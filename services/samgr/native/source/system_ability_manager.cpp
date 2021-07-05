@@ -145,7 +145,7 @@ sptr<IRemoteObject> SystemAbilityManager::CheckLocalAbilityManager(const u16stri
 
 sptr<IRemoteObject> SystemAbilityManager::GetSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
 {
-    return nullptr;
+    return CheckSystemAbility(systemAbilityId, deviceId);
 }
 
 sptr<IRemoteObject> SystemAbilityManager::CheckSystemAbility(int32_t systemAbilityId)
@@ -190,7 +190,14 @@ bool SystemAbilityManager::CheckDistributedPermission()
 sptr<IRemoteObject> SystemAbilityManager::CheckSystemAbility(int32_t systemAbilityId,
     const std::string& deviceId)
 {
-    return nullptr;
+    sptr<DBinderServiceStub> remoteBinder = nullptr;
+    if (dBinderService_ != nullptr) {
+        string strName = to_string(systemAbilityId);
+        remoteBinder = dBinderService_->MakeRemoteBinder(Str8ToStr16(strName), deviceId, systemAbilityId, 0);
+        HILOGI("CheckSystemAbility, MakeRemoteBinder, systemAbilityId is %{public}d, deviceId is %s", 
+            systemAbilityId, AnonymizeDeviceId(deviceId).c_str());
+    }
+    return remoteBinder;
 }
 
 int32_t SystemAbilityManager::FindSystemAbilityManagerNotify(int32_t systemAbilityId, int32_t code)

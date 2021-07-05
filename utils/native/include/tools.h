@@ -27,6 +27,8 @@ std::u16string DeleteAllMark(const std::u16string& str, const std::u16string& ma
 
 // template<typename T>
 std::u16string DeleteBlank(const std::u16string& str);
+
+std::string AnonymizeDeviceId(const std::string& deviceId);
 }
 
 #endif // !defined(UTILS_NATIVE_INCLUDE_TOOLS_H_)
