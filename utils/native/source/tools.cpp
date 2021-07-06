@@ -20,6 +20,8 @@
 #include <string>
 
 namespace OHOS {
+const std::string EMPTY_DEVICEID = "";
+constexpr int NON_ANONYMIZE_LENGTH = 6;
 // template<typename T>
 std::u16string DeleteAllMark(const std::u16string& str, const std::u16string& mark)
 {
@@ -42,5 +44,15 @@ std::u16string DeleteBlank(const std::u16string& str)
     res = DeleteAllMark(res, u"/t");
     res = DeleteAllMark(res, u"/n");
     return DeleteAllMark(res, u"/r");
+}
+
+std::string AnonymizeDeviceId(const std::string& deviceId)
+{
+    if (deviceId.length() < NON_ANONYMIZE_LENGTH) {
+        return EMPTY_DEVICEID;
+    }
+    std::string anonymizeDeviceId = deviceId.substr(0, NON_ANONYMIZE_LENGTH);
+    anonymizeDeviceId.append("******");
+    return anonymizeDeviceId;
 }
 }
