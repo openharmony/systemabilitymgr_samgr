@@ -13,14 +13,15 @@
  * limitations under the License.
  */
 
+#include <thread>
+#include <unistd.h>
+
 #include "errors.h"
 #include "ipc_skeleton.h"
 #include "ipc_types.h"
 #include "iservice_registry.h"
 #include "sam_log.h"
 #include "system_ability_manager.h"
-#include <unistd.h>
-#include <thread>
 
 using namespace OHOS;
 
