@@ -48,9 +48,9 @@ ohos_unittest("SystemAbilityMgrTest") {
   }
 
   deps = [
+    "${samgr_dir}/interfaces/innerkits/common:samgr_common",
     "${samgr_dir}/interfaces/innerkits/lsamgr:lsamgr",
     "${samgr_dir}/interfaces/innerkits/samgr_proxy:samgr_proxy",
-    "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
     "//third_party/googletest:gtest_main",
     "//utils/native/base:utils",
   ]
