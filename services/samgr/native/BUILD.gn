@@ -33,6 +33,7 @@ config("sam_config") {
     "//utils/native/base/include",
     "//utils/system/safwk/native/include",
     "//foundation/distributedschedule/samgr/services/lsamgr/include",
+    "//foundation/distributedschedule/samgr/interfaces/innerkits/common/include",
   ]
 }
 
@@ -64,7 +65,7 @@ ohos_executable("samgr") {
   ]
 
   deps = [
-    "//foundation/distributedschedule/safwk/interfaces/innerkits/safwk:system_ability_fwk",
+    "//foundation/distributedschedule/samgr/interfaces/innerkits/common:samgr_common",
     "//foundation/distributedschedule/samgr/interfaces/innerkits/lsamgr:lsamgr",
     "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "//utils/native/base:utils",
@@ -72,6 +73,7 @@ ohos_executable("samgr") {
 
   configs = [
     ":sam_config",
+    "//foundation/distributedschedule/samgr/interfaces/innerkits/common:config_samgr_common",
     "//foundation/distributedschedule/samgr/interfaces/innerkits/lsamgr:config_samgr",
     ":distributed_store_config",
   ]
