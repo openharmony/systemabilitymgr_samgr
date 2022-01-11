@@ -64,6 +64,7 @@ void SystemAbilityManager::Init()
     systemProcessDeath_ = sptr<IRemoteObject::DeathRecipient>(new SystemProcessDeathRecipient());
     abilityStatusDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityStatusDeathRecipient());
     abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityCallbackDeathRecipient());
+    rpcCallbackImp_ = make_shared<RpcCallbackImp>();
     if (workHandler_ == nullptr) {
         auto runner = AppExecFwk::EventRunner::Create("workHandler");
         workHandler_ = make_shared<AppExecFwk::EventHandler>(runner);
@@ -137,6 +138,28 @@ sptr<IRemoteObject> SystemAbilityManager::GetSystemAbility(int32_t systemAbility
 sptr<IRemoteObject> SystemAbilityManager::GetSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
 {
     return CheckSystemAbility(systemAbilityId, deviceId);
+}
+
+sptr<IRemoteObject> SystemAbilityManager::GetSystemAbilityFromRemote(int32_t systemAbilityId)
+{
+    HILOGD("%{public}s called, systemAbilityId = %{public}d", __func__, systemAbilityId);
+    if (!CheckInputSysAbilityId(systemAbilityId)) {
+        HILOGW("GetSystemAbilityFromRemote invalid!");
+        return nullptr;
+    }
+
+    shared_lock<shared_mutex> readLock(abilityMapLock_);
+    auto iter = abilityMap_.find(systemAbilityId);
+    if (iter == abilityMap_.end()) {
+        HILOGI("GetSystemAbilityFromRemote not found service : %{public}d.", systemAbilityId);
+        return nullptr;
+    }
+    if (!(iter->second.isDistributed)) {
+        HILOGW("GetSystemAbilityFromRemote service : %{public}d not distributed", systemAbilityId);
+        return nullptr;
+    }
+    HILOGI("GetSystemAbilityFromRemote found service : %{public}d.", systemAbilityId);
+    return iter->second.remoteObj;
 }
 
 sptr<IRemoteObject> SystemAbilityManager::CheckSystemAbility(int32_t systemAbilityId)
@@ -596,8 +619,8 @@ int32_t SystemAbilityManager::AddSystemAbility(int32_t systemAbilityId, const sp
         HILOGD("AddSystemAbility RegisterRemoteProxy, serviceId is %{public}d", systemAbilityId);
     }
     if (systemAbilityId == SOFTBUS_SERVER_SA_ID && !isDbinderStart_) {
-        if (dBinderService_ != nullptr) {
-            bool ret = dBinderService_->StartDBinderService();
+        if (dBinderService_ != nullptr && rpcCallbackImp_ != nullptr) {
+            bool ret = dBinderService_->StartDBinderService(rpcCallbackImp_);
             HILOGI("start result is %{public}s", ret ? "succeed" : "fail");
             isDbinderStart_ = true;
         }
