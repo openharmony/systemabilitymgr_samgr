@@ -21,7 +21,7 @@ config("sam_test_config") {
   visibility = [ ":*" ]
   include_dirs = [
     "${samgr_services_dir}/test/unittest/include",
-    "//utils/system/safwk/native/include",
+    "//foundation/distributedschedule/samgr/utils/native/include",
   ]
 }
 
@@ -56,7 +56,6 @@ ohos_unittest("SystemAbilityMgrTest") {
     "${samgr_dir}/interfaces/innerkits/lsamgr:lsamgr",
     "${samgr_dir}/interfaces/innerkits/samgr_proxy:samgr_proxy",
     "//third_party/googletest:gtest_main",
-    "//utils/native/base:utils",
   ]
 
   external_deps = [
@@ -65,6 +64,7 @@ ohos_unittest("SystemAbilityMgrTest") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "ipc:libdbinder",
+    "utils_base:utils",
   ]
 }
 
@@ -74,7 +74,7 @@ ohos_executable("ondemand") {
     ":sam_test_config",
     "${samgr_dir}/interfaces/innerkits/lsamgr:config_samgr",
   ]
-  deps = [ "//utils/native/base:utils" ]
+  deps = [ "${samgr_dir}/interfaces/innerkits/samgr_proxy:samgr_proxy" ]
   if (is_standard_system) {
     external_deps = [ "hiviewdfx_hilog_native:libhilog_base" ]
   } else {
@@ -88,6 +88,7 @@ ohos_executable("ondemand") {
   external_deps += [
     "ipc:ipc_core",
     "samgr_standard:samgr_proxy",
+    "utils_base:utils",
   ]
   part_name = "samgr_standard"
   subsystem_name = "distributedschedule"
