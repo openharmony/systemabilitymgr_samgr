@@ -16,24 +16,18 @@ import("//build/ohos_var.gni")
 
 config("distributed_store_config") {
   visibility = [ ":*" ]
-  include_dirs = [
-    "//foundation/distributedschedule/samgr/services/samgr/native/include",
-    "//third_party/json/include",
-    "//foundation/distributedschedule/dmsfwk/services/dtbdecidefwk/include",
-  ]
+  include_dirs =
+      [ "//foundation/distributedschedule/samgr/services/samgr/native/include" ]
 }
 
 config("sam_config") {
   # header file path
   include_dirs = [
-    "//developtools/liblog",
     "//foundation/distributedschedule/samgr/services/samgr/native/include",
-    "//foundation/distributedschedule/samgr/services/samgr/java/include",
     "//foundation/distributedschedule/samgr/utils/native/include",
-    "//utils/native/base/include",
-    "//utils/system/safwk/native/include",
     "//foundation/distributedschedule/samgr/services/lsamgr/include",
     "//foundation/distributedschedule/samgr/interfaces/innerkits/common/include",
+    "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy/include",
   ]
 }
 
@@ -68,7 +62,6 @@ ohos_executable("samgr") {
     "//foundation/distributedschedule/samgr/interfaces/innerkits/common:samgr_common",
     "//foundation/distributedschedule/samgr/interfaces/innerkits/lsamgr:lsamgr",
     "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-    "//utils/native/base:utils",
   ]
 
   configs = [
@@ -85,6 +78,7 @@ ohos_executable("samgr") {
       "init:libbegetutil",
       "ipc:ipc_core",
       "ipc:libdbinder",
+      "utils_base:utils",
     ]
     public_deps = [ "//third_party/libxml2:libxml2" ]
     part_name = "samgr_standard"
