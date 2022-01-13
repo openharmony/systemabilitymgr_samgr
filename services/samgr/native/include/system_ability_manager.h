@@ -24,6 +24,7 @@
 #include <utility>
 
 #include "event_handler.h"
+#include "rpc_callback_imp.h"
 #include "dbinder_service.h"
 #include "dbinder_service_stub.h"
 #include "sa_profiles.h"
@@ -90,6 +91,7 @@ public:
 
     int32_t LoadSystemAbility(int32_t systemAbilityId, const sptr<ISystemAbilityLoadCallback>& callback) override;
     void OnAbilityCallbackDied(const sptr<IRemoteObject>& remoteObject);
+    sptr<IRemoteObject> GetSystemAbilityFromRemote(int32_t systemAbilityId);
 private:
     enum class AbilityState {
         INIT,
@@ -148,6 +150,7 @@ private:
     sptr<IRemoteObject::DeathRecipient> abilityStatusDeath_;
     sptr<IRemoteObject::DeathRecipient> abilityCallbackDeath_;
     sptr<DBinderService> dBinderService_;
+    std::shared_ptr<RpcSystemAbilityCallback> rpcCallbackImp_;
     bool isDbinderStart_ = false;
 
     // must hold abilityMapLock_ never access other locks

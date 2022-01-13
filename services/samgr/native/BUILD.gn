@@ -57,6 +57,7 @@ ohos_executable("samgr") {
   sources = [
     "//foundation/distributedschedule/samgr/services/samgr/native/source/ability_death_recipient.cpp",
     "//foundation/distributedschedule/samgr/services/samgr/native/source/main.cpp",
+    "//foundation/distributedschedule/samgr/services/samgr/native/source/rpc_callback_imp.cpp",
     "//foundation/distributedschedule/samgr/services/samgr/native/source/system_ability_load_callback_proxy.cpp",
     "//foundation/distributedschedule/samgr/services/samgr/native/source/system_ability_manager.cpp",
     "//foundation/distributedschedule/samgr/services/samgr/native/source/system_ability_manager_stub.cpp",
