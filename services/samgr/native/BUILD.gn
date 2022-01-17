@@ -37,11 +37,7 @@ group("etc") {
 
 ohos_prebuilt_etc("samgr.rc") {
   relative_install_dir = "init"
-  if (use_musl) {
-    source = "samgr_standard.cfg"
-  } else {
-    source = "samgr_standard.rc"
-  }
+  source = "samgr_standard.cfg"
   part_name = "samgr_standard"
   subsystem_name = "distributedschedule"
 }
