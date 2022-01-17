@@ -36,6 +36,7 @@ enum {
     SUBSYS_AI_SYS_ABILITY_ID_BEGIN                   = 300,
     SUBSYS_APPEXECFWK_SYS_ABILITY_ID_BEGIN           = 400,
     BUNDLE_MGR_SERVICE_SYS_ABILITY_ID                = 401,
+    DISTRIBUTED_BUNDLE_MGR_SERVICE_SYS_ABILITY_ID    = 402,
     FORM_MGR_SERVICE_ID                              = 403,
     SUBSYS_APPLICATIONS_SYS_ABILITY_ID_BEGIN         = 500,
     APP_MGR_SERVICE_ID                               = 501,
