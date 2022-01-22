@@ -17,8 +17,8 @@
         "adapted_system_type": [
             "standard"
         ],
-        "rom": "",
-        "ram": "",
+        "rom": "300KB",
+        "ram": "7130KB",
         "deps": {
             "components": [
                 "eventhandler",
