@@ -176,6 +176,7 @@ enum {
     PASTEBOARD_SERVICE_ID                            = 3701,
     TIME_SERVICE_ID                                  = 3702,
     INPUT_METHOD_SYSTEM_ABILITY_ID                   = 3703,
+    SCREENLOCK_SERVICE_ID                            = 3704,
     SUBSYS_SOURCECODETRANSFORMER_SYS_ABILITY_ID_BEGIN = 3800,
     SUBSYS_STARTUP_SYS_ABILITY_ID_BEGIN              = 3900,
     PARAM_WATCHER_DISTRIBUTED_SERVICE_ID             = 3901,
