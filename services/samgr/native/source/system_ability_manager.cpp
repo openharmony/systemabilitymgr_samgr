@@ -877,7 +877,7 @@ int32_t SystemAbilityManager::LoadSystemAbility(int32_t systemAbilityId,
         ++count;
         abilityItem.callbackList.emplace_back(callback, callingPid);
         if (abilityCallbackDeath_ != nullptr) {
-            bool ret = callback->AsObject()->AddDeathRecipient(abilityCallbackDeath_);
+            ret = callback->AsObject()->AddDeathRecipient(abilityCallbackDeath_);
             HILOGI("LoadSystemAbility systemAbilityId:%{public}d AddDeathRecipient %{public}s",
                 systemAbilityId, ret ? "succeed" : "failed");
         }
