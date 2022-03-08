@@ -57,11 +57,11 @@ SystemAbilityManagerStub::SystemAbilityManagerStub()
 int32_t SystemAbilityManagerStub::OnRemoteRequest(uint32_t code,
     MessageParcel& data, MessageParcel& reply, MessageOption &option)
 {
-    HILOGI("SystemAbilityManagerStub::OnReceived, code = %{public}d, flags= %{public}d",
+    HILOGI("SystemAbilityManagerStub::OnReceived, code = %{public}u, flags= %{public}d",
         code, option.GetFlags());
     if (code != GET_SYSTEM_ABILITY_TRANSACTION && code != CHECK_SYSTEM_ABILITY_TRANSACTION) {
         if (!EnforceInterceToken(data)) {
-            HILOGI("SystemAbilityManagerStub::OnReceived, code = %{public}d, check interfaceToken failed", code);
+            HILOGI("SystemAbilityManagerStub::OnReceived, code = %{public}u, check interfaceToken failed", code);
             return ERR_PERMISSION_DENIED;
         }
     }

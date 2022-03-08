@@ -357,7 +357,7 @@ HWTEST_F(ParseUtilTest, RemoveSaProfile003, TestSize.Level1)
     EXPECT_EQ(profiles.size(), 4);
     /**
      * @tc.steps: step2. remove one existed id
-     * @tc.expected: step2. remove successed
+     * @tc.expected: step2. remove successfully
      */
     parser_->RemoveSaProfile(9999);
     profiles = parser_->GetAllSaProfiles();
@@ -383,7 +383,7 @@ HWTEST_F(ParseUtilTest, RemoveSaProfile004, TestSize.Level1)
     EXPECT_EQ(profiles.size(), 4);
     /**
      * @tc.steps: step2. remove one existed id
-     * @tc.expected: step2. remove successed
+     * @tc.expected: step2. remove successfully
      */
     parser_->RemoveSaProfile(9997);
     profiles = parser_->GetAllSaProfiles();
@@ -409,7 +409,7 @@ HWTEST_F(ParseUtilTest, RemoveSaProfile005, TestSize.Level1)
     EXPECT_EQ(profiles.size(), 4);
     /**
      * @tc.steps: step2. remove more existed id
-     * @tc.expected: step2. remove successed
+     * @tc.expected: step2. remove successfully
      */
     parser_->RemoveSaProfile(9997);
     parser_->RemoveSaProfile(9998);

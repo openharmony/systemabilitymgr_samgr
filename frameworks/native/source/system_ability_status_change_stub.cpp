@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -35,7 +35,7 @@ SystemAbilityStatusChangeStub::SystemAbilityStatusChangeStub()
 int32_t SystemAbilityStatusChangeStub::OnRemoteRequest(uint32_t code,
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
-    HILOGI("code:%{public}d, flags:%{public}d", code, option.GetFlags());
+    HILOGI("code:%{public}u, flags:%{public}d", code, option.GetFlags());
     if (!CanRequest()) {
         HILOGW("permission denied!");
         return ERR_PERMISSION_DENIED;
