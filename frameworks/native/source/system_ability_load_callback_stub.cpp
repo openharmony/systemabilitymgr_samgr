@@ -23,7 +23,7 @@ namespace OHOS {
 int32_t SystemAbilityLoadCallbackStub::OnRemoteRequest(uint32_t code,
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
-    HILOGI("SystemAbilityLoadCallbackStub::OnRemoteRequest, code = %{public}d", code);
+    HILOGI("SystemAbilityLoadCallbackStub::OnRemoteRequest, code = %{public}u", code);
     if (!EnforceInterceToken(data)) {
         HILOGW("SystemAbilityLoadCallbackStub::OnRemoteRequest check interface token failed!");
         return ERR_PERMISSION_DENIED;

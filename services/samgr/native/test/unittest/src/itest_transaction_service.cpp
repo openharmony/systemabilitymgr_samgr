@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,7 +46,7 @@ int32_t TestTransactionServiceProxy::ReverseInt(int32_t data, int32_t& rep)
 int32_t TestTransactionServiceStub::OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply,
     MessageOption& option)
 {
-    HILOGI("TestTransactionServiceStub::OnRemoteRequest, code = %d, flags = %d", code, option.GetFlags());
+    HILOGI("TestTransactionServiceStub::OnRemoteRequest, code = %u, flags = %d", code, option.GetFlags());
     switch (code) {
         case REVERSE_INT: {
             int32_t result = 0;
