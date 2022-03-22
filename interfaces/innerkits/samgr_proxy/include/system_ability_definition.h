@@ -239,6 +239,7 @@ enum {
 static const std::map<int, std::string> saNameMap_ = {
     { 200, "AccountMgr" },
     { 301, "AIEngine" },
+    { ABILITY_MGR_SERVICE_ID, "AbilityManagerService" },
     { BUNDLE_MGR_SERVICE_SYS_ABILITY_ID, "BundleMgr" },
     { FORM_MGR_SERVICE_ID, "FormMgr" },
     { WIFI_DEVICE_SYS_ABILITY_ID, "WifiDevice" },
