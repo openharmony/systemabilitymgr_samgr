@@ -20,10 +20,6 @@
 #include "system_ability_definition.h"
 
 namespace OHOS {
-namespace {
-constexpr int32_t UID_ROOT = 0;
-constexpr int32_t UID_SYSTEM = 1000;
-}
 SystemAbilityStatusChangeStub::SystemAbilityStatusChangeStub()
 {
     memberFuncMap_[ON_ADD_SYSTEM_ABILITY] =
@@ -36,10 +32,6 @@ int32_t SystemAbilityStatusChangeStub::OnRemoteRequest(uint32_t code,
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
     HILOGI("code:%{public}u, flags:%{public}d", code, option.GetFlags());
-    if (!CanRequest()) {
-        HILOGW("permission denied!");
-        return ERR_PERMISSION_DENIED;
-    }
     if (!EnforceInterceToken(data)) {
         HILOGW("check interface token failed!");
         return ERR_PERMISSION_DENIED;
@@ -82,12 +74,6 @@ int32_t SystemAbilityStatusChangeStub::OnRemoveSystemAbilityInner(MessageParcel&
 bool SystemAbilityStatusChangeStub::CheckInputSysAbilityId(int32_t systemAbilityId)
 {
     return (systemAbilityId >= FIRST_SYS_ABILITY_ID) && (systemAbilityId <= LAST_SYS_ABILITY_ID);
-}
-
-bool SystemAbilityStatusChangeStub::CanRequest()
-{
-    auto callingUid = IPCSkeleton::GetCallingUid();
-    return (callingUid == UID_ROOT) || (callingUid == UID_SYSTEM);
 }
 
 bool SystemAbilityStatusChangeStub::EnforceInterceToken(MessageParcel& data)

@@ -32,12 +32,16 @@ config("sam_config") {
 }
 
 group("etc") {
-  deps = [ ":samgr.rc" ]
+  deps = [ ":samgr_init" ]
 }
 
-ohos_prebuilt_etc("samgr.rc") {
+ohos_prebuilt_etc("samgr_init") {
+  if (use_musl) {
+    source = "samgr_standard_musl.cfg"
+  } else {
+    source = "samgr_standard.cfg"
+  }
   relative_install_dir = "init"
-  source = "samgr_standard.cfg"
   part_name = "samgr_standard"
   subsystem_name = "distributedschedule"
 }
