@@ -749,6 +749,11 @@ void SystemAbilityManager::SendCheckLoadedMsg(int32_t systemAbilityId, const std
                 HILOGD("SendCheckLoadedMsg startingAbilityMap remove SA : %{public}d.", systemAbilityId);
                 startingAbilityMap_.erase(iter);
             }
+            auto iterStarting = startingProcessMap_.find(name);
+            if (iterStarting != startingProcessMap_.end()) {
+                HILOGI("SendCheckLoadedMsg clean process:%{public}s", Str16ToStr8(name).c_str());
+                startingProcessMap_.erase(iterStarting);
+            }
         }
         (void)GetSystemProcess(name);
     };
