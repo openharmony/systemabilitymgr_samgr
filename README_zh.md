@@ -142,7 +142,8 @@ samgr组件是OpenHarmony的核心组件，提供OpenHarmony系统服务启动�
 >     ]
 >}
 >```
->3.LoadSystemAbility方法适用于动态加载场景，其他获取SystemAbility场景建议使用CheckSystemAbility方法。
+>3.LoadSystemAbility方法适用于动态加载场景，其他获取SystemAbility场景建议使用CheckSystemAbility方法。  
+>4.cfg里进程名称需要与SA的配置xml文件里进程名保持一致
 
 ## 相关仓<a name="section1371113476307"></a>
 
