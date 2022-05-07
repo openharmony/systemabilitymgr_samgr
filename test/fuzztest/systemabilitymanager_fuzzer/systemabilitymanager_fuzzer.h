@@ -16,6 +16,6 @@
 #ifndef SAMGR_TEST_FUZZTEST_SYSTEM_ABILITY_MANAGER_FUZZER_H
 #define SAMGR_TEST_FUZZTEST_SYSTEM_ABILITY_MANAGER_FUZZER_H
 
-#define FUZZ_PROJECT_NAME "system_ability_manager_fuzzer"
+#define FUZZ_PROJECT_NAME "systemabilitymanager_fuzzer"
 
 #endif
