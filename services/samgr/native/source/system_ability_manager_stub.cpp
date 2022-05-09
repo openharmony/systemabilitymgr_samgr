@@ -24,57 +24,8 @@
 #include "system_ability_manager.h"
 #include "tools.h"
 
-#ifdef WITH_SELINUX
-#include "service_checker.h"
-#endif
-
-namespace {
-#ifdef WITH_SELINUX
-    std::unique_ptr<ServiceChecker> selinuxChecker_ = std::make_unique<ServiceChecker>(false);
-#endif
-
-    bool CheckGetSAPermission(const int32_t said)
-    {
-#ifdef WITH_SELINUX
-        auto callingPid = OHOS::IPCSkeleton::GetCallingPid();
-        return selinuxChecker_->GetServiceCheck(callingPid, std::to_string(said)) == 0;
-#else
-        return true; // if not support selinux, not check selinux permission
-#endif
-    }
-
-    bool CheckAddOrRemovePermission(const int32_t said)
-    {
-#ifdef WITH_SELINUX
-        auto callingPid = OHOS::IPCSkeleton::GetCallingPid();
-        return selinuxChecker_->AddServiceCheck(callingPid, std::to_string(said)) == 0;
-#else
-        return true; // if not support selinux, not check selinux permission
-#endif
-    }
-
-    bool CheckGetRemoteSAPermission(const int32_t said)
-    {
-#ifdef WITH_SELINUX
-        auto callingPid = OHOS::IPCSkeleton::GetCallingPid();
-        return selinuxChecker_->GetRemoteServiceCheck(callingPid, std::to_string(said)) == 0;
-#else
-        return true; // if not support selinux, not check selinux permission
-#endif
-    }
-
-    bool CheckListSAPermission()
-    {
-#ifdef WITH_SELINUX
-        auto callingPid = OHOS::IPCSkeleton::GetCallingPid();
-        return selinuxChecker_->ListServiceCheck(callingPid) == 0;
-#else
-        return true; // if not support selinux, not check selinux permission
-#endif
-    }
-}
-
 using namespace OHOS::Security;
+
 namespace OHOS {
 SystemAbilityManagerStub::SystemAbilityManagerStub()
 {
@@ -103,7 +54,6 @@ SystemAbilityManagerStub::SystemAbilityManagerStub()
     memberFuncMap_[LOAD_SYSTEM_ABILITY_TRANSACTION] =
         &SystemAbilityManagerStub::LoadSystemAbilityInner;
 }
-
 int32_t SystemAbilityManagerStub::OnRemoteRequest(uint32_t code,
     MessageParcel& data, MessageParcel& reply, MessageOption &option)
 {
@@ -136,12 +86,6 @@ int32_t SystemAbilityManagerStub::ListSystemAbilityInner(MessageParcel& data, Me
         HILOGE("ListSystemAbilityInner PERMISSION DENIED!");
         return ERR_PERMISSION_DENIED;
     }
-
-    if (!CheckListSAPermission()) {
-        HILOGE("ListSystemAbilityInner selinux permission denied!");
-        return ERR_PERMISSION_DENIED;
-    }
-
     int32_t dumpFlag = 0;
     bool ret = data.ReadInt32(dumpFlag);
     if (!ret) {
@@ -245,11 +189,6 @@ int32_t SystemAbilityManagerStub::CheckRemtSystemAbilityInner(MessageParcel& dat
         return ERR_NULL_OBJECT;
     }
 
-    if (!CheckGetRemoteSAPermission(systemAbilityId)) {
-        HILOGE("CheckRemtSystemAbilityInner selinux permission denied!, SA : %{public}d", systemAbilityId);
-        return ERR_PERMISSION_DENIED;
-    }
-
     std::string deviceId;
     bool ret = data.ReadString(deviceId);
     if (!ret) {
@@ -277,12 +216,6 @@ int32_t SystemAbilityManagerStub::AddOndemandSystemAbilityInner(MessageParcel& d
         HILOGW("SystemAbilityManagerStub::AddOndemandSystemAbilityInner read systemAbilityId failed!");
         return ERR_NULL_OBJECT;
     }
-
-    if (!CheckAddOrRemovePermission(systemAbilityId)) {
-        HILOGE("AddOndemandSystemAbilityInner selinux permission denied! SA : %{public}d", systemAbilityId);
-        return ERR_PERMISSION_DENIED;
-    }
-
     std::u16string localManagerName = data.ReadString16();
     if (localManagerName.empty()) {
         HILOGW("SystemAbilityManagerStub::AddOndemandSystemAbilityInner read localName failed!");
@@ -307,12 +240,6 @@ int32_t SystemAbilityManagerStub::CheckSystemAbilityImmeInner(MessageParcel& dat
         HILOGW("SystemAbilityManagerStub::CheckSystemAbilityImmeInner read systemAbilityId failed!");
         return ERR_NULL_OBJECT;
     }
-
-    if (!CheckGetSAPermission(systemAbilityId)) {
-        HILOGE("CheckSystemAbilityImmeInner selinux permission denied! SA : %{public}d", systemAbilityId);
-        return ERR_PERMISSION_DENIED;
-    }
-
     bool isExist = false;
     bool ret = data.ReadBool(isExist);
     if (!ret) {
@@ -368,12 +295,6 @@ int32_t SystemAbilityManagerStub::AddSystemAbilityInner(MessageParcel& data, Mes
         HILOGW("SystemAbilityManagerStub::AddSystemAbilityExtraInner read systemAbilityId failed!");
         return ERR_NULL_OBJECT;
     }
-
-    if (!CheckAddOrRemovePermission(systemAbilityId)) {
-        HILOGE("AddSystemAbilityInner selinux permission denied! SA : %{public}d", systemAbilityId);
-        return ERR_PERMISSION_DENIED;
-    }
-
     auto object = data.ReadRemoteObject();
     if (object == nullptr) {
         HILOGW("SystemAbilityManagerStub::AddSystemAbilityExtraInner readParcelable failed!");
@@ -402,12 +323,6 @@ int32_t SystemAbilityManagerStub::GetSystemAbilityInner(MessageParcel& data, Mes
         HILOGW("SystemAbilityManagerStub::GetSystemAbilityInner read systemAbilityId failed!");
         return ERR_NULL_OBJECT;
     }
-
-    if (!CheckGetSAPermission(systemAbilityId)) {
-        HILOGE("GetSystemAbilityInner selinux permission denied! SA : %{public}d", systemAbilityId);
-        return ERR_PERMISSION_DENIED;
-    }
-
     bool ret = reply.WriteRemoteObject(GetSystemAbility(systemAbilityId));
     if (!ret) {
         HILOGW("SystemAbilityManagerStub:GetSystemAbilityInner write reply failed.");
@@ -423,12 +338,6 @@ int32_t SystemAbilityManagerStub::CheckSystemAbilityInner(MessageParcel& data, M
         HILOGW("SystemAbilityManagerStub::CheckSystemAbilityInner read systemAbilityId failed!");
         return ERR_NULL_OBJECT;
     }
-
-    if (!CheckGetSAPermission(systemAbilityId)) {
-        HILOGE("CheckSystemAbilityInner selinux permission denied! SA : %{public}d", systemAbilityId);
-        return ERR_PERMISSION_DENIED;
-    }
-
     bool ret = reply.WriteRemoteObject(CheckSystemAbility(systemAbilityId));
     if (!ret) {
         return ERR_FLATTEN_OBJECT;
@@ -447,12 +356,6 @@ int32_t SystemAbilityManagerStub::RemoveSystemAbilityInner(MessageParcel& data, 
         HILOGW("SystemAbilityManagerStub::RemoveSystemAbilityInner read systemAbilityId failed!");
         return ERR_NULL_OBJECT;
     }
-
-    if (!CheckAddOrRemovePermission(systemAbilityId)) {
-        HILOGE("RemoveSystemAbilityInner selinux permission denied!SA : %{public}d", systemAbilityId);
-        return ERR_PERMISSION_DENIED;
-    }
-
     int32_t result = RemoveSystemAbility(systemAbilityId);
     HILOGI("SystemAbilityManagerStub::RemoveSystemAbilityInner result is %{public}d", result);
     bool ret = reply.WriteInt32(result);
@@ -499,12 +402,6 @@ int32_t SystemAbilityManagerStub::LoadSystemAbilityInner(MessageParcel& data, Me
         HILOGW("SystemAbilityManagerStub::LoadSystemAbilityInner read systemAbilityId failed!");
         return ERR_INVALID_VALUE;
     }
-
-    if (!CheckGetSAPermission(systemAbilityId)) {
-        HILOGE("LoadSystemAbilityInner selinux permission denied!SA : %{public}d", systemAbilityId);
-        return ERR_PERMISSION_DENIED;
-    }
-
     sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
     if (remoteObject == nullptr) {
         HILOGW("SystemAbilityManagerStub::LoadSystemAbilityInner read callback failed!");
