@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "system_ability_manager_fuzzer.h"
+#include "systemabilitymanager_fuzzer.h"
 
 #include "if_system_ability_manager.h"
 #include "system_ability_manager.h"
@@ -38,7 +38,7 @@ uint32_t Convert2Uint32(const uint8_t* ptr)
     if (ptr == nullptr) {
         return 0;
     }
-    return (ptr[0] << 24) | (ptr[1] << 16) | (ptr[2] << 8) | (ptr[3]);
+    return (ptr[0] << 24) | (ptr[1] << 16) | (ptr[2] << 8) | (ptr[3]); // this is a general method of converting in fuzz
 }
 
 void FuzzSystemAbilityManager(const uint8_t* rawData, size_t size)
