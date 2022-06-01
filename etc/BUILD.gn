@@ -14,12 +14,26 @@
 import("//build/ohos.gni")
 
 group("samgr_etc") {
-  deps = [ ":samgr.param.dac" ]
+  deps = [
+    ":samgr.param.dac",
+    ":samgr_init",
+  ]
 }
 
 ohos_prebuilt_etc("samgr.param.dac") {
   source = "samgr.param.dac"
   relative_install_dir = "param"
+  part_name = "samgr_standard"
+  subsystem_name = "distributedschedule"
+}
+
+group("etc") {
+  deps = [ ":samgr_init" ]
+}
+
+ohos_prebuilt_etc("samgr_init") {
+  source = "samgr_standard.cfg"
+  relative_install_dir = "init"
   part_name = "samgr_standard"
   subsystem_name = "distributedschedule"
 }

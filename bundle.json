@@ -34,7 +34,6 @@
                 "//foundation/distributedschedule/samgr/interfaces/innerkits/common:samgr_common",
                 "//foundation/distributedschedule/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
                 "//foundation/distributedschedule/samgr/services/samgr/native:samgr",
-                "//foundation/distributedschedule/samgr/services/samgr/native:etc",
                 "//foundation/distributedschedule/samgr/etc:samgr_etc",
                 "//third_party/libxml2:libxml2"
             ],
