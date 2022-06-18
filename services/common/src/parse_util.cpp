@@ -218,7 +218,7 @@ bool ParseUtil::ParseProcess(const xmlNodePtr& rootNode, std::u16string& process
 
 bool ParseUtil::ParseSaProfiles(const string& profilePath)
 {
-    HILOGI("xmlFile:%{private}s", profilePath.c_str());
+    HILOGD("xmlFile:%{private}s", profilePath.c_str());
     std::string realPath = GetRealPath(profilePath);
     if (!CheckPathExist(realPath.c_str())) {
         HILOGE("bad profile path!");
@@ -245,7 +245,7 @@ bool ParseUtil::ParseSaProfiles(const string& profilePath)
         }
 
         string nodeName(reinterpret_cast<const char*>(currNodePtr->name));
-        HILOGI("profile nodeName:%{public}s", nodeName.c_str());
+        HILOGD("profile nodeName:%{public}s", nodeName.c_str());
         if (nodeName == XML_TAG_PROCESS && process.empty()) {
             if (!ParseProcess(currNodePtr, process)) {
                 HILOGW("profile %{public}s wrong tag!", currNodePtr->name);
@@ -289,7 +289,7 @@ bool ParseUtil::CheckPathExist(const string& profilePath)
 bool ParseUtil::ParseTrustConfig(const string& profilePath,
     std::map<std::u16string, std::set<int32_t>>& values)
 {
-    HILOGI("config path:%{private}s", profilePath.c_str());
+    HILOGD("config path:%{private}s", profilePath.c_str());
     std::string realPath = GetRealPath(profilePath);
     if (!CheckPathExist(realPath.c_str())) {
         HILOGE("bad profile path!");
@@ -334,7 +334,7 @@ bool ParseUtil::ParseTrustConfigInner(const xmlNodePtr& rootNodePtr,
         }
 
         string nodeName(reinterpret_cast<const char*>(currNodePtr->name));
-        HILOGI("profile nodeName:%{public}s", nodeName.c_str());
+        HILOGD("ParseTrustConfigInner profile nodeName:%{public}s", nodeName.c_str());
 
         if (nodeName == XML_TAG_NAME && processName.empty()) {
             // parse process name

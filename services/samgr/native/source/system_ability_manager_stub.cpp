@@ -129,10 +129,10 @@ SystemAbilityManagerStub::SystemAbilityManagerStub()
 int32_t SystemAbilityManagerStub::OnRemoteRequest(uint32_t code,
     MessageParcel& data, MessageParcel& reply, MessageOption &option)
 {
-    HILOGI("SystemAbilityManagerStub::OnReceived, code = %{public}u, flags= %{public}d",
-        code, option.GetFlags());
+    HILOGI("SystemAbilityManagerStub::OnReceived, code = %{public}u, callerPid = %{public}d, flags= %{public}d",
+        code, IPCSkeleton::GetCallingPid(), option.GetFlags());
     if (!EnforceInterceToken(data)) {
-        HILOGI("SystemAbilityManagerStub::OnReceived, code = %{public}u, check interfaceToken failed", code);
+        HILOGE("SystemAbilityManagerStub::OnReceived, code = %{public}u, check interfaceToken failed", code);
         return ERR_PERMISSION_DENIED;
     }
     auto itFunc = memberFuncMap_.find(code);
@@ -213,7 +213,7 @@ int32_t SystemAbilityManagerStub::SubsSystemAbilityInner(MessageParcel& data, Me
         return ERR_NULL_OBJECT;
     }
     int32_t result = SubscribeSystemAbility(systemAbilityId, listener);
-    HILOGI("SystemAbilityManagerStub::SubsSystemAbilityInner result is %d", result);
+    HILOGD("SystemAbilityManagerStub::SubsSystemAbilityInner result is %d", result);
     bool ret = reply.WriteInt32(result);
     if (!ret) {
         HILOGW("SystemAbilityManagerStub::SubsSystemAbilityInner write reply failed.");
@@ -245,7 +245,7 @@ int32_t SystemAbilityManagerStub::UnSubsSystemAbilityInner(MessageParcel& data, 
         return ERR_NULL_OBJECT;
     }
     int32_t result = UnSubscribeSystemAbility(systemAbilityId, listener);
-    HILOGI("SystemAbilityManagerStub::UnSubscribeSystemAbility result is %d", result);
+    HILOGD("SystemAbilityManagerStub::UnSubscribeSystemAbility result is %d", result);
     bool ret = reply.WriteInt32(result);
     if (!ret) {
         HILOGW("SystemAbilityManagerStub::UnSubscribeSystemAbility write reply failed.");
@@ -312,7 +312,7 @@ int32_t SystemAbilityManagerStub::AddOndemandSystemAbilityInner(MessageParcel& d
     }
 
     int32_t result = AddOnDemandSystemAbilityInfo(systemAbilityId, localManagerName);
-    HILOGI("SystemAbilityManagerStub::AddOndemandSystemAbilityInner result is %d", result);
+    HILOGD("SystemAbilityManagerStub::AddOndemandSystemAbilityInner result is %d", result);
     bool ret = reply.WriteInt32(result);
     if (!ret) {
         HILOGW("SystemAbilityManagerStub::AddOndemandSystemAbilityInner write reply failed.");
@@ -408,7 +408,6 @@ int32_t SystemAbilityManagerStub::AddSystemAbilityInner(MessageParcel& data, Mes
         return result;
     }
     result = AddSystemAbility(systemAbilityId, object, extraProp);
-    HILOGI("SystemAbilityManagerStub::AddSystemAbilityExtraInner result is %d", result);
     bool ret = reply.WriteInt32(result);
     if (!ret) {
         HILOGW("SystemAbilityManagerStub::AddSystemAbilityExtraInner write reply failed.");
@@ -476,7 +475,6 @@ int32_t SystemAbilityManagerStub::RemoveSystemAbilityInner(MessageParcel& data, 
     }
 
     int32_t result = RemoveSystemAbility(systemAbilityId);
-    HILOGI("SystemAbilityManagerStub::RemoveSystemAbilityInner result is %{public}d", result);
     bool ret = reply.WriteInt32(result);
     if (!ret) {
         HILOGW("SystemAbilityManagerStub::RemoveSystemAbilityInner write reply failed.");
@@ -505,7 +503,6 @@ int32_t SystemAbilityManagerStub::AddSystemProcessInner(MessageParcel& data, Mes
     }
 
     int32_t result = AddSystemProcess(procName, procObject);
-    HILOGI("SystemAbilityManagerStub::AddSystemProcessInner result is %{public}d", result);
     bool ret = reply.WriteInt32(result);
     if (!ret) {
         HILOGW("SystemAbilityManagerStub::AddSystemProcessInner write reply failed.");
@@ -538,7 +535,7 @@ int32_t SystemAbilityManagerStub::LoadSystemAbilityInner(MessageParcel& data, Me
         return ERR_INVALID_VALUE;
     }
     int32_t result = LoadSystemAbility(systemAbilityId, callback);
-    HILOGI("SystemAbilityManagerStub::LoadSystemAbilityInner result is %{public}d", result);
+    HILOGD("SystemAbilityManagerStub::LoadSystemAbilityInner result is %{public}d", result);
     bool ret = reply.WriteInt32(result);
     if (!ret) {
         HILOGW("SystemAbilityManagerStub::LoadSystemAbilityInner write reply failed.");
@@ -551,7 +548,7 @@ bool SystemAbilityManagerStub::CanRequest()
 {
     auto accessTokenId = IPCSkeleton::GetCallingTokenID();
     AccessToken::ATokenTypeEnum tokenType = AccessToken::AccessTokenKit::GetTokenTypeFlag(accessTokenId);
-    HILOGD("SystemAbilityManagerStub::CanRequest tokenId:%{public}u, tokenType:%{public}d",
+    HILOGD("SystemAbilityManagerStub::CanRequest tokenId:%{private}u, tokenType:%{public}d",
         accessTokenId, tokenType);
     return (tokenType == AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
 }
