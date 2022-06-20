@@ -24,27 +24,27 @@ void AbilityDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
     HILOGI("AbilityDeathRecipient OnRemoteDied called");
     SystemAbilityManager::GetInstance()->RemoveSystemAbility(remote.promote());
-    HILOGI("AbilityDeathRecipients death notice success");
+    HILOGD("AbilityDeathRecipients death notice success");
 }
 
 void SystemProcessDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
-    HILOGI("ystemProcessDeathRecipient called!");
+    HILOGI("SystemProcessDeathRecipient called!");
     SystemAbilityManager::GetInstance()->RemoveSystemProcess(remote.promote());
-    HILOGI("SystemProcessDeathRecipient death notice success");
+    HILOGD("SystemProcessDeathRecipient death notice success");
 }
 
 void AbilityStatusDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
     HILOGI("AbilityStatusDeathRecipient called!");
     SystemAbilityManager::GetInstance()->UnSubscribeSystemAbility(remote.promote());
-    HILOGI("AbilityStatusDeathRecipient death notice success");
+    HILOGD("AbilityStatusDeathRecipient death notice success");
 }
 
 void AbilityCallbackDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
     HILOGI("AbilityCallbackDeathRecipient called!");
     SystemAbilityManager::GetInstance()->OnAbilityCallbackDied(remote.promote());
-    HILOGI("AbilityCallbackDeathRecipient death notice success");
+    HILOGD("AbilityCallbackDeathRecipient death notice success");
 }
 } // namespace OHOS

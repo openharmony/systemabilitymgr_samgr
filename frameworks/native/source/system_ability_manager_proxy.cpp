@@ -94,7 +94,7 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbilityWrapper(int32_t
 
 sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t systemAbilityId)
 {
-    HILOGI("%{public}s called", __func__);
+    HILOGD("%{public}s called", __func__);
     if (!CheckInputSysAbilityId(systemAbilityId)) {
         HILOGW("systemAbilityId:%{public}d invalid!", systemAbilityId);
         return nullptr;
@@ -195,7 +195,7 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t system
 int32_t SystemAbilityManagerProxy::AddOnDemandSystemAbilityInfo(int32_t systemAbilityId,
     const std::u16string& localAbilityManagerName)
 {
-    HILOGI("%{public}s called, system ability name is : %{public}d ", __func__, systemAbilityId);
+    HILOGD("%{public}s called, system ability name is : %{public}d ", __func__, systemAbilityId);
     if (!CheckInputSysAbilityId(systemAbilityId) || localAbilityManagerName.empty()) {
         HILOGI("AddOnDemandSystemAbilityInfo invalid params!");
         return ERR_INVALID_VALUE;
@@ -269,13 +269,12 @@ int32_t SystemAbilityManagerProxy::RemoveSystemAbilityWrapper(int32_t code, Mess
 
 int32_t SystemAbilityManagerProxy::RemoveSystemAbility(int32_t systemAbilityId)
 {
-    HILOGI("%{public}s called", __func__);
+    HILOGD("%{public}s called, systemabilityId : %{public}d", __func__, systemAbilityId);
     if (!CheckInputSysAbilityId(systemAbilityId)) {
         HILOGW("systemAbilityId:%{public}d is invalid!", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
 
-    HILOGI("remove system ability id is : %{public}d \n", systemAbilityId);
     MessageParcel data;
     if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
         return ERR_FLATTEN_OBJECT;
@@ -290,7 +289,7 @@ int32_t SystemAbilityManagerProxy::RemoveSystemAbility(int32_t systemAbilityId)
 
 std::vector<u16string> SystemAbilityManagerProxy::ListSystemAbilities(unsigned int dumpFlags)
 {
-    HILOGI("%{public}s called", __func__);
+    HILOGD("%{public}s called", __func__);
     std::vector<u16string> saNames;
 
     sptr<IRemoteObject> remote = Remote();
@@ -330,13 +329,11 @@ std::vector<u16string> SystemAbilityManagerProxy::ListSystemAbilities(unsigned i
 int32_t SystemAbilityManagerProxy::SubscribeSystemAbility(int32_t systemAbilityId,
     const sptr<ISystemAbilityStatusChange>& listener)
 {
-    HILOGI("%{public}s called", __func__);
+    HILOGI("%{public}s called, SubscribeSystemAbility systemAbilityId:%{public}d", __func__, systemAbilityId);
     if (!CheckInputSysAbilityId(systemAbilityId) || listener == nullptr) {
         HILOGE("SubscribeSystemAbility systemAbilityId:%{public}d or listener invalid!", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
-
-    HILOGI("SubscribeSystemAbility systemAbilityId:%{public}d", systemAbilityId);
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -381,13 +378,11 @@ int32_t SystemAbilityManagerProxy::SubscribeSystemAbility(int32_t systemAbilityI
 int32_t SystemAbilityManagerProxy::UnSubscribeSystemAbility(int32_t systemAbilityId,
     const sptr<ISystemAbilityStatusChange>& listener)
 {
-    HILOGI("%{public}s called", __func__);
+    HILOGI("%{public}s called, UnSubscribeSystemAbility systemAbilityId:%{public}d", __func__, systemAbilityId);
     if (!CheckInputSysAbilityId(systemAbilityId) || listener == nullptr) {
         HILOGE("UnSubscribeSystemAbility systemAbilityId:%{public}d or listener invalid!", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
-
-    HILOGI("UnSubscribeSystemAbility systemAbilityId:%{public}d", systemAbilityId);
 
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
@@ -437,7 +432,6 @@ int32_t SystemAbilityManagerProxy::LoadSystemAbility(int32_t systemAbilityId,
         return ERR_INVALID_VALUE;
     }
 
-    HILOGI("LoadSystemAbility systemAbilityId:%{public}d", systemAbilityId);
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         HILOGE("LoadSystemAbility remote is null!");
@@ -464,10 +458,10 @@ int32_t SystemAbilityManagerProxy::LoadSystemAbility(int32_t systemAbilityId,
     MessageOption option;
     int32_t err = remote->SendRequest(LOAD_SYSTEM_ABILITY_TRANSACTION, data, reply, option);
     if (err != ERR_NONE) {
-        HILOGE("LoadSystemAbility SA invalid error:%{public}d!", err);
+        HILOGE("LoadSystemAbility systemAbilityId : %{public}d invalid error:%{public}d!", systemAbilityId, err);
         return err;
     }
-    HILOGI("LoadSystemAbility SendRequest succeed!");
+    HILOGI("LoadSystemAbility systemAbilityId : %{public}d, SendRequest succeed!", systemAbilityId);
     int32_t result = 0;
     ret = reply.ReadInt32(result);
     if (!ret) {
@@ -501,7 +495,7 @@ int32_t SystemAbilityManagerProxy::MarshalSAExtraProp(const SAExtraProp& extraPr
 int32_t SystemAbilityManagerProxy::AddSystemAbility(int32_t systemAbilityId, const sptr<IRemoteObject>& ability,
     const SAExtraProp& extraProp)
 {
-    HILOGI("%{public}s called, saId is %{public}d", __func__, systemAbilityId);
+    HILOGD("%{public}s called, systemAbilityId is %{public}d", __func__, systemAbilityId);
     if (!CheckInputSysAbilityId(systemAbilityId)) {
         HILOGW("systemAbilityId:%{public}d invalid.", systemAbilityId);
         return ERR_INVALID_VALUE;
@@ -554,7 +548,7 @@ int32_t SystemAbilityManagerProxy::AddSystemAbilityWrapper(int32_t code, Message
 
 int32_t SystemAbilityManagerProxy::AddSystemProcess(const u16string& procName, const sptr<IRemoteObject>& procObject)
 {
-    HILOGI("%{public}s called, process name is %{public}s", __func__, Str16ToStr8(procName).c_str());
+    HILOGD("%{public}s called, process name is %{public}s", __func__, Str16ToStr8(procName).c_str());
     if (procName.empty()) {
         HILOGI("process name is invalid!");
         return ERR_INVALID_VALUE;
