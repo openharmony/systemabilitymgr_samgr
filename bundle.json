@@ -24,10 +24,16 @@
         "ram": "7130KB",
         "deps": {
             "components": [
+                "access_token",
                 "eventhandler",
+                "hisysevent_native",
+                "hitrace_native",
                 "hiviewdfx_hilog_native",
                 "init",
                 "ipc",
+                "samgr_standard",
+                "selinux",
+                "startup_l2",
                 "utils_base"
             ],
             "third_party": [ "libxml2" ]
