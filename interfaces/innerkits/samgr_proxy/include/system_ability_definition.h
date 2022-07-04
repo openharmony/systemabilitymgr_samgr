@@ -328,6 +328,8 @@ static const std::map<int, std::string> saNameMap_ = {
     { AVSESSION_SERVICE_ID, "AVSessionService" },
     { LIVE_UPDATER_DISTRIBUTED_SERVICE_ID, "LiveUpdaterService" },
     { ARKUI_UI_APPEARANCE_SERVICE_ID, "UiAppearanceService"},
+    { SUBSYS_USERIAM_SYS_ABILITY_USERIDM, "UserIdmService" },
+    { SUBSYS_USERIAM_SYS_ABILITY_AUTHEXECUTORMGR, "AuthExecutorMgrService" },
 };
 } // namespace OHOS
 
