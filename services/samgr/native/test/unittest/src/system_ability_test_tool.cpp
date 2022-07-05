@@ -78,12 +78,13 @@ namespace {
         void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
     };
 
-    void MockSaStatusChange::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
+    void MockSaStatusChange::OnAddSystemAbility(int32_t systemAbilityId, [[maybe_unused]] const std::string& deviceId)
     {
         cout << "OnAddSystemAbility said : " << systemAbilityId << endl;
     }
 
-    void MockSaStatusChange::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
+    void MockSaStatusChange::OnRemoveSystemAbility(int32_t systemAbilityId,
+        [[maybe_unused]] const std::string& deviceId)
     {
         cout << "OnRemoveSystemAbility said : " << systemAbilityId << endl;
     }
@@ -243,12 +244,6 @@ static void DoDefault(char* argv[])
         DoPasre();
         return;
     }
-    if (strcmp(argv[1], "get") == 0) {
-        int32_t said = DEFAULT_SA_ID;
-        StrToInt(argv[ARV_SAID_INDEX], said);
-        DoGet(said);
-        return;
-    }
     if (strcmp(argv[1], "add") == 0) {
         DoAdd();
         return;
@@ -262,6 +257,12 @@ static void DoDefault(char* argv[])
 
 static void DoExtend(char* argv[])
 {
+    if (strcmp(argv[1], "get") == 0) {
+        int32_t said = DEFAULT_SA_ID;
+        StrToInt(argv[ARV_SAID_INDEX], said);
+        DoGet(said);
+        return;
+    }
     if (strcmp(argv[1], "load") == 0) {
         int32_t said = DEFAULT_SA_ID;
         StrToInt(argv[ARV_SAID_INDEX], said);
