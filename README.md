@@ -8,7 +8,7 @@ The **samgr** module is a core module of OpenHarmony. It provides functions, suc
 ## Directory Structure<a name="section161941989596"></a>
 
 ```
-/foundation/distributedschedule
+/foundation/systemabilitymgr
 ├── samgr
 │   ├── bundle.json  # Description and build file of samgr
 │   ├── frameworks   # Framework implementation
@@ -153,10 +153,10 @@ The **samgr** module is a core module of OpenHarmony. It provides functions, suc
 
 **System Ability Management Subsystem**
 
-[distributedschedule\_safwk](https://gitee.com/openharmony/distributedschedule_safwk)
+[systemabilitymgr\_safwk](https://gitee.com/openharmony/systemabilitymgr_safwk)
 
-[**distributedschedule\_samgr**](https://gitee.com/openharmony/distributedschedule_samgr)
+[**systemabilitymgr\_samgr**](https://gitee.com/openharmony/systemabilitymgr_samgr)
 
-[distributedschedule\_safwk\_lite](https://gitee.com/openharmony/distributedschedule_safwk_lite)
+[systemabilitymgr\_safwk\_lite](https://gitee.com/openharmony/systemabilitymgr_safwk_lite)
 
-[distributedschedule\_samgr\_lite](https://gitee.com/openharmony/distributedschedule_samgr_lite)
+[systemabilitymgr\_samgr\_lite](https://gitee.com/openharmony/systemabilitymgr_samgr_lite)
