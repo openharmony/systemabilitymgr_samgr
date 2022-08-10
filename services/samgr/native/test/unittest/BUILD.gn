@@ -62,6 +62,7 @@ ohos_unittest("SystemAbilityMgrTest") {
 
   external_deps = [
     "access_token:libaccesstoken_sdk",
+    "c_utils:utils",
     "eventhandler:libeventhandler",
     "hisysevent_native:libhisysevent",
     "hitrace_native:hitrace_meter",
@@ -69,7 +70,6 @@ ohos_unittest("SystemAbilityMgrTest") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "ipc:libdbinder",
-    "utils_base:utils",
   ]
 }
 
@@ -91,9 +91,9 @@ ohos_executable("ondemand") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
   external_deps += [
+    "c_utils:utils",
     "ipc:ipc_core",
     "samgr_standard:samgr_proxy",
-    "utils_base:utils",
   ]
   part_name = "samgr_standard"
   subsystem_name = "distributedschedule"
@@ -136,6 +136,7 @@ ohos_executable("TestTool") {
   }
   external_deps += [
     "access_token:libaccesstoken_sdk",
+    "c_utils:utils",
     "eventhandler:libeventhandler",
     "hisysevent_native:libhisysevent",
     "hitrace_native:hitrace_meter",
@@ -144,7 +145,6 @@ ohos_executable("TestTool") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "ipc:libdbinder",
-    "utils_base:utils",
   ]
   part_name = "samgr_standard"
   subsystem_name = "distributedschedule"

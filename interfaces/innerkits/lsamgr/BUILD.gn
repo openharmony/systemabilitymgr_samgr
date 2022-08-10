@@ -35,9 +35,9 @@ ohos_shared_library("lsamgr") {
 
   if (is_standard_system) {
     external_deps = [
+      "c_utils:utils",
       "hiviewdfx_hilog_native:libhilog",
       "ipc:ipc_core",
-      "utils_base:utils",
     ]
     part_name = "samgr_standard"
   }

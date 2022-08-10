@@ -34,7 +34,7 @@
                 "samgr_standard",
                 "selinux",
                 "startup_l2",
-                "utils_base"
+                "c_utils"
             ],
             "third_party": [ "libxml2" ]
         },
