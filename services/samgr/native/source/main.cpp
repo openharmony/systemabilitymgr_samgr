@@ -33,8 +33,8 @@ int main(int argc, char *argv[])
     if (!IPCSkeleton::SetContextObject(serv)) {
         HILOGE("set context fail!"); // add log for dfx
     }
-    bool result = SetParameter("bootevent.samgr.ready", "true");
-    HILOGI("set samgr ready ret : %{public}s", result ? "succeed" : "failed");
+    int result = SetParameter("bootevent.samgr.ready", "true");
+    HILOGI("set samgr ready ret : %{public}s", result == 0 ? "succeed" : "failed");
     OHOS::IPCSkeleton::JoinWorkThread();
     return -1;
 }
