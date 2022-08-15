@@ -8,7 +8,7 @@ samgr组件是OpenHarmony的核心组件，提供OpenHarmony系统服务启动�
 ## 目录<a name="section161941989596"></a>
 
 ```
-/foundation/distributedschedule
+/foundation/systemabilitymgr
 ├── samgr
 │   ├── bundle.json  # 部件描述及编译文件
 │   ├── frameworks   # 框架实现存在目录
@@ -149,11 +149,11 @@ samgr组件是OpenHarmony的核心组件，提供OpenHarmony系统服务启动�
 
 系统服务管理子系统
 
-[distributedschedule\_safwk](https://gitee.com/openharmony/distributedschedule_safwk)
+[systemabilitymgr\_safwk](https://gitee.com/openharmony/systemabilitymgr_safwk)
 
-[**distributedschedule\_samgr**](https://gitee.com/openharmony/distributedschedule_samgr)
+[**systemabilitymgr\_samgr**](https://gitee.com/openharmony/systemabilitymgr_samgr)
 
-[distributedschedule\_safwk\_lite](https://gitee.com/openharmony/distributedschedule_safwk_lite)
+[systemabilitymgr\_safwk\_lite](https://gitee.com/openharmony/systemabilitymgr_safwk_lite)
 
-[distributedschedule\_samgr\_lite](https://gitee.com/openharmony/distributedschedule_samgr_lite)
+[systemabilitymgr\_samgr\_lite](https://gitee.com/openharmony/systemabilitymgr_samgr_lite)
 
