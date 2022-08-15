@@ -37,7 +37,7 @@ ohos_unittest("ParseUtilTest") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
 
-  external_deps = [ "utils_base:utils" ]
+  external_deps = [ "c_utils:utils" ]
 
   public_deps = [ "//third_party/libxml2:libxml2" ]
 }

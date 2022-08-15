@@ -25,6 +25,7 @@
         "deps": {
             "components": [
                 "access_token",
+                "c_utils",
                 "eventhandler",
                 "hisysevent_native",
                 "hitrace_native",
@@ -33,8 +34,7 @@
                 "ipc",
                 "samgr",
                 "selinux",
-                "startup_l2",
-                "utils_base"
+                "startup_l2"
             ],
             "third_party": [ "libxml2" ]
         },
