@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
+#include "system_ability_mgr_test.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "itest_transaction_service.h"
 #include "sa_status_change_mock.h"
 #include "string_ex.h"
 #include "system_ability_definition.h"
-#include "system_ability_mgr_test.h"
 #include "test_log.h"
 
 #define private public

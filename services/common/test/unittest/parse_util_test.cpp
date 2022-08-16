@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 #include "gtest/gtest.h"
 #include "parse_util.h"
 #include "string_ex.h"
@@ -28,6 +27,7 @@ namespace {
     const std::string TEST_RESOURCE_PATH = "/data/test/resource/samgr/profile/";
     const std::u16string TEST_PROCESS_NAME = u"sa_test";
     const int32_t TEST_PROFILE_SAID = 9999;
+    const int32_t TEST_PROFILE_SAID_INVAILD = 9990;
 }
 
 class ParseUtilTest : public testing::Test {
@@ -436,8 +436,9 @@ HWTEST_F(ParseUtilTest, CheckPathExist002, TestSize.Level1)
 
 /**
  * @tc.name: GetProfile001
- * @tc.desc:  Verify if can get not-exist profile
+ * @tc.desc: Verify if can get not-exist profile
  * @tc.type: FUNC
+ * @tc.require: I5KMF7
  */
 HWTEST_F(ParseUtilTest, GetProfile001, TestSize.Level1)
 {
@@ -447,14 +448,16 @@ HWTEST_F(ParseUtilTest, GetProfile001, TestSize.Level1)
      * @tc.expected: step1. return true when load not exist file
      */
     SaProfile saProfile;
-    bool ret = parser_->GetProfile(9999, saProfile);
-    EXPECT_FALSE(ret);
+    bool ret = parser_->GetProfile(TEST_PROFILE_SAID, saProfile);
+    parser_->OpenSo();
+    EXPECT_EQ(ret, false);
 }
 
 /**
  * @tc.name: GetProfile002
- * @tc.desc:  Verify if can get exist profile
+ * @tc.desc: Verify if can get exist profile
  * @tc.type: FUNC
+ * @tc.require: I5KMF7
  */
 HWTEST_F(ParseUtilTest, GetProfile002, TestSize.Level1)
 {
@@ -464,12 +467,88 @@ HWTEST_F(ParseUtilTest, GetProfile002, TestSize.Level1)
      * @tc.expected: step1. return true when load not exist file
      */
     bool ret = parser_->ParseSaProfiles(TEST_RESOURCE_PATH + "multi_sa_profile.xml");
-    EXPECT_TRUE(ret);
+    EXPECT_EQ(ret, true);
     SaProfile saProfile;
-    ret = parser_->GetProfile(9999, saProfile);
-    EXPECT_TRUE(ret);
-    EXPECT_EQ(saProfile.saId, 9999);
-    EXPECT_TRUE(saProfile.runOnCreate);
+    ret = parser_->GetProfile(TEST_PROFILE_SAID, saProfile);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(saProfile.saId, TEST_PROFILE_SAID);
+    EXPECT_EQ(saProfile.runOnCreate, true);
+}
+
+/**
+ * @tc.name: LoadSaLib001
+ * @tc.desc: Verify if can load salib
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(ParseUtilTest, LoadSaLib001, TestSize.Level1)
+{
+    DTEST_LOG << " LoadSaLib001 start " << std::endl;
+    /**
+     * @tc.steps: step1. check exsit salib
+     * @tc.expected: step1. return true when load exist salib
+     */
+    bool ret = parser_->ParseSaProfiles(TEST_RESOURCE_PATH + "multi_sa_profile.xml");
+    EXPECT_EQ(ret, true);
+    ret = parser_->LoadSaLib(TEST_PROFILE_SAID);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: LoadSaLib002
+ * @tc.desc: Verify if can load salib
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(ParseUtilTest, LoadSaLib002, TestSize.Level1)
+{
+    DTEST_LOG << " LoadSaLib002 start " << std::endl;
+    /**
+     * @tc.steps: step1. check exsit salib
+     * @tc.expected: step1. return false when load not exist salib
+     */
+    bool ret = parser_->ParseSaProfiles(TEST_RESOURCE_PATH + "multi_sa_profile.xml");
+    EXPECT_EQ(ret, true);
+    ret = parser_->LoadSaLib(TEST_PROFILE_SAID_INVAILD);
+    EXPECT_NE(ret, true);
+}
+
+/**
+ * @tc.name: GetProcessName001
+ * @tc.desc: Verify if can get procesname
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(ParseUtilTest, GetProcessName001, TestSize.Level1)
+{
+    DTEST_LOG << " GetProcessName001 " << std::endl;
+    /**
+     * @tc.steps: step1. get SaProfiles
+     * @tc.expected: step1. return true when SaProfiles
+     */
+    bool ret = parser_->ParseSaProfiles(TEST_RESOURCE_PATH + "multi_sa_profile.xml");
+    EXPECT_EQ(ret, true);
+    std::u16string Name = parser_->GetProcessName();
+    EXPECT_EQ(Str16ToStr8(Name), "test");
+}
+
+/**
+ * @tc.name: GetProcessName002
+ * @tc.desc: Verify if can get procesname
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(ParseUtilTest, GetProcessName002, TestSize.Level1)
+{
+    DTEST_LOG << " GetProcessName002 " << std::endl;
+    /**
+    * @tc.steps: step1. get SaProfiles
+    * @tc.expected: step1. return true when SaProfiles
+    */
+    bool ret = parser_->ParseSaProfiles(TEST_RESOURCE_PATH + "multi_sa_profile.xml");
+    EXPECT_EQ(ret, true);
+    std::u16string Name = parser_->GetProcessName();
+    EXPECT_NE(Str16ToStr8(Name), "test_1");
 }
 } // namespace SAMGR
 } // namespace OHOS
