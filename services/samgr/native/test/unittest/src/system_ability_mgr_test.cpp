@@ -17,6 +17,7 @@
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "itest_transaction_service.h"
+#include "parameter.h"
 #include "sa_status_change_mock.h"
 #include "string_ex.h"
 #include "system_ability_definition.h"
@@ -1615,5 +1616,21 @@ HWTEST_F(SystemAbilityMgrTest, DoLoadRemoteSystemAbility003, TestSize.Level1)
      */
     saMgr->DoLoadRemoteSystemAbility(11111, 0, 0, "222", mockLoadCallback2);
     ASSERT_EQ(saMgr->remoteCallbacks_.size(), 1);
+}
+
+/**
+ * @tc.name: param check samgr ready event
+ * @tc.desc: param check samgr ready event
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, SamgrReady001, TestSize.Level1)
+{
+    DTEST_LOG << " SamgrReady001 start " << std::endl;
+    /**
+     * @tc.steps: step1. param check samgr ready event
+     * @tc.expected: step1. param check samgr ready event
+     */
+    auto ret = WaitParameter("bootevent.samgr.ready", "true", 1);
+    ASSERT_EQ(ret, 0);
 }
 } // namespace OHOS
