@@ -60,6 +60,7 @@ ohos_fuzztest("SystemAbilityManagerFuzzTest") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "ipc:libdbinder",
+    "samgr:samgr_common",
     "samgr:samgr_proxy",
   ]
   public_deps = [ "//third_party/libxml2:libxml2" ]
