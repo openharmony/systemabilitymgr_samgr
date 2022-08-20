@@ -29,7 +29,11 @@ ohos_shared_library("samgr_common") {
     "//foundation/systemabilitymgr/samgr/services/dfx/source/hisysevent_adapter.cpp",
   ]
 
-  configs = [ ":config_samgr_common" ]
+  configs = [
+    ":config_samgr_common",
+    "//foundation/systemabilitymgr/samgr/test/resource:coverage_flags",
+  ]
+
   public_configs = [ ":config_samgr_common" ]
   if (is_standard_system) {
     external_deps = [

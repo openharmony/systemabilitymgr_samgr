@@ -46,6 +46,7 @@ ohos_unittest("SystemAbilityMgrTest") {
     ":sam_test_config",
     "${samgr_dir}/interfaces/innerkits/lsamgr:config_samgr",
     "${samgr_dir}/services/samgr/native:sam_config",
+    "//foundation/systemabilitymgr/samgr/test/resource:coverage_flags",
   ]
 
   cflags = []
@@ -86,6 +87,7 @@ ohos_unittest("SystemAbilityMgrProxyTest") {
     ":sam_test_config",
     "${samgr_dir}/interfaces/innerkits/lsamgr:config_samgr",
     "${samgr_dir}/services/samgr/native:sam_config",
+    "//foundation/systemabilitymgr/samgr/test/resource:coverage_flags",
   ]
 
   if (target_cpu == "arm") {
@@ -116,6 +118,7 @@ ohos_unittest("LocalAbilityManagerProxyTest") {
     ":sam_test_config",
     "${samgr_dir}/interfaces/innerkits/lsamgr:config_samgr",
     "${samgr_dir}/services/samgr/native:sam_config",
+    "//foundation/systemabilitymgr/samgr/test/resource:coverage_flags",
   ]
 
   if (target_cpu == "arm") {
@@ -139,6 +142,7 @@ ohos_executable("ondemand") {
   configs = [
     ":sam_test_config",
     "${samgr_dir}/interfaces/innerkits/lsamgr:config_samgr",
+    "//foundation/systemabilitymgr/samgr/test/resource:coverage_flags",
   ]
   deps = [ "${samgr_dir}/interfaces/innerkits/samgr_proxy:samgr_proxy" ]
   if (is_standard_system) {
@@ -183,6 +187,7 @@ ohos_executable("TestTool") {
     "${samgr_dir}/interfaces/innerkits/lsamgr:config_samgr",
     "${samgr_dir}/interfaces/innerkits/samgr_proxy:samgr_proxy_config",
     "${samgr_dir}/services/samgr/native:sam_config",
+    "//foundation/systemabilitymgr/samgr/test/resource:coverage_flags",
   ]
   deps = [
     "${samgr_dir}/interfaces/innerkits/common:samgr_common",
