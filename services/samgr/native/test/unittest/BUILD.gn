@@ -220,6 +220,8 @@ ohos_executable("TestTool") {
 group("unittest") {
   testonly = true
   deps = [
+    ":LocalAbilityManagerProxyTest",
+    ":SystemAbilityMgrProxyTest",
     ":SystemAbilityMgrTest",
     ":TestTool",
     ":ondemand",
