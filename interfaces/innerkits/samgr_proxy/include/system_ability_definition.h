@@ -182,6 +182,7 @@ enum {
     ACCESS_TOKEN_MANAGER_SERVICE_ID                  = 3503,
     TOKEN_SYNC_MANAGER_SERVICE_ID                    = 3504,
     DEVICE_SECURITY_LEVEL_MANAGER_SA_ID              = 3511,
+    DLP_PERMISSION_SERVICE_ID                        = 3521,
     SUBSYS_SENSORS_SYS_ABILITY_ID_BEGIN              = 3600,
     SENSOR_SERVICE_ABILITY_ID                        = 3601,
     MISCDEVICE_SERVICE_ABILITY_ID                    = 3602,
@@ -344,6 +345,9 @@ static const std::map<int, std::string> saNameMap_ = {
     { SUBSYS_USERIAM_SYS_ABILITY_USERIDM, "UserIdmService" },
     { SUBSYS_USERIAM_SYS_ABILITY_AUTHEXECUTORMGR, "AuthExecutorMgrService" },
     { RENDER_SERVICE, "RenderService" },
+    { ACCESS_TOKEN_MANAGER_SERVICE_ID, "AccessTokenManagerService" },
+    { TOKEN_SYNC_MANAGER_SERVICE_ID, "TokenSyncManagerService" },
+    { DLP_PERMISSION_SERVICE_ID, "DlpPermissionService" },
 };
 } // namespace OHOS
 
