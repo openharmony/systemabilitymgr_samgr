@@ -30,7 +30,11 @@ config("public_config_lsamgr") {
 ohos_shared_library("lsamgr") {
   sources = [ "../../../services/lsamgr/src/local_ability_manager_proxy.cpp" ]
 
-  configs = [ ":config_samgr" ]
+  configs = [
+    ":config_samgr",
+    "//foundation/systemabilitymgr/samgr/test/resource:coverage_flags",
+  ]
+
   public_configs = [ ":public_config_lsamgr" ]
 
   if (is_standard_system) {

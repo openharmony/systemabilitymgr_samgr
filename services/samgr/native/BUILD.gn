@@ -56,6 +56,7 @@ ohos_executable("samgr") {
     ":sam_config",
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/common:config_samgr_common",
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/lsamgr:config_samgr",
+    "//foundation/systemabilitymgr/samgr/test/resource:coverage_flags",
     ":distributed_store_config",
   ]
 

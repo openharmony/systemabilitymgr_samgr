@@ -27,6 +27,9 @@ ohos_unittest("ParseUtilTest") {
 
   sources = [ "./parse_util_test.cpp" ]
 
+  configs =
+      [ "//foundation/systemabilitymgr/samgr/test/resource:coverage_flags" ]
+
   deps = [
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/common:samgr_common",
     "//third_party/googletest:gtest_main",
