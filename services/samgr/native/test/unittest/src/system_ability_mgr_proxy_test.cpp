@@ -140,4 +140,16 @@ HWTEST_F(SystemAbilityMgrProxyTest, UnSubscribeSystemAbility002, TestSize.Level1
     int32_t res = sm->UnSubscribeSystemAbility(TEST_ID_INVAILD, callback);
     EXPECT_EQ(res, ERR_OK);
 }
+
+/**
+ * @tc.name: ServiceRegistry001
+ * @tc.desc: check ServiceRegistry
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, ServiceRegistry001, TestSize.Level1)
+{
+    sptr<IServiceRegistry> sr = ServiceRegistry::GetInstance();
+    EXPECT_EQ(sr, nullptr);
+}
 }
