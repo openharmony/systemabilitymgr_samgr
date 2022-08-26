@@ -32,6 +32,7 @@ ohos_unittest("ParseUtilTest") {
 
   deps = [
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/common:samgr_common",
+    "//foundation/systemabilitymgr/samgr/services/common/test/mock:mock_sa",
     "//third_party/googletest:gtest_main",
   ]
 

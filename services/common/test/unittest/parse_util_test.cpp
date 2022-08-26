@@ -13,10 +13,11 @@
  * limitations under the License.
  */
 #include "gtest/gtest.h"
-#include "parse_util.h"
 #include "string_ex.h"
 #include "test_log.h"
 
+#define private public
+#include "parse_util.h"
 using namespace std;
 using namespace testing;
 using namespace testing::ext;
@@ -26,6 +27,8 @@ namespace SAMGR {
 namespace {
     const std::string TEST_RESOURCE_PATH = "/data/test/resource/samgr/profile/";
     const std::u16string TEST_PROCESS_NAME = u"sa_test";
+    const int32_t TEST_NUM = 123;
+    const int32_t MOCK_SAID = 1492;
     const int32_t TEST_PROFILE_SAID = 9999;
     const int32_t TEST_PROFILE_SAID_INVAILD = 9990;
 }
@@ -71,7 +74,7 @@ void ParseUtilTest::TearDown()
  * @tc.desc: Verify if can load not exist file
  * @tc.type: FUNC
  */
-HWTEST_F(ParseUtilTest, ParseSaProfile001, TestSize.Level1)
+HWTEST_F(ParseUtilTest, ParseSaProfile001, TestSize.Level2)
 {
     DTEST_LOG << " ParseSaProfile001 start " << std::endl;
     /**
@@ -87,7 +90,7 @@ HWTEST_F(ParseUtilTest, ParseSaProfile001, TestSize.Level1)
  * @tc.desc: Verify if can load invalid root file
  * @tc.type: FUNC
  */
-HWTEST_F(ParseUtilTest, ParseSaProfile002, TestSize.Level1)
+HWTEST_F(ParseUtilTest, ParseSaProfile002, TestSize.Level2)
 {
     DTEST_LOG << " ParseSaProfile002 start " << std::endl;
     /**
@@ -103,7 +106,7 @@ HWTEST_F(ParseUtilTest, ParseSaProfile002, TestSize.Level1)
  * @tc.desc: Verify if can load normal profile
  * @tc.type: FUNC
  */
-HWTEST_F(ParseUtilTest, ParseSaProfile003, TestSize.Level1)
+HWTEST_F(ParseUtilTest, ParseSaProfile003, TestSize.Level2)
 {
     DTEST_LOG << " ParseSaProfile003 start " << std::endl;
     /**
@@ -115,11 +118,55 @@ HWTEST_F(ParseUtilTest, ParseSaProfile003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ParseSaProfile004
+ * @tc.desc: Verify if can load normal profile
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseUtilTest, ParseSaProfile004, TestSize.Level2)
+{
+    DTEST_LOG << " ParseSaProfile004 start " << std::endl;
+    /**
+     * @tc.steps: step1. load correct system ability profile
+     * @tc.expected: step1. return false when load noxmlfile
+     */
+    bool ret = parser_->ParseSaProfiles(TEST_RESOURCE_PATH + "no_xml_file");
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: ParseSaProfile005
+ * @tc.desc: Verify if can load normal profile
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseUtilTest, ParseSaProfile005, TestSize.Level2)
+{
+    DTEST_LOG << " ParseSaProfile005 start " << std::endl;
+    bool ret = parser_->ParseSaProfiles(TEST_RESOURCE_PATH + "empty_process.xml");
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: ParseSaProfile006
+ * @tc.desc: Verify if can load normal profile
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseUtilTest, ParseSaProfile006, TestSize.Level2)
+{
+    DTEST_LOG << " ParseSaProfile006 start " << std::endl;
+    /**
+     * @tc.steps: step1. load correct system ability profile
+     * @tc.expected: step1. return false when load invalid format config file
+     */
+    bool ret = parser_->ParseSaProfiles(TEST_RESOURCE_PATH + "empty_systemability.xml");
+    EXPECT_FALSE(ret);
+}
+
+/**
  * @tc.name: GetSaProfiles001
  * @tc.desc:  Verify if not load sa file return empty list
  * @tc.type: FUNC
  */
-HWTEST_F(ParseUtilTest, GetSaProfiles001, TestSize.Level1)
+HWTEST_F(ParseUtilTest, GetSaProfiles001, TestSize.Level3)
 {
     DTEST_LOG << " GetSaProfiles001 start " << std::endl;
     /**
@@ -135,7 +182,7 @@ HWTEST_F(ParseUtilTest, GetSaProfiles001, TestSize.Level1)
  * @tc.desc:  Verify if can load normal sa profile
  * @tc.type: FUNC
  */
-HWTEST_F(ParseUtilTest, GetSaProfiles002, TestSize.Level1)
+HWTEST_F(ParseUtilTest, GetSaProfiles002, TestSize.Level3)
 {
     DTEST_LOG << " GetSaProfiles002 start " << std::endl;
     /**
@@ -144,6 +191,7 @@ HWTEST_F(ParseUtilTest, GetSaProfiles002, TestSize.Level1)
      */
     bool ret = parser_->ParseSaProfiles(TEST_RESOURCE_PATH + "profile.xml");
     ASSERT_TRUE(ret);
+    parser_->OpenSo();
     list<SaProfile> profiles = parser_->GetAllSaProfiles();
     if (!profiles.empty()) {
         SaProfile& profile = *(profiles.begin());
@@ -282,7 +330,7 @@ HWTEST_F(ParseUtilTest, ParseTrustConfig006, TestSize.Level1)
  * @tc.desc:  Verify if can remove not-existed id
  * @tc.type: FUNC
  */
-HWTEST_F(ParseUtilTest, RemoveSaProfile001, TestSize.Level1)
+HWTEST_F(ParseUtilTest, RemoveSaProfile001, TestSize.Level3)
 {
     DTEST_LOG << " RemoveSaProfile001 start " << std::endl;
     /**
@@ -305,7 +353,7 @@ HWTEST_F(ParseUtilTest, RemoveSaProfile001, TestSize.Level1)
  * @tc.desc:  Verify if can can remove not-existed id
  * @tc.type: FUNC
  */
-HWTEST_F(ParseUtilTest, RemoveSaProfile002, TestSize.Level1)
+HWTEST_F(ParseUtilTest, RemoveSaProfile002, TestSize.Level3)
 {
     DTEST_LOG << " RemoveSaProfile002 start " << std::endl;
     /**
@@ -330,7 +378,7 @@ HWTEST_F(ParseUtilTest, RemoveSaProfile002, TestSize.Level1)
  * @tc.desc:  Verify if can remove one existed id
  * @tc.type: FUNC
  */
-HWTEST_F(ParseUtilTest, RemoveSaProfile003, TestSize.Level1)
+HWTEST_F(ParseUtilTest, RemoveSaProfile003, TestSize.Level3)
 {
     DTEST_LOG << " RemoveSaProfile003 start " << std::endl;
     /**
@@ -355,7 +403,7 @@ HWTEST_F(ParseUtilTest, RemoveSaProfile003, TestSize.Level1)
  * @tc.desc:  Verify if can remove one existed id
  * @tc.type: FUNC
  */
-HWTEST_F(ParseUtilTest, RemoveSaProfile004, TestSize.Level1)
+HWTEST_F(ParseUtilTest, RemoveSaProfile004, TestSize.Level3)
 {
     DTEST_LOG << " RemoveSaProfile004 start " << std::endl;
     /**
@@ -380,7 +428,7 @@ HWTEST_F(ParseUtilTest, RemoveSaProfile004, TestSize.Level1)
  * @tc.desc:  Verify if can remove more existed id
  * @tc.type: FUNC
  */
-HWTEST_F(ParseUtilTest, RemoveSaProfile005, TestSize.Level1)
+HWTEST_F(ParseUtilTest, RemoveSaProfile005, TestSize.Level3)
 {
     DTEST_LOG << " RemoveSaProfile004 start " << std::endl;
     /**
@@ -407,7 +455,7 @@ HWTEST_F(ParseUtilTest, RemoveSaProfile005, TestSize.Level1)
  * @tc.desc:  Verify if can check not exist file
  * @tc.type: FUNC
  */
-HWTEST_F(ParseUtilTest, CheckPathExist001, TestSize.Level1)
+HWTEST_F(ParseUtilTest, CheckPathExist001, TestSize.Level2)
 {
     DTEST_LOG << " CheckPathExist001 start " << std::endl;
     /**
@@ -423,7 +471,7 @@ HWTEST_F(ParseUtilTest, CheckPathExist001, TestSize.Level1)
  * @tc.desc:  Verify if can check exist file
  * @tc.type: FUNC
  */
-HWTEST_F(ParseUtilTest, CheckPathExist002, TestSize.Level1)
+HWTEST_F(ParseUtilTest, CheckPathExist002, TestSize.Level2)
 {
     DTEST_LOG << " CheckPathExist002 start " << std::endl;
     /**
@@ -440,7 +488,7 @@ HWTEST_F(ParseUtilTest, CheckPathExist002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5KMF7
  */
-HWTEST_F(ParseUtilTest, GetProfile001, TestSize.Level1)
+HWTEST_F(ParseUtilTest, GetProfile001, TestSize.Level2)
 {
     DTEST_LOG << " GetProfile001 start " << std::endl;
     /**
@@ -449,7 +497,6 @@ HWTEST_F(ParseUtilTest, GetProfile001, TestSize.Level1)
      */
     SaProfile saProfile;
     bool ret = parser_->GetProfile(TEST_PROFILE_SAID, saProfile);
-    parser_->OpenSo();
     EXPECT_EQ(ret, false);
 }
 
@@ -459,7 +506,7 @@ HWTEST_F(ParseUtilTest, GetProfile001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5KMF7
  */
-HWTEST_F(ParseUtilTest, GetProfile002, TestSize.Level1)
+HWTEST_F(ParseUtilTest, GetProfile002, TestSize.Level2)
 {
     DTEST_LOG << " GetProfile002 start " << std::endl;
     /**
@@ -481,7 +528,7 @@ HWTEST_F(ParseUtilTest, GetProfile002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5KMF7
  */
-HWTEST_F(ParseUtilTest, LoadSaLib001, TestSize.Level1)
+HWTEST_F(ParseUtilTest, LoadSaLib001, TestSize.Level2)
 {
     DTEST_LOG << " LoadSaLib001 start " << std::endl;
     /**
@@ -500,7 +547,7 @@ HWTEST_F(ParseUtilTest, LoadSaLib001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5KMF7
  */
-HWTEST_F(ParseUtilTest, LoadSaLib002, TestSize.Level1)
+HWTEST_F(ParseUtilTest, LoadSaLib002, TestSize.Level2)
 {
     DTEST_LOG << " LoadSaLib002 start " << std::endl;
     /**
@@ -514,12 +561,52 @@ HWTEST_F(ParseUtilTest, LoadSaLib002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LoadSaLib003
+ * @tc.desc: Verify if can load salib
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(ParseUtilTest, LoadSaLib003, TestSize.Level2)
+{
+    DTEST_LOG << " LoadSaLib003 start " << std::endl;
+    /**
+     * @tc.steps: step1. check exsit salib
+     * @tc.expected: step1. return false when load not exist salib
+     */
+    bool ret = parser_->ParseSaProfiles(TEST_RESOURCE_PATH + "mock.xml");
+    EXPECT_EQ(ret, true);
+    ret = parser_->LoadSaLib(MOCK_SAID);
+    parser_->CloseSo(MOCK_SAID);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: LoadSaLib004
+ * @tc.desc: Verify if can load salib
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(ParseUtilTest, LoadSaLib004, TestSize.Level2)
+{
+    DTEST_LOG << " LoadSaLib004 start " << std::endl;
+    /**
+     * @tc.steps: step1. check exsit salib
+     * @tc.expected: step1. return false when load not exist salib
+     */
+    bool ret = parser_->ParseSaProfiles(TEST_RESOURCE_PATH + "mock.xml");
+    EXPECT_EQ(ret, true);
+    ret = parser_->LoadSaLib(MOCK_SAID);
+    EXPECT_EQ(ret, true);
+    parser_->LoadSaLib(MOCK_SAID);
+}
+
+/**
  * @tc.name: GetProcessName001
  * @tc.desc: Verify if can get procesname
  * @tc.type: FUNC
  * @tc.require: I5KMF7
  */
-HWTEST_F(ParseUtilTest, GetProcessName001, TestSize.Level1)
+HWTEST_F(ParseUtilTest, GetProcessName001, TestSize.Level3)
 {
     DTEST_LOG << " GetProcessName001 " << std::endl;
     /**
@@ -538,7 +625,7 @@ HWTEST_F(ParseUtilTest, GetProcessName001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5KMF7
  */
-HWTEST_F(ParseUtilTest, GetProcessName002, TestSize.Level1)
+HWTEST_F(ParseUtilTest, GetProcessName002, TestSize.Level3)
 {
     DTEST_LOG << " GetProcessName002 " << std::endl;
     /**
@@ -549,6 +636,239 @@ HWTEST_F(ParseUtilTest, GetProcessName002, TestSize.Level1)
     EXPECT_EQ(ret, true);
     std::u16string Name = parser_->GetProcessName();
     EXPECT_NE(Str16ToStr8(Name), "test_1");
+}
+
+/**
+ * @tc.name: ParseSAProp001
+ * @tc.desc: Verify if can ParseSAProp
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(ParseUtilTest, ParseSAProp001, TestSize.Level3)
+{
+    DTEST_LOG << " ParseSAProp001 " << std::endl;
+    string nodeName = "depend";
+    string nodeContent = "TEST";
+    SaProfile saProfile;
+    parser_->ParseSAProp(nodeName, nodeContent, saProfile);
+    EXPECT_EQ(saProfile.dependSa.size(), 1);
+}
+
+/**
+ * @tc.name: ParseSAProp002
+ * @tc.desc: Verify if can ParseSAProp
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(ParseUtilTest, ParseSAProp002, TestSize.Level3)
+{
+    DTEST_LOG << " ParseSAProp002 " << std::endl;
+    string nodeName = "depend-time-out";
+    string nodeContent = "123";
+    SaProfile saProfile;
+    parser_->ParseSAProp(nodeName, nodeContent, saProfile);
+    EXPECT_EQ(saProfile.dependTimeout, TEST_NUM);
+}
+
+/**
+ * @tc.name: ParseSAProp003
+ * @tc.desc: Verify if can ParseSAProp
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(ParseUtilTest, ParseSAProp003, TestSize.Level3)
+{
+    DTEST_LOG << " ParseSAProp003 " << std::endl;
+    string nodeName = "capability";
+    string nodeContent = "TEST";
+    SaProfile saProfile;
+    parser_->ParseSAProp(nodeName, nodeContent, saProfile);
+    EXPECT_EQ(nodeContent, Str16ToStr8(saProfile.capability));
+}
+
+/**
+ * @tc.name: ParseSAProp004
+ * @tc.desc: Verify if can ParseSAProp
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(ParseUtilTest, ParseSAProp004, TestSize.Level3)
+{
+    DTEST_LOG << " ParseSAProp004 " << std::endl;
+    string nodeName = "permission";
+    string nodeContent = "TEST";
+    SaProfile saProfile;
+    parser_->ParseSAProp(nodeName, nodeContent, saProfile);
+    EXPECT_EQ(nodeContent, Str16ToStr8(saProfile.permission));
+}
+
+/**
+ * @tc.name: ParseSAProp005
+ * @tc.desc: Verify if can ParseSAProp
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(ParseUtilTest, ParseSAProp005, TestSize.Level3)
+{
+    DTEST_LOG << " ParseSAProp005 " << std::endl;
+    string nodeName = "bootphase";
+    string nodeContent = "TEST";
+    SaProfile saProfile;
+    parser_->ParseSAProp(nodeName, nodeContent, saProfile);
+    EXPECT_EQ(nodeContent, Str16ToStr8(saProfile.bootPhase));
+}
+
+/**
+ * @tc.name: ParseSystemAbility001
+ * @tc.desc: Verify if can ParseSystemAbility
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(ParseUtilTest, ParseSystemAbility001, TestSize.Level3)
+{
+    DTEST_LOG << " ParseSystemAbility001 " << std::endl;
+    xmlNode rootNode;
+    rootNode.xmlChildrenNode = nullptr;
+    u16string process = u"tempprocess";
+    bool res = parser_->ParseSystemAbility(rootNode, process);
+    EXPECT_EQ(res, false);
+}
+
+/**
+ * @tc.name: ParseSystemAbility002
+ * @tc.desc: Verify if can ParseSystemAbility
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(ParseUtilTest, ParseSystemAbility002, TestSize.Level3)
+{
+    DTEST_LOG << " ParseSystemAbility002 " << std::endl;
+    xmlNode rootNode;
+    xmlNode tempNode;
+    xmlNode* childrenNode = &tempNode;
+    const char* nodeName = "test";
+    childrenNode->name = reinterpret_cast<const xmlChar*>(nodeName);
+    childrenNode->type = XML_PI_NODE;
+    childrenNode->content = nullptr;
+    childrenNode->next = nullptr;
+    rootNode.xmlChildrenNode = childrenNode;
+    u16string process = u"tempprocess";
+    bool res = parser_->ParseSystemAbility(rootNode, process);
+    EXPECT_EQ(res, true);
+}
+
+/**
+ * @tc.name: ParseProcess001
+ * @tc.desc: Verify if can ParseProcess
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(ParseUtilTest, ParseProcess001, TestSize.Level3)
+{
+    DTEST_LOG << " ParseProcess001 " << std::endl;
+    xmlNode tempNode;
+    xmlNode* rootNode = &tempNode;
+    u16string process = u"tempprocess";
+    bool res = parser_->ParseProcess(rootNode, process);
+    EXPECT_EQ(res, false);
+}
+
+/**
+ * @tc.name: ParseProcess002
+ * @tc.desc: Verify if can ParseProcess
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(ParseUtilTest, ParseProcess002, TestSize.Level3)
+{
+    DTEST_LOG << " ParseProcess002 " << std::endl;
+    xmlNode tempNode;
+    xmlNode* rootNode = &tempNode;
+    const char* nodeName = "test";
+    rootNode->name = reinterpret_cast<const xmlChar*>(nodeName);
+    rootNode->type = XML_PI_NODE;
+    rootNode->content = nullptr;
+    u16string process = u"tempprocess";
+    bool res = parser_->ParseProcess(rootNode, process);
+    EXPECT_EQ(res, false);
+}
+
+/**
+ * @tc.name: ParseTrustConfigInner001
+ * @tc.desc: Verify if can ParseTrustConfigInner
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(ParseUtilTest, ParseTrustConfigInner001, TestSize.Level2)
+{
+    DTEST_LOG << " ParseTrustConfigInner001 " << std::endl;
+    xmlNode tempNode;
+    xmlNode* rootNode = &tempNode;
+    rootNode->xmlChildrenNode = nullptr;
+    std::map<std::u16string, std::set<int32_t>> values;
+    bool res = parser_->ParseTrustConfigInner(rootNode, values);
+    EXPECT_EQ(res, false);
+}
+
+/**
+ * @tc.name: ParseTrustConfigInner002
+ * @tc.desc: Verify if can ParseTrustConfigInner
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(ParseUtilTest, ParseTrustConfigInner002, TestSize.Level2)
+{
+    DTEST_LOG << " ParseTrustConfigInner002 " << std::endl;
+    xmlNode rootNode;
+    xmlNode* rootNodeptr = &rootNode;
+    xmlNode tempNode;
+    xmlNode* childrenNode = &tempNode;
+    const char* nodeName = "name";
+    childrenNode->name = reinterpret_cast<const xmlChar*>(nodeName);
+    childrenNode->type = XML_PI_NODE;
+    childrenNode->content = nullptr;
+    childrenNode->next = nullptr;
+    rootNodeptr->xmlChildrenNode = childrenNode;
+    std::map<std::u16string, std::set<int32_t>> values;
+    bool res = parser_->ParseTrustConfigInner(rootNodeptr, values);
+    EXPECT_EQ(res, false);
+}
+
+/**
+ * @tc.name: ParseSaid001
+ * @tc.desc: Verify if can ParseSaid
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(ParseUtilTest, ParseSaid001, TestSize.Level1)
+{
+    DTEST_LOG << " ParseSaid001 " << std::endl;
+    xmlNode rootNode;
+    xmlNode* rootNodeptr = &rootNode;
+    rootNodeptr->name = nullptr;
+    int32_t tempSaId = -1;
+    bool res = parser_->ParseSaId(rootNodeptr, tempSaId);
+    EXPECT_EQ(res, false);
+}
+
+/**
+ * @tc.name: ParseSaid002
+ * @tc.desc: Verify if can ParseSaid
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(ParseUtilTest, ParseSaid002, TestSize.Level1)
+{
+    DTEST_LOG << " ParseSaid002 " << std::endl;
+    xmlNode rootNode;
+    xmlNode* rootNodeptr = &rootNode;
+    const char* nodeName = "noNull";
+    rootNodeptr->name = reinterpret_cast<const xmlChar*>(nodeName);
+    rootNodeptr->type = XML_PI_NODE;
+    rootNodeptr->content = nullptr;
+    int32_t tempSaId = -1;
+    bool res = parser_->ParseSaId(rootNodeptr, tempSaId);
+    EXPECT_EQ(res, false);
 }
 } // namespace SAMGR
 } // namespace OHOS
