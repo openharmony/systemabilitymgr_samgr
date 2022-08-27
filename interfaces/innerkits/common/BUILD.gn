@@ -13,6 +13,12 @@
 
 import("//build/ohos.gni")
 
+config("all_config_samgr_common") {
+  include_dirs = [
+    "include",
+  ]
+}
+
 config("config_samgr_common") {
   include_dirs = [
     "include",
@@ -35,6 +41,9 @@ ohos_shared_library("samgr_common") {
   ]
 
   public_configs = [ ":config_samgr_common" ]
+
+  all_dependent_configs = [ ":all_config_samgr_common" ]
+  
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
