@@ -25,7 +25,10 @@ ohos_unittest("ParseUtilTest") {
     "//foundation/systemabilitymgr/samgr/utils/native/include",
   ]
 
-  sources = [ "./parse_util_test.cpp" ]
+  sources = [
+    "./parse_util_test.cpp",
+    "//foundation/systemabilitymgr/samgr/utils/native/source/tools.cpp",
+  ]
 
   configs =
       [ "//foundation/systemabilitymgr/samgr/test/resource:coverage_flags" ]

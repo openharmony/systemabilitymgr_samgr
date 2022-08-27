@@ -15,6 +15,7 @@
 #include "gtest/gtest.h"
 #include "string_ex.h"
 #include "test_log.h"
+#include "tools.h"
 
 #define private public
 #include "parse_util.h"
@@ -191,6 +192,10 @@ HWTEST_F(ParseUtilTest, GetSaProfiles002, TestSize.Level3)
      */
     bool ret = parser_->ParseSaProfiles(TEST_RESOURCE_PATH + "profile.xml");
     ASSERT_TRUE(ret);
+    SaProfile saRunOnCreateTrue,saRunOnCreateFalse;
+    saRunOnCreateTrue.runOnCreate = true;
+    parser_->saProfiles_.emplace_back(saRunOnCreateTrue);
+    parser_->saProfiles_.emplace_back(saRunOnCreateFalse);
     parser_->OpenSo();
     list<SaProfile> profiles = parser_->GetAllSaProfiles();
     if (!profiles.empty()) {
@@ -557,6 +562,7 @@ HWTEST_F(ParseUtilTest, LoadSaLib002, TestSize.Level2)
     bool ret = parser_->ParseSaProfiles(TEST_RESOURCE_PATH + "multi_sa_profile.xml");
     EXPECT_EQ(ret, true);
     ret = parser_->LoadSaLib(TEST_PROFILE_SAID_INVAILD);
+    parser_->CloseSo(MOCK_SAID);
     EXPECT_NE(ret, true);
 }
 
@@ -600,6 +606,24 @@ HWTEST_F(ParseUtilTest, LoadSaLib004, TestSize.Level2)
     parser_->LoadSaLib(MOCK_SAID);
 }
 
+/**
+ * @tc.name: LoadSaLib005
+ * @tc.desc: Verify if can load salib
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(ParseUtilTest, LoadSaLib005, TestSize.Level2)
+{
+    DTEST_LOG << " LoadSaLib005 start " << std::endl;
+    /**
+     * @tc.steps: step1. check exsit salib
+     * @tc.expected: step1. return false when load not exist salib
+     */
+    bool ret = parser_->ParseSaProfiles(TEST_RESOURCE_PATH + "empty_libpath.xml");
+    EXPECT_EQ(ret, true);
+    ret = parser_->LoadSaLib(MOCK_SAID);
+    EXPECT_EQ(ret, true);
+}
 /**
  * @tc.name: GetProcessName001
  * @tc.desc: Verify if can get procesname
@@ -869,6 +893,21 @@ HWTEST_F(ParseUtilTest, ParseSaid002, TestSize.Level1)
     int32_t tempSaId = -1;
     bool res = parser_->ParseSaId(rootNodeptr, tempSaId);
     EXPECT_EQ(res, false);
+}
+
+/**
+ * @tc.name: DeleteAllMark001
+ * @tc.desc: Verify if can DeleteAllMark
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(ParseUtilTest, DeleteAllMark001, TestSize.Level3)
+{
+    DTEST_LOG << " DeleteAllMark001 " << std::endl;
+    u16string temp = u"stests";
+    u16string mask = u"s";
+    u16string res = DeleteAllMark(temp, mask);
+    EXPECT_EQ(res, u"tet");
 }
 } // namespace SAMGR
 } // namespace OHOS
