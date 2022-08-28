@@ -35,7 +35,7 @@ ohos_shared_library("lsamgr") {
     "//foundation/systemabilitymgr/samgr/test/resource:coverage_flags",
   ]
 
-  all_dependent_configs = [ ":public_config_lsamgr" ]
+  public_configs = [ ":public_config_lsamgr" ]
 
   if (is_standard_system) {
     external_deps = [
