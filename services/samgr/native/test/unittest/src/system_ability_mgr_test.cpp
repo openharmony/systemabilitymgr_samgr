@@ -17,6 +17,7 @@
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "itest_transaction_service.h"
+#include "sam_mock_permission.h"
 #include "parameter.h"
 #include "sa_status_change_mock.h"
 #include "string_ex.h"
@@ -56,6 +57,7 @@ void SystemAbilityMgrTest::TearDownTestCase()
 
 void SystemAbilityMgrTest::SetUp()
 {
+    SamMockPermission::MockPermission();
     DTEST_LOG << "SetUp" << std::endl;
 }
 
