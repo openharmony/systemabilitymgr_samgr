@@ -14,7 +14,10 @@
 import("//build/ohos.gni")
 
 config("all_config_samgr_common") {
-  include_dirs = [ "include" ]
+  include_dirs = [
+    "include",
+    "//third_party/libxml2/include",
+  ]
 }
 
 config("config_samgr_common") {
@@ -22,7 +25,6 @@ config("config_samgr_common") {
     "include",
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include",
     "//foundation/systemabilitymgr/samgr/services/dfx/include",
-    "//third_party/libxml2/include",
   ]
 }
 
