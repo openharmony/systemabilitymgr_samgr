@@ -35,6 +35,7 @@ int main(int argc, char *argv[])
     }
     int result = SetParameter("bootevent.samgr.ready", "true");
     HILOGI("set samgr ready ret : %{public}s", result == 0 ? "succeed" : "failed");
+    manager->StartDfxTimer();
     OHOS::IPCSkeleton::JoinWorkThread();
     return -1;
 }

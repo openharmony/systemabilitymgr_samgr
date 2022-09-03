@@ -41,12 +41,15 @@ namespace {
 const string PREFIX = "/system/profile/";
 const string LOCAL_DEVICE = "local";
 
+constexpr uint32_t REPORT_GET_SA_INTERVAL = 24 * 60 * 60 * 1000; // ms and is one day
 constexpr int32_t MAX_NAME_SIZE = 200;
 constexpr int32_t SPLIT_NAME_VECTOR_SIZE = 2;
 
 constexpr int32_t UID_ROOT = 0;
 constexpr int32_t UID_SYSTEM = 1000;
 constexpr int32_t MAX_SUBSCRIBE_COUNT = 256;
+constexpr int32_t MAX_SA_FREQUENCY_COUNT = INT32_MAX - 1000000;
+constexpr int32_t SHFIT_BIT = 32;
 constexpr int64_t CHECK_LOADED_DELAY_TIME = 4 * 1000; // ms
 }
 
@@ -61,6 +64,7 @@ SystemAbilityManager::SystemAbilityManager()
 SystemAbilityManager::~SystemAbilityManager()
 {
     loadPool_.Stop();
+    reportEventTimer_->Shutdown();
 }
 
 void SystemAbilityManager::Init()
@@ -79,11 +83,20 @@ void SystemAbilityManager::Init()
     InitSaProfile();
     loadPool_.Start(std::thread::hardware_concurrency());
     loadPool_.SetMaxTaskNum(std::thread::hardware_concurrency());
+    reportEventTimer_ = std::make_unique<Utils::Timer>("DfxReporter");
 }
 
 const sptr<DBinderService> SystemAbilityManager::GetDBinder() const
 {
     return dBinderService_;
+}
+
+void SystemAbilityManager::StartDfxTimer()
+{
+    reportEventTimer_->Setup();
+    uint32_t timerId = reportEventTimer_->Register(std::bind(&SystemAbilityManager::ReportGetSAPeriodically, this),
+        REPORT_GET_SA_INTERVAL);
+    HILOGI("StartDfxTimer timerId : %{public}u!", timerId);
 }
 
 sptr<SystemAbilityManager> SystemAbilityManager::GetInstance()
@@ -174,7 +187,7 @@ sptr<IRemoteObject> SystemAbilityManager::GetSystemAbilityFromRemote(int32_t sys
 sptr<IRemoteObject> SystemAbilityManager::CheckSystemAbility(int32_t systemAbilityId)
 {
     HILOGD("%{public}s called, systemAbilityId = %{public}d", __func__, systemAbilityId);
-    ReportGetSAFrequency(IPCSkeleton::GetCallingPid(), systemAbilityId);
+    UpdateSaFreMap(IPCSkeleton::GetCallingPid(), systemAbilityId);
     if (!CheckInputSysAbilityId(systemAbilityId)) {
         HILOGW("CheckSystemAbility CheckSystemAbility invalid!");
         return nullptr;
@@ -1131,5 +1144,39 @@ std::string SystemAbilityManager::TransformDeviceId(const std::string& deviceId,
 std::string SystemAbilityManager::GetLocalNodeId()
 {
     return std::string();
+}
+
+void SystemAbilityManager::UpdateSaFreMap(int32_t pid, int32_t saId)
+{
+    if (pid <= 0) {
+        HILOGW("UpdateSaFreMap return, pid not valid!");
+        return;
+    }
+
+    uint64_t key = GenerateFreKey(pid, saId);
+    lock_guard<mutex> autoLock(saFrequencyLock_);
+    auto& count = saFrequencyMap_[key];
+    if (count < MAX_SA_FREQUENCY_COUNT) {
+        count++;
+    }
+}
+
+uint64_t SystemAbilityManager::GenerateFreKey(int32_t pid, int32_t saId) const
+{
+    uint32_t uSaid = static_cast<uint32_t>(saId);
+    uint64_t key = static_cast<uint64_t>(pid);
+    return (key << SHFIT_BIT) | uSaid;
+}
+
+void SystemAbilityManager::ReportGetSAPeriodically()
+{
+    HILOGI("ReportGetSAPeriodically start!");
+    lock_guard<mutex> autoLock(saFrequencyLock_);
+    for (const auto& [key, count] : saFrequencyMap_) {
+        uint32_t saId = static_cast<uint32_t>(key);
+        uint32_t pid = key >> SHFIT_BIT;
+        ReportGetSAFrequency(pid, saId, count);
+    }
+    saFrequencyMap_.clear();
 }
 } // namespace OHOS
