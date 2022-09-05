@@ -341,6 +341,7 @@ static const std::map<int, std::string> saNameMap_ = {
     { ANIMATION_SERVER_SA_ID, "AnimationServer" },
     { CA_DAEMON_ID, "CaDaemon" },
     { ACCESSIBILITY_MANAGER_SERVICE_ID, "AccessibilityManagerService" },
+    { DEVICE_USAGE_STATISTICS_SYS_ABILITY_ID, "DeviceUsageStatistics" },
     { MEMORY_MANAGER_SA_ID, "MemoryManagerService" },
     { AVSESSION_SERVICE_ID, "AVSessionService" },
     { SYS_INSTALLER_DISTRIBUTED_SERVICE_ID, "SysInstallerService" },
