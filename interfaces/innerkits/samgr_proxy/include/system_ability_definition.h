@@ -91,7 +91,9 @@ enum {
     SMART_COMM_SYS_ABILITY_ID                        = 1180,
     SUBSYS_DFX_SYS_ABILITY_ID_BEGIN                  = 1200,
     DFX_SYS_HIVIEW_ABILITY_ID                        = 1201,
+    DFX_FAULT_LOGGER_ABILITY_ID                      = 1202,
     DFX_SYS_EVENT_SERVICE_ABILITY_ID                 = 1203,
+    DFX_HI_DUMPER_SERVICE_ABILITY_ID                 = 1212,
     SUBSYS_DISTRIBUTEDDATAMNG_SYS_ABILITY_ID_BEGIN   = 1300,
     DISTRIBUTED_KV_DATA_SERVICE_ABILITY_ID           = 1301,
     DISTRIBUTED_FS_DAEMON_SERVICE_ID                 = 1302,
@@ -353,6 +355,10 @@ static const std::map<int, std::string> saNameMap_ = {
     { DLP_PERMISSION_SERVICE_ID, "DlpPermissionService" },
     { MSDP_DEVICESTATUS_SERVICE_ID, "DeviceStatusService" },
     { MULTIMODAL_INPUT_SERVICE_ID, "MultimodalInput" },
+    { DFX_SYS_HIVIEW_ABILITY_ID, "HiviewService" },
+    { DFX_FAULT_LOGGER_ABILITY_ID, "HiviewFaultLogger" },
+    { DFX_SYS_EVENT_SERVICE_ABILITY_ID, "HiviewSysEventService" },
+    { DFX_HI_DUMPER_SERVICE_ABILITY_ID, "HiDumperService" },
 };
 } // namespace OHOS
 
