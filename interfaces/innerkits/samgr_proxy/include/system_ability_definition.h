@@ -326,6 +326,7 @@ static const std::map<int, std::string> saNameMap_ = {
     { DISTRIBUTED_HARDWARE_SCREEN_SINK_SA_ID, "DistributedScreenSinkService" },
     { DISTRIBUTED_HARDWARE_INPUT_SOURCE_SA_ID, "DistributedInputSourceService" },
     { DISTRIBUTED_HARDWARE_INPUT_SINK_SA_ID, "DistributedInputSinkService" },
+    { INPUT_METHOD_SYSTEM_ABILITY_ID, "InputMethodService" },
     { MEDICAL_SENSOR_SERVICE_ABILITY_ID, "MedicalSensorService" },
     { USB_SYSTEM_ABILITY_ID, "UsbService" },
     { DEVICE_SERVICE_MANAGER_SA_ID, "HdfDeviceServiceManager" },
