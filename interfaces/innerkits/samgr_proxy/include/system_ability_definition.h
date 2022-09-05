@@ -352,6 +352,7 @@ static const std::map<int, std::string> saNameMap_ = {
     { TOKEN_SYNC_MANAGER_SERVICE_ID, "TokenSyncManagerService" },
     { DLP_PERMISSION_SERVICE_ID, "DlpPermissionService" },
     { MSDP_DEVICESTATUS_SERVICE_ID, "DeviceStatusService" },
+    { MULTIMODAL_INPUT_SERVICE_ID, "MultimodalInput" },
 };
 } // namespace OHOS
 
