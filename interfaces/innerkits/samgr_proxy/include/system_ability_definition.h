@@ -287,6 +287,7 @@ static const std::map<int, std::string> saNameMap_ = {
     { BACKGROUND_TASK_MANAGER_SERVICE_ID, "BackgroundTaskManager" },
     { WORK_SCHEDULE_SERVICE_ID, "WorkSchedule" },
     { COMPONENT_SCHEDULE_SERVICE_ID, "ComponentSchedServer" },
+    { SOC_PERF_SERVICE_SA_ID, "SocPerfService" },
     { SUSPEND_MANAGER_SYSTEM_ABILITY_ID, "SuspendManager" },
     { ABNORMAL_EFFICIENCY_MGR_SYSTEM_ABILITY_ID, "AbnormalEfficiencyManager" },
     { LOCATION_GEO_CONVERT_SA_ID, "LocationGeoConvert" },
