@@ -28,6 +28,7 @@
 #include "dbinder_service_stub.h"
 #include "rpc_callback_imp.h"
 #include "thread_pool.h"
+#include "timer.h"
 #include "sa_profiles.h"
 #include "system_ability_definition.h"
 #include "system_ability_manager_stub.h"
@@ -100,6 +101,7 @@ public:
         const sptr<ISystemAbilityLoadCallback>& callback);
     void NotifyRpcLoadCompleted(const std::string& srcDeviceId, int32_t systemAbilityId,
         const sptr<IRemoteObject>& remoteObject);
+    void StartDfxTimer();
 private:
     enum class AbilityState {
         INIT,
@@ -163,6 +165,10 @@ private:
     void CleanCallbackForLoadFailed(int32_t systemAbilityId, const std::u16string& name,
         const std::string& srcDeviceId, const sptr<ISystemAbilityLoadCallback>& callback);
 
+    void UpdateSaFreMap(int32_t pid, int32_t saId);
+    uint64_t GenerateFreKey(int32_t pid, int32_t saId) const;
+    void ReportGetSAPeriodically();
+
     std::u16string deviceName_;
     static sptr<SystemAbilityManager> instance;
     static std::mutex instanceLock;
@@ -199,6 +205,11 @@ private:
     std::map<std::string, std::list<sptr<ISystemAbilityLoadCallback>>> remoteCallbacks_; // key : said_deviceId
 
     ThreadPool loadPool_;
+
+    std::mutex saFrequencyLock_;
+    std::map<uint64_t, int32_t> saFrequencyMap_; // {pid_said, count}
+
+    std::unique_ptr<Utils::Timer> reportEventTimer_;
 };
 } // namespace OHOS
 

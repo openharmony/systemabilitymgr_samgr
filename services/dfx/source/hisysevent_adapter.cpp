@@ -27,6 +27,7 @@ const std::string DOMAIN_NAME = std::string(HiSysEvent::Domain::SAMGR);
 const std::string ADD_SYSTEMABILITY_FAIL = "SAMGR_ADD_SYSTEMABILITY_FAIL";
 const std::string CALLER_PID = "CALLER_PID";
 const std::string SAID = "SAID";
+const std::string COUNT = "COUNT";
 const std::string FILE_NAME = "FILE_NAME";
 const std::string GETSA__TAG = "SAMGR_GETSA_FREQUENCY";
 }
@@ -43,13 +44,14 @@ void ReportAddSystemAbilityFailed(int32_t said, const std::string& filaName)
     }
 }
 
-void ReportGetSAFrequency(int32_t callerPid, int32_t said)
+void ReportGetSAFrequency(uint32_t callerPid, uint32_t said, int32_t count)
 {
     int ret = HiSysEvent::Write(DOMAIN_NAME,
         GETSA__TAG,
         HiSysEvent::EventType::STATISTIC,
         CALLER_PID, callerPid,
-        SAID, said);
+        SAID, said,
+        COUNT, count);
     if (ret != 0) {
         HILOGE("hisysevent report get sa frequency failed! ret %{public}d.", ret);
     }

@@ -15,8 +15,9 @@ domain: SAMGR
 
 SAMGR_GETSA_FREQUENCY:
   __BASE: {type: STATISTIC, level: MINOR, tag: statistic, desc: get system ability times event}
-  CALLER_PID: {type: INT32, desc: caller pid}
-  SAID: {type: INT32, desc: system ability id}
+  CALLER_PID: {type: UINT32, desc: caller pid}
+  SAID: {type: UINT32, desc: system ability id}
+  COUNT: {type: INT32, desc: the caller process get sa count}
 
 SAMGR_ADD_SYSTEMABILITY_FAIL:
   __BASE: {type: FAULT, level: CRITICAL, tag: fault, desc: add system ability failed event}
