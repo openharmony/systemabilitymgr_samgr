@@ -87,7 +87,7 @@ enum {
     COMM_VPN_MANAGER_SYS_ABILITY_ID                  = 1155,
     COMM_DNS_MANAGER_SYS_ABILITY_ID                  = 1156,
     COMM_ETHERNET_MANAGER_SYS_ABILITY_ID             = 1157,
-    COMM_NETSYS_NATIVE_SYS_ABILITY_ID                  = 1158,
+    COMM_NETSYS_NATIVE_SYS_ABILITY_ID                = 1158,
     SMART_COMM_SYS_ABILITY_ID                        = 1180,
     SUBSYS_DFX_SYS_ABILITY_ID_BEGIN                  = 1200,
     DFX_SYS_HIVIEW_ABILITY_ID                        = 1201,
@@ -366,6 +366,15 @@ static const std::map<int, std::string> saNameMap_ = {
     { DFX_FAULT_LOGGER_ABILITY_ID, "HiviewFaultLogger" },
     { DFX_SYS_EVENT_SERVICE_ABILITY_ID, "HiviewSysEventService" },
     { DFX_HI_DUMPER_SERVICE_ABILITY_ID, "HiDumperService" },
+    { NET_MANAGER_SYS_ABILITY_ID, "NetManager" },
+    { COMM_NET_CONN_MANAGER_SYS_ABILITY_ID, "NetConnManager" },
+    { COMM_NET_POLICY_MANAGER_SYS_ABILITY_ID, "NetPolicyManager" },
+    { COMM_NET_STATS_MANAGER_SYS_ABILITY_ID, "NetStatsManager" },
+    { COMM_NET_TETHERING_MANAGER_SYS_ABILITY_ID, "NetTetheringManager" },
+    { COMM_VPN_MANAGER_SYS_ABILITY_ID, "VPNManager" },
+    { COMM_DNS_MANAGER_SYS_ABILITY_ID, "DNSManager"},
+    { COMM_ETHERNET_MANAGER_SYS_ABILITY_ID, "EthernetManager" },
+    { COMM_NETSYS_NATIVE_SYS_ABILITY_ID, "NetsysNative" },
 };
 } // namespace OHOS
 
