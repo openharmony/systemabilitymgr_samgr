@@ -1672,6 +1672,7 @@ HWTEST_F(SystemAbilityMgrTest, ReportGetSAFre002, TestSize.Level3)
     DTEST_LOG << " ReportGetSAFre002 start " << std::endl;
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     int32_t pid = 1;
+    saMgr->saFrequencyMap_.clear();
     saMgr->UpdateSaFreMap(pid, TEST_SYSTEM_ABILITY1);
     ASSERT_EQ(saMgr->saFrequencyMap_.size(), 1);
     saMgr->ReportGetSAPeriodically();
