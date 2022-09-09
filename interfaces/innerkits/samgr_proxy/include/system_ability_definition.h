@@ -372,6 +372,10 @@ static const std::map<int, std::string> saNameMap_ = {
     { DFX_FAULT_LOGGER_ABILITY_ID, "HiviewFaultLogger" },
     { DFX_SYS_EVENT_SERVICE_ABILITY_ID, "HiviewSysEventService" },
     { DFX_HI_DUMPER_SERVICE_ABILITY_ID, "HiDumperService" },
+    { SUBSYS_USERIAM_SYS_ABILITY_USERAUTH, "UserAuthService" },
+    { SUBSYS_USERIAM_SYS_ABILITY_PINAUTH, "PinAuthService" },
+    { SUBSYS_USERIAM_SYS_ABILITY_FACEAUTH, "FaceAuthService" },
+    { SUBSYS_USERIAM_SYS_ABILITY_FINGERPRINTAUTH, "FingerprintAuthService" },
     { NET_MANAGER_SYS_ABILITY_ID, "NetManager" },
     { COMM_NET_CONN_MANAGER_SYS_ABILITY_ID, "NetConnManager" },
     { COMM_NET_POLICY_MANAGER_SYS_ABILITY_ID, "NetPolicyManager" },
@@ -381,6 +385,7 @@ static const std::map<int, std::string> saNameMap_ = {
     { COMM_DNS_MANAGER_SYS_ABILITY_ID, "DNSManager"},
     { COMM_ETHERNET_MANAGER_SYS_ABILITY_ID, "EthernetManager" },
     { COMM_NETSYS_NATIVE_SYS_ABILITY_ID, "NetsysNative" },
+    { ENTERPRISE_DEVICE_MANAGER_SA_ID, "EnterpriseDeviceManagerService" },
     { PARAM_WATCHER_DISTRIBUTED_SERVICE_ID, "ParamWatcher" },
     { SYSPARAM_DEVICE_SERVICE_ID, "SysParamDevice" },
 };
