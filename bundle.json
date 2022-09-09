@@ -44,7 +44,6 @@
                 "base_group": [],
                 "fwk_group": [
                     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/common:samgr_common",
-                    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/lsamgr:lsamgr",
                     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy"
                 ],
                 "service_group": [
@@ -80,16 +79,6 @@
                         ]
                     },
                     "name": "//foundation/systemabilitymgr/samgr/interfaces/innerkits/common:samgr_common"
-                },
-                {
-                    "header": {
-                        "header_base": "//foundation/systemabilitymgr/samgr/interfaces/innerkits/lsamgr/",
-                        "header_files": [
-                            "if_local_ability_manager.h",
-                            "local_ability_manager_proxy.h"
-                        ]
-                    },
-                    "name": "//foundation/systemabilitymgr/samgr/interfaces/innerkits/lsamgr:lsamgr"
                 }
             ],
             "test": [

@@ -20,7 +20,10 @@ samgr_dir = "//foundation/systemabilitymgr/samgr"
 samgr_services_dir = "${samgr_dir}/services/samgr/native"
 
 config("sam_fuzz_test_config") {
-  include_dirs = [ "//foundation/systemabilitymgr/samgr/services/dfx/include" ]
+  include_dirs = [
+    "//foundation/systemabilitymgr/samgr/services/dfx/include",
+    "//foundation/systemabilitymgr/samgr/services/lsamgr/include",
+  ]
 }
 
 ##############################fuzztest##########################################
@@ -31,7 +34,6 @@ ohos_fuzztest("SystemAbilityManagerFuzzTest") {
 
   configs = [
     ":sam_fuzz_test_config",
-    "${samgr_dir}/interfaces/innerkits/lsamgr:config_samgr",
     "${samgr_dir}/services/samgr/native:sam_config",
     "//foundation/systemabilitymgr/samgr/test/resource:coverage_flags",
   ]
