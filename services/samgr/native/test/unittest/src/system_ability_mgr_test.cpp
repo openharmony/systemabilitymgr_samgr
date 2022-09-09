@@ -14,6 +14,7 @@
  */
 
 #include "system_ability_mgr_test.h"
+#include "hisysevent_adapter.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "itest_transaction_service.h"
@@ -43,6 +44,7 @@ constexpr int32_t TEST_EXCEPTION_HIGH_SA_ID = LAST_SYS_ABILITY_ID + 1;
 constexpr int32_t TEST_EXCEPTION_LOW_SA_ID = FIRST_SYS_ABILITY_ID - 1;
 constexpr int32_t TEST_SYSTEM_ABILITY1 = 1491;
 constexpr int32_t TEST_SYSTEM_ABILITY2 = 1492;
+constexpr int32_t SHFIT_BIT = 32;
 const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 }
 void SystemAbilityMgrTest::SetUpTestCase()
@@ -1624,6 +1626,7 @@ HWTEST_F(SystemAbilityMgrTest, DoLoadRemoteSystemAbility003, TestSize.Level1)
  * @tc.name: param check samgr ready event
  * @tc.desc: param check samgr ready event
  * @tc.type: FUNC
+ * @tc.require: I5KMF7
  */
 HWTEST_F(SystemAbilityMgrTest, SamgrReady001, TestSize.Level1)
 {
@@ -1634,5 +1637,45 @@ HWTEST_F(SystemAbilityMgrTest, SamgrReady001, TestSize.Level1)
      */
     auto ret = WaitParameter("bootevent.samgr.ready", "true", 1);
     ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: ReportGetSAFre001
+ * @tc.desc: ReportGetSAFre001
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrTest, ReportGetSAFre001, TestSize.Level3)
+{
+    DTEST_LOG << " ReportGetSAFre001 start " << std::endl;
+    ReportGetSAFrequency(1, 1, 1);
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    uint32_t realPid = 1;
+    uint32_t readSaid = 1;
+    uint64_t key = saMgr->GenerateFreKey(realPid, readSaid);
+    DTEST_LOG << " key 001 :  " << key << std::endl;
+    uint32_t expectSid = static_cast<uint32_t>(key);
+    uint32_t expectPid = key >> SHFIT_BIT;
+    DTEST_LOG << " key 002 :  " << key << std::endl;
+    ASSERT_EQ(expectPid, realPid);
+    ASSERT_EQ(readSaid, expectSid);
+}
+
+/**
+ * @tc.name: ReportGetSAFre002
+ * @tc.desc: ReportGetSAFre002
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrTest, ReportGetSAFre002, TestSize.Level3)
+{
+    DTEST_LOG << " ReportGetSAFre002 start " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t pid = 1;
+    saMgr->saFrequencyMap_.clear();
+    saMgr->UpdateSaFreMap(pid, TEST_SYSTEM_ABILITY1);
+    ASSERT_EQ(saMgr->saFrequencyMap_.size(), 1);
+    saMgr->ReportGetSAPeriodically();
+    ASSERT_EQ(saMgr->saFrequencyMap_.size(), 0);
 }
 } // namespace OHOS
