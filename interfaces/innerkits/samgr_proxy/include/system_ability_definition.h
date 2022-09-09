@@ -361,6 +361,10 @@ static const std::map<int, std::string> saNameMap_ = {
     { DFX_FAULT_LOGGER_ABILITY_ID, "HiviewFaultLogger" },
     { DFX_SYS_EVENT_SERVICE_ABILITY_ID, "HiviewSysEventService" },
     { DFX_HI_DUMPER_SERVICE_ABILITY_ID, "HiDumperService" },
+    { SUBSYS_USERIAM_SYS_ABILITY_USERAUTH, "UserAuthService" },
+    { SUBSYS_USERIAM_SYS_ABILITY_PINAUTH, "PinAuthService" },
+    { SUBSYS_USERIAM_SYS_ABILITY_FACEAUTH, "FaceAuthService" },
+    { SUBSYS_USERIAM_SYS_ABILITY_FINGERPRINTAUTH, "FingerprintAuthService" },
 };
 } // namespace OHOS
 
