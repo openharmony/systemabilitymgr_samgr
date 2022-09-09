@@ -386,6 +386,8 @@ static const std::map<int, std::string> saNameMap_ = {
     { COMM_ETHERNET_MANAGER_SYS_ABILITY_ID, "EthernetManager" },
     { COMM_NETSYS_NATIVE_SYS_ABILITY_ID, "NetsysNative" },
     { ENTERPRISE_DEVICE_MANAGER_SA_ID, "EnterpriseDeviceManagerService" },
+    { PARAM_WATCHER_DISTRIBUTED_SERVICE_ID, "ParamWatcher" },
+    { SYSPARAM_DEVICE_SERVICE_ID, "SysParamDevice" },
 };
 } // namespace OHOS
 
