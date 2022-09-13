@@ -344,6 +344,7 @@ static const std::map<int, std::string> saNameMap_ = {
     { DISTRIBUTED_DEVICE_PROFILE_SA_ID, "DistributedDeviceProfile" },
     { WINDOW_MANAGER_SERVICE_ID, "WindowManagerService" },
     { DISPLAY_MANAGER_SERVICE_SA_ID, "DisplayManagerService" },
+    { SOFTBUS_SERVER_SA_ID, "DSoftbus" },
     { WINDOW_MANAGER_ID, "WindowManager" },
     { VSYNC_MANAGER_ID, "VsyncManager" },
     { VSYNC_MANAGER_TEST_ID, "VsyncManagerTest" },
