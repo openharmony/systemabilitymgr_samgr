@@ -15,13 +15,21 @@ import("//build/ohos.gni")
 
 group("samgr_etc") {
   deps = [
-    ":samgr.param.dac",
+    ":samgr.para",
+    ":samgr.para.dac",
     ":samgr_init",
   ]
 }
 
-ohos_prebuilt_etc("samgr.param.dac") {
-  source = "samgr.param.dac"
+ohos_prebuilt_etc("samgr.para.dac") {
+  source = "samgr.para.dac"
+  relative_install_dir = "param"
+  part_name = "samgr"
+  subsystem_name = "systemabilitymgr"
+}
+
+ohos_prebuilt_etc("samgr.para") {
+  source = "samgr.para"
   relative_install_dir = "param"
   part_name = "samgr"
   subsystem_name = "systemabilitymgr"
