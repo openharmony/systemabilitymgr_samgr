@@ -356,6 +356,7 @@ static const std::map<int, std::string> saNameMap_ = {
     { MEMORY_MANAGER_SA_ID, "MemoryManagerService" },
     { AVSESSION_SERVICE_ID, "AVSessionService" },
     { SYS_INSTALLER_DISTRIBUTED_SERVICE_ID, "SysInstallerService" },
+    { SUBSYS_ACE_SYS_ABILITY_ID_BEGIN, "UiService" },
     { ARKUI_UI_APPEARANCE_SERVICE_ID, "UiAppearanceService" },
     { SUBSYS_USERIAM_SYS_ABILITY_USERIDM, "UserIdmService" },
     { SUBSYS_USERIAM_SYS_ABILITY_AUTHEXECUTORMGR, "AuthExecutorMgrService" },
