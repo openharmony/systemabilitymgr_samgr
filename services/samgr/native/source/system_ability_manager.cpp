@@ -28,6 +28,8 @@
 #include "ipc_skeleton.h"
 #include "local_ability_manager_proxy.h"
 #include "parse_util.h"
+#include "parameter.h"
+#include "parameters.h"
 #include "sam_log.h"
 #include "service_control.h"
 #include "string_ex.h"
@@ -40,6 +42,8 @@ namespace OHOS {
 namespace {
 const string PREFIX = "/system/profile/";
 const string LOCAL_DEVICE = "local";
+const string ONDEMAND_PARAM = "persist.samgr.perf.ondemand";
+constexpr const char* ONDEMAND_PERF_PARAM = "persist.samgr.perf.ondemand";
 
 constexpr uint32_t REPORT_GET_SA_INTERVAL = 24 * 60 * 60 * 1000; // ms and is one day
 constexpr int32_t MAX_NAME_SIZE = 200;
@@ -50,6 +54,7 @@ constexpr int32_t UID_SYSTEM = 1000;
 constexpr int32_t MAX_SUBSCRIBE_COUNT = 256;
 constexpr int32_t MAX_SA_FREQUENCY_COUNT = INT32_MAX - 1000000;
 constexpr int32_t SHFIT_BIT = 32;
+constexpr int64_t ONDEMAND_PERF_DELAY_TIME = 60 * 1000; // ms
 constexpr int64_t CHECK_LOADED_DELAY_TIME = 4 * 1000; // ms
 }
 
@@ -84,6 +89,7 @@ void SystemAbilityManager::Init()
     loadPool_.Start(std::thread::hardware_concurrency());
     loadPool_.SetMaxTaskNum(std::thread::hardware_concurrency());
     reportEventTimer_ = std::make_unique<Utils::Timer>("DfxReporter");
+    OndemandLoadForPerf();
 }
 
 const sptr<DBinderService> SystemAbilityManager::GetDBinder() const
@@ -137,6 +143,59 @@ void SystemAbilityManager::InitSaProfile()
     bool ret = workHandler_->PostTask(callback);
     if (!ret) {
         HILOGW("SystemAbilityManager::InitSaProfile PostTask fail");
+    }
+}
+
+void SystemAbilityManager::OndemandLoadForPerf()
+{
+    if (workHandler_ == nullptr) {
+        HILOGE("LoadForPerf workHandler_ not init!");
+        return;
+    }
+    auto callback = [this] () {
+        OndemandLoad();
+    };
+    workHandler_->PostTask(callback, ONDEMAND_PERF_DELAY_TIME);
+}
+
+void SystemAbilityManager::OndemandLoad()
+{
+    auto bootEventCallback = [](const char *key, const char *value, void *context) {
+        int64_t begin = GetTickCount();
+        SystemAbilityManager::GetInstance()->DoLoadForPerf();
+        HILOGI("[PerformanceTest] DoLoadForPerf spend %{public}" PRId64 " ms", GetTickCount() - begin);
+    };
+
+    int ret = WatchParameter(ONDEMAND_PERF_PARAM, bootEventCallback, nullptr);
+    HILOGD("OndemandLoad ret %{public}d", ret);
+}
+
+std::list<int32_t> SystemAbilityManager::GetAllOndemandSa()
+{
+    std::list<int32_t> ondemandSaids;
+    {
+        lock_guard<mutex> autoLock(saProfileMapLock_);
+        for (const auto& [said, value] : saProfileMap_) {
+            shared_lock<shared_mutex> readLock(abilityMapLock_);
+            auto iter = abilityMap_.find(said);
+            if (iter == abilityMap_.end()) {
+                ondemandSaids.emplace_back(said);
+            }
+        }
+    }
+    return ondemandSaids;
+}
+
+void SystemAbilityManager::DoLoadForPerf()
+{
+    bool value = system::GetBoolParameter(ONDEMAND_PARAM, false);
+    if (value) {
+        std::list<int32_t> saids = GetAllOndemandSa();
+        HILOGD("DoLoadForPerf ondemand size : %{public}u.", saids.size());
+        auto callback = new SystemAbilityLoadCallbackStub();
+        for (auto said : saids) {
+            LoadSystemAbility(said, callback);
+        }
     }
 }
 

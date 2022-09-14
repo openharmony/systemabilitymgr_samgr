@@ -33,6 +33,7 @@ ohos_unittest("SystemAbilityMgrTest") {
   sources = [
     "${samgr_dir}/utils/native/source/tools.cpp",
     "${samgr_services_dir}/source/ability_death_recipient.cpp",
+    "${samgr_services_dir}/source/rpc_callback_imp.cpp",
     "${samgr_services_dir}/source/system_ability_load_callback_proxy.cpp",
     "${samgr_services_dir}/source/system_ability_manager.cpp",
     "${samgr_services_dir}/source/system_ability_manager_stub.cpp",
@@ -71,6 +72,7 @@ ohos_unittest("SystemAbilityMgrTest") {
     "hisysevent_native:libhisysevent",
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
+    "init:libbeget_proxy",
     "init:libbegetutil",
     "ipc:ipc_core",
     "ipc:libdbinder",
@@ -216,6 +218,7 @@ ohos_executable("TestTool") {
     "hitrace_native:hitrace_meter",
     "hiviewdfx_hilog_native:libhilog",
     "hiviewdfx_hilog_native:libhilog_base",
+    "init:libbeget_proxy",
     "init:libbegetutil",
     "ipc:ipc_core",
     "ipc:libdbinder",

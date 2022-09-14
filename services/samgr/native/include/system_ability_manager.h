@@ -102,6 +102,7 @@ public:
     void NotifyRpcLoadCompleted(const std::string& srcDeviceId, int32_t systemAbilityId,
         const sptr<IRemoteObject>& remoteObject);
     void StartDfxTimer();
+    void DoLoadForPerf();
 private:
     enum class AbilityState {
         INIT,
@@ -168,6 +169,9 @@ private:
     void UpdateSaFreMap(int32_t pid, int32_t saId);
     uint64_t GenerateFreKey(int32_t pid, int32_t saId) const;
     void ReportGetSAPeriodically();
+    void OndemandLoad();
+    void OndemandLoadForPerf();
+    std::list<int32_t> GetAllOndemandSa();
 
     std::u16string deviceName_;
     static sptr<SystemAbilityManager> instance;
