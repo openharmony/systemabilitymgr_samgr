@@ -20,6 +20,8 @@
 #include "itest_transaction_service.h"
 #include "sam_mock_permission.h"
 #include "parameter.h"
+#include "parameters.h"
+#include "sa_profiles.h"
 #include "sa_status_change_mock.h"
 #include "string_ex.h"
 #include "system_ability_definition.h"
@@ -45,7 +47,9 @@ constexpr int32_t TEST_EXCEPTION_LOW_SA_ID = FIRST_SYS_ABILITY_ID - 1;
 constexpr int32_t TEST_SYSTEM_ABILITY1 = 1491;
 constexpr int32_t TEST_SYSTEM_ABILITY2 = 1492;
 constexpr int32_t SHFIT_BIT = 32;
+constexpr int32_t ONDEMAND_SLEEP_TIME = 600 * 1000; // us
 const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
+const string ONDEMAND_PARAM = "persist.samgr.perf.ondemand";
 }
 void SystemAbilityMgrTest::SetUpTestCase()
 {
@@ -1677,5 +1681,109 @@ HWTEST_F(SystemAbilityMgrTest, ReportGetSAFre002, TestSize.Level3)
     ASSERT_EQ(saMgr->saFrequencyMap_.size(), 1);
     saMgr->ReportGetSAPeriodically();
     ASSERT_EQ(saMgr->saFrequencyMap_.size(), 0);
+}
+
+/**
+ * @tc.name: Get param debug
+ * @tc.desc: ReportGetSAFre002
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrTest, GetParamDebug001, TestSize.Level1)
+{
+    DTEST_LOG << " GetParamDebug001 " << std::endl;
+    bool value = system::GetBoolParameter(ONDEMAND_PARAM, false);
+    ASSERT_FALSE(value);
+}
+
+/**
+ * @tc.name: Test OndemandLoadForPerf
+ * @tc.desc: OndemandLoadForPerf001
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrTest, OndemandLoadForPerf001, TestSize.Level3)
+{
+    DTEST_LOG << " OndemandLoadForPerf001 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->OndemandLoadForPerf();
+    saMgr->Init();
+    saMgr->OndemandLoadForPerf();
+    usleep(ONDEMAND_SLEEP_TIME);
+    bool value = system::GetBoolParameter(ONDEMAND_PARAM, false);
+    ASSERT_FALSE(value);
+}
+
+/**
+ * @tc.name: Test OndemandLoad
+ * @tc.desc: OndemandLoad001
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrTest, OndemandLoad001, TestSize.Level3)
+{
+    DTEST_LOG << " OndemandLoad001 " << std::endl;
+    bool value = system::GetBoolParameter(ONDEMAND_PARAM, false);
+    ASSERT_FALSE(value);
+    int ret = SetParameter("persist.samgr.perf.ondemand", "true");
+    ASSERT_EQ(ret, 0);
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->saProfileMap_.clear();
+    saMgr->OndemandLoad();
+    ret = SetParameter("persist.samgr.perf.ondemand", "false");
+    ASSERT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: Test DoLoadForPerf
+ * @tc.desc: DoLoadForPerf001
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrTest, DoLoadForPerf001, TestSize.Level1)
+{
+    DTEST_LOG << " DoLoadForPerf001 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->DoLoadForPerf();
+    bool value = system::GetBoolParameter(ONDEMAND_PARAM, false);
+    ASSERT_FALSE(value);
+}
+/**
+ * @tc.name: Test GetAllOndemandSa001
+ * @tc.desc: GetAllOndemandSa001
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrTest, GetAllOndemandSa001, TestSize.Level3)
+{
+    DTEST_LOG << " GetAllOndemandSa001 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    SaProfile saProfile;
+    saMgr->saProfileMap_[1] = saProfile;
+    saMgr->GetAllOndemandSa();
+    bool value = system::GetBoolParameter(ONDEMAND_PARAM, false);
+    ASSERT_FALSE(value);
+    saMgr->saProfileMap_.clear();
+}
+
+/**
+ * @tc.name: Test GetAllOndemandSa002
+ * @tc.desc: GetAllOndemandSa002
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrTest, GetAllOndemandSa002, TestSize.Level3)
+{
+    DTEST_LOG << " GetAllOndemandSa002 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    SaProfile saProfile;
+    saMgr->saProfileMap_[1] = saProfile;
+    SAInfo saInfo;
+    saMgr->abilityMap_[1] = saInfo;
+    saMgr->GetAllOndemandSa();
+    bool value = system::GetBoolParameter(ONDEMAND_PARAM, false);
+    ASSERT_FALSE(value);
+    saMgr->saProfileMap_.clear();
+    saMgr->abilityMap_.clear();
 }
 } // namespace OHOS
