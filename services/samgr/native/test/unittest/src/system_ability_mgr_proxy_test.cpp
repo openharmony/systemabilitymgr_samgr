@@ -56,18 +56,6 @@ void SystemAbilityMgrProxyTest::TearDown()
 }
 
 /**
- * @tc.name: GetRegistryRemoteObject001 test
- * @tc.desc: test for get RegistryRemoteObject
- * @tc.type: FUNC
- * @tc.require: I5KMF7
- */
-HWTEST_F(SystemAbilityMgrProxyTest, GetRegistryRemoteObject001, TestSize.Level1)
-{
-    sptr<IRemoteObject> remote = SystemAbilityManagerClient::GetInstance().GetRegistryRemoteObject();
-    EXPECT_EQ(remote, nullptr);
-}
-
-/**
  * @tc.name: AddSystemProcess001
  * @tc.desc: check add process remoteobject
  * @tc.type: FUNC
@@ -153,5 +141,18 @@ HWTEST_F(SystemAbilityMgrProxyTest, ServiceRegistry001, TestSize.Level1)
 {
     sptr<IServiceRegistry> sr = ServiceRegistry::GetInstance();
     EXPECT_EQ(sr, nullptr);
+}
+
+/**
+ * @tc.name: DestroySystemAbilityManagerObject001
+ * @tc.desc: check  DestroySystemAbilityManagerObject
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, DestroySystemAbilityManagerObject001, TestSize.Level4)
+{
+    SystemAbilityManagerClient::GetInstance().DestroySystemAbilityManagerObject();
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    EXPECT_TRUE(sm != nullptr);
 }
 }

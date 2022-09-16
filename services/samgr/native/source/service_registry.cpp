@@ -155,11 +155,6 @@ sptr<ISystemAbilityManager> SystemAbilityManagerClient::GetSystemAbilityManager(
     return systemAbilityManager_;
 }
 
-sptr<IRemoteObject> SystemAbilityManagerClient::GetRegistryRemoteObject()
-{
-    return nullptr;
-}
-
 void SystemAbilityManagerClient::DestroySystemAbilityManagerObject()
 {
     HILOGI("%s called", __func__);
