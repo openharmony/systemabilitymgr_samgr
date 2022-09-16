@@ -191,7 +191,7 @@ void SystemAbilityManager::DoLoadForPerf()
     bool value = system::GetBoolParameter(ONDEMAND_PARAM, false);
     if (value) {
         std::list<int32_t> saids = GetAllOndemandSa();
-        HILOGD("DoLoadForPerf ondemand size : %{public}u.", saids.size());
+        HILOGD("DoLoadForPerf ondemand size : %{public}zu.", saids.size());
         auto callback = new SystemAbilityLoadCallbackStub();
         for (auto said : saids) {
             LoadSystemAbility(said, callback);
