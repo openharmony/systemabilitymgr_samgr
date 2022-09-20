@@ -48,6 +48,8 @@ constexpr int32_t TEST_SYSTEM_ABILITY1 = 1491;
 constexpr int32_t TEST_SYSTEM_ABILITY2 = 1492;
 constexpr int32_t SHFIT_BIT = 32;
 constexpr int32_t ONDEMAND_SLEEP_TIME = 600 * 1000; // us
+constexpr int32_t MAX_COUNT = INT32_MAX - 1000000;
+
 const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 const string ONDEMAND_PARAM = "persist.samgr.perf.ondemand";
 }
@@ -1681,6 +1683,40 @@ HWTEST_F(SystemAbilityMgrTest, ReportGetSAFre002, TestSize.Level3)
     ASSERT_EQ(saMgr->saFrequencyMap_.size(), 1);
     saMgr->ReportGetSAPeriodically();
     ASSERT_EQ(saMgr->saFrequencyMap_.size(), 0);
+}
+
+/**
+ * @tc.name: ReportGetSAFre003
+ * @tc.desc: ReportGetSAFre003
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrTest, ReportGetSAFre003, TestSize.Level3)
+{
+    DTEST_LOG << " ReportGetSAFre003 start " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t pid = -1;
+    saMgr->saFrequencyMap_.clear();
+    saMgr->UpdateSaFreMap(pid, TEST_SYSTEM_ABILITY1);
+    saMgr->ReportGetSAPeriodically();
+    ASSERT_EQ(saMgr->saFrequencyMap_.size(), 0);
+}
+
+/**
+ * @tc.name: ReportGetSAFre004
+ * @tc.desc: ReportGetSAFre004
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrTest, ReportGetSAFre004, TestSize.Level3)
+{
+    DTEST_LOG << " ReportGetSAFre004 start " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t pid = 1;
+    saMgr->saFrequencyMap_[pid] = MAX_COUNT;
+    saMgr->UpdateSaFreMap(pid, TEST_SYSTEM_ABILITY1);
+    ASSERT_EQ(saMgr->saFrequencyMap_[pid], MAX_COUNT);
+    saMgr->saFrequencyMap_.clear();
 }
 
 /**
