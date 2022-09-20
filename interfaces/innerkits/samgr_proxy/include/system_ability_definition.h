@@ -277,6 +277,7 @@ static const std::map<int, std::string> saNameMap_ = {
     { URI_PERMISSION_MGR_SERVICE_ID, "UriPermissionMgr" },
     { QUICK_FIX_MGR_SERVICE_ID, "QuickFixMgrService"},
     { BUNDLE_MGR_SERVICE_SYS_ABILITY_ID, "BundleMgr" },
+    { INSTALLD_SERVICE_ID, "Installd" },
     { FORM_MGR_SERVICE_ID, "FormMgr" },
     { WIFI_DEVICE_SYS_ABILITY_ID, "WifiDevice" },
     { WIFI_HOTSPOT_SYS_ABILITY_ID, "WifiHotspot" },
