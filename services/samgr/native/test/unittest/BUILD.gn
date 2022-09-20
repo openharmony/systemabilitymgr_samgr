@@ -144,7 +144,10 @@ ohos_unittest("LocalAbilityManagerProxyTest") {
 }
 
 ohos_executable("ondemand") {
-  sources = [ "./src/ondemand_helper.cpp" ]
+  sources = [
+    "${samgr_services_dir}/test/unittest/src/mock_permission.cpp",
+    "./src/ondemand_helper.cpp",
+  ]
   configs = [
     ":sam_test_config",
     "//foundation/systemabilitymgr/samgr/test/resource:coverage_flags",

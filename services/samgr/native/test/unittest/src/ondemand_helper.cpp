@@ -27,6 +27,7 @@
 #include "iservice_registry.h"
 #include "isystem_ability_load_callback.h"
 #include "nativetoken_kit.h"
+#include "sam_mock_permission.h"
 #include "softbus_bus_center.h"
 #include "system_ability_definition.h"
 #include "token_setproc.h"
@@ -254,29 +255,9 @@ void OnDemandHelper::OnDemandLoadCallback::OnLoadSACompleteForRemote(const std::
 }
 }
 
-void MockPermission()
-{
-    static const char *PERMS[] = {
-        "ohos.permission.DISTRIBUTED_DATASYNC"
-    };
-    uint64_t tokenId;
-    NativeTokenInfoParams infoInstance = {
-        .dcapsNum = 0,
-        .permsNum = 1,
-        .aclsNum = 0,
-        .dcaps = nullptr,
-        .perms = PERMS,
-        .acls = nullptr,
-        .processName = "distributedsched",
-        .aplStr = "system_core",
-    };
-    tokenId = GetAccessTokenId(&infoInstance);
-    SetSelfTokenID(tokenId);
-}
-
 int main(int argc, char* argv[])
 {
-    MockPermission();
+    SamMockPermission::MockPermission();
     OHOS::OnDemandHelper& ondemandHelper = OnDemandHelper::GetInstance();
     string cmd = "load";
     do {
