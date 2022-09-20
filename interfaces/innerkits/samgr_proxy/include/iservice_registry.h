@@ -72,11 +72,6 @@ public:
     sptr<ISystemAbilityManager> GetSystemAbilityManager();
 
     /**
-     * get remote object of samgr.
-     */
-    sptr<IRemoteObject> GetRegistryRemoteObject();
-
-    /**
      * destroy remote object of samgr.
      */
     void DestroySystemAbilityManagerObject();
