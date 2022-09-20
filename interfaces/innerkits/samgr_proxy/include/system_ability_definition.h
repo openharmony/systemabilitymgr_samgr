@@ -390,6 +390,7 @@ static const std::map<int, std::string> saNameMap_ = {
     { PARAM_WATCHER_DISTRIBUTED_SERVICE_ID, "ParamWatcher" },
     { SYSPARAM_DEVICE_SERVICE_ID, "SysParamDevice" },
     { TIME_SERVICE_ID, "TimeService" },
+    { INSTALLD_SERVICE_ID, "Installd" },
 };
 } // namespace OHOS
 
