@@ -192,7 +192,8 @@ HWTEST_F(ParseUtilTest, GetSaProfiles002, TestSize.Level3)
      */
     bool ret = parser_->ParseSaProfiles(TEST_RESOURCE_PATH + "profile.xml");
     ASSERT_TRUE(ret);
-    SaProfile saRunOnCreateTrue,saRunOnCreateFalse;
+    SaProfile saRunOnCreateTrue;
+    SaProfile saRunOnCreateFalse;
     saRunOnCreateTrue.runOnCreate = true;
     parser_->saProfiles_.emplace_back(saRunOnCreateTrue);
     parser_->saProfiles_.emplace_back(saRunOnCreateFalse);
