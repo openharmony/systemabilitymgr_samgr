@@ -192,7 +192,7 @@ void SystemAbilityManager::DoLoadForPerf()
     if (value) {
         std::list<int32_t> saids = GetAllOndemandSa();
         HILOGD("DoLoadForPerf ondemand size : %{public}zu.", saids.size());
-        auto callback = new SystemAbilityLoadCallbackStub();
+        sptr<ISystemAbilityLoadCallback> callback(new SystemAbilityLoadCallbackStub());
         for (auto said : saids) {
             LoadSystemAbility(said, callback);
         }
