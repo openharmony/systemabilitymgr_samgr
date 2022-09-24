@@ -16,6 +16,7 @@
 #include "systemabilitymanager_fuzzer.h"
 
 #include "if_system_ability_manager.h"
+#include "sam_mock_permission.h"
 #include "system_ability_manager.h"
 
 #include <cstddef>
@@ -43,6 +44,7 @@ uint32_t Convert2Uint32(const uint8_t* ptr)
 
 void FuzzSystemAbilityManager(const uint8_t* rawData, size_t size)
 {
+    SamMockPermission::MockPermission();
     uint32_t code = Convert2Uint32(rawData);
     rawData = rawData + OFFSET;
     size = size - OFFSET;

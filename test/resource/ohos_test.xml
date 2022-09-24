@@ -30,6 +30,7 @@
             <option name="push" value="profile/mock.xml -> /data/test/resource/samgr/profile/" src="res"/>
             <option name="push" value="profile/empty_process.xml -> /data/test/resource/samgr/profile/" src="res"/>
             <option name="push" value="profile/empty_systemability.xml -> /data/test/resource/samgr/profile/" src="res"/>
+            <option name="push" value="profile/empty_libpath.xml -> /data/test/resource/samgr/profile/" src="res"/>
             <option name="push" value="systemabilitymgr/samgr/libmock_sa.z.so -> /data/test/" src="out"/>
         </preparer>
     </target>
