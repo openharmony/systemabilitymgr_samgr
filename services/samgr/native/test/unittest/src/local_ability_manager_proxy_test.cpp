@@ -16,6 +16,7 @@
 
 #include "itest_transaction_service.h"
 #include "local_ability_manager_proxy.h"
+#include "mock_iro_sendrequest.h"
 #include "string_ex.h"
 #include "test_log.h"
 
@@ -60,9 +61,8 @@ void LocalAbilityManagerProxyTest::TearDown()
 HWTEST_F(LocalAbilityManagerProxyTest, LocalAbilityManagerProxy001, TestSize.Level1)
 {
     sptr<IRemoteObject> testAbility(new TestTransactionService());
-    sptr<LocalAbilityManagerProxy> LocalAbility(new LocalAbilityManagerProxy(testAbility));
-    EXPECT_NE(LocalAbility, nullptr);
-    bool res = LocalAbility->StartAbility(TEST_SAID_INVAILD);
+    sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
+    bool res = localAbility->StartAbility(TEST_SAID_INVAILD);
     EXPECT_EQ(res, false);
 }
 
@@ -74,10 +74,38 @@ HWTEST_F(LocalAbilityManagerProxyTest, LocalAbilityManagerProxy001, TestSize.Lev
  */
 HWTEST_F(LocalAbilityManagerProxyTest, LocalAbilityManagerProxy002, TestSize.Level1)
 {
-    sptr<IRemoteObject> testAbility(new TestTransactionService());
-    sptr<LocalAbilityManagerProxy> LocalAbility(new LocalAbilityManagerProxy(testAbility));
-    EXPECT_NE(LocalAbility, nullptr);
-    bool res = LocalAbility->StartAbility(TEST_SAID_VAILD);
+    sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(nullptr));
+    bool res = localAbility->StartAbility(TEST_SAID_VAILD);
+    EXPECT_EQ(res, false);
+}
+
+/**
+ * @tc.name: LocalAbilityManagerProxy003
+ * @tc.desc: LocalAbilityManagerProxy and check StartAbility
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(LocalAbilityManagerProxyTest, LocalAbilityManagerProxy003, TestSize.Level1)
+{
+    sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
+    sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
+    bool res = localAbility->StartAbility(TEST_SAID_VAILD);
     EXPECT_EQ(res, true);
+}
+
+/**
+ * @tc.name: LocalAbilityManagerProxy004
+ * @tc.desc: LocalAbilityManagerProxy and check StartAbility
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(LocalAbilityManagerProxyTest, LocalAbilityManagerProxy004, TestSize.Level1)
+{
+    sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
+    testAbility->result_ = 1;
+    sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
+    EXPECT_NE(localAbility, nullptr);
+    bool res = localAbility->StartAbility(TEST_SAID_VAILD);
+    EXPECT_EQ(res, false);
 }
 }
