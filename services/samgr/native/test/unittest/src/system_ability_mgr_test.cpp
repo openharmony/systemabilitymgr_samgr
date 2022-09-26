@@ -1715,7 +1715,7 @@ HWTEST_F(SystemAbilityMgrTest, ReportGetSAFre004, TestSize.Level3)
     int32_t pid = 1;
     saMgr->saFrequencyMap_[pid] = MAX_COUNT;
     saMgr->UpdateSaFreMap(pid, TEST_SYSTEM_ABILITY1);
-    ASSERT_EQ(saMgr->saFrequencyMap_[pid], MAX_COUNT);
+    EXPECT_EQ(saMgr->saFrequencyMap_[pid], MAX_COUNT);
     saMgr->saFrequencyMap_.clear();
 }
 
@@ -1751,26 +1751,6 @@ HWTEST_F(SystemAbilityMgrTest, OndemandLoadForPerf001, TestSize.Level3)
 }
 
 /**
- * @tc.name: Test OndemandLoad
- * @tc.desc: OndemandLoad001
- * @tc.type: FUNC
- * @tc.require: I5KMF7
- */
-HWTEST_F(SystemAbilityMgrTest, OndemandLoad001, TestSize.Level3)
-{
-    DTEST_LOG << " OndemandLoad001 " << std::endl;
-    bool value = system::GetBoolParameter(ONDEMAND_PARAM, false);
-    ASSERT_FALSE(value);
-    int ret = SetParameter("persist.samgr.perf.ondemand", "true");
-    ASSERT_EQ(ret, 0);
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    saMgr->saProfileMap_.clear();
-    saMgr->OndemandLoad();
-    ret = SetParameter("persist.samgr.perf.ondemand", "false");
-    ASSERT_EQ(ret, 0);
-}
-
-/**
  * @tc.name: Test DoLoadForPerf
  * @tc.desc: DoLoadForPerf001
  * @tc.type: FUNC
@@ -1784,6 +1764,7 @@ HWTEST_F(SystemAbilityMgrTest, DoLoadForPerf001, TestSize.Level1)
     bool value = system::GetBoolParameter(ONDEMAND_PARAM, false);
     ASSERT_FALSE(value);
 }
+
 /**
  * @tc.name: Test GetAllOndemandSa001
  * @tc.desc: GetAllOndemandSa001
@@ -1798,7 +1779,7 @@ HWTEST_F(SystemAbilityMgrTest, GetAllOndemandSa001, TestSize.Level3)
     saMgr->saProfileMap_[1] = saProfile;
     saMgr->GetAllOndemandSa();
     bool value = system::GetBoolParameter(ONDEMAND_PARAM, false);
-    ASSERT_FALSE(value);
+    EXPECT_FALSE(value);
     saMgr->saProfileMap_.clear();
 }
 
@@ -1818,7 +1799,7 @@ HWTEST_F(SystemAbilityMgrTest, GetAllOndemandSa002, TestSize.Level3)
     saMgr->abilityMap_[1] = saInfo;
     saMgr->GetAllOndemandSa();
     bool value = system::GetBoolParameter(ONDEMAND_PARAM, false);
-    ASSERT_FALSE(value);
+    EXPECT_FALSE(value);
     saMgr->saProfileMap_.clear();
     saMgr->abilityMap_.clear();
 }
