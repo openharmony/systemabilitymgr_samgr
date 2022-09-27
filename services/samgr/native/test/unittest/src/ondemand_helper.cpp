@@ -225,7 +225,7 @@ sptr<IRemoteObject> OnDemandHelper::GetSystemAbility(int32_t systemAbilityId)
         cout << "GetSystemAbility systemAbilityId:" << systemAbilityId << " failed !" << endl;
         return nullptr;
     }
-    cout << "GetSystemAbility result:" << ((remoteObject != nullptr) ? "succeed" : "failed") << " spend:"
+    cout << "GetSystemAbility result: success "<< " spend:"
         << (GetTickCount() - begin) << " ms" << " systemAbilityId:" << systemAbilityId << endl;
     return remoteObject;
 }
