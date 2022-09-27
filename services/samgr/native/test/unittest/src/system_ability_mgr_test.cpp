@@ -1708,9 +1708,10 @@ HWTEST_F(SystemAbilityMgrTest, ReportGetSAFre004, TestSize.Level3)
     DTEST_LOG << " ReportGetSAFre004 start " << std::endl;
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     int32_t pid = 1;
-    saMgr->saFrequencyMap_[pid] = MAX_COUNT;
+    uint64_t key = saMgr->GenerateFreKey(pid, TEST_SYSTEM_ABILITY1);
+    saMgr->saFrequencyMap_[key] = MAX_COUNT;
     saMgr->UpdateSaFreMap(pid, TEST_SYSTEM_ABILITY1);
-    ASSERT_EQ(saMgr->saFrequencyMap_[pid], MAX_COUNT);
+    EXPECT_EQ(saMgr->saFrequencyMap_[key], MAX_COUNT);
     saMgr->saFrequencyMap_.clear();
 }
 } // namespace OHOS
