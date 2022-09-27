@@ -79,7 +79,7 @@ namespace {
         cout << "OnLoadSystemAbilityFail systemAbilityId:" << systemAbilityId << endl;
     }
 
-    void MockLoadCallback::OnLoadSACompleteForRemote(const std::string& devcieId, int32_t systemAbilityId,
+    void MockLoadCallback::OnLoadSACompleteForRemote(const std::string& deviceId, int32_t systemAbilityId,
         const sptr<IRemoteObject>& remoteObject)
     {
         cout << "OnLoadSACompleteForRemote systemAbilityId:" << systemAbilityId <<  "ret : "<<
@@ -209,8 +209,8 @@ namespace {
             return;
         }
         sptr<IRemoteObject> testAbility = new TestTransactionService();
-        int32_t res = sm->AddSystemAbility(DISTRIBUTED_SCHED_TEST_TT_ID, testAbility);
-        res = sm->RemoveSystemAbility(DISTRIBUTED_SCHED_TEST_TT_ID);
+        sm->AddSystemAbility(DISTRIBUTED_SCHED_TEST_TT_ID, testAbility);
+        int32_t res = sm->RemoveSystemAbility(DISTRIBUTED_SCHED_TEST_TT_ID);
         cout << "remove system ability result : " << ((res == 0) ? "succeed" : "failed") << endl;
     }
 
