@@ -192,6 +192,7 @@ enum {
     DLP_PERMISSION_SERVICE_ID                        = 3521,
     RISK_ANALYSIS_MANAGER_SA_ID                      = 3523,
     DATA_COLLECT_MANAGER_SA_ID                       = 3524,
+    DLP_CREDENTIAL_SERVICE_ID                        = 3553,
     SUBSYS_SENSORS_SYS_ABILITY_ID_BEGIN              = 3600,
     SENSOR_SERVICE_ABILITY_ID                        = 3601,
     MISCDEVICE_SERVICE_ABILITY_ID                    = 3602,
@@ -408,6 +409,7 @@ static const std::map<int, std::string> saNameMap_ = {
     { PLAYER_DISTRIBUTED_SERVICE_ID, "PlayerDistributedService"},
     { CAMERA_SERVICE_ID, "CameraService"},
     { AUDIO_POLICY_SERVICE_ID, "AudioPolicyService"},
+    { DLP_CREDENTIAL_SERVICE_ID, "DlpCreService"},
 };
 } // namespace OHOS
 
