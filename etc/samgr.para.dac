@@ -11,6 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-bootevent.samgr.ready = samgr:samgr:0775
+bootevent.samgr.ready = samgr:samgr:0775:bool
 
-persist.samgr.perf.ondemand = samgr:samgr:0775
+persist.samgr.perf.ondemand = samgr:samgr:0775:bool
