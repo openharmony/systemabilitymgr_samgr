@@ -1,7 +1,12 @@
-# samgr组件<a name="ZH-CN_TOPIC_0000001162068341"></a>
+# 系统服务管理部件<a name="ZH-CN_TOPIC_0000001162068341"></a>
 ## 简介<a name="section11660541593"></a>
 
 samgr组件是OpenHarmony的核心组件，提供OpenHarmony系统服务启动、注册、查询等功能。
+
+## 系统架构<a name="section342962219551"></a>
+
+**图 1**  系统服务管理系统架构图
+
 
 ![](figures/zh-cn_image_0000001115820566.png)
 
