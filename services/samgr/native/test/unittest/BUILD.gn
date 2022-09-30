@@ -84,6 +84,8 @@ ohos_unittest("SystemAbilityMgrStubTest") {
 
   sources = [
     "${samgr_dir}/utils/native/source/tools.cpp",
+    "${samgr_services_dir}/source/ability_death_recipient.cpp",
+    "${samgr_services_dir}/source/rpc_callback_imp.cpp",
     "${samgr_services_dir}/source/system_ability_manager.cpp",
     "${samgr_services_dir}/source/system_ability_manager_stub.cpp",
     "${samgr_services_dir}/test/unittest/src/itest_transaction_service.cpp",
