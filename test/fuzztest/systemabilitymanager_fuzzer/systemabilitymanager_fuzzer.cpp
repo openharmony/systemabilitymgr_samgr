@@ -54,7 +54,9 @@ void FuzzSystemAbilityManager(const uint8_t* rawData, size_t size)
     data.RewindRead(0);
     MessageParcel reply;
     MessageOption option;
-    SystemAbilityManager::GetInstance()->OnRemoteRequest(code % MAX_CALL_TRANSACTION, data, reply, option);
+    sptr<SystemAbilityManager> manager = SystemAbilityManager::GetInstance();
+    manager->Init();
+    manager->OnRemoteRequest(code % MAX_CALL_TRANSACTION, data, reply, option);
 }
 }
 }

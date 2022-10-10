@@ -69,7 +69,8 @@ SystemAbilityManager::SystemAbilityManager()
 SystemAbilityManager::~SystemAbilityManager()
 {
     loadPool_.Stop();
-    reportEventTimer_->Shutdown();
+    if (reportEventTimer_ != nullptr)
+        reportEventTimer_->Shutdown();
 }
 
 void SystemAbilityManager::Init()
