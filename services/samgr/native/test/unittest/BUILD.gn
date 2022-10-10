@@ -286,6 +286,7 @@ group("unittest") {
   deps = [
     ":LocalAbilityManagerProxyTest",
     ":SystemAbilityMgrProxyTest",
+    ":SystemAbilityMgrStubTest",
     ":SystemAbilityMgrTest",
     ":TestTool",
     ":ondemand",
