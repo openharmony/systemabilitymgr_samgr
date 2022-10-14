@@ -87,6 +87,7 @@ public:
     std::string TransformDeviceId(const std::string& deviceId, int32_t type, bool isPrivate);
     std::string GetLocalNodeId();
     void Init();
+    void WatchDogInit();
 
     int32_t AddSystemProcess(const std::u16string& procName, const sptr<IRemoteObject>& procObject) override;
     int32_t RemoveSystemProcess(const sptr<IRemoteObject>& procObject);

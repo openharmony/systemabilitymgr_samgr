@@ -56,4 +56,18 @@ void ReportGetSAFrequency(uint32_t callerPid, uint32_t said, int32_t count)
         HILOGE("hisysevent report get sa frequency failed! ret %{public}d.", ret);
     }
 }
+
+void WatchDogSendEvent(int32_t pid, int32_t uid, const std::string& sendMsg,
+    const std::string& eventName)
+{
+    int ret = HiviewDFX::HiSysEvent::Write(DOMAIN_NAME,
+        eventName,
+        HiSysEvent::EventType::FAULT,
+        "PID", pid,
+        "UID", uid,
+        "MSG", sendMsg);
+    if (ret != 0) {
+        HILOGE("hisysevent report watchdog failed! ret %{public}d.", ret);
+    }
+}
 } // OHOS

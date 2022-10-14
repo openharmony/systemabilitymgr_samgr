@@ -23,3 +23,9 @@ SAMGR_ADD_SYSTEMABILITY_FAIL:
   __BASE: {type: FAULT, level: CRITICAL, tag: fault, desc: add system ability failed event}
   SAID: {type: INT32, desc: system ability id}
   FILE_NAME: {type: STRING, desc: file name}
+
+SAMGR_SERVICE_BLOCK:
+  __BASE: {type: FAULT, level: CRITICAL, tag: fault, desc: workhander watchdog block}
+  PID: {type: INT32, desc: caller pid}
+  UID: {type: INT32, desc: caller uid}
+  MSG: {type: STRING, desc: time msg}
