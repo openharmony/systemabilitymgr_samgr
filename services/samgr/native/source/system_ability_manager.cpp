@@ -22,6 +22,7 @@
 #include "datetime_ex.h"
 #include "directory_ex.h"
 #include "errors.h"
+#include "hicollie_helper.h"
 #include "hisysevent_adapter.h"
 #include "hitrace_meter.h"
 #include "if_local_ability_manager.h"
@@ -48,7 +49,7 @@ constexpr const char* ONDEMAND_PERF_PARAM = "persist.samgr.perf.ondemand";
 constexpr uint32_t REPORT_GET_SA_INTERVAL = 24 * 60 * 60 * 1000; // ms and is one day
 constexpr int32_t MAX_NAME_SIZE = 200;
 constexpr int32_t SPLIT_NAME_VECTOR_SIZE = 2;
-
+constexpr int32_t WAITTING = 1;
 constexpr int32_t UID_ROOT = 0;
 constexpr int32_t UID_SYSTEM = 1000;
 constexpr int32_t MAX_SUBSCRIBE_COUNT = 256;
@@ -87,10 +88,29 @@ void SystemAbilityManager::Init()
         workHandler_ = make_shared<AppExecFwk::EventHandler>(runner);
     }
     InitSaProfile();
+    WatchDogInit();
     loadPool_.Start(std::thread::hardware_concurrency());
     loadPool_.SetMaxTaskNum(std::thread::hardware_concurrency());
     reportEventTimer_ = std::make_unique<Utils::Timer>("DfxReporter");
     OndemandLoadForPerf();
+}
+
+void SystemAbilityManager::WatchDogInit()
+{
+    constexpr int CHECK_PERIOD = 30000;
+    auto timeOutCallback = [this](const std::string& name, int waitState) {
+        int32_t pid = getpid();
+        int32_t uid = getuid();
+        time_t curTime = time(nullptr);
+        std::string sendMsg = std::string((ctime(&curTime) == nullptr) ? "" : ctime(&curTime)) + "\n";
+        if (waitState == WAITTING) {
+            WatchDogSendEvent(pid, uid, sendMsg, "SAMGR_SERVICE_BLOCK");
+        }
+    };
+    int result = HicollieHelper::AddThread("SamgrTask", workHandler_, timeOutCallback, CHECK_PERIOD);
+    if (!result) {
+        HILOGE("Watchdog start failed");
+    }
 }
 
 const sptr<DBinderService> SystemAbilityManager::GetDBinder() const
