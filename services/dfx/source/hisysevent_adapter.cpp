@@ -34,7 +34,7 @@ const std::string GETSA__TAG = "SAMGR_GETSA_FREQUENCY";
 
 void ReportAddSystemAbilityFailed(int32_t said, const std::string& filaName)
 {
-    int ret = HiSysEvent::Write(DOMAIN_NAME,
+    int ret = HiSysEventWrite(HiSysEvent::Domain::SAMGR,
         ADD_SYSTEMABILITY_FAIL,
         HiSysEvent::EventType::FAULT,
         SAID, said,
@@ -46,7 +46,7 @@ void ReportAddSystemAbilityFailed(int32_t said, const std::string& filaName)
 
 void ReportGetSAFrequency(uint32_t callerPid, uint32_t said, int32_t count)
 {
-    int ret = HiSysEvent::Write(DOMAIN_NAME,
+    int ret = HiSysEventWrite(HiSysEvent::Domain::SAMGR,
         GETSA__TAG,
         HiSysEvent::EventType::STATISTIC,
         CALLER_PID, callerPid,
@@ -60,7 +60,7 @@ void ReportGetSAFrequency(uint32_t callerPid, uint32_t said, int32_t count)
 void WatchDogSendEvent(int32_t pid, int32_t uid, const std::string& sendMsg,
     const std::string& eventName)
 {
-    int ret = HiviewDFX::HiSysEvent::Write(DOMAIN_NAME,
+    int ret = HiSysEventWrite(HiSysEvent::Domain::SAMGR,
         eventName,
         HiSysEvent::EventType::FAULT,
         "PID", pid,
