@@ -69,9 +69,12 @@ SystemAbilityManager::SystemAbilityManager()
 
 SystemAbilityManager::~SystemAbilityManager()
 {
-    loadPool_.Stop();
-    if (reportEventTimer_ != nullptr)
+    if (loadPool_ != nullptr) {
+        loadPool_->Stop();
+    }
+    if (reportEventTimer_ != nullptr) {
         reportEventTimer_->Shutdown();
+    }
 }
 
 void SystemAbilityManager::Init()
@@ -89,15 +92,16 @@ void SystemAbilityManager::Init()
     }
     InitSaProfile();
     WatchDogInit();
-    loadPool_.Start(std::thread::hardware_concurrency());
-    loadPool_.SetMaxTaskNum(std::thread::hardware_concurrency());
+    loadPool_ = std::make_unique<ThreadPool>("OndemandLoader");
+    loadPool_->Start(std::thread::hardware_concurrency());
+    loadPool_->SetMaxTaskNum(std::thread::hardware_concurrency());
     reportEventTimer_ = std::make_unique<Utils::Timer>("DfxReporter");
     OndemandLoadForPerf();
 }
 
 void SystemAbilityManager::WatchDogInit()
 {
-    constexpr int CHECK_PERIOD = 30000;
+    constexpr int CHECK_PERIOD = 10000;
     auto timeOutCallback = [this](const std::string& name, int waitState) {
         int32_t pid = getpid();
         int32_t uid = getuid();
@@ -1063,7 +1067,7 @@ int32_t SystemAbilityManager::LoadSystemAbility(int32_t systemAbilityId, const s
     auto callingUid = IPCSkeleton::GetCallingUid();
     auto task = std::bind(&SystemAbilityManager::DoLoadRemoteSystemAbility, this,
         systemAbilityId, callingPid, callingUid, deviceId, callback);
-    loadPool_.AddTask(task);
+    loadPool_->AddTask(task);
     return ERR_OK;
 }
 
