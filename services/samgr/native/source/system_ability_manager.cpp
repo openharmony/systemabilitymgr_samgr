@@ -1045,6 +1045,9 @@ int32_t SystemAbilityManager::LoadSystemAbility(int32_t systemAbilityId,
 int32_t SystemAbilityManager::LoadSystemAbility(int32_t systemAbilityId, const std::string& deviceId,
     const sptr<ISystemAbilityLoadCallback>& callback)
 {
+    if (loadPool_ == nullptr) {
+        return ERR_NO_INIT;
+    }
     std::string key = ToString(systemAbilityId) + "_" + deviceId;
     {
         lock_guard<mutex> autoLock(loadRemoteLock_);
