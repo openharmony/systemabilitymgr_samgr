@@ -224,6 +224,7 @@ enum {
     TELEPHONY_IMS_SYS_ABILITY_ID                     = 4014,
     SUBSYS_UPDATE_SYS_ABILITY_ID_BEGIN               = 4100,
     SYS_INSTALLER_DISTRIBUTED_SERVICE_ID             = 4101,
+    QUICKFIX_ENGINE_SERVICE_ID                       = 4102,
     SUBSYS_USB_SYS_ABILITY_ID_BEGIN                  = 4200,
     USB_SYSTEM_ABILITY_ID                            = 4201,
     SUBSYS_WEARABLE_SYS_ABILITY_ID_BEGIN             = 4300,
@@ -414,6 +415,7 @@ static const std::map<int, std::string> saNameMap_ = {
     { CAMERA_SERVICE_ID, "CameraService"},
     { AUDIO_POLICY_SERVICE_ID, "AudioPolicyService"},
     { DLP_CREDENTIAL_SERVICE_ID, "DlpCreService"},
+    { QUICKFIX_ENGINE_SERVICE_ID, "QuickfixEngineService"},
 };
 } // namespace OHOS
 
