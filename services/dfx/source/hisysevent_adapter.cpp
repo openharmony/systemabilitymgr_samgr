@@ -56,7 +56,7 @@ void ReportGetSAFrequency(uint32_t callerPid, uint32_t said, int32_t count)
     }
 }
 
-void WatchDogSendEvent(int32_t pid, int32_t uid, const std::string& sendMsg,
+void WatchDogSendEvent(int32_t pid, uint32_t uid, const std::string& sendMsg,
     const std::string& eventName)
 {
     int ret = HiSysEventWrite(HiSysEvent::Domain::SAMGR,

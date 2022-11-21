@@ -27,5 +27,5 @@ SAMGR_ADD_SYSTEMABILITY_FAIL:
 SAMGR_SERVICE_BLOCK:
   __BASE: {type: FAULT, level: CRITICAL, tag: fault, desc: workhander watchdog block}
   PID: {type: INT32, desc: caller pid}
-  UID: {type: INT32, desc: caller uid}
+  UID: {type: UINT32, desc: caller uid}
   MSG: {type: STRING, desc: time msg}
