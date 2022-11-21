@@ -66,7 +66,7 @@ public:
         ADD_SYSTEM_PROCESS_TRANSACTION = 20
     };
 
-    // Retrieve an existing ability, blocking for a few seconds if it doesn't ye exist.
+    // Retrieve an existing ability, retrying and blocking for a few seconds if it doesn't exist.
     virtual sptr<IRemoteObject> GetSystemAbility(int32_t systemAbilityId) = 0;
 
     // Retrieve an existing ability, no-blocking.
@@ -75,12 +75,15 @@ public:
     // Remove an ability.
     virtual int32_t RemoveSystemAbility(int32_t systemAbilityId) = 0;
 
+    // Subscribe a system ability status, and inherit from ISystemAbilityStatusChange class.
     virtual int32_t SubscribeSystemAbility(int32_t systemAbilityId,
         const sptr<ISystemAbilityStatusChange>& listener) = 0;
+
+    // UnSubscribe a system ability status.
     virtual int32_t UnSubscribeSystemAbility(int32_t systemAbilityId,
         const sptr<ISystemAbilityStatusChange>& listener) = 0;
 
-    // Retrieve an existing ability, blocking for a few seconds if it doesn't ye exist.
+    // Retrieve an existing ability, blocking for a few seconds if it doesn't exist.
     virtual sptr<IRemoteObject> GetSystemAbility(int32_t systemAbilityId, const std::string& deviceId) = 0;
 
     // Retrieve an existing ability, no-blocking
