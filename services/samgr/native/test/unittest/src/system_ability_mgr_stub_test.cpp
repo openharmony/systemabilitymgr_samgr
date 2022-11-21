@@ -15,8 +15,10 @@
 
 #include "system_ability_mgr_stub_test.h"
 
+#include "ability_death_recipient.h"
 #include "itest_transaction_service.h"
 #include "if_system_ability_manager.h"
+#include "ipc_skeleton.h"
 #include "sam_mock_permission.h"
 #include "sa_status_change_mock.h"
 #include "string_ex.h"
@@ -900,14 +902,14 @@ HWTEST_F(SystemAbilityMgrStubTest, LoadRemoteSystemAbilityInner003, TestSize.Lev
 HWTEST_F(SystemAbilityMgrStubTest, LoadRemoteSystemAbilityInner004, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    sptr<IRemoteObject> testAbility(new SystemAbilityLoadCallbackStub());
+    sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
     EXPECT_TRUE(saMgr != nullptr);
     MessageParcel data;
     MessageParcel reply;
     data.WriteInt32(SAID);
     string deviceId = "test";
     data.WriteString(deviceId);
-    data.WriteRemoteObject(testAbility);
+    data.WriteRemoteObject(callback);
     int32_t result = saMgr->LoadRemoteSystemAbilityInner(data, reply);
     EXPECT_EQ(result, ERR_OK);
 }
@@ -1466,5 +1468,672 @@ HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbility007, TestSize.Level3)
     saMgr->abilityDeath_ = nullptr;
     int32_t res = saMgr->RemoveSystemAbility(saMgr);
     EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: SubscribeSystemAbility001
+ * @tc.desc: test SubscribeSystemAbility, systemAbilityId or listener invalid!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, SubscribeSystemAbility001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SaStatusChangeMock> listener(new SaStatusChangeMock());
+    int32_t res = saMgr->SubscribeSystemAbility(INVALID_SAID, listener);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: SubscribeSystemAbility002
+ * @tc.desc: test SubscribeSystemAbility, systemAbilityId or listener invalid!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, SubscribeSystemAbility002, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SaStatusChangeMock> listener(nullptr);
+    int32_t res = saMgr->SubscribeSystemAbility(SAID, listener);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: SubscribeSystemAbility003
+ * @tc.desc: test SubscribeSystemAbility, systemAbilityId or listener invalid!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, SubscribeSystemAbility003, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SaStatusChangeMock> listener(nullptr);
+    int32_t res = saMgr->SubscribeSystemAbility(INVALID_SAID, listener);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: SubscribeSystemAbility004
+ * @tc.desc: test SubscribeSystemAbility, already exist listener!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, SubscribeSystemAbility004, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SaStatusChangeMock> listener(new SaStatusChangeMock());
+    saMgr->listenerMap_[SAID].push_back(make_pair(listener, SAID));
+    int32_t res = saMgr->SubscribeSystemAbility(SAID, listener);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: UnSubscribeSystemAbility001
+ * @tc.desc: test UnSubscribeSystemAbility, UnSubscribeSystemAbility systemAbilityId or listener invalid!!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemAbility001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SaStatusChangeMock> listener(new SaStatusChangeMock());
+    int32_t res = saMgr->UnSubscribeSystemAbility(INVALID_SAID, listener);
+    u16string name = u"device_saname";
+    saMgr->NotifyRemoteSaDied(name);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: UnSubscribeSystemAbility002
+ * @tc.desc: test UnSubscribeSystemAbility, UnSubscribeSystemAbility systemAbilityId or listener invalid!!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemAbility002, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SaStatusChangeMock> listener(nullptr);
+    int32_t res = saMgr->UnSubscribeSystemAbility(SAID, listener);
+    u16string name = u"deviceSaname";
+    saMgr->dBinderService_ = nullptr;
+    saMgr->NotifyRemoteSaDied(name);
+    saMgr->dBinderService_ = DBinderService::GetInstance();
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: UnSubscribeSystemAbility003
+ * @tc.desc: test UnSubscribeSystemAbility, UnSubscribeSystemAbility systemAbilityId or listener invalid!!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemAbility003, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SaStatusChangeMock> listener(nullptr);
+    int32_t res = saMgr->UnSubscribeSystemAbility(INVALID_SAID, listener);
+    string deviceId = "device";
+    saMgr->NotifyRemoteDeviceOffline(deviceId);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: UnSubscribeSystemAbility004
+ * @tc.desc: test UnSubscribeSystemAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemAbility004, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SaStatusChangeMock> listener(new SaStatusChangeMock());
+    saMgr->listenerMap_[SAID].push_back(make_pair(listener, SAID));
+    saMgr->abilityStatusDeath_ = nullptr;
+    saMgr->subscribeCountMap_.clear();
+    int32_t res = saMgr->UnSubscribeSystemAbility(SAID, listener);
+    saMgr->dBinderService_ = nullptr;
+    string deviceId = "device";
+    saMgr->NotifyRemoteDeviceOffline(deviceId);
+    saMgr->dBinderService_ = DBinderService::GetInstance();
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: UnSubscribeSystemAbility005
+ * @tc.desc: test UnSubscribeSystemAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemAbility005, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SaStatusChangeMock> listener(new SaStatusChangeMock());
+    saMgr->listenerMap_[SAID].push_back(make_pair(listener, SAID));
+    saMgr->abilityStatusDeath_ = nullptr;
+    int countNum = 2;
+    saMgr->subscribeCountMap_[SAID] = countNum;
+    int32_t res = saMgr->UnSubscribeSystemAbility(SAID, listener);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: AddSystemAbility001
+ * @tc.desc: test AddSystemAbility, input params is invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, AddSystemAbility001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
+    SystemAbilityManager::SAExtraProp extraProp;
+    int32_t res = saMgr->AddSystemAbility(INVALID_SAID, testAbility, extraProp);
+    saMgr->workHandler_ = nullptr;
+    saMgr->SendSystemAbilityRemovedMsg(SAID);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: AddSystemAbility002
+ * @tc.desc: test AddSystemAbility, input params is invalid, work handler not initialized
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, AddSystemAbility002, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<IRemoteObject> testAbility(nullptr);
+    SystemAbilityManager::SAExtraProp extraProp;
+    int32_t res = saMgr->AddSystemAbility(SAID, testAbility, extraProp);
+    u16string name;
+    string srcDeviceId;
+    sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
+    saMgr->SendCheckLoadedMsg(SAID, name, srcDeviceId, callback);
+    saMgr->SendLoadedSystemAblityMsg(SAID, testAbility, callback);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: AddSystemAbility003
+ * @tc.desc: test AddSystemAbility, input params is invalid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, AddSystemAbility003, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<IRemoteObject> testAbility(nullptr);
+    SystemAbilityManager::SAExtraProp extraProp;
+    int32_t res = saMgr->AddSystemAbility(INVALID_SAID, testAbility, extraProp);
+    auto runner = AppExecFwk::EventRunner::Create("workHandler");
+    saMgr->workHandler_ = make_shared<AppExecFwk::EventHandler>(runner);
+    u16string name;
+    string srcDeviceId;
+    sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
+    saMgr->SendCheckLoadedMsg(SAID, name, srcDeviceId, callback);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: AddSystemAbility004
+ * @tc.desc: test AddSystemAbility, return ERR_OK,SendCheckLoadedMsg SA loaded
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, AddSystemAbility004, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
+    SystemAbilityManager::SAExtraProp extraProp;
+    extraProp.isDistributed = false;
+    saMgr->dBinderService_ = nullptr;
+    int32_t res = saMgr->AddSystemAbility(SAID, testAbility, extraProp);
+    saMgr->dBinderService_ = DBinderService::GetInstance();
+    u16string name;
+    string srcDeviceId;
+    sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
+    SAInfo saInfo;
+    saMgr->abilityMap_[SAID] = saInfo;
+    saMgr->SendCheckLoadedMsg(SAID, name, srcDeviceId, callback);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: AddSystemAbility005
+ * @tc.desc: test AddSystemAbility, return ERR_OK
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, AddSystemAbility005, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
+    SystemAbilityManager::SAExtraProp extraProp;
+    saMgr->dBinderService_ = nullptr;
+    int32_t res = saMgr->AddSystemAbility(SOFTBUS_SERVER_SA_ID, testAbility, extraProp);
+    saMgr->dBinderService_ = DBinderService::GetInstance();
+    u16string name = u"test";
+    string srcDeviceId;
+    int64_t id = 1;
+    saMgr->startingProcessMap_[name] = id;
+    saMgr->startingAbilityMap_.clear();
+    sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
+    saMgr->CleanCallbackForLoadFailed(SAID, name, srcDeviceId, callback);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: AddSystemAbility006
+ * @tc.desc: test AddSystemAbility, return ERR_OK
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, AddSystemAbility006, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
+    SystemAbilityManager::SAExtraProp extraProp;
+    saMgr->rpcCallbackImp_ = nullptr;
+    int32_t res = saMgr->AddSystemAbility(SOFTBUS_SERVER_SA_ID, testAbility, extraProp);
+    saMgr->rpcCallbackImp_ = make_shared<RpcCallbackImp>();
+    u16string name = u"test";
+    string srcDeviceId = "srcDeviceId";
+    saMgr->startingProcessMap_.clear();
+    sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
+    SystemAbilityManager::AbilityItem abilityItem;
+    abilityItem.callbackMap[srcDeviceId].push_back(make_pair(callback, SAID));
+    saMgr->startingAbilityMap_[SAID] = abilityItem;
+    saMgr->CleanCallbackForLoadFailed(SAID, name, srcDeviceId, callback);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: AddSystemProcess001
+ * @tc.desc: test AddSystemProcess, return ERR_INVALID_VALUE
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, AddSystemProcess001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
+    u16string procName = u"";
+    int32_t res = saMgr->AddSystemProcess(procName, testAbility);
+    u16string name = u"test";
+    string srcDeviceId = "srcDeviceId";
+    saMgr->startingProcessMap_.clear();
+    sptr<SystemAbilityLoadCallbackMock> callbackOne = new SystemAbilityLoadCallbackMock();
+    sptr<SystemAbilityLoadCallbackMock> callbackTwo = new SystemAbilityLoadCallbackMock();
+    SystemAbilityManager::AbilityItem abilityItem;
+    abilityItem.callbackMap[srcDeviceId].push_back(make_pair(callbackOne, SAID));
+    abilityItem.callbackMap[srcDeviceId].push_back(make_pair(callbackTwo, SAID));
+    saMgr->startingAbilityMap_[SAID] = abilityItem;
+    saMgr->CleanCallbackForLoadFailed(SAID, name, srcDeviceId, callbackOne);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: AddSystemProcess002
+ * @tc.desc: test AddSystemProcess, return ERR_INVALID_VALUE
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, AddSystemProcess002, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<IRemoteObject> testAbility(nullptr);
+    u16string procName = u"proname";
+    int32_t res = saMgr->AddSystemProcess(procName, testAbility);
+    sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
+    saMgr->SendLoadedSystemAblityMsg(SAID, testAbility, callback);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: RemoveSystemProcess001
+ * @tc.desc: test RemoveSystemProcess, return ERR_INVALID_VALUE
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemProcess001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<IRemoteObject> testAbility(nullptr);
+    int32_t res = saMgr->RemoveSystemProcess(testAbility);
+    saMgr->NotifySystemAbilityLoadFail(SAID, nullptr);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: RemoveSystemProcess002
+ * @tc.desc: test RemoveSystemProcess, return ERR_OK
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemProcess002, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
+    u16string procName = u"proname";
+    int32_t res = saMgr->AddSystemProcess(procName, testAbility);
+    EXPECT_EQ(res, ERR_OK);
+    saMgr->systemProcessDeath_ = nullptr;
+    res = saMgr->RemoveSystemProcess(testAbility);
+    sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
+    saMgr->NotifySystemAbilityLoadFail(SAID, callback);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: GetSystemProcess001
+ * @tc.desc: test GetSystemProcess, process found
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, GetSystemProcess001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
+    u16string procName = u"proTest";
+    int32_t res = saMgr->AddSystemProcess(procName, testAbility);
+    EXPECT_EQ(res, ERR_OK);
+    sptr<IRemoteObject> resObj = saMgr->GetSystemProcess(procName);
+    EXPECT_NE(resObj, nullptr);
+}
+
+/**
+ * @tc.name: StartingSystemProcess001
+ * @tc.desc: test StartingSystemProcess, process already starting!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, StartingSystemProcess001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    u16string procName = u"proTest";
+    saMgr->startingProcessMap_.clear();
+    int countNum = 2;
+    saMgr->startingProcessMap_[procName] = countNum;
+    int32_t res = saMgr->StartingSystemProcess(procName, SAID);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: StartingSystemProcess002
+ * @tc.desc: test StartingSystemProcess, return ERR_OK!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, StartingSystemProcess002, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
+    u16string procName = u"proTest";
+    saMgr->startingProcessMap_.clear();
+    saMgr->systemProcessMap_[procName] = testAbility;
+    int32_t res = saMgr->StartingSystemProcess(procName, SAID);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: LoadSystemAbilityFromRpc001
+ * @tc.desc: test LoadSystemAbilityFromRpc, not supported!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbilityFromRpc001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    SaProfile saProfile;
+    string srcDeviceId;
+    sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
+    saMgr->saProfileMap_.clear();
+    bool res = saMgr->LoadSystemAbilityFromRpc(srcDeviceId, SAID, callback);
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: LoadSystemAbilityFromRpc002
+ * @tc.desc: test LoadSystemAbilityFromRpc, not distributed!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbilityFromRpc002, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    SaProfile saProfile;
+    saProfile.distributed = false;
+    string srcDeviceId;
+    sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
+    saMgr->saProfileMap_[SAID] = saProfile;
+    bool res = saMgr->LoadSystemAbilityFromRpc(srcDeviceId, SAID, callback);
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: LoadSystemAbilityFromRpc003
+ * @tc.desc: test LoadSystemAbilityFromRpc, return true!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbilityFromRpc003, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
+    sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
+    SaProfile saProfile;
+    saProfile.distributed = true;
+    SAInfo saInfo;
+    saInfo.remoteObj = testAbility;
+    string srcDeviceId;
+    saMgr->saProfileMap_[SAID] = saProfile;
+    saMgr->abilityMap_[SAID] = saInfo;
+    bool res = saMgr->LoadSystemAbilityFromRpc(srcDeviceId, SAID, callback);
+    EXPECT_TRUE(res);
+}
+
+/**
+ * @tc.name: LoadSystemAbilityFromRpc004
+ * @tc.desc: test LoadSystemAbilityFromRpc, return true!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbilityFromRpc004, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
+    SaProfile saProfile;
+    u16string procName = u"procname";
+    int countNum = 2;
+    saProfile.distributed = true;
+    saProfile.process = procName;
+    SAInfo saInfo;
+    SystemAbilityManager::AbilityItem abilityItem;
+    saInfo.remoteObj = nullptr;
+    string srcDeviceId = "srcDeviceId";
+    saMgr->saProfileMap_[SAID] = saProfile;
+    saMgr->abilityMap_[SAID] = saInfo;
+    saMgr->startingAbilityMap_[SAID] = abilityItem;
+    saMgr->startingProcessMap_[procName] = countNum;
+    bool res = saMgr->LoadSystemAbilityFromRpc(srcDeviceId, SAID, callback);
+    EXPECT_TRUE(res);
+}
+
+/**
+ * @tc.name: LoadSystemAbilityFromRpc005
+ * @tc.desc: test LoadSystemAbilityFromRpc, LoadSystemAbility said or callback invalid!!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbilityFromRpc005, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityLoadCallbackMock> callback = nullptr;
+    string srcDeviceId = "srcDeviceId";
+    bool res = saMgr->LoadSystemAbilityFromRpc(srcDeviceId, SAID, callback);
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: LoadSystemAbilityFromRpc006
+ * @tc.desc: test LoadSystemAbilityFromRpc, LoadSystemAbility said or callback invalid!!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbilityFromRpc006, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
+    string srcDeviceId = "srcDeviceId";
+    bool res = saMgr->LoadSystemAbilityFromRpc(srcDeviceId, INVALID_SAID, callback);
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: LoadSystemAbility001
+ * @tc.desc: test LoadSystemAbility001, systemAbilityId or callback invalid!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbility001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
+    pair<sptr<ISystemAbilityLoadCallback>, int32_t> itemPair;
+    int countNum = 2;
+    itemPair.first = callback;
+    itemPair.second = SAID;
+    saMgr->callbackCountMap_[itemPair.second] = countNum;
+    saMgr->RemoveStartingAbilityCallbackLocked(itemPair);
+    int32_t res = saMgr->LoadSystemAbility(INVALID_SAID, callback);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: LoadSystemAbility002
+ * @tc.desc: test LoadSystemAbility002, systemAbilityId or callback invalid!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbility002, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->OnRemoteCallbackDied(nullptr);
+    int32_t res = saMgr->LoadSystemAbility(SAID, nullptr);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: LoadSystemAbility003
+ * @tc.desc: test LoadSystemAbility003, systemAbilityId or callback invalid!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbility003, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
+    list<sptr<ISystemAbilityLoadCallback>> callbacks;
+    callbacks.push_back(callback);
+    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
+    saMgr->RemoveRemoteCallbackLocked(callbacks, callback);
+    int32_t res = saMgr->LoadSystemAbility(INVALID_SAID, nullptr);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: LoadSystemAbility004
+ * @tc.desc: test LoadSystemAbility004, LoadSystemAbility already existed callback object systemAbilityId!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbility004, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    SaProfile saProfile;
+    SAInfo saInfo;
+    sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
+    SystemAbilityManager::AbilityItem abilityItem;
+    saMgr->saProfileMap_[SAID] = saProfile;
+    saMgr->abilityMap_[SAID] = saInfo;
+    saMgr->startingAbilityMap_[SAID] = abilityItem;
+    abilityItem.callbackMap["local"].push_back(make_pair(callback, SAID));
+    int32_t res = saMgr->LoadSystemAbility(SAID, callback);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: LoadSystemAbility005
+ * @tc.desc: test LoadSystemAbility005, LoadSystemAbility systemAbilityId!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbility005, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    SaProfile saProfile;
+    SAInfo saInfo;
+    sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
+    SystemAbilityManager::AbilityItem abilityItem;
+    saMgr->saProfileMap_[SAID] = saProfile;
+    saMgr->abilityMap_[SAID] = saInfo;
+    saMgr->startingAbilityMap_[SAID] = abilityItem;
+    saMgr->abilityCallbackDeath_ = nullptr;
+    int32_t res = saMgr->LoadSystemAbility(SAID, callback);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: LoadSystemAbility006
+ * @tc.desc: test LoadSystemAbility006, LoadSystemAbility already existed callback!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbility006, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
+    string deviceId = "deviceId";
+    saMgr->remoteCallbacks_["1499_deviceId"].push_back(callback);
+    int32_t res = saMgr->LoadSystemAbility(SAID, deviceId, callback);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: LoadSystemAbility007
+ * @tc.desc: test LoadSystemAbility007, LoadSystemAbility AddDeathRecipient succeed!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbility007, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
+    string deviceId = "deviceId";
+    saMgr->remoteCallbacks_.clear();
+    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
+    int32_t res = saMgr->LoadSystemAbility(SAID, deviceId, callback);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: DoMakeRemoteBinder001
+ * @tc.desc: test DoMakeRemoteBinder, callback is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, DoMakeRemoteBinder001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityLoadCallbackMock> callback = nullptr;
+    string deviceId = "deviceId";
+    auto callingPid = IPCSkeleton::GetCallingPid();
+    auto callingUid = IPCSkeleton::GetCallingUid();
+    saMgr->dBinderService_ = nullptr;
+    saMgr->DoLoadRemoteSystemAbility(SAID, callingPid, callingUid, deviceId, callback);
+    sptr<DBinderServiceStub> res = saMgr->DoMakeRemoteBinder(SAID, callingPid, callingUid, deviceId);
+    EXPECT_EQ(res, nullptr);
+}
+
+/**
+ * @tc.name: DoMakeRemoteBinder002
+ * @tc.desc: test DoMakeRemoteBinder, callback is nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, DoMakeRemoteBinder002, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
+    string deviceId = "deviceId";
+    auto callingPid = IPCSkeleton::GetCallingPid();
+    auto callingUid = IPCSkeleton::GetCallingUid();
+    saMgr->dBinderService_ = nullptr;
+    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
+    saMgr->DoLoadRemoteSystemAbility(SAID, callingPid, callingUid, deviceId, callback);
+    sptr<DBinderServiceStub> res = saMgr->DoMakeRemoteBinder(SAID, callingPid, callingUid, deviceId);
+    EXPECT_EQ(res, nullptr);
+}
+
+/**
+ * @tc.name: TransformDeviceId001
+ * @tc.desc: test TransformDeviceId, return string
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, TransformDeviceId001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    string deviceId = "deviceId";
+    int32_t type = NODE_ID;
+    sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
+    saMgr->dBinderService_ = nullptr;
+    saMgr->NotifyRpcLoadCompleted(deviceId, SAID, testAbility);
+    saMgr->dBinderService_ = DBinderService::GetInstance();
+    saMgr->NotifyRpcLoadCompleted(deviceId, SAID, testAbility);
+    string res = saMgr->TransformDeviceId(deviceId, type, true);
+    EXPECT_EQ(res, "");
 }
 }
