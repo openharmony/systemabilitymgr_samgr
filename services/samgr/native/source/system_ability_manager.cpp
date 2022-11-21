@@ -104,7 +104,7 @@ void SystemAbilityManager::WatchDogInit()
     constexpr int CHECK_PERIOD = 10000;
     auto timeOutCallback = [this](const std::string& name, int waitState) {
         int32_t pid = getpid();
-        int32_t uid = getuid();
+        uint32_t uid = getuid();
         time_t curTime = time(nullptr);
         std::string sendMsg = std::string((ctime(&curTime) == nullptr) ? "" : ctime(&curTime)) + "\n";
         if (waitState == WAITTING) {
