@@ -104,6 +104,131 @@ HWTEST_F(SystemAbilityMgrProxyTest, AddSystemProcess002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CheckSystemAbility001
+ * @tc.desc: CheckSystemAbility, systemAbilityId: invalid!
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, CheckSystemAbility001, TestSize.Level1)
+{
+    DTEST_LOG << " CheckSystemAbility001 start " << std::endl;
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    EXPECT_NE(sm, nullptr);
+    sptr<IRemoteObject> ret = sm->CheckSystemAbility(TEST_ID_NORANGE_SAID);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: CheckSystemAbility002
+ * @tc.desc: CheckSystemAbility, CheckSystemAbility:systemAbilityId or deviceId is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, CheckSystemAbility002, TestSize.Level1)
+{
+    DTEST_LOG << " CheckSystemAbility002 start " << std::endl;
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    EXPECT_NE(sm, nullptr);
+    std::string deviceId = "";
+    sptr<IRemoteObject> ret = sm->CheckSystemAbility(TEST_ID_NORANGE_SAID, deviceId);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: CheckSystemAbility003
+ * @tc.desc: CheckSystemAbility, CheckSystemAbility:systemAbilityId or deviceId is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, CheckSystemAbility003, TestSize.Level1)
+{
+    DTEST_LOG << " CheckSystemAbility003 start " << std::endl;
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    EXPECT_NE(sm, nullptr);
+    std::string deviceId = "";
+    sptr<IRemoteObject> ret = sm->CheckSystemAbility(TEST_ID_VAILD, deviceId);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: CheckSystemAbility004
+ * @tc.desc: CheckSystemAbility, CheckSystemAbility:systemAbilityId  invalid!
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, CheckSystemAbility004, TestSize.Level1)
+{
+    DTEST_LOG << " CheckSystemAbility004 start " << std::endl;
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    EXPECT_NE(sm, nullptr);
+    bool isExist = true;
+    sptr<IRemoteObject> ret = sm->CheckSystemAbility(TEST_ID_VAILD, isExist);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: AddOnDemandSystemAbilityInfo001
+ * @tc.desc: AddOnDemandSystemAbilityInfo, AddOnDemandSystemAbilityInfo invalid params
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, AddOnDemandSystemAbilityInfo001, TestSize.Level1)
+{
+    DTEST_LOG << " AddOnDemandSystemAbilityInfo001 start " << std::endl;
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    EXPECT_NE(sm, nullptr);
+    std::u16string localAbilityManagerName = u"";
+    int32_t ret = sm->AddOnDemandSystemAbilityInfo(TEST_ID_NORANGE_SAID, localAbilityManagerName);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: AddOnDemandSystemAbilityInfo002
+ * @tc.desc: AddOnDemandSystemAbilityInfo, AddOnDemandSystemAbilityInfo invalid params
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, AddOnDemandSystemAbilityInfo002, TestSize.Level1)
+{
+    DTEST_LOG << " AddOnDemandSystemAbilityInfo002 start " << std::endl;
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    EXPECT_NE(sm, nullptr);
+    std::u16string localAbilityManagerName = u"";
+    int32_t ret = sm->AddOnDemandSystemAbilityInfo(TEST_ID_VAILD, localAbilityManagerName);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: SubscribeSystemAbility001
+ * @tc.desc: SubscribeSystemAbility, SubscribeSystemAbility systemAbilityId: or listener invalid!
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, SubscribeSystemAbility001, TestSize.Level1)
+{
+    DTEST_LOG << " SubscribeSystemAbility001 start " << std::endl;
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    EXPECT_NE(sm, nullptr);
+    int32_t ret = sm->SubscribeSystemAbility(TEST_ID_NORANGE_SAID, nullptr);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: SubscribeSystemAbility002
+ * @tc.desc: SubscribeSystemAbility, SubscribeSystemAbility systemAbilityId: or listener invalid!
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, SubscribeSystemAbility002, TestSize.Level1)
+{
+    DTEST_LOG << " SubscribeSystemAbility002 start " << std::endl;
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    EXPECT_NE(sm, nullptr);
+    int32_t ret = sm->SubscribeSystemAbility(TEST_ID_VAILD, nullptr);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
  * @tc.name: UnSubscribeSystemAbility001
  * @tc.desc: check UnSubscribeSystemAbility
  * @tc.type: FUNC
@@ -133,6 +258,98 @@ HWTEST_F(SystemAbilityMgrProxyTest, UnSubscribeSystemAbility002, TestSize.Level1
     sm->SubscribeSystemAbility(TEST_ID_VAILD, callback);
     int32_t res = sm->UnSubscribeSystemAbility(TEST_ID_INVAILD, callback);
     EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: UnSubscribeSystemAbility003
+ * @tc.desc: check UnSubscribeSystemAbility
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, UnSubscribeSystemAbility003, TestSize.Level1)
+{
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    EXPECT_NE(sm, nullptr);
+    sptr<SaStatusChangeMock> callback(new SaStatusChangeMock());
+    int32_t res = sm->UnSubscribeSystemAbility(TEST_ID_NORANGE_SAID, callback);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: UnSubscribeSystemAbility004
+ * @tc.desc: check UnSubscribeSystemAbility
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, UnSubscribeSystemAbility004, TestSize.Level1)
+{
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    EXPECT_NE(sm, nullptr);
+    int32_t res = sm->UnSubscribeSystemAbility(TEST_ID_VAILD, nullptr);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: LoadSystemAbility001
+ * @tc.desc: check LoadSystemAbility
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, LoadSystemAbility001, TestSize.Level1)
+{
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    EXPECT_NE(sm, nullptr);
+    std::string deviceId = "deviceId";
+    sptr<SystemAbilityLoadCallbackMock> callback(new SystemAbilityLoadCallbackMock());
+    int32_t res = sm->LoadSystemAbility(TEST_ID_NORANGE_SAID, deviceId, callback);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: LoadSystemAbility002
+ * @tc.desc: check LoadSystemAbility
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, LoadSystemAbility002, TestSize.Level1)
+{
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    EXPECT_NE(sm, nullptr);
+    std::string deviceId = "";
+    sptr<SystemAbilityLoadCallbackMock> callback(new SystemAbilityLoadCallbackMock());
+    int32_t res = sm->LoadSystemAbility(TEST_ID_VAILD, deviceId, callback);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: LoadSystemAbility003
+ * @tc.desc: check LoadSystemAbility
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, LoadSystemAbility003, TestSize.Level1)
+{
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    EXPECT_NE(sm, nullptr);
+    std::string deviceId = "deviceId";
+    int32_t res = sm->LoadSystemAbility(TEST_ID_VAILD, deviceId, nullptr);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: LoadSystemAbility004
+ * @tc.desc: check LoadSystemAbility
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, LoadSystemAbility004, TestSize.Level1)
+{
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    EXPECT_NE(sm, nullptr);
+    std::string deviceId = "deviceId";
+    sptr<SystemAbilityLoadCallbackMock> callback(new SystemAbilityLoadCallbackMock());
+    int32_t res = sm->LoadSystemAbility(TEST_ID_VAILD, deviceId, callback);
+    EXPECT_EQ(res, ERR_NONE);
 }
 
 /**
