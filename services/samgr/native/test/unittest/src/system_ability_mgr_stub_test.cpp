@@ -20,12 +20,12 @@
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "sam_mock_permission.h"
-#include "sa_status_change_mock.h"
 #include "string_ex.h"
 #include "system_ability_definition.h"
 #include "test_log.h"
 
 #define private public
+#include "sa_status_change_mock.h"
 #include "system_ability_manager.h"
 
 using namespace std;
@@ -1769,6 +1769,16 @@ HWTEST_F(SystemAbilityMgrStubTest, AddSystemProcess002, TestSize.Level1)
     int32_t res = saMgr->AddSystemProcess(procName, testAbility);
     sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
     saMgr->SendLoadedSystemAblityMsg(SAID, testAbility, callback);
+    u16string name = u"test";
+    string srcDeviceId = "srcDeviceId";
+    saMgr->startingProcessMap_.clear();
+    sptr<SystemAbilityLoadCallbackMock> callbackOne = new SystemAbilityLoadCallbackMock();
+    sptr<SystemAbilityLoadCallbackMock> callbackTwo = new SystemAbilityLoadCallbackMock();
+    SystemAbilityManager::AbilityItem abilityItem;
+    abilityItem.callbackMap[srcDeviceId].push_back(make_pair(callbackOne, SAID));
+    abilityItem.callbackMap[srcDeviceId].push_back(make_pair(callbackTwo, SAID));
+    saMgr->startingAbilityMap_[SAID] = abilityItem;
+    saMgr->CleanCallbackForLoadFailed(SAID, name, srcDeviceId, callbackTwo);
     EXPECT_EQ(res, ERR_INVALID_VALUE);
 }
 
@@ -1783,6 +1793,13 @@ HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemProcess001, TestSize.Level1)
     sptr<IRemoteObject> testAbility(nullptr);
     int32_t res = saMgr->RemoveSystemProcess(testAbility);
     saMgr->NotifySystemAbilityLoadFail(SAID, nullptr);
+    u16string name = u"test";
+    string srcDeviceId = "srcDeviceId";
+    saMgr->startingProcessMap_.clear();
+    sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
+    SystemAbilityManager::AbilityItem abilityItem;
+    saMgr->startingAbilityMap_[SAID] = abilityItem;
+    saMgr->CleanCallbackForLoadFailed(SAID, name, srcDeviceId, callback);
     EXPECT_EQ(res, ERR_INVALID_VALUE);
 }
 
@@ -1803,6 +1820,20 @@ HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemProcess002, TestSize.Level3)
     sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
     saMgr->NotifySystemAbilityLoadFail(SAID, callback);
     EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: RemoveSystemProcess003
+ * @tc.desc: test RemoveSystemProcess, return ERR_INVALID_VALUE
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemProcess003, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
+    saMgr->systemProcessMap_.clear();
+    int32_t res = saMgr->RemoveSystemProcess(testAbility);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
 }
 
 /**
@@ -2082,6 +2113,27 @@ HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbility007, TestSize.Level3)
 }
 
 /**
+ * @tc.name: LoadSystemAbility008
+ * @tc.desc: test LoadSystemAbility008, LoadSystemAbility already existed callback!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbility008, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    SaProfile saProfile;
+    SAInfo saInfo;
+    sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
+    sptr<SystemAbilityLoadCallbackMock> callbackTwo = new SystemAbilityLoadCallbackMock();
+    SystemAbilityManager::AbilityItem abilityItem;
+    abilityItem.callbackMap["local"].push_back(make_pair(callback, SAID));
+    abilityItem.callbackMap["local"].push_back(make_pair(callbackTwo, SAID));
+    saMgr->saProfileMap_[SAID] = saProfile;
+    saMgr->startingAbilityMap_[SAID] = abilityItem;
+    int32_t res = saMgr->LoadSystemAbility(SAID, callbackTwo);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
  * @tc.name: DoMakeRemoteBinder001
  * @tc.desc: test DoMakeRemoteBinder, callback is nullptr
  * @tc.type: FUNC
@@ -2135,5 +2187,175 @@ HWTEST_F(SystemAbilityMgrStubTest, TransformDeviceId001, TestSize.Level3)
     saMgr->NotifyRpcLoadCompleted(deviceId, SAID, testAbility);
     string res = saMgr->TransformDeviceId(deviceId, type, true);
     EXPECT_EQ(res, "");
+}
+
+/**
+ * @tc.name: OnRemoteRequest002
+ * @tc.desc: test SystemAbilityStatusChangeStub::OnRemoteRequest002
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, OnRemoteRequest002, TestSize.Level3)
+{
+    sptr<SaStatusChangeMock> testAbility(new SaStatusChangeMock());
+    EXPECT_TRUE(testAbility != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    int32_t code = 1;
+    int32_t result = testAbility->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(result, ERR_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: OnRemoteRequest003
+ * @tc.desc: test SystemAbilityStatusChangeStub::OnRemoteRequest003
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, OnRemoteRequest003, TestSize.Level3)
+{
+    std::u16string StatuschangeToken = u"OHOS.ISystemAbilityStatusChange";
+    uint32_t code = 3;
+    sptr<SaStatusChangeMock> testAbility(new SaStatusChangeMock());
+    EXPECT_TRUE(testAbility != nullptr);
+    MessageParcel data;
+    data.WriteInterfaceToken(StatuschangeToken);
+    MessageParcel reply;
+    MessageOption option;
+    int32_t result = testAbility->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(result, IPC_STUB_UNKNOW_TRANS_ERR);
+}
+
+/**
+ * @tc.name: OnRemoteRequest004
+ * @tc.desc: test SystemAbilityLoadCallbackStub::OnRemoteRequest004
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, OnRemoteRequest004, TestSize.Level3)
+{
+    int32_t code = 1;
+    sptr<SystemAbilityLoadCallbackMock> testAbility(new SystemAbilityLoadCallbackMock());
+    EXPECT_TRUE(testAbility != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    int32_t result = testAbility->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(result, ERR_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: OnRemoteRequest005
+ * @tc.desc: test SystemAbilityLoadCallbackStub::OnRemoteRequest005
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, OnRemoteRequest005, TestSize.Level3)
+{
+    std::u16string loadToken = u"OHOS.ISystemAbilityLoadCallback";
+    uint32_t code = 4;
+    sptr<SystemAbilityLoadCallbackMock> testAbility(new SystemAbilityLoadCallbackMock());
+    EXPECT_TRUE(testAbility != nullptr);
+    MessageParcel data;
+    data.WriteInterfaceToken(loadToken);
+    MessageParcel reply;
+    MessageOption option;
+    int32_t result = testAbility->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(result, IPC_STUB_UNKNOW_TRANS_ERR);
+}
+
+/**
+ * @tc.name: OnAddSystemAbilityInner001
+ * @tc.desc: test SystemAbilityStatusChangeStub::OnAddSystemAbilityInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, OnAddSystemAbilityInner001, TestSize.Level3)
+{
+    sptr<SaStatusChangeMock> testAbility(new SaStatusChangeMock());
+    EXPECT_TRUE(testAbility != nullptr);
+    MessageParcel data;
+    data.WriteInt32(INVALID_SAID);
+    MessageParcel reply;
+    int32_t result = testAbility->OnAddSystemAbilityInner(data, reply);
+    EXPECT_EQ(result, ERR_NULL_OBJECT);
+}
+
+/**
+ * @tc.name: OnRemoveSystemAbilityInner001
+ * @tc.desc: test SystemAbilityStatusChangeStub::OnRemoveSystemAbilityInner001
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, OnRemoveSystemAbilityInner001, TestSize.Level3)
+{
+    sptr<SaStatusChangeMock> testAbility(new SaStatusChangeMock());
+    EXPECT_TRUE(testAbility != nullptr);
+    MessageParcel data;
+    data.WriteInt32(INVALID_SAID);
+    MessageParcel reply;
+    int32_t result = testAbility->OnRemoveSystemAbilityInner(data, reply);
+    EXPECT_EQ(result, ERR_NULL_OBJECT);
+}
+
+/**
+ * @tc.name: OnRemoveSystemAbilityInner002
+ * @tc.desc: test SystemAbilityStatusChangeStub::OnRemoveSystemAbilityInner002
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, OnRemoveSystemAbilityInner002, TestSize.Level3)
+{
+    sptr<SaStatusChangeMock> testAbility(new SaStatusChangeMock());
+    EXPECT_TRUE(testAbility != nullptr);
+    MessageParcel data;
+    data.WriteInt32(SAID);
+    std::string deviceId = "";
+    data.WriteString(deviceId);
+    MessageParcel reply;
+    int32_t result = testAbility->OnRemoveSystemAbilityInner(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+}
+
+/**
+ * @tc.name: OnLoadSystemAbilitySuccessInner001
+ * @tc.desc: test SystemAbilityLoadCallbackStub::OnLoadSystemAbilitySuccessInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, OnLoadSystemAbilitySuccessInner001, TestSize.Level3)
+{
+    sptr<SystemAbilityLoadCallbackMock> testAbility(new SystemAbilityLoadCallbackMock());
+    EXPECT_TRUE(testAbility != nullptr);
+    MessageParcel data;
+    data.WriteInt32(INVALID_SAID);
+    MessageParcel reply;
+    int32_t result = testAbility-> OnLoadSystemAbilitySuccessInner(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: OnLoadSystemAbilityFailInner001
+ * @tc.desc: test SystemAbilityLoadCallbackStub::OnLoadSystemAbilityFailInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, OnLoadSystemAbilityFailInner001, TestSize.Level3)
+{
+    sptr<SystemAbilityLoadCallbackMock> testAbility(new SystemAbilityLoadCallbackMock());
+    EXPECT_TRUE(testAbility != nullptr);
+    MessageParcel data;
+    data.WriteInt32(INVALID_SAID);
+    MessageParcel reply;
+    int32_t result = testAbility->OnLoadSystemAbilityFailInner(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: OnLoadSACompleteForRemoteInner001
+ * @tc.desc: test SystemAbilityLoadCallbackStub::OnLoadSACompleteForRemoteInner001
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, OnLoadSACompleteForRemoteInner001, TestSize.Level3)
+{
+    sptr<SystemAbilityLoadCallbackMock> testAbility(new SystemAbilityLoadCallbackMock());
+    EXPECT_TRUE(testAbility != nullptr);
+    MessageParcel data;
+    data.WriteInt32(INVALID_SAID);
+    MessageParcel reply;
+    int32_t result = testAbility->OnLoadSACompleteForRemoteInner(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
 }
 }
