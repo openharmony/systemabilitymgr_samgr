@@ -167,6 +167,22 @@ HWTEST_F(SystemAbilityMgrProxyTest, CheckSystemAbility004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CheckSystemAbility005
+ * @tc.desc: CheckSystemAbility, CheckSystemAbility:systemAbilityId  invalid!
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, CheckSystemAbility005, TestSize.Level1)
+{
+    DTEST_LOG << " CheckSystemAbility005 start " << std::endl;
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    EXPECT_NE(sm, nullptr);
+    bool isExist = true;
+    sptr<IRemoteObject> ret = sm->CheckSystemAbility(TEST_ID_NORANGE_SAID, isExist);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
  * @tc.name: AddOnDemandSystemAbilityInfo001
  * @tc.desc: AddOnDemandSystemAbilityInfo, AddOnDemandSystemAbilityInfo invalid params
  * @tc.type: FUNC
