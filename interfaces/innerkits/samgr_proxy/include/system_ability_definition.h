@@ -319,6 +319,7 @@ static const std::map<int, std::string> saNameMap_ = {
     { PASTEBOARD_SERVICE_ID, "PasteboardService" },
     { SCREENLOCK_SERVICE_ID, "ScreenlockService" },
     { WALLPAPER_MANAGER_SERVICE_ID, "WallpaperManagerService" },
+    { PRINT_SERVICE_ID, "PrintFramework" },
     { TELEPHONY_SYS_ABILITY_ID, "Telephony" },
     { DCALL_SYS_ABILITY_ID, "DistributedCallMgr" },
     { TELEPHONY_CALL_MANAGER_SYS_ABILITY_ID, "TelephonyCallManager" },
