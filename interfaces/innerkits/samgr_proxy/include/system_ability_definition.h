@@ -262,6 +262,7 @@ enum {
     FILEMANAGEMENT_DISTRIBUTED_FILE_DAEMON_SA_ID     = 5201,
     FILEMANAGEMENT_DISTRIBUTED_FILE_SERVICE_SA_ID    = 5202,
     FILEMANAGEMENT_BACKUP_SERVICE_SA_ID              = 5203,
+    DEVICE_ATTEST_PROFILE_SA_ID                      = 5501,
     DISTRIBUTED_DEVICE_PROFILE_SA_ID                 = 6001,
     SUBSYS_ACE_SYS_ABILITY_ID_BEGIN                  = 7001,
     ARKUI_UI_APPEARANCE_SERVICE_ID                   = 7002,
@@ -412,6 +413,7 @@ static const std::map<int, std::string> saNameMap_ = {
     { AUDIO_POLICY_SERVICE_ID, "AudioPolicyService"},
     { DLP_CREDENTIAL_SERVICE_ID, "DlpCreService"},
     { QUICKFIX_ENGINE_SERVICE_ID, "QuickfixEngineService"},
+    { DEVICE_ATTEST_PROFILE_SA_ID, "devattest_service" },
 };
 } // namespace OHOS
 
