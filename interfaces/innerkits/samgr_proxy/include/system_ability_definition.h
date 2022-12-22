@@ -40,6 +40,7 @@ enum {
     SUBSYS_ACCOUNT_SYS_ABILITY_ID_BEGIN              = 200,
     SUBSYS_AI_SYS_ABILITY_ID_BEGIN                   = 300,
     SUBSYS_AI_DS_SYS_ABILITY_ID                      = 310,
+    AIDISPATCHER_ENGINE_SERVICE                      = 311,
     SUBSYS_APPEXECFWK_SYS_ABILITY_ID_BEGIN           = 400,
     BUNDLE_MGR_SERVICE_SYS_ABILITY_ID                = 401,
     DISTRIBUTED_BUNDLE_MGR_SERVICE_SYS_ABILITY_ID    = 402,
@@ -427,6 +428,7 @@ static const std::map<int, std::string> saNameMap_ = {
     { DLP_CREDENTIAL_SERVICE_ID, "DlpCreService"},
     { QUICKFIX_ENGINE_SERVICE_ID, "QuickfixEngineService"},
     { DEVICE_ATTEST_PROFILE_SA_ID, "devattest_service" },
+    { AIDISPATCHER_ENGINE_SERVICE, "AIDispatcherEngineService" },
 };
 } // namespace OHOS
 
