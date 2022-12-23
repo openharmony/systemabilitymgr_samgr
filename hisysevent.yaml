@@ -13,19 +13,19 @@
 
 domain: SAMGR
 
-SAMGR_GETSA_FREQUENCY:
-  __BASE: {type: STATISTIC, level: MINOR, tag: statistic, desc: get system ability times event}
+GETSA_FREQUENCY:
+  __BASE: {type: STATISTIC, level: MINOR, desc: get system ability times event}
   CALLER_PID: {type: UINT32, desc: caller pid}
   SAID: {type: UINT32, desc: system ability id}
   COUNT: {type: INT32, desc: the caller process get sa count}
 
-SAMGR_ADD_SYSTEMABILITY_FAIL:
-  __BASE: {type: FAULT, level: CRITICAL, tag: fault, desc: add system ability failed event}
+ADD_SYSTEMABILITY_FAIL:
+  __BASE: {type: FAULT, level: CRITICAL, desc: add system ability failed event}
   SAID: {type: INT32, desc: system ability id}
   FILE_NAME: {type: STRING, desc: file name}
 
-SAMGR_SERVICE_BLOCK:
-  __BASE: {type: FAULT, level: CRITICAL, tag: fault, desc: workhander watchdog block}
+SERVICE_BLOCK:
+  __BASE: {type: FAULT, level: CRITICAL, desc: workhander watchdog block}
   PID: {type: INT32, desc: caller pid}
   UID: {type: UINT32, desc: caller uid}
   MSG: {type: STRING, desc: time msg}
