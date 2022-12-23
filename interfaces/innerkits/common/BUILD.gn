@@ -17,6 +17,8 @@ config("all_config_samgr_common") {
   include_dirs = [
     "include",
     "//third_party/libxml2/include",
+    "//third_party/json/include",
+    "//third_party/json/single_include",
   ]
 }
 

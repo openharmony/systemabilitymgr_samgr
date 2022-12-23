@@ -23,6 +23,7 @@
 #include "sa_profiles.h"
 #include "libxml/parser.h"
 #include "libxml/xpath.h"
+#include "nlohmann/json.hpp"
 
 namespace OHOS {
 class ParseUtil {
@@ -48,8 +49,72 @@ private:
     bool ParseProcess(const xmlNodePtr& rootNode, std::u16string& processName);
     void ParseSAProp(const std::string& nodeName, const std::string& nodeContent, SaProfile& saProfile);
     bool CheckRootTag(const xmlNodePtr& rootNodePtr);
-    bool ParseTrustConfigInner(const xmlNodePtr& rootNodePtr, std::map<std::u16string, std::set<int32_t>>& values);
-    bool ParseSaId(const xmlNodePtr& rootNode, int32_t& saId);
+    bool ParseXmlFile(const std::string& realPath);
+    bool ParseJsonFile(const std::string& realPath);
+    bool ParseJsonObj(nlohmann::json& jsonObj, const std::string& jsonPath);
+    bool ParseSystemAbility(SaProfile& saProfile, nlohmann::json& systemAbilityJson);
+    void ParseOndemandTag(nlohmann::json& systemAbilityJson,
+        std::vector<OnDemandEvent>& condationVec, const std::string& jsonTag);
+    void GetOnDemandArrayFromJson(int32_t eventId, const nlohmann::json& obj,
+        const std::string& key, std::vector<OnDemandEvent>& out);
+
+    static inline void GetBoolFromJson(const nlohmann::json& obj, const std::string& key, bool& out)
+    {
+        if (obj.find(key.c_str()) != obj.end() && obj[key.c_str()].is_boolean()) {
+            obj[key.c_str()].get_to(out);
+        }
+    }
+
+    static inline void GetStringFromJson(const nlohmann::json& obj, const std::string& key, std::string& out)
+    {
+        if (obj.find(key.c_str()) != obj.end() && obj[key.c_str()].is_string()) {
+            obj[key.c_str()].get_to(out);
+        }
+    }
+
+    static inline void GetInt32FromJson(const nlohmann::json& obj, const std::string& key, int32_t& out)
+    {
+        if (obj.find(key.c_str()) != obj.end() && obj[key.c_str()].is_number_integer()) {
+            obj[key.c_str()].get_to(out);
+        }
+    }
+
+    static inline void GetStringArrayFromJson(const nlohmann::json& obj, const std::string& key,
+        std::vector<std::string>& out)
+    {
+        if (obj.find(key.c_str()) != obj.end() && obj[key.c_str()].is_array()) {
+            for (auto& item : obj[key.c_str()]) {
+                if (item.is_string()) {
+                    out.emplace_back(item.get<std::string>());
+                }
+            }
+        }
+    }
+
+    static inline void GetIntArrayFromJson(const nlohmann::json& obj, const std::string& key,
+        std::set<int32_t>& out)
+    {
+        if (obj.find(key.c_str()) != obj.end() && obj[key.c_str()].is_array()) {
+            for (auto& item : obj[key.c_str()]) {
+                if (item.is_number_integer()) {
+                    out.insert(item.get<int32_t>());
+                }
+            }
+        }
+    }
+
+    static inline void GetIntArrayFromJson(const nlohmann::json& obj, const std::string& key,
+        std::vector<int32_t>& out)
+    {
+        if (obj.find(key.c_str()) != obj.end() && obj[key.c_str()].is_array()) {
+            for (auto& item : obj[key.c_str()]) {
+                if (item.is_number_integer()) {
+                    out.emplace_back(item.get<int32_t>());
+                }
+            }
+        }
+    }
+
     std::string GetRealPath(const std::string& profilePath) const;
     std::list<SaProfile> saProfiles_;
     std::u16string procName_;

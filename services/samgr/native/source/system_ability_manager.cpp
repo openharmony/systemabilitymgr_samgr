@@ -90,6 +90,7 @@ void SystemAbilityManager::Init()
         auto runner = AppExecFwk::EventRunner::Create("workHandler");
         workHandler_ = make_shared<AppExecFwk::EventHandler>(runner);
     }
+    collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
     InitSaProfile();
     WatchDogInit();
     loadPool_ = std::make_unique<ThreadPool>("OndemandLoader");
@@ -152,13 +153,17 @@ void SystemAbilityManager::InitSaProfile()
         GetDirFiles(PREFIX, fileNames);
         auto parser = std::make_shared<ParseUtil>();
         for (const auto& file : fileNames) {
-            if (file.empty() || file.find(".xml") == std::string::npos
-                || file.find("_trust.xml") != std::string::npos) {
+            if (file.empty() ||
+                (file.find(".xml") == std::string::npos && file.find(".json") == std::string::npos)
+                || (file.find("_trust.xml") != std::string::npos && file.find("_trust.json") != std::string::npos)) {
                 continue;
             }
             parser->ParseSaProfiles(file);
         }
-        auto saInfos = parser->GetAllSaProfiles();
+        std::list<SaProfile> saInfos = parser->GetAllSaProfiles();
+        if (collectManager_ != nullptr) {
+            collectManager_->Init(saInfos);
+        }
         lock_guard<mutex> autoLock(saProfileMapLock_);
         for (const auto& saInfo : saInfos) {
             saProfileMap_[saInfo.saId] = saInfo;
@@ -234,6 +239,45 @@ bool SystemAbilityManager::GetSaProfile(int32_t saId, SaProfile& saProfile)
         saProfile = iter->second;
     }
     return true;
+}
+
+bool SystemAbilityManager::IsSameEvent(const OnDemandEvent& ev1, const OnDemandEvent& ev2)
+{
+    if (ev1.eventId == ev2.eventId && ev1.name == ev2.name && ev1.value == ev2.value) {
+        return true;
+    }
+    return false;
+}
+
+void SystemAbilityManager::ProcessOnDemandEvent(const OnDemandEvent& event,
+    const std::list<SaControlInfo>& saControlList)
+{
+    HILOGI("SystemAbilityManager::ProcessEvent eventId:%{public}d name:%{public}s value:%{public}s",
+        event.eventId, event.name.c_str(), event.value.c_str());
+    for (auto& saControl : saControlList) {
+        if (saControl.ondemandId == START_ON_DEMAND) {
+            // Is the process still in progress?
+            // Is there a previous task to start or kill the process?
+            if (GetSystemAbility(saControl.saId) != nullptr) {
+                return;
+            }
+            SaProfile saProfile;
+            bool ret = GetSaProfile(saControl.saId, saProfile);
+            if (!ret) {
+                HILOGE("ProcessEvent said:%{public}d not supported!", saControl.saId);
+                return;
+            }
+            HILOGI("ProcessEvent StartingSystemProcess process:%{public}s saId=%{public}d",
+                Str16ToStr8(saProfile.process).c_str(), saControl.saId);
+            StartDynamicSystemProcess(saProfile.process, saControl.saId);
+        } else if (saControl.ondemandId == STOP_ON_DEMAND) {
+            // Is the process still in progress?
+            // Is there a previous task to kill or start the process?
+            // Can all the sa be killed?
+        } else {
+            HILOGE("ondemandId error");
+        }
+    }
 }
 
 sptr<IRemoteObject> SystemAbilityManager::GetSystemAbility(int32_t systemAbilityId)
@@ -932,7 +976,7 @@ int32_t SystemAbilityManager::StartDynamicSystemProcess(const std::u16string& na
 {
     std::string strExtra = std::to_string(systemAbilityId);
     auto extraArgv = strExtra.c_str();
-    auto result = ServiceControlWithExtra(Str16ToStr8(name).c_str(), START, &extraArgv, 1);
+    auto result = ServiceControlWithExtra(Str16ToStr8(name).c_str(), ServiceAction::START, &extraArgv, 1);
     HILOGI("StartDynamicSystemProcess call ServiceControlWithExtra result:%{public}d!", result);
     return (result == 0) ? ERR_OK : ERR_INVALID_VALUE;
 }

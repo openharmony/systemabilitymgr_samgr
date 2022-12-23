@@ -219,7 +219,7 @@ HWTEST_F(ParseUtilTest, ParseTrustConfig001, TestSize.Level1)
      * @tc.expected: step1. return correct profile object when load correct config file
      */
     std::map<std::u16string, std::set<int32_t>> values;
-    bool ret = parser_->ParseTrustConfig(TEST_RESOURCE_PATH + "test_trust_one_sa.xml", values);
+    bool ret = parser_->ParseTrustConfig(TEST_RESOURCE_PATH + "test_trust_one_sa.json", values);
     ASSERT_TRUE(ret);
     /**
      * @tc.steps: step2. Check map values
@@ -245,7 +245,7 @@ HWTEST_F(ParseUtilTest, ParseTrustConfig002, TestSize.Level1)
      * @tc.expected: step1. return correct profile object when load correct config file
      */
     std::map<std::u16string, std::set<int32_t>> values;
-    bool ret = parser_->ParseTrustConfig(TEST_RESOURCE_PATH + "test_trust_muti_sa.xml", values);
+    bool ret = parser_->ParseTrustConfig(TEST_RESOURCE_PATH + "test_trust_muti_sa.json", values);
     ASSERT_TRUE(ret);
     /**
      * @tc.steps: step2. Check map values
@@ -271,7 +271,7 @@ HWTEST_F(ParseUtilTest, ParseTrustConfig003, TestSize.Level1)
      * @tc.expected: step1. return false when load invalid root file
      */
     std::map<std::u16string, std::set<int32_t>> values;
-    bool ret = parser_->ParseTrustConfig(TEST_RESOURCE_PATH + "invalid_root_trust.xml", values);
+    bool ret = parser_->ParseTrustConfig(TEST_RESOURCE_PATH + "invalid_root_trust.json", values);
     ASSERT_FALSE(ret);
 }
 
@@ -305,7 +305,7 @@ HWTEST_F(ParseUtilTest, ParseTrustConfig005, TestSize.Level1)
      * @tc.expected: step1. return correct profile object when load correct config file
      */
     std::map<std::u16string, std::set<int32_t>> values;
-    bool ret = parser_->ParseTrustConfig(TEST_RESOURCE_PATH + "invalid_element_trust.xml", values);
+    bool ret = parser_->ParseTrustConfig(TEST_RESOURCE_PATH + "invalid_element_trust.json", values);
     ASSERT_TRUE(ret);
     for (const auto& [process, saIds] : values) {
         EXPECT_EQ(Str16ToStr8(process), "test");
@@ -327,7 +327,7 @@ HWTEST_F(ParseUtilTest, ParseTrustConfig006, TestSize.Level1)
      * @tc.expected: step1. return correct profile object when load correct config file
      */
     std::map<std::u16string, std::set<int32_t>> values;
-    bool ret = parser_->ParseTrustConfig(TEST_RESOURCE_PATH + "invalid_muti_root_trust.xml", values);
+    bool ret = parser_->ParseTrustConfig(TEST_RESOURCE_PATH + "invalid_muti_root_trust.json", values);
     ASSERT_FALSE(ret);
 }
 
@@ -740,7 +740,7 @@ HWTEST_F(ParseUtilTest, ParseSAProp005, TestSize.Level3)
     string nodeContent = "TEST";
     SaProfile saProfile;
     parser_->ParseSAProp(nodeName, nodeContent, saProfile);
-    EXPECT_EQ(nodeContent, Str16ToStr8(saProfile.bootPhase));
+    EXPECT_EQ(nodeContent, saProfile.bootPhase);
 }
 
 /**
@@ -815,84 +815,6 @@ HWTEST_F(ParseUtilTest, ParseProcess002, TestSize.Level3)
     rootNode->content = nullptr;
     u16string process = u"tempprocess";
     bool res = parser_->ParseProcess(rootNode, process);
-    EXPECT_EQ(res, false);
-}
-
-/**
- * @tc.name: ParseTrustConfigInner001
- * @tc.desc: Verify if can ParseTrustConfigInner
- * @tc.type: FUNC
- * @tc.require: I5KMF7
- */
-HWTEST_F(ParseUtilTest, ParseTrustConfigInner001, TestSize.Level2)
-{
-    DTEST_LOG << " ParseTrustConfigInner001 " << std::endl;
-    xmlNode tempNode;
-    xmlNode* rootNode = &tempNode;
-    rootNode->xmlChildrenNode = nullptr;
-    std::map<std::u16string, std::set<int32_t>> values;
-    bool res = parser_->ParseTrustConfigInner(rootNode, values);
-    EXPECT_EQ(res, false);
-}
-
-/**
- * @tc.name: ParseTrustConfigInner002
- * @tc.desc: Verify if can ParseTrustConfigInner
- * @tc.type: FUNC
- * @tc.require: I5KMF7
- */
-HWTEST_F(ParseUtilTest, ParseTrustConfigInner002, TestSize.Level2)
-{
-    DTEST_LOG << " ParseTrustConfigInner002 " << std::endl;
-    xmlNode rootNode;
-    xmlNode* rootNodeptr = &rootNode;
-    xmlNode tempNode;
-    xmlNode* childrenNode = &tempNode;
-    const char* nodeName = "name";
-    childrenNode->name = reinterpret_cast<const xmlChar*>(nodeName);
-    childrenNode->type = XML_PI_NODE;
-    childrenNode->content = nullptr;
-    childrenNode->next = nullptr;
-    rootNodeptr->xmlChildrenNode = childrenNode;
-    std::map<std::u16string, std::set<int32_t>> values;
-    bool res = parser_->ParseTrustConfigInner(rootNodeptr, values);
-    EXPECT_EQ(res, false);
-}
-
-/**
- * @tc.name: ParseSaid001
- * @tc.desc: Verify if can ParseSaid
- * @tc.type: FUNC
- * @tc.require: I5KMF7
- */
-HWTEST_F(ParseUtilTest, ParseSaid001, TestSize.Level1)
-{
-    DTEST_LOG << " ParseSaid001 " << std::endl;
-    xmlNode rootNode;
-    xmlNode* rootNodeptr = &rootNode;
-    rootNodeptr->name = nullptr;
-    int32_t tempSaId = -1;
-    bool res = parser_->ParseSaId(rootNodeptr, tempSaId);
-    EXPECT_EQ(res, false);
-}
-
-/**
- * @tc.name: ParseSaid002
- * @tc.desc: Verify if can ParseSaid
- * @tc.type: FUNC
- * @tc.require: I5KMF7
- */
-HWTEST_F(ParseUtilTest, ParseSaid002, TestSize.Level1)
-{
-    DTEST_LOG << " ParseSaid002 " << std::endl;
-    xmlNode rootNode;
-    xmlNode* rootNodeptr = &rootNode;
-    const char* nodeName = "noNull";
-    rootNodeptr->name = reinterpret_cast<const xmlChar*>(nodeName);
-    rootNodeptr->type = XML_PI_NODE;
-    rootNodeptr->content = nullptr;
-    int32_t tempSaId = -1;
-    bool res = parser_->ParseSaId(rootNodeptr, tempSaId);
     EXPECT_EQ(res, false);
 }
 
