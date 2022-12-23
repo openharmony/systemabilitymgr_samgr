@@ -23,12 +23,12 @@
 namespace OHOS {
 using namespace OHOS::HiviewDFX;
 namespace {
-const std::string ADD_SYSTEMABILITY_FAIL = "SAMGR_ADD_SYSTEMABILITY_FAIL";
+const std::string ADD_SYSTEMABILITY_FAIL = "ADD_SYSTEMABILITY_FAIL";
 const std::string CALLER_PID = "CALLER_PID";
 const std::string SAID = "SAID";
 const std::string COUNT = "COUNT";
 const std::string FILE_NAME = "FILE_NAME";
-const std::string GETSA__TAG = "SAMGR_GETSA_FREQUENCY";
+const std::string GETSA__TAG = "GETSA_FREQUENCY";
 }
 
 void ReportAddSystemAbilityFailed(int32_t said, const std::string& filaName)

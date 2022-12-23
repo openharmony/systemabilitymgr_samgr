@@ -108,7 +108,7 @@ void SystemAbilityManager::WatchDogInit()
         time_t curTime = time(nullptr);
         std::string sendMsg = std::string((ctime(&curTime) == nullptr) ? "" : ctime(&curTime)) + "\n";
         if (waitState == WAITTING) {
-            WatchDogSendEvent(pid, uid, sendMsg, "SAMGR_SERVICE_BLOCK");
+            WatchDogSendEvent(pid, uid, sendMsg, "SERVICE_BLOCK");
         }
     };
     int result = HicollieHelper::AddThread("SamgrTask", workHandler_, timeOutCallback, CHECK_PERIOD);
