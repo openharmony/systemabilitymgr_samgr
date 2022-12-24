@@ -26,6 +26,7 @@
 #include "event_handler.h"
 #include "dbinder_service.h"
 #include "dbinder_service_stub.h"
+#include "device_status_collect_manager.h"
 #include "rpc_callback_imp.h"
 #include "thread_pool.h"
 #include "timer.h"
@@ -104,6 +105,7 @@ public:
         const sptr<IRemoteObject>& remoteObject);
     void StartDfxTimer();
     void DoLoadForPerf();
+    void ProcessOnDemandEvent(const OnDemandEvent& event, const std::list<SaControlInfo>& saControlList);
 private:
     enum class AbilityState {
         INIT,
@@ -166,6 +168,7 @@ private:
         const sptr<IRemoteObject>& remoteObject);
     void CleanCallbackForLoadFailed(int32_t systemAbilityId, const std::u16string& name,
         const std::string& srcDeviceId, const sptr<ISystemAbilityLoadCallback>& callback);
+    bool IsSameEvent(const OnDemandEvent& ev1, const OnDemandEvent& ev2);
 
     void UpdateSaFreMap(int32_t pid, int32_t saId);
     uint64_t GenerateFreKey(int32_t pid, int32_t saId) const;
@@ -183,6 +186,7 @@ private:
     sptr<IRemoteObject::DeathRecipient> abilityCallbackDeath_;
     sptr<IRemoteObject::DeathRecipient> remoteCallbackDeath_;
     sptr<DBinderService> dBinderService_;
+    sptr<DeviceStatusCollectManager> collectManager_;
     std::shared_ptr<RpcSystemAbilityCallback> rpcCallbackImp_;
 
     // must hold abilityMapLock_ never access other locks
@@ -205,7 +209,6 @@ private:
 
     std::map<int32_t, SaProfile> saProfileMap_;
     std::mutex saProfileMapLock_;
-
     std::mutex loadRemoteLock_;
     std::map<std::string, std::list<sptr<ISystemAbilityLoadCallback>>> remoteCallbacks_; // key : said_deviceId
 

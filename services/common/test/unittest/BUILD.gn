@@ -23,6 +23,8 @@ ohos_unittest("ParseUtilTest") {
   include_dirs = [
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/common/include",
     "//foundation/systemabilitymgr/samgr/utils/native/include",
+    "//third_party/json/include",
+    "//third_party/json/single_include",
   ]
 
   sources = [

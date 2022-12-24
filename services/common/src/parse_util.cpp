@@ -35,21 +35,27 @@ namespace OHOS {
 using std::string;
 
 namespace {
-const auto XML_TAG_PROFILE = "profile";
-const auto XML_TAG_INFO = "info";
-const auto XML_TAG_SYSTEM_ABILITY = "systemability";
-const auto XML_TAG_PROCESS = "process";
-const auto XML_TAG_LIB_PATH = "libpath";
-const auto XML_TAG_NAME = "name";
-const auto XML_TAG_DEPEND = "depend";
-const auto XML_TAG_DEPEND_TIMEOUT = "depend-time-out";
-const auto XML_TAG_RUN_ON_CREATE = "run-on-create";
-const auto XML_TAG_DISTRIBUTED = "distributed";
-const auto XML_TAG_DUMP_LEVEL = "dump-level";
-const auto XML_TAG_CAPABILITY = "capability";
-const auto XML_TAG_PERMISSION = "permission";
-const auto XML_TAG_BOOT_PHASE = "bootphase";
-const auto XML_TAG_SAID = "said";
+constexpr const char* SA_TAG_PROFILE = "profile";
+constexpr const char* SA_TAG_INFO = "info";
+constexpr const char* SA_TAG_SYSTEM_ABILITY = "systemability";
+constexpr const char* SA_TAG_PROCESS = "process";
+constexpr const char* SA_TAG_LIB_PATH = "libpath";
+constexpr const char* SA_TAG_NAME = "name";
+constexpr const char* SA_TAG_DEPEND = "depend";
+constexpr const char* SA_TAG_DEPEND_TIMEOUT = "depend-time-out";
+constexpr const char* SA_TAG_RUN_ON_CREATE = "run-on-create";
+constexpr const char* SA_TAG_DISTRIBUTED = "distributed";
+constexpr const char* SA_TAG_DUMP_LEVEL = "dump-level";
+constexpr const char* SA_TAG_CAPABILITY = "capability";
+constexpr const char* SA_TAG_PERMISSION = "permission";
+constexpr const char* SA_TAG_BOOT_PHASE = "bootphase";
+constexpr const char* SA_TAG_SAID = "said";
+constexpr const char* SA_TAG_START_ON_DEMAND = "start-on-demand";
+constexpr const char* SA_TAG_STOP_ON_DEMAND = "stop-on-demand";
+constexpr const char* SA_TAG_DEVICE_ON_LINE = "deviceonline";
+constexpr const char* SA_TAG_SETTING_SWITCH = "settingswitch";
+constexpr const char* SA_TAG_COMMON_EVENT = "commonevent";
+constexpr const char* SA_TAG_PARAM = "param";
 }
 
 ParseUtil::~ParseUtil()
@@ -104,21 +110,21 @@ void ParseUtil::OpenSo()
 void ParseUtil::OpenSo(SaProfile& saProfile)
 {
     if (saProfile.handle == nullptr) {
-        std::string dlopenTag = ToString(saProfile.saId) + "_DLOPEN";
+        string dlopenTag = ToString(saProfile.saId) + "_DLOPEN";
         HITRACE_METER_NAME(HITRACE_TAG_SAMGR, dlopenTag);
         int64_t begin = GetTickCount();
-        DlHandle handle = dlopen(Str16ToStr8(saProfile.libPath).c_str(), RTLD_NOW);
+        DlHandle handle = dlopen(saProfile.libPath.c_str(), RTLD_LAZY);
         HILOGI("[PerformanceTest] SA:%{public}d OpenSo spend %{public}" PRId64 " ms",
             saProfile.saId, GetTickCount() - begin);
         if (handle == nullptr) {
             std::vector<string> libPathVec;
             string fileName = "";
-            SplitStr(Str16ToStr8(saProfile.libPath), "/", libPathVec);
+            SplitStr(saProfile.libPath, "/", libPathVec);
             if ((libPathVec.size() > 0)) {
                 fileName = libPathVec[libPathVec.size() - 1];
             }
             ReportAddSystemAbilityFailed(saProfile.saId, fileName);
-            HILOGE("dlopen %{public}s failed with errno:%s!", fileName.c_str(), dlerror());
+            HILOGE("dlopen %{public}s failed with errno:%{public}s!", fileName.c_str(), dlerror());
             return;
         }
         saProfile.handle = handle;
@@ -162,27 +168,29 @@ void ParseUtil::RemoveSaProfile(int32_t saId)
 
 void ParseUtil::ParseSAProp(const string& nodeName, const string& nodeContent, SaProfile& saProfile)
 {
-    if (nodeName == XML_TAG_NAME) {
+    if (nodeName == SA_TAG_NAME) {
         StrToInt(nodeContent.c_str(), saProfile.saId);
-    } else if (nodeName == XML_TAG_LIB_PATH) {
-        saProfile.libPath = Str8ToStr16(nodeContent);
-    } else if (nodeName == XML_TAG_DEPEND) {
-        saProfile.dependSa.emplace_back(Str8ToStr16(nodeContent));
-    } else if (nodeName == XML_TAG_DEPEND_TIMEOUT) {
+    } else if (nodeName == SA_TAG_LIB_PATH) {
+        saProfile.libPath = nodeContent;
+    } else if (nodeName == SA_TAG_DEPEND) {
+        int32_t saId = 0;
+        StrToInt(nodeContent.c_str(), saId);
+        saProfile.dependSa.emplace_back(saId);
+    } else if (nodeName == SA_TAG_DEPEND_TIMEOUT) {
         StrToInt(nodeContent.c_str(), saProfile.dependTimeout);
-    } else if (nodeName == XML_TAG_RUN_ON_CREATE) {
+    } else if (nodeName == SA_TAG_RUN_ON_CREATE) {
         std::istringstream(nodeContent) >> std::boolalpha >> saProfile.runOnCreate;
-    } else if (nodeName == XML_TAG_DISTRIBUTED) {
+    } else if (nodeName == SA_TAG_DISTRIBUTED) {
         std::istringstream(nodeContent) >> std::boolalpha >> saProfile.distributed;
-    } else if (nodeName == XML_TAG_DUMP_LEVEL) {
+    } else if (nodeName == SA_TAG_DUMP_LEVEL) {
         std::stringstream ss(nodeContent);
         ss >> saProfile.dumpLevel;
-    } else if (nodeName == XML_TAG_CAPABILITY) {
+    } else if (nodeName == SA_TAG_CAPABILITY) {
         saProfile.capability = Str8ToStr16(nodeContent);
-    } else if (nodeName == XML_TAG_PERMISSION) {
+    } else if (nodeName == SA_TAG_PERMISSION) {
         saProfile.permission = Str8ToStr16(nodeContent);
-    } else if (nodeName == XML_TAG_BOOT_PHASE) {
-        saProfile.bootPhase = Str8ToStr16(nodeContent);
+    } else if (nodeName == SA_TAG_BOOT_PHASE) {
+        saProfile.bootPhase = nodeContent;
     }
 }
 
@@ -228,12 +236,35 @@ bool ParseUtil::ParseProcess(const xmlNodePtr& rootNode, std::u16string& process
 
 bool ParseUtil::ParseSaProfiles(const string& profilePath)
 {
-    HILOGD("xmlFile:%{private}s", profilePath.c_str());
-    std::string realPath = GetRealPath(profilePath);
+    HILOGD("profilePath:%{private}s", profilePath.c_str());
+    string realPath = GetRealPath(profilePath);
     if (!CheckPathExist(realPath.c_str())) {
         HILOGE("bad profile path!");
         return false;
     }
+
+    if (realPath.find(".xml") != string::npos) {
+        return ParseXmlFile(realPath);
+    } else if (realPath.find(".json") != string::npos) {
+        return ParseJsonFile(realPath);
+    } else {
+        HILOGE("bad profile!");
+        return false;
+    }
+}
+
+bool ParseUtil::CheckRootTag(const xmlNodePtr& rootNodePtr)
+{
+    if (rootNodePtr == nullptr || rootNodePtr->name == nullptr ||
+        (xmlStrcmp(rootNodePtr->name, reinterpret_cast<const xmlChar*>(SA_TAG_PROFILE)) != 0 &&
+        xmlStrcmp(rootNodePtr->name, reinterpret_cast<const xmlChar*>(SA_TAG_INFO)) != 0)) {
+        return false;
+    }
+    return true;
+}
+
+bool ParseUtil::ParseXmlFile(const string& realPath)
+{
     std::unique_ptr<xmlDoc, decltype(&xmlFreeDoc)> ptrDoc(
         xmlReadFile(realPath.c_str(), nullptr, XML_PARSE_NOBLANKS), xmlFreeDoc);
 
@@ -256,13 +287,13 @@ bool ParseUtil::ParseSaProfiles(const string& profilePath)
 
         string nodeName(reinterpret_cast<const char*>(currNodePtr->name));
         HILOGD("profile nodeName:%{public}s", nodeName.c_str());
-        if (nodeName == XML_TAG_PROCESS && process.empty()) {
+        if (nodeName == SA_TAG_PROCESS && process.empty()) {
             if (!ParseProcess(currNodePtr, process)) {
                 HILOGW("profile %{public}s wrong tag!", currNodePtr->name);
                 return false;
             }
         }
-        if (nodeName == XML_TAG_SYSTEM_ABILITY) {
+        if (nodeName == SA_TAG_SYSTEM_ABILITY) {
             if (!ParseSystemAbility(*currNodePtr, process)) {
                 HILOGW("profile %{public}s wrong tag!", currNodePtr->name);
                 return false;
@@ -274,19 +305,123 @@ bool ParseUtil::ParseSaProfiles(const string& profilePath)
     return isParseCorrect;
 }
 
+bool ParseUtil::ParseJsonFile(const string& realPath)
+{
+    nlohmann::json profileJson;
+    bool result = ParseJsonObj(profileJson, realPath);
+    if (!result) {
+        HILOGE("json file parse error!");
+        return false;
+    }
+    HILOGI("profileJson:%{private}s", profileJson.dump().c_str());
+    string process;
+    GetStringFromJson(profileJson, SA_TAG_PROCESS, process);
+    if (process.empty()) {
+        HILOGE("profile format error: no process tag");
+        return false;
+    }
+    procName_ = Str8ToStr16(process);
+    if (profileJson.find(SA_TAG_SYSTEM_ABILITY) == profileJson.end()) {
+        HILOGE("system ability parse error!");
+        return false;
+    }
+    nlohmann::json& systemAbilityJson = profileJson.at(SA_TAG_SYSTEM_ABILITY);
+    HILOGI("systemAbilityJson:%{private}s", systemAbilityJson.dump().c_str());
+    if (!systemAbilityJson.is_array()) {
+        HILOGE("system ability is not array!");
+        return false;
+    }
+    size_t size = systemAbilityJson.size();
+    for (size_t i = 0; i < size; i++) {
+        SaProfile saProfile = { procName_ };
+        if (!ParseSystemAbility(saProfile, systemAbilityJson[i])) {
+            continue;
+        }
+        saProfiles_.emplace_back(saProfile);
+    }
+    return true;
+}
+
+bool ParseUtil::ParseSystemAbility(SaProfile& saProfile, nlohmann::json& systemAbilityJson)
+{
+    HILOGD("ParseSystemAbility begin");
+    GetInt32FromJson(systemAbilityJson, SA_TAG_NAME, saProfile.saId);
+    if (saProfile.saId == 0) {
+        HILOGE("profile format error: no name tag");
+        return false;
+    }
+    GetStringFromJson(systemAbilityJson, SA_TAG_LIB_PATH, saProfile.libPath);
+    if (saProfile.libPath.empty()) {
+        HILOGE("profile format error: no libPath tag");
+        return false;
+    }
+    GetBoolFromJson(systemAbilityJson, SA_TAG_RUN_ON_CREATE, saProfile.runOnCreate);
+    GetBoolFromJson(systemAbilityJson, SA_TAG_DISTRIBUTED, saProfile.distributed);
+    GetIntArrayFromJson(systemAbilityJson, SA_TAG_DEPEND, saProfile.dependSa);
+    GetInt32FromJson(systemAbilityJson, SA_TAG_DEPEND_TIMEOUT, saProfile.dependTimeout);
+    GetInt32FromJson(systemAbilityJson, SA_TAG_DUMP_LEVEL, saProfile.dumpLevel);
+    string capability;
+    GetStringFromJson(systemAbilityJson, SA_TAG_CAPABILITY, capability);
+    saProfile.capability = Str8ToStr16(capability);
+    string permission;
+    GetStringFromJson(systemAbilityJson, SA_TAG_PERMISSION, permission);
+    saProfile.permission = Str8ToStr16(permission);
+    GetStringFromJson(systemAbilityJson, SA_TAG_BOOT_PHASE, saProfile.bootPhase);
+    // parse start-on-demand tag
+    ParseOndemandTag(systemAbilityJson, saProfile.startOnDemand, SA_TAG_START_ON_DEMAND);
+    // parse stop-on-demand tag
+    ParseOndemandTag(systemAbilityJson, saProfile.stopOnDemand, SA_TAG_STOP_ON_DEMAND);
+    HILOGD("ParseSystemAbility end");
+    return true;
+}
+
+void ParseUtil::ParseOndemandTag(nlohmann::json& systemAbilityJson,
+    std::vector<OnDemandEvent>& condationVec, const std::string& jsonTag)
+{
+    if (systemAbilityJson.find(jsonTag) == systemAbilityJson.end()) {
+        return;
+    }
+    nlohmann::json& onDemandJson = systemAbilityJson.at(jsonTag);
+    if (!onDemandJson.is_object()) {
+        HILOGE("parse ondemand tag error");
+        return;
+    }
+    GetOnDemandArrayFromJson(DEVICE_ONLINE, onDemandJson, SA_TAG_DEVICE_ON_LINE, condationVec);
+    GetOnDemandArrayFromJson(SETTING_SWITCH, onDemandJson, SA_TAG_SETTING_SWITCH, condationVec);
+    GetOnDemandArrayFromJson(COMMON_EVENT, onDemandJson, SA_TAG_COMMON_EVENT, condationVec);
+    GetOnDemandArrayFromJson(PARAM, onDemandJson, SA_TAG_PARAM, condationVec);
+}
+
+void ParseUtil::GetOnDemandArrayFromJson(int32_t eventId, const nlohmann::json& obj,
+    const std::string& key, std::vector<OnDemandEvent>& out)
+{
+    if (obj.find(key.c_str()) != obj.end() && obj[key.c_str()].is_array()) {
+        for (auto& item : obj[key.c_str()]) {
+            std::string name;
+            GetStringFromJson(item, "name", name);
+            std::string value;
+            GetStringFromJson(item, "value", value);
+            if (!name.empty()) {
+                OnDemandEvent event = {eventId, name, value};
+                out.emplace_back(event);
+            }
+        }
+    }
+}
+
 std::u16string ParseUtil::GetProcessName() const
 {
     return procName_;
 }
 
-std::string ParseUtil::GetRealPath(const string& profilePath) const
+string ParseUtil::GetRealPath(const string& profilePath) const
 {
     char path[PATH_MAX] = {'\0'};
     if (realpath(profilePath.c_str(), path) == nullptr) {
         HILOGE("get real path fail");
         return "";
     }
-    std::string realPath(path);
+    string realPath(path);
     return realPath;
 }
 
@@ -300,84 +435,49 @@ bool ParseUtil::ParseTrustConfig(const string& profilePath,
     std::map<std::u16string, std::set<int32_t>>& values)
 {
     HILOGD("config path:%{private}s", profilePath.c_str());
-    std::string realPath = GetRealPath(profilePath);
+    string realPath = GetRealPath(profilePath);
     if (!CheckPathExist(realPath.c_str())) {
         HILOGE("bad profile path!");
         return false;
     }
-    std::unique_ptr<xmlDoc, decltype(&xmlFreeDoc)> docPtr(
-        xmlReadFile(realPath.c_str(), nullptr, XML_PARSE_NOBLANKS), xmlFreeDoc);
-    if (docPtr == nullptr) {
-        HILOGE("ParseTrustConfig xmlReadFile error!");
+    nlohmann::json trustSaIdJson;
+    bool result = ParseJsonObj(trustSaIdJson, realPath);
+    if (!result) {
+        HILOGE("trust json file parse error!");
         return false;
     }
-    xmlNodePtr rootNodePtr = xmlDocGetRootElement(docPtr.get());
-    if (!CheckRootTag(rootNodePtr)) {
-        HILOGW("ParseTrustConfig wrong root element tag!");
+    string process;
+    GetStringFromJson(trustSaIdJson, SA_TAG_PROCESS, process);
+    if (process.empty()) {
         return false;
     }
-
-    return ParseTrustConfigInner(rootNodePtr, values);
-}
-
-bool ParseUtil::CheckRootTag(const xmlNodePtr& rootNodePtr)
-{
-    if (rootNodePtr == nullptr || rootNodePtr->name == nullptr ||
-        (xmlStrcmp(rootNodePtr->name, reinterpret_cast<const xmlChar*>(XML_TAG_PROFILE)) != 0 &&
-        xmlStrcmp(rootNodePtr->name, reinterpret_cast<const xmlChar*>(XML_TAG_INFO)) != 0)) {
-        return false;
-    }
+    auto& saIds = values[Str8ToStr16(process)];
+    GetIntArrayFromJson(trustSaIdJson, SA_TAG_SAID, saIds);
+    HILOGI("ParseTrustConfig realPath:%s, saIds size = %{public}zu", realPath.c_str(), saIds.size());
     return true;
 }
 
-bool ParseUtil::ParseTrustConfigInner(const xmlNodePtr& rootNodePtr,
-    std::map<std::u16string, std::set<int32_t>>& values)
+bool ParseUtil::ParseJsonObj(nlohmann::json& jsonObj, const string& jsonPath)
 {
-    xmlNodePtr currNodePtr = rootNodePtr->xmlChildrenNode;
-    if (currNodePtr == nullptr) {
+    std::ifstream jsonFileStream;
+    jsonFileStream.open(jsonPath.c_str(), std::ios::in);
+    if (!jsonFileStream.is_open()) {
+        HILOGE("open json file error!!");
         return false;
     }
-    std::u16string processName = u"";
-    for (; currNodePtr != nullptr; currNodePtr = currNodePtr->next) {
-        if (currNodePtr->name == nullptr || currNodePtr->type == XML_COMMENT_NODE) {
-            continue;
-        }
+    std::ostringstream buffer;
+    char ch;
+    while (buffer && jsonFileStream.get(ch)) {
+        buffer.put(ch);
+    }
+    jsonFileStream.close();
 
-        string nodeName(reinterpret_cast<const char*>(currNodePtr->name));
-        HILOGD("ParseTrustConfigInner profile nodeName:%{public}s", nodeName.c_str());
-
-        if (nodeName == XML_TAG_NAME && processName.empty()) {
-            // parse process name
-            if (!ParseProcess(currNodePtr, processName)) {
-                HILOGE("ParseTrustConfigInner wrong name tag!");
-                return false;
-            }
-        } else if (nodeName == XML_TAG_SAID) {
-            // parse said
-            int32_t saId = -1;
-            if (!ParseSaId(currNodePtr, saId)) {
-                HILOGE("ParseTrustConfigInner wrong said tag!");
-                continue;
-            }
-            auto& saIds = values[processName];
-            saIds.emplace(saId);
-        }
+    string jsonStr = buffer.str();
+    jsonObj = nlohmann::json::parse(jsonStr, nullptr, false);
+    if (jsonObj.is_discarded()) {
+        HILOGE("parse json obj error!!");
+        return false;
     }
     return true;
-}
-
-bool ParseUtil::ParseSaId(const xmlNodePtr& rootNode, int32_t& saId)
-{
-    if (rootNode->name == nullptr || rootNode->type == XML_COMMENT_NODE) {
-        return false;
-    }
-    auto contentPtr = xmlNodeGetContent(rootNode);
-    if (contentPtr == nullptr) {
-        return false;
-    }
-    string nodeContent(reinterpret_cast<char*>(contentPtr));
-    bool ret = StrToInt(nodeContent.c_str(), saId);
-    xmlFree(contentPtr);
-    return ret;
 }
 } // namespace OHOS

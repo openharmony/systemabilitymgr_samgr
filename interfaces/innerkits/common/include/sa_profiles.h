@@ -22,18 +22,49 @@
 namespace OHOS {
 using DlHandle = void*;
 
+enum {
+    DEVICE_ONLINE = 1,
+    SETTING_SWITCH,
+    PARAM,
+    COMMON_EVENT,
+};
+
+enum {
+    START_ON_DEMAND = 1,
+    STOP_ON_DEMAND,
+};
+
+enum {
+    START = 1,
+    KILL,
+    FREEZE,
+};
+
+struct OnDemandEvent {
+    int32_t eventId;
+    std::string name;
+    std::string value;
+};
+
+struct SaControlInfo {
+    int32_t ondemandId;
+    int32_t saId;
+};
+
 struct SaProfile {
     std::u16string process;
     int32_t saId = 0;
-    std::u16string libPath;
-    std::vector<std::u16string> dependSa;
+    std::string libPath;
+    std::vector<int32_t> dependSa;
     int32_t dependTimeout = 0;
     bool runOnCreate = false;
     bool distributed = false;
     int32_t dumpLevel = 0;
     std::u16string capability;
     std::u16string permission;
-    std::u16string bootPhase;
+    std::string bootPhase;
+    std::vector<OnDemandEvent> startOnDemand;
+    std::vector<OnDemandEvent> stopOnDemand;
     DlHandle handle = nullptr;
 };
 }
