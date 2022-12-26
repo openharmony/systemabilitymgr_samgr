@@ -12,8 +12,13 @@
 # limitations under the License.
 declare_args() {
   hicollie_able = true
+  support_device_manager = false
   if (defined(global_parts_info) &&
       !defined(global_parts_info.hiviewdfx_hicollie_native)) {
     hicollie_able = false
+  }
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.distributedhardware_device_manager)) {
+    support_device_manager = true
   }
 }

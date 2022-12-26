@@ -42,7 +42,6 @@ ohos_executable("samgr") {
     "//foundation/systemabilitymgr/samgr/services/dfx/source/hisysevent_adapter.cpp",
     "//foundation/systemabilitymgr/samgr/services/lsamgr/src/local_ability_manager_proxy.cpp",
     "//foundation/systemabilitymgr/samgr/services/samgr/native/source/ability_death_recipient.cpp",
-    "//foundation/systemabilitymgr/samgr/services/samgr/native/source/collect/device_networking_collect.cpp",
     "//foundation/systemabilitymgr/samgr/services/samgr/native/source/collect/device_status_collect_manager.cpp",
     "//foundation/systemabilitymgr/samgr/services/samgr/native/source/collect/icollect_plugin.cpp",
     "//foundation/systemabilitymgr/samgr/services/samgr/native/source/main.cpp",
@@ -67,7 +66,6 @@ ohos_executable("samgr") {
     external_deps = [
       "access_token:libaccesstoken_sdk",
       "c_utils:utils",
-      "device_manager:devicemanagersdk",
       "eventhandler:libeventhandler",
       "hisysevent_native:libhisysevent",
       "hitrace_native:hitrace_meter",
@@ -87,6 +85,13 @@ ohos_executable("samgr") {
       external_deps += [ "hicollie_native:libhicollie" ]
       defines += [ "HICOLLIE_ENABLE" ]
     }
+
+    if (support_device_manager) {
+      sources += [ "//foundation/systemabilitymgr/samgr/services/samgr/native/source/collect/device_networking_collect.cpp" ]
+      external_deps += [ "device_manager:devicemanagersdk" ]
+      defines += [ "SUPPORT_DEVICE_MANAGER" ]
+    }
+
     public_deps = [ "//third_party/libxml2:libxml2" ]
     part_name = "samgr"
   }
