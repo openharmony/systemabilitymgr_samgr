@@ -16,7 +16,9 @@
 #include "device_status_collect_manager.h"
 
 #include "datetime_ex.h"
+#ifdef SUPPORT_DEVICE_MANAGER
 #include "device_networking_collect.h"
+#endif
 #include "sam_log.h"
 #include "system_ability_manager.h"
 
@@ -27,8 +29,10 @@ void DeviceStatusCollectManager::Init(const std::list<SaProfile>& saProfiles)
     FilterOnDemandSaProfiles(saProfiles);
     auto runner = AppExecFwk::EventRunner::Create("collect");
     collectHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+#ifdef SUPPORT_DEVICE_MANAGER
     sptr<ICollectPlugin> networkingCollect = new DeviceNetworkingCollect(this);
     collectPluginMap_[DEVICE_ONLINE] = networkingCollect;
+#endif
     StartCollect();
     HILOGI("DeviceStatusCollectManager Init end");
 }
