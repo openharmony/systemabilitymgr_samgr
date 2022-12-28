@@ -48,7 +48,6 @@ ohos_fuzztest("SystemAbilityManagerFuzzTest") {
   ]
   sources = [
     "${samgr_dir}/utils/native/source/tools.cpp",
-    "${samgr_services_dir}/source/collect/device_networking_collect.cpp",
     "${samgr_services_dir}/source/collect/device_status_collect_manager.cpp",
     "${samgr_services_dir}/source/collect/icollect_plugin.cpp",
     "${samgr_services_dir}/source/system_ability_manager.cpp",
@@ -67,7 +66,6 @@ ohos_fuzztest("SystemAbilityManagerFuzzTest") {
     "access_token:libnativetoken",
     "access_token:libtoken_setproc",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
     "hisysevent_native:libhisysevent",
     "hitrace_native:hitrace_meter",
@@ -79,9 +77,17 @@ ohos_fuzztest("SystemAbilityManagerFuzzTest") {
     "samgr:samgr_common",
     "samgr:samgr_proxy",
   ]
+  defines = []
   if (hicollie_able) {
     external_deps += [ "hicollie_native:libhicollie" ]
-    defines = [ "HICOLLIE_ENABLE" ]
+    defines += [ "HICOLLIE_ENABLE" ]
+  }
+
+  if (support_device_manager) {
+    sources +=
+        [ "${samgr_services_dir}/source/collect/device_networking_collect.cpp" ]
+    external_deps += [ "device_manager:devicemanagersdk" ]
+    defines += [ "SUPPORT_DEVICE_MANAGER" ]
   }
   public_deps = [ "//third_party/libxml2:libxml2" ]
 }
