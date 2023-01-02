@@ -1,0 +1,35 @@
+{
+    "process": "distributedsched",
+    "systemability": [
+        {
+            "name": 1401,
+            "libpath": "libdistributed_ability_manager_svr.z.so",
+            "run-on-create": true,
+            "distributed": true,
+            "dump-level": 1,
+            "start-on-demand": {
+                "deviceonline": [
+                    {
+                        "name": "deviceonline",
+                        "value": "on"
+                    }
+                ]
+            },
+            "stop-on-demand": {
+                "deviceonline": [
+                    {
+                        "name": "deviceonline",
+                        "value": "off"
+                    }
+                ]
+            }
+        },
+        {
+            "name": 6001,
+            "libpath": "libdistributed_device_profile.z.so",
+            "run-on-create": true,
+            "distributed": false,
+            "dump-level": 1
+        }
+    ]
+}

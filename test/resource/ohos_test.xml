@@ -31,6 +31,13 @@
             <option name="push" value="profile/empty_process.xml -> /data/test/resource/samgr/profile/" src="res"/>
             <option name="push" value="profile/empty_systemability.xml -> /data/test/resource/samgr/profile/" src="res"/>
             <option name="push" value="profile/empty_libpath.xml -> /data/test/resource/samgr/profile/" src="res"/>
+            <option name="push" value="profile/sa_profile.json -> /data/test/resource/samgr/profile/" src="res"/>
+            <option name="push" value="profile/sa_profile_error_bootphase.json -> /data/test/resource/samgr/profile/" src="res"/>
+            <option name="push" value="profile/sa_profile_error_ondemanad_tag.json -> /data/test/resource/samgr/profile/" src="res"/>
+            <option name="push" value="profile/sa_profile_error_said.json -> /data/test/resource/samgr/profile/" src="res"/>
+            <option name="push" value="profile/sa_profile_large.json -> /data/test/resource/samgr/profile/" src="res"/>
+            <option name="push" value="profile/sa_profile_long_libpath.json -> /data/test/resource/samgr/profile/" src="res"/>
+            <option name="push" value="profile/sa_profile_long_process.json -> /data/test/resource/samgr/profile/" src="res"/>
             <option name="push" value="systemabilitymgr/samgr/libmock_sa.z.so -> /data/test/" src="out"/>
         </preparer>
     </target>

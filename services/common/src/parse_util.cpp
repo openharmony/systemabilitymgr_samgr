@@ -30,6 +30,7 @@
 #include "libxml/xmlstring.h"
 #include "sam_log.h"
 #include "string_ex.h"
+#include "system_ability_definition.h"
 
 namespace OHOS {
 using std::string;
@@ -56,6 +57,10 @@ constexpr const char* SA_TAG_DEVICE_ON_LINE = "deviceonline";
 constexpr const char* SA_TAG_SETTING_SWITCH = "settingswitch";
 constexpr const char* SA_TAG_COMMON_EVENT = "commonevent";
 constexpr const char* SA_TAG_PARAM = "param";
+constexpr int32_t MAX_JSON_OBJECT_SIZE = 50 * 1024;
+constexpr int32_t MAX_JSON_STRING_LENGTH = 128;
+const string BOOT_START_PHASE = "BootStartPhase";
+const string CORE_START_PHASE = "CoreStartPhase";
 }
 
 ParseUtil::~ParseUtil()
@@ -113,7 +118,7 @@ void ParseUtil::OpenSo(SaProfile& saProfile)
         string dlopenTag = ToString(saProfile.saId) + "_DLOPEN";
         HITRACE_METER_NAME(HITRACE_TAG_SAMGR, dlopenTag);
         int64_t begin = GetTickCount();
-        DlHandle handle = dlopen(saProfile.libPath.c_str(), RTLD_LAZY);
+        DlHandle handle = dlopen(saProfile.libPath.c_str(), RTLD_NOW);
         HILOGI("[PerformanceTest] SA:%{public}d OpenSo spend %{public}" PRId64 " ms",
             saProfile.saId, GetTickCount() - begin);
         if (handle == nullptr) {
@@ -243,14 +248,19 @@ bool ParseUtil::ParseSaProfiles(const string& profilePath)
         return false;
     }
 
-    if (realPath.find(".xml") != string::npos) {
+    if (Endswith(realPath, ".xml")) {
         return ParseXmlFile(realPath);
-    } else if (realPath.find(".json") != string::npos) {
+    } else if (Endswith(realPath, ".json")) {
         return ParseJsonFile(realPath);
     } else {
         HILOGE("bad profile!");
         return false;
     }
+}
+
+bool ParseUtil::Endswith(const std::string& src, const std::string& sub)
+{
+    return (src.length() >= sub.length() && (src.rfind(sub) == (src.length() - sub.length())));
 }
 
 bool ParseUtil::CheckRootTag(const xmlNodePtr& rootNodePtr)
@@ -320,6 +330,10 @@ bool ParseUtil::ParseJsonFile(const string& realPath)
         HILOGE("profile format error: no process tag");
         return false;
     }
+    if (process.length() > MAX_JSON_STRING_LENGTH) {
+        HILOGE("profile format error: process is too long");
+        return false;
+    }
     procName_ = Str8ToStr16(process);
     if (profileJson.find(SA_TAG_SYSTEM_ABILITY) == profileJson.end()) {
         HILOGE("system ability parse error!");
@@ -339,7 +353,7 @@ bool ParseUtil::ParseJsonFile(const string& realPath)
         }
         saProfiles_.emplace_back(saProfile);
     }
-    return true;
+    return !saProfiles_.empty();
 }
 
 bool ParseUtil::ParseSystemAbility(SaProfile& saProfile, nlohmann::json& systemAbilityJson)
@@ -350,9 +364,17 @@ bool ParseUtil::ParseSystemAbility(SaProfile& saProfile, nlohmann::json& systemA
         HILOGE("profile format error: no name tag");
         return false;
     }
+    if (saProfile.saId < FIRST_SYS_ABILITY_ID || saProfile.saId > LAST_SYS_ABILITY_ID) {
+        HILOGE("profile format error: saId error");
+        return false;
+    }
     GetStringFromJson(systemAbilityJson, SA_TAG_LIB_PATH, saProfile.libPath);
     if (saProfile.libPath.empty()) {
         HILOGE("profile format error: no libPath tag");
+        return false;
+    }
+    if (saProfile.libPath.length() > MAX_JSON_STRING_LENGTH) {
+        HILOGE("profile format error: libPath is too long");
         return false;
     }
     GetBoolFromJson(systemAbilityJson, SA_TAG_RUN_ON_CREATE, saProfile.runOnCreate);
@@ -362,11 +384,15 @@ bool ParseUtil::ParseSystemAbility(SaProfile& saProfile, nlohmann::json& systemA
     GetInt32FromJson(systemAbilityJson, SA_TAG_DUMP_LEVEL, saProfile.dumpLevel);
     string capability;
     GetStringFromJson(systemAbilityJson, SA_TAG_CAPABILITY, capability);
-    saProfile.capability = Str8ToStr16(capability);
+    saProfile.capability = capability.length() <= MAX_JSON_STRING_LENGTH ? Str8ToStr16(capability) : u"";
     string permission;
     GetStringFromJson(systemAbilityJson, SA_TAG_PERMISSION, permission);
-    saProfile.permission = Str8ToStr16(permission);
+    saProfile.permission = permission.length() <= MAX_JSON_STRING_LENGTH ? Str8ToStr16(permission) : u"";
     GetStringFromJson(systemAbilityJson, SA_TAG_BOOT_PHASE, saProfile.bootPhase);
+    if (!saProfile.bootPhase.empty() && saProfile.bootPhase != BOOT_START_PHASE &&
+        saProfile.bootPhase != CORE_START_PHASE) {
+        saProfile.bootPhase = "";
+    }
     // parse start-on-demand tag
     ParseOndemandTag(systemAbilityJson, saProfile.startOnDemand, SA_TAG_START_ON_DEMAND);
     // parse stop-on-demand tag
@@ -401,7 +427,8 @@ void ParseUtil::GetOnDemandArrayFromJson(int32_t eventId, const nlohmann::json& 
             GetStringFromJson(item, "name", name);
             std::string value;
             GetStringFromJson(item, "value", value);
-            if (!name.empty()) {
+            if (!name.empty() && name.length() <= MAX_JSON_STRING_LENGTH &&
+                value.length() <= MAX_JSON_STRING_LENGTH) {
                 OnDemandEvent event = {eventId, name, value};
                 out.emplace_back(event);
             }
@@ -449,6 +476,11 @@ bool ParseUtil::ParseTrustConfig(const string& profilePath,
     string process;
     GetStringFromJson(trustSaIdJson, SA_TAG_PROCESS, process);
     if (process.empty()) {
+        HILOGE("trust profile format error: no process tag");
+        return false;
+    }
+    if (process.length() > MAX_JSON_STRING_LENGTH) {
+        HILOGE("trust profile format error: process is too long");
         return false;
     }
     auto& saIds = values[Str8ToStr16(process)];
@@ -467,11 +499,18 @@ bool ParseUtil::ParseJsonObj(nlohmann::json& jsonObj, const string& jsonPath)
     }
     std::ostringstream buffer;
     char ch;
+    int32_t readSize = 0;
     while (buffer && jsonFileStream.get(ch)) {
-        buffer.put(ch);
+        readSize++;
+        if (readSize < MAX_JSON_OBJECT_SIZE) {
+            buffer.put(ch);
+        } else {
+            jsonFileStream.close();
+            HILOGE("too big json file error!!");
+            return false;
+        }
     }
     jsonFileStream.close();
-
     string jsonStr = buffer.str();
     jsonObj = nlohmann::json::parse(jsonStr, nullptr, false);
     if (jsonObj.is_discarded()) {
