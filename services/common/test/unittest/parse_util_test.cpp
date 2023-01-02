@@ -832,5 +832,124 @@ HWTEST_F(ParseUtilTest, DeleteAllMark001, TestSize.Level3)
     u16string res = DeleteAllMark(temp, mask);
     EXPECT_EQ(res, u"tet");
 }
+
+/**
+ * @tc.name: ParseJsonFile001
+ * @tc.desc: parse json file using big json file
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseUtilTest, ParseJsonFile001, TestSize.Level3)
+{
+    DTEST_LOG << " ParseJsonFile001 BEGIN" << std::endl;
+    parser_->saProfiles_.clear();
+    bool ret = parser_->ParseSaProfiles(TEST_RESOURCE_PATH + "sa_profile_large.json");
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << " ParseJsonFile001 END" << std::endl;
+}
+
+/**
+ * @tc.name: ParseJsonFile002
+ * @tc.desc: parse json file using too long proces.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseUtilTest, ParseJsonFile002, TestSize.Level3)
+{
+    DTEST_LOG << " ParseJsonFile002 BEGIN" << std::endl;
+    parser_->saProfiles_.clear();
+    bool ret = parser_->ParseSaProfiles(TEST_RESOURCE_PATH + "sa_profile_long_process.json");
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << " ParseJsonFile002 END" << std::endl;
+}
+
+/**
+ * @tc.name: ParseJsonFile003
+ * @tc.desc: parse json file using error said.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseUtilTest, ParseJsonFile003, TestSize.Level3)
+{
+    DTEST_LOG << " ParseJsonFile003 BEGIN" << std::endl;
+    parser_->saProfiles_.clear();
+    bool ret = parser_->ParseSaProfiles(TEST_RESOURCE_PATH + "sa_profile_error_said.json");
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << " ParseJsonFile003 END" << std::endl;
+}
+
+/**
+ * @tc.name: ParseJsonFile004
+ * @tc.desc: parse json file using too long libpath.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseUtilTest, ParseJsonFile004, TestSize.Level3)
+{
+    DTEST_LOG << " ParseJsonFile004 BEGIN" << std::endl;
+    parser_->saProfiles_.clear();
+    bool ret = parser_->ParseSaProfiles(TEST_RESOURCE_PATH + "sa_profile_long_libpath.json");
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << " ParseJsonFile004 END" << std::endl;
+}
+
+/**
+ * @tc.name: ParseJsonFile005
+ * @tc.desc: parse json file using error bootPhase
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseUtilTest, ParseJsonFile005, TestSize.Level3)
+{
+    DTEST_LOG << " ParseJsonFile005 BEGIN" << std::endl;
+    parser_->saProfiles_.clear();
+    bool ret = parser_->ParseSaProfiles(TEST_RESOURCE_PATH + "sa_profile_error_bootphase.json");
+    EXPECT_EQ(ret, true);
+    DTEST_LOG << " ParseJsonFile005 END" << std::endl;
+}
+
+/**
+ * @tc.name: ParseJsonFile006
+ * @tc.desc: parse json file using error ondemand tag
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseUtilTest, ParseJsonFile006, TestSize.Level3)
+{
+    DTEST_LOG << " ParseJsonFile006 BEGIN" << std::endl;
+    parser_->saProfiles_.clear();
+    // name or vale is more than 128 bytes
+    bool ret = parser_->ParseSaProfiles(TEST_RESOURCE_PATH + "sa_profile_error_ondemanad_tag.json");
+    EXPECT_EQ(ret, true);
+    SaProfile saProfile;
+    parser_->GetProfile(1401, saProfile);
+    EXPECT_EQ(true, !saProfile.startOnDemand.empty());
+    EXPECT_EQ(true, saProfile.startOnDemand.empty());
+    EXPECT_EQ(true, saProfile.stopOnDemand.empty());
+    DTEST_LOG << " ParseJsonFile006 END" << std::endl;
+}
+
+/**
+ * @tc.name: ParseJsonFile007
+ * @tc.desc: parse json file using correct profile
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseUtilTest, ParseJsonFile007, TestSize.Level3)
+{
+    DTEST_LOG << " ParseJsonFile007 BEGIN" << std::endl;
+    parser_->saProfiles_.clear();
+    bool ret = parser_->ParseSaProfiles(TEST_RESOURCE_PATH + "sa_profile.json");
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(parser_->saProfiles_.empty(), false);
+    SaProfile saProfile1;
+    parser_->GetProfile(1401, saProfile1);
+    EXPECT_EQ(1401, saProfile1.saId);
+    EXPECT_EQ(true, !saProfile1.startOnDemand.empty());
+    EXPECT_EQ(1, saProfile1.startOnDemand[0].eventId);
+    EXPECT_EQ("deviceonline", saProfile1.startOnDemand[0].name);
+    EXPECT_EQ("on", saProfile1.startOnDemand[0].value);
+    EXPECT_EQ(true, !saProfile1.stopOnDemand.empty());
+    EXPECT_EQ(1, saProfile1.stopOnDemand[0].eventId);
+    EXPECT_EQ("deviceonline", saProfile1.stopOnDemand[0].name);
+    EXPECT_EQ("off", saProfile1.stopOnDemand[0].value);
+    SaProfile saProfile2;
+    parser_->GetProfile(6001, saProfile2);
+    EXPECT_EQ(6001, saProfile2.saId);
+    DTEST_LOG << " ParseJsonFile007 END" << std::endl;
+}
 } // namespace SAMGR
 } // namespace OHOS

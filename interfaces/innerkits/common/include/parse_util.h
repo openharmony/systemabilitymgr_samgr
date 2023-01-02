@@ -115,6 +115,7 @@ private:
         }
     }
 
+    static bool Endswith(const std::string& src, const std::string& sub);
     std::string GetRealPath(const std::string& profilePath) const;
     std::list<SaProfile> saProfiles_;
     std::u16string procName_;

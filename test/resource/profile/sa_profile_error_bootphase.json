@@ -1,0 +1,13 @@
+{
+    "process": "testdemo",
+    "systemability": [
+        {
+            "name": 1411,
+            "libpath": "libdistributed_ability_manager_svr.z.so",
+            "run-on-create": true,
+            "distributed": true,
+            "dump-level": 1,
+            "bootphase": "abc"
+        }
+    ]
+}
