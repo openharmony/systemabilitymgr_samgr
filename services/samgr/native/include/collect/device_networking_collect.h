@@ -33,6 +33,8 @@ class DeviceStateCallback : public DistributedHardware::DeviceStateCallback {
         void OnDeviceChanged(const DistributedHardware::DmDeviceInfo& deviceInfo) override;
         void OnDeviceReady(const DistributedHardware::DmDeviceInfo& deviceInfo) override;
         void ClearDeviceOnlineSet();
+        bool IsOnline();
+        void UpdateDeviceOnlineSet(const std::string& deviceId);
     private:
        sptr<ICollectPlugin> collect_;
        std::set<std::string> deviceOnlineSet_;
@@ -56,14 +58,16 @@ public:
     int32_t OnStart() override;
     int32_t OnStop() override;
     bool AddDeviceChangeListener();
-    void ClearDeviceOnlineSet();
-
 private:
     std::shared_ptr<DeviceStateCallback> stateCallback_;
     std::shared_ptr<DistributedHardware::DmInitCallback> initCallback_;
     std::shared_ptr<AppExecFwk::EventHandler> workHandler_;
 
     bool IsDmReady();
+    void ClearDeviceOnlineSet();
+    bool IsOnline();
+    void UpdateDeviceOnlineSet(const std::string& deviceId);
+    bool ReportMissedEvents();
 };
 
 class WorkHandler : public AppExecFwk::EventHandler {
