@@ -917,7 +917,6 @@ HWTEST_F(ParseUtilTest, ParseJsonFile006, TestSize.Level3)
     EXPECT_EQ(ret, true);
     SaProfile saProfile;
     parser_->GetProfile(1401, saProfile);
-    EXPECT_EQ(true, !saProfile.startOnDemand.empty());
     EXPECT_EQ(true, saProfile.startOnDemand.empty());
     EXPECT_EQ(true, saProfile.stopOnDemand.empty());
     DTEST_LOG << " ParseJsonFile006 END" << std::endl;
