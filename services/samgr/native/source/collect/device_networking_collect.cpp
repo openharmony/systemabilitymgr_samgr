@@ -79,6 +79,42 @@ bool DeviceNetworkingCollect::IsDmReady()
     return false;
 }
 
+bool DeviceNetworkingCollect::ReportMissedEvents()
+{
+    std::vector<DmDeviceInfo> devList;
+    int32_t ret = DeviceManager::GetInstance().GetTrustedDeviceList(PKG_NAME, "", devList);
+    if (ret != ERR_OK) {
+        HILOGE("DeviceNetworkingCollect GetTrustedDeviceList error");
+        return false;
+    }
+    bool isPreviousOnline = IsOnline();
+    if (isPreviousOnline) {
+        ClearDeviceOnlineSet();
+        if (devList.empty()) {
+            // send offline msg
+            OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "off" };
+            ReportEvent(event);
+        } else {
+            // update the online set;
+            for (DmDeviceInfo& devInfo : devList) {
+                UpdateDeviceOnlineSet(devInfo.deviceId);
+            }
+        }
+    } else {
+        // offline --> online
+        if (!devList.empty()) {
+            // update the online set;
+            for (DmDeviceInfo& devInfo : devList) {
+                UpdateDeviceOnlineSet(devInfo.deviceId);
+            }
+            // send online msg
+            OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
+            ReportEvent(event);
+        }
+    }
+    return true;
+}
+
 bool DeviceNetworkingCollect::AddDeviceChangeListener()
 {
     HILOGI("DeviceNetworkingCollect AddDeviceChangeListener called");
@@ -86,6 +122,10 @@ bool DeviceNetworkingCollect::AddDeviceChangeListener()
         int32_t ret = DeviceManager::GetInstance().InitDeviceManager(PKG_NAME, initCallback_);
         if (ret != ERR_OK) {
             HILOGE("DeviceNetworkingCollect InitDeviceManager error");
+            return false;
+        }
+        if (!ReportMissedEvents()) {
+            HILOGE("DeviceNetworkingCollect ReportMissedEvents error");
             return false;
         }
         ret = DeviceManager::GetInstance().RegisterDevStateCallback(PKG_NAME, "", stateCallback_);
@@ -99,11 +139,26 @@ bool DeviceNetworkingCollect::AddDeviceChangeListener()
     return false;
 }
 
+void DeviceNetworkingCollect::UpdateDeviceOnlineSet(const std::string& deviceId)
+{
+    if (stateCallback_ != nullptr) {
+        stateCallback_->UpdateDeviceOnlineSet(deviceId);
+    }
+}
+
 void DeviceNetworkingCollect::ClearDeviceOnlineSet()
 {
     if (stateCallback_ != nullptr) {
         stateCallback_->ClearDeviceOnlineSet();
     }
+}
+
+bool DeviceNetworkingCollect::IsOnline()
+{
+    if (stateCallback_ != nullptr) {
+        return stateCallback_->IsOnline();
+    }
+    return false;
 }
 
 void DeviceInitCallBack::OnRemoteDied()
@@ -154,6 +209,18 @@ void DeviceStateCallback::ClearDeviceOnlineSet()
     deviceOnlineSet_.clear();
 }
 
+bool DeviceStateCallback::IsOnline()
+{
+    lock_guard<mutex> autoLock(deviceOnlineLock_);
+    return !deviceOnlineSet_.empty();
+}
+
+void DeviceStateCallback::UpdateDeviceOnlineSet(const std::string& deviceId)
+{
+    lock_guard<mutex> autoLock(deviceOnlineLock_);
+    deviceOnlineSet_.emplace(deviceId);
+}
+
 void DeviceStateCallback::OnDeviceChanged(const DmDeviceInfo& deviceInfo)
 {
     HILOGD("DeviceNetworkingCollect OnDeviceChanged called");
@@ -174,9 +241,6 @@ void WorkHandler::ProcessEvent(const InnerEvent::Pointer& event)
     if (eventId != INIT_EVENT && eventId != DM_DIED_EVENT) {
         HILOGE("DeviceNetworkingCollect ProcessEvent error event code!");
         return;
-    }
-    if (eventId == DM_DIED_EVENT) {
-        collect_->ClearDeviceOnlineSet();
     }
     if (!collect_->AddDeviceChangeListener()) {
         HILOGW("DeviceNetworkingCollect AddDeviceChangeListener retry");
