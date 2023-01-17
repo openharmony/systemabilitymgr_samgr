@@ -368,7 +368,7 @@ static const std::map<int, std::string> saNameMap_ = {
     { STORAGE_MANAGER_DAEMON_ID, "StorageDaemon" },
     { STORAGE_MANAGER_MANAGER_ID, "StorageManager"},
     { FILEMANAGEMENT_DISTRIBUTED_FILE_DAEMON_SA_ID, "DistributedFileDaemon"},
-    { FILEMANAGEMENT_CLOUD_SYNC_SERVICE_SA_ID, "FileManagementCloudSyncService"},
+    { FILEMANAGEMENT_CLOUD_SYNC_SERVICE_SA_ID, "CloudFileSyncService"},
     { DEVICE_SERVICE_MANAGER_SA_ID, "HdfDeviceServiceManager" },
     { DISTRIBUTED_DEVICE_PROFILE_SA_ID, "DistributedDeviceProfile" },
     { WINDOW_MANAGER_SERVICE_ID, "WindowManagerService" },
