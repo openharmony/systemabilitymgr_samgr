@@ -168,7 +168,6 @@ private:
         const sptr<IRemoteObject>& remoteObject);
     void CleanCallbackForLoadFailed(int32_t systemAbilityId, const std::u16string& name,
         const std::string& srcDeviceId, const sptr<ISystemAbilityLoadCallback>& callback);
-    bool IsSameEvent(const OnDemandEvent& ev1, const OnDemandEvent& ev2);
 
     void UpdateSaFreMap(int32_t pid, int32_t saId);
     uint64_t GenerateFreKey(int32_t pid, int32_t saId) const;

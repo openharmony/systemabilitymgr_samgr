@@ -14,6 +14,7 @@
  */
 #include "gtest/gtest.h"
 #include "string_ex.h"
+#include "system_ability_definition.h"
 #include "test_log.h"
 #include "tools.h"
 
@@ -949,6 +950,33 @@ HWTEST_F(ParseUtilTest, ParseJsonFile007, TestSize.Level3)
     parser_->GetProfile(6001, saProfile2);
     EXPECT_EQ(6001, saProfile2.saId);
     DTEST_LOG << " ParseJsonFile007 END" << std::endl;
+}
+
+/**
+ * @tc.name: ParseSystemAbility003
+ * @tc.desc: parse sytemability tag with error param.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseUtilTest, ParseSystemAbility003, TestSize.Level3)
+{
+    DTEST_LOG << " ParseSystemAbility003 BEGIN" << std::endl;
+    nlohmann::json systemAbilityJson;
+    SaProfile saProfile;
+    bool ret = parser_->ParseSystemAbility(saProfile, systemAbilityJson);
+    EXPECT_EQ(ret, false);
+    systemAbilityJson["name"] = -1; // invalid said
+    ret = parser_->ParseSystemAbility(saProfile, systemAbilityJson);
+    EXPECT_EQ(ret, false);
+    systemAbilityJson["name"] = DISTRIBUTED_DEVICE_PROFILE_SA_ID;
+    ret = parser_->ParseSystemAbility(saProfile, systemAbilityJson);
+    EXPECT_EQ(ret, false);
+    systemAbilityJson["libpath"] = "/system/lib/test.so";
+    ret = parser_->ParseSystemAbility(saProfile, systemAbilityJson);
+    EXPECT_EQ(ret, true);
+    systemAbilityJson["bootphase"] = "aaa";
+    ret = parser_->ParseSystemAbility(saProfile, systemAbilityJson);
+    EXPECT_EQ(ret, true);
+    DTEST_LOG << " ParseSystemAbility003 END" << std::endl;
 }
 } // namespace SAMGR
 } // namespace OHOS

@@ -241,14 +241,6 @@ bool SystemAbilityManager::GetSaProfile(int32_t saId, SaProfile& saProfile)
     return true;
 }
 
-bool SystemAbilityManager::IsSameEvent(const OnDemandEvent& ev1, const OnDemandEvent& ev2)
-{
-    if (ev1.eventId == ev2.eventId && ev1.name == ev2.name && ev1.value == ev2.value) {
-        return true;
-    }
-    return false;
-}
-
 void SystemAbilityManager::ProcessOnDemandEvent(const OnDemandEvent& event,
     const std::list<SaControlInfo>& saControlList)
 {

@@ -40,23 +40,23 @@ void DeviceStatusCollectManager::Init(const std::list<SaProfile>& saProfiles)
 void DeviceStatusCollectManager::FilterOnDemandSaProfiles(const std::list<SaProfile>& saProfiles)
 {
     for (auto& saProfile : saProfiles) {
-        if (saProfile.startOnDemand.empty() || saProfile.stopOnDemand.empty()) {
+        if (saProfile.startOnDemand.empty() && saProfile.stopOnDemand.empty()) {
             continue;
         }
-        onDemandSaProfiles.push_back(saProfile);
+        onDemandSaProfiles_.emplace_back(saProfile);
     }
 }
 
 void DeviceStatusCollectManager::GetSaControlListByEvent(const OnDemandEvent& event,
     std::list<SaControlInfo>& saControlList)
 {
-    for (auto& profile : onDemandSaProfiles) {
+    for (auto& profile : onDemandSaProfiles_) {
         // start on demand
         for (auto iterStart = profile.startOnDemand.begin(); iterStart != profile.startOnDemand.end(); iterStart++) {
             if (IsSameEvent(event, *iterStart)) {
                 // maybe the process is being killed, let samgr make decisions.
                 SaControlInfo control = { START_ON_DEMAND, profile.saId };
-                saControlList.push_back(control);
+                saControlList.emplace_back(control);
                 break;
             }
         }
@@ -75,10 +75,7 @@ void DeviceStatusCollectManager::GetSaControlListByEvent(const OnDemandEvent& ev
 
 bool DeviceStatusCollectManager::IsSameEvent(const OnDemandEvent& ev1, const OnDemandEvent& ev2)
 {
-    if (ev1.eventId == ev2.eventId && ev1.name == ev2.name && ev1.value == ev2.value) {
-        return true;
-    }
-    return false;
+    return (ev1.eventId == ev2.eventId && ev1.name == ev2.name && ev1.value == ev2.value);
 }
 
 void DeviceStatusCollectManager::UnInit()
@@ -111,6 +108,7 @@ void DeviceStatusCollectManager::StartCollect()
 void DeviceStatusCollectManager::ReportEvent(const OnDemandEvent& event)
 {
     if (collectHandler_ == nullptr) {
+        HILOGW("DeviceStatusCollectManager collectHandler_ is nullptr");
         return;
     }
     std::list<SaControlInfo> saControlList;
