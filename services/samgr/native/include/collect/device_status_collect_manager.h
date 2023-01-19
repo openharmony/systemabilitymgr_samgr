@@ -37,7 +37,7 @@ private:
     static bool IsSameEvent(const OnDemandEvent& ev1, const OnDemandEvent& ev2);
     std::map<int32_t, sptr<ICollectPlugin>> collectPluginMap_;
     std::shared_ptr<AppExecFwk::EventHandler> collectHandler_;
-    std::list<SaProfile> onDemandSaProfiles;
+    std::list<SaProfile> onDemandSaProfiles_;
 };
 } // namespace OHOS
 #endif // OHOS_SYSTEM_ABILITY_MANAGER_DEVICE_STATUS_COLLECT_MANAGER_H

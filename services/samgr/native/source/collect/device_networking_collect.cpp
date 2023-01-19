@@ -43,6 +43,7 @@ int32_t DeviceNetworkingCollect::OnStart()
     HILOGI("DeviceNetworkingCollect OnStart called");
     std::shared_ptr<EventHandler> handler = EventHandler::Current();
     if (handler == nullptr) {
+        HILOGW("DeviceNetworkingCollect current handler is nullptr");
         return ERR_INVALID_VALUE;
     }
     workHandler_ = std::make_shared<WorkHandler>(handler->GetEventRunner(), this);

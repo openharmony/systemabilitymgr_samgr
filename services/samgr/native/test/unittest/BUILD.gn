@@ -41,6 +41,7 @@ ohos_unittest("SystemAbilityMgrTest") {
     "${samgr_services_dir}/source/system_ability_manager.cpp",
     "${samgr_services_dir}/source/system_ability_manager_stub.cpp",
     "${samgr_services_dir}/source/system_ability_status_change_proxy.cpp",
+    "${samgr_services_dir}/test/unittest/src/device_status_collect_manager_test.cpp",
     "${samgr_services_dir}/test/unittest/src/itest_transaction_service.cpp",
     "${samgr_services_dir}/test/unittest/src/mock_permission.cpp",
     "${samgr_services_dir}/test/unittest/src/sa_status_change_mock.cpp",
@@ -88,8 +89,10 @@ ohos_unittest("SystemAbilityMgrTest") {
   }
 
   if (support_device_manager) {
-    sources +=
-        [ "${samgr_services_dir}/source/collect/device_networking_collect.cpp" ]
+    sources += [
+      "${samgr_services_dir}/source/collect/device_networking_collect.cpp",
+      "${samgr_services_dir}/test/unittest/src/device_networking_collect_test.cpp",
+    ]
     external_deps += [ "device_manager:devicemanagersdk" ]
     defines += [ "SUPPORT_DEVICE_MANAGER" ]
   }

@@ -556,5 +556,49 @@ HWTEST_F(SystemAbilityManagerTest, GetSystemAbilityFromRemote006, TestSize.Level
         ASSERT_TRUE(object == nullptr);
     }
 }
+
+/**
+ * @tc.name: ProcessOnDemandEvent001
+ * @tc.desc: test ProcessOnDemandEvent with empty saControlList
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityManagerTest, ProcessOnDemandEvent001, TestSize.Level3)
+{
+    DTEST_LOG << " ProcessOnDemandEvent001 start " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    ASSERT_TRUE(sm != nullptr);
+    std::list<SaControlInfo> saControlList;
+    OnDemandEvent event;
+    saMgr->ProcessOnDemandEvent(event, saControlList);
+    DTEST_LOG << " ProcessOnDemandEvent001 end " << std::endl;
+}
+
+/**
+ * @tc.name: ProcessOnDemandEvent002
+ * @tc.desc: test ProcessOnDemandEvent with  saControlList
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityManagerTest, ProcessOnDemandEvent002, TestSize.Level3)
+{
+    DTEST_LOG << " ProcessOnDemandEvent002 start " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    ASSERT_TRUE(sm != nullptr);
+    std::list<SaControlInfo> saControlList;
+    OnDemandEvent event;
+    SaControlInfo saControlInfo1 = {START_ON_DEMAND, DISTRIBUTED_SCHED_SA_ID};
+    SaControlInfo saControlInfo2 = {START_ON_DEMAND, DISTRIBUTED_SCHED_ADAPTER_SA_ID};
+    SaControlInfo saControlInfo3 = {STOP_ON_DEMAND, DISTRIBUTED_SCHED_ADAPTER_SA_ID};
+    SaControlInfo saControlInfo4 = {STOP_ON_DEMAND + 1, DISTRIBUTED_SCHED_ADAPTER_SA_ID};
+    SaProfile saInfo1 = {u"distributedsched", DISTRIBUTED_SCHED_SA_ID};
+    SaProfile saInfo2 = {u"distributedadapter", DISTRIBUTED_SCHED_ADAPTER_SA_ID};
+    saMgr->saProfileMap_[DISTRIBUTED_SCHED_SA_ID] = saInfo1;
+    saMgr->saProfileMap_[DISTRIBUTED_SCHED_ADAPTER_SA_ID] = saInfo2;
+    saControlList.emplace_back(saControlInfo1);
+    saControlList.emplace_back(saControlInfo2);
+    saControlList.emplace_back(saControlInfo3);
+    saControlList.emplace_back(saControlInfo4);
+    saMgr->ProcessOnDemandEvent(event, saControlList);
+    DTEST_LOG << " ProcessOnDemandEvent002 end " << std::endl;
+}
 }
 }
