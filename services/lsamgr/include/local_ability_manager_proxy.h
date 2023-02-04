@@ -30,7 +30,8 @@ public:
         : IRemoteProxy<ILocalAbilityManager>(impl) {}
     ~LocalAbilityManagerProxy() = default;
 
-    bool StartAbility(int32_t saId);
+    bool StartAbility(int32_t systemAbilityId);
+    bool StopAbility(int32_t systemAbilityId);
 private:
     static inline BrokerDelegator<LocalAbilityManagerProxy> delegator_;
     OHOS::HiviewDFX::HiLogLabel label_ = { LOG_CORE, 0xD001800, "SA" };

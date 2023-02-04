@@ -25,12 +25,14 @@
 namespace OHOS {
 class ILocalAbilityManager : public IRemoteBroker {
 public:
-    virtual bool StartAbility(int32_t saId) = 0;
+    virtual bool StartAbility(int32_t systemAbilityId) = 0;
+    virtual bool StopAbility(int32_t systemAbilityId) = 0;
 
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ILocalAbilityManager");
 protected:
     enum {
         START_ABILITY_TRANSACTION = 1,
+        STOP_ABILITY_TRANSACTION = 2,
     };
     static inline const std::u16string LOCAL_ABILITY_MANAGER_INTERFACE_TOKEN = u"ohos.localabilitymanager.accessToken";
 };

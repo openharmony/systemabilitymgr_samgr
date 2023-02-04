@@ -58,4 +58,38 @@ bool LocalAbilityManagerProxy::StartAbility(int32_t systemAbilityId)
     }
     return true;
 }
+
+bool LocalAbilityManagerProxy::StopAbility(int32_t systemAbilityId)
+{
+    if (systemAbilityId <= 0) {
+        HiLog::Warn(label_, "StopAbility systemAbilityId invalid.");
+        return false;
+    }
+
+    sptr<IRemoteObject> iro = Remote();
+    if (iro == nullptr) {
+        HiLog::Error(label_, "StopAbility Remote return null");
+        return false;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(LOCAL_ABILITY_MANAGER_INTERFACE_TOKEN)) {
+        HiLog::Warn(label_, "StopAbility interface token check failed");
+        return false;
+    }
+    bool ret = data.WriteInt32(systemAbilityId);
+    if (!ret) {
+        HiLog::Warn(label_, "StopAbility write systemAbilityId failed!");
+        return false;
+    }
+
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    int32_t status = iro->SendRequest(STOP_ABILITY_TRANSACTION, data, reply, option);
+    if (status != NO_ERROR) {
+        HiLog::Error(label_, "StopAbility SendRequest failed, return value : %{public}d", status);
+        return false;
+    }
+    return true;
+}
 }

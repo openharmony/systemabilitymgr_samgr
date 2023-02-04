@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,6 +46,7 @@ private:
     int32_t RemoveSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t LoadSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t LoadRemoteSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
+    int32_t UnloadSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t UnmarshalingSaExtraProp(MessageParcel& data, SAExtraProp& extraProp);
     static int32_t GetHapIdMultiuser(int32_t uid);
 
