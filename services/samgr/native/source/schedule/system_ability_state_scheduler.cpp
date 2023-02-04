@@ -378,7 +378,7 @@ bool SystemAbilityStateScheduler::CanUnloadAllSystemAbility(
     std::shared_lock<std::shared_mutex> sharedLock(processContext->stateCountLock);
     uint32_t notLoadAbilityCount = processContext->abilityStateCountMap[SystemAbilityState::NOT_LOADED];
     uint32_t unloadableAbilityCount = processContext->abilityStateCountMap[SystemAbilityState::UNLOADABLE];
-    HILOGI("[SA Scheduler][process: %{public}s] SA num: %{public}d, notloaded: %{public}d, unloadable: %{public}d",
+    HILOGI("[SA Scheduler][process: %{public}s] SA num: %{public}zu, notloaded: %{public}d, unloadable: %{public}d",
         Str16ToStr8(processContext->processName).c_str(), processContext->saList.size(), notLoadAbilityCount,
         unloadableAbilityCount);
     if (unloadableAbilityCount <= 0) {
@@ -451,7 +451,7 @@ bool SystemAbilityStateScheduler::CanKillSystemProcess(
 {
     std::shared_lock<std::shared_mutex> sharedLock(processContext->stateCountLock);
     uint32_t notLoadAbilityCount = processContext->abilityStateCountMap[SystemAbilityState::NOT_LOADED];
-    HILOGI("[SA Scheduler][process: %{public}s] SA num: %{public}d, not loaded num: %{public}d",
+    HILOGI("[SA Scheduler][process: %{public}s] SA num: %{public}zu, not loaded num: %{public}d",
         Str16ToStr8(processContext->processName).c_str(), processContext->saList.size(), notLoadAbilityCount);
     if (notLoadAbilityCount == processContext->saList.size()) {
         return true;
