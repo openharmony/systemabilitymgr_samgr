@@ -37,6 +37,9 @@ ohos_unittest("SystemAbilityMgrTest") {
     "${samgr_services_dir}/source/collect/device_status_collect_manager.cpp",
     "${samgr_services_dir}/source/collect/icollect_plugin.cpp",
     "${samgr_services_dir}/source/rpc_callback_imp.cpp",
+    "${samgr_services_dir}/source/schedule/system_ability_event_handler.cpp",
+    "${samgr_services_dir}/source/schedule/system_ability_state_machine.cpp",
+    "${samgr_services_dir}/source/schedule/system_ability_state_scheduler.cpp",
     "${samgr_services_dir}/source/system_ability_load_callback_proxy.cpp",
     "${samgr_services_dir}/source/system_ability_manager.cpp",
     "${samgr_services_dir}/source/system_ability_manager_stub.cpp",
@@ -88,6 +91,11 @@ ohos_unittest("SystemAbilityMgrTest") {
     defines += [ "HICOLLIE_ENABLE" ]
   }
 
+  if (ressched_able) {
+    external_deps += [ "resource_schedule_service:ressched_client" ]
+    defines += [ "RESSCHED_ENABLE" ]
+  }
+
   if (support_device_manager) {
     sources += [
       "${samgr_services_dir}/source/collect/device_networking_collect.cpp",
@@ -107,6 +115,9 @@ ohos_unittest("SystemAbilityMgrStubTest") {
     "${samgr_services_dir}/source/collect/device_status_collect_manager.cpp",
     "${samgr_services_dir}/source/collect/icollect_plugin.cpp",
     "${samgr_services_dir}/source/rpc_callback_imp.cpp",
+    "${samgr_services_dir}/source/schedule/system_ability_event_handler.cpp",
+    "${samgr_services_dir}/source/schedule/system_ability_state_machine.cpp",
+    "${samgr_services_dir}/source/schedule/system_ability_state_scheduler.cpp",
     "${samgr_services_dir}/source/system_ability_manager.cpp",
     "${samgr_services_dir}/source/system_ability_manager_stub.cpp",
     "${samgr_services_dir}/test/unittest/src/itest_transaction_service.cpp",
@@ -151,6 +162,11 @@ ohos_unittest("SystemAbilityMgrStubTest") {
   if (hicollie_able) {
     external_deps += [ "hicollie_native:libhicollie" ]
     defines += [ "HICOLLIE_ENABLE" ]
+  }
+
+  if (ressched_able) {
+    external_deps += [ "resource_schedule_service:ressched_client" ]
+    defines += [ "RESSCHED_ENABLE" ]
   }
 
   if (support_device_manager) {
@@ -269,6 +285,9 @@ ohos_executable("TestTool") {
     "${samgr_services_dir}/source/collect/device_status_collect_manager.cpp",
     "${samgr_services_dir}/source/collect/icollect_plugin.cpp",
     "${samgr_services_dir}/source/rpc_callback_imp.cpp",
+    "${samgr_services_dir}/source/schedule/system_ability_event_handler.cpp",
+    "${samgr_services_dir}/source/schedule/system_ability_state_machine.cpp",
+    "${samgr_services_dir}/source/schedule/system_ability_state_scheduler.cpp",
     "${samgr_services_dir}/source/system_ability_load_callback_proxy.cpp",
     "${samgr_services_dir}/source/system_ability_manager.cpp",
     "${samgr_services_dir}/source/system_ability_manager_stub.cpp",
@@ -304,6 +323,11 @@ ohos_executable("TestTool") {
   if (hicollie_able) {
     external_deps += [ "hicollie_native:libhicollie" ]
     defines += [ "HICOLLIE_ENABLE" ]
+  }
+
+  if (ressched_able) {
+    external_deps += [ "resource_schedule_service:ressched_client" ]
+    defines += [ "RESSCHED_ENABLE" ]
   }
 
   if (support_device_manager) {

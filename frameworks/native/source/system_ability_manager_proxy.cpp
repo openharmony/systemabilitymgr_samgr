@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -520,6 +520,47 @@ int32_t SystemAbilityManagerProxy::LoadSystemAbility(int32_t systemAbilityId, co
     ret = reply.ReadInt32(result);
     if (!ret) {
         HILOGW("LoadSystemAbility read reply failed for remote!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
+int32_t SystemAbilityManagerProxy::UnloadSystemAbility(int32_t systemAbilityId)
+{
+    if (!CheckInputSysAbilityId(systemAbilityId)) {
+        HILOGE("UnloadSystemAbility systemAbilityId:%{public}d invalid!", systemAbilityId);
+        return ERR_INVALID_VALUE;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("UnloadSystemAbility remote is null!");
+        return ERR_INVALID_OPERATION;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        HILOGW("UnloadSystemAbility Write interface token failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    bool ret = data.WriteInt32(systemAbilityId);
+    if (!ret) {
+        HILOGW("UnloadSystemAbility Write systemAbilityId failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t err = remote->SendRequest(UNLOAD_SYSTEM_ABILITY_TRANSACTION, data, reply, option);
+    if (err != ERR_NONE) {
+        HILOGE("UnloadSystemAbility systemAbilityId : %{public}d invalid error:%{public}d!", systemAbilityId, err);
+        return err;
+    }
+    HILOGI("UnloadSystemAbility systemAbilityId : %{public}d, SendRequest succeed!", systemAbilityId);
+    int32_t result = 0;
+    ret = reply.ReadInt32(result);
+    if (!ret) {
+        HILOGW("UnloadSystemAbility Read reply failed!");
         return ERR_FLATTEN_OBJECT;
     }
     return result;

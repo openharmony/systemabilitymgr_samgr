@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -127,6 +127,8 @@ SystemAbilityManagerStub::SystemAbilityManagerStub()
         &SystemAbilityManagerStub::LoadSystemAbilityInner;
     memberFuncMap_[LOAD_REMOTE_SYSTEM_ABILITY_TRANSACTION] =
         &SystemAbilityManagerStub::LoadRemoteSystemAbilityInner;
+    memberFuncMap_[UNLOAD_SYSTEM_ABILITY_TRANSACTION] =
+        &SystemAbilityManagerStub::UnloadSystemAbilityInner;
 }
 
 int32_t SystemAbilityManagerStub::OnRemoteRequest(uint32_t code,
@@ -582,6 +584,23 @@ int32_t SystemAbilityManagerStub::LoadRemoteSystemAbilityInner(MessageParcel& da
     bool ret = reply.WriteInt32(result);
     if (!ret) {
         HILOGW("SystemAbilityManagerStub::LoadRemoteSystemAbilityInner write reply failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
+int32_t SystemAbilityManagerStub::UnloadSystemAbilityInner(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t systemAbilityId = data.ReadInt32();
+    if (!CheckInputSysAbilityId(systemAbilityId)) {
+        HILOGW("SystemAbilityManagerStub::UnloadSystemAbilityInner systemAbilityId invalid");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t result = UnloadSystemAbility(systemAbilityId);
+    HILOGD("SystemAbilityManagerStub::UnloadSystemAbilityInner result is %{public}d", result);
+    bool ret = reply.WriteInt32(result);
+    if (!ret) {
+        HILOGW("SystemAbilityManagerStub::UnloadSystemAbilityInner write reply failed.");
         return ERR_FLATTEN_OBJECT;
     }
     return result;

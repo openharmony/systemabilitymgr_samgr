@@ -33,6 +33,7 @@
                 "hiviewdfx_hilog_native",
                 "init",
                 "ipc",
+                "resource_schedule_service",
                 "samgr",
                 "selinux",
                 "startup_l2"

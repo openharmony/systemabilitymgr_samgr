@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,7 @@
 #include "sa_profiles.h"
 #include "system_ability_definition.h"
 #include "system_ability_manager_stub.h"
+#include "schedule/system_ability_state_scheduler.h"
 
 namespace OHOS {
 struct SAInfo {
@@ -80,6 +81,7 @@ public:
     int32_t AddOnDemandSystemAbilityInfo(int32_t systemAbilityId, const std::u16string& procName) override;
 
     sptr<IRemoteObject> CheckSystemAbility(int32_t systemAbilityId, bool& isExist) override;
+    bool DoLoadOnDemandAbility(int32_t systemAbilityId, bool& isExist);
 
     void NotifyRemoteSaDied(const std::u16string& name);
     void NotifyRemoteDeviceOffline(const std::string& deviceId);
@@ -94,13 +96,19 @@ public:
     int32_t RemoveSystemProcess(const sptr<IRemoteObject>& procObject);
 
     int32_t LoadSystemAbility(int32_t systemAbilityId, const sptr<ISystemAbilityLoadCallback>& callback) override;
+    int32_t DoLoadSystemAbility(int32_t systemAbilityId, const std::u16string& procName,
+        const sptr<ISystemAbilityLoadCallback>& callback, int32_t callingPid);
     int32_t LoadSystemAbility(int32_t systemAbilityId, const std::string& deviceId,
         const sptr<ISystemAbilityLoadCallback>& callback) override;
+    int32_t UnloadSystemAbility(int32_t systemAbilityId) override;
+    int32_t DoUnloadSystemAbility(int32_t systemAbilityId, const std::u16string& procName);
     void OnAbilityCallbackDied(const sptr<IRemoteObject>& remoteObject);
     void OnRemoteCallbackDied(const sptr<IRemoteObject>& remoteObject);
     sptr<IRemoteObject> GetSystemAbilityFromRemote(int32_t systemAbilityId);
     bool LoadSystemAbilityFromRpc(const std::string& srcDeviceId, int32_t systemAbilityId,
         const sptr<ISystemAbilityLoadCallback>& callback);
+    bool DoLoadSystemAbilityFromRpc(const std::string& srcDeviceId, int32_t systemAbilityId,
+        const std::u16string& procName, const sptr<ISystemAbilityLoadCallback>& callback);
     void NotifyRpcLoadCompleted(const std::string& srcDeviceId, int32_t systemAbilityId,
         const sptr<IRemoteObject>& remoteObject);
     void StartDfxTimer();
@@ -150,8 +158,10 @@ private:
     void NotifySystemAbilityLoadFail(int32_t systemAbilityId, const sptr<ISystemAbilityLoadCallback>& callback);
     int32_t StartingSystemProcess(const std::u16string& name, int32_t systemAbilityId);
     void StartOnDemandAbility(const std::u16string& name, int32_t systemAbilityId);
-    void StartOnDemandAbilityInner(const std::u16string& name, int32_t systemAbilityId, AbilityItem& abilityItem);
+    int32_t StartOnDemandAbilityInner(const std::u16string& name, int32_t systemAbilityId, AbilityItem& abilityItem);
     int32_t StartDynamicSystemProcess(const std::u16string& name, int32_t systemAbilityId);
+    bool StopOnDemandAbility(const std::u16string& name, int32_t systemAbilityId);
+    bool StopOnDemandAbilityInner(const std::u16string& name, int32_t systemAbilityId);
     void RemoveStartingAbilityCallback(CallbackList& callbackList, const sptr<IRemoteObject>& remoteObject);
     void RemoveStartingAbilityCallbackForDevice(AbilityItem& abilityItem, const sptr<IRemoteObject>& remoteObject);
     void RemoveStartingAbilityCallbackLocked(std::pair<sptr<ISystemAbilityLoadCallback>, int32_t>& itemPair);
@@ -217,6 +227,7 @@ private:
     std::map<uint64_t, int32_t> saFrequencyMap_; // {pid_said, count}
 
     std::unique_ptr<Utils::Timer> reportEventTimer_;
+    std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler_;
 };
 } // namespace OHOS
 
