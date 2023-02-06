@@ -29,6 +29,7 @@ using namespace OHOS;
 
 namespace OHOS {
 namespace {
+constexpr int32_t MAX_WAIT_TIME = 10000;
 const std::string SA_TAG_DEVICE_ON_LINE = "deviceonline";
 }
 
@@ -200,6 +201,18 @@ HWTEST_F(DeviceStatusCollectManagerTest, ReportEvent003, TestSize.Level3)
     collect->onDemandSaProfiles_.emplace_back(saProfile);
     collect->ReportEvent(event);
     EXPECT_EQ(true, collect->collectHandler_ != nullptr);
+    isCaseDone = false;
+    auto caseDoneNotifyTask = [this]() {
+        std::lock_guard<std::mutex> autoLock(caseDoneLock_);
+        isCaseDone = true;
+        caseDoneCondition_.notify_one();
+    };
+    if (collect->collectHandler_ != nullptr) {
+        collect->collectHandler_->PostTask(caseDoneNotifyTask);
+    }
+    std::unique_lock<std::mutex> lock(caseDoneLock_);
+    caseDoneCondition_.wait_for(lock, std::chrono::milliseconds(MAX_WAIT_TIME),
+        [&] () { return isCaseDone; });
     DTEST_LOG << " ReportEvent003 END" << std::endl;
 }
 } // namespace OHOS

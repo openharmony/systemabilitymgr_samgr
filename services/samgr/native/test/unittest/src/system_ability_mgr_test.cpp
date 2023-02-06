@@ -516,7 +516,8 @@ HWTEST_F(SystemAbilityMgrTest, StartOnDemandAbility001, TestSize.Level0)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
-    int32_t result = saMgr->StartOnDemandAbility(TEST_EXCEPTION_LOW_SA_ID);
+    bool isExist = false;
+    int32_t result = saMgr->StartOnDemandAbility(TEST_EXCEPTION_LOW_SA_ID, isExist);
     EXPECT_TRUE(result != ERR_NONE);
 }
 
@@ -529,7 +530,8 @@ HWTEST_F(SystemAbilityMgrTest, StartOnDemandAbility002, TestSize.Level0)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
-    int32_t result = saMgr->StartOnDemandAbility(TEST_EXCEPTION_HIGH_SA_ID);
+    bool isExist = false;
+    int32_t result = saMgr->StartOnDemandAbility(TEST_EXCEPTION_HIGH_SA_ID, isExist);
     EXPECT_TRUE(result != ERR_NONE);
 }
 
@@ -542,7 +544,8 @@ HWTEST_F(SystemAbilityMgrTest, StartOnDemandAbility003, TestSize.Level0)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
-    int32_t result = saMgr->StartOnDemandAbility(DISTRIBUTED_SCHED_TEST_SO_ID);
+    bool isExist = false;
+    int32_t result = saMgr->StartOnDemandAbility(DISTRIBUTED_SCHED_TEST_SO_ID, isExist);
     EXPECT_TRUE(result != ERR_NONE);
 }
 
@@ -555,7 +558,8 @@ HWTEST_F(SystemAbilityMgrTest, StartOnDemandAbility004, TestSize.Level0)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
-    int32_t result = saMgr->StartOnDemandAbility(DISTRIBUTED_SCHED_SA_ID);
+    bool isExist = false;
+    int32_t result = saMgr->StartOnDemandAbility(DISTRIBUTED_SCHED_SA_ID, isExist);
     EXPECT_TRUE(result != ERR_NONE);
 }
 
