@@ -67,7 +67,7 @@ void SystemAbilityStateScheduler::InitStateContext(const std::list<SaProfile>& s
         abilityContext->systemAbilityId = saProfile.saId;
         abilityContext->ownProcessContext = processContextMap_[saProfile.process];
         std::unique_lock<std::shared_mutex> abiltyWriteLock(abiltyMapLock_);
-        abiltyContextMap_[saProfile.saId] = abilityContext;
+        abilityContextMap_[saProfile.saId] = abilityContext;
     }
 }
 
@@ -75,11 +75,11 @@ bool SystemAbilityStateScheduler::GetSystemAbilityContext(int32_t systemAbilityI
     std::shared_ptr<SystemAbilityContext>& abilityContext)
 {
     std::shared_lock<std::shared_mutex> readLock(abiltyMapLock_);
-    if (abiltyContextMap_.count(systemAbilityId) == 0) {
+    if (abilityContextMap_.count(systemAbilityId) == 0) {
         HILOGE("[SA Scheduler][SA: %{public}d] not in SA profiles", systemAbilityId);
         return false;
     }
-    abilityContext = abiltyContextMap_[systemAbilityId];
+    abilityContext = abilityContextMap_[systemAbilityId];
     if (abilityContext == nullptr) {
         HILOGE("[SA Scheduler][SA: %{public}d] context is nullptr", systemAbilityId);
         return false;

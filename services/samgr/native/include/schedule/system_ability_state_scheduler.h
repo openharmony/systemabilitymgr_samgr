@@ -96,7 +96,7 @@ private:
     std::shared_ptr<SystemAbilityEventHandler> stateEventHandler_;
     std::shared_mutex abiltyMapLock_;
     std::shared_mutex processMapLock_;
-    std::map<int32_t, std::shared_ptr<SystemAbilityContext>> abiltyContextMap_;
+    std::map<int32_t, std::shared_ptr<SystemAbilityContext>> abilityContextMap_;
     std::map<std::u16string, std::shared_ptr<SystemProcessContext>> processContextMap_;
     std::shared_ptr<UnloadEventHandler> unloadEventHandler_;
     std::shared_ptr<AppExecFwk::EventHandler> processHandler_;

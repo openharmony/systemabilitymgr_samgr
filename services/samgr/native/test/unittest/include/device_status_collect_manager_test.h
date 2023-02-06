@@ -16,6 +16,9 @@
 #ifndef SAMGR_TEST_UNITTEST_INCLUDE_DEVICE_STATUS_COLLECT_MANAGER_TEST_H
 #define SAMGR_TEST_UNITTEST_INCLUDE_DEVICE_STATUS_COLLECT_MANAGER_TEST_H
 
+#include <condition_variable>
+#include <shared_mutex>
+
 #include "gtest/gtest.h"
 
 namespace OHOS {
@@ -25,6 +28,9 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+    bool isCaseDone;
+    std::mutex caseDoneLock_;
+    std::condition_variable caseDoneCondition_;
 };
 } // OHOS
 #endif /* SAMGR_TEST_UNITTEST_INCLUDE_DEVICE_STATUS_COLLECT_MANAGER_TEST_H */

@@ -107,7 +107,7 @@ public:
     sptr<IRemoteObject> GetSystemAbilityFromRemote(int32_t systemAbilityId);
     bool LoadSystemAbilityFromRpc(const std::string& srcDeviceId, int32_t systemAbilityId,
         const sptr<ISystemAbilityLoadCallback>& callback);
-    bool DoLoadSystemAbilityFromRpc(const std::string& srcDeviceId, int32_t systemAbilityId,
+    int32_t DoLoadSystemAbilityFromRpc(const std::string& srcDeviceId, int32_t systemAbilityId,
         const std::u16string& procName, const sptr<ISystemAbilityLoadCallback>& callback);
     void NotifyRpcLoadCompleted(const std::string& srcDeviceId, int32_t systemAbilityId,
         const sptr<IRemoteObject>& remoteObject);
@@ -131,7 +131,7 @@ private:
     SystemAbilityManager();
     void DoInsertSaData(const std::u16string& name, const sptr<IRemoteObject>& ability, const SAExtraProp& extraProp);
     bool IsNameInValid(const std::u16string& name);
-    int32_t StartOnDemandAbility(int32_t systemAbilityId);
+    int32_t StartOnDemandAbility(int32_t systemAbilityId, bool& isExist);
     void ParseRemoteSaName(const std::u16string& name, std::string& deviceId, std::u16string& saName);
     bool IsLocalDeviceId(const std::string& deviceId);
     bool CheckDistributedPermission();

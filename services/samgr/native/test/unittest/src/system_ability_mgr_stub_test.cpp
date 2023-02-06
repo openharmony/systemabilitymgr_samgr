@@ -42,6 +42,11 @@ constexpr uint32_t INVALID_CODE = 50;
 }
 void SystemAbilityMgrStubTest::SetUpTestCase()
 {
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+    std::list<SaProfile> saProfiles;
+    saMgr->abilityStateScheduler_->Init(saProfiles);
     DTEST_LOG << "SetUpTestCase" << std::endl;
 }
 
@@ -58,6 +63,33 @@ void SystemAbilityMgrStubTest::SetUp()
 void SystemAbilityMgrStubTest::TearDown()
 {
     DTEST_LOG << "TearDown" << std::endl;
+}
+
+void SystemAbilityMgrStubTest::AddSystemAbilityContext(int32_t systemAbilityId, const std::u16string& processName)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    EXPECT_TRUE(saMgr->abilityStateScheduler_ != nullptr);
+    std::unique_lock<std::shared_mutex> processWriteLock(saMgr->abilityStateScheduler_->processMapLock_);
+    if (saMgr->abilityStateScheduler_->processContextMap_.count(processName) == 0) {
+        auto processContext = std::make_shared<SystemProcessContext>();
+        processContext->processName = processName;
+        processContext->abilityStateCountMap[SystemAbilityState::NOT_LOADED] = 0;
+        processContext->abilityStateCountMap[SystemAbilityState::LOADING] = 0;
+        processContext->abilityStateCountMap[SystemAbilityState::LOADED] = 0;
+        processContext->abilityStateCountMap[SystemAbilityState::UNLOADABLE] = 0;
+        processContext->abilityStateCountMap[SystemAbilityState::UNLOADING] = 0;
+        saMgr->abilityStateScheduler_->processContextMap_[processName] = processContext;
+    }
+    saMgr->abilityStateScheduler_->processContextMap_[processName]->saList.push_back(systemAbilityId);
+    saMgr->abilityStateScheduler_->processContextMap_[processName]
+        ->abilityStateCountMap[SystemAbilityState::NOT_LOADED]++;
+
+    auto abilityContext = std::make_shared<SystemAbilityContext>();
+    abilityContext->systemAbilityId = systemAbilityId;
+    abilityContext->ownProcessContext = saMgr->abilityStateScheduler_->processContextMap_[processName];
+    std::unique_lock<std::shared_mutex> abiltyWriteLock(saMgr->abilityStateScheduler_->abiltyMapLock_);
+    saMgr->abilityStateScheduler_->abilityContextMap_[systemAbilityId] = abilityContext;
 }
 
 /**
@@ -1284,9 +1316,10 @@ HWTEST_F(SystemAbilityMgrStubTest, StartOnDemandAbility003, TestSize.Level3)
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     u16string procName = u"test";
     saMgr->onDemandAbilityMap_[SAID] = procName;
-    int32_t res = saMgr->StartOnDemandAbility(SAID);
+    bool isExist = false;
+    int32_t res = saMgr->StartOnDemandAbility(SAID, isExist);
     saMgr->onDemandAbilityMap_.clear();
-    EXPECT_EQ(res, ERR_OK);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
 }
 
 /**
@@ -1343,9 +1376,12 @@ HWTEST_F(SystemAbilityMgrStubTest, CheckSystemAbility006, TestSize.Level3)
     SystemAbilityManager::AbilityItem abilityItem;
     abilityItem.state = SystemAbilityManager::AbilityState::STARTING;
     saMgr->startingAbilityMap_[SAID] = abilityItem;
+    AddSystemAbilityContext(SAID, u"test");
     bool isExist = false;
     sptr<IRemoteObject> res = saMgr->CheckSystemAbility(SAID, isExist);
     saMgr->startingAbilityMap_.clear();
+    saMgr->abilityStateScheduler_->processContextMap_.clear();
+    saMgr->abilityStateScheduler_->abilityContextMap_.clear();
     EXPECT_EQ(isExist, true);
 }
 
@@ -1362,10 +1398,13 @@ HWTEST_F(SystemAbilityMgrStubTest, CheckSystemAbility007, TestSize.Level3)
     saMgr->startingAbilityMap_[SAID] = abilityItem;
     u16string proName = u"test";
     saMgr->onDemandAbilityMap_[SAID] = proName;
+    AddSystemAbilityContext(SAID, u"test");
     bool isExist = false;
     sptr<IRemoteObject> res = saMgr->CheckSystemAbility(SAID, isExist);
     saMgr->startingAbilityMap_.clear();
     saMgr->onDemandAbilityMap_.clear();
+    saMgr->abilityStateScheduler_->processContextMap_.clear();
+    saMgr->abilityStateScheduler_->abilityContextMap_.clear();
     EXPECT_EQ(isExist, true);
 }
 
@@ -1935,7 +1974,10 @@ HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbilityFromRpc003, TestSize.Level3)
     string srcDeviceId;
     saMgr->saProfileMap_[SAID] = saProfile;
     saMgr->abilityMap_[SAID] = saInfo;
+    AddSystemAbilityContext(SAID, u"listen_test");
     bool res = saMgr->LoadSystemAbilityFromRpc(srcDeviceId, SAID, callback);
+    saMgr->abilityStateScheduler_->processContextMap_.clear();
+    saMgr->abilityStateScheduler_->abilityContextMap_.clear();
     EXPECT_TRUE(res);
 }
 
@@ -1961,7 +2003,10 @@ HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbilityFromRpc004, TestSize.Level3)
     saMgr->abilityMap_[SAID] = saInfo;
     saMgr->startingAbilityMap_[SAID] = abilityItem;
     saMgr->startingProcessMap_[procName] = countNum;
+    AddSystemAbilityContext(SAID, procName);
     bool res = saMgr->LoadSystemAbilityFromRpc(srcDeviceId, SAID, callback);
+    saMgr->abilityStateScheduler_->processContextMap_.clear();
+    saMgr->abilityStateScheduler_->abilityContextMap_.clear();
     EXPECT_TRUE(res);
 }
 
@@ -2058,7 +2103,10 @@ HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbility004, TestSize.Level1)
     saMgr->abilityMap_[SAID] = saInfo;
     saMgr->startingAbilityMap_[SAID] = abilityItem;
     abilityItem.callbackMap["local"].push_back(make_pair(callback, SAID));
+    AddSystemAbilityContext(SAID, u"listen_test");
     int32_t res = saMgr->LoadSystemAbility(SAID, callback);
+    saMgr->abilityStateScheduler_->processContextMap_.clear();
+    saMgr->abilityStateScheduler_->abilityContextMap_.clear();
     EXPECT_EQ(res, ERR_OK);
 }
 
@@ -2078,7 +2126,10 @@ HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbility005, TestSize.Level3)
     saMgr->abilityMap_[SAID] = saInfo;
     saMgr->startingAbilityMap_[SAID] = abilityItem;
     saMgr->abilityCallbackDeath_ = nullptr;
+    AddSystemAbilityContext(SAID, u"listen_test");
     int32_t res = saMgr->LoadSystemAbility(SAID, callback);
+    saMgr->abilityStateScheduler_->processContextMap_.clear();
+    saMgr->abilityStateScheduler_->abilityContextMap_.clear();
     EXPECT_EQ(res, ERR_OK);
 }
 
@@ -2130,7 +2181,10 @@ HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbility008, TestSize.Level3)
     abilityItem.callbackMap["local"].push_back(make_pair(callbackTwo, SAID));
     saMgr->saProfileMap_[SAID] = saProfile;
     saMgr->startingAbilityMap_[SAID] = abilityItem;
+    AddSystemAbilityContext(SAID, u"listen_test");
     int32_t res = saMgr->LoadSystemAbility(SAID, callbackTwo);
+    saMgr->abilityStateScheduler_->processContextMap_.clear();
+    saMgr->abilityStateScheduler_->abilityContextMap_.clear();
     EXPECT_EQ(res, ERR_OK);
 }
 

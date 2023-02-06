@@ -252,6 +252,10 @@ void SystemAbilityManager::ProcessOnDemandEvent(const OnDemandEvent& event,
     HILOGI("SystemAbilityManager::ProcessEvent eventId:%{public}d name:%{public}s value:%{public}s",
         event.eventId, event.name.c_str(), event.value.c_str());
     sptr<ISystemAbilityLoadCallback> callback(new SystemAbilityLoadCallbackStub());
+    if (abilityStateScheduler_ == nullptr) {
+        HILOGE("abilityStateScheduler is nullptr");
+        return;
+    }
     for (auto& saControl : saControlList) {
         int32_t result = ERR_INVALID_VALUE;
         if (saControl.ondemandId == START_ON_DEMAND) {
@@ -474,14 +478,16 @@ int32_t SystemAbilityManager::AddOnDemandSystemAbilityInfo(int32_t systemAbility
     return ERR_OK;
 }
 
-int32_t SystemAbilityManager::StartOnDemandAbility(int32_t systemAbilityId)
+int32_t SystemAbilityManager::StartOnDemandAbility(int32_t systemAbilityId, bool& isExist)
 {
     lock_guard<recursive_mutex> onDemandAbilityLock(onDemandLock_);
     auto iter = onDemandAbilityMap_.find(systemAbilityId);
     if (iter == onDemandAbilityMap_.end()) {
+        isExist = false;
         return ERR_INVALID_VALUE;
     }
     HILOGI("found onDemandAbility: %{public}d.", systemAbilityId);
+    isExist = true;
     AbilityItem& abilityItem = startingAbilityMap_[systemAbilityId];
     return StartOnDemandAbilityInner(iter->second, systemAbilityId, abilityItem);
 }
@@ -489,6 +495,10 @@ int32_t SystemAbilityManager::StartOnDemandAbility(int32_t systemAbilityId)
 sptr<IRemoteObject> SystemAbilityManager::CheckSystemAbility(int32_t systemAbilityId, bool& isExist)
 {
     if (!CheckInputSysAbilityId(systemAbilityId)) {
+        return nullptr;
+    }
+    if (abilityStateScheduler_ == nullptr) {
+        HILOGE("abilityStateScheduler is nullptr");
         return nullptr;
     }
     if (abilityStateScheduler_->IsSystemAbilityUnloading(systemAbilityId)) {
@@ -517,13 +527,7 @@ bool SystemAbilityManager::DoLoadOnDemandAbility(int32_t systemAbilityId, bool& 
         isExist = true;
         return true;
     }
-    int32_t ret = StartOnDemandAbility(systemAbilityId);
-    if (ret == ERR_OK) {
-        isExist = true;
-        return true;
-    }
-    isExist = false;
-    return false;
+    return StartOnDemandAbility(systemAbilityId, isExist) == ERR_OK;
 }
 
 int32_t SystemAbilityManager::RemoveSystemAbility(int32_t systemAbilityId)
@@ -546,6 +550,10 @@ int32_t SystemAbilityManager::RemoveSystemAbility(int32_t systemAbilityId)
         (void)abilityMap_.erase(itSystemAbility);
         HILOGI("%s called, systemAbilityId : %{public}d, size : %{public}zu", __func__, systemAbilityId,
             abilityMap_.size());
+    }
+    if (abilityStateScheduler_ == nullptr) {
+        HILOGE("abilityStateScheduler is nullptr");
+        return ERR_INVALID_VALUE;
     }
     abilityStateScheduler_->SendAbilityStateEvent(systemAbilityId, AbilityStateEvent::ABILITY_UNLOAD_SUCCESS_EVENT);
     SendSystemAbilityRemovedMsg(systemAbilityId);
@@ -578,6 +586,10 @@ int32_t SystemAbilityManager::RemoveSystemAbility(const sptr<IRemoteObject>& abi
     }
 
     if (saId != 0) {
+        if (abilityStateScheduler_ == nullptr) {
+            HILOGE("abilityStateScheduler is nullptr");
+            return ERR_INVALID_VALUE;
+        }
         abilityStateScheduler_->SendAbilityStateEvent(saId, AbilityStateEvent::ABILITY_UNLOAD_SUCCESS_EVENT);
         SendSystemAbilityRemovedMsg(saId);
     }
@@ -766,6 +778,10 @@ int32_t SystemAbilityManager::AddSystemAbility(int32_t systemAbilityId, const sp
             HILOGI("start result is %{public}s", ret ? "succeed" : "fail");
         }
     }
+    if (abilityStateScheduler_ == nullptr) {
+        HILOGE("abilityStateScheduler is nullptr");
+        return ERR_INVALID_VALUE;
+    }
     abilityStateScheduler_->SendAbilityStateEvent(systemAbilityId, AbilityStateEvent::ABILITY_LOAD_SUCCESS_EVENT);
     SendSystemAbilityAddedMsg(systemAbilityId, ability);
     return ERR_OK;
@@ -801,6 +817,10 @@ int32_t SystemAbilityManager::AddSystemProcess(const u16string& procName,
             startingProcessMap_.erase(iterStarting);
         }
     }
+    if (abilityStateScheduler_ == nullptr) {
+        HILOGE("abilityStateScheduler is nullptr");
+        return ERR_INVALID_VALUE;
+    }
     auto callingPid = IPCSkeleton::GetCallingPid();
     auto callingUid = IPCSkeleton::GetCallingUid();
     ProcessInfo processInfo = {procName, callingPid, callingUid};
@@ -835,6 +855,10 @@ int32_t SystemAbilityManager::RemoveSystemProcess(const sptr<IRemoteObject>& pro
         }
     }
     if (result == ERR_OK) {
+        if (abilityStateScheduler_ == nullptr) {
+            HILOGE("abilityStateScheduler is nullptr");
+            return ERR_INVALID_VALUE;
+        }
         ProcessInfo processInfo = {processName};
         abilityStateScheduler_->SendProcessStateEvent(processInfo, ProcessStateEvent::PROCESS_STOPPED_EVENT);
     } else {
@@ -906,6 +930,10 @@ void SystemAbilityManager::SendCheckLoadedMsg(int32_t systemAbilityId, const std
             return;
         }
         CleanCallbackForLoadFailed(systemAbilityId, name, srcDeviceId, callback);
+        if (abilityStateScheduler_ == nullptr) {
+            HILOGE("abilityStateScheduler is nullptr");
+            return;
+        }
         abilityStateScheduler_->SendAbilityStateEvent(systemAbilityId, AbilityStateEvent::ABILITY_LOAD_FAILED_EVENT);
         (void)GetSystemProcess(name);
     };
@@ -1030,7 +1058,11 @@ int32_t SystemAbilityManager::StartingSystemProcess(const std::u16string& procNa
     }
     auto iter = systemProcessMap_.find(procName);
     if (iter != systemProcessMap_.end()) {
-        StartOnDemandAbility(systemAbilityId);
+        bool isExist = false;
+        StartOnDemandAbility(systemAbilityId, isExist);
+        if (!isExist) {
+            HILOGE("not found onDemandAbility: %{public}d.", systemAbilityId);
+        }
         return ERR_OK;
     }
     // call init start process
@@ -1080,7 +1112,7 @@ int32_t SystemAbilityManager::DoLoadSystemAbility(int32_t systemAbilityId, const
     return result;
 }
 
-bool SystemAbilityManager::DoLoadSystemAbilityFromRpc(const std::string& srcDeviceId, int32_t systemAbilityId,
+int32_t SystemAbilityManager::DoLoadSystemAbilityFromRpc(const std::string& srcDeviceId, int32_t systemAbilityId,
     const std::u16string& procName, const sptr<ISystemAbilityLoadCallback>& callback)
 {
     {
@@ -1088,14 +1120,14 @@ bool SystemAbilityManager::DoLoadSystemAbilityFromRpc(const std::string& srcDevi
         sptr<IRemoteObject> targetObject = CheckSystemAbility(systemAbilityId);
         if (targetObject != nullptr) {
             SendLoadedSystemAblityMsg(systemAbilityId, targetObject, callback);
-            return true;
+            return ERR_OK;
         }
         auto& abilityItem = startingAbilityMap_[systemAbilityId];
         abilityItem.callbackMap[srcDeviceId].emplace_back(callback, 0);
         StartingSystemProcess(procName, systemAbilityId);
     }
     SendCheckLoadedMsg(systemAbilityId, procName, srcDeviceId, callback);
-    return true;
+    return ERR_OK;
 }
 
 int32_t SystemAbilityManager::LoadSystemAbility(int32_t systemAbilityId,
@@ -1135,6 +1167,10 @@ bool SystemAbilityManager::LoadSystemAbilityFromRpc(const std::string& srcDevice
         return false;
     }
     LoadRequestInfo loadRequestInfo = {systemAbilityId, srcDeviceId, callback};
+    if (abilityStateScheduler_ == nullptr) {
+        HILOGE("abilityStateScheduler is nullptr");
+        return false;
+    }
     return abilityStateScheduler_->HandleLoadAbilityEvent(loadRequestInfo) == ERR_OK;
 }
 
@@ -1160,6 +1196,10 @@ int32_t SystemAbilityManager::UnloadSystemAbility(int32_t systemAbilityId)
     if (nativeTokenInfo.processName!= callProcess) {
         HILOGE("cannot unload system ability in other system, processName:%{public}s",
             nativeTokenInfo.processName.c_str());
+        return ERR_INVALID_VALUE;
+    }
+    if (abilityStateScheduler_ == nullptr) {
+        HILOGE("abilityStateScheduler is nullptr");
         return ERR_INVALID_VALUE;
     }
     return abilityStateScheduler_->HandleUnloadAbilityEvent(systemAbilityId);

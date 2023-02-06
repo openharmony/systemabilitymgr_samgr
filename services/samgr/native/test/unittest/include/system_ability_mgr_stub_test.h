@@ -25,6 +25,7 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+    void AddSystemAbilityContext(int32_t systemAbilityId, const std::u16string& processName);
 };
 } // OHOS
 #endif /* SAMGR_TEST_UNITTEST_INCLUDE_SYSTEM_ABILITY_MGR_PROXY_TEST_H */
