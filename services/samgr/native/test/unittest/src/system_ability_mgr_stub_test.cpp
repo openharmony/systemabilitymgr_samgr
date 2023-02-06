@@ -2413,4 +2413,118 @@ HWTEST_F(SystemAbilityMgrStubTest, OnLoadSACompleteForRemoteInner001, TestSize.L
     int32_t result = testAbility->OnLoadSACompleteForRemoteInner(data, reply);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
 }
+
+/**
+ * @tc.name: UnloadSystemAbilityInner001
+ * @tc.desc: call UnloadSystemAbility with invalid said
+ * @tc.type: FUNC
+ * @tc.require: I6AJ3S
+ */
+HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbilityInner001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInt32(INVALID_SAID);
+    int32_t result = saMgr->UnloadSystemAbilityInner(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: UnloadSystemAbilityInner002
+ * @tc.desc: call UnloadSystemAbility
+ * @tc.type: FUNC
+ * @tc.require: I6AJ3S
+ */
+HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbilityInner002, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInt32(SAID);
+    int32_t result = saMgr->UnloadSystemAbilityInner(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: UnloadSystemAbility001
+ * @tc.desc: call UnloadSystemAbility with invalid said
+ * @tc.type: FUNC
+ * @tc.require: I6AJ3S
+ */
+HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    int32_t result = saMgr->UnloadSystemAbility(INVALID_SAID);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: UnloadSystemAbility002
+ * @tc.desc: call UnloadSystemAbility with sa profile is not exist
+ * @tc.type: FUNC
+ * @tc.require: I6AJ3S
+ */
+HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility002, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    int32_t result = saMgr->UnloadSystemAbility(SAID);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: UnloadSystemAbility003
+ * @tc.desc: call UnloadSystemAbility not from native process
+ * @tc.type: FUNC
+ * @tc.require: I6AJ3S
+ */
+HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility003, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    SaProfile saProfile;
+    saMgr->saProfileMap_[SAID] = saProfile;
+    int32_t result = saMgr->UnloadSystemAbility(SAID);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: UnloadSystemAbility004
+ * @tc.desc: call UnloadSystemAbility from invalid process
+ * @tc.type: FUNC
+ * @tc.require: I6AJ3S
+ */
+HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility004, TestSize.Level3)
+{
+    SamMockPermission::MockProcess("invalidProcess");
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    SaProfile saProfile;
+    saProfile.process = u"testProcess";
+    saMgr->saProfileMap_[SAID] = saProfile;
+    int32_t result = saMgr->UnloadSystemAbility(SAID);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: UnloadSystemAbility005
+ * @tc.desc: call UnloadSystemAbility
+ * @tc.type: FUNC
+ * @tc.require: I6AJ3S
+ */
+HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility005, TestSize.Level3)
+{
+    SamMockPermission::MockProcess("testProcess");
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    SaProfile saProfile;
+    saProfile.process = u"testProcess";
+    saMgr->saProfileMap_[SAID] = saProfile;
+    int32_t result = saMgr->UnloadSystemAbility(SAID);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
 }
