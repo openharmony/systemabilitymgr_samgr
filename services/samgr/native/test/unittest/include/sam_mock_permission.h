@@ -20,6 +20,7 @@ namespace OHOS {
 class SamMockPermission {
 public:
     static void MockPermission();
+    static void MockProcess(const char* processName);
 };
 } // namespace OHOS
 #endif // SAMGR_SERVICES_SAMGR_MOCK_PERMISSION_H

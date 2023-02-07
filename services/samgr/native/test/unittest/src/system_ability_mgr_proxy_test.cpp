@@ -369,6 +369,34 @@ HWTEST_F(SystemAbilityMgrProxyTest, LoadSystemAbility004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UnloadSystemAbility001
+ * @tc.desc: call UnloadSystemAbility with invalid said
+ * @tc.type: FUNC
+ * @tc.require: I6AJ3S
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, UnloadSystemAbility001, TestSize.Level1)
+{
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    EXPECT_NE(sm, nullptr);
+    int32_t res = sm->UnloadSystemAbility(TEST_ID_NORANGE_SAID);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: UnloadSystemAbility002
+ * @tc.desc: call UnloadSystemAbility
+ * @tc.type: FUNC
+ * @tc.require: I6AJ3S
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, UnloadSystemAbility002, TestSize.Level1)
+{
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    EXPECT_NE(sm, nullptr);
+    int32_t res = sm->UnloadSystemAbility(TEST_ID_VAILD);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+}
+
+/**
  * @tc.name: ServiceRegistry001
  * @tc.desc: check ServiceRegistry
  * @tc.type: FUNC

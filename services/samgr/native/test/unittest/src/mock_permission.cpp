@@ -38,4 +38,24 @@ void SamMockPermission::MockPermission()
     tokenId = GetAccessTokenId(&infoInstance);
     SetSelfTokenID(tokenId);
 }
+
+void SamMockPermission::MockProcess(const char* processName)
+{
+    static const char *PERMS[] = {
+        "ohos.permission.DISTRIBUTED_DATASYNC"
+    };
+    uint64_t tokenId;
+    NativeTokenInfoParams infoInstance = {
+        .dcapsNum = 0,
+        .permsNum = 1,
+        .aclsNum = 0,
+        .dcaps = nullptr,
+        .perms = PERMS,
+        .acls = nullptr,
+        .processName = processName,
+        .aplStr = "system_core",
+    };
+    tokenId = GetAccessTokenId(&infoInstance);
+    SetSelfTokenID(tokenId);
+}
 }
