@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef SERVICES_SAMGR_NATIVE_INCLUDE_RPC_CALLBACK_IMP_H_
-#define SERVICES_SAMGR_NATIVE_INCLUDE_RPC_CALLBACK_IMP_H_
+#ifndef SERVICES_SAMGR_NATIVE_INCLUDE_RPC_CALLBACK_IMP_H
+#define SERVICES_SAMGR_NATIVE_INCLUDE_RPC_CALLBACK_IMP_H
 
 #include "rpc_system_ability_callback.h"
 #include "system_ability_load_callback_stub.h"
@@ -39,4 +39,4 @@ protected:
 };
 } // namespace OHOS
 
-#endif // !defined(SERVICES_SAMGR_NATIVE_INCLUDE_ABILITY_DEATH_RECIPIENT_H_)
+#endif // !defined(SERVICES_SAMGR_NATIVE_INCLUDE_ABILITY_DEATH_RECIPIENT_H)

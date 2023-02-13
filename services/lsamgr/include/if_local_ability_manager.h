@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef IF_LOCAL_ABILITY_MANAGER_H_
-#define IF_LOCAL_ABILITY_MANAGER_H_
+#ifndef IF_LOCAL_ABILITY_MANAGER_H
+#define IF_LOCAL_ABILITY_MANAGER_H
 
 #include <string>
 #include "iremote_broker.h"
@@ -37,4 +37,4 @@ protected:
     static inline const std::u16string LOCAL_ABILITY_MANAGER_INTERFACE_TOKEN = u"ohos.localabilitymanager.accessToken";
 };
 }
-#endif // !defined(IF_LOCAL_ABILITY_MANAGER_H_)
+#endif // !defined(IF_LOCAL_ABILITY_MANAGER_H)

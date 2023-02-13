@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef SAMGR_PROXY_INCLUDE_SAM_LOG_H_
-#define SAMGR_PROXY_INCLUDE_SAM_LOG_H_
+#ifndef SAMGR_PROXY_INCLUDE_SAM_LOG_H
+#define SAMGR_PROXY_INCLUDE_SAM_LOG_H
 
 #include "hilog/log.h"
 
@@ -60,4 +60,4 @@ static constexpr OHOS::HiviewDFX::HiLogLabel SYSTEM_ABLILITY_LABEL = {
 #define HILOGD(...) (void)OHOS::HiviewDFX::HiLog::Debug(SYSTEM_ABLILITY_LABEL, __VA_ARGS__)
 } // namespace OHOS
 
-#endif // #ifndef SAMGR_PROXY_INCLUDE_SAM_LOG_H_
+#endif // #ifndef SAMGR_PROXY_INCLUDE_SAM_LOG_H
