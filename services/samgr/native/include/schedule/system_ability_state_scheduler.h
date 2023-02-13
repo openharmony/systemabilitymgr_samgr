@@ -42,7 +42,7 @@ public:
     
     int32_t HandleLoadAbilityEvent(const LoadRequestInfo& loadRequestInfo);
     int32_t HandleLoadAbilityEvent(int32_t systemAbilityId, bool& isExist);
-    int32_t HandleUnloadAbilityEvent(int32_t systemAbilityId);
+    int32_t HandleUnloadAbilityEvent(int32_t systemAbilityId, UnloadReason unloadReason);
     int32_t SendAbilityStateEvent(int32_t systemAbilityId, AbilityStateEvent event);
     int32_t SendProcessStateEvent(const ProcessInfo& processInfo, ProcessStateEvent event);
     bool IsSystemAbilityUnloading(int32_t systemAbilityId);
@@ -53,6 +53,10 @@ private:
         std::shared_ptr<SystemAbilityContext>& abilityContext);
     bool GetSystemProcessContext(const std::u16string& processName,
         std::shared_ptr<SystemProcessContext>& processContext);
+
+    int32_t HandleLoadAbilityEventLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext,
+        const LoadRequestInfo& loadRequestInfo);
+    int32_t HandleUnloadAbilityEventLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext);
 
     int32_t SendDelayUnloadEvent(int32_t systemAbilityId);
     int32_t RemoveDelayUnloadEvent(int32_t systemAbilityId);

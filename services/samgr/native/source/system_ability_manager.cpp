@@ -263,7 +263,7 @@ void SystemAbilityManager::ProcessOnDemandEvent(const OnDemandEvent& event,
             LoadRequestInfo loadRequestInfo = {saControl.saId, LOCAL_DEVICE, callback, callingPid};
             result = abilityStateScheduler_->HandleLoadAbilityEvent(loadRequestInfo);
         } else if (saControl.ondemandId == STOP_ON_DEMAND) {
-            result = abilityStateScheduler_->HandleUnloadAbilityEvent(saControl.saId);
+            result = abilityStateScheduler_->HandleUnloadAbilityEvent(saControl.saId, UnloadReason::ONDEMAND_EVENT);
         } else {
             HILOGE("ondemandId error");
         }
@@ -1202,7 +1202,7 @@ int32_t SystemAbilityManager::UnloadSystemAbility(int32_t systemAbilityId)
         HILOGE("abilityStateScheduler is nullptr");
         return ERR_INVALID_VALUE;
     }
-    return abilityStateScheduler_->HandleUnloadAbilityEvent(systemAbilityId);
+    return abilityStateScheduler_->HandleUnloadAbilityEvent(systemAbilityId, UnloadReason::INTERFACE_CAll);
 }
 
 int32_t SystemAbilityManager::DoUnloadSystemAbility(int32_t systemAbilityId, const std::u16string& procName)

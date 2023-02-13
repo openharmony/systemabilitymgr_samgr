@@ -54,6 +54,11 @@ struct LoadRequestInfo {
     int32_t callingPid = -1;
 };
 
+enum class UnloadReason {
+    INTERFACE_CAll = 0,
+    ONDEMAND_EVENT,
+};
+
 struct SystemProcessContext {
     std::u16string processName;
     int32_t pid = -1;
@@ -72,6 +77,7 @@ struct SystemAbilityContext {
     PendingEvent pendingEvent = PendingEvent::NO_EVENT;
     std::map<int32_t, int32_t> pendingLoadEventCountMap;
     std::list<LoadRequestInfo> pendingLoadEventList;
+    UnloadReason unloadReason = UnloadReason::INTERFACE_CAll;
 };
 } // namespace OHOS
 
