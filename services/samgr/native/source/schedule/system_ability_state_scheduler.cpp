@@ -520,6 +520,8 @@ void SystemAbilityStateScheduler::OnAbilityNotLoadedLocked(int32_t systemAbility
     if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
         return;
     }
+    RemoveDelayUnloadEventLocked(abilityContext->systemAbilityId);
+    RemovePendingUnloadEventLocked(abilityContext);
     bool result = true;
     if (abilityContext->ownProcessContext->state == SystemProcessState::STOPPING) {
         result = processHandler_->PostTask([this, abilityContext] () {
