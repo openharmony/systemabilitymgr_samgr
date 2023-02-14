@@ -195,22 +195,21 @@ int32_t SystemAbilityStateScheduler::HandleUnloadAbilityEvent(int32_t systemAbil
         return ERR_INVALID_VALUE;
     }
     std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
-    abilityContext->unloadReason = unloadReason;
-    return HandleUnloadAbilityEventLocked(abilityContext);
+    return HandleUnloadAbilityEventLocked(abilityContext, unloadReason);
 }
 
 int32_t SystemAbilityStateScheduler::HandleUnloadAbilityEventLocked(
-    const std::shared_ptr<SystemAbilityContext>& abilityContext)
+    const std::shared_ptr<SystemAbilityContext>& abilityContext, UnloadReason unloadReason)
 {
     int32_t result = ERR_INVALID_VALUE;
     switch (abilityContext->state) {
         case SystemAbilityState::LOADING:
-            result = PendUnloadEventLocked(abilityContext);
+            result = PendUnloadEventLocked(abilityContext, unloadReason);
             break;
         case SystemAbilityState::LOADED:
-            if (abilityContext->unloadReason == UnloadReason::INTERFACE_CAll) {
+            if (unloadReason == UnloadReason::INTERFACE_CAll) {
                 result = stateMachine_->AbilityStateTransitionLocked(abilityContext, SystemAbilityState::UNLOADABLE);
-            } else if (abilityContext->unloadReason == UnloadReason::ONDEMAND_EVENT) {
+            } else if (unloadReason == UnloadReason::ONDEMAND_EVENT) {
                 result = SendDelayUnloadEvent(abilityContext->systemAbilityId);
             }
             break;
@@ -302,10 +301,11 @@ int32_t SystemAbilityStateScheduler::PendLoadEventLocked(const std::shared_ptr<S
 }
 
 int32_t SystemAbilityStateScheduler::PendUnloadEventLocked(
-    const std::shared_ptr<SystemAbilityContext>& abilityContext)
+    const std::shared_ptr<SystemAbilityContext>& abilityContext, UnloadReason unloadReason)
 {
     HILOGI("[SA Scheduler][SA: %{public}d] save unload event", abilityContext->systemAbilityId);
     abilityContext->pendingEvent = PendingEvent::UNLOAD_ABILITY_EVENT;
+    abilityContext->pendingUnloadReason = unloadReason;
     return ERR_OK;
 }
 
@@ -349,7 +349,7 @@ int32_t SystemAbilityStateScheduler::HandlePendingUnloadEventLocked(
         return ERR_OK;
     }
     abilityContext->pendingEvent = PendingEvent::NO_EVENT;
-    return HandleUnloadAbilityEventLocked(abilityContext);
+    return HandleUnloadAbilityEventLocked(abilityContext, abilityContext->pendingUnloadReason);
 }
 
 int32_t SystemAbilityStateScheduler::DoLoadSystemAbilityLocked(

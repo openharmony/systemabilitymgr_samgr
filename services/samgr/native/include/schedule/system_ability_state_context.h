@@ -77,7 +77,7 @@ struct SystemAbilityContext {
     PendingEvent pendingEvent = PendingEvent::NO_EVENT;
     std::map<int32_t, int32_t> pendingLoadEventCountMap;
     std::list<LoadRequestInfo> pendingLoadEventList;
-    UnloadReason unloadReason = UnloadReason::INTERFACE_CAll;
+    UnloadReason pendingUnloadReason = UnloadReason::INTERFACE_CAll;
 };
 } // namespace OHOS
 
