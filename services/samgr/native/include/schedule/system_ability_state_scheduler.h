@@ -59,8 +59,8 @@ private:
     int32_t HandleUnloadAbilityEventLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext,
         UnloadReason unloadReason);
 
-    int32_t SendDelayUnloadEvent(int32_t systemAbilityId);
-    int32_t RemoveDelayUnloadEvent(int32_t systemAbilityId);
+    int32_t SendDelayUnloadEventLocked(uint32_t systemAbilityId);
+    int32_t RemoveDelayUnloadEventLocked(uint32_t systemAbilityId);
     int32_t ProcessDelayUnloadEvent(int32_t systemAbilityId);
 
     int32_t PendLoadEventLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext,
