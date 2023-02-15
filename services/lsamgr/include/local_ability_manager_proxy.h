@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef LOCAL_ABILITY_MANAGER_PROXY_H_
-#define LOCAL_ABILITY_MANAGER_PROXY_H_
+#ifndef LOCAL_ABILITY_MANAGER_PROXY_H
+#define LOCAL_ABILITY_MANAGER_PROXY_H
 
 #include <string>
 #include "hilog/log.h"
@@ -37,4 +37,4 @@ private:
     OHOS::HiviewDFX::HiLogLabel label_ = { LOG_CORE, 0xD001800, "SA" };
 };
 }
-#endif // !defined(LOCAL_ABILITY_MANAGER_PROXY_H_)
+#endif // !defined(LOCAL_ABILITY_MANAGER_PROXY_H)

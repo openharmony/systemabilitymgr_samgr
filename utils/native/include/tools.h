@@ -14,8 +14,8 @@
  */
 
 
-#ifndef UTILS_NATIVE_INCLUDE_TOOLS_H_
-#define UTILS_NATIVE_INCLUDE_TOOLS_H_
+#ifndef UTILS_NATIVE_INCLUDE_TOOLS_H
+#define UTILS_NATIVE_INCLUDE_TOOLS_H
 
 #include <string>
 
@@ -31,4 +31,4 @@ std::u16string DeleteBlank(const std::u16string& str);
 std::string AnonymizeDeviceId(const std::string& deviceId);
 }
 
-#endif // !defined(UTILS_NATIVE_INCLUDE_TOOLS_H_)
+#endif // !defined(UTILS_NATIVE_INCLUDE_TOOLS_H)

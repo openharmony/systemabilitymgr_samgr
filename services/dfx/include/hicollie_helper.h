@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef SERVICES_DFX_INCLUDE_HICOLLIE_HELLER_H_
-#define SERVICES_DFX_INCLUDE_HICOLLIE_HELLER_H_
+#ifndef SERVICES_DFX_INCLUDE_HICOLLIE_HELLER_H
+#define SERVICES_DFX_INCLUDE_HICOLLIE_HELLER_H
 #include "event_handler.h"
 #include <string>
 namespace OHOS {
@@ -24,4 +24,4 @@ public:
         std::function<void(const std::string& name, int waitState)> timeOutCallback, uint64_t interval);
 };
 }  // namespace OHOS
-#endif  // SERVICES_DFX_INCLUDE_HICOLLIE_HELLER_H_
+#endif  // SERVICES_DFX_INCLUDE_HICOLLIE_HELLER_H
