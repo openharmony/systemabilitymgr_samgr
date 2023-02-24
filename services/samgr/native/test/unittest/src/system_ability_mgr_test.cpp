@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,6 +49,7 @@ constexpr int32_t TEST_SYSTEM_ABILITY2 = 1492;
 constexpr int32_t SHFIT_BIT = 32;
 constexpr int32_t ONDEMAND_SLEEP_TIME = 600 * 1000; // us
 constexpr int32_t MAX_COUNT = INT32_MAX - 1000000;
+const std::string SA_TAG_DEVICE_ON_LINE = "deviceonline";
 
 const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 const string ONDEMAND_PARAM = "persist.samgr.perf.ondemand";
@@ -1807,5 +1808,112 @@ HWTEST_F(SystemAbilityMgrTest, GetAllOndemandSa002, TestSize.Level3)
     EXPECT_FALSE(value);
     saMgr->saProfileMap_.clear();
     saMgr->abilityMap_.clear();
+}
+
+/**
+ * @tc.name: Test CheckStartEnableOnce001
+ * @tc.desc: CheckStartEnableOnce001
+ * @tc.type: FUNC
+ * @tc.require: I6H10P
+ */
+HWTEST_F(SystemAbilityMgrTest, CheckStartEnableOnce001, TestSize.Level3)
+{
+    DTEST_LOG << " CheckStartEnableOnce001 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
+    SaControlInfo saControl = { START_ON_DEMAND, TEST_SYSTEM_ABILITY1};
+    sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
+    int32_t result = saMgr->CheckStartEnableOnce(event, saControl, callback);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    saMgr->RemoveSystemAbility(TEST_SYSTEM_ABILITY1);
+}
+
+/**
+ * @tc.name: Test CheckStartEnableOnce002
+ * @tc.desc: CheckStartEnableOnce002
+ * @tc.type: FUNC
+ * @tc.require: I6H10P
+ */
+HWTEST_F(SystemAbilityMgrTest, CheckStartEnableOnce002, TestSize.Level3)
+{
+    DTEST_LOG << " CheckStartEnableOnce002 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
+    SaControlInfo saControl = { START_ON_DEMAND, TEST_SYSTEM_ABILITY1, true};
+    sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
+    int32_t result = saMgr->CheckStartEnableOnce(event, saControl, callback);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    saMgr->RemoveSystemAbility(TEST_SYSTEM_ABILITY1);
+}
+
+/**
+ * @tc.name: Test CheckStartEnableOnce003
+ * @tc.desc: CheckStartEnableOnce003
+ * @tc.type: FUNC
+ * @tc.require: I6H10P
+ */
+HWTEST_F(SystemAbilityMgrTest, CheckStartEnableOnce003, TestSize.Level3)
+{
+    DTEST_LOG << " CheckStartEnableOnce003 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
+    SaControlInfo saControl = { START_ON_DEMAND, TEST_SYSTEM_ABILITY1, true};
+    sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
+    saMgr->startEnableOnceMap_[saControl.saId].emplace_back(event);
+    int32_t result = saMgr->CheckStartEnableOnce(event, saControl, callback);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    saMgr->RemoveSystemAbility(TEST_SYSTEM_ABILITY1);
+}
+
+/**
+ * @tc.name: Test CheckStopEnableOnce001
+ * @tc.desc: CheckStopEnableOnce001
+ * @tc.type: FUNC
+ * @tc.require: I6H10P
+ */
+HWTEST_F(SystemAbilityMgrTest, CheckStopEnableOnce001, TestSize.Level3)
+{
+    DTEST_LOG << " CheckStopEnableOnce001 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "off" };
+    SaControlInfo saControl = { STOP_ON_DEMAND, TEST_SYSTEM_ABILITY1};
+    int32_t result = saMgr->CheckStopEnableOnce(event, saControl);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    saMgr->RemoveSystemAbility(TEST_SYSTEM_ABILITY1);
+}
+
+/**
+ * @tc.name: Test CheckStopEnableOnce002
+ * @tc.desc: CheckStopEnableOnce002
+ * @tc.type: FUNC
+ * @tc.require: I6H10P
+ */
+HWTEST_F(SystemAbilityMgrTest, CheckStopEnableOnce002, TestSize.Level3)
+{
+    DTEST_LOG << " CheckStopEnableOnce002 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "off" };
+    SaControlInfo saControl = { STOP_ON_DEMAND, TEST_SYSTEM_ABILITY1, true};
+    int32_t result = saMgr->CheckStopEnableOnce(event, saControl);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    saMgr->RemoveSystemAbility(TEST_SYSTEM_ABILITY1);
+}
+
+/**
+ * @tc.name: Test CheckStopEnableOnce003
+ * @tc.desc: CheckStopEnableOnce003
+ * @tc.type: FUNC
+ * @tc.require: I6H10P
+ */
+HWTEST_F(SystemAbilityMgrTest, CheckStopEnableOnce003, TestSize.Level3)
+{
+    DTEST_LOG << " CheckStopEnableOnce003 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "off" };
+    SaControlInfo saControl = { STOP_ON_DEMAND, TEST_SYSTEM_ABILITY1, true};
+    saMgr->stopEnableOnceMap_[saControl.saId].emplace_back(event);
+    int32_t result = saMgr->CheckStopEnableOnce(event, saControl);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    saMgr->RemoveSystemAbility(TEST_SYSTEM_ABILITY1);
 }
 } // namespace OHOS
