@@ -62,7 +62,8 @@ HWTEST_F(LocalAbilityManagerProxyTest, LocalAbilityManagerProxy001, TestSize.Lev
 {
     sptr<IRemoteObject> testAbility(new TestTransactionService());
     sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
-    bool res = localAbility->StartAbility(TEST_SAID_INVAILD);
+    string eventStr = "name:usual.event.SCREEN_ON,said:1499,type:4,value:";
+    bool res = localAbility->StartAbility(TEST_SAID_INVAILD, eventStr);
     EXPECT_EQ(res, false);
 }
 
@@ -75,7 +76,8 @@ HWTEST_F(LocalAbilityManagerProxyTest, LocalAbilityManagerProxy001, TestSize.Lev
 HWTEST_F(LocalAbilityManagerProxyTest, LocalAbilityManagerProxy002, TestSize.Level1)
 {
     sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(nullptr));
-    bool res = localAbility->StartAbility(TEST_SAID_VAILD);
+    string eventStr = "name:usual.event.SCREEN_ON,said:1499,type:4,value:";
+    bool res = localAbility->StartAbility(TEST_SAID_VAILD, eventStr);
     EXPECT_EQ(res, false);
 }
 
@@ -89,7 +91,8 @@ HWTEST_F(LocalAbilityManagerProxyTest, LocalAbilityManagerProxy003, TestSize.Lev
 {
     sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
     sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
-    bool res = localAbility->StartAbility(TEST_SAID_VAILD);
+    string eventStr = "name:usual.event.SCREEN_ON,said:1499,type:4,value:";
+    bool res = localAbility->StartAbility(TEST_SAID_VAILD, eventStr);
     EXPECT_EQ(res, true);
 }
 
@@ -105,7 +108,8 @@ HWTEST_F(LocalAbilityManagerProxyTest, LocalAbilityManagerProxy004, TestSize.Lev
     testAbility->result_ = 1;
     sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
     EXPECT_NE(localAbility, nullptr);
-    bool res = localAbility->StartAbility(TEST_SAID_VAILD);
+    string eventStr = "name:usual.event.SCREEN_ON,said:1499,type:4,value:";
+    bool res = localAbility->StartAbility(TEST_SAID_VAILD, eventStr);
     EXPECT_EQ(res, false);
 }
 }

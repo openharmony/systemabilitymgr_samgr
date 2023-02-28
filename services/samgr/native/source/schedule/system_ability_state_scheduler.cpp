@@ -27,7 +27,9 @@ namespace {
 constexpr int32_t MAX_SUBSCRIBE_COUNT = 256;
 constexpr int32_t UNLOAD_DELAY_TIME = 20 * 1000;
 constexpr int32_t UNLOAD_TIMEOUT_TIME = 5 * 1000;
+constexpr int64_t DEFAULT_EVENTID = 0;
 const std::string LOCAL_DEVICE = "local";
+const std::string DEFAULT_LOAD_NAME = "loadfromrpc";
 }
 void SystemAbilityStateScheduler::Init(const std::list<SaProfile>& saProfiles)
 {
@@ -62,7 +64,6 @@ void SystemAbilityStateScheduler::InitStateContext(const std::list<SaProfile>& s
         }
         processContextMap_[saProfile.process]->saList.push_back(saProfile.saId);
         processContextMap_[saProfile.process]->abilityStateCountMap[SystemAbilityState::NOT_LOADED]++;
-
         auto abilityContext = std::make_shared<SystemAbilityContext>();
         abilityContext->systemAbilityId = saProfile.saId;
         abilityContext->ownProcessContext = processContextMap_[saProfile.process];
@@ -187,7 +188,8 @@ int32_t SystemAbilityStateScheduler::HandleLoadAbilityEventLocked(
     return result;
 }
 
-int32_t SystemAbilityStateScheduler::HandleUnloadAbilityEvent(int32_t systemAbilityId, UnloadReason unloadReason)
+int32_t SystemAbilityStateScheduler::HandleUnloadAbilityEvent(int32_t systemAbilityId, UnloadReason unloadReason,
+    const OnDemandEvent& event)
 {
     HILOGI("[SA Scheduler][SA: %{public}d] handle unload event start", systemAbilityId);
     std::shared_ptr<SystemAbilityContext> abilityContext;
@@ -195,6 +197,7 @@ int32_t SystemAbilityStateScheduler::HandleUnloadAbilityEvent(int32_t systemAbil
         return ERR_INVALID_VALUE;
     }
     std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
+    abilityContext->event = event;
     return HandleUnloadAbilityEventLocked(abilityContext, unloadReason);
 }
 
@@ -365,11 +368,14 @@ int32_t SystemAbilityStateScheduler::DoLoadSystemAbilityLocked(
     if (loadRequestInfo.deviceId == LOCAL_DEVICE) {
         HILOGI("[SA Scheduler][SA: %{public}d] load ability from local start", abilityContext->systemAbilityId);
         result = SystemAbilityManager::GetInstance()->DoLoadSystemAbility(abilityContext->systemAbilityId,
-            abilityContext->ownProcessContext->processName, loadRequestInfo.callback, loadRequestInfo.callingPid);
+            abilityContext->ownProcessContext->processName, loadRequestInfo.callback, loadRequestInfo.callingPid,
+            loadRequestInfo.event);
     } else {
         HILOGI("[SA Scheduler][SA: %{public}d] load ability from remote start", abilityContext->systemAbilityId);
+        OnDemandEvent defaultevent = {DEFAULT_EVENTID, DEFAULT_LOAD_NAME, ""};
         result = SystemAbilityManager::GetInstance()->DoLoadSystemAbilityFromRpc(loadRequestInfo.deviceId,
-            abilityContext->systemAbilityId, abilityContext->ownProcessContext->processName, loadRequestInfo.callback);
+            abilityContext->systemAbilityId, abilityContext->ownProcessContext->processName, loadRequestInfo.callback,
+            defaultevent);
     }
     if (result == ERR_OK && abilityContext->state == SystemAbilityState::NOT_LOADED) {
         return stateMachine_->AbilityStateTransitionLocked(abilityContext, SystemAbilityState::LOADING);
@@ -444,7 +450,7 @@ int32_t SystemAbilityStateScheduler::DoUnloadSystemAbilityLocked(
     int32_t result = ERR_OK;
     HILOGI("[SA Scheduler][SA: %{public}d] unload start", abilityContext->systemAbilityId);
     result = SystemAbilityManager::GetInstance()->DoUnloadSystemAbility(abilityContext->systemAbilityId,
-        abilityContext->ownProcessContext->processName);
+        abilityContext->ownProcessContext->processName, abilityContext->event);
     if (result == ERR_OK) {
         return stateMachine_->AbilityStateTransitionLocked(abilityContext, SystemAbilityState::UNLOADING);
     }

@@ -25,6 +25,7 @@
 
 #include "refbase.h"
 #include "isystem_ability_load_callback.h"
+#include "sa_profiles.h"
 
 namespace OHOS {
 enum class SystemAbilityState {
@@ -52,6 +53,7 @@ struct LoadRequestInfo {
     std::string deviceId;
     sptr<ISystemAbilityLoadCallback> callback;
     int32_t callingPid = -1;
+    OnDemandEvent event;
 };
 
 enum class UnloadReason {
@@ -78,6 +80,7 @@ struct SystemAbilityContext {
     std::map<int32_t, int32_t> pendingLoadEventCountMap;
     std::list<LoadRequestInfo> pendingLoadEventList;
     UnloadReason pendingUnloadReason = UnloadReason::INTERFACE_CAll;
+    OnDemandEvent event = {-1, "", ""};
 };
 } // namespace OHOS
 

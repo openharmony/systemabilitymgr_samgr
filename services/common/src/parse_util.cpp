@@ -36,6 +36,9 @@ namespace OHOS {
 using std::string;
 
 namespace {
+constexpr const char* EVENT_TYPE = "eventId";
+constexpr const char* EVENT_NAME = "name";
+constexpr const char* EVENT_VALUE = "value";
 constexpr const char* SA_TAG_PROFILE = "profile";
 constexpr const char* SA_TAG_INFO = "info";
 constexpr const char* SA_TAG_SYSTEM_ABILITY = "systemability";
@@ -261,6 +264,52 @@ bool ParseUtil::ParseSaProfiles(const string& profilePath)
 bool ParseUtil::Endswith(const std::string& src, const std::string& sub)
 {
     return (src.length() >= sub.length() && (src.rfind(sub) == (src.length() - sub.length())));
+}
+
+std::unordered_map<std::string, std::string> ParseUtil::StringToMap(const std::string& eventStr)
+{
+    nlohmann::json eventJson = StringToJsonObj(eventStr);
+    std::unordered_map<std::string, std::string> eventMap = JsonObjToMap(eventJson);
+    return eventMap;
+}
+
+nlohmann::json ParseUtil::StringToJsonObj(const std::string& eventStr)
+{
+    nlohmann::json jsonObj = nlohmann::json::object();
+    if (eventStr.empty()) {
+        return jsonObj;
+    }
+    nlohmann::json eventJson = nlohmann::json::parse(eventStr, nullptr, false);
+    if (eventJson.is_discarded()) {
+        HILOGE("parse eventStr to json failed");
+        return jsonObj;
+    }
+    if (!eventJson.is_object()) {
+        HILOGE("eventStr converted result is not a jsonObj");
+        return jsonObj;
+    }
+    return eventJson;
+}
+
+std::unordered_map<std::string, std::string> ParseUtil::JsonObjToMap(nlohmann::json& eventJson)
+{
+    std::unordered_map<std::string, std::string> eventMap;
+    if (eventJson.contains(EVENT_TYPE) && eventJson[EVENT_TYPE].is_string()) {
+        eventMap[EVENT_TYPE] = eventJson[EVENT_TYPE];
+    } else {
+        eventMap[EVENT_TYPE] = "";
+    }
+    if (eventJson.contains(EVENT_NAME) && eventJson[EVENT_NAME].is_string()) {
+        eventMap[EVENT_NAME] = eventJson[EVENT_NAME];
+    } else {
+        eventMap[EVENT_NAME] = "";
+    }
+    if (eventJson.contains(EVENT_VALUE) && eventJson[EVENT_VALUE].is_string()) {
+        eventMap[EVENT_VALUE] = eventJson[EVENT_VALUE];
+    } else {
+        eventMap[EVENT_VALUE] = "";
+    }
+    return eventMap;
 }
 
 bool ParseUtil::CheckRootTag(const xmlNodePtr& rootNodePtr)
