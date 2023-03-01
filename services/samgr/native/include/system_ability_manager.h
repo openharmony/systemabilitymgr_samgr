@@ -101,6 +101,7 @@ public:
     int32_t LoadSystemAbility(int32_t systemAbilityId, const std::string& deviceId,
         const sptr<ISystemAbilityLoadCallback>& callback) override;
     int32_t UnloadSystemAbility(int32_t systemAbilityId) override;
+    int32_t CancelUnloadSystemAbility(int32_t systemAbilityId) override;
     int32_t DoUnloadSystemAbility(int32_t systemAbilityId, const std::u16string& procName);
     void OnAbilityCallbackDied(const sptr<IRemoteObject>& remoteObject);
     void OnRemoteCallbackDied(const sptr<IRemoteObject>& remoteObject);

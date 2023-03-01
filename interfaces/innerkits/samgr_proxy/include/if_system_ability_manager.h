@@ -65,6 +65,7 @@ public:
         UNSUBSCRIBE_SYSTEM_ABILITY_TRANSACTION = 18,
         ADD_SYSTEM_PROCESS_TRANSACTION = 20,
         UNLOAD_SYSTEM_ABILITY_TRANSACTION = 21,
+        CANCEL_UNLOAD_SYSTEM_ABILITY_TRANSACTION = 22,
     };
 
     // Retrieve an existing ability, retrying and blocking for a few seconds if it doesn't exist.
@@ -121,6 +122,7 @@ public:
     virtual int32_t LoadSystemAbility(int32_t systemAbilityId, const std::string& deviceId,
         const sptr<ISystemAbilityLoadCallback>& callback) = 0;
     virtual int32_t UnloadSystemAbility(int32_t systemAbilityId) = 0;
+    virtual int32_t CancelUnloadSystemAbility(int32_t systemAbilityId) = 0;
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISystemAbilityManager");
 protected:

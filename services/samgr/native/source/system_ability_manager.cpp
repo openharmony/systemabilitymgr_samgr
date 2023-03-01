@@ -1205,6 +1205,11 @@ int32_t SystemAbilityManager::UnloadSystemAbility(int32_t systemAbilityId)
     return abilityStateScheduler_->HandleUnloadAbilityEvent(systemAbilityId, UnloadReason::INTERFACE_CAll);
 }
 
+int32_t SystemAbilityManager::CancelUnloadSystemAbility(int32_t systemAbilityId)
+{
+    return ERR_OK;
+}
+
 int32_t SystemAbilityManager::DoUnloadSystemAbility(int32_t systemAbilityId, const std::u16string& procName)
 {
     lock_guard<recursive_mutex> autoLock(onDemandLock_);
