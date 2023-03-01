@@ -56,7 +56,10 @@ ohos_executable("samgr") {
     "//foundation/systemabilitymgr/samgr/utils/native/source/tools.cpp",
   ]
 
-  deps = [ "//foundation/systemabilitymgr/samgr/interfaces/innerkits/common:samgr_common" ]
+  deps = [
+    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/common:samgr_common",
+    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/rust:rust_samgr",
+  ]
 
   configs = [
     ":sam_config",

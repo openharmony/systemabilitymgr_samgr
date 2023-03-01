@@ -409,6 +409,26 @@ ohos_executable("TestTool") {
   subsystem_name = "systemabilitymgr"
 }
 
+ohos_rust_unittest("rust_samgr_test_client") {
+  module_out_path = module_output_path
+
+  resource_config_file =
+      "//foundation/systemabilitymgr/samgr/test/resource/ohos_test.xml"
+
+  sources = [ "./rust/rust_samgr_test.rs" ]
+  deps = [
+    "//base/hiviewdfx/hilog/interfaces/rust:hilog_rust",
+    "//foundation/communication/ipc/interfaces/innerkits/rust:ipc_rust",
+    "//foundation/systemabilitymgr/safwk/test/services/safwk/unittest/rust:rust_service_test",
+    "//foundation/systemabilitymgr/safwk/test/services/safwk/unittest/rust:sa_test",
+    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/rust:rust_samgr",
+    "//foundation/systemabilitymgr/samgr/services/samgr/native/test/unittest/rust/service:test_access_token",
+  ]
+
+  subsystem_name = "systemabilitymgr"
+  part_name = "samgr"
+}
+
 group("unittest") {
   testonly = true
   deps = [
@@ -419,5 +439,6 @@ group("unittest") {
     ":SystemAbilityStateSchedulerTest",
     ":TestTool",
     ":ondemand",
+    ":rust_samgr_test_client",
   ]
 }
