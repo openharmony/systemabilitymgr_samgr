@@ -48,6 +48,7 @@ public:
     int32_t LoadSystemAbility(int32_t systemAbilityId, const std::string& deviceId,
         const sptr<ISystemAbilityLoadCallback>& callback) override;
     int32_t UnloadSystemAbility(int32_t systemAbilityId) override;
+    int32_t CancelUnloadSystemAbility(int32_t systemAbilityId) override;
 private:
     sptr<IRemoteObject> GetSystemAbilityWrapper(int32_t systemAbilityId, const std::string& deviceId = "");
     sptr<IRemoteObject> CheckSystemAbilityWrapper(int32_t code, MessageParcel& data);
