@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -427,9 +427,11 @@ void ParseUtil::GetOnDemandArrayFromJson(int32_t eventId, const nlohmann::json& 
             GetStringFromJson(item, "name", name);
             std::string value;
             GetStringFromJson(item, "value", value);
+            bool enableOnce = false;
+            GetBoolFromJson(item, "enable-once", enableOnce);
             if (!name.empty() && name.length() <= MAX_JSON_STRING_LENGTH &&
                 value.length() <= MAX_JSON_STRING_LENGTH) {
-                OnDemandEvent event = {eventId, name, value};
+                OnDemandEvent event = {eventId, name, value, enableOnce};
                 out.emplace_back(event);
             }
         }

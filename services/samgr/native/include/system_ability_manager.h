@@ -179,6 +179,10 @@ private:
         const sptr<IRemoteObject>& remoteObject);
     void CleanCallbackForLoadFailed(int32_t systemAbilityId, const std::u16string& name,
         const std::string& srcDeviceId, const sptr<ISystemAbilityLoadCallback>& callback);
+    int32_t CheckStartEnableOnce(const OnDemandEvent& event, const SaControlInfo& saControl,
+        sptr<ISystemAbilityLoadCallback> callback);
+    int32_t CheckStopEnableOnce(const OnDemandEvent& event, const SaControlInfo& saControl);
+    bool IsSameEvent(const OnDemandEvent& event, std::list<OnDemandEvent>& enableOnceList);
 
     void UpdateSaFreMap(int32_t pid, int32_t saId);
     uint64_t GenerateFreKey(int32_t pid, int32_t saId) const;
@@ -214,6 +218,10 @@ private:
     std::map<std::u16string, sptr<IRemoteObject>> systemProcessMap_;
     std::map<std::u16string, int64_t> startingProcessMap_;
     std::map<int32_t, int32_t> callbackCountMap_;
+    std::mutex startEnableOnceLock_;
+    std::map<int32_t, std::list<OnDemandEvent>> startEnableOnceMap_;
+    std::mutex stopEnableOnceLock_;
+    std::map<int32_t, std::list<OnDemandEvent>> stopEnableOnceMap_;
 
     std::shared_ptr<AppExecFwk::EventHandler> workHandler_;
 
