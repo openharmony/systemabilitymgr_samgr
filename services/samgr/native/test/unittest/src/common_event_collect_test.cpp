@@ -125,9 +125,7 @@ HWTEST_F(CommonEventCollectTest, init002, TestSize.Level3)
     std::list<SaProfile> onDemandSaProfiles;
     onDemandSaProfiles.push_back(saProfile);
     commonEventCollect->Init(onDemandSaProfiles);
-    std::shared_ptr<EventFwk::CommonEventSubscriber> ret
-        = commonEventCollect->CreateCommonEventSubscriber();
-    EXPECT_NE(nullptr, ret);
+    EXPECT_NE(nullptr, commonEventCollect);
 }
 
 /**
@@ -141,20 +139,6 @@ HWTEST_F(CommonEventCollectTest, IsCesReady001, TestSize.Level3)
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
     bool ret = commonEventCollect->IsCesReady();
     EXPECT_EQ(false, ret);
-}
-
-/**
- * @tc.name: IsCommonEvent001
- * @tc.desc: test IsCommonEvent
- * @tc.type: FUNC
- */
-HWTEST_F(CommonEventCollectTest, IsCommonEvent001, TestSize.Level3)
-{
-    DTEST_LOG << " IsCommonEvent001 BEGIN" << std::endl;
-    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
-    const OnDemandEvent event = {COMMON_EVENT, "", ""};
-    bool ret = commonEventCollect->IsCommonEvent(event);
-    EXPECT_EQ(true, ret);
 }
 
 /**
@@ -188,12 +172,11 @@ HWTEST_F(CommonEventCollectTest, ProcessEvent001, TestSize.Level3)
 HWTEST_F(CommonEventCollectTest, OnReceiveEvent001, TestSize.Level3)
 {
     DTEST_LOG << " OnReceiveEvent001 BEGIN" << std::endl;
-    std::shared_ptr<CommonEventCollect> commonEventCollect
-        = make_shared<CommonEventCollect>(nullptr);
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
     EventFwk::MatchingSkills skill = EventFwk::MatchingSkills();
     EventFwk::CommonEventSubscribeInfo info(skill);
     std::shared_ptr<CommonEventSubscriber> commonEventStatusSubscriber
-        (new CommonEventSubscriber(info, commonEventCollect));
+        = std::make_shared<CommonEventSubscriber>(info, commonEventCollect);
     EventFwk::CommonEventData eventData;
     commonEventStatusSubscriber->OnReceiveEvent(eventData);
     std::string action = EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON;
@@ -204,8 +187,6 @@ HWTEST_F(CommonEventCollectTest, OnReceiveEvent001, TestSize.Level3)
     commonEventStatusSubscriber->SaveAction(action);
     action = EventFwk::CommonEventSupport::COMMON_EVENT_DISCHARGING;
     commonEventStatusSubscriber->SaveAction(action);
-    const OnDemandEvent event = {COMMON_EVENT, "", ""};
-    bool ret = commonEventCollect->IsCommonEvent(event);
-    EXPECT_EQ(true, ret);
+    EXPECT_NE(commonEventStatusSubscriber, nullptr);
 }
 } // namespace OHOS

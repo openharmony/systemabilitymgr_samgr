@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -63,7 +63,7 @@ void DeviceStatusCollectManager::GetSaControlListByEvent(const OnDemandEvent& ev
         for (auto iterStart = profile.startOnDemand.begin(); iterStart != profile.startOnDemand.end(); iterStart++) {
             if (IsSameEvent(event, *iterStart)) {
                 // maybe the process is being killed, let samgr make decisions.
-                SaControlInfo control = { START_ON_DEMAND, profile.saId };
+                SaControlInfo control = { START_ON_DEMAND, profile.saId, iterStart->enableOnce };
                 saControlList.emplace_back(control);
                 break;
             }
@@ -72,7 +72,7 @@ void DeviceStatusCollectManager::GetSaControlListByEvent(const OnDemandEvent& ev
         for (auto iterStop = profile.stopOnDemand.begin(); iterStop != profile.stopOnDemand.end(); iterStop++) {
             if (IsSameEvent(event, *iterStop)) {
                 // maybe the process is starting, let samgr make decisions.
-                SaControlInfo control = { STOP_ON_DEMAND, profile.saId };
+                SaControlInfo control = { STOP_ON_DEMAND, profile.saId, iterStop->enableOnce };
                 saControlList.emplace_back(control);
                 break;
             }

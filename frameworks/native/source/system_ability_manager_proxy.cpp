@@ -566,6 +566,11 @@ int32_t SystemAbilityManagerProxy::UnloadSystemAbility(int32_t systemAbilityId)
     return result;
 }
 
+int32_t SystemAbilityManagerProxy::CancelUnloadSystemAbility(int32_t systemAbilityId)
+{
+    return ERR_OK;
+}
+
 int32_t SystemAbilityManagerProxy::MarshalSAExtraProp(const SAExtraProp& extraProp, MessageParcel& data) const
 {
     if (!data.WriteBool(extraProp.isDistributed)) {

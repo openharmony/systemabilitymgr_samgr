@@ -108,12 +108,12 @@ bool CommonEventCollect::IsCesReady()
         COMMON_EVENT_SERVICE_ID);
     if (cesProxy != nullptr) {
         IPCObjectProxy* proxy = reinterpret_cast<IPCObjectProxy*>(cesProxy.GetRefPtr());
+        if (commonEventDeath_ != nullptr) {
+            cesProxy->AddDeathRecipient(commonEventDeath_);
+        }
         // make sure the proxy is not dead
         if (proxy != nullptr && !proxy->IsObjectDead()) {
             return true;
-        }
-        if (commonEventDeath_ != nullptr) {
-            cesProxy->AddDeathRecipient(commonEventDeath_);
         }
     }
     return false;
