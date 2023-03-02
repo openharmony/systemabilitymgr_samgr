@@ -19,6 +19,9 @@
 #ifdef SUPPORT_DEVICE_MANAGER
 #include "device_networking_collect.h"
 #endif
+#ifdef SUPPORT_COMMON_EVENT
+#include "common_event_collect.h"
+#endif
 #include "sam_log.h"
 #include "system_ability_manager.h"
 
@@ -32,6 +35,11 @@ void DeviceStatusCollectManager::Init(const std::list<SaProfile>& saProfiles)
 #ifdef SUPPORT_DEVICE_MANAGER
     sptr<ICollectPlugin> networkingCollect = new DeviceNetworkingCollect(this);
     collectPluginMap_[DEVICE_ONLINE] = networkingCollect;
+#endif
+#ifdef SUPPORT_COMMON_EVENT
+    sptr<CommonEventCollect> eventStatuscollect = new CommonEventCollect(this);
+    eventStatuscollect->Init(onDemandSaProfiles_);
+    collectPluginMap_[COMMON_EVENT] = eventStatuscollect;
 #endif
     StartCollect();
     HILOGI("DeviceStatusCollectManager Init end");

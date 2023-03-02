@@ -100,6 +100,15 @@ ohos_executable("samgr") {
       defines += [ "SUPPORT_DEVICE_MANAGER" ]
     }
 
+    if (support_common_event) {
+      sources += [ "//foundation/systemabilitymgr/samgr/services/samgr/native/source/collect/common_event_collect.cpp" ]
+      external_deps += [
+        "ability_base:want",
+        "common_event_service:cesfwk_innerkits",
+      ]
+      defines += [ "SUPPORT_COMMON_EVENT" ]
+    }
+
     public_deps = [ "//third_party/libxml2:libxml2" ]
     part_name = "samgr"
   }

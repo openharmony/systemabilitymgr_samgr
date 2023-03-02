@@ -25,9 +25,8 @@
 namespace OHOS {
 class ILocalAbilityManager : public IRemoteBroker {
 public:
-    virtual bool StartAbility(int32_t systemAbilityId) = 0;
-    virtual bool StopAbility(int32_t systemAbilityId) = 0;
-
+    virtual bool StartAbility(int32_t systemAbilityId, const std::string& eventStr) = 0;
+    virtual bool StopAbility(int32_t systemAbilityId, const std::string& eventStr) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ILocalAbilityManager");
 protected:
     enum {

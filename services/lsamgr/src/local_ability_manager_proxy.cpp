@@ -25,10 +25,15 @@ using namespace std;
 using namespace OHOS::HiviewDFX;
 
 namespace OHOS {
-bool LocalAbilityManagerProxy::StartAbility(int32_t systemAbilityId)
+bool LocalAbilityManagerProxy::StartAbility(int32_t systemAbilityId, const std::string& eventStr)
 {
     if (systemAbilityId <= 0) {
         HiLog::Warn(label_, "StartAbility systemAbilityId invalid.");
+        return false;
+    }
+
+    if (eventStr.empty()) {
+        HiLog::Warn(label_, "StartAbility eventStr invalid.");
         return false;
     }
 
@@ -48,7 +53,11 @@ bool LocalAbilityManagerProxy::StartAbility(int32_t systemAbilityId)
         HiLog::Warn(label_, "StartAbility write systemAbilityId failed!");
         return false;
     }
-
+    ret = data.WriteString(eventStr);
+    if (!ret) {
+        HiLog::Warn(label_, "StartAbility write eventStr failed!");
+        return false;
+    }
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     int32_t status = iro->SendRequest(START_ABILITY_TRANSACTION, data, reply, option);
@@ -59,13 +68,18 @@ bool LocalAbilityManagerProxy::StartAbility(int32_t systemAbilityId)
     return true;
 }
 
-bool LocalAbilityManagerProxy::StopAbility(int32_t systemAbilityId)
+bool LocalAbilityManagerProxy::StopAbility(int32_t systemAbilityId, const std::string& eventStr)
 {
     if (systemAbilityId <= 0) {
         HiLog::Warn(label_, "StopAbility systemAbilityId invalid.");
         return false;
     }
 
+    if (eventStr.empty()) {
+        HiLog::Warn(label_, "StartAbility eventStr invalid.");
+        return false;
+    }
+    
     sptr<IRemoteObject> iro = Remote();
     if (iro == nullptr) {
         HiLog::Error(label_, "StopAbility Remote return null");
@@ -82,7 +96,11 @@ bool LocalAbilityManagerProxy::StopAbility(int32_t systemAbilityId)
         HiLog::Warn(label_, "StopAbility write systemAbilityId failed!");
         return false;
     }
-
+    ret = data.WriteString(eventStr);
+    if (!ret) {
+        HiLog::Warn(label_, "StopAbility write eventStr failed!");
+        return false;
+    }
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
     int32_t status = iro->SendRequest(STOP_ABILITY_TRANSACTION, data, reply, option);

@@ -44,6 +44,7 @@ ohos_unittest("SystemAbilityMgrTest") {
     "${samgr_services_dir}/source/system_ability_manager.cpp",
     "${samgr_services_dir}/source/system_ability_manager_stub.cpp",
     "${samgr_services_dir}/source/system_ability_status_change_proxy.cpp",
+    "${samgr_services_dir}/test/unittest/src/common_event_collect_test.cpp",
     "${samgr_services_dir}/test/unittest/src/device_status_collect_manager_test.cpp",
     "${samgr_services_dir}/test/unittest/src/itest_transaction_service.cpp",
     "${samgr_services_dir}/test/unittest/src/mock_permission.cpp",
@@ -103,6 +104,15 @@ ohos_unittest("SystemAbilityMgrTest") {
     ]
     external_deps += [ "device_manager:devicemanagersdk" ]
     defines += [ "SUPPORT_DEVICE_MANAGER" ]
+  }
+
+  if (support_common_event) {
+    sources += [ "//foundation/systemabilitymgr/samgr/services/samgr/native/source/collect/common_event_collect.cpp" ]
+    external_deps += [
+      "ability_base:want",
+      "common_event_service:cesfwk_innerkits",
+    ]
+    defines += [ "SUPPORT_COMMON_EVENT" ]
   }
 }
 

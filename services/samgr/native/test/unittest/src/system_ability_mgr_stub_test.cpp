@@ -19,6 +19,7 @@
 #include "itest_transaction_service.h"
 #include "if_system_ability_manager.h"
 #include "ipc_skeleton.h"
+#include "sa_profiles.h"
 #include "sam_mock_permission.h"
 #include "string_ex.h"
 #include "system_ability_definition.h"
@@ -35,8 +36,11 @@ using namespace OHOS;
 
 namespace OHOS {
 namespace {
+
 const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
+const string DEFAULT_LOAD_NAME = "loadevent";
 constexpr uint32_t SAID = 1499;
+constexpr int64_t DEFAULT_EVENTID = 0;
 constexpr uint32_t INVALID_SAID = -1;
 constexpr uint32_t INVALID_CODE = 50;
 }
@@ -1904,7 +1908,8 @@ HWTEST_F(SystemAbilityMgrStubTest, StartingSystemProcess001, TestSize.Level1)
     saMgr->startingProcessMap_.clear();
     int countNum = 2;
     saMgr->startingProcessMap_[procName] = countNum;
-    int32_t res = saMgr->StartingSystemProcess(procName, SAID);
+    OnDemandEvent defaultevent = {DEFAULT_EVENTID, DEFAULT_LOAD_NAME, ""};
+    int32_t res = saMgr->StartingSystemProcess(procName, SAID, defaultevent);
     EXPECT_EQ(res, ERR_OK);
 }
 
@@ -1920,7 +1925,8 @@ HWTEST_F(SystemAbilityMgrStubTest, StartingSystemProcess002, TestSize.Level1)
     u16string procName = u"proTest";
     saMgr->startingProcessMap_.clear();
     saMgr->systemProcessMap_[procName] = testAbility;
-    int32_t res = saMgr->StartingSystemProcess(procName, SAID);
+    OnDemandEvent defaultevent = {DEFAULT_EVENTID, DEFAULT_LOAD_NAME, ""};
+    int32_t res = saMgr->StartingSystemProcess(procName, SAID, defaultevent);
     EXPECT_EQ(res, ERR_OK);
 }
 

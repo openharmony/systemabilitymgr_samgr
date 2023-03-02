@@ -97,10 +97,11 @@ public:
 
     int32_t LoadSystemAbility(int32_t systemAbilityId, const sptr<ISystemAbilityLoadCallback>& callback) override;
     int32_t DoLoadSystemAbility(int32_t systemAbilityId, const std::u16string& procName,
-        const sptr<ISystemAbilityLoadCallback>& callback, int32_t callingPid);
+        const sptr<ISystemAbilityLoadCallback>& callback, int32_t callingPid, const OnDemandEvent& event);
     int32_t LoadSystemAbility(int32_t systemAbilityId, const std::string& deviceId,
         const sptr<ISystemAbilityLoadCallback>& callback) override;
     int32_t UnloadSystemAbility(int32_t systemAbilityId) override;
+    int32_t DoUnloadSystemAbility(int32_t systemAbilityId, const std::u16string& procName, const OnDemandEvent& event);
     int32_t CancelUnloadSystemAbility(int32_t systemAbilityId) override;
     int32_t DoUnloadSystemAbility(int32_t systemAbilityId, const std::u16string& procName);
     void OnAbilityCallbackDied(const sptr<IRemoteObject>& remoteObject);
@@ -109,7 +110,7 @@ public:
     bool LoadSystemAbilityFromRpc(const std::string& srcDeviceId, int32_t systemAbilityId,
         const sptr<ISystemAbilityLoadCallback>& callback);
     int32_t DoLoadSystemAbilityFromRpc(const std::string& srcDeviceId, int32_t systemAbilityId,
-        const std::u16string& procName, const sptr<ISystemAbilityLoadCallback>& callback);
+        const std::u16string& procName, const sptr<ISystemAbilityLoadCallback>& callback, const OnDemandEvent& event);
     void NotifyRpcLoadCompleted(const std::string& srcDeviceId, int32_t systemAbilityId,
         const sptr<IRemoteObject>& remoteObject);
     void StartDfxTimer();
@@ -127,9 +128,11 @@ private:
     struct AbilityItem {
         AbilityState state = AbilityState::INIT;
         std::map<std::string, CallbackList> callbackMap; // key : networkid
+        OnDemandEvent event;
     };
 
     SystemAbilityManager();
+    std::string EventToJson(const OnDemandEvent& event);
     void DoInsertSaData(const std::u16string& name, const sptr<IRemoteObject>& ability, const SAExtraProp& extraProp);
     bool IsNameInValid(const std::u16string& name);
     int32_t StartOnDemandAbility(int32_t systemAbilityId, bool& isExist);
@@ -157,12 +160,12 @@ private:
     void NotifySystemAbilityLoaded(int32_t systemAbilityId, const sptr<IRemoteObject>& remoteObject,
         const sptr<ISystemAbilityLoadCallback>& callback);
     void NotifySystemAbilityLoadFail(int32_t systemAbilityId, const sptr<ISystemAbilityLoadCallback>& callback);
-    int32_t StartingSystemProcess(const std::u16string& name, int32_t systemAbilityId);
+    int32_t StartingSystemProcess(const std::u16string& name, int32_t systemAbilityId, const OnDemandEvent& event);
     void StartOnDemandAbility(const std::u16string& name, int32_t systemAbilityId);
     int32_t StartOnDemandAbilityInner(const std::u16string& name, int32_t systemAbilityId, AbilityItem& abilityItem);
-    int32_t StartDynamicSystemProcess(const std::u16string& name, int32_t systemAbilityId);
-    bool StopOnDemandAbility(const std::u16string& name, int32_t systemAbilityId);
-    bool StopOnDemandAbilityInner(const std::u16string& name, int32_t systemAbilityId);
+    int32_t StartDynamicSystemProcess(const std::u16string& name, int32_t systemAbilityId, const OnDemandEvent& event);
+    bool StopOnDemandAbility(const std::u16string& name, int32_t systemAbilityId, const OnDemandEvent& event);
+    bool StopOnDemandAbilityInner(const std::u16string& name, int32_t systemAbilityId, const OnDemandEvent& event);
     void RemoveStartingAbilityCallback(CallbackList& callbackList, const sptr<IRemoteObject>& remoteObject);
     void RemoveStartingAbilityCallbackForDevice(AbilityItem& abilityItem, const sptr<IRemoteObject>& remoteObject);
     void RemoveStartingAbilityCallbackLocked(std::pair<sptr<ISystemAbilityLoadCallback>, int32_t>& itemPair);
@@ -190,6 +193,7 @@ private:
     void OndemandLoad();
     void OndemandLoadForPerf();
     std::list<int32_t> GetAllOndemandSa();
+    std::string EventToStr(const OnDemandEvent& event);
 
     std::u16string deviceName_;
     static sptr<SystemAbilityManager> instance;
