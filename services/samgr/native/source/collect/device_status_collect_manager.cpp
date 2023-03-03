@@ -22,6 +22,7 @@
 #ifdef SUPPORT_COMMON_EVENT
 #include "common_event_collect.h"
 #endif
+#include "device_param_collect.h"
 #include "sam_log.h"
 #include "system_ability_manager.h"
 
@@ -32,6 +33,9 @@ void DeviceStatusCollectManager::Init(const std::list<SaProfile>& saProfiles)
     FilterOnDemandSaProfiles(saProfiles);
     auto runner = AppExecFwk::EventRunner::Create("collect");
     collectHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    sptr<DeviceParamCollect> deviceParamCollect = new DeviceParamCollect(this);
+    deviceParamCollect->Init(saProfiles);
+    collectPluginMap_[PARAM] = deviceParamCollect;
 #ifdef SUPPORT_DEVICE_MANAGER
     sptr<ICollectPlugin> networkingCollect = new DeviceNetworkingCollect(this);
     collectPluginMap_[DEVICE_ONLINE] = networkingCollect;
