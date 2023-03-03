@@ -31,10 +31,12 @@ public:
     void UnInit();
     void ReportEvent(const OnDemandEvent& event) override;
     void StartCollect();
+    void PostDelayTask(std::function<void()> callback, int32_t delayTime) override;
 private:
     void FilterOnDemandSaProfiles(const std::list<SaProfile>& saProfiles);
     void GetSaControlListByEvent(const OnDemandEvent& event, std::list<SaControlInfo>& saControlList);
     static bool IsSameEvent(const OnDemandEvent& ev1, const OnDemandEvent& ev2);
+    bool CheckConditions(const OnDemandEvent& onDemandEvent);
     std::map<int32_t, sptr<ICollectPlugin>> collectPluginMap_;
     std::shared_ptr<AppExecFwk::EventHandler> collectHandler_;
     std::list<SaProfile> onDemandSaProfiles_;
