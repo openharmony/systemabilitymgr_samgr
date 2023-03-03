@@ -568,7 +568,44 @@ int32_t SystemAbilityManagerProxy::UnloadSystemAbility(int32_t systemAbilityId)
 
 int32_t SystemAbilityManagerProxy::CancelUnloadSystemAbility(int32_t systemAbilityId)
 {
-    return ERR_OK;
+    if (!CheckInputSysAbilityId(systemAbilityId)) {
+        HILOGE("CancelUnloadSystemAbility systemAbilityId:%{public}d invalid!", systemAbilityId);
+        return ERR_INVALID_VALUE;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("CancelUnloadSystemAbility remote is null!");
+        return ERR_INVALID_OPERATION;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        HILOGW("CancelUnloadSystemAbility Write interface token failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    bool ret = data.WriteInt32(systemAbilityId);
+    if (!ret) {
+        HILOGW("CancelUnloadSystemAbility Write systemAbilityId failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t err = remote->SendRequest(CANCEL_UNLOAD_SYSTEM_ABILITY_TRANSACTION, data, reply, option);
+    if (err != ERR_NONE) {
+        HILOGE("CancelUnloadSystemAbility systemAbilityId : %{public}d SendRequest failed, error:%{public}d!",
+            systemAbilityId, err);
+        return err;
+    }
+    HILOGI("CancelUnloadSystemAbility systemAbilityId : %{public}d, SendRequest succeed!", systemAbilityId);
+    int32_t result = 0;
+    ret = reply.ReadInt32(result);
+    if (!ret) {
+        HILOGW("CancelUnloadSystemAbility Read reply failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
 }
 
 int32_t SystemAbilityManagerProxy::MarshalSAExtraProp(const SAExtraProp& extraProp, MessageParcel& data) const

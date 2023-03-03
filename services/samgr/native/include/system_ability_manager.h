@@ -104,6 +104,10 @@ public:
     int32_t DoUnloadSystemAbility(int32_t systemAbilityId, const std::u16string& procName, const OnDemandEvent& event);
     int32_t CancelUnloadSystemAbility(int32_t systemAbilityId) override;
     int32_t DoUnloadSystemAbility(int32_t systemAbilityId, const std::u16string& procName);
+    bool IdleSystemAbility(int32_t systemAbilityId, const std::u16string& procName,
+        const std::unordered_map<std::string, std::string>& idleReason, int32_t& delayTime);
+    bool ActiveSystemAbility(int32_t systemAbilityId, const std::u16string& procName,
+        const std::unordered_map<std::string, std::string>& activeReason);
     void OnAbilityCallbackDied(const sptr<IRemoteObject>& remoteObject);
     void OnRemoteCallbackDied(const sptr<IRemoteObject>& remoteObject);
     sptr<IRemoteObject> GetSystemAbilityFromRemote(int32_t systemAbilityId);

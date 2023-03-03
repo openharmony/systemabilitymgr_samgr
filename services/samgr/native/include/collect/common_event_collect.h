@@ -52,7 +52,7 @@ class CommonHandler : public AppExecFwk::EventHandler {
         void ProcessEvent(const OHOS::AppExecFwk::InnerEvent::Pointer& event) override;
 
     private:
-        sptr<CommonEventCollect> commonCollect_;
+        wptr<CommonEventCollect> commonCollect_;
 };
 
 class CommonEventSubscriber : public EventFwk::CommonEventSubscriber {
@@ -64,7 +64,7 @@ public:
     void OnReceiveEvent(const EventFwk::CommonEventData& data) override;
 private:
     std::set<std::string> commonEventState_;
-    sptr<CommonEventCollect> collect_;
+    wptr<CommonEventCollect> collect_;
     std::mutex commonEventStateLock_;
 };
 

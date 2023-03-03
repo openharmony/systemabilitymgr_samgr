@@ -23,7 +23,8 @@ namespace OHOS {
 using DlHandle = void*;
 
 enum {
-    DEVICE_ONLINE = 1,
+    INTERFACE_CALL = 0,
+    DEVICE_ONLINE,
     SETTING_SWITCH,
     PARAM,
     COMMON_EVENT,

@@ -129,6 +129,8 @@ SystemAbilityManagerStub::SystemAbilityManagerStub()
         &SystemAbilityManagerStub::LoadRemoteSystemAbilityInner;
     memberFuncMap_[UNLOAD_SYSTEM_ABILITY_TRANSACTION] =
         &SystemAbilityManagerStub::UnloadSystemAbilityInner;
+    memberFuncMap_[CANCEL_UNLOAD_SYSTEM_ABILITY_TRANSACTION] =
+        &SystemAbilityManagerStub::CancelUnloadSystemAbilityInner;
 }
 
 int32_t SystemAbilityManagerStub::OnRemoteRequest(uint32_t code,
@@ -601,6 +603,23 @@ int32_t SystemAbilityManagerStub::UnloadSystemAbilityInner(MessageParcel& data, 
     bool ret = reply.WriteInt32(result);
     if (!ret) {
         HILOGW("SystemAbilityManagerStub::UnloadSystemAbilityInner write reply failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
+int32_t SystemAbilityManagerStub::CancelUnloadSystemAbilityInner(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t systemAbilityId = data.ReadInt32();
+    if (!CheckInputSysAbilityId(systemAbilityId)) {
+        HILOGW("SystemAbilityManagerStub::CancelUnloadSystemAbilityInner systemAbilityId invalid");
+        return ERR_INVALID_VALUE;
+    }
+    int32_t result = CancelUnloadSystemAbility(systemAbilityId);
+    HILOGD("SystemAbilityManagerStub::CancelUnloadSystemAbilityInner result is %{public}d", result);
+    bool ret = reply.WriteInt32(result);
+    if (!ret) {
+        HILOGW("SystemAbilityManagerStub::CancelUnloadSystemAbilityInner write reply failed.");
         return ERR_FLATTEN_OBJECT;
     }
     return result;
