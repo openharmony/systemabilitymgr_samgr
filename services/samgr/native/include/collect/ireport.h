@@ -25,6 +25,7 @@ public:
     IReport() = default;
     virtual ~IReport() = default;
     virtual void ReportEvent(const OnDemandEvent& event) = 0;
+    virtual void PostDelayTask(std::function<void()> callback, int32_t delayTime) = 0;
 };
 } // namespace OHOS
 #endif // OHOS_SYSTEM_ABILITY_MANAGER_REPORT_INTERFACE_H

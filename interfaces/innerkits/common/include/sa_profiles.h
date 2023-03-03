@@ -28,6 +28,7 @@ enum {
     SETTING_SWITCH,
     PARAM,
     COMMON_EVENT,
+    TIMED_EVENT,
 };
 
 enum {
@@ -45,6 +46,7 @@ struct OnDemandEvent {
     int32_t eventId;
     std::string name;
     std::string value;
+    std::vector<OnDemandEvent> conditions;
     bool enableOnce = false;
 
     bool operator==(const OnDemandEvent& event) const

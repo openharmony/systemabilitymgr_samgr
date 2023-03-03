@@ -28,7 +28,9 @@ public:
 
     virtual int32_t OnStart() = 0;
     virtual int32_t OnStop() = 0;
+    virtual bool CheckCondition(const OnDemandEvent& condition) { return false; };
     void ReportEvent(const OnDemandEvent& event);
+    void PostDelayTask(std::function<void()> callback, int32_t delayTime);
 private:
     sptr<IReport> report_;
 };

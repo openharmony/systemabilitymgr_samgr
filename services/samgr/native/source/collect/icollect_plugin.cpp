@@ -26,4 +26,11 @@ void ICollectPlugin::ReportEvent(const OnDemandEvent& event)
         report_->ReportEvent(event);
     }
 }
+
+void ICollectPlugin::PostDelayTask(std::function<void()> callback, int32_t delayTime)
+{
+    if (report_ != nullptr) {
+        report_->PostDelayTask(callback, delayTime);
+    }
+}
 }  // namespace OHOS

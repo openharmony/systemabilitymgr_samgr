@@ -59,6 +59,8 @@ private:
         std::vector<OnDemandEvent>& condationVec, const std::string& jsonTag);
     void GetOnDemandArrayFromJson(int32_t eventId, const nlohmann::json& obj,
         const std::string& key, std::vector<OnDemandEvent>& out);
+    void GetOnDemandConditionsFromJson(const nlohmann::json& obj,
+        const std::string& key, std::vector<OnDemandEvent>& out);
 
     static inline void GetBoolFromJson(const nlohmann::json& obj, const std::string& key, bool& out)
     {
