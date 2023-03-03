@@ -40,6 +40,10 @@ CommonEventCollect::CommonEventCollect(const sptr<IReport>& report)
 int32_t CommonEventCollect::OnStart()
 {
     HILOGI("CommonEventCollect OnStart called");
+    if (commonEventNames_.empty()) {
+        HILOGW("CommonEventCollect commonEventNames_ is empty");
+        return ERR_OK;
+    }
     std::shared_ptr<EventHandler> handler = EventHandler::Current();
     if (handler == nullptr) {
         HILOGW("CommonEventCollect current handler is nullptr");
@@ -136,6 +140,7 @@ void CommonHandler::ProcessEvent(const InnerEvent::Pointer& event)
     if (!commonCollect->AddCommonListener()) {
         HILOGW("CommonEventCollect AddCommonListener retry");
         SendEvent(INIT_EVENT, DELAY_TIME);
+        return;
     }
     HILOGI("CommonEventCollect AddCommonListener success");
 }
