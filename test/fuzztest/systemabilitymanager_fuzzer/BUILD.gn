@@ -48,6 +48,7 @@ ohos_fuzztest("SystemAbilityManagerFuzzTest") {
   ]
   sources = [
     "${samgr_dir}/utils/native/source/tools.cpp",
+    "${samgr_services_dir}/source/collect/device_param_collect.cpp",
     "${samgr_services_dir}/source/collect/device_status_collect_manager.cpp",
     "${samgr_services_dir}/source/collect/device_timed_collect.cpp",
     "${samgr_services_dir}/source/collect/icollect_plugin.cpp",
