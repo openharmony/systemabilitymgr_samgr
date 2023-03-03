@@ -25,6 +25,8 @@ config("sam_test_config") {
     "//foundation/systemabilitymgr/samgr/services/dfx/include",
     "//foundation/systemabilitymgr/samgr/utils/native/include",
     "//foundation/systemabilitymgr/samgr/services/lsamgr/include",
+    "//third_party/json/include",
+    "//third_party/json/single_include",
   ]
 }
 
@@ -34,7 +36,9 @@ ohos_unittest("SystemAbilityMgrTest") {
   sources = [
     "${samgr_dir}/utils/native/source/tools.cpp",
     "${samgr_services_dir}/source/ability_death_recipient.cpp",
+    "${samgr_services_dir}/source/collect/device_param_collect.cpp",
     "${samgr_services_dir}/source/collect/device_status_collect_manager.cpp",
+    "${samgr_services_dir}/source/collect/device_timed_collect.cpp",
     "${samgr_services_dir}/source/collect/icollect_plugin.cpp",
     "${samgr_services_dir}/source/rpc_callback_imp.cpp",
     "${samgr_services_dir}/source/schedule/system_ability_event_handler.cpp",
@@ -44,6 +48,7 @@ ohos_unittest("SystemAbilityMgrTest") {
     "${samgr_services_dir}/source/system_ability_manager.cpp",
     "${samgr_services_dir}/source/system_ability_manager_stub.cpp",
     "${samgr_services_dir}/source/system_ability_status_change_proxy.cpp",
+    "${samgr_services_dir}/test/unittest/src/device_param_collect_test.cpp",
     "${samgr_services_dir}/test/unittest/src/device_status_collect_manager_test.cpp",
     "${samgr_services_dir}/test/unittest/src/itest_transaction_service.cpp",
     "${samgr_services_dir}/test/unittest/src/mock_permission.cpp",
@@ -104,6 +109,18 @@ ohos_unittest("SystemAbilityMgrTest") {
     external_deps += [ "device_manager:devicemanagersdk" ]
     defines += [ "SUPPORT_DEVICE_MANAGER" ]
   }
+
+  if (support_common_event) {
+    sources += [
+      "${samgr_services_dir}/source/collect/common_event_collect.cpp",
+      "${samgr_services_dir}/test/unittest/src/common_event_collect_test.cpp",
+    ]
+    external_deps += [
+      "ability_base:want",
+      "common_event_service:cesfwk_innerkits",
+    ]
+    defines += [ "SUPPORT_COMMON_EVENT" ]
+  }
 }
 
 ohos_unittest("SystemAbilityMgrStubTest") {
@@ -112,7 +129,9 @@ ohos_unittest("SystemAbilityMgrStubTest") {
   sources = [
     "${samgr_dir}/utils/native/source/tools.cpp",
     "${samgr_services_dir}/source/ability_death_recipient.cpp",
+    "${samgr_services_dir}/source/collect/device_param_collect.cpp",
     "${samgr_services_dir}/source/collect/device_status_collect_manager.cpp",
+    "${samgr_services_dir}/source/collect/device_timed_collect.cpp",
     "${samgr_services_dir}/source/collect/icollect_plugin.cpp",
     "${samgr_services_dir}/source/rpc_callback_imp.cpp",
     "${samgr_services_dir}/source/schedule/system_ability_event_handler.cpp",
@@ -251,6 +270,7 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
   sources = [
     "${samgr_dir}/utils/native/source/tools.cpp",
     "${samgr_services_dir}/source/ability_death_recipient.cpp",
+    "${samgr_services_dir}/source/collect/device_param_collect.cpp",
     "${samgr_services_dir}/source/collect/device_status_collect_manager.cpp",
     "${samgr_services_dir}/source/collect/icollect_plugin.cpp",
     "${samgr_services_dir}/source/rpc_callback_imp.cpp",
@@ -323,6 +343,8 @@ ohos_executable("ondemand") {
     "access_token:libtoken_setproc",
     "c_utils:utils",
     "dsoftbus:softbus_client",
+    "init:libbeget_proxy",
+    "init:libbegetutil",
     "ipc:ipc_core",
     "samgr:samgr_proxy",
   ]
@@ -335,7 +357,9 @@ ohos_executable("TestTool") {
   sources = [
     "${samgr_dir}/utils/native/source/tools.cpp",
     "${samgr_services_dir}/source/ability_death_recipient.cpp",
+    "${samgr_services_dir}/source/collect/device_param_collect.cpp",
     "${samgr_services_dir}/source/collect/device_status_collect_manager.cpp",
+    "${samgr_services_dir}/source/collect/device_timed_collect.cpp",
     "${samgr_services_dir}/source/collect/icollect_plugin.cpp",
     "${samgr_services_dir}/source/rpc_callback_imp.cpp",
     "${samgr_services_dir}/source/schedule/system_ability_event_handler.cpp",

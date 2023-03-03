@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,24 +13,18 @@
  * limitations under the License.
  */
 
-#include "icollect_plugin.h"
+#ifndef SAMGR_TEST_UNITTEST_INCLUDE_DEVICE_PARAM_COLLECT_TEST_H
+#define SAMGR_TEST_UNITTEST_INCLUDE_DEVICE_PARAM_COLLECT_TEST_H
+
+#include "gtest/gtest.h"
 
 namespace OHOS {
-ICollectPlugin::ICollectPlugin(const sptr<IReport>& report) : report_(report)
-{
-}
-
-void ICollectPlugin::ReportEvent(const OnDemandEvent& event)
-{
-    if (report_ != nullptr) {
-        report_->ReportEvent(event);
-    }
-}
-
-void ICollectPlugin::PostDelayTask(std::function<void()> callback, int32_t delayTime)
-{
-    if (report_ != nullptr) {
-        report_->PostDelayTask(callback, delayTime);
-    }
-}
-}  // namespace OHOS
+class DeviceParamCollectTest : public testing::Test {
+public:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp();
+    void TearDown();
+};
+} // OHOS
+#endif /* SAMGR_TEST_UNITTEST_INCLUDE_DEVICE_PARAM_COLLECT_TEST_H */

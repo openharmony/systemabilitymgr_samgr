@@ -38,10 +38,15 @@
 #include "system_ability_definition.h"
 #include "tools.h"
 
+
 using namespace std;
 
 namespace OHOS {
 namespace {
+const string START_SAID = "said";
+const string EVENT_TYPE = "eventId";
+const string EVENT_NAME = "name";
+const string EVENT_VALUE = "value";
 const string PREFIX = "/system/profile/";
 const string LOCAL_DEVICE = "local";
 const string ONDEMAND_PARAM = "persist.samgr.perf.ondemand";
@@ -259,11 +264,9 @@ void SystemAbilityManager::ProcessOnDemandEvent(const OnDemandEvent& event,
     for (auto& saControl : saControlList) {
         int32_t result = ERR_INVALID_VALUE;
         if (saControl.ondemandId == START_ON_DEMAND) {
-            auto callingPid = IPCSkeleton::GetCallingPid();
-            LoadRequestInfo loadRequestInfo = {saControl.saId, LOCAL_DEVICE, callback, callingPid};
-            result = abilityStateScheduler_->HandleLoadAbilityEvent(loadRequestInfo);
+            result = CheckStartEnableOnce(event, saControl, callback);
         } else if (saControl.ondemandId == STOP_ON_DEMAND) {
-            result = abilityStateScheduler_->HandleUnloadAbilityEvent(saControl.saId, UnloadReason::ONDEMAND_EVENT);
+            result = CheckStopEnableOnce(event, saControl);
         } else {
             HILOGE("ondemandId error");
         }
@@ -272,6 +275,80 @@ void SystemAbilityManager::ProcessOnDemandEvent(const OnDemandEvent& event,
                 saControl.ondemandId, saControl.saId);
         }
     }
+}
+
+int32_t SystemAbilityManager::CheckStartEnableOnce(const OnDemandEvent& event,
+    const SaControlInfo& saControl, sptr<ISystemAbilityLoadCallback> callback)
+{
+    int32_t result = ERR_INVALID_VALUE;
+    if (saControl.enableOnce) {
+        lock_guard<mutex> autoLock(startEnableOnceLock_);
+        auto iter = startEnableOnceMap_.find(saControl.saId);
+        if (iter != startEnableOnceMap_.end() && IsSameEvent(event, startEnableOnceMap_[saControl.saId])) {
+            HILOGI("ondemand canceled for enable-once, ondemandId:%{public}d, saId:%{public}d",
+                saControl.ondemandId, saControl.saId);
+            return result;
+        }
+        startEnableOnceMap_[saControl.saId].emplace_back(event);
+        HILOGI("startEnableOnceMap_ add saId:%{public}d, eventId:%{public}d",
+            saControl.saId, event.eventId);
+    }
+    auto callingPid = IPCSkeleton::GetCallingPid();
+    LoadRequestInfo loadRequestInfo = {saControl.saId, LOCAL_DEVICE, callback, callingPid, event};
+    result = abilityStateScheduler_->HandleLoadAbilityEvent(loadRequestInfo);
+    if (saControl.enableOnce && result != ERR_OK) {
+        lock_guard<mutex> autoLock(startEnableOnceLock_);
+        auto& events = startEnableOnceMap_[saControl.saId];
+        events.remove(event);
+        if (events.empty()) {
+            startEnableOnceMap_.erase(saControl.saId);
+        }
+        HILOGI("startEnableOnceMap_remove saId:%{public}d, eventId:%{public}d",
+            saControl.saId, event.eventId);
+    }
+    return result;
+}
+
+int32_t SystemAbilityManager::CheckStopEnableOnce(const OnDemandEvent& event,
+    const SaControlInfo& saControl)
+{
+    int32_t result = ERR_INVALID_VALUE;
+    if (saControl.enableOnce) {
+        lock_guard<mutex> autoLock(stopEnableOnceLock_);
+        auto iter = stopEnableOnceMap_.find(saControl.saId);
+        if (iter != stopEnableOnceMap_.end() && IsSameEvent(event, stopEnableOnceMap_[saControl.saId])) {
+            HILOGI("ondemand canceled for enable-once, ondemandId:%{public}d, saId:%{public}d",
+                saControl.ondemandId, saControl.saId);
+            return result;
+        }
+        stopEnableOnceMap_[saControl.saId].emplace_back(event);
+        HILOGI("stopEnableOnceMap_ add saId:%{public}d, eventId:%{public}d",
+            saControl.saId, event.eventId);
+    }
+    UnloadRequestInfo unloadRequestInfo = {saControl.saId, event};
+    result = abilityStateScheduler_->HandleUnloadAbilityEvent(unloadRequestInfo);
+    if (saControl.enableOnce && result != ERR_OK) {
+        lock_guard<mutex> autoLock(stopEnableOnceLock_);
+        auto& events = stopEnableOnceMap_[saControl.saId];
+        events.remove(event);
+        if (events.empty()) {
+            stopEnableOnceMap_.erase(saControl.saId);
+        }
+        HILOGI("stopEnableOnceMap_ remove saId:%{public}d, eventId:%{public}d",
+            saControl.saId, event.eventId);
+    }
+    return result;
+}
+
+bool SystemAbilityManager::IsSameEvent(const OnDemandEvent& event, std::list<OnDemandEvent>& enableOnceList)
+{
+    for (auto iter = enableOnceList.begin(); iter != enableOnceList.end(); iter++) {
+        if (event.eventId == iter->eventId && event.name == iter->name && event.value == iter->value) {
+            HILOGI("event already exits in enable-once list");
+            return true;
+        }
+    }
+    return false;
 }
 
 sptr<IRemoteObject> SystemAbilityManager::GetSystemAbility(int32_t systemAbilityId)
@@ -418,18 +495,22 @@ int32_t SystemAbilityManager::StartOnDemandAbilityInner(const std::u16string& pr
         HILOGI("get process:%{public}s fail", Str16ToStr8(procName).c_str());
         return ERR_INVALID_VALUE;
     }
-    procObject->StartAbility(systemAbilityId);
+    auto event = abilityItem.event;
+    auto eventStr = EventToStr(event);
+    procObject->StartAbility(systemAbilityId, eventStr);
     abilityItem.state = AbilityState::STARTING;
     return ERR_OK;
 }
 
-bool SystemAbilityManager::StopOnDemandAbility(const std::u16string& procName, int32_t systemAbilityId)
+bool SystemAbilityManager::StopOnDemandAbility(const std::u16string& procName,
+    int32_t systemAbilityId, const OnDemandEvent& event)
 {
     lock_guard<recursive_mutex> autoLock(onDemandLock_);
-    return StopOnDemandAbilityInner(procName, systemAbilityId);
+    return StopOnDemandAbilityInner(procName, systemAbilityId, event);
 }
 
-bool SystemAbilityManager::StopOnDemandAbilityInner(const std::u16string& procName, int32_t systemAbilityId)
+bool SystemAbilityManager::StopOnDemandAbilityInner(const std::u16string& procName,
+    int32_t systemAbilityId, const OnDemandEvent& event)
 {
     sptr<ILocalAbilityManager> procObject =
         iface_cast<ILocalAbilityManager>(GetSystemProcess(procName));
@@ -437,7 +518,8 @@ bool SystemAbilityManager::StopOnDemandAbilityInner(const std::u16string& procNa
         HILOGI("get process:%{public}s fail", Str16ToStr8(procName).c_str());
         return false;
     }
-    return procObject->StopAbility(systemAbilityId);
+    auto eventStr = EventToStr(event);
+    return procObject->StopAbility(systemAbilityId, eventStr);
 }
 
 int32_t SystemAbilityManager::AddOnDemandSystemAbilityInfo(int32_t systemAbilityId,
@@ -527,6 +609,8 @@ bool SystemAbilityManager::DoLoadOnDemandAbility(int32_t systemAbilityId, bool& 
         isExist = true;
         return true;
     }
+    auto& abilityItem = startingAbilityMap_[systemAbilityId];
+    abilityItem.event = {INTERFACE_CALL, "get", ""};
     return StartOnDemandAbility(systemAbilityId, isExist) == ERR_OK;
 }
 
@@ -1040,16 +1124,26 @@ void SystemAbilityManager::NotifySystemAbilityLoadFail(int32_t systemAbilityId,
     callback->OnLoadSystemAbilityFail(systemAbilityId);
 }
 
-int32_t SystemAbilityManager::StartDynamicSystemProcess(const std::u16string& name, int32_t systemAbilityId)
+int32_t SystemAbilityManager::StartDynamicSystemProcess(const std::u16string& name,
+    int32_t systemAbilityId, const OnDemandEvent& event)
 {
-    std::string strExtra = std::to_string(systemAbilityId);
-    auto extraArgv = strExtra.c_str();
+    std::unordered_map<std::string, std::string> startReason;
+    startReason[START_SAID] = std::to_string(systemAbilityId);
+    startReason[EVENT_TYPE] = std::to_string(event.eventId);
+    startReason[EVENT_NAME] = event.name;
+    startReason[EVENT_VALUE] = event.value;
+    nlohmann::json eventJson;
+    for (auto it = startReason.begin(); it != startReason.end(); ++it) {
+        eventJson[it->first] = it->second;
+    }
+    auto extraArgv = eventJson.dump().c_str();
     auto result = ServiceControlWithExtra(Str16ToStr8(name).c_str(), ServiceAction::START, &extraArgv, 1);
     HILOGI("StartDynamicSystemProcess call ServiceControlWithExtra result:%{public}d!", result);
     return (result == 0) ? ERR_OK : ERR_INVALID_VALUE;
 }
 
-int32_t SystemAbilityManager::StartingSystemProcess(const std::u16string& procName, int32_t systemAbilityId)
+int32_t SystemAbilityManager::StartingSystemProcess(const std::u16string& procName,
+    int32_t systemAbilityId, const OnDemandEvent& event)
 {
     lock_guard<recursive_mutex> autoLock(onDemandLock_);
     if (startingProcessMap_.count(procName) != 0) {
@@ -1067,7 +1161,7 @@ int32_t SystemAbilityManager::StartingSystemProcess(const std::u16string& procNa
     }
     // call init start process
     int64_t begin = GetTickCount();
-    int32_t result = StartDynamicSystemProcess(procName, systemAbilityId);
+    int32_t result = StartDynamicSystemProcess(procName, systemAbilityId, event);
     if (result == ERR_OK) {
         startingProcessMap_.emplace(procName, begin);
     }
@@ -1075,7 +1169,7 @@ int32_t SystemAbilityManager::StartingSystemProcess(const std::u16string& procNa
 }
 
 int32_t SystemAbilityManager::DoLoadSystemAbility(int32_t systemAbilityId, const std::u16string& procName,
-    const sptr<ISystemAbilityLoadCallback>& callback, int32_t callingPid)
+    const sptr<ISystemAbilityLoadCallback>& callback, int32_t callingPid, const OnDemandEvent& event)
 {
     int32_t result = ERR_INVALID_VALUE;
     {
@@ -1099,12 +1193,13 @@ int32_t SystemAbilityManager::DoLoadSystemAbility(int32_t systemAbilityId, const
         }
         ++count;
         abilityItem.callbackMap[LOCAL_DEVICE].emplace_back(callback, callingPid);
+        abilityItem.event = event;
         if (abilityCallbackDeath_ != nullptr) {
             bool ret = callback->AsObject()->AddDeathRecipient(abilityCallbackDeath_);
             HILOGI("LoadSystemAbility systemAbilityId:%{public}d AddDeathRecipient %{public}s",
                 systemAbilityId, ret ? "succeed" : "failed");
         }
-        result = StartingSystemProcess(procName, systemAbilityId);
+        result = StartingSystemProcess(procName, systemAbilityId, event);
         HILOGI("LoadSystemAbility systemAbilityId:%{public}d size : %{public}zu",
             systemAbilityId, abilityItem.callbackMap[LOCAL_DEVICE].size());
     }
@@ -1113,7 +1208,7 @@ int32_t SystemAbilityManager::DoLoadSystemAbility(int32_t systemAbilityId, const
 }
 
 int32_t SystemAbilityManager::DoLoadSystemAbilityFromRpc(const std::string& srcDeviceId, int32_t systemAbilityId,
-    const std::u16string& procName, const sptr<ISystemAbilityLoadCallback>& callback)
+    const std::u16string& procName, const sptr<ISystemAbilityLoadCallback>& callback, const OnDemandEvent& event)
 {
     {
         lock_guard<recursive_mutex> autoLock(onDemandLock_);
@@ -1124,7 +1219,7 @@ int32_t SystemAbilityManager::DoLoadSystemAbilityFromRpc(const std::string& srcD
         }
         auto& abilityItem = startingAbilityMap_[systemAbilityId];
         abilityItem.callbackMap[srcDeviceId].emplace_back(callback, 0);
-        StartingSystemProcess(procName, systemAbilityId);
+        StartingSystemProcess(procName, systemAbilityId, event);
     }
     SendCheckLoadedMsg(systemAbilityId, procName, srcDeviceId, callback);
     return ERR_OK;
@@ -1144,7 +1239,8 @@ int32_t SystemAbilityManager::LoadSystemAbility(int32_t systemAbilityId,
         return ERR_INVALID_VALUE;
     }
     auto callingPid = IPCSkeleton::GetCallingPid();
-    LoadRequestInfo loadRequestInfo = {systemAbilityId, LOCAL_DEVICE, callback, callingPid};
+    OnDemandEvent onDemandEvent = {INTERFACE_CALL, "load"};
+    LoadRequestInfo loadRequestInfo = {systemAbilityId, LOCAL_DEVICE, callback, callingPid, onDemandEvent};
     return abilityStateScheduler_->HandleLoadAbilityEvent(loadRequestInfo);
 }
 
@@ -1166,7 +1262,8 @@ bool SystemAbilityManager::LoadSystemAbilityFromRpc(const std::string& srcDevice
         HILOGE("LoadSystemAbilityFromRpc said:%{public}d not distributed!", systemAbilityId);
         return false;
     }
-    LoadRequestInfo loadRequestInfo = {systemAbilityId, srcDeviceId, callback};
+    OnDemandEvent onDemandEvent = {INTERFACE_CALL, "loadFromRpc"};
+    LoadRequestInfo loadRequestInfo = {systemAbilityId, srcDeviceId, callback, -1, onDemandEvent};
     if (abilityStateScheduler_ == nullptr) {
         HILOGE("abilityStateScheduler is nullptr");
         return false;
@@ -1202,27 +1299,91 @@ int32_t SystemAbilityManager::UnloadSystemAbility(int32_t systemAbilityId)
         HILOGE("abilityStateScheduler is nullptr");
         return ERR_INVALID_VALUE;
     }
-    return abilityStateScheduler_->HandleUnloadAbilityEvent(systemAbilityId, UnloadReason::INTERFACE_CAll);
+    OnDemandEvent onDemandEvent = {INTERFACE_CALL, "unload"};
+    UnloadRequestInfo unloadRequestInfo = {systemAbilityId, onDemandEvent};
+    return abilityStateScheduler_->HandleUnloadAbilityEvent(unloadRequestInfo);
 }
 
 int32_t SystemAbilityManager::CancelUnloadSystemAbility(int32_t systemAbilityId)
 {
-    return ERR_OK;
+    if (!CheckInputSysAbilityId(systemAbilityId)) {
+        HILOGW("CancelUnloadSystemAbility systemAbilityId or callback invalid!");
+        return ERR_INVALID_VALUE;
+    }
+    SaProfile saProfile;
+    bool ret = GetSaProfile(systemAbilityId, saProfile);
+    if (!ret) {
+        HILOGE("CancelUnloadSystemAbility systemAbilityId:%{public}d not supported!", systemAbilityId);
+        return ERR_INVALID_VALUE;
+    }
+    Security::AccessToken::NativeTokenInfo nativeTokenInfo;
+    int32_t tokenInfoResult = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(
+        IPCSkeleton::GetCallingTokenID(), nativeTokenInfo);
+    if (tokenInfoResult != ERR_OK) {
+        HILOGE("cannot get token info, processName:%{public}s",
+            nativeTokenInfo.processName.c_str());
+        return ERR_INVALID_VALUE;
+    }
+    if (nativeTokenInfo.processName != Str16ToStr8(saProfile.process)) {
+        HILOGE("cannot cancel unload system ability from other sa, processName:%{public}s",
+            nativeTokenInfo.processName.c_str());
+        return ERR_INVALID_VALUE;
+    }
+    if (abilityStateScheduler_ == nullptr) {
+        HILOGE("abilityStateScheduler is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    return abilityStateScheduler_->HandleCancelUnloadAbilityEvent(systemAbilityId);
 }
 
-int32_t SystemAbilityManager::DoUnloadSystemAbility(int32_t systemAbilityId, const std::u16string& procName)
+int32_t SystemAbilityManager::DoUnloadSystemAbility(int32_t systemAbilityId,
+    const std::u16string& procName, const OnDemandEvent& event)
 {
     lock_guard<recursive_mutex> autoLock(onDemandLock_);
     sptr<IRemoteObject> targetObject = CheckSystemAbility(systemAbilityId);
     if (targetObject == nullptr) {
         return ERR_OK;
     }
-    bool result = StopOnDemandAbility(procName, systemAbilityId);
+    bool result = StopOnDemandAbility(procName, systemAbilityId, event);
     if (!result) {
         HILOGE("unload system ability failed, systemAbilityId: %{public}d", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
     return ERR_OK;
+}
+
+bool SystemAbilityManager::IdleSystemAbility(int32_t systemAbilityId, const std::u16string& procName,
+    const std::unordered_map<std::string, std::string>& idleReason, int32_t& delayTime)
+{
+    sptr<IRemoteObject> targetObject = CheckSystemAbility(systemAbilityId);
+    if (targetObject == nullptr) {
+        HILOGE("systemAbility :%{public}d not loaded", systemAbilityId);
+        return false;
+    }
+    sptr<ILocalAbilityManager> procObject =
+        iface_cast<ILocalAbilityManager>(GetSystemProcess(procName));
+    if (procObject == nullptr) {
+        HILOGE("get process:%{public}s fail", Str16ToStr8(procName).c_str());
+        return false;
+    }
+    return procObject->IdleAbility(systemAbilityId, idleReason, delayTime);
+}
+
+bool SystemAbilityManager::ActiveSystemAbility(int32_t systemAbilityId, const std::u16string& procName,
+    const std::unordered_map<std::string, std::string>& activeReason)
+{
+    sptr<IRemoteObject> targetObject = CheckSystemAbility(systemAbilityId);
+    if (targetObject == nullptr) {
+        HILOGE("systemAbility :%{public}d not loaded", systemAbilityId);
+        return false;
+    }
+    sptr<ILocalAbilityManager> procObject =
+        iface_cast<ILocalAbilityManager>(GetSystemProcess(procName));
+    if (procObject == nullptr) {
+        HILOGE("get process:%{public}s fail", Str16ToStr8(procName).c_str());
+        return false;
+    }
+    return procObject->ActiveAbility(systemAbilityId, activeReason);
 }
 
 int32_t SystemAbilityManager::LoadSystemAbility(int32_t systemAbilityId, const std::string& deviceId,
@@ -1414,6 +1575,20 @@ std::string SystemAbilityManager::TransformDeviceId(const std::string& deviceId,
 std::string SystemAbilityManager::GetLocalNodeId()
 {
     return std::string();
+}
+
+std::string SystemAbilityManager::EventToStr(const OnDemandEvent& event)
+{
+    std::unordered_map<std::string, std::string> stopReason;
+    stopReason[EVENT_TYPE] = std::to_string(event.eventId);
+    stopReason[EVENT_NAME] = event.name;
+    stopReason[EVENT_VALUE] = event.value;
+    nlohmann::json eventJson;
+    for (auto it = stopReason.begin(); it != stopReason.end(); ++it) {
+        eventJson[it->first] = it->second;
+    }
+    std::string eventStr = eventJson.dump();
+    return eventStr;
 }
 
 void SystemAbilityManager::UpdateSaFreMap(int32_t pid, int32_t saId)

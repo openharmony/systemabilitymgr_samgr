@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -36,6 +36,9 @@ namespace OHOS {
 using std::string;
 
 namespace {
+constexpr const char* EVENT_TYPE = "eventId";
+constexpr const char* EVENT_NAME = "name";
+constexpr const char* EVENT_VALUE = "value";
 constexpr const char* SA_TAG_PROFILE = "profile";
 constexpr const char* SA_TAG_INFO = "info";
 constexpr const char* SA_TAG_SYSTEM_ABILITY = "systemability";
@@ -57,6 +60,7 @@ constexpr const char* SA_TAG_DEVICE_ON_LINE = "deviceonline";
 constexpr const char* SA_TAG_SETTING_SWITCH = "settingswitch";
 constexpr const char* SA_TAG_COMMON_EVENT = "commonevent";
 constexpr const char* SA_TAG_PARAM = "param";
+constexpr const char* SA_TAG_TIEMD_EVENT = "timedevent";
 constexpr int32_t MAX_JSON_OBJECT_SIZE = 50 * 1024;
 constexpr int32_t MAX_JSON_STRING_LENGTH = 128;
 const string BOOT_START_PHASE = "BootStartPhase";
@@ -263,6 +267,52 @@ bool ParseUtil::Endswith(const std::string& src, const std::string& sub)
     return (src.length() >= sub.length() && (src.rfind(sub) == (src.length() - sub.length())));
 }
 
+std::unordered_map<std::string, std::string> ParseUtil::StringToMap(const std::string& eventStr)
+{
+    nlohmann::json eventJson = StringToJsonObj(eventStr);
+    std::unordered_map<std::string, std::string> eventMap = JsonObjToMap(eventJson);
+    return eventMap;
+}
+
+nlohmann::json ParseUtil::StringToJsonObj(const std::string& eventStr)
+{
+    nlohmann::json jsonObj = nlohmann::json::object();
+    if (eventStr.empty()) {
+        return jsonObj;
+    }
+    nlohmann::json eventJson = nlohmann::json::parse(eventStr, nullptr, false);
+    if (eventJson.is_discarded()) {
+        HILOGE("parse eventStr to json failed");
+        return jsonObj;
+    }
+    if (!eventJson.is_object()) {
+        HILOGE("eventStr converted result is not a jsonObj");
+        return jsonObj;
+    }
+    return eventJson;
+}
+
+std::unordered_map<std::string, std::string> ParseUtil::JsonObjToMap(nlohmann::json& eventJson)
+{
+    std::unordered_map<std::string, std::string> eventMap;
+    if (eventJson.contains(EVENT_TYPE) && eventJson[EVENT_TYPE].is_string()) {
+        eventMap[EVENT_TYPE] = eventJson[EVENT_TYPE];
+    } else {
+        eventMap[EVENT_TYPE] = "";
+    }
+    if (eventJson.contains(EVENT_NAME) && eventJson[EVENT_NAME].is_string()) {
+        eventMap[EVENT_NAME] = eventJson[EVENT_NAME];
+    } else {
+        eventMap[EVENT_NAME] = "";
+    }
+    if (eventJson.contains(EVENT_VALUE) && eventJson[EVENT_VALUE].is_string()) {
+        eventMap[EVENT_VALUE] = eventJson[EVENT_VALUE];
+    } else {
+        eventMap[EVENT_VALUE] = "";
+    }
+    return eventMap;
+}
+
 bool ParseUtil::CheckRootTag(const xmlNodePtr& rootNodePtr)
 {
     if (rootNodePtr == nullptr || rootNodePtr->name == nullptr ||
@@ -416,6 +466,7 @@ void ParseUtil::ParseOndemandTag(nlohmann::json& systemAbilityJson,
     GetOnDemandArrayFromJson(SETTING_SWITCH, onDemandJson, SA_TAG_SETTING_SWITCH, condationVec);
     GetOnDemandArrayFromJson(COMMON_EVENT, onDemandJson, SA_TAG_COMMON_EVENT, condationVec);
     GetOnDemandArrayFromJson(PARAM, onDemandJson, SA_TAG_PARAM, condationVec);
+    GetOnDemandArrayFromJson(TIMED_EVENT, onDemandJson, SA_TAG_TIEMD_EVENT, condationVec);
 }
 
 void ParseUtil::GetOnDemandArrayFromJson(int32_t eventId, const nlohmann::json& obj,
@@ -427,12 +478,53 @@ void ParseUtil::GetOnDemandArrayFromJson(int32_t eventId, const nlohmann::json& 
             GetStringFromJson(item, "name", name);
             std::string value;
             GetStringFromJson(item, "value", value);
+            std::vector<OnDemandEvent> conditions;
+            GetOnDemandConditionsFromJson(item, "conditions", conditions);
+            HILOGD("conditions size: %{public}zu", conditions.size());
+            bool enableOnce = false;
+            GetBoolFromJson(item, "enable-once", enableOnce);
             if (!name.empty() && name.length() <= MAX_JSON_STRING_LENGTH &&
                 value.length() <= MAX_JSON_STRING_LENGTH) {
-                OnDemandEvent event = {eventId, name, value};
+                OnDemandEvent event = {eventId, name, value, conditions, enableOnce};
                 out.emplace_back(event);
             }
         }
+    }
+}
+
+void ParseUtil::GetOnDemandConditionsFromJson(const nlohmann::json& obj,
+    const std::string& key, std::vector<OnDemandEvent>& out)
+{
+    nlohmann::json conditionsJson;
+    if (obj.find(key.c_str()) == obj.end() || !obj[key.c_str()].is_array()) {
+        HILOGW("parse conditions failed");
+        return;
+    }
+    conditionsJson = obj.at(key.c_str());
+    for (auto& condition : conditionsJson) {
+        std::string type;
+        GetStringFromJson(condition, "eventId", type);
+        std::string name;
+        GetStringFromJson(condition, "name", name);
+        std::string value;
+        GetStringFromJson(condition, "value", value);
+        int32_t eventId = 0;
+        if (type == SA_TAG_DEVICE_ON_LINE) {
+            eventId = DEVICE_ONLINE;
+        } else if (SA_TAG_SETTING_SWITCH) {
+            eventId = SETTING_SWITCH;
+        } else if (SA_TAG_COMMON_EVENT) {
+            eventId = COMMON_EVENT;
+        } else if (SA_TAG_PARAM) {
+            eventId = PARAM;
+        } else if (SA_TAG_TIEMD_EVENT) {
+            eventId = TIMED_EVENT;
+        } else {
+            HILOGW("invalid condition eventId: %{public}s", type.c_str());
+            continue;
+        }
+        OnDemandEvent conditionEvent = {eventId, name, value};
+        out.emplace_back(conditionEvent);
     }
 }
 

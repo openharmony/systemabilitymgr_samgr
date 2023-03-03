@@ -27,6 +27,7 @@
 #include "schedule/system_ability_event_handler.h"
 
 namespace OHOS {
+constexpr int32_t UNLOAD_DELAY_TIME = 20 * 1000;
 struct ProcessInfo {
     std::u16string processName;
     int32_t pid = -1;
@@ -42,7 +43,8 @@ public:
     
     int32_t HandleLoadAbilityEvent(const LoadRequestInfo& loadRequestInfo);
     int32_t HandleLoadAbilityEvent(int32_t systemAbilityId, bool& isExist);
-    int32_t HandleUnloadAbilityEvent(int32_t systemAbilityId, UnloadReason unloadReason);
+    int32_t HandleUnloadAbilityEvent(const UnloadRequestInfo& unloadRequestInfo);
+    int32_t HandleCancelUnloadAbilityEvent(int32_t systemAbilityId);
     int32_t SendAbilityStateEvent(int32_t systemAbilityId, AbilityStateEvent event);
     int32_t SendProcessStateEvent(const ProcessInfo& processInfo, ProcessStateEvent event);
     bool IsSystemAbilityUnloading(int32_t systemAbilityId);
@@ -57,16 +59,16 @@ private:
     int32_t HandleLoadAbilityEventLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext,
         const LoadRequestInfo& loadRequestInfo);
     int32_t HandleUnloadAbilityEventLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext,
-        UnloadReason unloadReason);
+        const UnloadRequestInfo& unloadRequestInfo);
 
-    int32_t SendDelayUnloadEventLocked(uint32_t systemAbilityId);
+    int32_t SendDelayUnloadEventLocked(uint32_t systemAbilityId, int32_t delayTime = UNLOAD_DELAY_TIME);
     int32_t RemoveDelayUnloadEventLocked(uint32_t systemAbilityId);
     int32_t ProcessDelayUnloadEvent(int32_t systemAbilityId);
 
     int32_t PendLoadEventLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext,
         const LoadRequestInfo& loadRequestInfo);
     int32_t PendUnloadEventLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext,
-        UnloadReason unloadReason);
+        const UnloadRequestInfo& unloadRequestInfo);
     int32_t RemovePendingUnloadEventLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext);
     int32_t HandlePendingLoadEventLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext);
     int32_t HandlePendingUnloadEventLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext);
@@ -87,6 +89,9 @@ private:
     void OnAbilityUnloadableLocked(int32_t systemAbilityId) override;
     void OnProcessNotStartedLocked(const std::u16string& processName) override;
 
+    int32_t ActiveSystemAbilityLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext,
+        const std::unordered_map<std::string, std::string>& activeReason);
+
     class UnloadEventHandler : public AppExecFwk::EventHandler {
     public:
         UnloadEventHandler(const std::shared_ptr<AppExecFwk::EventRunner>& runner,
@@ -97,7 +102,6 @@ private:
     private:
         std::weak_ptr<SystemAbilityStateScheduler> stateScheduler_;
     };
-
     std::shared_ptr<SystemAbilityStateMachine> stateMachine_;
     std::shared_ptr<SystemAbilityEventHandler> stateEventHandler_;
     std::shared_mutex abiltyMapLock_;

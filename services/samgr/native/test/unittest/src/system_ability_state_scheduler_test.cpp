@@ -27,6 +27,7 @@ using namespace OHOS;
 
 namespace OHOS {
 namespace {
+
 constexpr int32_t SAID_INVALID = -1;
 constexpr int32_t SAID = 1234;
 constexpr int32_t STATENUMS = 1;
@@ -476,7 +477,9 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleUnloadAbilityEvent001, TestSize.
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
     systemAbilityStateScheduler->abilityContextMap_.clear();
-    int32_t ret = systemAbilityStateScheduler->HandleUnloadAbilityEvent(SAID, UnloadReason::INTERFACE_CAll);
+    OnDemandEvent onDemandEvent = {INTERFACE_CALL};
+    UnloadRequestInfo unloadRequestInfo = {SAID, onDemandEvent};
+    int32_t ret = systemAbilityStateScheduler->HandleUnloadAbilityEvent(unloadRequestInfo);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
 
@@ -499,7 +502,9 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleUnloadAbilityEvent002, TestSize.
     systemAbilityContext->ownProcessContext = systemProcessContext;
     systemAbilityStateScheduler->abilityContextMap_[SAID] = systemAbilityContext;
     systemAbilityContext->state = SystemAbilityState::LOADING;
-    int32_t ret = systemAbilityStateScheduler->HandleUnloadAbilityEvent(SAID, UnloadReason::INTERFACE_CAll);
+    OnDemandEvent onDemandEvent = {INTERFACE_CALL};
+    UnloadRequestInfo unloadRequestInfo = {SAID, onDemandEvent};
+    int32_t ret = systemAbilityStateScheduler->HandleUnloadAbilityEvent(unloadRequestInfo);
     EXPECT_EQ(ret, ERR_OK);
 }
 
@@ -522,7 +527,9 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleUnloadAbilityEvent003, TestSize.
     systemAbilityContext->ownProcessContext = systemProcessContext;
     systemAbilityStateScheduler->abilityContextMap_[SAID] = systemAbilityContext;
     systemAbilityContext->state = SystemAbilityState::LOADED;
-    int32_t ret = systemAbilityStateScheduler->HandleUnloadAbilityEvent(SAID, UnloadReason::INTERFACE_CAll);
+    OnDemandEvent onDemandEvent = {INTERFACE_CALL};
+    UnloadRequestInfo unloadRequestInfo = {SAID, onDemandEvent};
+    int32_t ret = systemAbilityStateScheduler->HandleUnloadAbilityEvent(unloadRequestInfo);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
 
@@ -544,7 +551,9 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleUnloadAbilityEvent004, TestSize.
     systemAbilityStateScheduler->abilityContextMap_.clear();
     systemAbilityContext->ownProcessContext = systemProcessContext;
     systemAbilityStateScheduler->abilityContextMap_[SAID] = systemAbilityContext;
-    int32_t ret = systemAbilityStateScheduler->HandleUnloadAbilityEvent(SAID, UnloadReason::INTERFACE_CAll);
+    OnDemandEvent onDemandEvent = {INTERFACE_CALL};
+    UnloadRequestInfo unloadRequestInfo = {SAID, onDemandEvent};
+    int32_t ret = systemAbilityStateScheduler->HandleUnloadAbilityEvent(unloadRequestInfo);
     EXPECT_EQ(ret, ERR_OK);
 }
 

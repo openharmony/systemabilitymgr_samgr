@@ -24,7 +24,9 @@
 #include <shared_mutex>
 
 #include "refbase.h"
+#include "sa_profiles.h"
 #include "isystem_ability_load_callback.h"
+#include "sa_profiles.h"
 
 namespace OHOS {
 enum class SystemAbilityState {
@@ -52,11 +54,12 @@ struct LoadRequestInfo {
     std::string deviceId;
     sptr<ISystemAbilityLoadCallback> callback;
     int32_t callingPid = -1;
+    OnDemandEvent loadEvent;
 };
 
-enum class UnloadReason {
-    INTERFACE_CAll = 0,
-    ONDEMAND_EVENT,
+struct UnloadRequestInfo {
+    int32_t systemAbilityId = -1;
+    OnDemandEvent unloadEvent;
 };
 
 struct SystemProcessContext {
@@ -64,7 +67,7 @@ struct SystemProcessContext {
     int32_t pid = -1;
     int32_t uid = -1;
     std::list<int32_t> saList;
-    std::mutex processLock;
+    std::recursive_mutex processLock;
     SystemProcessState state = SystemProcessState::NOT_STARTED;
     std::shared_mutex stateCountLock;
     std::map<SystemAbilityState, uint32_t> abilityStateCountMap;
@@ -77,7 +80,8 @@ struct SystemAbilityContext {
     PendingEvent pendingEvent = PendingEvent::NO_EVENT;
     std::map<int32_t, int32_t> pendingLoadEventCountMap;
     std::list<LoadRequestInfo> pendingLoadEventList;
-    UnloadReason pendingUnloadReason = UnloadReason::INTERFACE_CAll;
+    UnloadRequestInfo pendingUnloadEvent;
+    UnloadRequestInfo unloadRequest;
 };
 } // namespace OHOS
 

@@ -30,7 +30,6 @@ class ParseUtil {
 public:
     ~ParseUtil();
     bool ParseSaProfiles(const std::string& profilePath);
-
     const std::list<SaProfile>& GetAllSaProfiles() const;
     bool GetProfile(int32_t saId, SaProfile& saProfile);
     void ClearResource();
@@ -41,6 +40,9 @@ public:
     void RemoveSaProfile(int32_t saId);
     bool CheckPathExist(const std::string& profilePath);
     std::u16string GetProcessName() const;
+    static std::unordered_map<std::string, std::string> StringToMap(const std::string& eventStr);
+    static nlohmann::json StringToJsonObj(const std::string& eventStr);
+    static std::unordered_map<std::string, std::string> JsonObjToMap(nlohmann::json& eventJson);
 private:
     void CloseSo();
     void OpenSo(SaProfile& saProfile);
@@ -57,6 +59,8 @@ private:
         std::vector<OnDemandEvent>& condationVec, const std::string& jsonTag);
     void GetOnDemandArrayFromJson(int32_t eventId, const nlohmann::json& obj,
         const std::string& key, std::vector<OnDemandEvent>& out);
+    void GetOnDemandConditionsFromJson(const nlohmann::json& obj,
+        const std::string& key, std::vector<OnDemandEvent>& out);
 
     static inline void GetBoolFromJson(const nlohmann::json& obj, const std::string& key, bool& out)
     {
@@ -71,7 +75,7 @@ private:
             obj[key.c_str()].get_to(out);
         }
     }
-
+    
     static inline void GetInt32FromJson(const nlohmann::json& obj, const std::string& key, int32_t& out)
     {
         if (obj.find(key.c_str()) != obj.end() && obj[key.c_str()].is_number_integer()) {
@@ -114,7 +118,6 @@ private:
             }
         }
     }
-
     static bool Endswith(const std::string& src, const std::string& sub);
     std::string GetRealPath(const std::string& profilePath) const;
     std::list<SaProfile> saProfiles_;

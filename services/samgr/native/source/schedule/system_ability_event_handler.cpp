@@ -132,6 +132,7 @@ int32_t SystemAbilityEventHandler::HandleAbilityUnLoadSuccessEventLocked(
                 context->pendingEvent = PendingEvent::NO_EVENT;
             }
             result = stateMachine_->AbilityStateTransitionLocked(context, SystemAbilityState::NOT_LOADED);
+            break;
         case SystemAbilityState::LOADED:
         case SystemAbilityState::UNLOADABLE:
         case SystemAbilityState::UNLOADING:

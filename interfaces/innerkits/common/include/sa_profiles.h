@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,10 +23,12 @@ namespace OHOS {
 using DlHandle = void*;
 
 enum {
-    DEVICE_ONLINE = 1,
+    INTERFACE_CALL = 0,
+    DEVICE_ONLINE,
     SETTING_SWITCH,
     PARAM,
     COMMON_EVENT,
+    TIMED_EVENT,
 };
 
 enum {
@@ -44,11 +46,19 @@ struct OnDemandEvent {
     int32_t eventId;
     std::string name;
     std::string value;
+    std::vector<OnDemandEvent> conditions;
+    bool enableOnce = false;
+
+    bool operator==(const OnDemandEvent& event) const
+    {
+        return this->eventId == event.eventId && this->name == event.name && this->value == event.value;
+    }
 };
 
 struct SaControlInfo {
     int32_t ondemandId;
     int32_t saId;
+    bool enableOnce = false;
 };
 
 struct SaProfile {
