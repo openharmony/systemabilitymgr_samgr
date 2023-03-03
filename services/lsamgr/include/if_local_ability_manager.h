@@ -17,6 +17,7 @@
 #define IF_LOCAL_ABILITY_MANAGER_H
 
 #include <string>
+#include <unordered_map>
 #include "iremote_broker.h"
 #include "iremote_object.h"
 #include "iremote_stub.h"
@@ -27,11 +28,17 @@ class ILocalAbilityManager : public IRemoteBroker {
 public:
     virtual bool StartAbility(int32_t systemAbilityId, const std::string& eventStr) = 0;
     virtual bool StopAbility(int32_t systemAbilityId, const std::string& eventStr) = 0;
+    virtual bool ActiveAbility(int32_t systemAbilityId,
+        const std::unordered_map<std::string, std::string>& activeReason) = 0;
+    virtual bool IdleAbility(int32_t systemAbilityId,
+        const std::unordered_map<std::string, std::string>& idleReason, int32_t& delayTime) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ILocalAbilityManager");
 protected:
     enum {
         START_ABILITY_TRANSACTION = 1,
         STOP_ABILITY_TRANSACTION = 2,
+        ACTIVE_ABILITY_TRANSACTION = 3,
+        IDLE_ABILITY_TRANSACTION = 4,
     };
     static inline const std::u16string LOCAL_ABILITY_MANAGER_INTERFACE_TOKEN = u"ohos.localabilitymanager.accessToken";
 };

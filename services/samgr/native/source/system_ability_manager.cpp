@@ -50,8 +50,6 @@ const string EVENT_VALUE = "value";
 const string PREFIX = "/system/profile/";
 const string LOCAL_DEVICE = "local";
 const string ONDEMAND_PARAM = "persist.samgr.perf.ondemand";
-const string DEFAULT_LOAD_NAME = "loadevent";
-const string DEFAULT_UNLOAD_NAME = "unloadevent";
 constexpr const char* ONDEMAND_PERF_PARAM = "persist.samgr.perf.ondemand";
 
 constexpr uint32_t REPORT_GET_SA_INTERVAL = 24 * 60 * 60 * 1000; // ms and is one day
@@ -65,8 +63,6 @@ constexpr int32_t MAX_SA_FREQUENCY_COUNT = INT32_MAX - 1000000;
 constexpr int32_t SHFIT_BIT = 32;
 constexpr int64_t ONDEMAND_PERF_DELAY_TIME = 60 * 1000; // ms
 constexpr int64_t CHECK_LOADED_DELAY_TIME = 4 * 1000; // ms
-constexpr int64_t DEFAULT_EVENTID = 0;
-constexpr int64_t DEFAULT_CALLINGPID = -1;
 }
 
 std::mutex SystemAbilityManager::instanceLock;
@@ -329,8 +325,8 @@ int32_t SystemAbilityManager::CheckStopEnableOnce(const OnDemandEvent& event,
         HILOGI("stopEnableOnceMap_ add saId:%{public}d, eventId:%{public}d",
             saControl.saId, event.eventId);
     }
-    result = abilityStateScheduler_->HandleUnloadAbilityEvent(saControl.saId,
-        UnloadReason::ONDEMAND_EVENT, event);
+    UnloadRequestInfo unloadRequestInfo = {saControl.saId, event};
+    result = abilityStateScheduler_->HandleUnloadAbilityEvent(unloadRequestInfo);
     if (saControl.enableOnce && result != ERR_OK) {
         lock_guard<mutex> autoLock(stopEnableOnceLock_);
         auto& events = stopEnableOnceMap_[saControl.saId];
@@ -614,7 +610,7 @@ bool SystemAbilityManager::DoLoadOnDemandAbility(int32_t systemAbilityId, bool& 
         return true;
     }
     auto& abilityItem = startingAbilityMap_[systemAbilityId];
-    abilityItem.event = {DEFAULT_EVENTID, DEFAULT_LOAD_NAME, ""};
+    abilityItem.event = {INTERFACE_CALL, "get", ""};
     return StartOnDemandAbility(systemAbilityId, isExist) == ERR_OK;
 }
 
@@ -1243,8 +1239,8 @@ int32_t SystemAbilityManager::LoadSystemAbility(int32_t systemAbilityId,
         return ERR_INVALID_VALUE;
     }
     auto callingPid = IPCSkeleton::GetCallingPid();
-    OnDemandEvent defaultevent = {DEFAULT_EVENTID, DEFAULT_LOAD_NAME, ""};
-    LoadRequestInfo loadRequestInfo = {systemAbilityId, LOCAL_DEVICE, callback, callingPid, defaultevent};
+    OnDemandEvent onDemandEvent = {INTERFACE_CALL, "load"};
+    LoadRequestInfo loadRequestInfo = {systemAbilityId, LOCAL_DEVICE, callback, callingPid, onDemandEvent};
     return abilityStateScheduler_->HandleLoadAbilityEvent(loadRequestInfo);
 }
 
@@ -1266,8 +1262,8 @@ bool SystemAbilityManager::LoadSystemAbilityFromRpc(const std::string& srcDevice
         HILOGE("LoadSystemAbilityFromRpc said:%{public}d not distributed!", systemAbilityId);
         return false;
     }
-    OnDemandEvent defaultevent = {DEFAULT_EVENTID, DEFAULT_LOAD_NAME, ""};
-    LoadRequestInfo loadRequestInfo = {systemAbilityId, srcDeviceId, callback, DEFAULT_CALLINGPID, defaultevent};
+    OnDemandEvent onDemandEvent = {INTERFACE_CALL, "loadFromRpc"};
+    LoadRequestInfo loadRequestInfo = {systemAbilityId, srcDeviceId, callback, -1, onDemandEvent};
     if (abilityStateScheduler_ == nullptr) {
         HILOGE("abilityStateScheduler is nullptr");
         return false;
@@ -1303,14 +1299,41 @@ int32_t SystemAbilityManager::UnloadSystemAbility(int32_t systemAbilityId)
         HILOGE("abilityStateScheduler is nullptr");
         return ERR_INVALID_VALUE;
     }
-    OnDemandEvent defaultevent = {DEFAULT_EVENTID, DEFAULT_UNLOAD_NAME, ""};
-    return abilityStateScheduler_->HandleUnloadAbilityEvent(systemAbilityId,
-        UnloadReason::INTERFACE_CAll, defaultevent);
+    OnDemandEvent onDemandEvent = {INTERFACE_CALL, "unload"};
+    UnloadRequestInfo unloadRequestInfo = {systemAbilityId, onDemandEvent};
+    return abilityStateScheduler_->HandleUnloadAbilityEvent(unloadRequestInfo);
 }
 
 int32_t SystemAbilityManager::CancelUnloadSystemAbility(int32_t systemAbilityId)
 {
-    return ERR_OK;
+    if (!CheckInputSysAbilityId(systemAbilityId)) {
+        HILOGW("CancelUnloadSystemAbility systemAbilityId or callback invalid!");
+        return ERR_INVALID_VALUE;
+    }
+    SaProfile saProfile;
+    bool ret = GetSaProfile(systemAbilityId, saProfile);
+    if (!ret) {
+        HILOGE("CancelUnloadSystemAbility systemAbilityId:%{public}d not supported!", systemAbilityId);
+        return ERR_INVALID_VALUE;
+    }
+    Security::AccessToken::NativeTokenInfo nativeTokenInfo;
+    int32_t tokenInfoResult = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(
+        IPCSkeleton::GetCallingTokenID(), nativeTokenInfo);
+    if (tokenInfoResult != ERR_OK) {
+        HILOGE("cannot get token info, processName:%{public}s",
+            nativeTokenInfo.processName.c_str());
+        return ERR_INVALID_VALUE;
+    }
+    if (nativeTokenInfo.processName != Str16ToStr8(saProfile.process)) {
+        HILOGE("cannot cancel unload system ability from other sa, processName:%{public}s",
+            nativeTokenInfo.processName.c_str());
+        return ERR_INVALID_VALUE;
+    }
+    if (abilityStateScheduler_ == nullptr) {
+        HILOGE("abilityStateScheduler is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    return abilityStateScheduler_->HandleCancelUnloadAbilityEvent(systemAbilityId);
 }
 
 int32_t SystemAbilityManager::DoUnloadSystemAbility(int32_t systemAbilityId,
@@ -1327,6 +1350,40 @@ int32_t SystemAbilityManager::DoUnloadSystemAbility(int32_t systemAbilityId,
         return ERR_INVALID_VALUE;
     }
     return ERR_OK;
+}
+
+bool SystemAbilityManager::IdleSystemAbility(int32_t systemAbilityId, const std::u16string& procName,
+    const std::unordered_map<std::string, std::string>& idleReason, int32_t& delayTime)
+{
+    sptr<IRemoteObject> targetObject = CheckSystemAbility(systemAbilityId);
+    if (targetObject == nullptr) {
+        HILOGE("systemAbility :%{public}d not loaded", systemAbilityId);
+        return false;
+    }
+    sptr<ILocalAbilityManager> procObject =
+        iface_cast<ILocalAbilityManager>(GetSystemProcess(procName));
+    if (procObject == nullptr) {
+        HILOGE("get process:%{public}s fail", Str16ToStr8(procName).c_str());
+        return false;
+    }
+    return procObject->IdleAbility(systemAbilityId, idleReason, delayTime);
+}
+
+bool SystemAbilityManager::ActiveSystemAbility(int32_t systemAbilityId, const std::u16string& procName,
+    const std::unordered_map<std::string, std::string>& activeReason)
+{
+    sptr<IRemoteObject> targetObject = CheckSystemAbility(systemAbilityId);
+    if (targetObject == nullptr) {
+        HILOGE("systemAbility :%{public}d not loaded", systemAbilityId);
+        return false;
+    }
+    sptr<ILocalAbilityManager> procObject =
+        iface_cast<ILocalAbilityManager>(GetSystemProcess(procName));
+    if (procObject == nullptr) {
+        HILOGE("get process:%{public}s fail", Str16ToStr8(procName).c_str());
+        return false;
+    }
+    return procObject->ActiveAbility(systemAbilityId, activeReason);
 }
 
 int32_t SystemAbilityManager::LoadSystemAbility(int32_t systemAbilityId, const std::string& deviceId,

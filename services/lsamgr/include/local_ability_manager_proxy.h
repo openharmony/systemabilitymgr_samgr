@@ -32,6 +32,10 @@ public:
 
     bool StartAbility(int32_t systemAbilityId, const std::string& eventStr);
     bool StopAbility(int32_t systemAbilityId, const std::string& eventStr);
+    bool ActiveAbility(int32_t systemAbilityId,
+        const std::unordered_map<std::string, std::string>& activeReason);
+    bool IdleAbility(int32_t systemAbilityId,
+        const std::unordered_map<std::string, std::string>& idleReason, int32_t& delayTime);
 private:
     static inline BrokerDelegator<LocalAbilityManagerProxy> delegator_;
     OHOS::HiviewDFX::HiLogLabel label_ = { LOG_CORE, 0xD001800, "SA" };

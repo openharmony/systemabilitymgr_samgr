@@ -47,6 +47,7 @@ private:
     int32_t LoadSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t LoadRemoteSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t UnloadSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
+    int32_t CancelUnloadSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t UnmarshalingSaExtraProp(MessageParcel& data, SAExtraProp& extraProp);
     static int32_t GetHapIdMultiuser(int32_t uid);
 

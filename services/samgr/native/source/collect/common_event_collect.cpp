@@ -81,9 +81,7 @@ bool CommonEventCollect::AddCommonListener()
 {
     if (IsCesReady()) {
         HILOGI("CommonEventCollect AddCommonListener ces is ready");
-        if (commonEventSubscriber_ == nullptr) {
-            CreateCommonEventSubscriber();
-        }
+        CreateCommonEventSubscriber();
         return EventFwk::CommonEventManager::SubscribeCommonEvent(commonEventSubscriber_);
     }
     return false;
@@ -130,7 +128,12 @@ void CommonHandler::ProcessEvent(const InnerEvent::Pointer& event)
         HILOGE("CommonEventCollect ProcessEvent error event code!");
         return;
     }
-    if (!commonCollect_->AddCommonListener()) {
+    auto commonCollect = commonCollect_.promote();
+    if (commonCollect == nullptr) {
+        HILOGE("CommonEventCollect collect is nullptr");
+        return;
+    }
+    if (!commonCollect->AddCommonListener()) {
         HILOGW("CommonEventCollect AddCommonListener retry");
         SendEvent(INIT_EVENT, DELAY_TIME);
     }
@@ -147,7 +150,12 @@ void CommonEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData& data
     HILOGI("OnReceiveEvent get action: %{public}s", action.c_str());
     SaveAction(action);
     OnDemandEvent event = {COMMON_EVENT, action, ""};
-    collect_->ReportEvent(event);
+    auto collect = collect_.promote();
+    if (collect == nullptr) {
+        HILOGE("CommonEventCollect collect is nullptr");
+        return;
+    }
+    collect->ReportEvent(event);
 }
 
 void CommonEventSubscriber::SaveAction(const std::string& action)
