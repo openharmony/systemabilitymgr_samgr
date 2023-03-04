@@ -24,6 +24,7 @@
 #include "iremote_proxy.h"
 #include "isystem_ability_load_callback.h"
 #include "isystem_ability_status_change.h"
+#include "isystem_process_status_change.h"
 
 namespace OHOS {
 class ISystemAbilityManager : public IRemoteBroker {
@@ -66,6 +67,9 @@ public:
         ADD_SYSTEM_PROCESS_TRANSACTION = 20,
         UNLOAD_SYSTEM_ABILITY_TRANSACTION = 21,
         CANCEL_UNLOAD_SYSTEM_ABILITY_TRANSACTION = 22,
+        GET_RUNNING_SYSTEM_PROCESS_TRANSACTION = 23,
+        SUBSCRIBE_SYSTEM_PROCESS_TRANSACTION = 24,
+        UNSUBSCRIBE_SYSTEM_PROCESS_TRANSACTION = 25,
     };
 
     // Retrieve an existing ability, retrying and blocking for a few seconds if it doesn't exist.
@@ -123,6 +127,9 @@ public:
         const sptr<ISystemAbilityLoadCallback>& callback) = 0;
     virtual int32_t UnloadSystemAbility(int32_t systemAbilityId) = 0;
     virtual int32_t CancelUnloadSystemAbility(int32_t systemAbilityId) = 0;
+    virtual int32_t GetRunningSystemProcess(std::list<SystemProcessInfo>& systemProcessInfos) = 0;
+    virtual int32_t SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener) = 0;
+    virtual int32_t UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener) = 0;
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISystemAbilityManager");
 protected:

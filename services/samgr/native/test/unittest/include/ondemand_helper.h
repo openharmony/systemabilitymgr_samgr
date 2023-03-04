@@ -17,6 +17,7 @@
 
 #include "refbase.h"
 #include "system_ability_load_callback_stub.h"
+#include "system_process_status_change_stub.h"
 namespace OHOS {
 class OnDemandHelper {
 public:
@@ -24,6 +25,8 @@ public:
     static OnDemandHelper& GetInstance();
 
     int32_t OnDemandAbility(int32_t systemAbilityId);
+    int32_t LoadSystemAbility(int32_t systemAbilityId, const sptr<ISystemAbilityLoadCallback>& callback);
+    int32_t UnloadSystemAbility(int32_t systemAbilityId);
     void GetDeviceList();
     std::string GetFirstDevice();
     int32_t LoadRemoteAbility(int32_t systemAbilityId, const std::string& deviceId,
@@ -33,9 +36,12 @@ public:
     void LoadRemoteAbilityMutiSACb(int32_t systemAbilityId, const std::string& deviceId);
     void LoadRemoteAbilityMutiCb(int32_t systemAbilityId, const std::string& deviceId);
     void LoadRemoteAbilityPressure(int32_t systemAbilityId, const std::string& deviceId);
-
     sptr<IRemoteObject> GetSystemAbility(int32_t systemAbilityId);
     void OnLoadSystemAbility(int32_t systemAbilityId);
+    void InitSystemProcessStatusChange();
+    void GetSystemProcess();
+    void SubscribeSystemProcess();
+    void UnSubscribeSystemProcess();
 protected:
     class OnDemandLoadCallback : public SystemAbilityLoadCallbackStub {
     public:
@@ -44,12 +50,18 @@ protected:
         void OnLoadSACompleteForRemote(const std::string& deviceId, int32_t systemAbilityId,
             const sptr<IRemoteObject>& remoteObject) override;
     };
+    class SystemProcessStatusChange : public SystemProcessStatusChangeStub {
+    public:
+        void OnSystemProcessStarted(SystemProcessInfo& systemProcessInfo) override;
+        void OnSystemProcessStopped(SystemProcessInfo& systemProcessInfo) override;
+    };
 private:
     OnDemandHelper();
     sptr<OnDemandLoadCallback> loadCallback_;
     sptr<OnDemandLoadCallback> loadCallback2_;
     sptr<OnDemandLoadCallback> loadCallback3_;
     sptr<OnDemandLoadCallback> loadCallback4_;
+    sptr<SystemProcessStatusChange> systemProcessStatusChange_;
 };
 }
 #endif /* SAMGR_TEST_UNITTEST_INCLUDE_ONDEMAND_HELPER_H */

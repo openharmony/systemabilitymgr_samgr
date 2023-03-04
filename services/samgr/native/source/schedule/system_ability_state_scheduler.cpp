@@ -15,6 +15,7 @@
 
 #include <algorithm>
 
+#include "ability_death_recipient.h"
 #include "ipc_skeleton.h"
 #ifdef RESSCHED_ENABLE
 #include "res_sched_client.h"
@@ -38,6 +39,7 @@ const std::string KEY_VALUE = "value";
 void SystemAbilityStateScheduler::Init(const std::list<SaProfile>& saProfiles)
 {
     InitStateContext(saProfiles);
+    processListenerDeath_ = sptr<IRemoteObject::DeathRecipient>(new SystemProcessListenerDeathRecipient());
     auto unloadRunner = AppExecFwk::EventRunner::Create("UnloadHandler");
     unloadEventHandler_ = std::make_shared<UnloadEventHandler>(unloadRunner, weak_from_this());
 
@@ -291,9 +293,7 @@ int32_t SystemAbilityStateScheduler::SendProcessStateEvent(const ProcessInfo& pr
         return ERR_INVALID_VALUE;
     }
     std::lock_guard<std::recursive_mutex> autoLock(processContext->processLock);
-    processContext->pid = processInfo.pid;
-    processContext->uid = processInfo.uid;
-    return stateEventHandler_->HandleProcessEventLocked(processContext, event);
+    return stateEventHandler_->HandleProcessEventLocked(processContext, processInfo, event);
 }
 
 int32_t SystemAbilityStateScheduler::SendDelayUnloadEventLocked(uint32_t systemAbilityId, int32_t delayTime)
@@ -544,6 +544,22 @@ int32_t SystemAbilityStateScheduler::KillSystemProcessLocked(
     return ERR_OK;
 }
 
+void SystemAbilityStateScheduler::OnProcessStartedLocked(const std::u16string& processName)
+{
+    HILOGI("[SA Scheduler][process: %{public}s] started", Str16ToStr8(processName).c_str());
+    std::shared_ptr<SystemProcessContext> processContext;
+    if (!GetSystemProcessContext(processName, processContext)) {
+        return;
+    }
+    std::shared_lock<std::shared_mutex> readLock(listenerSetLock_);
+    for (auto& listener : processListeners) {
+        if (listener->AsObject() != nullptr) {
+            SystemProcessInfo systemProcessInfo = {Str16ToStr8(processContext->processName), processContext->pid};
+            listener->OnSystemProcessStarted(systemProcessInfo);
+        }
+    }
+}
+
 void SystemAbilityStateScheduler::OnProcessNotStartedLocked(const std::u16string& processName)
 {
     HILOGI("[SA Scheduler][process: %{public}s] stopped", Str16ToStr8(processName).c_str());
@@ -560,6 +576,13 @@ void SystemAbilityStateScheduler::OnProcessNotStartedLocked(const std::u16string
         result = stateMachine_->AbilityStateTransitionLocked(abilityContext, SystemAbilityState::NOT_LOADED);
         if (result == ERR_OK) {
             HandlePendingLoadEventLocked(abilityContext);
+        }
+    }
+    std::shared_lock<std::shared_mutex> readLock(listenerSetLock_);
+    for (auto& listener : processListeners) {
+        if (listener->AsObject() != nullptr) {
+            SystemProcessInfo systemProcessInfo = {Str16ToStr8(processContext->processName), processContext->pid};
+            listener->OnSystemProcessStopped(systemProcessInfo);
         }
     }
 }
@@ -623,6 +646,62 @@ void SystemAbilityStateScheduler::OnAbilityUnloadableLocked(int32_t systemAbilit
     if (!result) {
         HILOGE("[SA Scheduler] post unload all SA task failed");
     }
+}
+
+int32_t SystemAbilityStateScheduler::GetRunningSystemProcess(std::list<SystemProcessInfo>& systemProcessInfos)
+{
+    HILOGI("[SA Scheduler] get running process");
+    std::shared_lock<std::shared_mutex> readLock(processMapLock_);
+    for (auto it : processContextMap_) {
+        auto& processContext = it.second;
+        if (processContext == nullptr) {
+            continue;
+        }
+        std::lock_guard<std::recursive_mutex> autoLock(processContext->processLock);
+        if (processContext->state == SystemProcessState::STARTED) {
+            SystemProcessInfo systemProcessInfo = {Str16ToStr8(processContext->processName), processContext->pid};
+            systemProcessInfos.emplace_back(systemProcessInfo);
+        }
+    }
+    return ERR_OK;
+}
+
+int32_t SystemAbilityStateScheduler::SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener)
+{
+    std::unique_lock<std::shared_mutex> writeLock(listenerSetLock_);
+    auto iter = std::find_if(processListeners.begin(), processListeners.end(),
+        [listener](sptr<ISystemProcessStatusChange>& item) {
+        return item->AsObject() == listener->AsObject();
+    });
+    if (iter == processListeners.end()) {
+        if (processListenerDeath_ != nullptr) {
+            bool ret = listener->AsObject()->AddDeathRecipient(processListenerDeath_);
+            HILOGI("SubscribeSystemProcess AddDeathRecipient %{public}s", ret ? "succeed" : "failed");
+        }
+        processListeners.emplace_back(listener);
+    } else {
+        HILOGI("UnSubscribeSystemProcess listener already exists");
+    }
+    return ERR_OK;
+}
+
+int32_t SystemAbilityStateScheduler::UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener)
+{
+    std::unique_lock<std::shared_mutex> writeLock(listenerSetLock_);
+    auto iter = std::find_if(processListeners.begin(), processListeners.end(),
+        [listener](sptr<ISystemProcessStatusChange>& item) {
+        return item->AsObject() == listener->AsObject();
+    });
+    if (iter != processListeners.end()) {
+        if (processListenerDeath_ != nullptr) {
+            listener->AsObject()->RemoveDeathRecipient(processListenerDeath_);
+        }
+        processListeners.erase(iter);
+        HILOGI("UnSubscribeSystemProcess listener remove success");
+    } else {
+        HILOGI("UnSubscribeSystemProcess listener not exists");
+    }
+    return ERR_OK;
 }
 
 int32_t SystemAbilityStateScheduler::ProcessDelayUnloadEvent(int32_t systemAbilityId)

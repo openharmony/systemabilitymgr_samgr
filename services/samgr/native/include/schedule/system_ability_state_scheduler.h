@@ -23,16 +23,12 @@
 #include <shared_mutex>
 
 #include "event_handler.h"
+#include "isystem_process_status_change.h"
 #include "sa_profiles.h"
 #include "schedule/system_ability_event_handler.h"
 
 namespace OHOS {
 constexpr int32_t UNLOAD_DELAY_TIME = 20 * 1000;
-struct ProcessInfo {
-    std::u16string processName;
-    int32_t pid = -1;
-    int32_t uid = -1;
-};
 
 class SystemAbilityStateScheduler : public SystemAbilityStateListener,
     public std::enable_shared_from_this<SystemAbilityStateScheduler> {
@@ -48,6 +44,10 @@ public:
     int32_t SendAbilityStateEvent(int32_t systemAbilityId, AbilityStateEvent event);
     int32_t SendProcessStateEvent(const ProcessInfo& processInfo, ProcessStateEvent event);
     bool IsSystemAbilityUnloading(int32_t systemAbilityId);
+
+    int32_t GetRunningSystemProcess(std::list<SystemProcessInfo>& systemProcessInfos);
+    int32_t SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener);
+    int32_t UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener);
 private:
     void InitStateContext(const std::list<SaProfile>& saProfiles);
 
@@ -88,6 +88,7 @@ private:
     void OnAbilityLoadedLocked(int32_t systemAbilityId) override;
     void OnAbilityUnloadableLocked(int32_t systemAbilityId) override;
     void OnProcessNotStartedLocked(const std::u16string& processName) override;
+    void OnProcessStartedLocked(const std::u16string& processName) override;
 
     int32_t ActiveSystemAbilityLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext,
         const std::unordered_map<std::string, std::string>& activeReason);
@@ -110,6 +111,9 @@ private:
     std::map<std::u16string, std::shared_ptr<SystemProcessContext>> processContextMap_;
     std::shared_ptr<UnloadEventHandler> unloadEventHandler_;
     std::shared_ptr<AppExecFwk::EventHandler> processHandler_;
+    std::shared_mutex listenerSetLock_;
+    std::list<sptr<ISystemProcessStatusChange>> processListeners;
+    sptr<IRemoteObject::DeathRecipient> processListenerDeath_;
 };
 } // namespace OHOS
 

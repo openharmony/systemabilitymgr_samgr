@@ -54,6 +54,106 @@ OnDemandHelper& OnDemandHelper::GetInstance()
     return instance;
 }
 
+void OnDemandHelper::GetSystemProcess()
+{
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (sm == nullptr) {
+        cout << "GetSystemAbilityManager samgr object null!" << endl;
+        return;
+    }
+    std::list<SystemProcessInfo> systemProcessInfos;
+    int32_t ret = sm->GetRunningSystemProcess(systemProcessInfos);
+    if (ret != ERR_OK) {
+        cout << "GetRunningSystemProcess failed" << endl;
+    }
+    cout << "GetRunningSystemProcess size: "<< systemProcessInfos.size() << endl;
+    for (auto& systemProcessInfo : systemProcessInfos) {
+        cout << "processName: " << systemProcessInfo.processName << " pid:" << systemProcessInfo.pid << endl;
+    }
+}
+
+void OnDemandHelper::InitSystemProcessStatusChange()
+{
+    systemProcessStatusChange_ = new SystemProcessStatusChange();
+}
+
+void OnDemandHelper::SubscribeSystemProcess()
+{
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (sm == nullptr) {
+        cout << "GetSystemAbilityManager samgr object null!" << endl;
+        return;
+    }
+    int32_t ret = sm->SubscribeSystemProcess(systemProcessStatusChange_);
+    if (ret != ERR_OK) {
+        cout << "SubscribeSystemProcess failed" << endl;
+    }
+    cout << "SubscribeSystemProcess success" << endl;
+}
+
+void OnDemandHelper::UnSubscribeSystemProcess()
+{
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (sm == nullptr) {
+        cout << "GetSystemAbilityManager samgr object null!" << endl;
+        return;
+    }
+    int32_t ret = sm->UnSubscribeSystemProcess(systemProcessStatusChange_);
+    if (ret != ERR_OK) {
+        cout << "UnSubscribeSystemProcess failed" << endl;
+    }
+    cout << "UnSubscribeSystemProcess success" << endl;
+}
+
+void OnDemandHelper::SystemProcessStatusChange::OnSystemProcessStarted(SystemProcessInfo& systemProcessInfo)
+{
+    cout << "OnSystemProcessStarted, processName: " << systemProcessInfo.processName << " pid:"
+        << systemProcessInfo.pid << endl;
+}
+
+void OnDemandHelper::SystemProcessStatusChange::OnSystemProcessStopped(SystemProcessInfo& systemProcessInfo)
+{
+    cout << "OnSystemProcessStopped, processName: " << systemProcessInfo.processName << " pid:"
+        << systemProcessInfo.pid << endl;
+}
+
+int32_t OnDemandHelper::LoadSystemAbility(int32_t systemAbilityId, const sptr<ISystemAbilityLoadCallback>& callback)
+{
+    int64_t begin = GetTickCount();
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (sm == nullptr) {
+        cout << "GetSystemAbilityManager samgr object null!" << endl;
+        return ERR_NULL_OBJECT;
+    }
+    int32_t result = sm->LoadSystemAbility(systemAbilityId, callback);
+    if (result != ERR_OK) {
+        cout << "systemAbilityId:" << systemAbilityId << " unload failed, result code:" << result << endl;
+        return result;
+    }
+    cout << "LoadSystemAbility result:" << result << " spend:" << (GetTickCount() - begin) << " ms"
+            << " systemAbilityId:" << systemAbilityId << endl;
+    return ERR_OK;
+}
+
+int32_t OnDemandHelper::UnloadSystemAbility(int32_t systemAbilityId)
+{
+    SamMockPermission::MockProcess("listen_test");
+    int64_t begin = GetTickCount();
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (sm == nullptr) {
+        cout << "GetSystemAbilityManager samgr object null!" << endl;
+        return ERR_NULL_OBJECT;
+    }
+    int32_t result = sm->UnloadSystemAbility(systemAbilityId);
+    if (result != ERR_OK) {
+        cout << "systemAbilityId:" << systemAbilityId << " unload failed, result code:" << result << endl;
+        return result;
+    }
+    cout << "UnloadSystemAbility result:" << result << " spend:" << (GetTickCount() - begin) << " ms"
+            << " systemAbilityId:" << systemAbilityId << endl;
+    return ERR_OK;
+}
+
 int32_t OnDemandHelper::OnDemandAbility(int32_t systemAbilityId)
 {
     int64_t begin = GetTickCount();
@@ -255,13 +355,29 @@ void OnDemandHelper::OnDemandLoadCallback::OnLoadSACompleteForRemote(const std::
 }
 }
 
+void TestProcess(OHOS::OnDemandHelper& ondemandHelper, string& cmd)
+{
+    if (cmd == "getp") {
+        SamMockPermission::MockProcess("resource_schedule_service");
+        ondemandHelper.GetSystemProcess();
+    } else if (cmd == "subp") {
+        SamMockPermission::MockProcess("resource_schedule_service");
+        ondemandHelper.SubscribeSystemProcess();
+    } else if (cmd == "unsubp") {
+        SamMockPermission::MockProcess("resource_schedule_service");
+        ondemandHelper.UnSubscribeSystemProcess();
+    } else if (cmd == "initp") {
+        ondemandHelper.InitSystemProcessStatusChange();
+    }
+}
+
 int main(int argc, char* argv[])
 {
     SamMockPermission::MockPermission();
     OHOS::OnDemandHelper& ondemandHelper = OnDemandHelper::GetInstance();
     string cmd = "load";
     do {
-        cout << "please input operation " << endl;
+        cout << "please input operation (get/load/unload/getp/initp/subp/unsubp) " << endl;
         cin >> cmd;
         int32_t systemAbilityId = 0;
         std::string deviceId = ondemandHelper.GetFirstDevice();
@@ -294,6 +410,10 @@ int main(int argc, char* argv[])
             ondemandHelper.LoadRemoteAbility(otherSystemAbilityId, otherDevice, nullptr);
         } else if (cmd == "loadmuti") {
             ondemandHelper.LoadRemoteAbilityPressure(systemAbilityId, deviceId);
+        } else if (cmd == "unload") {
+            ondemandHelper.UnloadSystemAbility(systemAbilityId);
+        } else {
+            TestProcess(ondemandHelper, cmd);
         }
         cout << "-----Input q or Q to quit, [load] for LoadSystemAbility, [get] for GetSystemAbility-----" << endl;
         cmd.clear();

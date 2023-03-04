@@ -968,6 +968,33 @@ sptr<IRemoteObject> SystemAbilityManager::GetSystemProcess(const u16string& proc
     return nullptr;
 }
 
+int32_t SystemAbilityManager::GetRunningSystemProcess(std::list<SystemProcessInfo>& systemProcessInfos)
+{
+    if (abilityStateScheduler_ == nullptr) {
+        HILOGE("abilityStateScheduler is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    return abilityStateScheduler_->GetRunningSystemProcess(systemProcessInfos);
+}
+
+int32_t SystemAbilityManager::SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener)
+{
+    if (abilityStateScheduler_ == nullptr) {
+        HILOGE("abilityStateScheduler is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    return abilityStateScheduler_->SubscribeSystemProcess(listener);
+}
+
+int32_t SystemAbilityManager::UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener)
+{
+    if (abilityStateScheduler_ == nullptr) {
+        HILOGE("abilityStateScheduler is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    return abilityStateScheduler_->UnSubscribeSystemProcess(listener);
+}
+
 void SystemAbilityManager::SendSystemAbilityAddedMsg(int32_t systemAbilityId, const sptr<IRemoteObject>& remoteObject)
 {
     if (workHandler_ == nullptr) {

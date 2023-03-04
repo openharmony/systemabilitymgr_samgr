@@ -94,6 +94,9 @@ public:
 
     int32_t AddSystemProcess(const std::u16string& procName, const sptr<IRemoteObject>& procObject) override;
     int32_t RemoveSystemProcess(const sptr<IRemoteObject>& procObject);
+    int32_t GetRunningSystemProcess(std::list<SystemProcessInfo>& systemProcessInfos) override;
+    int32_t SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener) override;
+    int32_t UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener) override;
 
     int32_t LoadSystemAbility(int32_t systemAbilityId, const sptr<ISystemAbilityLoadCallback>& callback) override;
     int32_t DoLoadSystemAbility(int32_t systemAbilityId, const std::u16string& procName,

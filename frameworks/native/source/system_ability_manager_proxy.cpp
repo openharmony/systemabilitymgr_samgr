@@ -706,4 +706,154 @@ int32_t SystemAbilityManagerProxy::AddSystemProcess(const u16string& procName, c
     }
     return AddSystemAbilityWrapper(ADD_SYSTEM_PROCESS_TRANSACTION, data);
 }
+
+int32_t SystemAbilityManagerProxy::GetRunningSystemProcess(std::list<SystemProcessInfo>& systemProcessInfos)
+{
+    HILOGI("GetRunningSystemProcess called");
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGI("GetRunningSystemProcess remote is nullptr");
+        return ERR_INVALID_OPERATION;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t err = remote->SendRequest(GET_RUNNING_SYSTEM_PROCESS_TRANSACTION, data, reply, option);
+    if (err != ERR_NONE) {
+        HILOGE("GetRunningSystemProcess SendRequest error: %{public}d!", err);
+        return err;
+    }
+    HILOGI("GetRunningSystemProcess SendRequest succeed!");
+    int32_t result = 0;
+    bool ret = reply.ReadInt32(result);
+    if (!ret) {
+        HILOGW("SubscribeSystemProcess Read result failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (result != ERR_OK) {
+        HILOGE("GetRunningSystemProcess failed: %{public}d!", result);
+    }
+    return ReadSystemProcessFromParcel(systemProcessInfos, reply);
+}
+
+int32_t SystemAbilityManagerProxy::ReadSystemProcessFromParcel(std::list<SystemProcessInfo>& systemProcessInfos,
+    MessageParcel& reply)
+{
+    int32_t size = 0;
+    bool ret = reply.ReadInt32(size);
+    if (!ret) {
+        HILOGW("GetRunningSystemProcess Read list size failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    systemProcessInfos.clear();
+    if (size == 0) {
+        return ERR_OK;
+    }
+    if (static_cast<size_t>(size) > reply.GetReadableBytes() || size < 0) {
+        HILOGE("Failed to read system process list, size = %{public}d", size);
+        return ERR_FLATTEN_OBJECT;
+    }
+    for (int32_t i = 0; i < size; i++) {
+        SystemProcessInfo systemProcessInfo;
+        ret = reply.ReadString(systemProcessInfo.processName);
+        if (!ret) {
+            HILOGW("GetRunningSystemProcess Read processName failed!");
+            return ERR_FLATTEN_OBJECT;
+        }
+        ret = reply.ReadInt32(systemProcessInfo.pid);
+        if (!ret) {
+            HILOGW("GetRunningSystemProcess Read pid failed!");
+            return ERR_FLATTEN_OBJECT;
+        }
+        systemProcessInfos.emplace_back(systemProcessInfo);
+    }
+    return ERR_OK;
+}
+
+int32_t SystemAbilityManagerProxy::SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener)
+{
+    HILOGI("SubscribeSystemProcess called");
+    if (listener == nullptr) {
+        HILOGE("SubscribeSystemProcess listener is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGI("SubscribeSystemProcess remote is nullptr");
+        return ERR_INVALID_OPERATION;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    bool ret = data.WriteRemoteObject(listener->AsObject());
+    if (!ret) {
+        HILOGW("SubscribeSystemProcess Write listenerName failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t err = remote->SendRequest(SUBSCRIBE_SYSTEM_PROCESS_TRANSACTION, data, reply, option);
+    if (err != ERR_NONE) {
+        HILOGE("SubscribeSystemProcess SendRequest error:%{public}d!", err);
+        return err;
+    }
+    HILOGI("SubscribeSystemProcesss SendRequest succeed!");
+    int32_t result = 0;
+    ret = reply.ReadInt32(result);
+    if (!ret) {
+        HILOGW("SubscribeSystemProcess Read result failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ERR_OK;
+}
+
+int32_t SystemAbilityManagerProxy::UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener)
+{
+    HILOGI("UnSubscribeSystemProcess called");
+    if (listener == nullptr) {
+        HILOGE("UnSubscribeSystemProcess listener is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGI("UnSubscribeSystemProcess remote is nullptr");
+        return ERR_INVALID_OPERATION;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    bool ret = data.WriteRemoteObject(listener->AsObject());
+    if (!ret) {
+        HILOGW("UnSubscribeSystemProcess Write listenerName failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t err = remote->SendRequest(UNSUBSCRIBE_SYSTEM_PROCESS_TRANSACTION, data, reply, option);
+    if (err != ERR_NONE) {
+        HILOGE("UnSubscribeSystemProcess SendRequest error:%{public}d!", err);
+        return err;
+    }
+    HILOGI("UnSubscribeSystemProcess SendRequest succeed!");
+    int32_t result = 0;
+    ret = reply.ReadInt32(result);
+    if (!ret) {
+        HILOGW("UnSubscribeSystemProcess Read result failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ERR_OK;
+}
 } // namespace OHOS

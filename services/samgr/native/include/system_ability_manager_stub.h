@@ -30,6 +30,7 @@ public:
 
 protected:
     static bool CanRequest();
+    static bool CanRequestProcessInfo();
     static bool EnforceInterceToken(MessageParcel& data);
 
 private:
@@ -44,6 +45,9 @@ private:
     int32_t CheckSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t AddSystemProcessInner(MessageParcel& data, MessageParcel& reply);
     int32_t RemoveSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
+    int32_t GetRunningSystemProcessInner(MessageParcel& data, MessageParcel& reply);
+    int32_t SubscribeSystemProcessInner(MessageParcel& data, MessageParcel& reply);
+    int32_t UnSubscribeSystemProcessInner(MessageParcel& data, MessageParcel& reply);
     int32_t LoadSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t LoadRemoteSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t UnloadSystemAbilityInner(MessageParcel& data, MessageParcel& reply);

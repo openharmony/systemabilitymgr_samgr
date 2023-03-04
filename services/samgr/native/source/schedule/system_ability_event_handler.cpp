@@ -59,7 +59,7 @@ int32_t SystemAbilityEventHandler::HandleAbilityEventLocked(const std::shared_pt
 }
 
 int32_t SystemAbilityEventHandler::HandleProcessEventLocked(const std::shared_ptr<SystemProcessContext>& context,
-    ProcessStateEvent event)
+    const ProcessInfo& processInfo, ProcessStateEvent event)
 {
     if (context == nullptr) {
         HILOGE("[SA Scheduler] context is nullptr");
@@ -71,7 +71,7 @@ int32_t SystemAbilityEventHandler::HandleProcessEventLocked(const std::shared_pt
     if (iter != processEventHandlerMap_.end()) {
         auto func = iter->second;
         if (func != nullptr) {
-            return (this->*func)(context);
+            return (this->*func)(context, processInfo);
         }
     }
     HILOGE("[SA Scheduler][process: %{public}s] invalid process event %{public}d",
@@ -148,9 +148,11 @@ int32_t SystemAbilityEventHandler::HandleAbilityUnLoadSuccessEventLocked(
 }
 
 int32_t SystemAbilityEventHandler::HandleProcessStartedEventLocked(
-    const std::shared_ptr<SystemProcessContext>& context)
+    const std::shared_ptr<SystemProcessContext>& context, const ProcessInfo& processInfo)
 {
     HILOGI("[SA Scheduler][process: %{public}s] handle started event", Str16ToStr8(context->processName).c_str());
+    context->pid = processInfo.pid;
+    context->uid = processInfo.uid;
     int32_t result = ERR_OK;
     switch (context->state) {
         case SystemProcessState::NOT_STARTED:
@@ -166,7 +168,7 @@ int32_t SystemAbilityEventHandler::HandleProcessStartedEventLocked(
 }
 
 int32_t SystemAbilityEventHandler::HandleProcessStoppedEventLocked(
-    const std::shared_ptr<SystemProcessContext>& context)
+    const std::shared_ptr<SystemProcessContext>& context, const ProcessInfo& processInfo)
 {
     HILOGI("[SA Scheduler][process: %{public}s] handle stopped event", Str16ToStr8(context->processName).c_str());
     int32_t result = ERR_OK;

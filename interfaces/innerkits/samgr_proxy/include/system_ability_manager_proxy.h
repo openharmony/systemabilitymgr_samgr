@@ -49,12 +49,16 @@ public:
         const sptr<ISystemAbilityLoadCallback>& callback) override;
     int32_t UnloadSystemAbility(int32_t systemAbilityId) override;
     int32_t CancelUnloadSystemAbility(int32_t systemAbilityId) override;
+    int32_t GetRunningSystemProcess(std::list<SystemProcessInfo>& systemProcessInfos) override;
+    int32_t SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener) override;
+    int32_t UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener) override;
 private:
     sptr<IRemoteObject> GetSystemAbilityWrapper(int32_t systemAbilityId, const std::string& deviceId = "");
     sptr<IRemoteObject> CheckSystemAbilityWrapper(int32_t code, MessageParcel& data);
     int32_t MarshalSAExtraProp(const SAExtraProp& extraProp, MessageParcel& data) const;
     int32_t AddSystemAbilityWrapper(int32_t code, MessageParcel& data);
     int32_t RemoveSystemAbilityWrapper(int32_t code, MessageParcel& data);
+    int32_t ReadSystemProcessFromParcel(std::list<SystemProcessInfo>& systemProcessInfos, MessageParcel& reply);
 private:
     static inline BrokerDelegator<SystemAbilityManagerProxy> delegator_;
 };
