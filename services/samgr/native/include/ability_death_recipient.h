@@ -53,6 +53,13 @@ public:
     RemoteCallbackDeathRecipient() = default;
     ~RemoteCallbackDeathRecipient() override = default;
 };
+
+class SystemProcessListenerDeathRecipient : public IRemoteObject::DeathRecipient {
+public:
+    void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
+    SystemProcessListenerDeathRecipient() = default;
+    ~SystemProcessListenerDeathRecipient() override = default;
+};
 } // namespace OHOS
 
 #endif // !defined(SERVICES_SAMGR_NATIVE_INCLUDE_ABILITY_DEATH_RECIPIENT_H)

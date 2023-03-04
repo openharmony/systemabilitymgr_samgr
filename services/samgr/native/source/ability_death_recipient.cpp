@@ -54,4 +54,12 @@ void RemoteCallbackDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remot
     SystemAbilityManager::GetInstance()->OnRemoteCallbackDied(remote.promote());
     HILOGD("RemoteCallbackDeathRecipient death notice success");
 }
+
+void SystemProcessListenerDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
+{
+    HILOGI("SystemProcessListenerDeathRecipient called!");
+    sptr<ISystemProcessStatusChange> listener = iface_cast<ISystemProcessStatusChange>(remote.promote());
+    SystemAbilityManager::GetInstance()->UnSubscribeSystemProcess(listener);
+    HILOGD("SystemProcessListenerDeathRecipient death notice success");
+}
 } // namespace OHOS

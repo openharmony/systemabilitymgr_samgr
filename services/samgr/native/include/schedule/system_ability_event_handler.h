@@ -19,6 +19,12 @@
 #include "schedule/system_ability_state_machine.h"
 
 namespace OHOS {
+struct ProcessInfo {
+    std::u16string processName;
+    int32_t pid = -1;
+    int32_t uid = -1;
+};
+
 enum class AbilityStateEvent {
     ABILITY_LOAD_SUCCESS_EVENT = 0,
     ABILITY_LOAD_FAILED_EVENT,
@@ -34,18 +40,22 @@ class SystemAbilityEventHandler {
 public:
     explicit SystemAbilityEventHandler(const std::shared_ptr<SystemAbilityStateMachine>& stateMachine);
     int32_t HandleAbilityEventLocked(const std::shared_ptr<SystemAbilityContext>& context, AbilityStateEvent event);
-    int32_t HandleProcessEventLocked(const std::shared_ptr<SystemProcessContext>& context, ProcessStateEvent event);
+    int32_t HandleProcessEventLocked(const std::shared_ptr<SystemProcessContext>& context,
+        const ProcessInfo& processInfo, ProcessStateEvent event);
 private:
     void InitEventHandlerMap();
     int32_t HandleAbilityLoadFailedEventLocked(const std::shared_ptr<SystemAbilityContext>& context);
     int32_t HandleAbilityLoadSuccessEventLocked(const std::shared_ptr<SystemAbilityContext>& context);
     int32_t HandleAbilityUnLoadSuccessEventLocked(const std::shared_ptr<SystemAbilityContext>& context);
-    int32_t HandleProcessStartedEventLocked(const std::shared_ptr<SystemProcessContext>& context);
-    int32_t HandleProcessStoppedEventLocked(const std::shared_ptr<SystemProcessContext>& context);
+    int32_t HandleProcessStartedEventLocked(const std::shared_ptr<SystemProcessContext>& context,
+        const ProcessInfo& processInfo);
+    int32_t HandleProcessStoppedEventLocked(const std::shared_ptr<SystemProcessContext>& context,
+        const ProcessInfo& processInfo);
     using AbilityEventHandlerFunc =
         int32_t(SystemAbilityEventHandler::*)(const std::shared_ptr<SystemAbilityContext>& context);
     using ProcessEventHandlerFunc =
-        int32_t(SystemAbilityEventHandler::*)(const std::shared_ptr<SystemProcessContext>& context);
+        int32_t(SystemAbilityEventHandler::*)(const std::shared_ptr<SystemProcessContext>& context,
+        const ProcessInfo& processInfo);
     std::shared_ptr<SystemAbilityStateMachine> stateMachine_;
     std::map<AbilityStateEvent, AbilityEventHandlerFunc> abilityEventHandlerMap_;
     std::map<ProcessStateEvent, ProcessEventHandlerFunc> processEventHandlerMap_;

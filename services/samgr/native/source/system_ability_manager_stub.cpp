@@ -131,6 +131,12 @@ SystemAbilityManagerStub::SystemAbilityManagerStub()
         &SystemAbilityManagerStub::UnloadSystemAbilityInner;
     memberFuncMap_[CANCEL_UNLOAD_SYSTEM_ABILITY_TRANSACTION] =
         &SystemAbilityManagerStub::CancelUnloadSystemAbilityInner;
+    memberFuncMap_[GET_RUNNING_SYSTEM_PROCESS_TRANSACTION] =
+        &SystemAbilityManagerStub::GetRunningSystemProcessInner;
+    memberFuncMap_[SUBSCRIBE_SYSTEM_PROCESS_TRANSACTION] =
+        &SystemAbilityManagerStub::SubscribeSystemProcessInner;
+    memberFuncMap_[UNSUBSCRIBE_SYSTEM_PROCESS_TRANSACTION] =
+        &SystemAbilityManagerStub::UnSubscribeSystemProcessInner;
 }
 
 int32_t SystemAbilityManagerStub::OnRemoteRequest(uint32_t code,
@@ -608,6 +614,95 @@ int32_t SystemAbilityManagerStub::UnloadSystemAbilityInner(MessageParcel& data, 
     return result;
 }
 
+int32_t SystemAbilityManagerStub::GetRunningSystemProcessInner(MessageParcel& data, MessageParcel& reply)
+{
+    HILOGI("GetRunningSystemProcessInner called");
+    if (!CanRequest()) {
+        HILOGE("GetRunningSystemProcessInner PERMISSION DENIED!");
+        return ERR_PERMISSION_DENIED;
+    }
+    std::list<SystemProcessInfo> systemProcessInfos;
+    int32_t result = GetRunningSystemProcess(systemProcessInfos);
+    bool ret = reply.WriteInt32(result);
+    if (!ret) {
+        HILOGW("GetRunningSystemProcessInner write reply failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (result != ERR_OK) {
+        return ERR_OK;
+    }
+
+    int32_t size = systemProcessInfos.size();
+    ret = reply.WriteInt32(size);
+    if (!ret) {
+        HILOGW("GetRunningSystemProcessInner write systemProcessInfos size failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    for (auto& systemProcessInfo : systemProcessInfos) {
+        ret = reply.WriteString(systemProcessInfo.processName);
+        if (!ret) {
+            HILOGW("GetRunningSystemProcessInner write processName failed.");
+            return ERR_FLATTEN_OBJECT;
+        }
+        ret = reply.WriteInt32(systemProcessInfo.pid);
+        if (!ret) {
+            HILOGW("GetRunningSystemProcessInner write pid failed.");
+            return ERR_FLATTEN_OBJECT;
+        }
+    }
+    return ERR_OK;
+}
+int32_t SystemAbilityManagerStub::SubscribeSystemProcessInner(MessageParcel& data, MessageParcel& reply)
+{
+    if (!CanRequest()) {
+        HILOGE("SubscribeSystemProcessInner PERMISSION DENIED!");
+        return ERR_PERMISSION_DENIED;
+    }
+    sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
+    if (remoteObject == nullptr) {
+        HILOGW("SubscribeSystemProcessInner read listener failed!");
+        return ERR_NULL_OBJECT;
+    }
+    sptr<ISystemProcessStatusChange> listener = iface_cast<ISystemProcessStatusChange>(remoteObject);
+    if (listener == nullptr) {
+        HILOGW("SubscribeSystemProcessInner iface_cast failed!");
+        return ERR_NULL_OBJECT;
+    }
+    int32_t result = SubscribeSystemProcess(listener);
+    HILOGD("SubscribeSystemProcess result is %{public}d", result);
+    bool ret = reply.WriteInt32(result);
+    if (!ret) {
+        HILOGW("SubscribeSystemProcessInner write reply failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+int32_t SystemAbilityManagerStub::UnSubscribeSystemProcessInner(MessageParcel& data, MessageParcel& reply)
+{
+    if (!CanRequest()) {
+        HILOGE("UnSubscribeSystemProcessInner PERMISSION DENIED!");
+        return ERR_PERMISSION_DENIED;
+    }
+    sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
+    if (remoteObject == nullptr) {
+        HILOGW("UnSubscribeSystemProcessInner read listener failed!");
+        return ERR_NULL_OBJECT;
+    }
+    sptr<ISystemProcessStatusChange> listener = iface_cast<ISystemProcessStatusChange>(remoteObject);
+    if (listener == nullptr) {
+        HILOGW("UnSubscribeSystemProcessInner iface_cast failed!");
+        return ERR_NULL_OBJECT;
+    }
+    int32_t result = UnSubscribeSystemProcess(listener);
+    HILOGD("UnSubscribeSystemProcessInner result is %{public}d", result);
+    bool ret = reply.WriteInt32(result);
+    if (!ret) {
+        HILOGW("UnSubscribeSystemProcessInner write reply failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
 int32_t SystemAbilityManagerStub::CancelUnloadSystemAbilityInner(MessageParcel& data, MessageParcel& reply)
 {
     int32_t systemAbilityId = data.ReadInt32();
@@ -633,4 +728,23 @@ bool SystemAbilityManagerStub::CanRequest()
         accessTokenId, tokenType);
     return (tokenType == AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
 }
+
+bool SystemAbilityManagerStub::CanRequestProcessInfo()
+{
+    AccessToken::NativeTokenInfo nativeTokenInfo;
+    int32_t tokenInfoResult = AccessToken::AccessTokenKit::GetNativeTokenInfo(
+        IPCSkeleton::GetCallingTokenID(), nativeTokenInfo);
+    if (tokenInfoResult != ERR_OK) {
+        HILOGE("get token info failed");
+        return false;
+    }
+    if (nativeTokenInfo.processName != "resource_schedule_service") {
+        HILOGE("cannot request from other process: %{public}s",
+            nativeTokenInfo.processName.c_str());
+        return false;
+    }
+    return true;
+}
+
+
 } // namespace OHOS
