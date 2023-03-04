@@ -42,6 +42,12 @@ DeviceParamCollect::DeviceParamCollect(const sptr<IReport>& report)
 {
 }
 
+bool DeviceParamCollect::CheckCondition(const OnDemandEvent& condition)
+{
+    std::string value = system::GetParameter(condition.name, "");
+    return value == condition.value;
+}
+
 void DeviceParamCollect::Init(const std::list<SaProfile>& saProfiles)
 {
     std::lock_guard<std::mutex> autoLock(paramLock_);
