@@ -1154,16 +1154,9 @@ void SystemAbilityManager::NotifySystemAbilityLoadFail(int32_t systemAbilityId,
 int32_t SystemAbilityManager::StartDynamicSystemProcess(const std::u16string& name,
     int32_t systemAbilityId, const OnDemandEvent& event)
 {
-    std::unordered_map<std::string, std::string> startReason;
-    startReason[START_SAID] = std::to_string(systemAbilityId);
-    startReason[EVENT_TYPE] = std::to_string(event.eventId);
-    startReason[EVENT_NAME] = event.name;
-    startReason[EVENT_VALUE] = event.value;
-    nlohmann::json eventJson;
-    for (auto it = startReason.begin(); it != startReason.end(); ++it) {
-        eventJson[it->first] = it->second;
-    }
-    auto extraArgv = eventJson.dump().c_str();
+    std::string eventStr = std::to_string(systemAbilityId) + "#" + std::to_string(event.eventId) + "#"
+        + event.name + "#" + event.value + "#";
+    auto extraArgv = eventStr.c_str();
     auto result = ServiceControlWithExtra(Str16ToStr8(name).c_str(), ServiceAction::START, &extraArgv, 1);
     HILOGI("StartDynamicSystemProcess call ServiceControlWithExtra result:%{public}d!", result);
     return (result == 0) ? ERR_OK : ERR_INVALID_VALUE;
