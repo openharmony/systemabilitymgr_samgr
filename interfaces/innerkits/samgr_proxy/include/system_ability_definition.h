@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -111,6 +111,7 @@ enum {
     DISTRIBUTED_SCHED_SA_ID                          = 1401,
     DISTRIBUTED_SCHED_ADAPTER_SA_ID                  = 1402,
     DISTRIBUTED_SCENARIO_MGR_SA_ID                   = 1403,
+    CONTINUATION_MANAGER_SA_ID                       = 1404,
     DISTRIBUTED_SCHED_TEST_SO_ID                     = 1490,
     DISTRIBUTED_SCHED_TEST_OS_ID                     = 1491,
     DISTRIBUTED_SCHED_TEST_OOS_ID                    = 1492,
@@ -311,6 +312,7 @@ static const std::map<int, std::string> saNameMap_ = {
     { DISTRIBUTED_SCHED_SA_ID, "DistributedSched" },
     { DISTRIBUTED_SCHED_ADAPTER_SA_ID, "DistributedSchedAdapter" },
     { DISTRIBUTED_SCENARIO_MGR_SA_ID, "DistributedScenarioMgr" },
+    { CONTINUATION_MANAGER_SA_ID, "ContinuationManagerService" },
     { RES_SCHED_SYS_ABILITY_ID, "ResourceSched" },
     { RESSCHEDD_SA_ID, "ResourceSchedDamon" },
     { BACKGROUND_TASK_MANAGER_SERVICE_ID, "BackgroundTaskManager" },
