@@ -497,7 +497,6 @@ void ParseUtil::GetOnDemandConditionsFromJson(const nlohmann::json& obj,
 {
     nlohmann::json conditionsJson;
     if (obj.find(key.c_str()) == obj.end() || !obj[key.c_str()].is_array()) {
-        HILOGW("parse conditions failed");
         return;
     }
     conditionsJson = obj.at(key.c_str());
@@ -511,13 +510,13 @@ void ParseUtil::GetOnDemandConditionsFromJson(const nlohmann::json& obj,
         int32_t eventId = 0;
         if (type == SA_TAG_DEVICE_ON_LINE) {
             eventId = DEVICE_ONLINE;
-        } else if (SA_TAG_SETTING_SWITCH) {
+        } else if (type == SA_TAG_SETTING_SWITCH) {
             eventId = SETTING_SWITCH;
-        } else if (SA_TAG_COMMON_EVENT) {
+        } else if (type == SA_TAG_COMMON_EVENT) {
             eventId = COMMON_EVENT;
-        } else if (SA_TAG_PARAM) {
+        } else if (type == SA_TAG_PARAM) {
             eventId = PARAM;
-        } else if (SA_TAG_TIEMD_EVENT) {
+        } else if (type == SA_TAG_TIEMD_EVENT) {
             eventId = TIMED_EVENT;
         } else {
             HILOGW("invalid condition eventId: %{public}s", type.c_str());

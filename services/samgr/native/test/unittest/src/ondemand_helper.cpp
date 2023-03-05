@@ -31,6 +31,8 @@
 #include "softbus_bus_center.h"
 #include "system_ability_definition.h"
 #include "token_setproc.h"
+#include "parameter.h"
+#include "parameters.h"
 
 using namespace OHOS;
 using namespace std;
@@ -371,49 +373,69 @@ void TestProcess(OHOS::OnDemandHelper& ondemandHelper, string& cmd)
     }
 }
 
+void InputCmd(string& cmd, OHOS::OnDemandHelper& ondemandHelper)
+{
+    int32_t systemAbilityId = 0;
+    std::string deviceId = ondemandHelper.GetFirstDevice();
+    cout << "please input systemAbilityId for " << cmd << " operation" << endl;
+    cin >> systemAbilityId;
+    if (cmd == "get") {
+        ondemandHelper.GetSystemAbility(systemAbilityId);
+    } else if (cmd == "load") {
+        ondemandHelper.OnDemandAbility(systemAbilityId);
+    } else if (cmd == "device") { // get remote networkid
+        ondemandHelper.GetDeviceList();
+    } else if (cmd == "loadrmt1") { // single thread with one device, one system ability, one callback
+        ondemandHelper.LoadRemoteAbility(systemAbilityId, deviceId, nullptr);
+    } else if (cmd == "loadrmt2") { // one device, one system ability, one callback, three threads
+        ondemandHelper.LoadRemoteAbilityMuti(systemAbilityId, deviceId);
+    } else if (cmd == "loadrmt3") { // one device, one system ability, three callbacks, three threads
+        ondemandHelper.LoadRemoteAbilityMutiCb(systemAbilityId, deviceId);
+    } else if (cmd == "loadrmt4") { // one device, three system abilities, one callback, three threads
+        ondemandHelper.LoadRemoteAbilityMutiSA(systemAbilityId, deviceId);
+    } else if (cmd == "loadrmt5") { // one device, three system abilities, three callbacks, three threads
+        ondemandHelper.LoadRemoteAbilityMutiSACb(systemAbilityId, deviceId);
+    } else if (cmd == "loadrmt6") { // two devices
+        int32_t otherSystemAbilityId = 0;
+        cout << "please input another systemabilityId for " << cmd << " operation" << endl;
+        cin >> otherSystemAbilityId;
+        cout << "please input another deviceId for " << cmd << " operation" << endl;
+        std::string otherDevice;
+        cin >> otherDevice;
+        ondemandHelper.LoadRemoteAbility(systemAbilityId, deviceId, nullptr);
+        ondemandHelper.LoadRemoteAbility(otherSystemAbilityId, otherDevice, nullptr);
+    } else if (cmd == "loadmuti") {
+        ondemandHelper.LoadRemoteAbilityPressure(systemAbilityId, deviceId);
+    } else if (cmd == "unload") {
+        ondemandHelper.UnloadSystemAbility(systemAbilityId);
+    } else {
+        TestProcess(ondemandHelper, cmd);
+    }
+}
+
 int main(int argc, char* argv[])
 {
     SamMockPermission::MockPermission();
     OHOS::OnDemandHelper& ondemandHelper = OnDemandHelper::GetInstance();
     string cmd = "load";
     do {
-        cout << "please input operation (get/load/unload/getp/initp/subp/unsubp) " << endl;
+        cout << "please input operation " << endl;
         cin >> cmd;
-        int32_t systemAbilityId = 0;
-        std::string deviceId = ondemandHelper.GetFirstDevice();
-        cout << "please input systemAbilityId for " << cmd << " operation" << endl;
-        cin >> systemAbilityId;
-        if (cmd == "get") {
-            ondemandHelper.GetSystemAbility(systemAbilityId);
-        } else if (cmd == "load") {
-            ondemandHelper.OnDemandAbility(systemAbilityId);
-        } else if (cmd == "device") { // get remote networkid
-            ondemandHelper.GetDeviceList();
-        } else if (cmd == "loadrmt1") { // single thread with one device, one system ability, one callback
-            ondemandHelper.LoadRemoteAbility(systemAbilityId, deviceId, nullptr);
-        } else if (cmd == "loadrmt2") { // one device, one system ability, one callback, three threads
-            ondemandHelper.LoadRemoteAbilityMuti(systemAbilityId, deviceId);
-        } else if (cmd == "loadrmt3") { // one device, one system ability, three callbacks, three threads
-            ondemandHelper.LoadRemoteAbilityMutiCb(systemAbilityId, deviceId);
-        } else if (cmd == "loadrmt4") { // one device, three system abilities, one callback, three threads
-            ondemandHelper.LoadRemoteAbilityMutiSA(systemAbilityId, deviceId);
-        } else if (cmd == "loadrmt5") { // one device, three system abilities, three callbacks, three threads
-            ondemandHelper.LoadRemoteAbilityMutiSACb(systemAbilityId, deviceId);
-        } else if (cmd == "loadrmt6") { // two devices
-            int32_t otherSystemAbilityId = 0;
-            cout << "please input another systemabilityId for " << cmd << " operation" << endl;
-            cin >> otherSystemAbilityId;
-            cout << "please input another deviceId for " << cmd << " operation" << endl;
-            std::string otherDevice;
-            cin >> otherDevice;
-            ondemandHelper.LoadRemoteAbility(systemAbilityId, deviceId, nullptr);
-            ondemandHelper.LoadRemoteAbility(otherSystemAbilityId, otherDevice, nullptr);
-        } else if (cmd == "loadmuti") {
-            ondemandHelper.LoadRemoteAbilityPressure(systemAbilityId, deviceId);
-        } else if (cmd == "unload") {
-            ondemandHelper.UnloadSystemAbility(systemAbilityId);
+        if (cmd == "param") {
+            cout << "please input param's value" << endl;
+            string value = "false";
+            cin >> value;
+            if (value == "false") {
+                int ret = SetParameter("persist.samgr.deviceparam", "false");
+                cout << ret;
+            } else if (value == "true") {
+                int ret = SetParameter("persist.samgr.deviceparam", "true");
+                cout << ret;
+            } else {
+                cout << "invalid input" << endl;
+            }
         } else {
-            TestProcess(ondemandHelper, cmd);
+            InputCmd(cmd, ondemandHelper);
         }
         cout << "-----Input q or Q to quit, [load] for LoadSystemAbility, [get] for GetSystemAbility-----" << endl;
         cmd.clear();
