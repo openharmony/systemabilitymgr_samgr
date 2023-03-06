@@ -65,6 +65,27 @@ constexpr int32_t MAX_JSON_OBJECT_SIZE = 50 * 1024;
 constexpr int32_t MAX_JSON_STRING_LENGTH = 128;
 const string BOOT_START_PHASE = "BootStartPhase";
 const string CORE_START_PHASE = "CoreStartPhase";
+
+void ParseLibPath(const string& libPath, string& fileName, string& libDir)
+{
+    std::vector<string> libPathVec;
+    SplitStr(libPath, "/", libPathVec);
+    if ((libPathVec.size() > 0)) {
+        int fileNameIndex = libPathVec.size() - 1;
+        fileName = libPathVec[fileNameIndex];
+        int libDirIndex = fileNameIndex - 1;
+        if (libDirIndex >= 0) {
+            libDir = libPathVec[libDirIndex];
+        }
+    }
+    if (libDir.empty()) {
+#ifdef __aarch64__
+        libDir = "lib64";
+#else
+        libDir = "lib";
+#endif
+    }
+}
 }
 
 ParseUtil::~ParseUtil()
@@ -119,19 +140,43 @@ void ParseUtil::OpenSo()
 void ParseUtil::OpenSo(SaProfile& saProfile)
 {
     if (saProfile.handle == nullptr) {
+        string fileName;
+        string libDir;
+        ParseLibPath(saProfile.libPath, fileName, libDir);
+        if (libDir != "lib64" && libDir != "lib") {
+            HILOGE("invalid libDir %{public}s", libDir.c_str());
+            return;
+        }
+        bool loadFromModuleUpdate = false;
+        Dl_namespace dlNs;
+        string updateLibPath = GetRealPath("/module_update/" + ToString(saProfile.saId) + "/" + libDir + "/" + fileName);
+        if (CheckPathExist(updateLibPath)) {
+            Dl_namespace currentNs;
+            string nsName = "module_update_" + ToString(saProfile.saId);
+            dlns_init(&dlNs, nsName.c_str());
+            dlns_get(nullptr, &currentNs);
+
+            string libLdPath = GetRealPath("/module_update/" + ToString(saProfile.saId) + "/" + libDir);
+            if (!libLdPath.empty()) {
+                dlns_create(&dlNs, libLdPath.c_str());
+                dlns_inherit(&dlNs, &currentNs, nullptr);
+                loadFromModuleUpdate = true;
+            }
+        }
+
         string dlopenTag = ToString(saProfile.saId) + "_DLOPEN";
         HITRACE_METER_NAME(HITRACE_TAG_SAMGR, dlopenTag);
         int64_t begin = GetTickCount();
-        DlHandle handle = dlopen(saProfile.libPath.c_str(), RTLD_NOW);
+        DlHandle handle = nullptr;
+        if (loadFromModuleUpdate) {
+            handle = dlopen_ns(&dlNs, updateLibPath.c_str(), RTLD_NOW);
+        }
+        if (handle == nullptr) {
+            handle = dlopen(saProfile.libPath.c_str(), RTLD_NOW);
+        }
         HILOGI("[PerformanceTest] SA:%{public}d OpenSo spend %{public}" PRId64 " ms",
             saProfile.saId, GetTickCount() - begin);
         if (handle == nullptr) {
-            std::vector<string> libPathVec;
-            string fileName = "";
-            SplitStr(saProfile.libPath, "/", libPathVec);
-            if ((libPathVec.size() > 0)) {
-                fileName = libPathVec[libPathVec.size() - 1];
-            }
             ReportAddSystemAbilityFailed(saProfile.saId, fileName);
             HILOGE("dlopen %{public}s failed with errno:%{public}s!", fileName.c_str(), dlerror());
             return;
