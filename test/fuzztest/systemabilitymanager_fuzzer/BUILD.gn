@@ -52,6 +52,7 @@ ohos_fuzztest("SystemAbilityManagerFuzzTest") {
     "${samgr_services_dir}/source/collect/device_status_collect_manager.cpp",
     "${samgr_services_dir}/source/collect/device_timed_collect.cpp",
     "${samgr_services_dir}/source/collect/icollect_plugin.cpp",
+    "${samgr_services_dir}/source/memory_guard.cpp",
     "${samgr_services_dir}/source/schedule/system_ability_event_handler.cpp",
     "${samgr_services_dir}/source/schedule/system_ability_state_machine.cpp",
     "${samgr_services_dir}/source/schedule/system_ability_state_scheduler.cpp",
@@ -83,6 +84,11 @@ ohos_fuzztest("SystemAbilityManagerFuzzTest") {
     "samgr:samgr_proxy",
   ]
   defines = []
+  if (use_musl) {
+    if (use_jemalloc && use_jemalloc_dfx_intf) {
+      defines += [ "CONFIG_USE_JEMALLOC_DFX_INTF" ]
+    }
+  }
   if (hicollie_able) {
     external_deps += [ "hicollie_native:libhicollie" ]
     defines += [ "HICOLLIE_ENABLE" ]

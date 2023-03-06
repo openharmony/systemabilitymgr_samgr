@@ -17,6 +17,7 @@
 
 #include "ability_death_recipient.h"
 #include "ipc_skeleton.h"
+#include "memory_guard.h"
 #ifdef RESSCHED_ENABLE
 #include "res_sched_client.h"
 #endif
@@ -42,6 +43,7 @@ void SystemAbilityStateScheduler::Init(const std::list<SaProfile>& saProfiles)
     processListenerDeath_ = sptr<IRemoteObject::DeathRecipient>(new SystemProcessListenerDeathRecipient());
     auto unloadRunner = AppExecFwk::EventRunner::Create("UnloadHandler");
     unloadEventHandler_ = std::make_shared<UnloadEventHandler>(unloadRunner, weak_from_this());
+    unloadEventHandler_->PostTask([]() { Samgr::MemoryGuard cacheGuard; });
 
     auto listener =  std::dynamic_pointer_cast<SystemAbilityStateListener>(shared_from_this());
     stateMachine_ = std::make_shared<SystemAbilityStateMachine>(listener);
@@ -49,6 +51,7 @@ void SystemAbilityStateScheduler::Init(const std::list<SaProfile>& saProfiles)
 
     auto processRunner = AppExecFwk::EventRunner::Create("ProcssHandler");
     processHandler_ = std::make_shared<AppExecFwk::EventHandler>(processRunner);
+    processHandler_->PostTask([]() { Samgr::MemoryGuard cacheGuard; });
 }
 
 void SystemAbilityStateScheduler::InitStateContext(const std::list<SaProfile>& saProfiles)

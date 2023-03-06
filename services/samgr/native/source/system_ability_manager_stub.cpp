@@ -24,6 +24,7 @@
 #include "hitrace_meter.h"
 #include "ipc_skeleton.h"
 #include "ipc_types.h"
+#include "memory_guard.h"
 #include "sam_log.h"
 #include "string_ex.h"
 #include "system_ability_manager.h"
@@ -144,6 +145,7 @@ int32_t SystemAbilityManagerStub::OnRemoteRequest(uint32_t code,
 {
     HILOGI("SystemAbilityManagerStub::OnReceived, code = %{public}u, callerPid = %{public}d, flags= %{public}d",
         code, IPCSkeleton::GetCallingPid(), option.GetFlags());
+    Samgr::MemoryGuard cacheGuard;
     if (!EnforceInterceToken(data)) {
         HILOGE("SystemAbilityManagerStub::OnReceived, code = %{public}u, check interfaceToken failed", code);
         return ERR_PERMISSION_DENIED;

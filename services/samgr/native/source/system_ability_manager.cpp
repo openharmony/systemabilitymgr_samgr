@@ -29,6 +29,7 @@
 #include "if_local_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "local_ability_manager_proxy.h"
+#include "memory_guard.h"
 #include "parse_util.h"
 #include "parameter.h"
 #include "parameters.h"
@@ -95,6 +96,7 @@ void SystemAbilityManager::Init()
     if (workHandler_ == nullptr) {
         auto runner = AppExecFwk::EventRunner::Create("workHandler");
         workHandler_ = make_shared<AppExecFwk::EventHandler>(runner);
+        workHandler_->PostTask([]() { Samgr::MemoryGuard cacheGuard; });
     }
     collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
     abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
@@ -1441,6 +1443,7 @@ int32_t SystemAbilityManager::LoadSystemAbility(int32_t systemAbilityId, const s
 void SystemAbilityManager::DoLoadRemoteSystemAbility(int32_t systemAbilityId, int32_t callingPid,
     int32_t callingUid, const std::string& deviceId, const sptr<ISystemAbilityLoadCallback>& callback)
 {
+    Samgr::MemoryGuard cacheGuard;
     sptr<DBinderServiceStub> remoteBinder = DoMakeRemoteBinder(systemAbilityId, callingPid, callingUid, deviceId);
 
     if (callback == nullptr) {

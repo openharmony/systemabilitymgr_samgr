@@ -15,6 +15,7 @@
 
 #include "errors.h"
 #include "ipc_skeleton.h"
+#include "memory_guard.h"
 #include "parameter.h"
 #include "refbase.h"
 #include "sam_log.h"
@@ -25,7 +26,7 @@ using namespace OHOS;
 int main(int argc, char *argv[])
 {
     HILOGI("%{public}s called, enter System Ability Manager ", __func__);
-
+    Samgr::MemoryGuard cacheGuard;
     OHOS::sptr<OHOS::SystemAbilityManager> manager = OHOS::SystemAbilityManager::GetInstance();
     manager->Init();
     OHOS::sptr<OHOS::IRemoteObject> serv = manager->AsObject();
