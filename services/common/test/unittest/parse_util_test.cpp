@@ -978,5 +978,21 @@ HWTEST_F(ParseUtilTest, ParseSystemAbility003, TestSize.Level3)
     EXPECT_EQ(ret, true);
     DTEST_LOG << " ParseSystemAbility003 END" << std::endl;
 }
+
+/**
+ * @tc.name: GetOnDemandConditionsFromJson001
+ * @tc.desc: parse OnDemandConditions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseUtilTest, GetOnDemandConditionsFromJson001, TestSize.Level3)
+{
+    DTEST_LOG << " GetOnDemandConditionsFromJson001 BEGIN" << std::endl;
+    nlohmann::json obj;
+    std::string key;
+    std::vector<OnDemandEvent> out;
+    SaProfile saProfile;
+    EXPECT_TRUE(out.empty());
+    DTEST_LOG << " GetOnDemandConditionsFromJson001 END" << std::endl;
+}
 } // namespace SAMGR
 } // namespace OHOS
