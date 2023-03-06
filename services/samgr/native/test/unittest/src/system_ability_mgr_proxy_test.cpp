@@ -22,22 +22,32 @@
 #include "system_ability_load_callback_proxy.h"
 #include "system_ability_status_change_proxy.h"
 #include "string_ex.h"
-#include "system_ability_manager_proxy.h"
 #include "test_log.h"
 
 #define private public
+#include "system_ability_manager_proxy.h"
 
 using namespace std;
 using namespace testing;
 using namespace testing::ext;
 using namespace OHOS;
-
+std::u16string SAMANAGER_INTERFACE_TOKEN = u"OHOS.ISystemProcessStatusChange";
 namespace OHOS {
 namespace {
 constexpr int32_t TEST_ID_NORANGE_SAID = -1;
 constexpr int32_t TEST_ID_VAILD = 9999;
 constexpr int32_t TEST_ID_INVAILD = 9990;
 }
+void SystemProcessStatusChange::OnSystemProcessStarted(SystemProcessInfo& systemProcessInfo)
+{
+    cout << "OnSystemProcessStarted, processName: ";
+}
+
+void SystemProcessStatusChange::OnSystemProcessStopped(SystemProcessInfo& systemProcessInfo)
+{
+    cout << "OnSystemProcessStopped, processName: ";
+}
+
 void SystemAbilityMgrProxyTest::SetUpTestCase()
 {
     DTEST_LOG << "SetUpTestCase" << std::endl;
@@ -715,5 +725,167 @@ HWTEST_F(SystemAbilityMgrProxyTest, DestroySystemAbilityManagerObject001, TestSi
     SystemAbilityManagerClient::GetInstance().DestroySystemAbilityManagerObject();
     sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     EXPECT_TRUE(sm != nullptr);
+}
+
+/**
+ * @tc.name: GetRunningSystemProcess001
+ * @tc.desc: GetRunningSystemProcess
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, GetRunningSystemProcess001, TestSize.Level3)
+{
+    DTEST_LOG << " GetRunningSystemProcess001 start " << std::endl;
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    EXPECT_NE(sm, nullptr);
+    SystemProcessInfo processInfo = {"test"};
+    std::list<SystemProcessInfo> systemProcessInfos;
+    systemProcessInfos.push_back(processInfo);
+    int32_t ret = sm->GetRunningSystemProcess(systemProcessInfos);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: SubscribeSystemProcess001
+ * @tc.desc: SubscribeSystemProcess
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, SubscribeSystemProcess001, TestSize.Level3)
+{
+    DTEST_LOG << " SubscribeSystemProcess001 start " << std::endl;
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    EXPECT_NE(sm, nullptr);
+    sptr<ISystemProcessStatusChange> systemProcessStatusChange = new SystemProcessStatusChange();
+    int32_t ret = sm->SubscribeSystemProcess(systemProcessStatusChange);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: UnSubscribeSystemProcess001
+ * @tc.desc: UnSubscribeSystemProcess
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, UnSubscribeSystemProcess001, TestSize.Level3)
+{
+    DTEST_LOG << " UnSubscribeSystemProcess001 start " << std::endl;
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    EXPECT_NE(sm, nullptr);
+    sptr<ISystemProcessStatusChange> systemProcessStatusChange = new SystemProcessStatusChange();
+    int32_t ret = sm->UnSubscribeSystemProcess(systemProcessStatusChange);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: UnSubscribeSystemProcess002
+ * @tc.desc: UnSubscribeSystemProcess
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, UnSubscribeSystemProcess002, TestSize.Level3)
+{
+    DTEST_LOG << " UnSubscribeSystemProcess002 start " << std::endl;
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    EXPECT_NE(sm, nullptr);
+    sptr<ISystemProcessStatusChange> systemProcessStatusChange = nullptr;
+    int32_t ret = sm->UnSubscribeSystemProcess(systemProcessStatusChange);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: OnRemoteRequest001
+ * @tc.desc: OnRemoteRequest001
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, OnRemoteRequest001, TestSize.Level3)
+{
+    sptr<SystemProcessStatusChange> processStub = new SystemProcessStatusChange();
+    uint32_t code = 1;
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = processStub->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: OnRemoteRequest002
+ * @tc.desc: OnRemoteRequest002
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, OnRemoteRequest002, TestSize.Level3)
+{
+    sptr<SystemProcessStatusChangeStub> processStub = new SystemProcessStatusChange();
+    uint32_t code = 1;
+    MessageParcel data;
+    data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN);
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = processStub->OnRemoteRequest(code, data, reply, option);
+    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+}
+
+/**
+ * @tc.name: OnSystemProcessStartedInner001
+ * @tc.desc: OnSystemProcessStartedInner001
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, OnSystemProcessStartedInner001, TestSize.Level3)
+{
+    sptr<SystemProcessStatusChangeStub> processStub = new SystemProcessStatusChange();
+    MessageParcel data;
+    data.WriteString("test");
+    MessageParcel reply;
+    int32_t ret = processStub->OnSystemProcessStartedInner(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+/**
+ * @tc.name: OnSystemProcessStoppedInner001
+ * @tc.desc: OnSystemProcessStoppedInner001
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, OnSystemProcessStoppedInner001, TestSize.Level3)
+{
+    sptr<SystemProcessStatusChangeStub> processStub = new SystemProcessStatusChange();
+    MessageParcel data;
+    data.WriteString("test");
+    MessageParcel reply;
+    int32_t ret = processStub->OnSystemProcessStoppedInner(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+/**
+ * @tc.name: OnSystemProcessStoppedInner002
+ * @tc.desc: OnSystemProcessStoppedInner002
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, OnSystemProcessStoppedInner002, TestSize.Level3)
+{
+    sptr<SystemProcessStatusChangeStub> processStub = new SystemProcessStatusChange();
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = processStub->OnSystemProcessStoppedInner(data, reply);
+    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+}
+
+/**
+ * @tc.name: CancelUnloadSystemAbility001
+ * @tc.desc: CancelUnloadSystemAbility001
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, CancelUnloadSystemAbility001, TestSize.Level3)
+{
+    sptr<ISystemAbilityManager> samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    int32_t said = -1;
+    int32_t result = samgrProxy->CancelUnloadSystemAbility(said);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
 }
 }

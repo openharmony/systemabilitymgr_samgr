@@ -65,6 +65,20 @@ HWTEST_F(CommonEventCollectTest, OnStart001, TestSize.Level3)
     DTEST_LOG << " OnStart001 BEGIN" << std::endl;
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
     int32_t ret = commonEventCollect->OnStart();
+    EXPECT_EQ(ERR_OK, ret);
+}
+
+/**
+ * @tc.name: OnStart002
+ * @tc.desc: test Onstart
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonEventCollectTest, OnStart002, TestSize.Level3)
+{
+    DTEST_LOG << " OnStart001 BEGIN" << std::endl;
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
+    commonEventCollect->commonEventNames_.push_back("test");
+    int32_t ret = commonEventCollect->OnStart();
     EXPECT_EQ(ERR_INVALID_VALUE, ret);
 }
 
@@ -151,7 +165,7 @@ HWTEST_F(CommonEventCollectTest, ProcessEvent001, TestSize.Level3)
     DTEST_LOG << " ProcessEvent001 BEGIN" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
-    auto runner = AppExecFwk::EventRunner::Create("collect_test");
+    auto runner = AppExecFwk::EventRunner::Create("collect_test1");
     commonEventCollect->workHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     int32_t ret = commonEventCollect->workHandler_->SendEvent(COMMON_DIED_EVENT + 1);
     EXPECT_EQ(true, ret);

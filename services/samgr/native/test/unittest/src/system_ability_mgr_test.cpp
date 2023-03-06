@@ -1820,10 +1820,13 @@ HWTEST_F(SystemAbilityMgrTest, CheckStartEnableOnce001, TestSize.Level3)
 {
     DTEST_LOG << " CheckStartEnableOnce001 " << std::endl;
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
+    OnDemandEvent event1 = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
+    OnDemandEvent event2 = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
+    bool res = (event1 == event2);
+    EXPECT_EQ(res, true);
     SaControlInfo saControl = { START_ON_DEMAND, TEST_SYSTEM_ABILITY1};
     sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
-    int32_t result = saMgr->CheckStartEnableOnce(event, saControl, callback);
+    int32_t result = saMgr->CheckStartEnableOnce(event1, saControl, callback);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
     saMgr->RemoveSystemAbility(TEST_SYSTEM_ABILITY1);
 }
@@ -1915,5 +1918,36 @@ HWTEST_F(SystemAbilityMgrTest, CheckStopEnableOnce003, TestSize.Level3)
     int32_t result = saMgr->CheckStopEnableOnce(event, saControl);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
     saMgr->RemoveSystemAbility(TEST_SYSTEM_ABILITY1);
+}
+
+/**
+ * @tc.name: Test GetRunningSystemProcess001
+ * @tc.desc: GetRunningSystemProcess001
+ * @tc.type: FUNC
+ * @tc.require: I6H10P
+ */
+HWTEST_F(SystemAbilityMgrTest, GetRunningSystemProcess001, TestSize.Level3)
+{
+    DTEST_LOG << " GetRunningSystemProcess001 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::list<SystemProcessInfo> systemProcessInfos;
+    int32_t ret = saMgr->GetRunningSystemProcess(systemProcessInfos);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: Test GetRunningSystemProcess002
+ * @tc.desc: GetRunningSystemProcess002
+ * @tc.type: FUNC
+ * @tc.require: I6H10P
+ */
+HWTEST_F(SystemAbilityMgrTest, GetRunningSystemProcess002, TestSize.Level3)
+{
+    DTEST_LOG << " GetRunningSystemProcess002 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::list<SystemProcessInfo> systemProcessInfos;
+    saMgr->abilityStateScheduler_ = nullptr;
+    int32_t ret = saMgr->GetRunningSystemProcess(systemProcessInfos);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
 } // namespace OHOS

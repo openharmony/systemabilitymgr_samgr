@@ -1013,6 +1013,6 @@ HWTEST_F(SystemAbilityStateSchedulerTest, ProcessDelayUnloadEvent002, TestSize.L
     systemAbilityStateScheduler->abilityContextMap_[SAID] = systemAbilityContext;
     systemAbilityContext->ownProcessContext = systemProcessContext;
     int32_t ret = systemAbilityStateScheduler->ProcessDelayUnloadEvent(SAID);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, ERR_OK);
 }
 }

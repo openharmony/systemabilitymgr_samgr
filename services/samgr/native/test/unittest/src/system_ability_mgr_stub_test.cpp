@@ -958,7 +958,7 @@ HWTEST_F(SystemAbilityMgrStubTest, LoadRemoteSystemAbilityInner004, TestSize.Lev
 HWTEST_F(SystemAbilityMgrStubTest, InitSaProfile001, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    auto runner = AppExecFwk::EventRunner::Create("workHandler");
+    auto runner = AppExecFwk::EventRunner::Create("workHandler1");
     saMgr->workHandler_ = make_shared<AppExecFwk::EventHandler>(runner);
     saMgr->InitSaProfile();
     EXPECT_NE(saMgr->workHandler_, nullptr);
@@ -1301,7 +1301,7 @@ HWTEST_F(SystemAbilityMgrStubTest, AddOnDemandSystemAbilityInfo004, TestSize.Lev
     saMgr->systemProcessMap_[procName] = saMgr;
     SystemAbilityManager::AbilityItem abilityItem;
     abilityItem.state = SystemAbilityManager::AbilityState::STARTING;
-    auto runner = AppExecFwk::EventRunner::Create("workHandler");
+    auto runner = AppExecFwk::EventRunner::Create("workHandler2");
     saMgr->workHandler_ = make_shared<AppExecFwk::EventHandler>(runner);
     saMgr->startingAbilityMap_[SAID] = abilityItem;
     int32_t res = saMgr->AddOnDemandSystemAbilityInfo(SAID, procName);
@@ -1696,7 +1696,7 @@ HWTEST_F(SystemAbilityMgrStubTest, AddSystemAbility003, TestSize.Level1)
     sptr<IRemoteObject> testAbility(nullptr);
     SystemAbilityManager::SAExtraProp extraProp;
     int32_t res = saMgr->AddSystemAbility(INVALID_SAID, testAbility, extraProp);
-    auto runner = AppExecFwk::EventRunner::Create("workHandler");
+    auto runner = AppExecFwk::EventRunner::Create("workHandler3");
     saMgr->workHandler_ = make_shared<AppExecFwk::EventHandler>(runner);
     u16string name;
     string srcDeviceId;
