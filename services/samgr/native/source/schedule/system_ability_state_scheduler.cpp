@@ -278,7 +278,7 @@ int32_t SystemAbilityStateScheduler::ActiveSystemAbilityLocked(
 
 int32_t SystemAbilityStateScheduler::SendAbilityStateEvent(int32_t systemAbilityId, AbilityStateEvent event)
 {
-    HILOGI("[SA Scheduler][SA: %{public}d] receive state event", systemAbilityId);
+    HILOGD("[SA Scheduler][SA: %{public}d] receive state event", systemAbilityId);
     std::shared_ptr<SystemAbilityContext> abilityContext;
     if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
         return ERR_INVALID_VALUE;
@@ -289,7 +289,7 @@ int32_t SystemAbilityStateScheduler::SendAbilityStateEvent(int32_t systemAbility
 
 int32_t SystemAbilityStateScheduler::SendProcessStateEvent(const ProcessInfo& processInfo, ProcessStateEvent event)
 {
-    HILOGI("[SA Scheduler][process: %{public}s] receive state event",
+    HILOGD("[SA Scheduler][process: %{public}s] receive state event",
         Str16ToStr8(processInfo.processName).c_str());
     std::shared_ptr<SystemProcessContext> processContext;
     if (!GetSystemProcessContext(processInfo.processName, processContext)) {
@@ -380,11 +380,11 @@ int32_t SystemAbilityStateScheduler::RemovePendingUnloadEventLocked(
 int32_t SystemAbilityStateScheduler::HandlePendingLoadEventLocked(
     const std::shared_ptr<SystemAbilityContext>& abilityContext)
 {
-    HILOGI("[SA Scheduler][SA: %{public}d] handle pending load event start", abilityContext->systemAbilityId);
     if (abilityContext->pendingEvent != PendingEvent::LOAD_ABILITY_EVENT) {
         HILOGI("[SA Scheduler][SA: %{public}d] no pending load event", abilityContext->systemAbilityId);
         return ERR_OK;
     }
+    HILOGI("[SA Scheduler][SA: %{public}d] handle pending load event start", abilityContext->systemAbilityId);
     abilityContext->pendingEvent = PendingEvent::NO_EVENT;
     for (auto& loadRequestInfo : abilityContext->pendingLoadEventList) {
         int32_t result = HandleLoadAbilityEventLocked(abilityContext, loadRequestInfo);
@@ -401,11 +401,11 @@ int32_t SystemAbilityStateScheduler::HandlePendingLoadEventLocked(
 int32_t SystemAbilityStateScheduler::HandlePendingUnloadEventLocked(
     const std::shared_ptr<SystemAbilityContext>& abilityContext)
 {
-    HILOGI("[SA Scheduler][SA: %{public}d] handle pending unload event start", abilityContext->systemAbilityId);
     if (abilityContext->pendingEvent != PendingEvent::UNLOAD_ABILITY_EVENT) {
         HILOGI("[SA Scheduler][SA: %{public}d] no pending unload event", abilityContext->systemAbilityId);
         return ERR_OK;
     }
+    HILOGI("[SA Scheduler][SA: %{public}d] handle pending unload event start", abilityContext->systemAbilityId);
     abilityContext->pendingEvent = PendingEvent::NO_EVENT;
     return HandleUnloadAbilityEventLocked(abilityContext, abilityContext->pendingUnloadEvent);
 }
