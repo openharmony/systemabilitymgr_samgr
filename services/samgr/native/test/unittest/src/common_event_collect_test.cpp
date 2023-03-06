@@ -180,13 +180,13 @@ HWTEST_F(CommonEventCollectTest, OnReceiveEvent001, TestSize.Level3)
     EventFwk::CommonEventData eventData;
     commonEventStatusSubscriber->OnReceiveEvent(eventData);
     std::string action = EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON;
-    commonEventStatusSubscriber->SaveAction(action);
+    commonEventCollect->SaveAction(action);
     action = EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF;
-    commonEventStatusSubscriber->SaveAction(action);
+    commonEventCollect->SaveAction(action);
     action = EventFwk::CommonEventSupport::COMMON_EVENT_CHARGING;
-    commonEventStatusSubscriber->SaveAction(action);
+    commonEventCollect->SaveAction(action);
     action = EventFwk::CommonEventSupport::COMMON_EVENT_DISCHARGING;
-    commonEventStatusSubscriber->SaveAction(action);
+    commonEventCollect->SaveAction(action);
     EXPECT_NE(commonEventStatusSubscriber, nullptr);
 }
 } // namespace OHOS

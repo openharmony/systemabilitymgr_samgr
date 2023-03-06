@@ -66,7 +66,16 @@ int32_t CommonEventCollect::OnStop()
 
 void CommonEventCollect::Init(const std::list<SaProfile>& onDemandSaProfiles)
 {
+    {
+        std::lock_guard<std::mutex> autoLock(commonEventStateLock_);
+        commonEventState_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON);
+        commonEventState_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_DISCHARGING);
+    }
     std::lock_guard<std::mutex> autoLock(commomEventLock_);
+    commonEventNames_.push_back(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON);
+    commonEventNames_.push_back(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
+    commonEventNames_.push_back(EventFwk::CommonEventSupport::COMMON_EVENT_CHARGING);
+    commonEventNames_.push_back(EventFwk::CommonEventSupport::COMMON_EVENT_DISCHARGING);
     for (auto& profile : onDemandSaProfiles) {
         for (auto iterStart = profile.startOnDemand.begin(); iterStart != profile.startOnDemand.end(); iterStart++) {
             if (iterStart->eventId == COMMON_EVENT) {
@@ -121,6 +130,30 @@ bool CommonEventCollect::IsCesReady()
     return false;
 }
 
+void CommonEventCollect::SaveAction(const std::string& action)
+{
+    std::lock_guard<std::mutex> autoLock(commonEventStateLock_);
+    if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON) {
+        commonEventState_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON);
+        commonEventState_.erase(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
+    } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF) {
+        commonEventState_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
+        commonEventState_.erase(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON);
+    } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_CHARGING) {
+        commonEventState_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_CHARGING);
+        commonEventState_.erase(EventFwk::CommonEventSupport::COMMON_EVENT_DISCHARGING);
+    } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_DISCHARGING) {
+        commonEventState_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_DISCHARGING);
+        commonEventState_.erase(EventFwk::CommonEventSupport::COMMON_EVENT_CHARGING);
+    }
+}
+
+bool CommonEventCollect::CheckCondition(const OnDemandEvent& condition)
+{
+    std::lock_guard<std::mutex> autoLock(commonEventStateLock_);
+    return commonEventState_.count(condition.name) > 0;
+}
+
 void CommonHandler::ProcessEvent(const InnerEvent::Pointer& event)
 {
     if (commonCollect_ == nullptr || event == nullptr) {
@@ -153,32 +186,14 @@ void CommonEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData& data
 {
     std::string action = data.GetWant().GetAction();
     HILOGI("OnReceiveEvent get action: %{public}s", action.c_str());
-    SaveAction(action);
     OnDemandEvent event = {COMMON_EVENT, action, ""};
     auto collect = collect_.promote();
     if (collect == nullptr) {
         HILOGE("CommonEventCollect collect is nullptr");
         return;
     }
+    collect->SaveAction(action);
     collect->ReportEvent(event);
-}
-
-void CommonEventSubscriber::SaveAction(const std::string& action)
-{
-    std::lock_guard<std::mutex> autoLock(commonEventStateLock_);
-    if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON) {
-        commonEventState_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON);
-        commonEventState_.erase(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
-    } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF) {
-        commonEventState_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
-        commonEventState_.erase(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON);
-    } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_CHARGING) {
-        commonEventState_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_CHARGING);
-        commonEventState_.erase(EventFwk::CommonEventSupport::COMMON_EVENT_DISCHARGING);
-    } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_DISCHARGING) {
-        commonEventState_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_DISCHARGING);
-        commonEventState_.erase(EventFwk::CommonEventSupport::COMMON_EVENT_CHARGING);
-    }
 }
 
 void CommonEventDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)

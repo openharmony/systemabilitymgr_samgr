@@ -45,7 +45,7 @@ int32_t SystemAbilityEventHandler::HandleAbilityEventLocked(const std::shared_pt
         HILOGE("[SA Scheduler] context is nullptr");
         return ERR_INVALID_VALUE;
     }
-    HILOGI("[SA Scheduler][SA: %{public}d] handle ability event %{public}d start",
+    HILOGD("[SA Scheduler][SA: %{public}d] handle ability event %{public}d start",
         context->systemAbilityId, event);
     auto iter = abilityEventHandlerMap_.find(event);
     if (iter != abilityEventHandlerMap_.end()) {
@@ -65,7 +65,7 @@ int32_t SystemAbilityEventHandler::HandleProcessEventLocked(const std::shared_pt
         HILOGE("[SA Scheduler] context is nullptr");
         return ERR_INVALID_VALUE;
     }
-    HILOGI("[SA Scheduler][process: %{public}s] handle process event %{public}d start",
+    HILOGD("[SA Scheduler][process: %{public}s] handle process event %{public}d start",
         Str16ToStr8(context->processName).c_str(), event);
     auto iter = processEventHandlerMap_.find(event);
     if (iter != processEventHandlerMap_.end()) {

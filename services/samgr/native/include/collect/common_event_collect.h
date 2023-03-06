@@ -31,6 +31,8 @@ public:
 
     int32_t OnStart() override;
     int32_t OnStop() override;
+    void SaveAction(const std::string& action);
+    bool CheckCondition(const OnDemandEvent& condition) override;
     void Init(const std::list<SaProfile>& saProfiles);
     bool AddCommonListener();
 private:
@@ -41,6 +43,8 @@ private:
     std::vector<std::string> commonEventNames_;
     std::shared_ptr<AppExecFwk::EventHandler> workHandler_;
     std::shared_ptr<EventFwk::CommonEventSubscriber> commonEventSubscriber_ = nullptr;
+    std::mutex commonEventStateLock_;
+    std::set<std::string> commonEventState_;
 };
 
 class CommonHandler : public AppExecFwk::EventHandler {
@@ -60,12 +64,9 @@ public:
     CommonEventSubscriber(const EventFwk::CommonEventSubscribeInfo& subscribeInfo,
         const sptr<CommonEventCollect>& collect);
     ~CommonEventSubscriber() override = default;
-    void SaveAction(const std::string& action);
     void OnReceiveEvent(const EventFwk::CommonEventData& data) override;
 private:
-    std::set<std::string> commonEventState_;
     wptr<CommonEventCollect> collect_;
-    std::mutex commonEventStateLock_;
 };
 
 class CommonEventDeathRecipient : public IRemoteObject::DeathRecipient {
