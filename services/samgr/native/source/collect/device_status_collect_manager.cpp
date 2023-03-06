@@ -24,6 +24,7 @@
 #include "common_event_collect.h"
 #endif
 #include "device_param_collect.h"
+#include "memory_guard.h"
 #include "sam_log.h"
 #include "system_ability_manager.h"
 
@@ -37,6 +38,7 @@ void DeviceStatusCollectManager::Init(const std::list<SaProfile>& saProfiles)
     FilterOnDemandSaProfiles(saProfiles);
     auto runner = AppExecFwk::EventRunner::Create("collect");
     collectHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    collectHandler_->PostTask([]() { Samgr::MemoryGuard cacheGuard; });
     sptr<DeviceParamCollect> deviceParamCollect = new DeviceParamCollect(this);
     deviceParamCollect->Init(saProfiles);
     collectPluginMap_[PARAM] = deviceParamCollect;

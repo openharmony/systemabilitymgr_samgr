@@ -40,6 +40,7 @@ ohos_unittest("SystemAbilityMgrTest") {
     "${samgr_services_dir}/source/collect/device_status_collect_manager.cpp",
     "${samgr_services_dir}/source/collect/device_timed_collect.cpp",
     "${samgr_services_dir}/source/collect/icollect_plugin.cpp",
+    "${samgr_services_dir}/source/memory_guard.cpp",
     "${samgr_services_dir}/source/rpc_callback_imp.cpp",
     "${samgr_services_dir}/source/schedule/system_ability_event_handler.cpp",
     "${samgr_services_dir}/source/schedule/system_ability_state_machine.cpp",
@@ -92,6 +93,11 @@ ohos_unittest("SystemAbilityMgrTest") {
     "ipc:libdbinder",
   ]
   defines = []
+  if (use_musl) {
+    if (use_jemalloc && use_jemalloc_dfx_intf) {
+      defines += [ "CONFIG_USE_JEMALLOC_DFX_INTF" ]
+    }
+  }
   if (hicollie_able) {
     external_deps += [ "hicollie_native:libhicollie" ]
     defines += [ "HICOLLIE_ENABLE" ]
@@ -134,6 +140,7 @@ ohos_unittest("SystemAbilityMgrStubTest") {
     "${samgr_services_dir}/source/collect/device_status_collect_manager.cpp",
     "${samgr_services_dir}/source/collect/device_timed_collect.cpp",
     "${samgr_services_dir}/source/collect/icollect_plugin.cpp",
+    "${samgr_services_dir}/source/memory_guard.cpp",
     "${samgr_services_dir}/source/rpc_callback_imp.cpp",
     "${samgr_services_dir}/source/schedule/system_ability_event_handler.cpp",
     "${samgr_services_dir}/source/schedule/system_ability_state_machine.cpp",
@@ -179,6 +186,11 @@ ohos_unittest("SystemAbilityMgrStubTest") {
     "ipc:libdbinder",
   ]
   defines = []
+  if (use_musl) {
+    if (use_jemalloc && use_jemalloc_dfx_intf) {
+      defines += [ "CONFIG_USE_JEMALLOC_DFX_INTF" ]
+    }
+  }
   if (hicollie_able) {
     external_deps += [ "hicollie_native:libhicollie" ]
     defines += [ "HICOLLIE_ENABLE" ]
@@ -275,6 +287,7 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
     "${samgr_services_dir}/source/collect/device_param_collect.cpp",
     "${samgr_services_dir}/source/collect/device_status_collect_manager.cpp",
     "${samgr_services_dir}/source/collect/icollect_plugin.cpp",
+    "${samgr_services_dir}/source/memory_guard.cpp",
     "${samgr_services_dir}/source/rpc_callback_imp.cpp",
     "${samgr_services_dir}/source/schedule/system_ability_event_handler.cpp",
     "${samgr_services_dir}/source/schedule/system_ability_state_machine.cpp",
@@ -287,6 +300,13 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
     "${samgr_services_dir}/test/unittest/src/system_ability_state_scheduler_test.cpp",
     "//foundation/systemabilitymgr/samgr/services/dfx/source/hicollie_helper.cpp",
   ]
+
+  defines = []
+  if (use_musl) {
+    if (use_jemalloc && use_jemalloc_dfx_intf) {
+      defines += [ "CONFIG_USE_JEMALLOC_DFX_INTF" ]
+    }
+  }
 
   configs = [
     ":sam_test_config",
@@ -363,6 +383,7 @@ ohos_executable("TestTool") {
     "${samgr_services_dir}/source/collect/device_status_collect_manager.cpp",
     "${samgr_services_dir}/source/collect/device_timed_collect.cpp",
     "${samgr_services_dir}/source/collect/icollect_plugin.cpp",
+    "${samgr_services_dir}/source/memory_guard.cpp",
     "${samgr_services_dir}/source/rpc_callback_imp.cpp",
     "${samgr_services_dir}/source/schedule/system_ability_event_handler.cpp",
     "${samgr_services_dir}/source/schedule/system_ability_state_machine.cpp",
@@ -400,6 +421,11 @@ ohos_executable("TestTool") {
   }
 
   defines = []
+  if (use_musl) {
+    if (use_jemalloc && use_jemalloc_dfx_intf) {
+      defines += [ "CONFIG_USE_JEMALLOC_DFX_INTF" ]
+    }
+  }
   if (hicollie_able) {
     external_deps += [ "hicollie_native:libhicollie" ]
     defines += [ "HICOLLIE_ENABLE" ]
