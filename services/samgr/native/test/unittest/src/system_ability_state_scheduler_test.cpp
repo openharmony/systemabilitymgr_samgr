@@ -14,6 +14,8 @@
  */
 
 #include "system_ability_state_scheduler_test.h"
+
+#include "ability_death_recipient.h"
 #include "sa_status_change_mock.h"
 #include "test_log.h"
 
@@ -975,6 +977,115 @@ HWTEST_F(SystemAbilityStateSchedulerTest, OnAbilityUnloadableLocked001, TestSize
     EXPECT_EQ(systemAbilityStateScheduler->abilityContextMap_.count(SAID_INVALID), 0);
 }
 
+HWTEST_F(SystemAbilityStateSchedulerTest, GetRunningSystemProcess001, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::list<SystemProcessInfo> systemProcessInfos;
+    systemAbilityStateScheduler->processContextMap_.clear();
+    systemAbilityStateScheduler->processContextMap_[process] = nullptr;
+    int32_t ret = systemAbilityStateScheduler->GetRunningSystemProcess(systemProcessInfos);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: GetRunningSystemProcess002
+ * @tc.desc: test GetRunningSystemProcess
+ * @tc.type: FUNC
+ * @tc.require: I6FDNZ
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, GetRunningSystemProcess002, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::shared_ptr<SystemProcessContext> systemProcessContext = std::make_shared<SystemProcessContext>();
+    std::list<SystemProcessInfo> systemProcessInfos;
+    systemProcessContext->state = SystemProcessState::STARTED;
+    systemAbilityStateScheduler->processContextMap_.clear();
+    systemAbilityStateScheduler->processContextMap_[process] = systemProcessContext;
+    int32_t ret = systemAbilityStateScheduler->GetRunningSystemProcess(systemProcessInfos);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: SubscribeSystemProcess001
+ * @tc.desc: test SubscribeSystemProcess
+ * @tc.type: FUNC
+ * @tc.require: I6FDNZ
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, SubscribeSystemProcess001, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    sptr<SystemProcessStatusChange> listener = new SystemProcessStatusChange();
+    systemAbilityStateScheduler->processListenerDeath_ =
+        sptr<IRemoteObject::DeathRecipient>(new SystemProcessListenerDeathRecipient());
+    systemAbilityStateScheduler->processListeners.clear();
+    int32_t ret = systemAbilityStateScheduler->SubscribeSystemProcess(listener);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: SubscribeSystemProcess002
+ * @tc.desc: test SubscribeSystemProcess
+ * @tc.type: FUNC
+ * @tc.require: I6FDNZ
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, SubscribeSystemProcess002, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    sptr<SystemProcessStatusChange> listener = new SystemProcessStatusChange();
+    systemAbilityStateScheduler->processListenerDeath_ =
+        sptr<IRemoteObject::DeathRecipient>(new SystemProcessListenerDeathRecipient());
+    systemAbilityStateScheduler->processListeners.clear();
+    systemAbilityStateScheduler->processListeners.push_back(listener);
+    int32_t ret = systemAbilityStateScheduler->SubscribeSystemProcess(listener);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: UnSubscribeSystemProcess001
+ * @tc.desc: test UnSubscribeSystemProcess
+ * @tc.type: FUNC
+ * @tc.require: I6FDNZ
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, UnSubscribeSystemProcess001, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    sptr<SystemProcessStatusChange> listener = new SystemProcessStatusChange();
+    systemAbilityStateScheduler->processListenerDeath_ =
+        sptr<IRemoteObject::DeathRecipient>(new SystemProcessListenerDeathRecipient());
+    systemAbilityStateScheduler->processListeners.clear();
+    systemAbilityStateScheduler->processListeners.push_back(listener);
+    int32_t ret = systemAbilityStateScheduler->UnSubscribeSystemProcess(listener);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: UnSubscribeSystemProcess002
+ * @tc.desc: test UnSubscribeSystemProcess
+ * @tc.type: FUNC
+ * @tc.require: I6FDNZ
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, UnSubscribeSystemProcess002, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    sptr<SystemProcessStatusChange> listener = new SystemProcessStatusChange();
+    systemAbilityStateScheduler->processListenerDeath_ =
+        sptr<IRemoteObject::DeathRecipient>(new SystemProcessListenerDeathRecipient());
+    systemAbilityStateScheduler->processListeners.clear();
+    int32_t ret = systemAbilityStateScheduler->UnSubscribeSystemProcess(listener);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
 /**
  * @tc.name: ProcessDelayUnloadEvent001
  * @tc.desc: test ProcessDelayUnloadEvent
@@ -1010,9 +1121,10 @@ HWTEST_F(SystemAbilityStateSchedulerTest, ProcessDelayUnloadEvent002, TestSize.L
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
     std::shared_ptr<SystemProcessContext> systemProcessContext = std::make_shared<SystemProcessContext>();
     systemAbilityStateScheduler->abilityContextMap_.clear();
-    systemAbilityStateScheduler->abilityContextMap_[SAID] = systemAbilityContext;
     systemAbilityContext->ownProcessContext = systemProcessContext;
+    systemAbilityStateScheduler->abilityContextMap_[SAID] = systemAbilityContext;
+    systemAbilityContext->state = SystemAbilityState::NOT_LOADED;
     int32_t ret = systemAbilityStateScheduler->ProcessDelayUnloadEvent(SAID);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, ERR_OK);
 }
 }

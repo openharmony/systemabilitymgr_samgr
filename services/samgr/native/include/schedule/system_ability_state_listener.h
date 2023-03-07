@@ -24,6 +24,7 @@
 namespace OHOS {
 class SystemAbilityStateListener {
 public:
+    virtual ~SystemAbilityStateListener() = default;
     virtual void OnAbilityNotLoadedLocked(int32_t systemAbilityId)
     {
         HILOGI("[SA Scheduler][SA: %{public}d] not loaded", systemAbilityId);
