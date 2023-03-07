@@ -44,6 +44,17 @@ constexpr int64_t DEFAULT_EVENTID = 0;
 constexpr uint32_t INVALID_SAID = -1;
 constexpr uint32_t INVALID_CODE = 50;
 }
+
+void SystemProcessStatusChange::OnSystemProcessStarted(SystemProcessInfo& systemProcessInfo)
+{
+    cout << "OnSystemProcessStarted, processName: ";
+}
+
+void SystemProcessStatusChange::OnSystemProcessStopped(SystemProcessInfo& systemProcessInfo)
+{
+    cout << "OnSystemProcessStopped, processName: ";
+}
+
 void SystemAbilityMgrStubTest::SetUpTestCase()
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
@@ -231,6 +242,54 @@ HWTEST_F(SystemAbilityMgrStubTest, AddSystemProcessInner001, TestSize.Level4)
     MessageParcel reply;
     int32_t result = saMgr->AddSystemProcessInner(data, reply);
     EXPECT_EQ(result, ERR_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: Test SubscribeSystemProcessInner001
+ * @tc.desc: SubscribeSystemProcessInner001, permission denied!
+ * @tc.type: FUNC
+ * @tc.require: I6H10P
+ */
+HWTEST_F(SystemAbilityMgrStubTest, SubscribeSystemProcessInner001, TestSize.Level3)
+{
+    DTEST_LOG << "SubscribeSystemProcessInner001" << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = saMgr->SubscribeSystemProcessInner(data, reply);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: Test GetRunningSystemProcessInner001
+ * @tc.desc: GetRunningSystemProcessInner001, permission denied!
+ * @tc.type: FUNC
+ * @tc.require: I6H10P
+ */
+HWTEST_F(SystemAbilityMgrStubTest, GetRunningSystemProcessInner001, TestSize.Level3)
+{
+    DTEST_LOG << "GetRunningSystemProcessInner001" << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = saMgr->GetRunningSystemProcessInner(data, reply);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: Test UnSubscribeSystemProcessInner001
+ * @tc.desc: UnSubscribeSystemProcessInner001, permission denied!
+ * @tc.type: FUNC
+ * @tc.require: I6H10P
+ */
+HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemProcessInner001, TestSize.Level3)
+{
+    DTEST_LOG << "UnSubscribeSystemProcessInner001" << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = saMgr->UnSubscribeSystemProcessInner(data, reply);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
 }
 
 /**
@@ -2526,11 +2585,113 @@ HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility005, TestSize.Level3)
 {
     SamMockPermission::MockProcess("testProcess");
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->abilityStateScheduler_->processContextMap_.clear();
+    saMgr->abilityStateScheduler_->abilityContextMap_.clear();
     EXPECT_TRUE(saMgr != nullptr);
     SaProfile saProfile;
     saProfile.process = u"testProcess";
     saMgr->saProfileMap_[SAID] = saProfile;
     int32_t result = saMgr->UnloadSystemAbility(SAID);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: Test GetRunningSystemProcessInner002
+ * @tc.desc: GetRunningSystemProcessInner002
+ * @tc.type: FUNC
+ * @tc.require: I6H10P
+ */
+HWTEST_F(SystemAbilityMgrStubTest, GetRunningSystemProcessInner002, TestSize.Level3)
+{
+    DTEST_LOG << "GetRunningSystemProcessInner002" << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = saMgr->GetRunningSystemProcessInner(data, reply);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: Test SubscribeSystemProcessInner002
+ * @tc.desc: SubscribeSystemProcessInner002
+ * @tc.type: FUNC
+ * @tc.require: I6H10P
+ */
+HWTEST_F(SystemAbilityMgrStubTest, SubscribeSystemProcessInner002, TestSize.Level3)
+{
+    DTEST_LOG << "SubscribeSystemProcessInner002" << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    data.WriteRemoteObject(nullptr);
+    MessageParcel reply;
+    int32_t ret = saMgr->SubscribeSystemProcessInner(data, reply);
+    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+}
+
+/**
+ * @tc.name: Test SubscribeSystemProcessInner003
+ * @tc.desc: SubscribeSystemProcessInner003
+ * @tc.type: FUNC
+ * @tc.require: I6H10P
+ */
+HWTEST_F(SystemAbilityMgrStubTest, SubscribeSystemProcessInner003, TestSize.Level3)
+{
+    DTEST_LOG << "SubscribeSystemProcessInner003" << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    sptr<IRemoteObject> ptr = new SystemProcessStatusChange();
+    data.WriteRemoteObject(ptr);
+    MessageParcel reply;
+    int32_t ret = saMgr->SubscribeSystemProcessInner(data, reply);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: Test UnSubscribeSystemProcessInner002
+ * @tc.desc: UnSubscribeSystemProcessInner002
+ * @tc.type: FUNC
+ * @tc.require: I6H10P
+ */
+HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemProcessInner002, TestSize.Level3)
+{
+    DTEST_LOG << "UnSubscribeSystemProcessInner002" << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    data.WriteRemoteObject(nullptr);
+    MessageParcel reply;
+    int32_t ret = saMgr->UnSubscribeSystemProcessInner(data, reply);
+    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+}
+
+/**
+ * @tc.name: Test UnSubscribeSystemProcessInner003
+ * @tc.desc: UnSubscribeSystemProcessInner003
+ * @tc.type: FUNC
+ * @tc.require: I6H10P
+ */
+HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemProcessInner003, TestSize.Level3)
+{
+    DTEST_LOG << "UnSubscribeSystemProcessInner003" << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    sptr<IRemoteObject> ptr = new SystemProcessStatusChange();
+    data.WriteRemoteObject(ptr);
+    MessageParcel reply;
+    int32_t ret = saMgr->UnSubscribeSystemProcessInner(data, reply);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: Test CanRequestProcessInfo001
+ * @tc.desc: CanRequestProcessInfo001
+ * @tc.type: FUNC
+ * @tc.require: I6H10P
+ */
+HWTEST_F(SystemAbilityMgrStubTest, CanRequestProcessInfo001, TestSize.Level3)
+{
+    DTEST_LOG << "CanRequestProcessInfo001" << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t ret = saMgr->CanRequestProcessInfo();
+    EXPECT_EQ(ret, false);
 }
 }

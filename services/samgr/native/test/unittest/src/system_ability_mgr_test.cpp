@@ -25,8 +25,8 @@
 #include "sa_status_change_mock.h"
 #include "string_ex.h"
 #include "system_ability_definition.h"
+#include "system_process_status_change_proxy.h"
 #include "test_log.h"
-
 #define private public
 #include "system_ability_manager.h"
 
@@ -54,6 +54,17 @@ const std::string SA_TAG_DEVICE_ON_LINE = "deviceonline";
 const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 const string ONDEMAND_PARAM = "persist.samgr.perf.ondemand";
 }
+
+void SystemProcessStatusChange::OnSystemProcessStarted(SystemProcessInfo& systemProcessInfo)
+{
+    DTEST_LOG << "OnSystemProcessStarted, processName: ";
+}
+
+void SystemProcessStatusChange::OnSystemProcessStopped(SystemProcessInfo& systemProcessInfo)
+{
+    DTEST_LOG << "OnSystemProcessStopped, processName: ";
+}
+
 void SystemAbilityMgrTest::SetUpTestCase()
 {
     DTEST_LOG << "SetUpTestCase" << std::endl;
@@ -1949,5 +1960,133 @@ HWTEST_F(SystemAbilityMgrTest, GetRunningSystemProcess002, TestSize.Level3)
     saMgr->abilityStateScheduler_ = nullptr;
     int32_t ret = saMgr->GetRunningSystemProcess(systemProcessInfos);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: Test SubscribeSystemProcess001
+ * @tc.desc: SubscribeSystemProcess001
+ * @tc.type: FUNC
+ * @tc.require: I6H10P
+ */
+HWTEST_F(SystemAbilityMgrTest, SubscribeSystemProcess001, TestSize.Level3)
+{
+    DTEST_LOG << " SubscribeSystemProcess001 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<ISystemProcessStatusChange> systemProcessStatusChange = new SystemProcessStatusChange();
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+    int32_t ret = saMgr->SubscribeSystemProcess(systemProcessStatusChange);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: Test SubscribeSystemProcess002
+ * @tc.desc: SubscribeSystemProcess002
+ * @tc.type: FUNC
+ * @tc.require: I6H10P
+ */
+HWTEST_F(SystemAbilityMgrTest, SubscribeSystemProcess002, TestSize.Level3)
+{
+    DTEST_LOG << " SubscribeSystemProcess002 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->abilityStateScheduler_ = nullptr;
+    sptr<ISystemProcessStatusChange> systemProcessStatusChange = new SystemProcessStatusChange();
+    int32_t ret = saMgr->SubscribeSystemProcess(systemProcessStatusChange);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: Test UnSubscribeSystemProcess001
+ * @tc.desc: UnSubscribeSystemProcess001
+ * @tc.type: FUNC
+ * @tc.require: I6H10P
+ */
+HWTEST_F(SystemAbilityMgrTest, UnSubscribeSystemProcess001, TestSize.Level3)
+{
+    DTEST_LOG << " UnSubscribeSystemProcess001" << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<ISystemProcessStatusChange> systemProcessStatusChange = new SystemProcessStatusChange();
+    int32_t ret = saMgr->UnSubscribeSystemProcess(systemProcessStatusChange);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: Test UnSubscribeSystemProcess002
+ * @tc.desc: UnSubscribeSystemProcess002
+ * @tc.type: FUNC
+ * @tc.require: I6H10P
+ */
+HWTEST_F(SystemAbilityMgrTest, UnSubscribeSystemProcess002, TestSize.Level3)
+{
+    DTEST_LOG << " UnSubscribeSystemProcess002" << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<ISystemProcessStatusChange> systemProcessStatusChange = new SystemProcessStatusChange();
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+    int32_t ret = saMgr->UnSubscribeSystemProcess(systemProcessStatusChange);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: Test OnSystemProcessStarted001
+ * @tc.desc: OnSystemProcessStarted001
+ * @tc.type: FUNC
+ * @tc.require: I6H10P
+ */
+HWTEST_F(SystemAbilityMgrTest, OnSystemProcessStarted001, TestSize.Level3)
+{
+    DTEST_LOG << " OnSystemProcessStarted001" << std::endl;
+    sptr<ISystemProcessStatusChange> systemProcessStatusChange = new SystemProcessStatusChange();
+    SystemProcessInfo systemProcessInfos;
+    systemProcessStatusChange->OnSystemProcessStarted(systemProcessInfos);
+    EXPECT_NE(systemProcessStatusChange, nullptr);
+}
+
+/**
+ * @tc.name: Test OnSystemProcessStopped001
+ * @tc.desc: OnSystemProcessStopped001
+ * @tc.type: FUNC
+ * @tc.require: I6H10P
+ */
+HWTEST_F(SystemAbilityMgrTest, OnSystemProcessStopped001, TestSize.Level3)
+{
+    DTEST_LOG << " OnSystemProcessStopped001" << std::endl;
+    sptr<SystemProcessStatusChangeStub> systemProcessStatusChange = new SystemProcessStatusChange();
+    SystemProcessInfo systemProcessInfos;
+    systemProcessStatusChange->OnSystemProcessStopped(systemProcessInfos);
+    EXPECT_NE(systemProcessStatusChange, nullptr);
+}
+
+/**
+ * @tc.name: Test SendRequestInner001
+ * @tc.desc: SendRequestInner001
+ * @tc.type: FUNC
+ * @tc.require: I6H10P
+ */
+HWTEST_F(SystemAbilityMgrTest, SendRequestInner001, TestSize.Level3)
+{
+    DTEST_LOG << " SendRequestInner001" << std::endl;
+    sptr<SystemProcessStatusChangeStub> stub = new SystemProcessStatusChange();
+    sptr<SystemProcessStatusChangeProxy> systemProcessStatusChange = new SystemProcessStatusChangeProxy(stub);
+    SystemProcessInfo systemProcessInfos;
+    uint32_t code = 1;
+    bool ret = systemProcessStatusChange->SendRequestInner(code, systemProcessInfos);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: Test SendRequestInner002
+ * @tc.desc: SendRequestInner002
+ * @tc.type: FUNC
+ * @tc.require: I6H10P
+ */
+HWTEST_F(SystemAbilityMgrTest, SendRequestInner002, TestSize.Level3)
+{
+    DTEST_LOG << " SendRequestInner002" << std::endl;
+    sptr<SystemProcessStatusChangeStub> stub = new SystemProcessStatusChange();
+    sptr<SystemProcessStatusChangeProxy> systemProcessStatusChange = new SystemProcessStatusChangeProxy(stub);
+    SystemProcessInfo systemProcessInfos;
+    systemProcessInfos.processName = "test";
+    uint32_t code = 1;
+    bool ret = systemProcessStatusChange->SendRequestInner(code, systemProcessInfos);
+    EXPECT_EQ(ret, true);
 }
 } // namespace OHOS
