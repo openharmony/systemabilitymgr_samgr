@@ -42,7 +42,7 @@ std::shared_ptr<AppExecFwk::EventHandler> collectHandler_ = nullptr;
 
 void DeviceNetworkingCollectTest::SetUpTestCase()
 {
-    auto runner = AppExecFwk::EventRunner::Create("collect_test");
+    auto runner = AppExecFwk::EventRunner::Create("collect_test2");
     collectHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     DTEST_LOG << "SetUpTestCase" << std::endl;
 }
