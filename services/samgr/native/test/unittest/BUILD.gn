@@ -52,6 +52,7 @@ ohos_unittest("SystemAbilityMgrTest") {
     "${samgr_services_dir}/source/system_process_status_change_proxy.cpp",
     "${samgr_services_dir}/test/unittest/src/device_param_collect_test.cpp",
     "${samgr_services_dir}/test/unittest/src/device_status_collect_manager_test.cpp",
+    "${samgr_services_dir}/test/unittest/src/device_timed_collect_test.cpp",
     "${samgr_services_dir}/test/unittest/src/itest_transaction_service.cpp",
     "${samgr_services_dir}/test/unittest/src/mock_permission.cpp",
     "${samgr_services_dir}/test/unittest/src/sa_status_change_mock.cpp",
