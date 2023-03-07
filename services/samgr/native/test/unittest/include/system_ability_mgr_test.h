@@ -17,7 +17,8 @@
 #define SAMGR_TEST_UNITTEST_INCLUDE_SYSTEM_ABILITY_MGR_TEST_H
 
 #include "gtest/gtest.h"
-
+#define private public
+#include "system_process_status_change_stub.h"
 namespace OHOS {
 class SystemAbilityMgrTest : public testing::Test {
 public:
@@ -25,6 +26,12 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+};
+
+class SystemProcessStatusChange : public SystemProcessStatusChangeStub {
+public:
+    void OnSystemProcessStarted(SystemProcessInfo& systemProcessInfo) override;
+    void OnSystemProcessStopped(SystemProcessInfo& systemProcessInfo) override;
 };
 } // OHOS
 #endif /* SAMGR_TEST_UNITTEST_INCLUDE_SYSTEM_ABILITY_MGR_TEST_H */

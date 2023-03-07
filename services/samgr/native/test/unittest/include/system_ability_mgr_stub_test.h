@@ -17,7 +17,9 @@
 #define SAMGR_TEST_UNITTEST_INCLUDE_SYSTEM_ABILITY_MGR_PROXY_TEST_H
 
 #include "gtest/gtest.h"
-
+#define private public
+#define protected public
+#include "system_process_status_change_stub.h"
 namespace OHOS {
 class SystemAbilityMgrStubTest : public testing::Test {
 public:
@@ -26,6 +28,12 @@ public:
     void SetUp();
     void TearDown();
     void AddSystemAbilityContext(int32_t systemAbilityId, const std::u16string& processName);
+};
+
+class SystemProcessStatusChange : public SystemProcessStatusChangeStub {
+public:
+    void OnSystemProcessStarted(SystemProcessInfo& systemProcessInfo) override;
+    void OnSystemProcessStopped(SystemProcessInfo& systemProcessInfo) override;
 };
 } // OHOS
 #endif /* SAMGR_TEST_UNITTEST_INCLUDE_SYSTEM_ABILITY_MGR_PROXY_TEST_H */
