@@ -33,6 +33,11 @@ namespace {
     const int32_t MOCK_SAID = 1492;
     const int32_t TEST_PROFILE_SAID = 9999;
     const int32_t TEST_PROFILE_SAID_INVAILD = 9990;
+    constexpr const char* SA_TAG_DEVICE_ON_LINE = "deviceonline";
+    constexpr const char* SA_TAG_SETTING_SWITCH = "settingswitch";
+    constexpr const char* SA_TAG_COMMON_EVENT = "commonevent";
+    constexpr const char* SA_TAG_PARAM = "param";
+    constexpr const char* SA_TAG_TIEMD_EVENT = "timedevent";
 }
 
 class ParseUtilTest : public testing::Test {
@@ -835,6 +840,122 @@ HWTEST_F(ParseUtilTest, DeleteAllMark001, TestSize.Level3)
 }
 
 /**
+ * @tc.name: GetOnDemandConditionsFromJson001
+ * @tc.desc: parse OnDemandConditions, conditions is empty.
+ * @tc.type: FUNC
+ * @tc.require: I6JE38
+ */
+HWTEST_F(ParseUtilTest, GetOnDemandConditionsFromJson001, TestSize.Level3)
+{
+    DTEST_LOG << " GetOnDemandConditionsFromJson001 BEGIN" << std::endl;
+    nlohmann::json obj;
+    std::string key;
+    std::vector<OnDemandEvent> out;
+    SaProfile saProfile;
+    parser_->GetOnDemandConditionsFromJson(obj, key, out);
+    EXPECT_TRUE(out.empty());
+    DTEST_LOG << " GetOnDemandConditionsFromJson001 END" << std::endl;
+}
+
+/**
+ * @tc.name: GetOnDemandConditionsFromJson002
+ * @tc.desc: parse OnDemandConditions, one condition.
+ * @tc.type: FUNC
+ * @tc.require: I6JE38
+ */
+HWTEST_F(ParseUtilTest, GetOnDemandConditionsFromJson002, TestSize.Level3)
+{
+    DTEST_LOG << " GetOnDemandConditionsFromJson002 BEGIN" << std::endl;
+    nlohmann::json obj;
+    nlohmann::json conditions;
+    nlohmann::json condition;
+    condition["eventId"] = SA_TAG_DEVICE_ON_LINE;
+    condition["name"] = "mockName";
+    condition["value"] = "mockValue";
+    conditions[0] = condition;
+    obj["conditions"] = conditions;
+
+    std::string key = "conditions";
+    std::vector<OnDemandEvent> out;
+    SaProfile saProfile;
+    parser_->GetOnDemandConditionsFromJson(obj, key, out);
+    EXPECT_EQ(out.size(), 1);
+    DTEST_LOG << " GetOnDemandConditionsFromJson002 END" << std::endl;
+}
+
+/**
+ * @tc.name: GetOnDemandConditionsFromJson003
+ * @tc.desc: parse OnDemandConditions, five condition.
+ * @tc.type: FUNC
+ * @tc.require: I6JE38
+ */
+HWTEST_F(ParseUtilTest, GetOnDemandConditionsFromJson003, TestSize.Level3)
+{
+    DTEST_LOG << " GetOnDemandConditionsFromJson003 BEGIN" << std::endl;
+    nlohmann::json obj;
+    nlohmann::json conditions;
+    nlohmann::json condition;
+    condition["eventId"] = SA_TAG_DEVICE_ON_LINE;
+    condition["name"] = "mockName";
+    condition["value"] = "mockValue";
+    nlohmann::json condition2;
+    condition2["eventId"] = SA_TAG_SETTING_SWITCH;
+    condition2["name"] = "mockName";
+    condition2["value"] = "mockValue";
+    nlohmann::json condition3;
+    condition3["eventId"] = SA_TAG_COMMON_EVENT;
+    condition3["name"] = "mockName";
+    condition3["value"] = "mockValue";
+    nlohmann::json condition4;
+    condition4["eventId"] = SA_TAG_PARAM;
+    condition4["name"] = "mockName";
+    condition4["value"] = "mockValue";
+    nlohmann::json condition5;
+    condition5["eventId"] = SA_TAG_TIEMD_EVENT;
+    condition5["name"] = "mockName";
+    condition5["value"] = "mockValue";
+    conditions[0] = condition;
+    conditions[1] = condition2;
+    conditions[2] = condition3;
+    conditions[3] = condition4;
+    conditions[4] = condition5;
+    obj["conditions"] = conditions;
+
+    std::string key = "conditions";
+    std::vector<OnDemandEvent> out;
+    SaProfile saProfile;
+    parser_->GetOnDemandConditionsFromJson(obj, key, out);
+    EXPECT_EQ(out.size(), 5);
+    DTEST_LOG << " GetOnDemandConditionsFromJson003 END" << std::endl;
+}
+
+/**
+ * @tc.name: GetOnDemandConditionsFromJson004
+ * @tc.desc: parse OnDemandConditions, invalid condition.
+ * @tc.type: FUNC
+ * @tc.require: I6JE38
+ */
+HWTEST_F(ParseUtilTest, GetOnDemandConditionsFromJson004, TestSize.Level3)
+{
+    DTEST_LOG << " GetOnDemandConditionsFromJson004 BEGIN" << std::endl;
+    nlohmann::json obj;
+    nlohmann::json conditions;
+    nlohmann::json condition;
+    condition["eventId"] = "mockeventId";
+    condition["name"] = "mockName";
+    condition["value"] = "mockValue";
+    conditions[0] = condition;
+    obj["conditions"] = conditions;
+
+    std::string key = "conditions";
+    std::vector<OnDemandEvent> out;
+    SaProfile saProfile;
+    parser_->GetOnDemandConditionsFromJson(obj, key, out);
+    EXPECT_EQ(out.size(), 0);
+    DTEST_LOG << " GetOnDemandConditionsFromJson004 END" << std::endl;
+}
+
+/**
  * @tc.name: ParseJsonFile001
  * @tc.desc: parse json file using big json file
  * @tc.type: FUNC
@@ -977,22 +1098,6 @@ HWTEST_F(ParseUtilTest, ParseSystemAbility003, TestSize.Level3)
     ret = parser_->ParseSystemAbility(saProfile, systemAbilityJson);
     EXPECT_EQ(ret, true);
     DTEST_LOG << " ParseSystemAbility003 END" << std::endl;
-}
-
-/**
- * @tc.name: GetOnDemandConditionsFromJson001
- * @tc.desc: parse OnDemandConditions.
- * @tc.type: FUNC
- */
-HWTEST_F(ParseUtilTest, GetOnDemandConditionsFromJson001, TestSize.Level3)
-{
-    DTEST_LOG << " GetOnDemandConditionsFromJson001 BEGIN" << std::endl;
-    nlohmann::json obj;
-    std::string key;
-    std::vector<OnDemandEvent> out;
-    SaProfile saProfile;
-    EXPECT_TRUE(out.empty());
-    DTEST_LOG << " GetOnDemandConditionsFromJson001 END" << std::endl;
 }
 } // namespace SAMGR
 } // namespace OHOS

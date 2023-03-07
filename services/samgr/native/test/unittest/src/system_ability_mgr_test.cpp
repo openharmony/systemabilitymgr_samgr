@@ -2089,4 +2089,106 @@ HWTEST_F(SystemAbilityMgrTest, SendRequestInner002, TestSize.Level3)
     bool ret = systemProcessStatusChange->SendRequestInner(code, systemProcessInfos);
     EXPECT_EQ(ret, true);
 }
+
+/**
+ * @tc.name: CancelUnloadSystemAbility001
+ * @tc.desc: test CancelUnloadSystemAbility, said is invalid
+ * @tc.type: FUNC
+ * @tc.require: I6J4T7
+ */
+HWTEST_F(SystemAbilityMgrTest, CancelUnloadSystemAbility001, TestSize.Level3)
+{
+    DTEST_LOG << " CancelUnloadSystemAbility001 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t systemAbilityId = -1;
+    int32_t ret = saMgr->CancelUnloadSystemAbility(systemAbilityId);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: CancelUnloadSystemAbility002
+ * @tc.desc: test CancelUnloadSystemAbility, said is invalid
+ * @tc.type: FUNC
+ * @tc.require: I6J4T7
+ */
+HWTEST_F(SystemAbilityMgrTest, CancelUnloadSystemAbility002, TestSize.Level3)
+{
+    DTEST_LOG << " CancelUnloadSystemAbility002 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->saProfileMap_.erase(1);
+    int32_t systemAbilityId = 1;
+    int32_t ret = saMgr->CancelUnloadSystemAbility(systemAbilityId);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: CancelUnloadSystemAbility003
+ * @tc.desc: test CancelUnloadSystemAbility, caller process is invalid
+ * @tc.type: FUNC
+ * @tc.require: I6J4T7
+ */
+HWTEST_F(SystemAbilityMgrTest, CancelUnloadSystemAbility003, TestSize.Level3)
+{
+    DTEST_LOG << " CancelUnloadSystemAbility003 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    SaProfile saProfile;
+    saMgr->saProfileMap_[1] = saProfile;
+    int32_t systemAbilityId = 1;
+    int32_t ret = saMgr->CancelUnloadSystemAbility(systemAbilityId);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: CancelUnloadSystemAbility004
+ * @tc.desc: test CancelUnloadSystemAbility, caller process is valid
+ * @tc.type: FUNC
+ * @tc.require: I6J4T7
+ */
+HWTEST_F(SystemAbilityMgrTest, CancelUnloadSystemAbility004, TestSize.Level3)
+{
+    DTEST_LOG << " CancelUnloadSystemAbility004 " << std::endl;
+    SamMockPermission::MockProcess("mockProcess");
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    SaProfile saProfile;
+    saProfile.process = u"mockProcess";
+    saMgr->saProfileMap_[1] = saProfile;
+    int32_t systemAbilityId = 1;
+    int32_t ret = saMgr->CancelUnloadSystemAbility(systemAbilityId);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: IdleSystemAbility001
+ * @tc.desc: test IdleSystemAbility, said is invalid
+ * @tc.type: FUNC
+ * @tc.require: I6J4T7
+ */
+HWTEST_F(SystemAbilityMgrTest, IdleSystemAbility001, TestSize.Level3)
+{
+    DTEST_LOG << " IdleSystemAbility001 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t systemAbilityId = -1;
+    std::u16string procName;
+    std::unordered_map<std::string, std::string> idleReason;
+    int32_t delayTime = 0;
+    bool ret = saMgr->IdleSystemAbility(systemAbilityId, procName, idleReason, delayTime);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: ActiveSystemAbility001
+ * @tc.desc: test ActiveSystemAbility001, said is invalid
+ * @tc.type: FUNC
+ * @tc.require: I6J4T7
+ */
+HWTEST_F(SystemAbilityMgrTest, ActiveSystemAbility001, TestSize.Level3)
+{
+    DTEST_LOG << " ActiveSystemAbility001 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t systemAbilityId = -1;
+    std::u16string procName;
+    std::unordered_map<std::string, std::string> activeReason;
+    bool ret = saMgr->ActiveSystemAbility(systemAbilityId, procName, activeReason);
+    EXPECT_FALSE(ret);
+}
 } // namespace OHOS

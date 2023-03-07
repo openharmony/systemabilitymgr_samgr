@@ -112,4 +112,103 @@ HWTEST_F(LocalAbilityManagerProxyTest, LocalAbilityManagerProxy004, TestSize.Lev
     bool res = localAbility->StartAbility(TEST_SAID_VAILD, eventStr);
     EXPECT_EQ(res, false);
 }
+
+/**
+ * @tc.name: StopAbility001
+ * @tc.desc: test StopAbility, said is invalid
+ * @tc.type: FUNC
+ * @tc.require: I6J4T7
+ */
+HWTEST_F(LocalAbilityManagerProxyTest, StopAbility001, TestSize.Level1)
+{
+    sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
+    testAbility->result_ = 1;
+    sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
+    EXPECT_NE(localAbility, nullptr);
+    string eventStr = "name:usual.event.SCREEN_ON,said:1499,type:4,value:";
+    bool res = localAbility->StopAbility(TEST_SAID_INVAILD, eventStr);
+    EXPECT_EQ(res, false);
+}
+
+/**
+ * @tc.name: StopAbility002
+ * @tc.desc: test StopAbility, eventStr is empty
+ * @tc.type: FUNC
+ * @tc.require: I6J4T7
+ */
+HWTEST_F(LocalAbilityManagerProxyTest, StopAbility002, TestSize.Level1)
+{
+    sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
+    testAbility->result_ = 1;
+    sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
+    EXPECT_NE(localAbility, nullptr);
+    string eventStr = "";
+    bool res = localAbility->StopAbility(TEST_SAID_VAILD, eventStr);
+    EXPECT_EQ(res, false);
+}
+
+/**
+ * @tc.name: StopAbility003
+ * @tc.desc: test StopAbility,return success
+ * @tc.type: FUNC
+ * @tc.require: I6J4T7
+ */
+HWTEST_F(LocalAbilityManagerProxyTest, StopAbility003, TestSize.Level1)
+{
+    sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
+    sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
+    EXPECT_NE(localAbility, nullptr);
+    string eventStr = "name:usual.event.SCREEN_ON,said:1499,type:4,value:";
+    bool res = localAbility->StopAbility(TEST_SAID_VAILD, eventStr);
+    EXPECT_EQ(res, true);
+}
+
+/**
+ * @tc.name: StopAbility004
+ * @tc.desc: test StopAbility, return failed
+ * @tc.type: FUNC
+ * @tc.require: I6J4T7
+ */
+HWTEST_F(LocalAbilityManagerProxyTest, StopAbility004, TestSize.Level1)
+{
+    sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
+    testAbility->result_ = 1;
+    sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
+    EXPECT_NE(localAbility, nullptr);
+    string eventStr = "name:usual.event.SCREEN_ON,said:1499,type:4,value:";
+    bool res = localAbility->StopAbility(TEST_SAID_VAILD, eventStr);
+    EXPECT_EQ(res, false);
+}
+
+/**
+ * @tc.name: ActiveAbility001
+ * @tc.desc: test ActiveAbility, said is invalid
+ * @tc.type: FUNC
+ * @tc.require: I6J4T7
+ */
+HWTEST_F(LocalAbilityManagerProxyTest, ActiveAbility001, TestSize.Level3)
+{
+    sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
+    sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
+    EXPECT_NE(localAbility, nullptr);
+    std::unordered_map<std::string, std::string> activeReason;
+    bool res = localAbility->ActiveAbility(TEST_SAID_INVAILD, activeReason);
+    EXPECT_EQ(res, false);
+}
+
+/**
+ * @tc.name: ActiveAbility002
+ * @tc.desc: test ActiveAbility, said is valid
+ * @tc.type: FUNC
+ * @tc.require: I6J4T7
+ */
+HWTEST_F(LocalAbilityManagerProxyTest, ActiveAbility002, TestSize.Level3)
+{
+    sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
+    sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
+    EXPECT_NE(localAbility, nullptr);
+    std::unordered_map<std::string, std::string> activeReason;
+    bool res = localAbility->ActiveAbility(TEST_SAID_VAILD, activeReason);
+    EXPECT_EQ(res, false);
+}
 }

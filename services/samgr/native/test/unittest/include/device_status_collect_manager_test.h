@@ -19,7 +19,9 @@
 #include <condition_variable>
 #include <shared_mutex>
 
+#include "event_handler.h"
 #include "gtest/gtest.h"
+#include "icollect_plugin.h"
 
 namespace OHOS {
 class DeviceStatusCollectManagerTest : public testing::Test {
@@ -28,9 +30,20 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
+    void PostTask(std::shared_ptr<AppExecFwk::EventHandler>& collectHandler);
     bool isCaseDone;
     std::mutex caseDoneLock_;
     std::condition_variable caseDoneCondition_;
+};
+
+class MockCollectPlugin : public ICollectPlugin {
+public:
+    explicit MockCollectPlugin(const sptr<IReport>& report) : ICollectPlugin(report) {};
+    ~MockCollectPlugin() = default;
+    bool CheckCondition(const OnDemandEvent& condition) override;
+    int32_t OnStart() override { return 0; };
+    int32_t OnStop() override { return 0; };
+    bool mockCheckConditionResult_ = false;
 };
 } // OHOS
 #endif /* SAMGR_TEST_UNITTEST_INCLUDE_DEVICE_STATUS_COLLECT_MANAGER_TEST_H */
