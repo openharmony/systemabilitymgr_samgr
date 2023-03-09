@@ -143,11 +143,11 @@ SystemAbilityManagerStub::SystemAbilityManagerStub()
 int32_t SystemAbilityManagerStub::OnRemoteRequest(uint32_t code,
     MessageParcel& data, MessageParcel& reply, MessageOption &option)
 {
-    HILOGI("SystemAbilityManagerStub::OnReceived, code = %{public}u, callerPid = %{public}d, flags= %{public}d",
-        code, IPCSkeleton::GetCallingPid(), option.GetFlags());
+    HILOGD("SAMStub::OnReceived, code = %{public}u, callerPid = %{public}d",
+        code, IPCSkeleton::GetCallingPid());
     Samgr::MemoryGuard cacheGuard;
     if (!EnforceInterceToken(data)) {
-        HILOGE("SystemAbilityManagerStub::OnReceived, code = %{public}u, check interfaceToken failed", code);
+        HILOGE("SAMStub::OnReceived, code = %{public}u, check interfaceToken failed", code);
         return ERR_PERMISSION_DENIED;
     }
     auto itFunc = memberFuncMap_.find(code);
@@ -157,7 +157,7 @@ int32_t SystemAbilityManagerStub::OnRemoteRequest(uint32_t code,
             return (this->*memberFunc)(data, reply);
         }
     }
-    HILOGW("SystemAbilityManagerStub: default case, need check.");
+    HILOGW("SAMStub: default case, need check.");
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
 }
 
@@ -634,7 +634,7 @@ int32_t SystemAbilityManagerStub::GetRunningSystemProcessInner(MessageParcel& da
         return ERR_OK;
     }
 
-    int32_t size = systemProcessInfos.size();
+    size_t size = systemProcessInfos.size();
     ret = reply.WriteInt32(size);
     if (!ret) {
         HILOGW("GetRunningSystemProcessInner write systemProcessInfos size failed.");
