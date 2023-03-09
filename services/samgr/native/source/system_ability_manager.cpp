@@ -39,7 +39,6 @@
 #include "system_ability_definition.h"
 #include "tools.h"
 
-
 using namespace std;
 
 namespace OHOS {
@@ -963,7 +962,7 @@ sptr<IRemoteObject> SystemAbilityManager::GetSystemProcess(const u16string& proc
     lock_guard<recursive_mutex> autoLock(onDemandLock_);
     auto iter = systemProcessMap_.find(procName);
     if (iter != systemProcessMap_.end()) {
-        HILOGI("process:%{public}s found", Str16ToStr8(procName).c_str());
+        HILOGD("process:%{public}s found", Str16ToStr8(procName).c_str());
         return iter->second;
     }
     HILOGE("process:%{public}s not exist", Str16ToStr8(procName).c_str());
@@ -1313,7 +1312,7 @@ int32_t SystemAbilityManager::UnloadSystemAbility(int32_t systemAbilityId)
     }
     std::string callProcess = Str16ToStr8(saProfile.process);
     if (nativeTokenInfo.processName!= callProcess) {
-        HILOGE("cannot unload system ability in other system, processName:%{public}s",
+        HILOGE("cannot unload SA by another SA, processName:%{public}s",
             nativeTokenInfo.processName.c_str());
         return ERR_INVALID_VALUE;
     }
@@ -1347,7 +1346,7 @@ int32_t SystemAbilityManager::CancelUnloadSystemAbility(int32_t systemAbilityId)
         return ERR_INVALID_VALUE;
     }
     if (nativeTokenInfo.processName != Str16ToStr8(saProfile.process)) {
-        HILOGE("cannot cancel unload system ability from other sa, processName:%{public}s",
+        HILOGE("cannot cancel unload SA by another SA, processName:%{public}s",
             nativeTokenInfo.processName.c_str());
         return ERR_INVALID_VALUE;
     }

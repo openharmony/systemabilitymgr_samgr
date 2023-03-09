@@ -357,8 +357,11 @@ void OnDemandHelper::OnDemandLoadCallback::OnLoadSACompleteForRemote(const std::
 }
 }
 
-void TestProcess(OHOS::OnDemandHelper& ondemandHelper, string& cmd)
+static void TestProcess(OHOS::OnDemandHelper& ondemandHelper)
 {
+    std::string cmd = "";
+    cout << "please input proc test case(getp/initp/subp/unsubp)" << endl;
+    cin >> cmd;
     if (cmd == "getp") {
         SamMockPermission::MockProcess("resource_schedule_service");
         ondemandHelper.GetSystemProcess();
@@ -370,11 +373,16 @@ void TestProcess(OHOS::OnDemandHelper& ondemandHelper, string& cmd)
         ondemandHelper.UnSubscribeSystemProcess();
     } else if (cmd == "initp") {
         ondemandHelper.InitSystemProcessStatusChange();
+    } else {
+        cout << "invalid input" << endl;
     }
 }
 
-void InputCmd(string& cmd, OHOS::OnDemandHelper& ondemandHelper)
+static void TestSystemAbility(OHOS::OnDemandHelper& ondemandHelper)
 {
+    std::string cmd = "";
+    cout << "please input sa test case(get/load/unload)" << endl;
+    cin >> cmd;
     int32_t systemAbilityId = 0;
     std::string deviceId = ondemandHelper.GetFirstDevice();
     cout << "please input systemAbilityId for " << cmd << " operation" << endl;
@@ -409,7 +417,23 @@ void InputCmd(string& cmd, OHOS::OnDemandHelper& ondemandHelper)
     } else if (cmd == "unload") {
         ondemandHelper.UnloadSystemAbility(systemAbilityId);
     } else {
-        TestProcess(ondemandHelper, cmd);
+        cout << "invalid input" << endl;
+    }
+}
+
+static void TestParamPlugin(OHOS::OnDemandHelper& ondemandHelper)
+{
+    cout << "please input param's value" << endl;
+    string value = "false";
+    cin >> value;
+    if (value == "false") {
+        int ret = SetParameter("persist.samgr.deviceparam", "false");
+        cout << ret;
+    } else if (value == "true") {
+        int ret = SetParameter("persist.samgr.deviceparam", "true");
+        cout << ret;
+    } else {
+        cout << "invalid input" << endl;
     }
 }
 
@@ -419,25 +443,18 @@ int main(int argc, char* argv[])
     OHOS::OnDemandHelper& ondemandHelper = OnDemandHelper::GetInstance();
     string cmd = "load";
     do {
-        cout << "please input operation " << endl;
+        cout << "please input operation(sa/proc/param)" << endl;
         cin >> cmd;
         if (cmd == "param") {
-            cout << "please input param's value" << endl;
-            string value = "false";
-            cin >> value;
-            if (value == "false") {
-                int ret = SetParameter("persist.samgr.deviceparam", "false");
-                cout << ret;
-            } else if (value == "true") {
-                int ret = SetParameter("persist.samgr.deviceparam", "true");
-                cout << ret;
-            } else {
-                cout << "invalid input" << endl;
-            }
+            TestParamPlugin(ondemandHelper);
+        } else if (cmd == "sa") {
+            TestSystemAbility(ondemandHelper);
+        } else if (cmd == "proc") {
+            TestProcess(ondemandHelper);
         } else {
-            InputCmd(cmd, ondemandHelper);
+            cout << "invalid input" << endl;
         }
-        cout << "-----Input q or Q to quit, [load] for LoadSystemAbility, [get] for GetSystemAbility-----" << endl;
+        cout << "-----Input q or Q to quit" << endl;
         cmd.clear();
         cin.clear();
         cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
