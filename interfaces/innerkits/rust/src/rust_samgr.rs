@@ -67,7 +67,7 @@ pub trait ISystemAbilityManager: IRemoteBroker {
 
 impl FromRemoteObj for dyn ISystemAbilityManager {
     /// For example, convert RemoteObj to RemoteObjRef<dyn ITest>
-    fn from(object: RemoteObj) -> Result<RemoteObjRef<dyn ISystemAbilityManager>> {
+    fn try_from(object: RemoteObj) -> Result<RemoteObjRef<dyn ISystemAbilityManager>> {
         Ok(RemoteObjRef::new(Box::new(SystemAbilityManagerProxy::from_remote_object(object)?)))
     }
 }
@@ -77,14 +77,14 @@ pub fn get_service_proxy<T: FromRemoteObj + ?Sized>(said: i32) -> Result<RemoteO
 {
     let samgr_proxy = get_systemability_manager();
     let object = samgr_proxy.get_systemability(said)?;
-    <T as FromRemoteObj>::from(object)
+    <T as FromRemoteObj>::try_from(object)
 }
 
 /// get_systemability_manager - get samgr proxy
 pub fn get_systemability_manager() -> RemoteObjRef<dyn ISystemAbilityManager>
 {
     let object = get_context_object().expect("samgr is null");
-    let remote = <dyn ISystemAbilityManager as FromRemoteObj>::from(object);
+    let remote = <dyn ISystemAbilityManager as FromRemoteObj>::try_from(object);
     let remote = match remote {
         Ok(x) => x,
         Err(error) => {
