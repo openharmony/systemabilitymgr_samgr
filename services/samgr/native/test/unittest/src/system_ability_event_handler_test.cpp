@@ -258,6 +258,28 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityLoadFailedEventLocked002, T
 }
 
 /**
+ * @tc.name: HandleAbilityLoadFailedEventLocked003
+ * @tc.desc: test HandleAbilityLoadFailedEventLocked with context is PendingEvent::UNLOAD_ABILITY_EVENT
+ * @tc.type: FUNC
+ * @tc.require: I6LQ18
+ */
+
+HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityLoadFailedEventLocked003, TestSize.Level3)
+{
+    std::shared_ptr<StateListener> stateListener =
+        std::make_shared<StateListener>();
+    std::shared_ptr<SystemAbilityStateMachine> systemAbilityStateMachine =
+        std::make_shared<SystemAbilityStateMachine>(stateListener);
+    std::shared_ptr<SystemAbilityEventHandler> systemAbilityEventHandler =
+        std::make_shared<SystemAbilityEventHandler>(systemAbilityStateMachine);
+    std::shared_ptr<SystemAbilityContext> systemAbilityContext =
+        std::make_shared<SystemAbilityContext>();
+    systemAbilityContext->pendingEvent = PendingEvent::UNLOAD_ABILITY_EVENT;
+    int32_t ret = systemAbilityEventHandler->HandleAbilityLoadFailedEventLocked(systemAbilityContext);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
  * @tc.name: HandleAbilityLoadSuccessEventLocked001
  * @tc.desc: test HandleAbilityLoadSuccessEventLocked with context's state is LOADED
  * @tc.type: FUNC
@@ -297,6 +319,30 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityUnLoadSuccessEventLocked001
     std::shared_ptr<SystemAbilityContext> systemAbilityContext =
         std::make_shared<SystemAbilityContext>();
     systemAbilityContext->state = SystemAbilityState::LOADING;
+    systemAbilityStateMachine->ablityStateHandlerMap_.clear();
+    int32_t ret = systemAbilityEventHandler->HandleAbilityUnLoadSuccessEventLocked(systemAbilityContext);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: HandleAbilityUnLoadSuccessEventLocked002
+ * @tc.desc: test HandleAbilityUnLoadSuccessEventLocked with context is PendingEvent::UNLOAD_ABILITY_EVENT
+ * @tc.type: FUNC
+ * @tc.require: I6LQ18
+ */
+
+HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityUnLoadSuccessEventLocked002, TestSize.Level3)
+{
+    std::shared_ptr<StateListener> stateListener =
+        std::make_shared<StateListener>();
+    std::shared_ptr<SystemAbilityStateMachine> systemAbilityStateMachine =
+        std::make_shared<SystemAbilityStateMachine>(stateListener);
+    std::shared_ptr<SystemAbilityEventHandler> systemAbilityEventHandler =
+        std::make_shared<SystemAbilityEventHandler>(systemAbilityStateMachine);
+    std::shared_ptr<SystemAbilityContext> systemAbilityContext =
+        std::make_shared<SystemAbilityContext>();
+    systemAbilityContext->state = SystemAbilityState::LOADING;
+    systemAbilityContext->pendingEvent = PendingEvent::UNLOAD_ABILITY_EVENT;
     systemAbilityStateMachine->ablityStateHandlerMap_.clear();
     int32_t ret = systemAbilityEventHandler->HandleAbilityUnLoadSuccessEventLocked(systemAbilityContext);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
