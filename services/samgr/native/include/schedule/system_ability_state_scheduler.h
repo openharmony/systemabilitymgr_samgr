@@ -112,7 +112,7 @@ private:
     std::shared_ptr<UnloadEventHandler> unloadEventHandler_;
     std::shared_ptr<AppExecFwk::EventHandler> processHandler_;
     std::shared_mutex listenerSetLock_;
-    std::list<sptr<ISystemProcessStatusChange>> processListeners;
+    std::list<sptr<ISystemProcessStatusChange>> processListeners_;
     sptr<IRemoteObject::DeathRecipient> processListenerDeath_;
 };
 } // namespace OHOS
