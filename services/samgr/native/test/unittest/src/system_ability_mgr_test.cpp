@@ -37,6 +37,7 @@ using namespace OHOS;
 
 namespace OHOS {
 namespace {
+constexpr int32_t OTHER_ON_DEMAND = 3;
 constexpr int32_t TEST_VALUE = 2021;
 constexpr int32_t TEST_REVERSE_VALUE = 1202;
 constexpr int32_t REPEAT = 10;
@@ -199,6 +200,23 @@ HWTEST_F(SystemAbilityMgrTest, RemoveSystemAbility002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RemoveSystemAbility003
+ * @tc.desc: remove system ability. abilityStateScheduler_ is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+HWTEST_F(SystemAbilityMgrTest, RemoveSystemAbility003, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<IRemoteObject> testAbility = new TestTransactionService();
+    ISystemAbilityManager::SAExtraProp extraProp;
+    saMgr->AddSystemAbility(DISTRIBUTED_SCHED_TEST_TT_ID, testAbility, extraProp);
+    saMgr->abilityStateScheduler_ = nullptr;
+    int32_t result = saMgr->RemoveSystemAbility(DISTRIBUTED_SCHED_TEST_TT_ID);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
  * @tc.name: GetSystemAbility001
  * @tc.desc: get not exist system ability.
  * @tc.type: FUNC
@@ -302,9 +320,25 @@ HWTEST_F(SystemAbilityMgrTest, CheckSystemAbility001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CheckSystemAbility002
+ * @tc.desc: check system ability. abilityStateScheduler_ is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+HWTEST_F(SystemAbilityMgrTest, CheckSystemAbility002, TestSize.Level1)
+{
+    int32_t systemAbilityId = DISTRIBUTED_SCHED_TEST_TT_ID;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    bool isExist = true;
+    sptr<IRemoteObject> abilityObj = saMgr->CheckSystemAbility(systemAbilityId, isExist);
+    EXPECT_EQ(abilityObj, nullptr);
+}
+
+/**
  * @tc.name: CheckOnDemandSystemAbility001
  * @tc.desc: check on demand system ability.
  * @tc.type: FUNC
+ * @tc.require: I6MO6A
  */
 HWTEST_F(SystemAbilityMgrTest, CheckOnDemandSystemAbility001, TestSize.Level1)
 {
@@ -1880,6 +1914,25 @@ HWTEST_F(SystemAbilityMgrTest, CheckStartEnableOnce003, TestSize.Level3)
 }
 
 /**
+ * @tc.name: Test CheckStartEnableOnce004
+ * @tc.desc: CheckStartEnableOnce004 saControl.enableOnce is true
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+HWTEST_F(SystemAbilityMgrTest, CheckStartEnableOnce004, TestSize.Level3)
+{
+    DTEST_LOG << " CheckStartEnableOnce004 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    SaControlInfo saControl;
+    saControl.enableOnce = true;
+    OnDemandEvent event;
+    sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
+    saMgr->startEnableOnceMap_[saControl.saId].emplace_back(event);
+    int32_t result = saMgr->CheckStartEnableOnce(event, saControl, callback);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
  * @tc.name: Test CheckStopEnableOnce001
  * @tc.desc: CheckStopEnableOnce001
  * @tc.type: FUNC
@@ -2176,6 +2229,24 @@ HWTEST_F(SystemAbilityMgrTest, IdleSystemAbility001, TestSize.Level3)
 }
 
 /**
+ * @tc.name: IdleSystemAbility002
+ * @tc.desc: test IdleSystemAbility, return false
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+HWTEST_F(SystemAbilityMgrTest, IdleSystemAbility002, TestSize.Level3)
+{
+    DTEST_LOG << " IdleSystemAbility002 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t systemAbilityId = 401;
+    std::u16string procName;
+    std::unordered_map<std::string, std::string> idleReason;
+    int32_t delayTime = 0;
+    bool ret = saMgr->IdleSystemAbility(systemAbilityId, procName, idleReason, delayTime);
+    EXPECT_FALSE(ret);
+}
+
+/**
  * @tc.name: ActiveSystemAbility001
  * @tc.desc: test ActiveSystemAbility001, said is invalid
  * @tc.type: FUNC
@@ -2190,5 +2261,303 @@ HWTEST_F(SystemAbilityMgrTest, ActiveSystemAbility001, TestSize.Level3)
     std::unordered_map<std::string, std::string> activeReason;
     bool ret = saMgr->ActiveSystemAbility(systemAbilityId, procName, activeReason);
     EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: ActiveSystemAbility002
+ * @tc.desc: test ActiveSystemAbility002, said is valid
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+HWTEST_F(SystemAbilityMgrTest, ActiveSystemAbility002, TestSize.Level3)
+{
+    DTEST_LOG << " ActiveSystemAbility002 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t systemAbilityId = 401;
+    std::u16string procName;
+    std::unordered_map<std::string, std::string> activeReason;
+    bool ret = saMgr->ActiveSystemAbility(systemAbilityId, procName, activeReason);
+    EXPECT_FALSE(ret);
+}
+/**
+ * @tc.name: watchdoginit001
+ * @tc.desc: test watchdoginit, waitState is not WAITTING
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+HWTEST_F(SystemAbilityMgrTest, WatchDogInit001, TestSize.Level3)
+{
+    DTEST_LOG << " WatchDogInit001 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->WatchDogInit();
+    EXPECT_NE(saMgr, nullptr);
+}
+
+/**
+ * @tc.name: OndemandLoadForPerf002
+ * @tc.desc: test OndemandLoadForPerf, workHandler_ is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+HWTEST_F(SystemAbilityMgrTest, OndemandLoadForPerf002, TestSize.Level3)
+{
+    DTEST_LOG << " OndemandLoadForPerf002 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->workHandler_ = nullptr;
+    saMgr->OndemandLoadForPerf();
+    EXPECT_NE(saMgr, nullptr);
+}
+
+/**
+ * @tc.name: ProcessOnDemandEvent001
+ * @tc.desc: test ProcessOnDemandEvent, abilityStateScheduler_ is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent001, TestSize.Level3)
+{
+    DTEST_LOG << " ProcessOnDemandEvent001 " << std::endl;
+    OnDemandEvent event;
+    std::list<SaControlInfo> saControlList;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->abilityStateScheduler_ = nullptr;
+    saMgr->ProcessOnDemandEvent(event, saControlList);
+    EXPECT_NE(saMgr, nullptr);
+}
+
+/**
+ * @tc.name: ProcessOnDemandEvent002
+ * @tc.desc: test ProcessOnDemandEvent, saControl.ondemandId == START_ON_DEMAND
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent002, TestSize.Level3)
+{
+    DTEST_LOG << " ProcessOnDemandEvent002 " << std::endl;
+    OnDemandEvent event;
+    std::list<SaControlInfo> saControlList;
+    SaControlInfo saControlInfo;
+    saControlInfo.ondemandId = START_ON_DEMAND;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+    saMgr->ProcessOnDemandEvent(event, saControlList);
+    EXPECT_NE(saMgr, nullptr);
+}
+
+/**
+ * @tc.name: ProcessOnDemandEvent003
+ * @tc.desc: test ProcessOnDemandEvent, saControl.ondemandId == STOP_ON_DEMAND
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent003, TestSize.Level3)
+{
+    DTEST_LOG << " ProcessOnDemandEvent003 " << std::endl;
+    OnDemandEvent event;
+    std::list<SaControlInfo> saControlList;
+    SaControlInfo saControlInfo;
+    saControlInfo.ondemandId = STOP_ON_DEMAND;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->ProcessOnDemandEvent(event, saControlList);
+    EXPECT_NE(saMgr, nullptr);
+}
+
+/**
+ * @tc.name: ProcessOnDemandEvent004
+ * @tc.desc: test ProcessOnDemandEvent, saControl.ondemandId == other
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent004, TestSize.Level3)
+{
+    DTEST_LOG << " ProcessOnDemandEvent003 " << std::endl;
+    OnDemandEvent event;
+    std::list<SaControlInfo> saControlList;
+    SaControlInfo saControlInfo;
+    saControlInfo.ondemandId = OTHER_ON_DEMAND;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->ProcessOnDemandEvent(event, saControlList);
+    EXPECT_NE(saMgr, nullptr);
+}
+
+/**
+ * @tc.name: IsNameInValid001
+ * @tc.desc: test IsNameInValid, name is empty
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+HWTEST_F(SystemAbilityMgrTest, IsNameInValid001, TestSize.Level3)
+{
+    DTEST_LOG << " IsNameInValid001 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::u16string name;
+    bool ret = saMgr->IsNameInValid(name);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: IsNameInValid002
+ * @tc.desc: test IsNameInValid, DeleteBlank is empty
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+HWTEST_F(SystemAbilityMgrTest, IsNameInValid002, TestSize.Level3)
+{
+    DTEST_LOG << " IsNameInValid002 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::u16string name = u"/t";
+    bool ret = saMgr->IsNameInValid(name);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: IsNameInValid003
+ * @tc.desc: test IsNameInValid, name is not empty
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+HWTEST_F(SystemAbilityMgrTest, IsNameInValid003, TestSize.Level3)
+{
+    DTEST_LOG << " IsNameInValid003 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::u16string name = u"test";
+    bool ret = saMgr->IsNameInValid(name);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: StopOnDemandAbilityInner001
+ * @tc.desc: test StopOnDemandAbilityInner, procObject is empty
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+HWTEST_F(SystemAbilityMgrTest, StopOnDemandAbilityInner001, TestSize.Level3)
+{
+    DTEST_LOG << " StopOnDemandAbilityInner001 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::u16string procName = u"listen_test1";
+    int32_t systemAbilityId = 1494;
+    OnDemandEvent event;
+    bool ret = saMgr->StopOnDemandAbilityInner(procName, systemAbilityId, event);
+    sptr<ISystemAbilityLoadCallback> mockLoadCallback1 = new SystemAbilityLoadCallbackMock();
+    SystemAbilityManager::CallbackList mockCallbackMap1 = {{mockLoadCallback1, 1}};
+    sptr<IRemoteObject> testAbility = new TestTransactionService();
+    saMgr->RemoveStartingAbilityCallback(mockCallbackMap1, testAbility);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: StopOnDemandAbilityInner002
+ * @tc.desc: test StopOnDemandAbilityInner, procObject is no empty
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+HWTEST_F(SystemAbilityMgrTest, StopOnDemandAbilityInner002, TestSize.Level3)
+{
+    DTEST_LOG << " StopOnDemandAbilityInner002 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::u16string procName = u"foundation";
+    int32_t systemAbilityId = 401;
+    OnDemandEvent event;
+    bool ret = saMgr->StopOnDemandAbilityInner(procName, systemAbilityId, event);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: AddOnDemandSystemAbilityInfo005
+ * @tc.desc: test AddOnDemandSystemAbilityInfo, invalid systemAbilityId.
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+HWTEST_F(SystemAbilityMgrTest, AddOnDemandSystemAbilityInfo005, TestSize.Level0)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t said = -1;
+    int32_t result = saMgr->AddOnDemandSystemAbilityInfo(said, u"");
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: DoLoadOnDemandAbility001
+ * @tc.desc: test DoLoadOnDemandAbility, abilityProxy is no nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+HWTEST_F(SystemAbilityMgrTest, DoLoadOnDemandAbility001, TestSize.Level0)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<IRemoteObject> testAbility = new TestTransactionService();
+    ISystemAbilityManager::SAExtraProp saExtraProp;
+    saMgr->AddSystemAbility(DISTRIBUTED_SCHED_TEST_TT_ID, testAbility, saExtraProp);
+    bool isExist = true;
+    bool result = saMgr->DoLoadOnDemandAbility(DISTRIBUTED_SCHED_TEST_TT_ID, isExist);
+    saMgr->RemoveSystemAbility(DISTRIBUTED_SCHED_TEST_TT_ID);
+    EXPECT_EQ(result, true);
+}
+
+/**
+ * @tc.name: AddSystemProcess001
+ * @tc.desc: test AddSystemProcess, abilityStateScheduler_ is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+HWTEST_F(SystemAbilityMgrTest, AddSystemProcess001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::u16string procName = u"test";
+    sptr<IRemoteObject> testAbility = new TestTransactionService();
+    saMgr->abilityStateScheduler_ = nullptr;
+    int32_t result = saMgr->AddSystemProcess(procName, testAbility);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: RemoveSystemProcess001
+ * @tc.desc: test RemoveSystemProcess, abilityStateScheduler_ is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+HWTEST_F(SystemAbilityMgrTest, RemoveSystemProcess001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<IRemoteObject> testAbility = new TestTransactionService();
+    saMgr->abilityStateScheduler_ = nullptr;
+    int32_t result = saMgr->RemoveSystemProcess(testAbility);
+    sptr<ISystemAbilityLoadCallback> mockLoadCallback1 = new SystemAbilityLoadCallbackMock();
+    std::map<std::string, SystemAbilityManager::CallbackList> mockCallbackMap1 = {
+        {"111111", {}}
+    };
+    SystemAbilityManager::AbilityItem mockAbilityItem1 = {
+        SystemAbilityManager::AbilityState::INIT, mockCallbackMap1
+    };
+    saMgr->RemoveStartingAbilityCallbackForDevice(
+        mockAbilityItem1, testAbility);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: DoUnloadSystemAbility001
+ * @tc.desc: test DoUnloadSystemAbility, targetObject is no nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+HWTEST_F(SystemAbilityMgrTest, DoUnloadSystemAbility001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::u16string procName = u"foundation";
+    int32_t said = 401;
+    OnDemandEvent event;
+    bool result = saMgr->DoUnloadSystemAbility(said, procName, event);
+    sptr<ISystemAbilityLoadCallback> mockLoadCallback1 = new SystemAbilityLoadCallbackMock();
+    std::map<std::string, SystemAbilityManager::CallbackList> mockCallbackMap1 = {
+        {"111111", {{mockLoadCallback1, 1}}}
+    };
+    SystemAbilityManager::AbilityItem mockAbilityItem1 = {
+        SystemAbilityManager::AbilityState::INIT, mockCallbackMap1
+    };
+    sptr<IRemoteObject> testAbility = new TestTransactionService();
+    saMgr->RemoveStartingAbilityCallbackForDevice(
+        mockAbilityItem1, testAbility);
+    EXPECT_EQ(result, ERR_OK);
 }
 } // namespace OHOS

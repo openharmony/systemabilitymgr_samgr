@@ -397,7 +397,7 @@ sptr<IRemoteObject> SystemAbilityManager::CheckSystemAbility(int32_t systemAbili
     shared_lock<shared_mutex> readLock(abilityMapLock_);
     auto iter = abilityMap_.find(systemAbilityId);
     if (iter != abilityMap_.end()) {
-        HILOGI("found service : %{public}d.", systemAbilityId);
+        HILOGD("found service : %{public}d.", systemAbilityId);
         return iter->second.remoteObj;
     }
     HILOGW("NOT found service : %{public}d", systemAbilityId);

@@ -31,9 +31,9 @@ using namespace std;
 using namespace testing;
 using namespace testing::ext;
 using namespace OHOS;
-std::u16string SAMANAGER_INTERFACE_TOKEN = u"OHOS.ISystemProcessStatusChange";
 namespace OHOS {
 namespace {
+std::u16string SAMANAGER_INTERFACE_TOKEN = u"OHOS.ISystemProcessStatusChange";
 constexpr int32_t TEST_ID_NORANGE_SAID = -1;
 constexpr int32_t TEST_ID_VAILD = 9999;
 constexpr int32_t TEST_ID_INVAILD = 9990;
