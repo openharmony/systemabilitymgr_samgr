@@ -29,6 +29,9 @@ namespace SAMGR {
 namespace {
     const std::string TEST_RESOURCE_PATH = "/data/test/resource/samgr/profile/";
     const std::u16string TEST_PROCESS_NAME = u"sa_test";
+    const std::string EVENT_TYPE ;
+    const std::string EVENT_NAME ;
+    const std::string EVENT_VALUE ;
     const int32_t TEST_NUM = 123;
     const int32_t MOCK_SAID = 1492;
     const int32_t TEST_PROFILE_SAID = 9999;
@@ -1098,6 +1101,219 @@ HWTEST_F(ParseUtilTest, ParseSystemAbility003, TestSize.Level3)
     ret = parser_->ParseSystemAbility(saProfile, systemAbilityJson);
     EXPECT_EQ(ret, true);
     DTEST_LOG << " ParseSystemAbility003 END" << std::endl;
+}
+
+/**
+ * @tc.name: JsonObjToMap
+ * @tc.desc: eventJson.contains is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6MNUA
+ */
+HWTEST_F(ParseUtilTest, JsonObjToMap001, TestSize.Level3)
+{
+    DTEST_LOG << " JsonObjToMap001 BEGIN" << std::endl;
+    nlohmann::json systemAbilityJson;
+    std::unordered_map<std::string, std::string> res = parser_->JsonObjToMap(systemAbilityJson);
+    EXPECT_EQ(res.size(), 3);
+    DTEST_LOG << " JsonObjToMap001 END" << std::endl;
+}
+/**
+ * @tc.name: JsonObjToMap
+ * @tc.desc: eventJson.contains is event_type,evnt_name and event_value
+ * @tc.type: FUNC
+ * @tc.require: I6MNUA
+ */
+HWTEST_F(ParseUtilTest, JsonObjToMap002, TestSize.Level3)
+{
+    DTEST_LOG << " JsonObjToMap002 BEGIN" << std::endl;
+    std::unordered_map<std::string, std::string> strMap;
+    strMap[EVENT_TYPE] = "test";
+    strMap[EVENT_NAME] = "test";
+    strMap[EVENT_VALUE] = "test";
+    nlohmann::json systemAbilityJson;
+    for (auto it = strMap.begin(); it != strMap.end(); it++) {
+        systemAbilityJson[it->first] = it->second;
+    }
+    std::unordered_map<std::string, std::string> res = parser_->JsonObjToMap(systemAbilityJson);
+    EXPECT_EQ(res.size(), 3);
+    DTEST_LOG << " JsonObjToMap002 END" << std::endl;
+}
+/**
+ * @tc.name: JsonObjToMap
+ * @tc.desc: eventJson.contains is evnt_name and event_value
+ * @tc.type: FUNC
+ * @tc.require: I6MNUA
+ */
+HWTEST_F(ParseUtilTest, JsonObjToMap003, TestSize.Level3)
+{
+    DTEST_LOG << " JsonObjToMap003 BEGIN" << std::endl;
+    std::unordered_map<std::string, std::string> strMap;
+    strMap[EVENT_NAME] = "test";
+    strMap[EVENT_VALUE] = "test";
+    nlohmann::json systemAbilityJson;
+    for (auto it = strMap.begin(); it != strMap.end(); it++) {
+        systemAbilityJson[it->first] = it->second;
+    }
+    std::unordered_map<std::string, std::string> res = parser_->JsonObjToMap(systemAbilityJson);
+    EXPECT_EQ(res.size(), 3);
+    DTEST_LOG << " JsonObjToMap003 END" << std::endl;
+}
+/**
+ * @tc.name: JsonObjToMap
+ * @tc.desc: eventJson.contains is event_type and event_value
+ * @tc.type: FUNC
+ * @tc.require: I6MNUA
+ */
+HWTEST_F(ParseUtilTest, JsonObjToMap004, TestSize.Level3)
+{
+    DTEST_LOG << " JsonObjToMap004 BEGIN" << std::endl;
+    std::unordered_map<std::string, std::string> strMap;
+    strMap[EVENT_TYPE] = "test";
+    strMap[EVENT_VALUE] = "test";
+    nlohmann::json systemAbilityJson;
+    for (auto it = strMap.begin(); it != strMap.end(); it++) {
+        systemAbilityJson[it->first] = it->second;
+    }
+    std::unordered_map<std::string, std::string> res = parser_->JsonObjToMap(systemAbilityJson);
+    EXPECT_EQ(res.size(), 3);
+    DTEST_LOG << " JsonObjToMap004 END" << std::endl;
+}
+/**
+ * @tc.name: JsonObjToMap
+ * @tc.desc: eventJson.contains is event_type and evnt_name 
+ * @tc.type: FUNC
+ * @tc.require: I6MNUA
+ */
+HWTEST_F(ParseUtilTest, JsonObjToMap005, TestSize.Level3)
+{
+    DTEST_LOG << " JsonObjToMap005 BEGIN" << std::endl;
+    std::unordered_map<std::string, std::string> strMap;
+    strMap[EVENT_TYPE] = "test";
+    strMap[EVENT_NAME] = "test";
+    nlohmann::json systemAbilityJson;
+    for (auto it = strMap.begin(); it != strMap.end(); it++) {
+        systemAbilityJson[it->first] = it->second;
+    }
+    std::unordered_map<std::string, std::string> res = parser_->JsonObjToMap(systemAbilityJson);
+    EXPECT_EQ(res.size(), 3);
+    DTEST_LOG << " JsonObjToMap005 END" << std::endl;
+}
+/**
+ * @tc.name: JsonObjToMap
+ * @tc.desc: eventJson.contains is event_type
+ * @tc.type: FUNC
+ * @tc.require: I6MNUA
+ */
+HWTEST_F(ParseUtilTest, JsonObjToMap006, TestSize.Level3)
+{
+    DTEST_LOG << " JsonObjToMap006 BEGIN" << std::endl;
+    std::unordered_map<std::string, std::string> strMap;
+    strMap[EVENT_TYPE] = "test";
+    nlohmann::json systemAbilityJson;
+    for (auto it = strMap.begin(); it != strMap.end(); it++) {
+        systemAbilityJson[it->first] = it->second;
+    }
+    std::unordered_map<std::string, std::string> res = parser_->JsonObjToMap(systemAbilityJson);
+    EXPECT_EQ(res.size(), 3);
+    DTEST_LOG << " JsonObjToMap006 END" << std::endl;
+}
+/**
+ * @tc.name: JsonObjToMap
+ * @tc.desc: eventJson.contains is event_name
+ * @tc.type: FUNC
+ * @tc.require: I6MNUA
+ */
+HWTEST_F(ParseUtilTest, JsonObjToMap007, TestSize.Level3)
+{
+    DTEST_LOG << " JsonObjToMap007 BEGIN" << std::endl;
+    std::unordered_map<std::string, std::string> strMap;
+    strMap[EVENT_NAME] = "test";
+    nlohmann::json systemAbilityJson;
+    for (auto it = strMap.begin(); it != strMap.end(); it++) {
+        systemAbilityJson[it->first] = it->second;
+    }
+    std::unordered_map<std::string, std::string> res = parser_->JsonObjToMap(systemAbilityJson);
+    EXPECT_EQ(res.size(), 3);
+    DTEST_LOG << " JsonObjToMap007 END" << std::endl;
+}
+/**
+ * @tc.name: JsonObjToMap
+ * @tc.desc: eventJson.contains is event_value
+ * @tc.type: FUNC
+ * @tc.require: I6MNUA
+ */
+HWTEST_F(ParseUtilTest, JsonObjToMap008, TestSize.Level3)
+{
+    DTEST_LOG << " JsonObjToMap008 BEGIN" << std::endl;
+    std::unordered_map<std::string, std::string> strMap;
+    strMap[EVENT_VALUE] = "test";
+    nlohmann::json systemAbilityJson;
+    for (auto it = strMap.begin(); it != strMap.end(); it++) {
+        systemAbilityJson[it->first] = it->second;
+    }
+    std::unordered_map<std::string, std::string> res = parser_->JsonObjToMap(systemAbilityJson);
+    EXPECT_EQ(res.size(), 3);
+    DTEST_LOG << " JsonObjToMap008 END" << std::endl;
+}
+/**
+ * @tc.name: JsonObjToMap
+ * @tc.desc: eventJson.contains is event_type,evnt_name and event_value;eventJson.is_string is false
+ * @tc.type: FUNC
+ * @tc.require: I6MNUA
+ */
+HWTEST_F(ParseUtilTest, JsonObjToMap009, TestSize.Level3)
+{
+    DTEST_LOG << " JsonObjToMap009 BEGIN" << std::endl;
+    std::unordered_map<std::string, int> strMap;
+    strMap[EVENT_TYPE] = TEST_NUM;
+    strMap[EVENT_NAME] = TEST_NUM;
+    strMap[EVENT_VALUE] = TEST_NUM;
+    nlohmann::json systemAbilityJson;
+    for (auto it = strMap.begin(); it != strMap.end(); it++) {
+        systemAbilityJson[it->first] = it->second;
+    }
+    std::unordered_map<std::string, std::string> res = parser_->JsonObjToMap(systemAbilityJson);
+    EXPECT_EQ(res.size(), 3);
+    DTEST_LOG << " JsonObjToMap009 END" << std::endl;
+}
+/**
+ * @tc.name: JsonObjToMap
+ * @tc.desc: eventJson.contains is evnt_name and event_value;eventJson.is_string is false
+ * @tc.type: FUNC
+ * @tc.require: I6MNUA
+ */
+HWTEST_F(ParseUtilTest, JsonObjToMap010, TestSize.Level3)
+{
+    DTEST_LOG << " JsonObjToMap010 BEGIN" << std::endl;
+    std::unordered_map<std::string, int> strMap;
+    strMap[EVENT_NAME] = TEST_NUM;
+    strMap[EVENT_VALUE] = TEST_NUM;
+    nlohmann::json systemAbilityJson;
+    for (auto it = strMap.begin(); it != strMap.end(); it++) {
+        systemAbilityJson[it->first] = it->second;
+    }
+    std::unordered_map<std::string, std::string> res = parser_->JsonObjToMap(systemAbilityJson);
+    EXPECT_EQ(res.size(), 3);
+    DTEST_LOG << " JsonObjToMap010 END" << std::endl;
+}
+/**
+ * @tc.name: JsonObjToMap
+ * @tc.desc: eventJson.contains is event_value;eventJson.is_string is false
+ * @tc.type: FUNC
+ * @tc.require: I6MNUA
+ */
+HWTEST_F(ParseUtilTest, JsonObjToMap011, TestSize.Level3)
+{
+    DTEST_LOG << " JsonObjToMap011 BEGIN" << std::endl;
+    std::unordered_map<std::string, int> strMap;
+    strMap[EVENT_VALUE] = TEST_NUM;
+    nlohmann::json systemAbilityJson;
+    for (auto it = strMap.begin(); it != strMap.end(); it++) {
+        systemAbilityJson[it->first] = it->second;
+    }
+    std::unordered_map<std::string, std::string> res = parser_->JsonObjToMap(systemAbilityJson);
+    EXPECT_EQ(res.size(), 3);
+    DTEST_LOG << " JsonObjToMap011 END" << std::endl;
 }
 } // namespace SAMGR
 } // namespace OHOS
