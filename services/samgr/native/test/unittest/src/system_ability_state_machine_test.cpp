@@ -16,7 +16,6 @@
 #include "system_ability_state_machine_test.h"
 #include "sa_status_change_mock.h"
 #include "test_log.h"
-#include <memory>
 #define private public
 #define protected public
 #include "schedule/system_ability_state_machine.h"
