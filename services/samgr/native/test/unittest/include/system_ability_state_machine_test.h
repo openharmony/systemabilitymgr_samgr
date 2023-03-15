@@ -31,7 +31,6 @@ class StateMachineListener : public SystemAbilityStateListener {
 public:
     StateMachineListener() = default;
     ~StateMachineListener() = default;
-    
     void OnAbilityNotLoadedLocked(int32_t systemAbilityId) override;
     void OnAbilityLoadingLocked(int32_t systemAbilityId) override;
     void OnAbilityLoadedLocked(int32_t systemAbilityId) override;
