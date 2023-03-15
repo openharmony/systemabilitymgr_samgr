@@ -29,6 +29,8 @@
 #include "sam_log.h"
 #include "string_ex.h"
 
+#include "local_abilitys.h"
+
 using namespace std;
 namespace OHOS {
 namespace {
@@ -102,6 +104,12 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t system
         HILOGW("systemAbilityId:%{public}d invalid!", systemAbilityId);
         return nullptr;
     }
+
+    auto proxy = LocalAbilitys::GetInstance().GetAbility(systemAbilityId);
+    if (proxy != nullptr) {
+        return proxy;
+    }
+
     MessageParcel data;
     if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
         return nullptr;
@@ -154,6 +162,12 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t system
     if (!CheckInputSysAbilityId(systemAbilityId)) {
         HILOGW("CheckSystemAbility:systemAbilityId:%{public}d invalid!", systemAbilityId);
         return nullptr;
+    }
+
+    auto proxy = LocalAbilitys::GetInstance().GetAbility(systemAbilityId);
+    if (proxy != nullptr) {
+        isExist = true;
+        return proxy;
     }
 
     auto remote = Remote();
@@ -287,7 +301,12 @@ int32_t SystemAbilityManagerProxy::RemoveSystemAbility(int32_t systemAbilityId)
         HILOGW("RemoveSystemAbility Write systemAbilityId failed!");
         return ERR_FLATTEN_OBJECT;
     }
-    return RemoveSystemAbilityWrapper(REMOVE_SYSTEM_ABILITY_TRANSACTION, data);
+
+    int32_t result = RemoveSystemAbilityWrapper(REMOVE_SYSTEM_ABILITY_TRANSACTION, data);
+    if (result == ERR_OK) {
+        LocalAbilitys::GetInstance().RemoveAbility(systemAbilityId);
+    }
+    return result;
 }
 
 std::vector<u16string> SystemAbilityManagerProxy::ListSystemAbilities(unsigned int dumpFlags)
@@ -656,7 +675,12 @@ int32_t SystemAbilityManagerProxy::AddSystemAbility(int32_t systemAbilityId, con
         HILOGW("AddSystemAbility MarshalSAExtraProp failed!");
         return ret;
     }
-    return AddSystemAbilityWrapper(ADD_SYSTEM_ABILITY_TRANSACTION, data);
+
+    int32_t result = AddSystemAbilityWrapper(ADD_SYSTEM_ABILITY_TRANSACTION, data);
+    if (result == ERR_OK) {
+        LocalAbilitys::GetInstance().AddAbility(systemAbilityId, ability);
+    }
+    return result;
 }
 
 int32_t SystemAbilityManagerProxy::AddSystemAbilityWrapper(int32_t code, MessageParcel& data)
