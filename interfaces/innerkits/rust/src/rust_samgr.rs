@@ -16,7 +16,7 @@
 extern crate ipc_rust;
 use ipc_rust::{
     IRemoteObj, RemoteObjRef, FromRemoteObj, IRemoteBroker, MsgParcel,
-    RemoteObj, InterfaceToken, String16, Result, get_context_object
+    RemoteObj, InterfaceToken, String16, IpcResult, parse_status_code, get_context_object
 };
 use std::ffi::{c_char, CString};
 use std::default::Default;
@@ -60,20 +60,20 @@ impl Default for SAExtraProp {
 /// samgr interface
 pub trait ISystemAbilityManager: IRemoteBroker {
     /// add_systemability
-    fn add_systemability(&self, service: &RemoteObj, said: i32,  extra_prop: SAExtraProp) -> Result<()>;
+    fn add_systemability(&self, service: &RemoteObj, said: i32,  extra_prop: SAExtraProp) -> IpcResult<()>;
     /// get_systemability
-    fn get_systemability(&self, said: i32) -> Result<RemoteObj>;
+    fn get_systemability(&self, said: i32) -> IpcResult<RemoteObj>;
 }
 
 impl FromRemoteObj for dyn ISystemAbilityManager {
     /// For example, convert RemoteObj to RemoteObjRef<dyn ITest>
-    fn try_from(object: RemoteObj) -> Result<RemoteObjRef<dyn ISystemAbilityManager>> {
+    fn try_from(object: RemoteObj) -> IpcResult<RemoteObjRef<dyn ISystemAbilityManager>> {
         Ok(RemoteObjRef::new(Box::new(SystemAbilityManagerProxy::from_remote_object(object)?)))
     }
 }
 
 /// get_service_proxy
-pub fn get_service_proxy<T: FromRemoteObj + ?Sized>(said: i32) -> Result<RemoteObjRef<T>>
+pub fn get_service_proxy<T: FromRemoteObj + ?Sized>(said: i32) -> IpcResult<RemoteObjRef<T>>
 {
     let samgr_proxy = get_systemability_manager();
     let object = samgr_proxy.get_systemability(said)?;
@@ -101,7 +101,7 @@ pub struct SystemAbilityManagerProxy {
 }
 
 impl SystemAbilityManagerProxy {
-    fn from_remote_object(remote: RemoteObj) -> Result<Self> {
+    fn from_remote_object(remote: RemoteObj) -> IpcResult<Self> {
         Ok(Self {remote})
     }
 }
@@ -114,7 +114,7 @@ impl IRemoteBroker for SystemAbilityManagerProxy {
 }
 
 impl ISystemAbilityManager for SystemAbilityManagerProxy {
-    fn add_systemability(&self, service: &RemoteObj, said: i32,  extra_prop: SAExtraProp) -> Result<()>
+    fn add_systemability(&self, service: &RemoteObj, said: i32,  extra_prop: SAExtraProp) -> IpcResult<()>
     {    
         let mut data = MsgParcel::new().expect("MsgParcel is null");
         data.write(&InterfaceToken::new("ohos.samgr.accessToken"))?;
@@ -128,10 +128,10 @@ impl ISystemAbilityManager for SystemAbilityManagerProxy {
             ISystemAbilityManagerCode::CodeAddSystemAbility as u32, &data, false)?;
         let reply_value: i32 = reply.read()?;
         info!(LOG_LABEL, "register service result: {}", reply_value);
-        if reply_value == 0 { Ok(())} else { Err(reply_value) }
+        if reply_value == 0 { Ok(())} else { Err(parse_status_code(reply_value)) }
     }
 
-    fn get_systemability(&self, said: i32) -> Result<RemoteObj>
+    fn get_systemability(&self, said: i32) -> IpcResult<RemoteObj>
     {
         let mut data = MsgParcel::new().expect("MsgParcel is null");
         data.write(&InterfaceToken::new("ohos.samgr.accessToken"))?;
