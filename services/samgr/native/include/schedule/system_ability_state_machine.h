@@ -121,7 +121,7 @@ private:
     void InitStateHandlerMap(const std::shared_ptr<SystemAbilityStateListener>& listener);
     bool UpdateStateCount(const std::shared_ptr<SystemProcessContext>& context,
         SystemAbilityState fromState, SystemAbilityState toState);
-    std::map<SystemAbilityState, std::shared_ptr<SystemAbilityStateHandler>> ablityStateHandlerMap_;
+    std::map<SystemAbilityState, std::shared_ptr<SystemAbilityStateHandler>> abilityStateHandlerMap_;
     std::map<SystemProcessState, std::shared_ptr<SystemProcessStateHandler>> processStateHandlerMap_;
 };
 } // namespace OHOS

@@ -1740,7 +1740,7 @@ HWTEST_F(SystemAbilityMgrStubTest, AddSystemAbility002, TestSize.Level1)
     string srcDeviceId;
     sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
     saMgr->SendCheckLoadedMsg(SAID, name, srcDeviceId, callback);
-    saMgr->SendLoadedSystemAblityMsg(SAID, testAbility, callback);
+    saMgr->SendLoadedSystemAbilityMsg(SAID, testAbility, callback);
     EXPECT_EQ(res, ERR_INVALID_VALUE);
 }
 
@@ -1870,7 +1870,7 @@ HWTEST_F(SystemAbilityMgrStubTest, AddSystemProcess002, TestSize.Level1)
     u16string procName = u"proname";
     int32_t res = saMgr->AddSystemProcess(procName, testAbility);
     sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
-    saMgr->SendLoadedSystemAblityMsg(SAID, testAbility, callback);
+    saMgr->SendLoadedSystemAbilityMsg(SAID, testAbility, callback);
     u16string name = u"test";
     string srcDeviceId = "srcDeviceId";
     saMgr->startingProcessMap_.clear();

@@ -27,11 +27,11 @@ SystemAbilityStateMachine::SystemAbilityStateMachine(const std::shared_ptr<Syste
 
 void SystemAbilityStateMachine::InitStateHandlerMap(const std::shared_ptr<SystemAbilityStateListener>& listener)
 {
-    ablityStateHandlerMap_[SystemAbilityState::NOT_LOADED] = std::make_shared<NotLoadedStateHandler>(listener);
-    ablityStateHandlerMap_[SystemAbilityState::LOADING] = std::make_shared<LoadingStateHandler>(listener);
-    ablityStateHandlerMap_[SystemAbilityState::LOADED] = std::make_shared<LoadedStateHandler>(listener);
-    ablityStateHandlerMap_[SystemAbilityState::UNLOADABLE] = std::make_shared<UnloadableStateHandler>(listener);
-    ablityStateHandlerMap_[SystemAbilityState::UNLOADING] = std::make_shared<UnloadingStateHandler>(listener);
+    abilityStateHandlerMap_[SystemAbilityState::NOT_LOADED] = std::make_shared<NotLoadedStateHandler>(listener);
+    abilityStateHandlerMap_[SystemAbilityState::LOADING] = std::make_shared<LoadingStateHandler>(listener);
+    abilityStateHandlerMap_[SystemAbilityState::LOADED] = std::make_shared<LoadedStateHandler>(listener);
+    abilityStateHandlerMap_[SystemAbilityState::UNLOADABLE] = std::make_shared<UnloadableStateHandler>(listener);
+    abilityStateHandlerMap_[SystemAbilityState::UNLOADING] = std::make_shared<UnloadingStateHandler>(listener);
 
     processStateHandlerMap_[SystemProcessState::NOT_STARTED] = std::make_shared<NotStartedStateHandler>(listener);
     processStateHandlerMap_[SystemProcessState::STARTED] = std::make_shared<StartedStateHandler>(listener);
@@ -45,11 +45,11 @@ int32_t SystemAbilityStateMachine::AbilityStateTransitionLocked(const std::share
         HILOGE("[SA Scheduler] context is nullptr");
         return ERR_INVALID_VALUE;
     }
-    if (ablityStateHandlerMap_.count(nextState) == 0) {
+    if (abilityStateHandlerMap_.count(nextState) == 0) {
         HILOGE("[SA Scheduler] invalid next state: %{public}d", nextState);
         return ERR_INVALID_VALUE;
     }
-    std::shared_ptr<SystemAbilityStateHandler> handler = ablityStateHandlerMap_[nextState];
+    std::shared_ptr<SystemAbilityStateHandler> handler = abilityStateHandlerMap_[nextState];
     if (handler == nullptr) {
         HILOGE("[SA Scheduler] next state: %{public}d handler is nullptr", nextState);
         return ERR_INVALID_VALUE;

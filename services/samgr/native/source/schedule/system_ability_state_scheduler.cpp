@@ -154,8 +154,8 @@ int32_t SystemAbilityStateScheduler::HandleLoadAbilityEvent(int32_t systemAbilit
 
 int32_t SystemAbilityStateScheduler::HandleLoadAbilityEvent(const LoadRequestInfo& loadRequestInfo)
 {
-    HILOGI("[SA Scheduler][SA: %{public}d] handle load event start, deviceId: %{public}s, callingpid: %{public}d",
-        loadRequestInfo.systemAbilityId, loadRequestInfo.deviceId.c_str(), loadRequestInfo.callingPid);
+    HILOGI("[SA Scheduler][SA: %{public}d] handle load event start, callingpid: %{public}d",
+        loadRequestInfo.systemAbilityId, loadRequestInfo.callingPid);
     std::shared_ptr<SystemAbilityContext> abilityContext;
     if (!GetSystemAbilityContext(loadRequestInfo.systemAbilityId, abilityContext)) {
         return ERR_INVALID_VALUE;

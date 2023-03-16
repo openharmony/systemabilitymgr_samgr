@@ -231,7 +231,7 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityLoadFailedEventLocked001, T
     std::shared_ptr<SystemAbilityContext> systemAbilityContext =
         std::make_shared<SystemAbilityContext>();
     systemAbilityContext->state = SystemAbilityState::LOADING;
-    systemAbilityStateMachine->ablityStateHandlerMap_.clear();
+    systemAbilityStateMachine->abilityStateHandlerMap_.clear();
     int32_t ret = systemAbilityEventHandler->HandleAbilityLoadFailedEventLocked(systemAbilityContext);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
@@ -319,7 +319,7 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityUnLoadSuccessEventLocked001
     std::shared_ptr<SystemAbilityContext> systemAbilityContext =
         std::make_shared<SystemAbilityContext>();
     systemAbilityContext->state = SystemAbilityState::LOADING;
-    systemAbilityStateMachine->ablityStateHandlerMap_.clear();
+    systemAbilityStateMachine->abilityStateHandlerMap_.clear();
     int32_t ret = systemAbilityEventHandler->HandleAbilityUnLoadSuccessEventLocked(systemAbilityContext);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
@@ -343,7 +343,7 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityUnLoadSuccessEventLocked002
         std::make_shared<SystemAbilityContext>();
     systemAbilityContext->state = SystemAbilityState::LOADING;
     systemAbilityContext->pendingEvent = PendingEvent::UNLOAD_ABILITY_EVENT;
-    systemAbilityStateMachine->ablityStateHandlerMap_.clear();
+    systemAbilityStateMachine->abilityStateHandlerMap_.clear();
     int32_t ret = systemAbilityEventHandler->HandleAbilityUnLoadSuccessEventLocked(systemAbilityContext);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
