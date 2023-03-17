@@ -29,6 +29,9 @@ using namespace OHOS;
 
 namespace OHOS {
 namespace {
+const std::string TEST_STRING = "test";
+const std::string EVENT_NAME = "name";
+const std::string EVENT_ID = "eventId";
 constexpr int32_t TEST_SAID_INVAILD = -1;
 constexpr int32_t TEST_SAID_VAILD = 9999;
 }
@@ -111,6 +114,21 @@ HWTEST_F(LocalAbilityManagerProxyTest, LocalAbilityManagerProxy004, TestSize.Lev
     string eventStr = "name:usual.event.SCREEN_ON,said:1499,type:4,value:";
     bool res = localAbility->StartAbility(TEST_SAID_VAILD, eventStr);
     EXPECT_EQ(res, false);
+}
+
+/**
+ * @tc.name: StartAbility001
+ * @tc.desc: test StartAbility with eventStr is empty
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(LocalAbilityManagerProxyTest, StartAbility001, TestSize.Level1)
+{
+    sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
+    sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
+    string eventStr = "";
+    bool ret = localAbility->StartAbility(TEST_SAID_VAILD, eventStr);
+    EXPECT_FALSE(ret);
 }
 
 /**
@@ -210,5 +228,56 @@ HWTEST_F(LocalAbilityManagerProxyTest, ActiveAbility002, TestSize.Level3)
     std::unordered_map<std::string, std::string> activeReason;
     bool res = localAbility->ActiveAbility(TEST_SAID_VAILD, activeReason);
     EXPECT_EQ(res, false);
+}
+
+/**
+ * @tc.name: ActiveAbility003
+ * @tc.desc: test ActiveAbility with activeReason is not empty
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(LocalAbilityManagerProxyTest, ActiveAbility003, TestSize.Level3)
+{
+    sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
+    sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
+    std::unordered_map<std::string, std::string> activeReason;
+    activeReason[EVENT_ID] = TEST_STRING;
+    activeReason[EVENT_NAME] = TEST_STRING;
+    bool ret = localAbility->ActiveAbility(TEST_SAID_VAILD, activeReason);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: IdleAbility001
+ * @tc.desc: test IdleAbility with SaID is invalid
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(LocalAbilityManagerProxyTest, IdleAbility001, TestSize.Level3)
+{
+    sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
+    sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
+    std::unordered_map<std::string, std::string> idleReason;
+    int32_t delayTime = 0;
+    bool ret = localAbility->IdleAbility(TEST_SAID_INVAILD, idleReason, delayTime);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: IdleAbility002
+ * @tc.desc: test IdleAbility001 with idleReason is not empty
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(LocalAbilityManagerProxyTest, IdleAbility002, TestSize.Level3)
+{
+    sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
+    sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
+    std::unordered_map<std::string, std::string> idleReason;
+    idleReason[EVENT_ID] = TEST_STRING;
+    idleReason[EVENT_NAME] = TEST_STRING;
+    int32_t delayTime = 0;
+    bool ret = localAbility->IdleAbility(TEST_SAID_VAILD, idleReason, delayTime);
+    EXPECT_TRUE(ret);
 }
 }
