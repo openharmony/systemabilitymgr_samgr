@@ -37,6 +37,7 @@ using namespace OHOS;
 
 namespace OHOS {
 namespace {
+constexpr int32_t SAID = 1234;
 constexpr int32_t OTHER_ON_DEMAND = 3;
 constexpr int32_t TEST_VALUE = 2021;
 constexpr int32_t TEST_REVERSE_VALUE = 1202;
@@ -52,6 +53,8 @@ constexpr int32_t ONDEMAND_SLEEP_TIME = 600 * 1000; // us
 constexpr int32_t MAX_COUNT = INT32_MAX - 1000000;
 const std::string SA_TAG_DEVICE_ON_LINE = "deviceonline";
 
+const std::u16string PROCESS_NAME = u"test_process_name";
+const std::u16string DEVICE_NAME = u"test_name";
 const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 const string ONDEMAND_PARAM = "persist.samgr.perf.ondemand";
 }
@@ -335,6 +338,44 @@ HWTEST_F(SystemAbilityMgrTest, CheckSystemAbility002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CheckSystemAbility003
+ * @tc.desc: test CheckSystemAbility with  abilityStateScheduler_ is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, CheckSystemAbility003, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->abilityStateScheduler_ = nullptr;
+    bool isExist = true;
+    sptr<IRemoteObject> ret = saMgr->CheckSystemAbility(SAID, isExist);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: CheckSystemAbility004
+ * @tc.desc: test CheckSystemAbility with systemAbilityId is unloading
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, CheckSystemAbility004, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    saMgr->abilityStateScheduler_ = systemAbilityStateScheduler;
+    std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
+    std::shared_ptr<SystemProcessContext> systemProcessContext = std::make_shared<SystemProcessContext>();
+    systemAbilityStateScheduler->abilityContextMap_.clear();
+    systemAbilityContext->ownProcessContext = systemProcessContext;
+    systemAbilityStateScheduler->abilityContextMap_[SAID] = systemAbilityContext;
+    systemAbilityContext->state = SystemAbilityState::UNLOADING;
+    bool isExist = true;
+    sptr<IRemoteObject> ret = saMgr->CheckSystemAbility(SAID, isExist);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
  * @tc.name: CheckOnDemandSystemAbility001
  * @tc.desc: check on demand system ability.
  * @tc.type: FUNC
@@ -540,6 +581,21 @@ HWTEST_F(SystemAbilityMgrTest, LoadSystemAbility009, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LoadSystemAbility010
+ * @tc.desc: test LoadSystemAbility with saProfileMap_ is empty
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, LoadSystemAbility010, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->saProfileMap_.clear();
+    sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
+    int32_t ret = saMgr->LoadSystemAbility(SAID, callback);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
  * @tc.name: OnRemoteDied001
  * @tc.desc: test OnRemoteDied, remove registered callback.
  * @tc.type: FUNC
@@ -659,6 +715,20 @@ HWTEST_F(SystemAbilityMgrTest, AddOnDemandSystemAbilityInfo004, TestSize.Level0)
     EXPECT_TRUE(saMgr != nullptr);
     int32_t result = saMgr->AddOnDemandSystemAbilityInfo(DISTRIBUTED_SCHED_TEST_SO_ID, u"fake_process_name");
     EXPECT_TRUE(result != ERR_NONE);
+}
+
+/**
+ * @tc.name: AddOnDemandSystemAbilityInfo005
+ * @tc.desc: test AddOnDemandSystemAbilityInfo, invalid systemAbilityId.
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+HWTEST_F(SystemAbilityMgrTest, AddOnDemandSystemAbilityInfo005, TestSize.Level0)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t said = -1;
+    int32_t result = saMgr->AddOnDemandSystemAbilityInfo(said, u"");
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
 }
 
 /**
@@ -1802,6 +1872,21 @@ HWTEST_F(SystemAbilityMgrTest, OndemandLoadForPerf001, TestSize.Level3)
 }
 
 /**
+ * @tc.name: OndemandLoadForPerf002
+ * @tc.desc: test OndemandLoadForPerf, workHandler_ is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+HWTEST_F(SystemAbilityMgrTest, OndemandLoadForPerf002, TestSize.Level3)
+{
+    DTEST_LOG << " OndemandLoadForPerf002 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->workHandler_ = nullptr;
+    saMgr->OndemandLoadForPerf();
+    EXPECT_NE(saMgr, nullptr);
+}
+
+/**
  * @tc.name: Test DoLoadForPerf
  * @tc.desc: DoLoadForPerf001
  * @tc.type: FUNC
@@ -1853,6 +1938,36 @@ HWTEST_F(SystemAbilityMgrTest, GetAllOndemandSa002, TestSize.Level3)
     EXPECT_FALSE(value);
     saMgr->saProfileMap_.clear();
     saMgr->abilityMap_.clear();
+}
+
+/**
+ * @tc.name: GetAllOndemandSa003
+ * @tc.desc: test GetAllOndemandSa with saProfileMap_ is empty
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, GetAllOndemandSa003, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->saProfileMap_.clear();
+    auto ret = saMgr->GetAllOndemandSa();
+    EXPECT_TRUE(ret.empty());
+}
+
+/**
+ * @tc.name: GetAllOndemandSa004
+ * @tc.desc: test GetAllOndemand with saProfileMap_ is not  empty
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, GetAllOndemandSa004, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    SaProfile saProfile;
+    saMgr->saProfileMap_.clear();
+    saMgr->saProfileMap_[SAID] = saProfile;
+    auto ret = saMgr->GetAllOndemandSa();
+    EXPECT_FALSE(ret.empty());
 }
 
 /**
@@ -1930,6 +2045,96 @@ HWTEST_F(SystemAbilityMgrTest, CheckStartEnableOnce004, TestSize.Level3)
     saMgr->startEnableOnceMap_[saControl.saId].emplace_back(event);
     int32_t result = saMgr->CheckStartEnableOnce(event, saControl, callback);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: CheckStartEnableOnce005
+ * @tc.desc: test CheckStartEnableOnce with startEnableOnceMap_ contains saControl's SaID and event is same
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, CheckStartEnableOnce005, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    OnDemandEvent onDemandEvent;
+    std::list<OnDemandEvent> onDemandList;
+    onDemandList.emplace_back(onDemandEvent);
+    saMgr->startEnableOnceMap_.clear();
+    saMgr->startEnableOnceMap_[SAID] = onDemandList;
+    SaControlInfo saControlInfo;
+    saControlInfo.saId = SAID;
+    saControlInfo.enableOnce = true;
+    sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
+    int32_t ret = saMgr->CheckStartEnableOnce(onDemandEvent, saControlInfo, callback);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: CheckStartEnableOnce006
+ * @tc.desc: test CheckStartEnableOnce with startEnableOnceMap_ is empty
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, CheckStartEnableOnce006, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    saMgr->abilityStateScheduler_ = systemAbilityStateScheduler;
+    OnDemandEvent onDemandEvent;
+    SaControlInfo saControlInfo;
+    saControlInfo.saId = SAID;
+    saControlInfo.enableOnce = true;
+    saMgr->startEnableOnceMap_.clear();
+    sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
+    int32_t ret = saMgr->CheckStartEnableOnce(onDemandEvent, saControlInfo, callback);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: CheckStartEnableOnce007
+ * @tc.desc: test CheckStartEnableOnce with startEnableOnceMap_ is not empty and event is not same
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, CheckStartEnableOnce007, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    saMgr->abilityStateScheduler_ = systemAbilityStateScheduler;
+    OnDemandEvent anotherOnDemandEvent;
+    OnDemandEvent onDemandEvent;
+    std::list<OnDemandEvent> onDemandList;
+    onDemandList.emplace_back(onDemandEvent);
+    saMgr->startEnableOnceMap_.clear();
+    saMgr->startEnableOnceMap_[SAID] = onDemandList;
+    SaControlInfo saControlInfo;
+    saControlInfo.enableOnce = true;
+    saControlInfo.saId = SAID;
+    sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
+    int32_t ret = saMgr->CheckStartEnableOnce(anotherOnDemandEvent, saControlInfo, callback);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: CheckStartEnableOnce008
+ * @tc.desc: test CheckStartEnableOnce with saControl's enableOnce is false
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, CheckStartEnableOnce008, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    saMgr->abilityStateScheduler_ = systemAbilityStateScheduler;
+    OnDemandEvent onDemandEvent;
+    saMgr->startEnableOnceMap_.clear();
+    SaControlInfo saControlInfo;
+    sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
+    int32_t ret = saMgr->CheckStartEnableOnce(onDemandEvent, saControlInfo, callback);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
 
 /**
@@ -2016,6 +2221,21 @@ HWTEST_F(SystemAbilityMgrTest, GetRunningSystemProcess002, TestSize.Level3)
 }
 
 /**
+ * @tc.name: GetRunningSystemProcess003
+ * @tc.desc: test GetRunningSystemProcess with abilityStateScheduler_ is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, GetRunningSystemProcess003, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->abilityStateScheduler_ = nullptr;
+    std::list<SystemProcessInfo> systemProcessInfos;
+    int32_t ret = saMgr->GetRunningSystemProcess(systemProcessInfos);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
  * @tc.name: Test SubscribeSystemProcess001
  * @tc.desc: SubscribeSystemProcess001
  * @tc.type: FUNC
@@ -2044,6 +2264,22 @@ HWTEST_F(SystemAbilityMgrTest, SubscribeSystemProcess002, TestSize.Level3)
     saMgr->abilityStateScheduler_ = nullptr;
     sptr<ISystemProcessStatusChange> systemProcessStatusChange = new SystemProcessStatusChange();
     int32_t ret = saMgr->SubscribeSystemProcess(systemProcessStatusChange);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: SubscribeSystemProcess003
+ * @tc.desc: test SubscribeSystemProcess with abilityStateScheduler_ is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, SubscribeSystemProcess003, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemProcessStatusChange> listener = new SystemProcessStatusChange();
+    saMgr->abilityStateScheduler_ = nullptr;
+    std::list<SystemProcessInfo> systemProcessInfos;
+    int32_t ret = saMgr->SubscribeSystemProcess(listener);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
 
@@ -2079,8 +2315,24 @@ HWTEST_F(SystemAbilityMgrTest, UnSubscribeSystemProcess002, TestSize.Level3)
 }
 
 /**
+ * @tc.name: UnSubscribeSystemProcess003
+ * @tc.desc: test UnSubscribeSystemProcess with abilityStateScheduler_ is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, UnSubscribeSystemProcess003, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemProcessStatusChange> listener = new SystemProcessStatusChange();
+    saMgr->abilityStateScheduler_ = nullptr;
+    std::list<SystemProcessInfo> systemProcessInfos;
+    int32_t ret = saMgr->UnSubscribeSystemProcess(listener);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
  * @tc.name: Test OnSystemProcessStarted001
- * @tc.desc: OnSystemProcessStarted001
+ * @tc.desc: OnSystemProcessStarted
  * @tc.type: FUNC
  * @tc.require: I6H10P
  */
@@ -2294,21 +2546,6 @@ HWTEST_F(SystemAbilityMgrTest, WatchDogInit001, TestSize.Level3)
 }
 
 /**
- * @tc.name: OndemandLoadForPerf002
- * @tc.desc: test OndemandLoadForPerf, workHandler_ is nullptr
- * @tc.type: FUNC
- * @tc.require: I6MO6A
- */
-HWTEST_F(SystemAbilityMgrTest, OndemandLoadForPerf002, TestSize.Level3)
-{
-    DTEST_LOG << " OndemandLoadForPerf002 " << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    saMgr->workHandler_ = nullptr;
-    saMgr->OndemandLoadForPerf();
-    EXPECT_NE(saMgr, nullptr);
-}
-
-/**
  * @tc.name: ProcessOnDemandEvent001
  * @tc.desc: test ProcessOnDemandEvent, abilityStateScheduler_ is nullptr
  * @tc.type: FUNC
@@ -2378,6 +2615,58 @@ HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent004, TestSize.Level3)
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     saMgr->ProcessOnDemandEvent(event, saControlList);
     EXPECT_NE(saMgr, nullptr);
+}
+
+/**
+ * @tc.name: ProcessOnDemandEvent005
+ * @tc.desc: test ProcessOnDemandEvent with saControl's ondemandId is START_ON_DEMAND
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent005, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    saMgr->abilityStateScheduler_ = systemAbilityStateScheduler;
+    OnDemandEvent onDemandEvent;
+    std::list<OnDemandEvent> onDemandList;
+    saMgr->startEnableOnceMap_.clear();
+    saMgr->startEnableOnceMap_[SAID] = onDemandList;
+    SaControlInfo saControlInfo;
+    saControlInfo.saId = SAID;
+    saControlInfo.ondemandId = START_ON_DEMAND;
+    saControlInfo.enableOnce = true;
+    std::list<SaControlInfo> saControlList;
+    saControlList.emplace_back(saControlInfo);
+    saMgr->ProcessOnDemandEvent(onDemandEvent, saControlList);
+    EXPECT_TRUE(saMgr->startEnableOnceMap_.empty());
+}
+
+/**
+ * @tc.name: ProcessOnDemandEvent006
+ * @tc.desc: test ProcessOnDemandEvent with saControl's ondemandId is STOP_ON_DEMAND
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent006, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    saMgr->abilityStateScheduler_ = systemAbilityStateScheduler;
+    OnDemandEvent onDemandEvent;
+    std::list<OnDemandEvent> onDemandList;
+    saMgr->stopEnableOnceMap_.clear();
+    saMgr->stopEnableOnceMap_[SAID] = onDemandList;
+    SaControlInfo saControlInfo;
+    saControlInfo.saId = SAID;
+    saControlInfo.ondemandId = STOP_ON_DEMAND;
+    saControlInfo.enableOnce = true;
+    std::list<SaControlInfo> saControlList;
+    saControlList.emplace_back(saControlInfo);
+    saMgr->ProcessOnDemandEvent(onDemandEvent, saControlList);
+    EXPECT_TRUE(saMgr->stopEnableOnceMap_.empty());
 }
 
 /**
@@ -2464,20 +2753,6 @@ HWTEST_F(SystemAbilityMgrTest, StopOnDemandAbilityInner002, TestSize.Level3)
 }
 
 /**
- * @tc.name: AddOnDemandSystemAbilityInfo005
- * @tc.desc: test AddOnDemandSystemAbilityInfo, invalid systemAbilityId.
- * @tc.type: FUNC
- * @tc.require: I6MO6A
- */
-HWTEST_F(SystemAbilityMgrTest, AddOnDemandSystemAbilityInfo005, TestSize.Level0)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    int32_t said = -1;
-    int32_t result = saMgr->AddOnDemandSystemAbilityInfo(said, u"");
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
-}
-
-/**
  * @tc.name: DoLoadOnDemandAbility001
  * @tc.desc: test DoLoadOnDemandAbility, abilityProxy is no nullptr
  * @tc.type: FUNC
@@ -2559,5 +2834,118 @@ HWTEST_F(SystemAbilityMgrTest, DoUnloadSystemAbility001, TestSize.Level3)
     saMgr->RemoveStartingAbilityCallbackForDevice(
         mockAbilityItem1, testAbility);
     EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: DoUnloadSystemAbility002
+ * @tc.desc: test DoUnloadSystemAbility with failed to unload system ability
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, DoUnloadSystemAbility002, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    EXPECT_TRUE(sm != nullptr);
+    ISystemAbilityManager::SAExtraProp saExtraProp(false, 0, u"", u"");
+    int32_t systemAbilityId = DISTRIBUTED_SCHED_TEST_TT_ID;
+    int32_t result = sm->AddSystemAbility(systemAbilityId, new TestTransactionService(), saExtraProp);
+    EXPECT_EQ(result, ERR_OK);
+    sptr<IRemoteObject> saObject = sm->CheckSystemAbility(systemAbilityId);
+    SAInfo sAInfo;
+    sAInfo.remoteObj = saObject;
+    saMgr->abilityMap_.clear();
+    saMgr->abilityMap_[SAID] = sAInfo;
+    OnDemandEvent onDemandEvent;
+    int32_t ret = saMgr->DoUnloadSystemAbility(SAID, PROCESS_NAME, onDemandEvent);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: SetDeviceName001
+ * @tc.desc: test SetDeviceName
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, SetDeviceName001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->SetDeviceName(DEVICE_NAME);
+    EXPECT_EQ(saMgr->deviceName_, DEVICE_NAME);
+}
+
+/**
+ * @tc.name: GetDeviceName001
+ * @tc.desc: test GetDeviceName
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, GetDeviceName001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->SetDeviceName(DEVICE_NAME);
+    auto ret = saMgr->GetDeviceName();
+    EXPECT_EQ(ret, DEVICE_NAME);
+}
+
+/**
+ * @tc.name: OnAbilityCallbackDied001
+ * @tc.desc: test OnAbilityCallbackDied with remoteObject is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, OnAbilityCallbackDied001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->startingAbilityMap_.clear();
+    saMgr->OnAbilityCallbackDied(nullptr);
+    EXPECT_TRUE(saMgr->startingAbilityMap_.empty());
+}
+
+/**
+ * @tc.name: GetLocalNodeId001
+ * @tc.desc: test GetLocalNodeId
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, GetLocalNodeId001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    string ret = saMgr->GetLocalNodeId();
+    EXPECT_EQ(ret, "");
+}
+
+/**
+ * @tc.name: EventToStr001
+ * @tc.desc: test EventToStr with event is initialized
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, EventToStr001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    OnDemandEvent onDemandEvent;
+    onDemandEvent.eventId = 1234;
+    onDemandEvent.name = "name";
+    onDemandEvent.value = "value";
+    string ret = saMgr->EventToStr(onDemandEvent);
+    EXPECT_FALSE(ret.empty());
+}
+
+/**
+ * @tc.name: ReportGetSAPeriodically001
+ * @tc.desc: test ReportGetSAPeriodically with saFrequencyMap_ is not empty
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, ReportGetSAPeriodically001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    uint64_t pid_said = 123;
+    int32_t count = 1;
+    saMgr->saFrequencyMap_.clear();
+    saMgr->saFrequencyMap_[pid_said] = count;
+    saMgr->ReportGetSAPeriodically();
+    EXPECT_TRUE(saMgr->saFrequencyMap_.empty());
 }
 } // namespace OHOS
