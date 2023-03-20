@@ -69,7 +69,7 @@ void OnDemandHelper::GetSystemProcess()
         cout << "GetRunningSystemProcess failed" << endl;
     }
     cout << "GetRunningSystemProcess size: "<< systemProcessInfos.size() << endl;
-    for (auto& systemProcessInfo : systemProcessInfos) {
+    for (const auto& systemProcessInfo : systemProcessInfos) {
         cout << "processName: " << systemProcessInfo.processName << " pid:" << systemProcessInfo.pid << endl;
     }
 }

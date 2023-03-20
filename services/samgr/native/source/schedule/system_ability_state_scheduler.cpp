@@ -270,8 +270,8 @@ int32_t SystemAbilityStateScheduler::ActiveSystemAbilityLocked(
     bool result = SystemAbilityManager::GetInstance()->ActiveSystemAbility(abilityContext->systemAbilityId,
         abilityContext->ownProcessContext->processName, activeReason);
     if (!result) {
-        return ERR_INVALID_VALUE;
         HILOGE("[SA Scheduler][SA: %{public}d] active ability failed", abilityContext->systemAbilityId);
+        return ERR_INVALID_VALUE;
     }
     return stateMachine_->AbilityStateTransitionLocked(abilityContext, SystemAbilityState::LOADED);
 }
@@ -339,12 +339,13 @@ int32_t SystemAbilityStateScheduler::PendLoadEventLocked(const std::shared_ptr<S
         HILOGW("[SA Scheduler] callback invalid!");
         return ERR_INVALID_VALUE;
     }
-    for (const auto& loadEventItem : abilityContext->pendingLoadEventList) {
-        if (loadRequestInfo.callback->AsObject() == loadEventItem.callback->AsObject()) {
-            HILOGI("[SA Scheduler][SA: %{public}d] already existed callback object",
-                abilityContext->systemAbilityId);
-            return ERR_OK;
-        }
+    bool isExist = std::any_of(abilityContext->pendingLoadEventList.begin(),
+        abilityContext->pendingLoadEventList.end(), [&loadRequestInfo](const auto& loadEventItem) {
+            return loadRequestInfo.callback->AsObject() == loadEventItem.callback->AsObject();
+        });
+    if (isExist) {
+        HILOGI("[SA Scheduler][SA: %{public}d] already existed callback object", abilityContext->systemAbilityId);
+        return ERR_OK;
     }
     auto& count = abilityContext->pendingLoadEventCountMap[loadRequestInfo.callingPid];
     if (count >= MAX_SUBSCRIBE_COUNT) {
@@ -454,7 +455,7 @@ bool SystemAbilityStateScheduler::CanUnloadAllSystemAbility(
     HILOGI("[SA Scheduler][process: %{public}s] SA num: %{public}zu, notloaded: %{public}d, unloadable: %{public}d",
         Str16ToStr8(processContext->processName).c_str(), processContext->saList.size(), notLoadAbilityCount,
         unloadableAbilityCount);
-    if (unloadableAbilityCount <= 0) {
+    if (unloadableAbilityCount == 0) {
         return false;
     }
     if (notLoadAbilityCount + unloadableAbilityCount == processContext->saList.size()) {
