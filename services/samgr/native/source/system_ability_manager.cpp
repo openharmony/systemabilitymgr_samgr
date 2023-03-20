@@ -1097,11 +1097,11 @@ void SystemAbilityManager::RemoveCheckLoadedMsg(int32_t systemAbilityId)
     workHandler_->RemoveTask(ToString(systemAbilityId));
 }
 
-void SystemAbilityManager::SendLoadedSystemAblityMsg(int32_t systemAbilityId, const sptr<IRemoteObject>& remoteObject,
+void SystemAbilityManager::SendLoadedSystemAbilityMsg(int32_t systemAbilityId, const sptr<IRemoteObject>& remoteObject,
     const sptr<ISystemAbilityLoadCallback>& callback)
 {
     if (workHandler_ == nullptr) {
-        HILOGE("SendLoadedSystemAblityMsg work handler not initialized!");
+        HILOGE("SendLoadedSystemAbilityMsg work handler not initialized!");
         return;
     }
     auto notifyLoadedTask = [systemAbilityId, remoteObject, callback, this]() {
@@ -1109,7 +1109,7 @@ void SystemAbilityManager::SendLoadedSystemAblityMsg(int32_t systemAbilityId, co
     };
     bool ret = workHandler_->PostTask(notifyLoadedTask);
     if (!ret) {
-        HILOGW("SendLoadedSystemAblityMsg PostTask failed!");
+        HILOGW("SendLoadedSystemAbilityMsg PostTask failed!");
     }
 }
 
@@ -1235,7 +1235,7 @@ int32_t SystemAbilityManager::DoLoadSystemAbilityFromRpc(const std::string& srcD
         lock_guard<recursive_mutex> autoLock(onDemandLock_);
         sptr<IRemoteObject> targetObject = CheckSystemAbility(systemAbilityId);
         if (targetObject != nullptr) {
-            SendLoadedSystemAblityMsg(systemAbilityId, targetObject, callback);
+            SendLoadedSystemAbilityMsg(systemAbilityId, targetObject, callback);
             return ERR_OK;
         }
         auto& abilityItem = startingAbilityMap_[systemAbilityId];
@@ -1294,10 +1294,6 @@ bool SystemAbilityManager::LoadSystemAbilityFromRpc(const std::string& srcDevice
 
 int32_t SystemAbilityManager::UnloadSystemAbility(int32_t systemAbilityId)
 {
-    if (!CheckInputSysAbilityId(systemAbilityId)) {
-        HILOGW("UnloadSystemAbility systemAbilityId or callback invalid!");
-        return ERR_INVALID_VALUE;
-    }
     SaProfile saProfile;
     bool ret = GetSaProfile(systemAbilityId, saProfile);
     if (!ret) {

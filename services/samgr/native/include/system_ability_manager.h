@@ -179,7 +179,7 @@ private:
     void SendCheckLoadedMsg(int32_t systemAbilityId, const std::u16string& name, const std::string& srcDeviceId,
         const sptr<ISystemAbilityLoadCallback>& callback);
     void RemoveCheckLoadedMsg(int32_t systemAbilityId);
-    void SendLoadedSystemAblityMsg(int32_t systemAbilityId, const sptr<IRemoteObject>& remoteObject,
+    void SendLoadedSystemAbilityMsg(int32_t systemAbilityId, const sptr<IRemoteObject>& remoteObject,
         const sptr<ISystemAbilityLoadCallback>& callback);
     void DoLoadRemoteSystemAbility(int32_t systemAbilityId, int32_t callingPid,
         int32_t callingUid, const std::string& deviceId, const sptr<ISystemAbilityLoadCallback>& callback);

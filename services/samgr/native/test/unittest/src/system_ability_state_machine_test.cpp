@@ -104,7 +104,7 @@ HWTEST_F(SystemAbilityStateMachineTest, AbilityStateTransitionLocked001, TestSiz
 
 /**
  * @tc.name: AbilityStateTransitionLocked002
- * @tc.desc: test AbilityStateTransitionLocked with nextState is not in ablityStateHandlerMap_
+ * @tc.desc: test AbilityStateTransitionLocked with nextState is not in abilityStateHandlerMap_
  * @tc.type: FUNC
  * @tc.require: I6KOQV
  */
@@ -117,7 +117,7 @@ HWTEST_F(SystemAbilityStateMachineTest, AbilityStateTransitionLocked002, TestSiz
         std::make_shared<SystemAbilityStateMachine>(stateListener);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext =
         std::make_shared<SystemAbilityContext>();
-    systemAbilityStateMachine->ablityStateHandlerMap_.clear();
+    systemAbilityStateMachine->abilityStateHandlerMap_.clear();
     int32_t ret = systemAbilityStateMachine->AbilityStateTransitionLocked(systemAbilityContext,
         SystemAbilityState::NOT_LOADED);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
@@ -125,7 +125,7 @@ HWTEST_F(SystemAbilityStateMachineTest, AbilityStateTransitionLocked002, TestSiz
 
 /**
  * @tc.name: AbilityStateTransitionLocked003
- * @tc.desc: test AbilityStateTransitionLocked with ablityStateHandlerMap_[nextState] is nullptr
+ * @tc.desc: test AbilityStateTransitionLocked with abilityStateHandlerMap_[nextState] is nullptr
  * @tc.type: FUNC
  * @tc.require: I6KOQV
  */
@@ -138,8 +138,8 @@ HWTEST_F(SystemAbilityStateMachineTest, AbilityStateTransitionLocked003, TestSiz
         std::make_shared<SystemAbilityStateMachine>(stateListener);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext =
         std::make_shared<SystemAbilityContext>();
-    systemAbilityStateMachine->ablityStateHandlerMap_.clear();
-    systemAbilityStateMachine->ablityStateHandlerMap_[SystemAbilityState::NOT_LOADED] = nullptr;
+    systemAbilityStateMachine->abilityStateHandlerMap_.clear();
+    systemAbilityStateMachine->abilityStateHandlerMap_[SystemAbilityState::NOT_LOADED] = nullptr;
     int32_t ret = systemAbilityStateMachine->AbilityStateTransitionLocked(systemAbilityContext,
         SystemAbilityState::NOT_LOADED);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
@@ -165,8 +165,8 @@ HWTEST_F(SystemAbilityStateMachineTest, AbilityStateTransitionLocked004, TestSiz
     std::shared_ptr<NotLoadedStateHandler> notLoadedStateHandler =
         std::make_shared<NotLoadedStateHandler>(stateListener1);
     systemAbilityContext->state = SystemAbilityState::NOT_LOADED;
-    systemAbilityStateMachine->ablityStateHandlerMap_.clear();
-    systemAbilityStateMachine->ablityStateHandlerMap_[SystemAbilityState::NOT_LOADED] = notLoadedStateHandler;
+    systemAbilityStateMachine->abilityStateHandlerMap_.clear();
+    systemAbilityStateMachine->abilityStateHandlerMap_[SystemAbilityState::NOT_LOADED] = notLoadedStateHandler;
     int32_t ret = systemAbilityStateMachine->AbilityStateTransitionLocked(systemAbilityContext,
         SystemAbilityState::NOT_LOADED);
     EXPECT_EQ(ret, ERR_OK);
@@ -192,8 +192,8 @@ HWTEST_F(SystemAbilityStateMachineTest, AbilityStateTransitionLocked005, TestSiz
     std::shared_ptr<NotLoadedStateHandler> notLoadedStateHandler =
         std::make_shared<NotLoadedStateHandler>(stateListener1);
     systemAbilityContext->state = SystemAbilityState::NOT_LOADED;
-    systemAbilityStateMachine->ablityStateHandlerMap_.clear();
-    systemAbilityStateMachine->ablityStateHandlerMap_[SystemAbilityState::NOT_LOADED] = notLoadedStateHandler;
+    systemAbilityStateMachine->abilityStateHandlerMap_.clear();
+    systemAbilityStateMachine->abilityStateHandlerMap_[SystemAbilityState::NOT_LOADED] = notLoadedStateHandler;
     int32_t ret = systemAbilityStateMachine->AbilityStateTransitionLocked(systemAbilityContext,
         SystemAbilityState::LOADING);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
