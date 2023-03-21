@@ -132,7 +132,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemAbilityContext002, TestSize.L
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
     systemAbilityStateScheduler->abilityContextMap_.clear();
     systemAbilityStateScheduler->abilityContextMap_[SAID] = nullptr;
-    bool ret = systemAbilityStateScheduler->GetSystemAbilityContext(SAID_INVALID, systemAbilityContext);
+    bool ret = systemAbilityStateScheduler->GetSystemAbilityContext(SAID, systemAbilityContext);
     EXPECT_FALSE(ret);
 }
 
@@ -213,7 +213,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemProcessContext002, TestSize.L
     std::shared_ptr<SystemProcessContext> systemProcessContext = std::make_shared<SystemProcessContext>();
     systemAbilityStateScheduler->processContextMap_.clear();
     systemAbilityStateScheduler->processContextMap_[process] = nullptr;
-    bool ret = systemAbilityStateScheduler->GetSystemProcessContext(process_invalid, systemProcessContext);
+    bool ret = systemAbilityStateScheduler->GetSystemProcessContext(process, systemProcessContext);
     EXPECT_FALSE(ret);
 }
 
@@ -1327,6 +1327,67 @@ HWTEST_F(SystemAbilityStateSchedulerTest, CanKillSystemProcess002, TestSize.Leve
 }
 
 /**
+ * @tc.name: OnProcessStartedLocked001
+ * @tc.desc: test OnProcessStartedLocked, invalid process
+ * @tc.type: FUNC
+ * @tc.require: I6OU0A
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, OnProcessStartedLocked001, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::list<SaProfile> saProfiles;
+    systemAbilityStateScheduler->Init(saProfiles);
+    std::shared_ptr<SystemProcessContext> systemProcessContext = std::make_shared<SystemProcessContext>();
+    systemAbilityStateScheduler->processContextMap_.clear();
+    systemAbilityStateScheduler->OnProcessStartedLocked(process);
+    EXPECT_TRUE(systemAbilityStateScheduler->processContextMap_.empty());
+}
+
+/**
+ * @tc.name: OnProcessStartedLocked002
+ * @tc.desc: test OnProcessStartedLocked, valid process
+ * @tc.type: FUNC
+ * @tc.require: I6OU0A
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, OnProcessStartedLocked002, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::list<SaProfile> saProfiles;
+    systemAbilityStateScheduler->Init(saProfiles);
+    std::shared_ptr<SystemProcessContext> systemProcessContext = std::make_shared<SystemProcessContext>();
+    systemAbilityStateScheduler->processContextMap_.clear();
+    systemAbilityStateScheduler->processContextMap_[process] = systemProcessContext;
+    systemAbilityStateScheduler->OnProcessNotStartedLocked(process);
+    EXPECT_FALSE(systemAbilityStateScheduler->processContextMap_.empty());
+}
+
+/**
+ * @tc.name: OnProcessStartedLocked003
+ * @tc.desc: test OnProcessStartedLocked, listener is not nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6OU0A
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, OnProcessStartedLocked003, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::list<SaProfile> saProfiles;
+    systemAbilityStateScheduler->Init(saProfiles);
+    sptr<ISystemProcessStatusChange> listener = new SystemProcessStatusChange();
+    systemAbilityStateScheduler->processListeners_.push_back(listener);
+    std::shared_ptr<SystemProcessContext> systemProcessContext = std::make_shared<SystemProcessContext>();
+    systemAbilityStateScheduler->processContextMap_.clear();
+    systemAbilityStateScheduler->processContextMap_[process] = systemProcessContext;
+    systemAbilityStateScheduler->OnProcessNotStartedLocked(process);
+    EXPECT_FALSE(systemAbilityStateScheduler->processContextMap_.empty());
+}
+
+/**
  * @tc.name: OnProcessNotStartedLocked001
  * @tc.desc: test OnProcessNotStartedLocked, invalid process
  * @tc.type: FUNC
@@ -1446,7 +1507,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, OnAbilityUnloadableLocked001, TestSize
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
     systemAbilityStateScheduler->abilityContextMap_.clear();
     systemAbilityStateScheduler->abilityContextMap_[SAID] = systemAbilityContext;
-    systemAbilityStateScheduler->OnAbilityLoadedLocked(SAID_INVALID);
+    systemAbilityStateScheduler->OnAbilityUnloadableLocked(SAID_INVALID);
     EXPECT_EQ(systemAbilityStateScheduler->abilityContextMap_.count(SAID_INVALID), 0);
 }
 
@@ -1707,5 +1768,77 @@ HWTEST_F(SystemAbilityStateSchedulerTest, ProcessDelayUnloadEvent003, TestSize.L
     systemAbilityContext->state = SystemAbilityState::LOADED;
     int32_t ret = systemAbilityStateScheduler->ProcessDelayUnloadEvent(SAID);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: ProcessEvent001
+ * @tc.desc: test ProcessEvent, event is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6OU0A
+ */
+HWTEST_F(SystemAbilityStateSchedulerTest, ProcessEvent001, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::list<SaProfile> saProfiles;
+    systemAbilityStateScheduler->Init(saProfiles);
+    auto unloadRunner = AppExecFwk::EventRunner::Create("UnloadHandler");
+    std::shared_ptr<SystemAbilityStateScheduler::UnloadEventHandler> unloadEventHandler =
+        std::make_shared<SystemAbilityStateScheduler::UnloadEventHandler>(unloadRunner, systemAbilityStateScheduler);
+    AppExecFwk::InnerEvent *event = nullptr;
+    auto destructor = [](AppExecFwk::InnerEvent *event) {
+        if (event != nullptr) {
+            delete event;
+        }
+    };
+    unloadEventHandler->ProcessEvent(AppExecFwk::InnerEvent::Pointer(event, destructor));
+    EXPECT_EQ(event, nullptr);
+}
+
+/**
+ * @tc.name: ProcessEvent002
+ * @tc.desc: test ProcessEvent, stateScheduler_ is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6OU0A
+ */
+HWTEST_F(SystemAbilityStateSchedulerTest, ProcessEvent002, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler = nullptr;
+    auto unloadRunner = AppExecFwk::EventRunner::Create("UnloadHandler");
+    std::shared_ptr<SystemAbilityStateScheduler::UnloadEventHandler> unloadEventHandler =
+        std::make_shared<SystemAbilityStateScheduler::UnloadEventHandler>(unloadRunner, systemAbilityStateScheduler);
+    AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
+    auto destructor = [](AppExecFwk::InnerEvent *event) {
+        if (event != nullptr) {
+            delete event;
+        }
+    };
+    unloadEventHandler->ProcessEvent(AppExecFwk::InnerEvent::Pointer(event, destructor));
+    EXPECT_NE(event, nullptr);
+}
+
+/**
+ * @tc.name: ProcessEvent003
+ * @tc.desc: test ProcessEvent, stateScheduler_ is not nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6OU0A
+ */
+HWTEST_F(SystemAbilityStateSchedulerTest, ProcessEvent003, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::list<SaProfile> saProfiles;
+    systemAbilityStateScheduler->Init(saProfiles);
+    auto unloadRunner = AppExecFwk::EventRunner::Create("UnloadHandler");
+    std::shared_ptr<SystemAbilityStateScheduler::UnloadEventHandler> unloadEventHandler =
+        std::make_shared<SystemAbilityStateScheduler::UnloadEventHandler>(unloadRunner, systemAbilityStateScheduler);
+    AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
+    auto destructor = [](AppExecFwk::InnerEvent *event) {
+        if (event != nullptr) {
+            delete event;
+        }
+    };
+    unloadEventHandler->ProcessEvent(AppExecFwk::InnerEvent::Pointer(event, destructor));
+    EXPECT_NE(event, nullptr);
 }
 }

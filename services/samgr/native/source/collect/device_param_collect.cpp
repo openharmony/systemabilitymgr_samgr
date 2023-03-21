@@ -95,6 +95,9 @@ void SystemAbilityStatusChange::OnAddSystemAbility(int32_t systemAbilityId, cons
     HILOGI("OnAddSystemAbility systemAbilityId:%{public}d", systemAbilityId);
     switch (systemAbilityId) {
         case PARAM_WATCHER_DISTRIBUTED_SERVICE_ID:
+            if (deviceParamCollect_ == nullptr) {
+                HILOGE("DeviceParamCollect is nullptr");
+            }
             deviceParamCollect_->WatchParameters();
             break;
         default:

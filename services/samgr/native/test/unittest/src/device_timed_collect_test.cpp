@@ -180,4 +180,50 @@ HWTEST_F(DeviceTimedCollectTest, Init007, TestSize.Level3)
     deviceTimedCollect->Init(saProfiles);
     EXPECT_EQ(deviceTimedCollect->timedSet_.size(), 0);
 }
+
+/**
+ * @tc.name: ReportEvent001
+ * @tc.desc: test ReportEvent, report is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6OU0A
+ */
+HWTEST_F(DeviceTimedCollectTest, ReportEvent001, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = nullptr;
+    std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
+        std::make_shared<DeviceTimedCollect>(collect);
+    OnDemandEvent event;
+    deviceTimedCollect->ReportEvent(event);
+    EXPECT_EQ(collect, nullptr);
+}
+
+/**
+ * @tc.name: PostDelayTask001
+ * @tc.desc: test ReportEvent, report is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6OU0A
+ */
+HWTEST_F(DeviceTimedCollectTest, PostDelayTask001, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = nullptr;
+    std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
+        std::make_shared<DeviceTimedCollect>(collect);
+    deviceTimedCollect->PostDelayTask(deviceTimedCollect->loopTask_, 0);
+    EXPECT_EQ(collect, nullptr);
+}
+
+/**
+ * @tc.name: PostDelayTask002
+ * @tc.desc: test ReportEvent, report is not nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6OU0A
+ */
+HWTEST_F(DeviceTimedCollectTest, PostDelayTask002, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
+        std::make_shared<DeviceTimedCollect>(collect);
+    deviceTimedCollect->PostDelayTask(deviceTimedCollect->loopTask_, 0);
+    EXPECT_NE(collect, nullptr);
+}
 }
