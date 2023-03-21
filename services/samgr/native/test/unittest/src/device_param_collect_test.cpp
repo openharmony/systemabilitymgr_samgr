@@ -18,6 +18,7 @@
 #include "device_status_collect_manager.h"
 #include "sa_profiles.h"
 #include "string_ex.h"
+#include "system_ability_definition.h"
 #include "test_log.h"
 #include "icollect_plugin.h"
 
@@ -111,5 +112,39 @@ HWTEST_F(DeviceParamCollectTest, OnStop001, TestSize.Level3)
         std::make_shared<DeviceParamCollect>(report);
     int32_t ret = deviceParamCollect->OnStop();
     EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: OnAddSystemAbility001
+ * @tc.desc: test OnAddSystemAbility, with invalid sa id
+ * @tc.type: FUNC
+ * @tc.require: I6OU0A
+ */
+
+HWTEST_F(DeviceParamCollectTest, OnAddSystemAbility001, TestSize.Level3)
+{
+    sptr<IReport> report;
+    sptr<DeviceParamCollect> deviceParamCollect = new DeviceParamCollect(report);
+    sptr<SystemAbilityStatusChange> statusChangeListener = new SystemAbilityStatusChange();
+    statusChangeListener->Init(deviceParamCollect);
+    statusChangeListener->OnAddSystemAbility(-1, "");
+    EXPECT_NE(-1, PARAM_WATCHER_DISTRIBUTED_SERVICE_ID);
+}
+
+/**
+ * @tc.name: OnAddSystemAbility002
+ * @tc.desc: test OnAddSystemAbility, with valid sa id
+ * @tc.type: FUNC
+ * @tc.require: I6OU0A
+ */
+
+HWTEST_F(DeviceParamCollectTest, OnAddSystemAbility002, TestSize.Level3)
+{
+    sptr<IReport> report;
+    sptr<DeviceParamCollect> deviceParamCollect = new DeviceParamCollect(report);
+    sptr<SystemAbilityStatusChange> statusChangeListener = new SystemAbilityStatusChange();
+    statusChangeListener->Init(deviceParamCollect);
+    statusChangeListener->OnAddSystemAbility(PARAM_WATCHER_DISTRIBUTED_SERVICE_ID, "");
+    EXPECT_NE(-1, PARAM_WATCHER_DISTRIBUTED_SERVICE_ID);
 }
 }  // namespace OHOS

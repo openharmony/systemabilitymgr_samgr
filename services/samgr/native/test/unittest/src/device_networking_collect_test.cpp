@@ -247,6 +247,43 @@ HWTEST_F(DeviceNetworkingCollectTest, OnDeviceOffline001, TestSize.Level3)
 }
 
 /**
+ * @tc.name: OnDeviceOffline002
+ * @tc.desc: test OnDeviceOffline, device is online
+ * @tc.type: FUNC
+ * @tc.require: I6OU0A
+ */
+HWTEST_F(DeviceNetworkingCollectTest, OnDeviceOffline002, TestSize.Level3)
+{
+    DTEST_LOG << " OnDeviceOffline002 BEGIN" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
+    auto callback = [networkingCollect] () {
+        networkingCollect->OnStart();
+    };
+    collectHandler_->PostTask(callback);
+    auto initDoneTask = []() {
+        std::lock_guard<std::mutex> autoLock(caseDoneLock_);
+        isCaseDone_ = true;
+        caseDoneCondition_.notify_all();
+    };
+    collectHandler_->PostTask(initDoneTask);
+    std::unique_lock<std::mutex> lock(caseDoneLock_);
+    caseDoneCondition_.wait_for(lock, std::chrono::milliseconds(MAX_WAIT_TIME),
+        [&] () { return isCaseDone_; });
+    isCaseDone_ = false;
+
+    networkingCollect->stateCallback_->deviceOnlineSet_.insert("mockDevice");
+    DistributedHardware::DmDeviceInfo dmDeviceInfo = {
+        .deviceId = "asdad",
+        .deviceName = "asda",
+        .deviceTypeId = 1,
+    };
+    networkingCollect->stateCallback_->OnDeviceOffline(dmDeviceInfo);
+    EXPECT_TRUE(networkingCollect->IsOnline());
+    DTEST_LOG << " OnDeviceOffline002 END" << std::endl;
+}
+
+/**
  * @tc.name: ProcessEvent001
  * @tc.desc: test ProcessEvent, with error param.
  * @tc.type: FUNC
@@ -279,5 +316,136 @@ HWTEST_F(DeviceNetworkingCollectTest, ProcessEvent001, TestSize.Level3)
     ret = networkingCollect->workHandler_->SendEvent(DM_DIED_EVENT);
     EXPECT_EQ(true, ret);
     DTEST_LOG << " ProcessEvent001 END" << std::endl;
+}
+
+/**
+ * @tc.name: AddDeviceChangeListener001
+ * @tc.desc: test AddDeviceChangeListener, with init DeviceManager failed.
+ * @tc.type: FUNC
+ * @tc.require: I6OU0A
+ */
+HWTEST_F(DeviceNetworkingCollectTest, AddDeviceChangeListener001, TestSize.Level3)
+{
+    DTEST_LOG << " AddDeviceChangeListener001 BEGIN" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
+    networkingCollect->initCallback_ = nullptr;
+    bool result = networkingCollect->AddDeviceChangeListener();
+    EXPECT_FALSE(result);
+    DTEST_LOG << " AddDeviceChangeListener001 END" << std::endl;
+}
+
+/**
+ * @tc.name: CheckCondition001
+ * @tc.desc: test CheckCondition, with condition is on and is online.
+ * @tc.type: FUNC
+ * @tc.require: I6OU0A
+ */
+HWTEST_F(DeviceNetworkingCollectTest, CheckCondition001, TestSize.Level3)
+{
+    DTEST_LOG << " CheckCondition001 BEGIN" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
+    OnDemandEvent condition;
+    condition.value = "on";
+    networkingCollect->stateCallback_ = std::make_shared<DeviceStateCallback>(networkingCollect);
+    networkingCollect->stateCallback_->deviceOnlineSet_.insert("mockDeivce");
+    bool result = networkingCollect->CheckCondition(condition);
+    EXPECT_TRUE(result);
+    DTEST_LOG << " CheckCondition001 END" << std::endl;
+}
+
+/**
+ * @tc.name: CheckCondition002
+ * @tc.desc: test CheckCondition, with condition is on and is offline.
+ * @tc.type: FUNC
+ * @tc.require: I6OU0A
+ */
+HWTEST_F(DeviceNetworkingCollectTest, CheckCondition002, TestSize.Level3)
+{
+    DTEST_LOG << " CheckCondition002 BEGIN" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
+    OnDemandEvent condition;
+    condition.value = "on";
+    bool result = networkingCollect->CheckCondition(condition);
+    EXPECT_FALSE(result);
+    DTEST_LOG << " CheckCondition002 END" << std::endl;
+}
+
+/**
+ * @tc.name: CheckCondition003
+ * @tc.desc: test CheckCondition, with condition is off and is online.
+ * @tc.type: FUNC
+ * @tc.require: I6OU0A
+ */
+HWTEST_F(DeviceNetworkingCollectTest, CheckCondition003, TestSize.Level3)
+{
+    DTEST_LOG << " CheckCondition003 BEGIN" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
+    OnDemandEvent condition;
+    condition.value = "off";
+    networkingCollect->stateCallback_ = std::make_shared<DeviceStateCallback>(networkingCollect);
+    networkingCollect->stateCallback_->deviceOnlineSet_.insert("mockDeivce");
+    bool result = networkingCollect->CheckCondition(condition);
+    EXPECT_FALSE(result);
+    DTEST_LOG << " CheckCondition003 END" << std::endl;
+}
+
+/**
+ * @tc.name: CheckCondition004
+ * @tc.desc: test CheckCondition, with condition is off and is offline.
+ * @tc.type: FUNC
+ * @tc.require: I6OU0A
+ */
+HWTEST_F(DeviceNetworkingCollectTest, CheckCondition004, TestSize.Level3)
+{
+    DTEST_LOG << " CheckCondition004 BEGIN" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
+    OnDemandEvent condition;
+    condition.value = "off";
+    bool result = networkingCollect->CheckCondition(condition);
+    EXPECT_TRUE(result);
+    DTEST_LOG << " CheckCondition004 END" << std::endl;
+}
+
+/**
+ * @tc.name: CheckCondition005
+ * @tc.desc: test CheckCondition, with condition is invalid and is online.
+ * @tc.type: FUNC
+ * @tc.require: I6OU0A
+ */
+HWTEST_F(DeviceNetworkingCollectTest, CheckCondition005, TestSize.Level3)
+{
+    DTEST_LOG << " CheckCondition005 BEGIN" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
+    OnDemandEvent condition;
+    condition.value = "invalid";
+    networkingCollect->stateCallback_ = std::make_shared<DeviceStateCallback>(networkingCollect);
+    networkingCollect->stateCallback_->deviceOnlineSet_.insert("mockDeivce");
+    bool result = networkingCollect->CheckCondition(condition);
+    EXPECT_FALSE(result);
+    DTEST_LOG << " CheckCondition005 END" << std::endl;
+}
+
+/**
+ * @tc.name: CheckCondition006
+ * @tc.desc: test CheckCondition, with condition is invalid and is offline.
+ * @tc.type: FUNC
+ * @tc.require: I6OU0A
+ */
+HWTEST_F(DeviceNetworkingCollectTest, CheckCondition006, TestSize.Level3)
+{
+    DTEST_LOG << " CheckCondition006 BEGIN" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
+    OnDemandEvent condition;
+    condition.value = "invalid";
+    bool result = networkingCollect->CheckCondition(condition);
+    EXPECT_FALSE(result);
+    DTEST_LOG << " CheckCondition006 END" << std::endl;
 }
 } // namespace OHOS
