@@ -84,11 +84,6 @@ ohos_fuzztest("SystemAbilityManagerFuzzTest") {
     "samgr:samgr_proxy",
   ]
   defines = []
-  if (use_musl) {
-    if (use_jemalloc && use_jemalloc_dfx_intf) {
-      defines += [ "CONFIG_USE_JEMALLOC_DFX_INTF" ]
-    }
-  }
   if (hicollie_able) {
     external_deps += [ "hicollie_native:libhicollie" ]
     defines += [ "HICOLLIE_ENABLE" ]
