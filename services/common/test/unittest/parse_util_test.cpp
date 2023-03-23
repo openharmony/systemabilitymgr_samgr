@@ -1180,7 +1180,7 @@ HWTEST_F(ParseUtilTest, JsonObjToMap004, TestSize.Level3)
 }
 /**
  * @tc.name: JsonObjToMap
- * @tc.desc: eventJson.contains is event_type and evnt_name 
+ * @tc.desc: eventJson.contains is event_type and evnt_name
  * @tc.type: FUNC
  * @tc.require: I6MNUA
  */
