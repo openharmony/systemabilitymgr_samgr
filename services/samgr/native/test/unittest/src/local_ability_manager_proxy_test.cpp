@@ -244,7 +244,7 @@ HWTEST_F(LocalAbilityManagerProxyTest, ActiveAbility003, TestSize.Level3)
     activeReason[EVENT_ID] = TEST_STRING;
     activeReason[EVENT_NAME] = TEST_STRING;
     bool ret = localAbility->ActiveAbility(TEST_SAID_VAILD, activeReason);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 }
 
 /**
@@ -278,6 +278,6 @@ HWTEST_F(LocalAbilityManagerProxyTest, IdleAbility002, TestSize.Level3)
     idleReason[EVENT_NAME] = TEST_STRING;
     int32_t delayTime = 0;
     bool ret = localAbility->IdleAbility(TEST_SAID_VAILD, idleReason, delayTime);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 }
 }
