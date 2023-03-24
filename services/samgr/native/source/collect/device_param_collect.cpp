@@ -97,6 +97,7 @@ void SystemAbilityStatusChange::OnAddSystemAbility(int32_t systemAbilityId, cons
         case PARAM_WATCHER_DISTRIBUTED_SERVICE_ID:
             if (deviceParamCollect_ == nullptr) {
                 HILOGE("DeviceParamCollect is nullptr");
+                return;
             }
             deviceParamCollect_->WatchParameters();
             break;
