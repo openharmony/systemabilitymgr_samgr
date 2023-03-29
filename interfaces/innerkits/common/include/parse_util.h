@@ -42,7 +42,7 @@ public:
     std::u16string GetProcessName() const;
     static std::unordered_map<std::string, std::string> StringToMap(const std::string& eventStr);
     static nlohmann::json StringToJsonObj(const std::string& eventStr);
-    static std::unordered_map<std::string, std::string> JsonObjToMap(nlohmann::json& eventJson);
+    static std::unordered_map<std::string, std::string> JsonObjToMap(const nlohmann::json& eventJson);
 private:
     void CloseSo();
     void OpenSo(SaProfile& saProfile);
