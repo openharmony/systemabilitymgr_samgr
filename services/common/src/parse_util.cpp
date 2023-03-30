@@ -292,7 +292,7 @@ nlohmann::json ParseUtil::StringToJsonObj(const std::string& eventStr)
     return eventJson;
 }
 
-std::unordered_map<std::string, std::string> ParseUtil::JsonObjToMap(nlohmann::json& eventJson)
+std::unordered_map<std::string, std::string> ParseUtil::JsonObjToMap(const nlohmann::json& eventJson)
 {
     std::unordered_map<std::string, std::string> eventMap;
     if (eventJson.contains(EVENT_TYPE) && eventJson[EVENT_TYPE].is_string()) {

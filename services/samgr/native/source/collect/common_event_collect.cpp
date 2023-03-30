@@ -13,8 +13,9 @@
  * limitations under the License.
  */
 
-#include "ability_death_recipient.h"
 #include "common_event_collect.h"
+
+#include "ability_death_recipient.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
 #include "matching_skills.h"
@@ -92,12 +93,12 @@ void CommonEventCollect::Init(const std::list<SaProfile>& onDemandSaProfiles)
 
 bool CommonEventCollect::AddCommonListener()
 {
-    if (IsCesReady()) {
-        HILOGI("CommonEventCollect AddCommonListener ces is ready");
-        CreateCommonEventSubscriber();
-        return EventFwk::CommonEventManager::SubscribeCommonEvent(commonEventSubscriber_);
+    if (!IsCesReady()) {
+        return false;
     }
-    return false;
+    HILOGI("CommonEventCollect AddCommonListener ces is ready");
+    CreateCommonEventSubscriber();
+    return EventFwk::CommonEventManager::SubscribeCommonEvent(commonEventSubscriber_);
 }
 
 void CommonEventCollect::CreateCommonEventSubscriber()

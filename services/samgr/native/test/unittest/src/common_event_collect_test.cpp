@@ -121,7 +121,7 @@ HWTEST_F(CommonEventCollectTest, init001, TestSize.Level3)
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
     const std::list<SaProfile> onDemandSaProfiles;
     commonEventCollect->Init(onDemandSaProfiles);
-    int32_t ret = commonEventCollect->AddCommonListener();
+    bool ret = commonEventCollect->AddCommonListener();
     EXPECT_EQ(false, ret);
 }
 
@@ -140,7 +140,9 @@ HWTEST_F(CommonEventCollectTest, init002, TestSize.Level3)
     std::list<SaProfile> onDemandSaProfiles;
     onDemandSaProfiles.push_back(saProfile);
     commonEventCollect->Init(onDemandSaProfiles);
-    EXPECT_NE(nullptr, commonEventCollect);
+    commonEventCollect->workHandler_ = nullptr;
+    int32_t ret = commonEventCollect->OnStop();
+    EXPECT_EQ(ERR_OK, ret);
 }
 
 /**
@@ -263,6 +265,7 @@ HWTEST_F(CommonEventCollectTest, OnReceiveEvent001, TestSize.Level3)
     EventFwk::CommonEventSubscribeInfo info(skill);
     std::shared_ptr<CommonEventSubscriber> commonEventStatusSubscriber
         = std::make_shared<CommonEventSubscriber>(info, commonEventCollect);
+    EXPECT_NE(commonEventStatusSubscriber, nullptr);
     EventFwk::CommonEventData eventData;
     commonEventStatusSubscriber->OnReceiveEvent(eventData);
     std::string action = EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON;
@@ -273,6 +276,8 @@ HWTEST_F(CommonEventCollectTest, OnReceiveEvent001, TestSize.Level3)
     commonEventCollect->SaveAction(action);
     action = EventFwk::CommonEventSupport::COMMON_EVENT_DISCHARGING;
     commonEventCollect->SaveAction(action);
-    EXPECT_NE(commonEventStatusSubscriber, nullptr);
+    commonEventCollect->workHandler_ = nullptr;
+    int32_t ret = commonEventCollect->OnStop();
+    EXPECT_EQ(ERR_OK, ret);
 }
 } // namespace OHOS
