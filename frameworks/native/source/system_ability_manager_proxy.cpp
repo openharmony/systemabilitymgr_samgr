@@ -761,6 +761,7 @@ int32_t SystemAbilityManagerProxy::GetRunningSystemProcess(std::list<SystemProce
     }
     if (result != ERR_OK) {
         HILOGE("GetRunningSystemProcess failed: %{public}d!", result);
+        return result;
     }
     return ReadSystemProcessFromParcel(systemProcessInfos, reply);
 }
@@ -837,7 +838,7 @@ int32_t SystemAbilityManagerProxy::SubscribeSystemProcess(const sptr<ISystemProc
         HILOGW("SubscribeSystemProcess Read result failed!");
         return ERR_FLATTEN_OBJECT;
     }
-    return ERR_OK;
+    return result;
 }
 
 int32_t SystemAbilityManagerProxy::UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener)
@@ -878,6 +879,6 @@ int32_t SystemAbilityManagerProxy::UnSubscribeSystemProcess(const sptr<ISystemPr
         HILOGW("UnSubscribeSystemProcess Read result failed!");
         return ERR_FLATTEN_OBJECT;
     }
-    return ERR_OK;
+    return result;
 }
 } // namespace OHOS
