@@ -107,6 +107,7 @@ void CommonEventCollect::CreateCommonEventSubscriber()
     {
         std::lock_guard<std::mutex> autoLock(commomEventLock_);
         for (auto& commonEventName : commonEventNames_) {
+            HILOGD("CommonEventCollect add event: %{puhlic}s", commonEventName.c_str());
             skill.AddEvent(commonEventName);
         }
     }

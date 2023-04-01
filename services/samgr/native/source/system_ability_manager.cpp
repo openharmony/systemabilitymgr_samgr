@@ -150,41 +150,30 @@ sptr<SystemAbilityManager> SystemAbilityManager::GetInstance()
 
 void SystemAbilityManager::InitSaProfile()
 {
-    if (workHandler_ == nullptr) {
-        HILOGE("InitSaProfile parseHandler_ not init!");
-        return;
+    int64_t begin = GetTickCount();
+    std::vector<std::string> fileNames;
+    GetDirFiles(PREFIX, fileNames);
+    auto parser = std::make_shared<ParseUtil>();
+    for (const auto& file : fileNames) {
+        if (file.empty() ||
+            (file.find(".xml") == std::string::npos && file.find(".json") == std::string::npos)
+            || (file.find("_trust.xml") != std::string::npos && file.find("_trust.json") != std::string::npos)) {
+            continue;
+        }
+        parser->ParseSaProfiles(file);
     }
-
-    auto callback = [this] () {
-        int64_t begin = GetTickCount();
-        std::vector<std::string> fileNames;
-        GetDirFiles(PREFIX, fileNames);
-        auto parser = std::make_shared<ParseUtil>();
-        for (const auto& file : fileNames) {
-            if (file.empty() ||
-                (file.find(".xml") == std::string::npos && file.find(".json") == std::string::npos)
-                || (file.find("_trust.xml") != std::string::npos && file.find("_trust.json") != std::string::npos)) {
-                continue;
-            }
-            parser->ParseSaProfiles(file);
-        }
-        std::list<SaProfile> saInfos = parser->GetAllSaProfiles();
-        if (collectManager_ != nullptr) {
-            collectManager_->Init(saInfos);
-        }
-        if (abilityStateScheduler_ != nullptr) {
-            abilityStateScheduler_->Init(saInfos);
-        }
-        lock_guard<mutex> autoLock(saProfileMapLock_);
-        for (const auto& saInfo : saInfos) {
-            saProfileMap_[saInfo.saId] = saInfo;
-        }
-        HILOGI("[PerformanceTest] InitSaProfile spend %{public}" PRId64 " ms", GetTickCount() - begin);
-    };
-    bool ret = workHandler_->PostTask(callback);
-    if (!ret) {
-        HILOGW("SystemAbilityManager::InitSaProfile PostTask fail");
+    std::list<SaProfile> saInfos = parser->GetAllSaProfiles();
+    if (collectManager_ != nullptr) {
+        collectManager_->Init(saInfos);
     }
+    if (abilityStateScheduler_ != nullptr) {
+        abilityStateScheduler_->Init(saInfos);
+    }
+    lock_guard<mutex> autoLock(saProfileMapLock_);
+    for (const auto& saInfo : saInfos) {
+        saProfileMap_[saInfo.saId] = saInfo;
+    }
+    HILOGI("[PerformanceTest] InitSaProfile spend %{public}" PRId64 " ms", GetTickCount() - begin);
 }
 
 void SystemAbilityManager::OndemandLoadForPerf()
