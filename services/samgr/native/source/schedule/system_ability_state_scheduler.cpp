@@ -39,6 +39,7 @@ const std::string KEY_VALUE = "value";
 }
 void SystemAbilityStateScheduler::Init(const std::list<SaProfile>& saProfiles)
 {
+    HILOGI("[SA Scheduler] init start");
     InitStateContext(saProfiles);
     processListenerDeath_ = sptr<IRemoteObject::DeathRecipient>(new SystemProcessListenerDeathRecipient());
     auto unloadRunner = AppExecFwk::EventRunner::Create("UnloadHandler");
@@ -52,6 +53,7 @@ void SystemAbilityStateScheduler::Init(const std::list<SaProfile>& saProfiles)
     auto processRunner = AppExecFwk::EventRunner::Create("ProcessHandler");
     processHandler_ = std::make_shared<AppExecFwk::EventHandler>(processRunner);
     processHandler_->PostTask([]() { Samgr::MemoryGuard cacheGuard; });
+    HILOGI("[SA Scheduler] init end");
 }
 
 void SystemAbilityStateScheduler::InitStateContext(const std::list<SaProfile>& saProfiles)

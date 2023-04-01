@@ -86,6 +86,7 @@ void DeviceParamCollect::WatchParameters()
 {
     std::lock_guard<std::mutex> autoLock(paramLock_);
     for (auto param : params_) {
+        HILOGD("DeviceParamCollect watch param: %{puhlic}s", param.c_str());
         WatchParameter(param.c_str(), DeviceParamCallback, this);
     }
 }
