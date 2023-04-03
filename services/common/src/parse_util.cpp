@@ -56,6 +56,7 @@ constexpr const char* SA_TAG_BOOT_PHASE = "bootphase";
 constexpr const char* SA_TAG_SAID = "said";
 constexpr const char* SA_TAG_START_ON_DEMAND = "start-on-demand";
 constexpr const char* SA_TAG_STOP_ON_DEMAND = "stop-on-demand";
+constexpr const char* SA_TAG_RECYCLE_DELAYTIME = "recycle-delaytime";
 constexpr const char* SA_TAG_DEVICE_ON_LINE = "deviceonline";
 constexpr const char* SA_TAG_SETTING_SWITCH = "settingswitch";
 constexpr const char* SA_TAG_COMMON_EVENT = "commonevent";
@@ -489,29 +490,55 @@ bool ParseUtil::ParseSystemAbility(SaProfile& saProfile, nlohmann::json& systemA
         saProfile.bootPhase = "";
     }
     // parse start-on-demand tag
-    ParseOndemandTag(systemAbilityJson, saProfile.startOnDemand, SA_TAG_START_ON_DEMAND);
+    ParseStartOndemandTag(systemAbilityJson, SA_TAG_START_ON_DEMAND, saProfile.startOnDemand);
     // parse stop-on-demand tag
-    ParseOndemandTag(systemAbilityJson, saProfile.stopOnDemand, SA_TAG_STOP_ON_DEMAND);
+    ParseStopOndemandTag(systemAbilityJson, SA_TAG_STOP_ON_DEMAND, saProfile.stopOnDemand);
     HILOGD("ParseSystemAbility end");
     return true;
 }
 
-void ParseUtil::ParseOndemandTag(nlohmann::json& systemAbilityJson,
-    std::vector<OnDemandEvent>& condationVec, const std::string& jsonTag)
+bool ParseUtil::ParseJsonTag(const nlohmann::json& systemAbilityJson, const std::string& jsonTag,
+    nlohmann::json& onDemandJson)
 {
     if (systemAbilityJson.find(jsonTag) == systemAbilityJson.end()) {
-        return;
+        return false;
     }
-    nlohmann::json& onDemandJson = systemAbilityJson.at(jsonTag);
+    onDemandJson = systemAbilityJson.at(jsonTag);
     if (!onDemandJson.is_object()) {
         HILOGE("parse ondemand tag error");
+        return false;
+    }
+    return true;
+}
+
+void ParseUtil::ParseOndemandTag(const nlohmann::json& onDemandJson, std::vector<OnDemandEvent>& onDemandEvents)
+{
+    GetOnDemandArrayFromJson(DEVICE_ONLINE, onDemandJson, SA_TAG_DEVICE_ON_LINE, onDemandEvents);
+    GetOnDemandArrayFromJson(SETTING_SWITCH, onDemandJson, SA_TAG_SETTING_SWITCH, onDemandEvents);
+    GetOnDemandArrayFromJson(COMMON_EVENT, onDemandJson, SA_TAG_COMMON_EVENT, onDemandEvents);
+    GetOnDemandArrayFromJson(PARAM, onDemandJson, SA_TAG_PARAM, onDemandEvents);
+    GetOnDemandArrayFromJson(TIMED_EVENT, onDemandJson, SA_TAG_TIEMD_EVENT, onDemandEvents);
+}
+
+void ParseUtil::ParseStartOndemandTag(const nlohmann::json& systemAbilityJson,
+    const std::string& jsonTag, StartOnDemand& startOnDemand)
+{
+    nlohmann::json onDemandJson;
+    if (!ParseJsonTag(systemAbilityJson, jsonTag, onDemandJson)) {
         return;
     }
-    GetOnDemandArrayFromJson(DEVICE_ONLINE, onDemandJson, SA_TAG_DEVICE_ON_LINE, condationVec);
-    GetOnDemandArrayFromJson(SETTING_SWITCH, onDemandJson, SA_TAG_SETTING_SWITCH, condationVec);
-    GetOnDemandArrayFromJson(COMMON_EVENT, onDemandJson, SA_TAG_COMMON_EVENT, condationVec);
-    GetOnDemandArrayFromJson(PARAM, onDemandJson, SA_TAG_PARAM, condationVec);
-    GetOnDemandArrayFromJson(TIMED_EVENT, onDemandJson, SA_TAG_TIEMD_EVENT, condationVec);
+    ParseOndemandTag(onDemandJson, startOnDemand.onDemandEvents);
+}
+
+void ParseUtil::ParseStopOndemandTag(const nlohmann::json& systemAbilityJson,
+    const std::string& jsonTag, StopOnDemand& stopOnDemand)
+{
+    nlohmann::json onDemandJson;
+    if (!ParseJsonTag(systemAbilityJson, jsonTag, onDemandJson)) {
+        return;
+    }
+    ParseOndemandTag(onDemandJson, stopOnDemand.onDemandEvents);
+    GetInt32FromJson(onDemandJson, SA_TAG_RECYCLE_DELAYTIME, stopOnDemand.delayTime);
 }
 
 void ParseUtil::GetOnDemandArrayFromJson(int32_t eventId, const nlohmann::json& obj,
@@ -523,7 +550,7 @@ void ParseUtil::GetOnDemandArrayFromJson(int32_t eventId, const nlohmann::json& 
             GetStringFromJson(item, "name", name);
             std::string value;
             GetStringFromJson(item, "value", value);
-            std::vector<OnDemandEvent> conditions;
+            std::vector<OnDemandCondition> conditions;
             GetOnDemandConditionsFromJson(item, "conditions", conditions);
             HILOGD("conditions size: %{public}zu", conditions.size());
             bool enableOnce = false;
@@ -538,7 +565,7 @@ void ParseUtil::GetOnDemandArrayFromJson(int32_t eventId, const nlohmann::json& 
 }
 
 void ParseUtil::GetOnDemandConditionsFromJson(const nlohmann::json& obj,
-    const std::string& key, std::vector<OnDemandEvent>& out)
+    const std::string& key, std::vector<OnDemandCondition>& out)
 {
     nlohmann::json conditionsJson;
     if (obj.find(key.c_str()) == obj.end() || !obj[key.c_str()].is_array()) {
@@ -567,7 +594,7 @@ void ParseUtil::GetOnDemandConditionsFromJson(const nlohmann::json& obj,
             HILOGW("invalid condition eventId: %{public}s", type.c_str());
             continue;
         }
-        OnDemandEvent conditionEvent = {eventId, name, value};
+        OnDemandCondition conditionEvent = {eventId, name, value};
         out.emplace_back(conditionEvent);
     }
 }

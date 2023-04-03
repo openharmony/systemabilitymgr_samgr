@@ -42,11 +42,17 @@ enum {
     FREEZE,
 };
 
+struct OnDemandCondition {
+    int32_t eventId;
+    std::string name;
+    std::string value;
+};
+
 struct OnDemandEvent {
     int32_t eventId;
     std::string name;
     std::string value;
-    std::vector<OnDemandEvent> conditions;
+    std::vector<OnDemandCondition> conditions;
     bool enableOnce = false;
 
     bool operator==(const OnDemandEvent& event) const
@@ -61,6 +67,17 @@ struct SaControlInfo {
     bool enableOnce = false;
 };
 
+struct StartOnDemand {
+    bool allowUpdate = false;
+    std::vector<OnDemandEvent> onDemandEvents;
+};
+
+struct StopOnDemand {
+    bool allowUpdate = false;
+    int32_t delayTime = 20000;
+    std::vector<OnDemandEvent> onDemandEvents;
+};
+
 struct SaProfile {
     std::u16string process;
     int32_t saId = 0;
@@ -73,8 +90,8 @@ struct SaProfile {
     std::u16string capability;
     std::u16string permission;
     std::string bootPhase;
-    std::vector<OnDemandEvent> startOnDemand;
-    std::vector<OnDemandEvent> stopOnDemand;
+    StartOnDemand startOnDemand;
+    StopOnDemand stopOnDemand;
     DlHandle handle = nullptr;
 };
 }

@@ -69,7 +69,7 @@ HWTEST_F(DeviceParamCollectTest, DeviceParamInit001, TestSize.Level3)
     std::list<SaProfile> SaProfiles;
     SaProfile saProfile;
     OnDemandEvent onDemandEvent = {3, TEST_NAME, "true"};
-    saProfile.startOnDemand.push_back(onDemandEvent);
+    saProfile.startOnDemand.onDemandEvents.push_back(onDemandEvent);
     SaProfiles.push_back(saProfile);
     deviceParamCollect->params_.clear();
     deviceParamCollect->Init(SaProfiles);
@@ -91,7 +91,7 @@ HWTEST_F(DeviceParamCollectTest, DeviceParamInit002, TestSize.Level3)
     std::list<SaProfile> SaProfiles;
     SaProfile saProfile;
     OnDemandEvent onDemandEvent = {3, TEST_NAME, "false"};
-    saProfile.stopOnDemand.push_back(onDemandEvent);
+    saProfile.stopOnDemand.onDemandEvents.push_back(onDemandEvent);
     SaProfiles.push_back(saProfile);
     deviceParamCollect->params_.clear();
     deviceParamCollect->Init(SaProfiles);

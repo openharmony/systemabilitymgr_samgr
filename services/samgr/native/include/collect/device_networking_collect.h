@@ -57,7 +57,7 @@ public:
 
     int32_t OnStart() override;
     int32_t OnStop() override;
-    bool CheckCondition(const OnDemandEvent& condition) override;
+    bool CheckCondition(const OnDemandCondition& condition) override;
     bool AddDeviceChangeListener();
 private:
     std::shared_ptr<DeviceStateCallback> stateCallback_;

@@ -51,6 +51,7 @@ public:
 private:
     void InitStateContext(const std::list<SaProfile>& saProfiles);
 
+    int32_t LimitDelayTime(int32_t delayTime);
     bool GetSystemAbilityContext(int32_t systemAbilityId,
         std::shared_ptr<SystemAbilityContext>& abilityContext);
     bool GetSystemProcessContext(const std::u16string& processName,

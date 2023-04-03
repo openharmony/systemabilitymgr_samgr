@@ -55,12 +55,17 @@ private:
     bool ParseJsonFile(const std::string& realPath);
     bool ParseJsonObj(nlohmann::json& jsonObj, const std::string& jsonPath);
     bool ParseSystemAbility(SaProfile& saProfile, nlohmann::json& systemAbilityJson);
-    void ParseOndemandTag(nlohmann::json& systemAbilityJson,
-        std::vector<OnDemandEvent>& condationVec, const std::string& jsonTag);
+    bool ParseJsonTag(const nlohmann::json& systemAbilityJson, const std::string& jsonTag,
+        nlohmann::json& onDemandJson);
+    void ParseOndemandTag(const nlohmann::json& onDemandJson, std::vector<OnDemandEvent>& onDemandEvents);
+    void ParseStartOndemandTag(const nlohmann::json& systemAbilityJson,
+        const std::string& jsonTag, StartOnDemand& startOnDemand);
+    void ParseStopOndemandTag(const nlohmann::json& systemAbilityJson,
+        const std::string& jsonTag, StopOnDemand& stopOnDemand);
     void GetOnDemandArrayFromJson(int32_t eventId, const nlohmann::json& obj,
         const std::string& key, std::vector<OnDemandEvent>& out);
     void GetOnDemandConditionsFromJson(const nlohmann::json& obj,
-        const std::string& key, std::vector<OnDemandEvent>& out);
+        const std::string& key, std::vector<OnDemandCondition>& out);
 
     static inline void GetBoolFromJson(const nlohmann::json& obj, const std::string& key, bool& out)
     {
