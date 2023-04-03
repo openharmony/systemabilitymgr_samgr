@@ -30,6 +30,24 @@ config("sam_test_config") {
   ]
 }
 
+config("samgr_proxy_config") {
+  include_dirs = [
+    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include"
+  ]
+}
+
+config("samgr_proxy_private_config") {
+  include_dirs = [
+    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include",
+    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/lsamgr",
+    "//foundation/systemabilitymgr/samgr/services/lsamgr/include",
+    "//foundation/systemabilitymgr/samgr/services/samgr/native/include",
+    "//foundation/systemabilitymgr/samgr/utils/native/include",
+    "//third_party/json/include",
+    "//third_party/json/single_include",
+  ]
+}
+
 ohos_unittest("SystemAbilityMgrTest") {
   module_out_path = module_output_path
 
@@ -76,7 +94,7 @@ ohos_unittest("SystemAbilityMgrTest") {
 
   deps = [
     "${samgr_dir}/interfaces/innerkits/common:samgr_common",
-    "${samgr_dir}/interfaces/innerkits/samgr_proxy:samgr_proxy",
+    ":samgr_proxy_tdd",
     "//third_party/googletest:gtest_main",
   ]
 
@@ -169,7 +187,7 @@ ohos_unittest("SystemAbilityMgrStubTest") {
 
   deps = [
     "${samgr_dir}/interfaces/innerkits/common:samgr_common",
-    "${samgr_dir}/interfaces/innerkits/samgr_proxy:samgr_proxy",
+    ":samgr_proxy_tdd",
     "//third_party/googletest:gtest_main",
   ]
 
@@ -239,7 +257,7 @@ ohos_unittest("SystemAbilityMgrProxyTest") {
   }
 
   deps = [
-    "${samgr_dir}/interfaces/innerkits/samgr_proxy:samgr_proxy",
+    ":samgr_proxy_tdd",
     "//third_party/googletest:gtest_main",
   ]
 
@@ -323,7 +341,7 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
 
   deps = [
     "${samgr_dir}/interfaces/innerkits/common:samgr_common",
-    "${samgr_dir}/interfaces/innerkits/samgr_proxy:samgr_proxy",
+    ":samgr_proxy_tdd",
     "//third_party/googletest:gtest_main",
   ]
 
@@ -352,7 +370,7 @@ ohos_executable("ondemand") {
     ":sam_test_config",
     "//foundation/systemabilitymgr/samgr/test/resource:coverage_flags",
   ]
-  deps = [ "${samgr_dir}/interfaces/innerkits/samgr_proxy:samgr_proxy" ]
+  deps = [ ":samgr_proxy_tdd" ]
   if (is_standard_system) {
     external_deps = [ "hiviewdfx_hilog_native:libhilog_base" ]
   } else {
@@ -371,7 +389,6 @@ ohos_executable("ondemand") {
     "init:libbeget_proxy",
     "init:libbegetutil",
     "ipc:ipc_core",
-    "samgr:samgr_proxy",
   ]
   part_name = "samgr"
   subsystem_name = "systemabilitymgr"
@@ -410,7 +427,7 @@ ohos_executable("TestTool") {
   ]
   deps = [
     "${samgr_dir}/interfaces/innerkits/common:samgr_common",
-    "${samgr_dir}/interfaces/innerkits/samgr_proxy:samgr_proxy",
+    ":samgr_proxy_tdd",
   ]
   if (is_standard_system) {
     external_deps = [ "hiviewdfx_hilog_native:libhilog_base" ]
@@ -462,6 +479,35 @@ ohos_executable("TestTool") {
     "ipc:libdbinder",
   ]
   part_name = "samgr"
+  subsystem_name = "systemabilitymgr"
+}
+
+ohos_static_library("samgr_proxy_tdd") {
+  defines = [ "SAMGR_PROXY" ]
+  sources = [
+    "//foundation/systemabilitymgr/samgr/frameworks/native/source/system_ability_load_callback_stub.cpp",
+    "//foundation/systemabilitymgr/samgr/frameworks/native/source/system_ability_manager_proxy.cpp",
+    "//foundation/systemabilitymgr/samgr/frameworks/native/source/system_ability_status_change_stub.cpp",
+    "//foundation/systemabilitymgr/samgr/frameworks/native/source/system_process_status_change_stub.cpp",
+    "//foundation/systemabilitymgr/samgr/services/lsamgr/src/local_ability_manager_proxy.cpp",
+    "//foundation/systemabilitymgr/samgr/services/lsamgr/src/local_abilitys.cpp",
+    "//foundation/systemabilitymgr/samgr/services/samgr/native/source/service_registry.cpp",
+  ]
+  configs = [
+    ":samgr_proxy_private_config",
+    "//foundation/systemabilitymgr/samgr/test/resource:coverage_flags",
+  ]
+
+  all_dependent_configs = [ ":samgr_proxy_config" ]
+
+  if (is_standard_system) {
+    external_deps = [
+      "c_utils:utils",
+      "hiviewdfx_hilog_native:libhilog",
+      "ipc:ipc_single",
+    ]
+    part_name = "samgr"
+  }
   subsystem_name = "systemabilitymgr"
 }
 

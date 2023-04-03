@@ -24,7 +24,23 @@ namespace OHOS {
 class ISystemAbilityStatusChange : public IRemoteBroker {
 public:
     virtual ~ISystemAbilityStatusChange() = default;
+
+    /**
+     * OnAddSystemAbility, OnAddSystemAbility will be called when subscribe sa register
+     *
+     * @param systemAbilityId,.subscribe sa
+     * @param deviceId,.is empty, Cross device support is temporarily not supported
+     * @return void
+     */
     virtual void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) = 0;
+
+    /**
+     * OnRemoveSystemAbility, OnRemoveSystemAbility will be called when subscribe sa remove
+     *
+     * @param systemAbilityId,.subscribe sa
+     * @param deviceId,.is empty, Cross device support is temporarily not supported
+     * @return void
+     */
     virtual void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISystemAbilityStatusChange");
     enum {

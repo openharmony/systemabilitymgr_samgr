@@ -31,7 +31,21 @@ struct SystemProcessInfo {
 class ISystemProcessStatusChange : public IRemoteBroker {
 public:
     virtual ~ISystemProcessStatusChange() = default;
+
+    /**
+     * OnSystemProcessStarted, OnSystemProcessStarted will be called when subscribe process Started
+     *
+     * @param systemProcessInfo,.Process related status information
+     * @return void
+     */
     virtual void OnSystemProcessStarted(SystemProcessInfo& systemProcessInfo) = 0;
+
+    /**
+     * OnSystemProcessStopped, OnSystemProcessStopped will be called when subscribe process Stopped
+     *
+     * @param systemProcessInfo,.Process related status information
+     * @return void
+     */
     virtual void OnSystemProcessStopped(SystemProcessInfo& systemProcessInfo) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISystemProcessStatusChange");
     enum {
