@@ -654,6 +654,7 @@ int32_t SystemAbilityManagerStub::GetRunningSystemProcessInner(MessageParcel& da
     }
     return ERR_OK;
 }
+
 int32_t SystemAbilityManagerStub::SubscribeSystemProcessInner(MessageParcel& data, MessageParcel& reply)
 {
     if (!CanRequest()) {
@@ -679,6 +680,7 @@ int32_t SystemAbilityManagerStub::SubscribeSystemProcessInner(MessageParcel& dat
     }
     return result;
 }
+
 int32_t SystemAbilityManagerStub::UnSubscribeSystemProcessInner(MessageParcel& data, MessageParcel& reply)
 {
     if (!CanRequest()) {
@@ -747,6 +749,4 @@ bool SystemAbilityManagerStub::CanRequestProcessInfo()
     }
     return true;
 }
-
-
 } // namespace OHOS
