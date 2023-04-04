@@ -15,6 +15,7 @@
 #include "local_abilitys_test.h"
 
 #include "local_abilitys.h"
+#include "mock_iro_sendrequest.h"
 #include "test_log.h"
 
 using namespace std;
@@ -54,7 +55,7 @@ void LocalAbilitysTest::TearDown()
  */
 HWTEST_F(LocalAbilitysTest, AddAbility001, TestSize.Level1)
 {
-    sptr<IRemoteObject> testAbility(nullptr);
+    sptr<IRemoteObject> testAbility(new MockIroSendrequesteStub());
     LocalAbilitys::GetInstance().AddAbility(SAID, testAbility);
     auto proxy = LocalAbilitys::GetInstance().GetAbility(SAID);
     EXPECT_TRUE(proxy != nullptr);
@@ -68,7 +69,7 @@ HWTEST_F(LocalAbilitysTest, AddAbility001, TestSize.Level1)
  */
 HWTEST_F(LocalAbilitysTest, RemoveAbility001, TestSize.Level1)
 {
-    sptr<IRemoteObject> testAbility(nullptr);
+    sptr<IRemoteObject> testAbility(new MockIroSendrequesteStub());
     LocalAbilitys::GetInstance().AddAbility(SAID, testAbility);
     LocalAbilitys::GetInstance().RemoveAbility(SAID);
     auto proxy = LocalAbilitys::GetInstance().GetAbility(SAID);
