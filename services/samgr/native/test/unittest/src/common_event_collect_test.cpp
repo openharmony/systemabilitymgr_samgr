@@ -135,8 +135,8 @@ HWTEST_F(CommonEventCollectTest, init002, TestSize.Level3)
     DTEST_LOG << " init002 BEGIN" << std::endl;
     shared_ptr<CommonEventCollect> commonEventCollect = make_shared<CommonEventCollect>(nullptr);
     SaProfile saProfile;
-    saProfile.startOnDemand.push_back({COMMON_EVENT, "", ""});
-    saProfile.stopOnDemand.push_back({COMMON_EVENT, "", ""});
+    saProfile.startOnDemand.onDemandEvents.push_back({COMMON_EVENT, "", ""});
+    saProfile.stopOnDemand.onDemandEvents.push_back({COMMON_EVENT, "", ""});
     std::list<SaProfile> onDemandSaProfiles;
     onDemandSaProfiles.push_back(saProfile);
     commonEventCollect->Init(onDemandSaProfiles);

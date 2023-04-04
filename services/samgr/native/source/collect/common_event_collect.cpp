@@ -78,14 +78,14 @@ void CommonEventCollect::Init(const std::list<SaProfile>& onDemandSaProfiles)
     commonEventNames_.push_back(EventFwk::CommonEventSupport::COMMON_EVENT_CHARGING);
     commonEventNames_.push_back(EventFwk::CommonEventSupport::COMMON_EVENT_DISCHARGING);
     for (auto& profile : onDemandSaProfiles) {
-        for (auto iterStart = profile.startOnDemand.begin(); iterStart != profile.startOnDemand.end(); iterStart++) {
-            if (iterStart->eventId == COMMON_EVENT) {
-                commonEventNames_.push_back(iterStart->name);
+        for (auto iterStart : profile.startOnDemand.onDemandEvents) {
+            if (iterStart.eventId == COMMON_EVENT) {
+                commonEventNames_.push_back(iterStart.name);
             }
         }
-        for (auto iterStop = profile.stopOnDemand.begin(); iterStop != profile.stopOnDemand.end(); iterStop++) {
-            if (iterStop->eventId == COMMON_EVENT) {
-                commonEventNames_.push_back(iterStop->name);
+        for (auto iterStop : profile.stopOnDemand.onDemandEvents) {
+            if (iterStop.eventId == COMMON_EVENT) {
+                commonEventNames_.push_back(iterStop.name);
             }
         }
     }
@@ -150,7 +150,7 @@ void CommonEventCollect::SaveAction(const std::string& action)
     }
 }
 
-bool CommonEventCollect::CheckCondition(const OnDemandEvent& condition)
+bool CommonEventCollect::CheckCondition(const OnDemandCondition& condition)
 {
     std::lock_guard<std::mutex> autoLock(commonEventStateLock_);
     return commonEventState_.count(condition.name) > 0;

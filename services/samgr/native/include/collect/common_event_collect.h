@@ -32,7 +32,7 @@ public:
     int32_t OnStart() override;
     int32_t OnStop() override;
     void SaveAction(const std::string& action);
-    bool CheckCondition(const OnDemandEvent& condition) override;
+    bool CheckCondition(const OnDemandCondition& condition) override;
     void Init(const std::list<SaProfile>& saProfiles);
     bool AddCommonListener();
 private:

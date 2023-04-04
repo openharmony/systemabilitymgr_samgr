@@ -61,7 +61,7 @@ void DeviceStatusCollectManager::Init(const std::list<SaProfile>& saProfiles)
 void DeviceStatusCollectManager::FilterOnDemandSaProfiles(const std::list<SaProfile>& saProfiles)
 {
     for (auto& saProfile : saProfiles) {
-        if (saProfile.startOnDemand.empty() && saProfile.stopOnDemand.empty()) {
+        if (saProfile.startOnDemand.onDemandEvents.empty() && saProfile.stopOnDemand.onDemandEvents.empty()) {
             continue;
         }
         onDemandSaProfiles_.emplace_back(saProfile);
@@ -73,7 +73,8 @@ void DeviceStatusCollectManager::GetSaControlListByEvent(const OnDemandEvent& ev
 {
     for (auto& profile : onDemandSaProfiles_) {
         // start on demand
-        for (auto iterStart = profile.startOnDemand.begin(); iterStart != profile.startOnDemand.end(); iterStart++) {
+        for (auto iterStart = profile.startOnDemand.onDemandEvents.begin();
+            iterStart != profile.startOnDemand.onDemandEvents.end(); iterStart++) {
             if (IsSameEvent(event, *iterStart) && CheckConditions(*iterStart)) {
                 // maybe the process is being killed, let samgr make decisions.
                 SaControlInfo control = { START_ON_DEMAND, profile.saId, iterStart->enableOnce };
@@ -82,7 +83,8 @@ void DeviceStatusCollectManager::GetSaControlListByEvent(const OnDemandEvent& ev
             }
         }
         // stop on demand
-        for (auto iterStop = profile.stopOnDemand.begin(); iterStop != profile.stopOnDemand.end(); iterStop++) {
+        for (auto iterStop = profile.stopOnDemand.onDemandEvents.begin();
+            iterStop != profile.stopOnDemand.onDemandEvents.end(); iterStop++) {
             if (IsSameEvent(event, *iterStop) && CheckConditions(*iterStop)) {
                 // maybe the process is starting, let samgr make decisions.
                 SaControlInfo control = { STOP_ON_DEMAND, profile.saId, iterStop->enableOnce };

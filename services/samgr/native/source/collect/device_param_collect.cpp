@@ -42,7 +42,7 @@ DeviceParamCollect::DeviceParamCollect(const sptr<IReport>& report)
 {
 }
 
-bool DeviceParamCollect::CheckCondition(const OnDemandEvent& condition)
+bool DeviceParamCollect::CheckCondition(const OnDemandCondition& condition)
 {
     std::string value = system::GetParameter(condition.name, "");
     return value == condition.value;
@@ -53,12 +53,12 @@ void DeviceParamCollect::Init(const std::list<SaProfile>& saProfiles)
     std::lock_guard<std::mutex> autoLock(paramLock_);
     HILOGI("DeviceParamCollect Init begin");
     for (auto saProfile : saProfiles) {
-        for (auto onDemandEvent : saProfile.startOnDemand) {
+        for (auto onDemandEvent : saProfile.startOnDemand.onDemandEvents) {
             if (onDemandEvent.eventId == PARAM) {
                 params_.insert(onDemandEvent.name);
             }
         }
-        for (auto onDemandEvent : saProfile.stopOnDemand) {
+        for (auto onDemandEvent : saProfile.stopOnDemand.onDemandEvents) {
             if (onDemandEvent.eventId == PARAM) {
                 params_.insert(onDemandEvent.name);
             }

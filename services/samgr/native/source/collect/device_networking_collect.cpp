@@ -154,7 +154,7 @@ void DeviceNetworkingCollect::ClearDeviceOnlineSet()
     }
 }
 
-bool DeviceNetworkingCollect::CheckCondition(const OnDemandEvent& condition)
+bool DeviceNetworkingCollect::CheckCondition(const OnDemandCondition& condition)
 {
     bool isOnline = IsOnline();
     if (condition.value == "on" && isOnline) {

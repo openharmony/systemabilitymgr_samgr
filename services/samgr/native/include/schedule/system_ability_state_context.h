@@ -75,6 +75,7 @@ struct SystemProcessContext {
 
 struct SystemAbilityContext {
     int32_t systemAbilityId = -1;
+    int32_t delayTime = 0;
     std::shared_ptr<SystemProcessContext> ownProcessContext;
     SystemAbilityState state = SystemAbilityState::NOT_LOADED;
     PendingEvent pendingEvent = PendingEvent::NO_EVENT;

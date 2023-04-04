@@ -77,10 +77,23 @@ void SystemAbilityStateScheduler::InitStateContext(const std::list<SaProfile>& s
         processContextMap_[saProfile.process]->abilityStateCountMap[SystemAbilityState::NOT_LOADED]++;
         auto abilityContext = std::make_shared<SystemAbilityContext>();
         abilityContext->systemAbilityId = saProfile.saId;
+        int32_t delayTime = LimitDelayTime(saProfile.stopOnDemand.delayTime);
+        abilityContext->delayTime = delayTime;
         abilityContext->ownProcessContext = processContextMap_[saProfile.process];
         std::unique_lock<std::shared_mutex> abiltyWriteLock(abiltyMapLock_);
         abilityContextMap_[saProfile.saId] = abilityContext;
     }
+}
+
+int32_t SystemAbilityStateScheduler::LimitDelayTime(int32_t delayTime)
+{
+    if (delayTime < 0) {
+        return 0;
+    }
+    if (delayTime > MAX_DELAY_TIME) {
+        return MAX_DELAY_TIME;
+    }
+    return delayTime;
 }
 
 bool SystemAbilityStateScheduler::GetSystemAbilityContext(int32_t systemAbilityId,
@@ -227,7 +240,7 @@ int32_t SystemAbilityStateScheduler::HandleUnloadAbilityEventLocked(
             if (unloadRequestInfo.unloadEvent.eventId == INTERFACE_CALL) {
                 result = ProcessDelayUnloadEvent(abilityContext->systemAbilityId);
             } else {
-                result = SendDelayUnloadEventLocked(abilityContext->systemAbilityId);
+                result = SendDelayUnloadEventLocked(abilityContext->systemAbilityId, abilityContext->delayTime);
             }
             break;
         default:

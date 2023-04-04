@@ -853,7 +853,7 @@ HWTEST_F(ParseUtilTest, GetOnDemandConditionsFromJson001, TestSize.Level3)
     DTEST_LOG << " GetOnDemandConditionsFromJson001 BEGIN" << std::endl;
     nlohmann::json obj;
     std::string key;
-    std::vector<OnDemandEvent> out;
+    std::vector<OnDemandCondition> out;
     SaProfile saProfile;
     parser_->GetOnDemandConditionsFromJson(obj, key, out);
     EXPECT_TRUE(out.empty());
@@ -879,7 +879,7 @@ HWTEST_F(ParseUtilTest, GetOnDemandConditionsFromJson002, TestSize.Level3)
     obj["conditions"] = conditions;
 
     std::string key = "conditions";
-    std::vector<OnDemandEvent> out;
+    std::vector<OnDemandCondition> out;
     SaProfile saProfile;
     parser_->GetOnDemandConditionsFromJson(obj, key, out);
     EXPECT_EQ(out.size(), 1);
@@ -925,7 +925,7 @@ HWTEST_F(ParseUtilTest, GetOnDemandConditionsFromJson003, TestSize.Level3)
     obj["conditions"] = conditions;
 
     std::string key = "conditions";
-    std::vector<OnDemandEvent> out;
+    std::vector<OnDemandCondition> out;
     SaProfile saProfile;
     parser_->GetOnDemandConditionsFromJson(obj, key, out);
     EXPECT_EQ(out.size(), 5);
@@ -951,7 +951,7 @@ HWTEST_F(ParseUtilTest, GetOnDemandConditionsFromJson004, TestSize.Level3)
     obj["conditions"] = conditions;
 
     std::string key = "conditions";
-    std::vector<OnDemandEvent> out;
+    std::vector<OnDemandCondition> out;
     SaProfile saProfile;
     parser_->GetOnDemandConditionsFromJson(obj, key, out);
     EXPECT_EQ(out.size(), 0);
@@ -1042,8 +1042,8 @@ HWTEST_F(ParseUtilTest, ParseJsonFile006, TestSize.Level3)
     EXPECT_EQ(ret, true);
     SaProfile saProfile;
     parser_->GetProfile(1401, saProfile);
-    EXPECT_EQ(true, saProfile.startOnDemand.empty());
-    EXPECT_EQ(true, saProfile.stopOnDemand.empty());
+    EXPECT_EQ(true, saProfile.startOnDemand.onDemandEvents.empty());
+    EXPECT_EQ(true, saProfile.stopOnDemand.onDemandEvents.empty());
     DTEST_LOG << " ParseJsonFile006 END" << std::endl;
 }
 
@@ -1062,14 +1062,14 @@ HWTEST_F(ParseUtilTest, ParseJsonFile007, TestSize.Level3)
     SaProfile saProfile1;
     parser_->GetProfile(1401, saProfile1);
     EXPECT_EQ(1401, saProfile1.saId);
-    EXPECT_EQ(true, !saProfile1.startOnDemand.empty());
-    EXPECT_EQ(1, saProfile1.startOnDemand[0].eventId);
-    EXPECT_EQ("deviceonline", saProfile1.startOnDemand[0].name);
-    EXPECT_EQ("on", saProfile1.startOnDemand[0].value);
-    EXPECT_EQ(true, !saProfile1.stopOnDemand.empty());
-    EXPECT_EQ(1, saProfile1.stopOnDemand[0].eventId);
-    EXPECT_EQ("deviceonline", saProfile1.stopOnDemand[0].name);
-    EXPECT_EQ("off", saProfile1.stopOnDemand[0].value);
+    EXPECT_EQ(true, !saProfile1.startOnDemand.onDemandEvents.empty());
+    EXPECT_EQ(1, saProfile1.startOnDemand.onDemandEvents[0].eventId);
+    EXPECT_EQ("deviceonline", saProfile1.startOnDemand.onDemandEvents[0].name);
+    EXPECT_EQ("on", saProfile1.startOnDemand.onDemandEvents[0].value);
+    EXPECT_EQ(true, !saProfile1.stopOnDemand.onDemandEvents.empty());
+    EXPECT_EQ(1, saProfile1.stopOnDemand.onDemandEvents[0].eventId);
+    EXPECT_EQ("deviceonline", saProfile1.stopOnDemand.onDemandEvents[0].name);
+    EXPECT_EQ("off", saProfile1.stopOnDemand.onDemandEvents[0].value);
     SaProfile saProfile2;
     parser_->GetProfile(6001, saProfile2);
     EXPECT_EQ(6001, saProfile2.saId);
