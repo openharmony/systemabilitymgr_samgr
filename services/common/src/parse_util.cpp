@@ -71,7 +71,7 @@ void ParseLibPath(const string& libPath, string& fileName, string& libDir)
     std::vector<string> libPathVec;
     SplitStr(libPath, "/", libPathVec);
     if ((libPathVec.size() > 0)) {
-        int fileNameIndex = libPathVec.size() - 1;
+        int fileNameIndex = static_cast<int>(libPathVec.size()) - 1;
         fileName = libPathVec[fileNameIndex];
         int libDirIndex = fileNameIndex - 1;
         if (libDirIndex >= 0) {
@@ -149,7 +149,8 @@ void ParseUtil::OpenSo(SaProfile& saProfile)
         }
         bool loadFromModuleUpdate = false;
         Dl_namespace dlNs;
-        string updateLibPath = GetRealPath("/module_update/" + ToString(saProfile.saId) + "/" + libDir + "/" + fileName);
+        string updateLibPath = GetRealPath("/module_update/" + ToString(saProfile.saId) + "/" + libDir + "/"
+            + fileName);
         if (CheckPathExist(updateLibPath)) {
             Dl_namespace currentNs;
             string nsName = "module_update_" + ToString(saProfile.saId);
