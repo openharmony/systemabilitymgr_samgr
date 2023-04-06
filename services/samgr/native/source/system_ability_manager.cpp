@@ -16,6 +16,7 @@
 #include "system_ability_manager.h"
 
 #include <cinttypes>
+#include <thread>
 #include <unistd.h>
 
 #include "ability_death_recipient.h"
@@ -51,6 +52,7 @@ const string PREFIX = "/system/profile/";
 const string LOCAL_DEVICE = "local";
 const string ONDEMAND_PARAM = "persist.samgr.perf.ondemand";
 constexpr const char* ONDEMAND_PERF_PARAM = "persist.samgr.perf.ondemand";
+constexpr const char* ONDEMAND_WORKER = "OndemandLoader";
 
 constexpr uint32_t REPORT_GET_SA_INTERVAL = 24 * 60 * 60 * 1000; // ms and is one day
 constexpr int32_t MAX_NAME_SIZE = 200;
@@ -75,9 +77,6 @@ SystemAbilityManager::SystemAbilityManager()
 
 SystemAbilityManager::~SystemAbilityManager()
 {
-    if (loadPool_ != nullptr) {
-        loadPool_->Stop();
-    }
     if (reportEventTimer_ != nullptr) {
         reportEventTimer_->Shutdown();
     }
@@ -101,9 +100,6 @@ void SystemAbilityManager::Init()
     abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
     InitSaProfile();
     WatchDogInit();
-    loadPool_ = std::make_unique<ThreadPool>("OndemandLoader");
-    loadPool_->Start(std::thread::hardware_concurrency());
-    loadPool_->SetMaxTaskNum(std::thread::hardware_concurrency());
     reportEventTimer_ = std::make_unique<Utils::Timer>("DfxReporter");
     OndemandLoadForPerf();
 }
@@ -1395,9 +1391,6 @@ bool SystemAbilityManager::ActiveSystemAbility(int32_t systemAbilityId, const st
 int32_t SystemAbilityManager::LoadSystemAbility(int32_t systemAbilityId, const std::string& deviceId,
     const sptr<ISystemAbilityLoadCallback>& callback)
 {
-    if (loadPool_ == nullptr) {
-        return ERR_NO_INIT;
-    }
     std::string key = ToString(systemAbilityId) + "_" + deviceId;
     {
         lock_guard<mutex> autoLock(loadRemoteLock_);
@@ -1420,7 +1413,8 @@ int32_t SystemAbilityManager::LoadSystemAbility(int32_t systemAbilityId, const s
     auto callingUid = IPCSkeleton::GetCallingUid();
     auto task = std::bind(&SystemAbilityManager::DoLoadRemoteSystemAbility, this,
         systemAbilityId, callingPid, callingUid, deviceId, callback);
-    loadPool_->AddTask(task);
+    std::thread thread(task);
+    thread.detach();
     return ERR_OK;
 }
 
@@ -1428,6 +1422,7 @@ void SystemAbilityManager::DoLoadRemoteSystemAbility(int32_t systemAbilityId, in
     int32_t callingUid, const std::string& deviceId, const sptr<ISystemAbilityLoadCallback>& callback)
 {
     Samgr::MemoryGuard cacheGuard;
+    pthread_setname_np(pthread_self(), ONDEMAND_WORKER);
     sptr<DBinderServiceStub> remoteBinder = DoMakeRemoteBinder(systemAbilityId, callingPid, callingUid, deviceId);
 
     if (callback == nullptr) {

@@ -1006,7 +1006,7 @@ HWTEST_F(SystemAbilityMgrStubTest, LoadRemoteSystemAbilityInner004, TestSize.Lev
     data.WriteString(deviceId);
     data.WriteRemoteObject(callback);
     int32_t result = saMgr->LoadRemoteSystemAbilityInner(data, reply);
-    EXPECT_EQ(result, ERR_NO_INIT);
+    EXPECT_EQ(result, ERR_OK);
 }
 
 /**
@@ -2210,7 +2210,7 @@ HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbility006, TestSize.Level1)
     string deviceId = "deviceId";
     saMgr->remoteCallbacks_["1499_deviceId"].push_back(callback);
     int32_t res = saMgr->LoadSystemAbility(SAID, deviceId, callback);
-    EXPECT_EQ(res, ERR_NO_INIT);
+    EXPECT_EQ(res, ERR_OK);
 }
 
 /**
@@ -2226,7 +2226,7 @@ HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbility007, TestSize.Level3)
     saMgr->remoteCallbacks_.clear();
     saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
     int32_t res = saMgr->LoadSystemAbility(SAID, deviceId, callback);
-    EXPECT_EQ(res, ERR_NO_INIT);
+    EXPECT_EQ(res, ERR_OK);
 }
 
 /**

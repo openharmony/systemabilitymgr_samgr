@@ -241,8 +241,6 @@ private:
     std::mutex loadRemoteLock_;
     std::map<std::string, std::list<sptr<ISystemAbilityLoadCallback>>> remoteCallbacks_; // key : said_deviceId
 
-    std::unique_ptr<ThreadPool> loadPool_;
-
     std::mutex saFrequencyLock_;
     std::map<uint64_t, int32_t> saFrequencyMap_; // {pid_said, count}
 
