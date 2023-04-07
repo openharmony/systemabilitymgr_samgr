@@ -283,6 +283,7 @@ enum {
     SUBSYS_TESTPLATFORM_SYS_ABILITY_ID_BEGIN         = 5500,
     DEVICE_ATTEST_PROFILE_SA_ID                      = 5501,
     DISTRIBUTED_DEVICE_PROFILE_SA_ID                 = 6001,
+    PUSH_MANAGER_SERVICE_SA_ID                       = 6103,
     SUBSYS_ACE_SYS_ABILITY_ID_BEGIN                  = 7001,
     ARKUI_UI_APPEARANCE_SERVICE_ID                   = 7002,
     CA_DAEMON_ID                                     = 8001,
