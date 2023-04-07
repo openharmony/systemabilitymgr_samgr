@@ -28,10 +28,12 @@ const LOG_LABEL: HiLogLabel = HiLogLabel {
 };
 
 pub enum ISystemAbilityManagerCode {
-    /// get systemability code
-    CodeGetSystemAbility = 2,
-    /// add systemability code
-    CodeAddSystemAbility = 3,
+    /// get code
+    Get = 2,
+    /// add code
+    Add = 3,
+    /// unload code
+    Unload = 21,
 }
 
 /// SAExtraProp is used to add_systemability
@@ -63,6 +65,8 @@ pub trait ISystemAbilityManager: IRemoteBroker {
     fn add_systemability(&self, service: &RemoteObj, said: i32,  extra_prop: SAExtraProp) -> IpcResult<()>;
     /// get_systemability
     fn get_systemability(&self, said: i32) -> IpcResult<RemoteObj>;
+    /// unload_systemability
+    fn unload_systemability(&self, said: i32) -> IpcResult<()>;
 }
 
 impl FromRemoteObj for dyn ISystemAbilityManager {
@@ -125,7 +129,7 @@ impl ISystemAbilityManager for SystemAbilityManagerProxy {
         data.write(&extra_prop.capability)?;
         data.write(&extra_prop.permission)?;
         let reply = self.remote.send_request(
-            ISystemAbilityManagerCode::CodeAddSystemAbility as u32, &data, false)?;
+            ISystemAbilityManagerCode::Add as u32, &data, false)?;
         let reply_value: i32 = reply.read()?;
         info!(LOG_LABEL, "register service result: {}", reply_value);
         if reply_value == 0 { Ok(())} else { Err(parse_status_code(reply_value)) }
@@ -137,8 +141,20 @@ impl ISystemAbilityManager for SystemAbilityManagerProxy {
         data.write(&InterfaceToken::new("ohos.samgr.accessToken"))?;
         data.write(&said)?;
         let reply = self.remote.send_request(
-            ISystemAbilityManagerCode::CodeGetSystemAbility as u32, &data, false)?;
+            ISystemAbilityManagerCode::Get as u32, &data, false)?;
         let remote: RemoteObj = reply.read()?;
         Ok(remote)
+    }
+
+    fn unload_systemability(&self, said: i32) -> IpcResult<()>
+    {
+        let mut data = MsgParcel::new().expect("MsgParcel is null");
+        data.write(&InterfaceToken::new("ohos.samgr.accessToken"))?;
+        data.write(&said)?;
+        let reply = self.remote.send_request(
+            ISystemAbilityManagerCode::Unload as u32, &data, false)?;
+        let reply_value: i32 = reply.read()?;
+        info!(LOG_LABEL, "unload service result: {}", reply_value);
+        if reply_value == 0 { Ok(())} else { Err(parse_status_code(reply_value)) }
     }
 }

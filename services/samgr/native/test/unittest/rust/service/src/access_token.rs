@@ -39,7 +39,7 @@ extern "C" {
 pub fn init_access_token()
 {
     let perms_str =  CString::new("ohos.permission.DISTRIBUTED_DATASYNC").expect("permission is invalid");
-    let name = CString::new("distributedsched").expect("process name is invalid");
+    let name = CString::new("listen_test").expect("process name is invalid");
     let apl = CString::new("system_core").expect("apl string is invalid");
     let mut param = TokenInfoParams {
         dcaps_num: 0,
