@@ -452,6 +452,7 @@ static const std::map<int, std::string> saNameMap_ = {
     { DEVICE_ATTEST_PROFILE_SA_ID, "devattest_service" },
     { AIDISPATCHER_ENGINE_SERVICE, "AIDispatcherEngineService" },
     { SECURITY_COMPONENT_SERVICE_ID, "SecurityComponentService" },
+    { PUSH_MANAGER_SERVICE_SA_ID, "PushManagerService" },
 };
 } // namespace OHOS
 
