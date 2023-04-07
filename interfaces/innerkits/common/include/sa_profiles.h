@@ -52,6 +52,7 @@ struct OnDemandEvent {
     int32_t eventId;
     std::string name;
     std::string value;
+    int64_t extraDataId = -1;
     std::vector<OnDemandCondition> conditions;
     bool enableOnce = false;
 

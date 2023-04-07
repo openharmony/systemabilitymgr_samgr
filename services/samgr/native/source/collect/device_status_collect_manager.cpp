@@ -175,4 +175,22 @@ void DeviceStatusCollectManager::PostDelayTask(std::function<void()> callback, i
     HILOGI("DeviceStatusCollectManager PostDelayTask begin");
     collectHandler_->PostTask(callback, delayTime * SECOND);
 }
+
+int32_t DeviceStatusCollectManager::GetOnDemandReasonExtraData(int64_t extraDataId, OnDemandReasonExtraData& extraData)
+{
+    HILOGI("DeviceStatusCollectManager GetOnDemandReasonExtraData begin");
+    if (collectPluginMap_.count(COMMON_EVENT) == 0) {
+        HILOGE("not support get extra data");
+        return ERR_INVALID_VALUE;
+    }
+    if (collectPluginMap_[COMMON_EVENT] == nullptr) {
+        HILOGE("CommonEventCollect is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    if (!collectPluginMap_[COMMON_EVENT]->GetOnDemandReasonExtraData(extraDataId, extraData)) {
+        HILOGE("get extra data failed");
+        return ERR_INVALID_VALUE;
+    }
+    return ERR_OK;
+}
 }  // namespace OHOS

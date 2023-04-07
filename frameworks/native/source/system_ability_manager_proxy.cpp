@@ -881,4 +881,50 @@ int32_t SystemAbilityManagerProxy::UnSubscribeSystemProcess(const sptr<ISystemPr
     }
     return result;
 }
+
+int32_t SystemAbilityManagerProxy::GetOnDemandReasonExtraData(int64_t extraDataId, MessageParcel& extraDataParcel)
+{
+    HILOGI("GetOnDemandReasonExtraData called");
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("GetOnDemandReasonExtraData remote is nullptr");
+        return ERR_INVALID_OPERATION;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        HILOGE("GetOnDemandReasonExtraData write interface token failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt64(extraDataId)) {
+        HILOGE("GetOnDemandReasonExtraData write extraDataId failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageOption option;
+    int32_t err = remote->SendRequest(GET_ONDEMAND_REASON_EXTRA_DATA_TRANSACTION, data, extraDataParcel, option);
+    if (err != ERR_NONE) {
+        HILOGE("GetOnDemandReasonExtraData SendRequest error:%{public}d", err);
+        return err;
+    }
+    HILOGI("GetOnDemandReasonExtraData SendRequest succeed");
+    int32_t result = 0;
+    if (!extraDataParcel.ReadInt32(result)) {
+        HILOGE("GetOnDemandReasonExtraData read result failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
+int32_t SystemAbilityManagerProxy::GetOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
+    std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents)
+{
+    return ERR_OK;
+}
+
+int32_t SystemAbilityManagerProxy::UpdateOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
+    const std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents)
+{
+    return ERR_OK;
+}
 } // namespace OHOS

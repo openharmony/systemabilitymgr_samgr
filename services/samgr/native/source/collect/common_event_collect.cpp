@@ -30,7 +30,11 @@ namespace OHOS {
 namespace {
 constexpr uint32_t INIT_EVENT = 10;
 constexpr uint32_t COMMON_DIED_EVENT = 11;
+constexpr uint32_t REMOVE_EXTRA_DATA_EVENT = 12;
+constexpr uint32_t REMOVE_EXTRA_DATA_DELAY_TIME = 300000;
 constexpr int64_t DELAY_TIME = 1000;
+constexpr int64_t MAX_EXTRA_DATA_ID = 1000000000;
+const std::string UID = "uid";
 }
 
 CommonEventCollect::CommonEventCollect(const sptr<IReport>& report)
@@ -156,6 +160,49 @@ bool CommonEventCollect::CheckCondition(const OnDemandCondition& condition)
     return commonEventState_.count(condition.name) > 0;
 }
 
+int64_t CommonEventCollect::GenerateExtraDataIdLocked()
+{
+    extraDataId_++;
+    if (extraDataId_ > MAX_EXTRA_DATA_ID) {
+        extraDataId_ = 1;
+    }
+    return extraDataId_;
+}
+
+int64_t CommonEventCollect::SaveOnDemandReasonExtraData(const EventFwk::CommonEventData& data)
+{
+    std::lock_guard<std::mutex> autoLock(extraDataLock_);
+    HILOGD("CommonEventCollect extraData code: %{public}d, data: %{public}s", data.GetCode(),
+        data.GetData().c_str());
+    int32_t uid = data.GetWant().GetIntParam(UID, -1);
+    std::map<std::string, std::string> want;
+    want[UID] = std::to_string(uid);
+    OnDemandReasonExtraData extraData(data.GetCode(), data.GetData(), want);
+    int64_t extraDataId = GenerateExtraDataIdLocked();
+    extraDatas_[extraDataId] = extraData;
+    HILOGD("CommonEventCollect save extraData %{public}lld", extraDataId);
+    workHandler_->SendEvent(REMOVE_EXTRA_DATA_EVENT, extraDataId, REMOVE_EXTRA_DATA_DELAY_TIME);
+    return extraDataId;
+}
+
+void CommonEventCollect::RemoveOnDemandReasonExtraData(int64_t extraDataId)
+{
+    std::lock_guard<std::mutex> autoLock(extraDataLock_);
+    extraDatas_.erase(extraDataId);
+    HILOGD("CommonEventCollect remove extraData %{public}lld", extraDataId);
+}
+
+bool CommonEventCollect::GetOnDemandReasonExtraData(int64_t extraDataId, OnDemandReasonExtraData& extraData)
+{
+    std::lock_guard<std::mutex> autoLock(extraDataLock_);
+    HILOGI("CommonEventCollect get extraData %{public}lld", extraDataId);
+    if (extraDatas_.count(extraDataId) == 0) {
+        return false;
+    }
+    extraData = extraDatas_[extraDataId];
+    return true;
+}
+
 void CommonHandler::ProcessEvent(const InnerEvent::Pointer& event)
 {
     if (commonCollect_ == nullptr || event == nullptr) {
@@ -163,13 +210,17 @@ void CommonHandler::ProcessEvent(const InnerEvent::Pointer& event)
         return;
     }
     auto eventId = event->GetInnerEventId();
-    if (eventId != INIT_EVENT && eventId != COMMON_DIED_EVENT) {
+    if (eventId != INIT_EVENT && eventId != COMMON_DIED_EVENT && eventId != REMOVE_EXTRA_DATA_EVENT) {
         HILOGE("CommonEventCollect ProcessEvent error event code!");
         return;
     }
     auto commonCollect = commonCollect_.promote();
     if (commonCollect == nullptr) {
         HILOGE("CommonEventCollect collect is nullptr");
+        return;
+    }
+    if (eventId == REMOVE_EXTRA_DATA_EVENT) {
+        commonCollect->RemoveOnDemandReasonExtraData(event->GetParam());
         return;
     }
     if (!commonCollect->AddCommonListener()) {
@@ -188,13 +239,14 @@ void CommonEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData& data
 {
     std::string action = data.GetWant().GetAction();
     HILOGI("OnReceiveEvent get action: %{public}s", action.c_str());
-    OnDemandEvent event = {COMMON_EVENT, action, ""};
     auto collect = collect_.promote();
     if (collect == nullptr) {
         HILOGE("CommonEventCollect collect is nullptr");
         return;
     }
     collect->SaveAction(action);
+    int64_t extraDataId = collect->SaveOnDemandReasonExtraData(data);
+    OnDemandEvent event = {COMMON_EVENT, action, "", extraDataId};
     collect->ReportEvent(event);
 }
 

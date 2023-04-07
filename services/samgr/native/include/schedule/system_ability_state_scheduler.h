@@ -24,6 +24,7 @@
 
 #include "event_handler.h"
 #include "isystem_process_status_change.h"
+#include "nlohmann/json.hpp"
 #include "sa_profiles.h"
 #include "schedule/system_ability_event_handler.h"
 
@@ -92,7 +93,7 @@ private:
     void OnProcessStartedLocked(const std::u16string& processName) override;
 
     int32_t ActiveSystemAbilityLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext,
-        const std::unordered_map<std::string, std::string>& activeReason);
+        const nlohmann::json& activeReason);
 
     class UnloadEventHandler : public AppExecFwk::EventHandler {
     public:

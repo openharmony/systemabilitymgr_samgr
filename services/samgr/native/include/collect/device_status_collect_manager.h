@@ -21,6 +21,7 @@
 
 #include "event_handler.h"
 #include "icollect_plugin.h"
+#include "system_ability_ondemand_reason.h"
 
 namespace OHOS {
 class DeviceStatusCollectManager : public IReport {
@@ -32,6 +33,7 @@ public:
     void ReportEvent(const OnDemandEvent& event) override;
     void StartCollect();
     void PostDelayTask(std::function<void()> callback, int32_t delayTime) override;
+    int32_t GetOnDemandReasonExtraData(int64_t extraDataId, OnDemandReasonExtraData& extraData);
 private:
     void FilterOnDemandSaProfiles(const std::list<SaProfile>& saProfiles);
     void GetSaControlListByEvent(const OnDemandEvent& event, std::list<SaControlInfo>& saControlList);

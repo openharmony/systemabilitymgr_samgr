@@ -25,6 +25,7 @@
 #include "isystem_ability_load_callback.h"
 #include "isystem_ability_status_change.h"
 #include "isystem_process_status_change.h"
+#include "system_ability_on_demand_event.h"
 
 namespace OHOS {
 class ISystemAbilityManager : public IRemoteBroker {
@@ -70,6 +71,9 @@ public:
         GET_RUNNING_SYSTEM_PROCESS_TRANSACTION = 23,
         SUBSCRIBE_SYSTEM_PROCESS_TRANSACTION = 24,
         UNSUBSCRIBE_SYSTEM_PROCESS_TRANSACTION = 25,
+        GET_ONDEMAND_REASON_EXTRA_DATA_TRANSACTION = 26,
+        GET_ONDEAMND_POLICY_TRANSACTION = 27,
+        UPDATE_ONDEAMND_POLICY_TRANSACTION = 28,
     };
 
     // Retrieve an existing ability, retrying and blocking for a few seconds if it doesn't exist.
@@ -130,6 +134,11 @@ public:
     virtual int32_t GetRunningSystemProcess(std::list<SystemProcessInfo>& systemProcessInfos) = 0;
     virtual int32_t SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener) = 0;
     virtual int32_t UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener) = 0;
+    virtual int32_t GetOnDemandReasonExtraData(int64_t extraDataId, MessageParcel& extraDataParcel) = 0;
+    virtual int32_t GetOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
+        std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents) = 0;
+    virtual int32_t UpdateOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
+        const std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents) = 0;
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISystemAbilityManager");
 protected:

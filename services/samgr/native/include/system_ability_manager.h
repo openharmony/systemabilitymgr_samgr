@@ -97,7 +97,7 @@ public:
     int32_t GetRunningSystemProcess(std::list<SystemProcessInfo>& systemProcessInfos) override;
     int32_t SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener) override;
     int32_t UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener) override;
-
+    int32_t GetOnDemandReasonExtraData(int64_t extraDataId, MessageParcel& extraDataParcel) override;
     int32_t LoadSystemAbility(int32_t systemAbilityId, const sptr<ISystemAbilityLoadCallback>& callback) override;
     int32_t DoLoadSystemAbility(int32_t systemAbilityId, const std::u16string& procName,
         const sptr<ISystemAbilityLoadCallback>& callback, int32_t callingPid, const OnDemandEvent& event);
@@ -108,9 +108,9 @@ public:
     int32_t CancelUnloadSystemAbility(int32_t systemAbilityId) override;
     int32_t DoUnloadSystemAbility(int32_t systemAbilityId, const std::u16string& procName);
     bool IdleSystemAbility(int32_t systemAbilityId, const std::u16string& procName,
-        const std::unordered_map<std::string, std::string>& idleReason, int32_t& delayTime);
+        const nlohmann::json& idleReason, int32_t& delayTime);
     bool ActiveSystemAbility(int32_t systemAbilityId, const std::u16string& procName,
-        const std::unordered_map<std::string, std::string>& activeReason);
+        const nlohmann::json& activeReason);
     void OnAbilityCallbackDied(const sptr<IRemoteObject>& remoteObject);
     void OnRemoteCallbackDied(const sptr<IRemoteObject>& remoteObject);
     sptr<IRemoteObject> GetSystemAbilityFromRemote(int32_t systemAbilityId);
@@ -123,6 +123,10 @@ public:
     void StartDfxTimer();
     void DoLoadForPerf();
     void ProcessOnDemandEvent(const OnDemandEvent& event, const std::list<SaControlInfo>& saControlList);
+    int32_t GetOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
+        std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents) override;
+    int32_t UpdateOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
+        const std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents) override;
 private:
     enum class AbilityState {
         INIT,

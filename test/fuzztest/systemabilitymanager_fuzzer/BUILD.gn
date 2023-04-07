@@ -80,6 +80,7 @@ ohos_fuzztest("SystemAbilityManagerFuzzTest") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "ipc:libdbinder",
+    "safwk:system_ability_fwk",
     "samgr:samgr_common",
     "samgr:samgr_proxy",
   ]

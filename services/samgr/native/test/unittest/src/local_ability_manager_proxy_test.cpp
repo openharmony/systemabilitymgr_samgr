@@ -203,7 +203,7 @@ HWTEST_F(LocalAbilityManagerProxyTest, ActiveAbility001, TestSize.Level3)
     sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
     sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
     EXPECT_NE(localAbility, nullptr);
-    std::unordered_map<std::string, std::string> activeReason;
+    nlohmann::json activeReason;
     bool res = localAbility->ActiveAbility(TEST_SAID_INVAILD, activeReason);
     EXPECT_EQ(res, false);
 }
@@ -219,7 +219,7 @@ HWTEST_F(LocalAbilityManagerProxyTest, ActiveAbility002, TestSize.Level3)
     sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
     sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
     EXPECT_NE(localAbility, nullptr);
-    std::unordered_map<std::string, std::string> activeReason;
+    nlohmann::json activeReason;
     bool res = localAbility->ActiveAbility(TEST_SAID_VAILD, activeReason);
     EXPECT_EQ(res, false);
 }
@@ -234,7 +234,7 @@ HWTEST_F(LocalAbilityManagerProxyTest, ActiveAbility003, TestSize.Level3)
 {
     sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
     sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
-    std::unordered_map<std::string, std::string> activeReason;
+    nlohmann::json activeReason;
     activeReason[EVENT_ID] = TEST_STRING;
     activeReason[EVENT_NAME] = TEST_STRING;
     bool ret = localAbility->ActiveAbility(TEST_SAID_VAILD, activeReason);
@@ -251,7 +251,7 @@ HWTEST_F(LocalAbilityManagerProxyTest, IdleAbility001, TestSize.Level3)
 {
     sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
     sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
-    std::unordered_map<std::string, std::string> idleReason;
+    nlohmann::json idleReason;
     int32_t delayTime = 0;
     bool ret = localAbility->IdleAbility(TEST_SAID_INVAILD, idleReason, delayTime);
     EXPECT_FALSE(ret);
@@ -267,7 +267,7 @@ HWTEST_F(LocalAbilityManagerProxyTest, IdleAbility002, TestSize.Level3)
 {
     sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
     sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
-    std::unordered_map<std::string, std::string> idleReason;
+    nlohmann::json idleReason;
     idleReason[EVENT_ID] = TEST_STRING;
     idleReason[EVENT_NAME] = TEST_STRING;
     int32_t delayTime = 0;

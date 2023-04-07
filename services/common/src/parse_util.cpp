@@ -557,7 +557,7 @@ void ParseUtil::GetOnDemandArrayFromJson(int32_t eventId, const nlohmann::json& 
             GetBoolFromJson(item, "enable-once", enableOnce);
             if (!name.empty() && name.length() <= MAX_JSON_STRING_LENGTH &&
                 value.length() <= MAX_JSON_STRING_LENGTH) {
-                OnDemandEvent event = {eventId, name, value, conditions, enableOnce};
+                OnDemandEvent event = {eventId, name, value, -1, conditions, enableOnce};
                 out.emplace_back(event);
             }
         }
