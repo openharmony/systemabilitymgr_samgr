@@ -23,6 +23,9 @@
 #ifdef SUPPORT_COMMON_EVENT
 #include "common_event_collect.h"
 #endif
+#ifdef SUPPORT_SWITCH_COLLECT
+#include "device_switch_collect.h"
+#endif
 #include "device_param_collect.h"
 #include "memory_guard.h"
 #include "sam_log.h"
@@ -50,6 +53,11 @@ void DeviceStatusCollectManager::Init(const std::list<SaProfile>& saProfiles)
     sptr<CommonEventCollect> eventStatuscollect = new CommonEventCollect(this);
     eventStatuscollect->Init(onDemandSaProfiles_);
     collectPluginMap_[COMMON_EVENT] = eventStatuscollect;
+#endif
+#ifdef SUPPORT_SWITCH_COLLECT
+    sptr<DeviceSwitchCollect> deviceSwitchCollect = new DeviceSwitchCollect(this);
+    deviceSwitchCollect->Init(saProfiles);
+    collectPluginMap_[SETTING_SWITCH] = deviceSwitchCollect;
 #endif
     sptr<DeviceTimedCollect> timedCollect = new DeviceTimedCollect(this);
     timedCollect->Init(onDemandSaProfiles_);

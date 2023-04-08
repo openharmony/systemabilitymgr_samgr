@@ -123,6 +123,12 @@ ohos_executable("samgr") {
       defines += [ "SUPPORT_COMMON_EVENT" ]
     }
 
+    if (support_common_event && bluetooth_part_enable) {
+      sources += [ "//foundation/systemabilitymgr/samgr/services/samgr/native/source/collect/device_switch_collect.cpp" ]
+      external_deps += [ "bluetooth:btframework" ]
+      defines += [ "SUPPORT_SWITCH_COLLECT" ]
+    }
+
     public_deps = [ "//third_party/libxml2:libxml2" ]
     part_name = "samgr"
   }
