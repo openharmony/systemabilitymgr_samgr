@@ -180,7 +180,7 @@ int64_t CommonEventCollect::SaveOnDemandReasonExtraData(const EventFwk::CommonEv
     OnDemandReasonExtraData extraData(data.GetCode(), data.GetData(), want);
     int64_t extraDataId = GenerateExtraDataIdLocked();
     extraDatas_[extraDataId] = extraData;
-    HILOGD("CommonEventCollect save extraData %{public}lld", extraDataId);
+    HILOGD("CommonEventCollect save extraData %{public}d", static_cast<int32_t>(extraDataId));
     workHandler_->SendEvent(REMOVE_EXTRA_DATA_EVENT, extraDataId, REMOVE_EXTRA_DATA_DELAY_TIME);
     return extraDataId;
 }
@@ -189,13 +189,13 @@ void CommonEventCollect::RemoveOnDemandReasonExtraData(int64_t extraDataId)
 {
     std::lock_guard<std::mutex> autoLock(extraDataLock_);
     extraDatas_.erase(extraDataId);
-    HILOGD("CommonEventCollect remove extraData %{public}lld", extraDataId);
+    HILOGD("CommonEventCollect remove extraData %{public}d", static_cast<int32_t>(extraDataId));
 }
 
 bool CommonEventCollect::GetOnDemandReasonExtraData(int64_t extraDataId, OnDemandReasonExtraData& extraData)
 {
     std::lock_guard<std::mutex> autoLock(extraDataLock_);
-    HILOGI("CommonEventCollect get extraData %{public}lld", extraDataId);
+    HILOGI("CommonEventCollect get extraData %{public}d", static_cast<int32_t>(extraDataId));
     if (extraDatas_.count(extraDataId) == 0) {
         return false;
     }
