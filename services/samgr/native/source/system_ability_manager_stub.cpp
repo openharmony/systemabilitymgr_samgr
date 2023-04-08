@@ -208,10 +208,6 @@ int32_t SystemAbilityManagerStub::ListSystemAbilityInner(MessageParcel& data, Me
 
 int32_t SystemAbilityManagerStub::SubsSystemAbilityInner(MessageParcel& data, MessageParcel& reply)
 {
-    if (!CanRequest()) {
-        HILOGE("SubsSystemAbilityInner PERMISSION DENIED!");
-        return ERR_PERMISSION_DENIED;
-    }
     int32_t systemAbilityId = data.ReadInt32();
     if (!CheckInputSysAbilityId(systemAbilityId)) {
         HILOGW("SystemAbilityManagerStub::SubsSystemAbilityInner read systemAbilityId failed!");
@@ -240,10 +236,6 @@ int32_t SystemAbilityManagerStub::SubsSystemAbilityInner(MessageParcel& data, Me
 
 int32_t SystemAbilityManagerStub::UnSubsSystemAbilityInner(MessageParcel& data, MessageParcel& reply)
 {
-    if (!CanRequest()) {
-        HILOGE("UnSubsSystemAbilityInner PERMISSION DENIED!");
-        return ERR_PERMISSION_DENIED;
-    }
     int32_t systemAbilityId = data.ReadInt32();
     if (!CheckInputSysAbilityId(systemAbilityId)) {
         HILOGW("SystemAbilityManagerStub::UnSubsSystemAbilityInner read systemAbilityId failed!");
