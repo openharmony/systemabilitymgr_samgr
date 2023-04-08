@@ -25,30 +25,30 @@ class ISystemAbilityLoadCallback : public IRemoteBroker {
 public:
     virtual ~ISystemAbilityLoadCallback() = default;
     /**
-     * OnLoadSystemAbilitySuccess, OnLoadSystemAbilitySuccess will be called when loadsystemability success
+     * OnLoadSystemAbilitySuccess, OnLoadSystemAbilitySuccess will be called when loadsystemability success.
      *
-     * @param systemAbilityId,.The loaded said
-     * @param remoteObject,.Loaded sa object
-     * @return void
+     * @param systemAbilityId, The loaded said.
+     * @param remoteObject, Loaded sa object.
+     * @return void.
      */
     virtual void OnLoadSystemAbilitySuccess([[maybe_unused]] int32_t systemAbilityId,
         [[maybe_unused]] const sptr<IRemoteObject>& remoteObject) {}
     
     /**
-     * OnLoadSystemAbilityFail, OnLoadSystemAbilityFail will be called when loadsystemability failed
+     * OnLoadSystemAbilityFail, OnLoadSystemAbilityFail will be called when loadsystemability failed.
      *
-     * @param systemAbilityId,.The loaded said
-     * @return void
+     * @param systemAbilityId, The loaded said.
+     * @return void.
      */
     virtual void OnLoadSystemAbilityFail([[maybe_unused]] int32_t systemAbilityId) {}
     
     /**
-     * OnLoadSACompleteForRemote, OnLoadSACompleteForRemote will be called when loadsystemability remote
+     * OnLoadSACompleteForRemote, OnLoadSACompleteForRemote will be called when loadsystemability remote.
      *
-     * @param deviceId,.DeviceId of the remote
-     * @param systemAbilityId,.The loaded said
-     * @param remoteObject,.Loaded sa object
-     * @return void
+     * @param deviceId, DeviceId of the remote.
+     * @param systemAbilityId, The loaded said.
+     * @param remoteObject, Loaded sa object.
+     * @return void.
      */
     virtual void OnLoadSACompleteForRemote([[maybe_unused]] const std::string& deviceId,
         [[maybe_unused]] int32_t systemAbilityId, [[maybe_unused]] const sptr<IRemoteObject>& remoteObject) {}

@@ -32,8 +32,8 @@ public:
     /**
      * ListSystemAbilities, Return list of all existing abilities.
      *
-     * @param dumpFlags,.dump all
-     * @return Returns the sa where the current samgr exists
+     * @param dumpFlags, dump all.
+     * @return Returns the sa where the current samgr exists.
      */
     virtual std::vector<std::u16string> ListSystemAbilities(unsigned int dumpFlags = DUMP_FLAG_PRIORITY_ALL) = 0;
 
@@ -79,43 +79,43 @@ public:
     /**
      * GetSystemAbility, Retrieve an existing ability, retrying and blocking for a few seconds if it doesn't exist.
      *
-     * @param systemAbilityId,.Need to obtain the said of sa
-     * @return nullptr indicates acquisition failure
+     * @param systemAbilityId, Need to obtain the said of sa.
+     * @return nullptr indicates acquisition failure.
      */
     virtual sptr<IRemoteObject> GetSystemAbility(int32_t systemAbilityId) = 0;
 
     /**
      * CheckSystemAbility, Retrieve an existing ability, no-blocking.
      *
-     * @param systemAbilityId,.Need to obtain the said of sa
-     * @return nullptr indicates acquisition failure
+     * @param systemAbilityId, Need to obtain the said of sa.
+     * @return nullptr indicates acquisition failure.
      */
     virtual sptr<IRemoteObject> CheckSystemAbility(int32_t systemAbilityId) = 0;
 
     /**
      * RemoveSystemAbility, Remove an ability.
      *
-     * @param systemAbilityId,.Need to remove the said of sa
-     * @return ERR_OK indicates remove success
+     * @param systemAbilityId, Need to remove the said of sa.
+     * @return ERR_OK indicates remove success.
      */
     virtual int32_t RemoveSystemAbility(int32_t systemAbilityId) = 0;
 
     /**
-     * SubscribeSystemAbility, Subscribe a system ability status, and inherit from ISystemAbilityStatusChange class.
+     * SubscribeSystemAbility, Subscribe a system ability status.
      *
-     * @param systemAbilityId,.Need to subscribe the said of sa
-     * @param listener,.Need to implement OnAddSystemAbility, OnRemoveSystemAbility
-     * @return ERR_OK indicates SubscribeSystemAbility success
+     * @param systemAbilityId, Need to subscribe the said of sa.
+     * @param listener, Need to implement OnAddSystemAbility, OnRemoveSystemAbility.
+     * @return ERR_OK indicates SubscribeSystemAbility success.
      */
     virtual int32_t SubscribeSystemAbility(int32_t systemAbilityId,
         const sptr<ISystemAbilityStatusChange>& listener) = 0;
 
     /**
-     * UnSubscribeSystemAbility, UnSubscribe a system ability status, and inherit from ISystemAbilityStatusChange class.
+     * UnSubscribeSystemAbility, UnSubscribe a system ability status.
      *
-     * @param systemAbilityId,.Need to UnSubscribe the said of sa
-     * @param listener,.Need to implement OnAddSystemAbility, OnRemoveSystemAbility
-     * @return ERR_OK indicates SubscribeSystemAbility success
+     * @param systemAbilityId, Need to UnSubscribe the said of sa.
+     * @param listener, Need to implement OnAddSystemAbility, OnRemoveSystemAbility.
+     * @return ERR_OK indicates SubscribeSystemAbility success.
      */
     virtual int32_t UnSubscribeSystemAbility(int32_t systemAbilityId,
         const sptr<ISystemAbilityStatusChange>& listener) = 0;
@@ -123,27 +123,27 @@ public:
     /**
      * GetSystemAbility, Retrieve an existing ability, blocking for a few seconds if it doesn't exist.
      *
-     * @param systemAbilityId,.Need to get the said of sa
-     * @param deviceId,.If the device id is empty, it indicates that it is a local get
-     * @return nullptr indicates acquisition failure
+     * @param systemAbilityId, Need to get the said of sa.
+     * @param deviceId, If the device id is empty, it indicates that it is a local get.
+     * @return nullptr indicates acquisition failure.
      */
     virtual sptr<IRemoteObject> GetSystemAbility(int32_t systemAbilityId, const std::string& deviceId) = 0;
 
     /**
-     * CheckSystemAbility, Retrieve an existing ability, no-blocking
+     * CheckSystemAbility, Retrieve an existing ability, no-blocking.
      *
-     * @param systemAbilityId,.Need to get the said of sa
-     * @param deviceId,.If the device id is empty, it indicates that it is a local get
-     * @return nullptr indicates acquisition failure
+     * @param systemAbilityId, Need to get the said of sa.
+     * @param deviceId, If the device id is empty, it indicates that it is a local get.
+     * @return nullptr indicates acquisition failure.
      */
     virtual sptr<IRemoteObject> CheckSystemAbility(int32_t systemAbilityId, const std::string& deviceId) = 0;
 
     /**
      * AddOnDemandSystemAbilityInfo, Add ondemand ability info.
      *
-     * @param systemAbilityId,.Need to add info the said of sa
-     * @param localAbilityManagerName,.Process Name
-     * @return ERR_OK indicates AddOnDemandSystemAbilityInfo success
+     * @param systemAbilityId, Need to add info the said of sa.
+     * @param localAbilityManagerName, Process Name.
+     * @return ERR_OK indicates AddOnDemandSystemAbilityInfo success.
      */
     virtual int32_t AddOnDemandSystemAbilityInfo(int32_t systemAbilityId,
         const std::u16string& localAbilityManagerName) = 0;
@@ -151,9 +151,9 @@ public:
     /**
      * CheckSystemAbility, Retrieve an ability, no-blocking.
      *
-     * @param systemAbilityId,.Need to check the said of sa
-     * @param isExist,.Issue parameters, and a result of true indicates success
-     * @return nullptr indicates acquisition failure
+     * @param systemAbilityId, Need to check the said of sa.
+     * @param isExist, Issue parameters, and a result of true indicates success.
+     * @return nullptr indicates acquisition failure.
      */
     virtual sptr<IRemoteObject> CheckSystemAbility(int32_t systemAbilityId, bool& isExist) = 0;
 
@@ -175,86 +175,82 @@ public:
     };
 
     /**
-     * AddSystemAbility, add an ability to samgr
+     * AddSystemAbility, add an ability to samgr.
      *
-     * @param systemAbilityId,.Need to add the said of sa
-     * @param ability, .SA to be added
-     * @param extraProp, .Additional parameters for sa, such as whether it is distributed
-     * @return ERR_OK indicates successful add
+     * @param systemAbilityId, Need to add the said of sa.
+     * @param ability, SA to be added.
+     * @param extraProp, Additional parameters for sa, such as whether it is distributed.
+     * @return ERR_OK indicates successful add.
      */
     virtual int32_t AddSystemAbility(int32_t systemAbilityId, const sptr<IRemoteObject>& ability,
         const SAExtraProp& extraProp = SAExtraProp(false, DUMP_FLAG_PRIORITY_DEFAULT, u"", u"")) = 0;
 
     /**
-     * AddSystemProcess, add an process
+     * AddSystemProcess, add an process.
      *
-     * @param procName,.Need to add the procName of process
-     * @param procObject, .Remoteobject of procName
-     * @return ERR_OK indicates successful add
+     * @param procName, Need to add the procName of process.
+     * @param procObject, Remoteobject of procName.
+     * @return ERR_OK indicates successful add.
      */
     virtual int32_t AddSystemProcess(const std::u16string& procName, const sptr<IRemoteObject>& procObject) = 0;
     
     /**
-     * LoadSystemAbility, Load sa
+     * LoadSystemAbility, Load sa.
      *
-     * @param systemAbilityId,.Need to load the said of sa
-     * @param callback, .OnLoadSystemAbilityFail and OnLoadSystemAbilitySuccess need be rewritten
-     * @return ERR_OK It does not mean that the load was successful, but a callback function is
-     required to confirm whether it was successful
+     * @param systemAbilityId, Need to load the said of sa.
+     * @param callback, OnLoadSystemAbilityFail and OnLoadSystemAbilitySuccess need be rewritten.
+     * @return ERR_OK It does not mean that the load was successful.
      */
     virtual int32_t LoadSystemAbility(int32_t systemAbilityId, const sptr<ISystemAbilityLoadCallback>& callback) = 0;
     
     /**
-     * LoadSystemAbility, Load sa
+     * LoadSystemAbility, Load sa.
      *
-     * @param systemAbilityId,.Need to load the said of sa
-     * @param deviceId,.if deviceId is empty, it indicates local load
-     * @param callback, .OnLoadSystemAbilityFail and OnLoadSystemAbilitySuccess need be rewritten
-     * @return ERR_OK It does not mean that the load was successful, but a callback function is
-     required to confirm whether it was successful
+     * @param systemAbilityId, Need to load the said of sa.
+     * @param deviceId, if deviceId is empty, it indicates local load.
+     * @param callback, OnLoadSystemAbilityFail and OnLoadSystemAbilitySuccess need be rewritten.
+     * @return ERR_OK It does not mean that the load was successful.
      */
     virtual int32_t LoadSystemAbility(int32_t systemAbilityId, const std::string& deviceId,
         const sptr<ISystemAbilityLoadCallback>& callback) = 0;
 
     /**
-     * UnloadSystemAbility, UnLoad sa
+     * UnloadSystemAbility, UnLoad sa.
      *
-     * @param systemAbilityId,.Need to UnLoad the said of sa
-     * @return ERR_OK It does not mean that the unload was successful, but sa entered an idle state
+     * @param systemAbilityId, Need to UnLoad the said of sa.
+     * @return ERR_OK It does not mean that the unload was successful, but sa entered an idle state.
      */
     virtual int32_t UnloadSystemAbility(int32_t systemAbilityId) = 0;
 
     /**
-     * CancelUnloadSystemAbility, CancelUnload sa
+     * CancelUnloadSystemAbility, CancelUnload sa.
      *
-     * @param systemAbilityId,.Need to CancelUnload the said of sa
-     * @return ERR_OK indicates that the uninstall was canceled successfully
+     * @param systemAbilityId, Need to CancelUnload the said of sa.
+     * @return ERR_OK indicates that the uninstall was canceled successfully.
      */
     virtual int32_t CancelUnloadSystemAbility(int32_t systemAbilityId) = 0;
 
     /**
-     * GetRunningSystemProcess, Get all processes currently running
+     * GetRunningSystemProcess, Get all processes currently running.
      *
-     * @param systemProcessInfos,.Issue a parameter and return it as a result.
-     * @return ERR_OK indicates that the get successfully
+     * @param systemProcessInfos, Issue a parameter and return it as a result.
+     * @return ERR_OK indicates that the get successfully.
      */
     virtual int32_t GetRunningSystemProcess(std::list<SystemProcessInfo>& systemProcessInfos) = 0;
 
     /**
-     * SubscribeSystemProcess, Subscribe the status of process
+     * SubscribeSystemProcess, Subscribe the status of process.
      *
-     * @param listener,.callback, add listener to processListeners_, OnSystemProcessStarted will be
-     called when the process starts, OnSystemProcessStopped will be called when the process end.
-     * @return ERR_OK indicates that the Subscribe successfully
+     * @param listener, callback
+     * @return ERR_OK indicates that the Subscribe successfully.
      */
     virtual int32_t SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener) = 0;
     
     /**
-     * UnSubscribeSystemProcess, UnSubscribe the status of process
+     * UnSubscribeSystemProcess, UnSubscribe the status of process.
      *
-     * @param listener,.callback, remove listener to processListeners_, OnSystemProcessStarted will be
-     called when the process starts, OnSystemProcessStopped will be called when the process end.
-     * @return ERR_OK indicates that the UnSubscribe successfully
+     * @param listener, callback
+     * @return ERR_OK indicates that the UnSubscribe successfully.
      */
     virtual int32_t UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener) = 0;
 public:

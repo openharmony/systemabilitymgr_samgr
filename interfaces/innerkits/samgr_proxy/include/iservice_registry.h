@@ -26,27 +26,27 @@ namespace OHOS {
 class IServiceRegistry : public IRemoteBroker {
 public:
     /**
-     * GetService, Retrieve an existing service, blocking for a few seconds
+     * GetService, Retrieve an existing service, blocking for a few seconds.
      *
-     * @param name,.name of service
-     * @return if it doesn't yet exist. return nulltpr
+     * @param name, name of service
+     * @return if it doesn't yet exist. return nulltpr.
      */
     virtual sptr<IRemoteObject> GetService(const std::u16string& name) = 0;
 
     /**
      * CheckService, Retrieve an existing service, non-blocking.
      *
-     * @param name,.name of service
-     * @return if it doesn't yet exist. return nulltpr
+     * @param name, name of service.
+     * @return if it doesn't yet exist. return nulltpr.
      */
     virtual sptr<IRemoteObject> CheckService(const std::u16string& name) = 0;
 
     /**
      * AddService, Register a service.
      *
-     * @param name,.name of service
-     * @param service,.remoteobject of service
-     * @return ERR_OK indicates that the add was successful
+     * @param name, name of service.
+     * @param service, remoteobject of service.
+     * @return ERR_OK indicates that the add was successful.
      */
     virtual int AddService(const std::u16string& name, const sptr<IRemoteObject> &service,
         bool allowIsolated = false, int dumpsysFlags = 0) = 0;
@@ -65,7 +65,7 @@ public:
     /**
      * GetInstance, get Service registry instance.
      *
-     * @return Get Single Instance Object
+     * @return Get Single Instance Object.
      */
     static sptr<IServiceRegistry> GetInstance();
 
@@ -78,21 +78,21 @@ public:
     /**
      * GetInstance, get SystemAbilityManagerClient instance.
      *
-     * @return Get Single Instance Object
+     * @return Get Single Instance Object.
      */
     static SystemAbilityManagerClient& GetInstance();
 
     /**
      * GetSystemAbilityManager, get system ability manager.
      *
-     * @return Get systemAbilityManager_
+     * @return Get systemAbilityManager_.
      */
     sptr<ISystemAbilityManager> GetSystemAbilityManager();
     
     /**
      * DestroySystemAbilityManagerObject, destroy remote object of samgr.
      *
-     * @return destroy systemAbilityManager_
+     * @return destroy systemAbilityManager_.
      */
     void DestroySystemAbilityManagerObject();
 
