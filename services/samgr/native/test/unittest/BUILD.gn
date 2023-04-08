@@ -91,8 +91,8 @@ ohos_unittest("SystemAbilityMgrTest") {
   }
 
   deps = [
-    "${samgr_dir}/interfaces/innerkits/common:samgr_common",
     ":samgr_proxy_tdd",
+    "${samgr_dir}/interfaces/innerkits/common:samgr_common",
     "//third_party/googletest:gtest_main",
   ]
 
@@ -184,8 +184,8 @@ ohos_unittest("SystemAbilityMgrStubTest") {
   }
 
   deps = [
-    "${samgr_dir}/interfaces/innerkits/common:samgr_common",
     ":samgr_proxy_tdd",
+    "${samgr_dir}/interfaces/innerkits/common:samgr_common",
     "//third_party/googletest:gtest_main",
   ]
 
@@ -338,8 +338,8 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
   }
 
   deps = [
-    "${samgr_dir}/interfaces/innerkits/common:samgr_common",
     ":samgr_proxy_tdd",
+    "${samgr_dir}/interfaces/innerkits/common:samgr_common",
     "//third_party/googletest:gtest_main",
   ]
 
@@ -424,8 +424,8 @@ ohos_executable("TestTool") {
     "//foundation/systemabilitymgr/samgr/test/resource:coverage_flags",
   ]
   deps = [
-    "${samgr_dir}/interfaces/innerkits/common:samgr_common",
     ":samgr_proxy_tdd",
+    "${samgr_dir}/interfaces/innerkits/common:samgr_common",
   ]
   if (is_standard_system) {
     external_deps = [ "hiviewdfx_hilog_native:libhilog_base" ]
