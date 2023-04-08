@@ -64,6 +64,7 @@ ohos_executable("samgr") {
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/common:samgr_common",
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/rust:rust_samgr",
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
+    "//third_party/libxml2:libxml2",
   ]
 
   configs = [
@@ -129,7 +130,6 @@ ohos_executable("samgr") {
       defines += [ "SUPPORT_SWITCH_COLLECT" ]
     }
 
-    public_deps = [ "//third_party/libxml2:libxml2" ]
     part_name = "samgr"
   }
   subsystem_name = "systemabilitymgr"

@@ -702,7 +702,7 @@ int32_t SystemAbilityStateScheduler::SubscribeSystemProcess(const sptr<ISystemPr
         }
         processListeners_.emplace_back(listener);
     } else {
-        HILOGI("UnSubscribeSystemProcess listener already exists");
+        HILOGI("SubscribeSystemProcess listener already exists");
     }
     return ERR_OK;
 }

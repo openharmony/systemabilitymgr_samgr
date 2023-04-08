@@ -101,7 +101,7 @@ ohos_fuzztest("SystemAbilityManagerFuzzTest") {
     external_deps += [ "device_manager:devicemanagersdk" ]
     defines += [ "SUPPORT_DEVICE_MANAGER" ]
   }
-  public_deps = [ "//third_party/libxml2:libxml2" ]
+  deps += [ "//third_party/libxml2:libxml2" ]
 }
 
 group("fuzztest") {
