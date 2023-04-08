@@ -31,6 +31,8 @@
     *SystemProcessStatus*;
     *SystemAbilityManagerProxy*;
     *LocalAbilityManagerProxy*;
+    *marshalling*;
+    *OnDemandReasonExtraData*;
   local:
     *;
 };
