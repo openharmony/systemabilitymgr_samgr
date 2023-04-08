@@ -43,7 +43,7 @@ public:
     virtual void OnLoadSystemAbilityFail([[maybe_unused]] int32_t systemAbilityId) {}
     
     /**
-     * OnLoadSACompleteForRemote, OnLoadSACompleteForRemote will be called when loadsystemability remote 
+     * OnLoadSACompleteForRemote, OnLoadSACompleteForRemote will be called when loadsystemability remote
      *
      * @param deviceId,.DeviceId of the remote
      * @param systemAbilityId,.The loaded said
