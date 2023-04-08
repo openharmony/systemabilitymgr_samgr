@@ -138,6 +138,8 @@ SystemAbilityManagerStub::SystemAbilityManagerStub()
         &SystemAbilityManagerStub::SubscribeSystemProcessInner;
     memberFuncMap_[UNSUBSCRIBE_SYSTEM_PROCESS_TRANSACTION] =
         &SystemAbilityManagerStub::UnSubscribeSystemProcessInner;
+    memberFuncMap_[GET_ONDEMAND_REASON_EXTRA_DATA_TRANSACTION] =
+        &SystemAbilityManagerStub::GetOnDemandReasonExtraDataInner;
 }
 
 int32_t SystemAbilityManagerStub::OnRemoteRequest(uint32_t code,
@@ -208,10 +210,6 @@ int32_t SystemAbilityManagerStub::ListSystemAbilityInner(MessageParcel& data, Me
 
 int32_t SystemAbilityManagerStub::SubsSystemAbilityInner(MessageParcel& data, MessageParcel& reply)
 {
-    if (!CanRequest()) {
-        HILOGE("SubsSystemAbilityInner PERMISSION DENIED!");
-        return ERR_PERMISSION_DENIED;
-    }
     int32_t systemAbilityId = data.ReadInt32();
     if (!CheckInputSysAbilityId(systemAbilityId)) {
         HILOGW("SystemAbilityManagerStub::SubsSystemAbilityInner read systemAbilityId failed!");
@@ -240,10 +238,6 @@ int32_t SystemAbilityManagerStub::SubsSystemAbilityInner(MessageParcel& data, Me
 
 int32_t SystemAbilityManagerStub::UnSubsSystemAbilityInner(MessageParcel& data, MessageParcel& reply)
 {
-    if (!CanRequest()) {
-        HILOGE("UnSubsSystemAbilityInner PERMISSION DENIED!");
-        return ERR_PERMISSION_DENIED;
-    }
     int32_t systemAbilityId = data.ReadInt32();
     if (!CheckInputSysAbilityId(systemAbilityId)) {
         HILOGW("SystemAbilityManagerStub::UnSubsSystemAbilityInner read systemAbilityId failed!");
@@ -654,6 +648,7 @@ int32_t SystemAbilityManagerStub::GetRunningSystemProcessInner(MessageParcel& da
     }
     return ERR_OK;
 }
+
 int32_t SystemAbilityManagerStub::SubscribeSystemProcessInner(MessageParcel& data, MessageParcel& reply)
 {
     if (!CanRequest()) {
@@ -679,6 +674,7 @@ int32_t SystemAbilityManagerStub::SubscribeSystemProcessInner(MessageParcel& dat
     }
     return result;
 }
+
 int32_t SystemAbilityManagerStub::UnSubscribeSystemProcessInner(MessageParcel& data, MessageParcel& reply)
 {
     if (!CanRequest()) {
@@ -722,6 +718,37 @@ int32_t SystemAbilityManagerStub::CancelUnloadSystemAbilityInner(MessageParcel& 
     return result;
 }
 
+int32_t SystemAbilityManagerStub::GetOnDemandReasonExtraDataInner(MessageParcel& data, MessageParcel& reply)
+{
+    if (!CanRequest()) {
+        HILOGE("GetOnDemandReasonExtraData PERMISSION DENIED!");
+        return ERR_PERMISSION_DENIED;
+    }
+    int64_t extraDataId = -1;
+    if (!data.ReadInt64(extraDataId)) {
+        HILOGW("SystemAbilityManagerStub::GetOnDemandReasonExtraData read extraDataId failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel extraDataParcel;
+    int32_t result = GetOnDemandReasonExtraData(extraDataId, extraDataParcel);
+    HILOGD("SystemAbilityManagerStub::GetOnDemandReasonExtraData result is %{public}d", result);
+    if (!reply.WriteInt32(result)) {
+        HILOGW("SystemAbilityManagerStub::GetOnDemandReasonExtraData write reply failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    sptr<OnDemandReasonExtraData> extraData;
+    extraData = extraDataParcel.ReadParcelable<OnDemandReasonExtraData>();
+    if (extraData == nullptr) {
+        HILOGW("SystemAbilityManagerStub::GetOnDemandReasonExtraData read extraData failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.WriteParcelable(extraData)) {
+        HILOGW("SystemAbilityManagerStub::GetOnDemandReasonExtraData write extraData failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ERR_OK;
+}
+
 bool SystemAbilityManagerStub::CanRequest()
 {
     auto accessTokenId = IPCSkeleton::GetCallingTokenID();
@@ -747,6 +774,4 @@ bool SystemAbilityManagerStub::CanRequestProcessInfo()
     }
     return true;
 }
-
-
 } // namespace OHOS

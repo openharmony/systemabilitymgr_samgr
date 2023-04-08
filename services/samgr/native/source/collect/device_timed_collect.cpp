@@ -39,10 +39,10 @@ int32_t DeviceTimedCollect::Init(const std::list<SaProfile>& saProfiles)
 {
     lock_guard<mutex> autoLock(taskLock_);
     for (auto& saProfile : saProfiles) {
-        for (auto& onDemandEvent : saProfile.startOnDemand) {
+        for (auto& onDemandEvent : saProfile.startOnDemand.onDemandEvents) {
             SaveTimedEvent(onDemandEvent);
         }
-        for (auto& onDemandEvent : saProfile.stopOnDemand) {
+        for (auto& onDemandEvent : saProfile.stopOnDemand.onDemandEvents) {
             SaveTimedEvent(onDemandEvent);
         }
     }

@@ -56,6 +56,7 @@ constexpr const char* SA_TAG_BOOT_PHASE = "bootphase";
 constexpr const char* SA_TAG_SAID = "said";
 constexpr const char* SA_TAG_START_ON_DEMAND = "start-on-demand";
 constexpr const char* SA_TAG_STOP_ON_DEMAND = "stop-on-demand";
+constexpr const char* SA_TAG_RECYCLE_DELAYTIME = "recycle-delaytime";
 constexpr const char* SA_TAG_DEVICE_ON_LINE = "deviceonline";
 constexpr const char* SA_TAG_SETTING_SWITCH = "settingswitch";
 constexpr const char* SA_TAG_COMMON_EVENT = "commonevent";
@@ -65,6 +66,27 @@ constexpr int32_t MAX_JSON_OBJECT_SIZE = 50 * 1024;
 constexpr int32_t MAX_JSON_STRING_LENGTH = 128;
 const string BOOT_START_PHASE = "BootStartPhase";
 const string CORE_START_PHASE = "CoreStartPhase";
+
+void ParseLibPath(const string& libPath, string& fileName, string& libDir)
+{
+    std::vector<string> libPathVec;
+    SplitStr(libPath, "/", libPathVec);
+    if ((libPathVec.size() > 0)) {
+        int fileNameIndex = libPathVec.size() - 1;
+        fileName = libPathVec[fileNameIndex];
+        int libDirIndex = fileNameIndex - 1;
+        if (libDirIndex >= 0) {
+            libDir = libPathVec[libDirIndex];
+        }
+    }
+    if (libDir.empty()) {
+#ifdef __aarch64__
+        libDir = "lib64";
+#else
+        libDir = "lib";
+#endif
+    }
+}
 }
 
 ParseUtil::~ParseUtil()
@@ -119,19 +141,43 @@ void ParseUtil::OpenSo()
 void ParseUtil::OpenSo(SaProfile& saProfile)
 {
     if (saProfile.handle == nullptr) {
+        string fileName;
+        string libDir;
+        ParseLibPath(saProfile.libPath, fileName, libDir);
+        if (libDir != "lib64" && libDir != "lib") {
+            HILOGE("invalid libDir %{public}s", libDir.c_str());
+            return;
+        }
+        bool loadFromModuleUpdate = false;
+        Dl_namespace dlNs;
+        string updateLibPath = GetRealPath("/module_update/" + ToString(saProfile.saId) + "/" + libDir + "/" + fileName);
+        if (CheckPathExist(updateLibPath)) {
+            Dl_namespace currentNs;
+            string nsName = "module_update_" + ToString(saProfile.saId);
+            dlns_init(&dlNs, nsName.c_str());
+            dlns_get(nullptr, &currentNs);
+
+            string libLdPath = GetRealPath("/module_update/" + ToString(saProfile.saId) + "/" + libDir);
+            if (!libLdPath.empty()) {
+                dlns_create(&dlNs, libLdPath.c_str());
+                dlns_inherit(&dlNs, &currentNs, nullptr);
+                loadFromModuleUpdate = true;
+            }
+        }
+
         string dlopenTag = ToString(saProfile.saId) + "_DLOPEN";
         HITRACE_METER_NAME(HITRACE_TAG_SAMGR, dlopenTag);
         int64_t begin = GetTickCount();
-        DlHandle handle = dlopen(saProfile.libPath.c_str(), RTLD_NOW);
+        DlHandle handle = nullptr;
+        if (loadFromModuleUpdate) {
+            handle = dlopen_ns(&dlNs, updateLibPath.c_str(), RTLD_NOW);
+        }
+        if (handle == nullptr) {
+            handle = dlopen(saProfile.libPath.c_str(), RTLD_NOW);
+        }
         HILOGI("[PerformanceTest] SA:%{public}d OpenSo spend %{public}" PRId64 " ms",
             saProfile.saId, GetTickCount() - begin);
         if (handle == nullptr) {
-            std::vector<string> libPathVec;
-            string fileName = "";
-            SplitStr(saProfile.libPath, "/", libPathVec);
-            if ((libPathVec.size() > 0)) {
-                fileName = libPathVec[libPathVec.size() - 1];
-            }
             ReportAddSystemAbilityFailed(saProfile.saId, fileName);
             HILOGE("dlopen %{public}s failed with errno:%{public}s!", fileName.c_str(), dlerror());
             return;
@@ -292,7 +338,7 @@ nlohmann::json ParseUtil::StringToJsonObj(const std::string& eventStr)
     return eventJson;
 }
 
-std::unordered_map<std::string, std::string> ParseUtil::JsonObjToMap(nlohmann::json& eventJson)
+std::unordered_map<std::string, std::string> ParseUtil::JsonObjToMap(const nlohmann::json& eventJson)
 {
     std::unordered_map<std::string, std::string> eventMap;
     if (eventJson.contains(EVENT_TYPE) && eventJson[EVENT_TYPE].is_string()) {
@@ -444,29 +490,55 @@ bool ParseUtil::ParseSystemAbility(SaProfile& saProfile, nlohmann::json& systemA
         saProfile.bootPhase = "";
     }
     // parse start-on-demand tag
-    ParseOndemandTag(systemAbilityJson, saProfile.startOnDemand, SA_TAG_START_ON_DEMAND);
+    ParseStartOndemandTag(systemAbilityJson, SA_TAG_START_ON_DEMAND, saProfile.startOnDemand);
     // parse stop-on-demand tag
-    ParseOndemandTag(systemAbilityJson, saProfile.stopOnDemand, SA_TAG_STOP_ON_DEMAND);
+    ParseStopOndemandTag(systemAbilityJson, SA_TAG_STOP_ON_DEMAND, saProfile.stopOnDemand);
     HILOGD("ParseSystemAbility end");
     return true;
 }
 
-void ParseUtil::ParseOndemandTag(nlohmann::json& systemAbilityJson,
-    std::vector<OnDemandEvent>& condationVec, const std::string& jsonTag)
+bool ParseUtil::ParseJsonTag(const nlohmann::json& systemAbilityJson, const std::string& jsonTag,
+    nlohmann::json& onDemandJson)
 {
     if (systemAbilityJson.find(jsonTag) == systemAbilityJson.end()) {
-        return;
+        return false;
     }
-    nlohmann::json& onDemandJson = systemAbilityJson.at(jsonTag);
+    onDemandJson = systemAbilityJson.at(jsonTag);
     if (!onDemandJson.is_object()) {
         HILOGE("parse ondemand tag error");
+        return false;
+    }
+    return true;
+}
+
+void ParseUtil::ParseOndemandTag(const nlohmann::json& onDemandJson, std::vector<OnDemandEvent>& onDemandEvents)
+{
+    GetOnDemandArrayFromJson(DEVICE_ONLINE, onDemandJson, SA_TAG_DEVICE_ON_LINE, onDemandEvents);
+    GetOnDemandArrayFromJson(SETTING_SWITCH, onDemandJson, SA_TAG_SETTING_SWITCH, onDemandEvents);
+    GetOnDemandArrayFromJson(COMMON_EVENT, onDemandJson, SA_TAG_COMMON_EVENT, onDemandEvents);
+    GetOnDemandArrayFromJson(PARAM, onDemandJson, SA_TAG_PARAM, onDemandEvents);
+    GetOnDemandArrayFromJson(TIMED_EVENT, onDemandJson, SA_TAG_TIEMD_EVENT, onDemandEvents);
+}
+
+void ParseUtil::ParseStartOndemandTag(const nlohmann::json& systemAbilityJson,
+    const std::string& jsonTag, StartOnDemand& startOnDemand)
+{
+    nlohmann::json onDemandJson;
+    if (!ParseJsonTag(systemAbilityJson, jsonTag, onDemandJson)) {
         return;
     }
-    GetOnDemandArrayFromJson(DEVICE_ONLINE, onDemandJson, SA_TAG_DEVICE_ON_LINE, condationVec);
-    GetOnDemandArrayFromJson(SETTING_SWITCH, onDemandJson, SA_TAG_SETTING_SWITCH, condationVec);
-    GetOnDemandArrayFromJson(COMMON_EVENT, onDemandJson, SA_TAG_COMMON_EVENT, condationVec);
-    GetOnDemandArrayFromJson(PARAM, onDemandJson, SA_TAG_PARAM, condationVec);
-    GetOnDemandArrayFromJson(TIMED_EVENT, onDemandJson, SA_TAG_TIEMD_EVENT, condationVec);
+    ParseOndemandTag(onDemandJson, startOnDemand.onDemandEvents);
+}
+
+void ParseUtil::ParseStopOndemandTag(const nlohmann::json& systemAbilityJson,
+    const std::string& jsonTag, StopOnDemand& stopOnDemand)
+{
+    nlohmann::json onDemandJson;
+    if (!ParseJsonTag(systemAbilityJson, jsonTag, onDemandJson)) {
+        return;
+    }
+    ParseOndemandTag(onDemandJson, stopOnDemand.onDemandEvents);
+    GetInt32FromJson(onDemandJson, SA_TAG_RECYCLE_DELAYTIME, stopOnDemand.delayTime);
 }
 
 void ParseUtil::GetOnDemandArrayFromJson(int32_t eventId, const nlohmann::json& obj,
@@ -478,14 +550,14 @@ void ParseUtil::GetOnDemandArrayFromJson(int32_t eventId, const nlohmann::json& 
             GetStringFromJson(item, "name", name);
             std::string value;
             GetStringFromJson(item, "value", value);
-            std::vector<OnDemandEvent> conditions;
+            std::vector<OnDemandCondition> conditions;
             GetOnDemandConditionsFromJson(item, "conditions", conditions);
             HILOGD("conditions size: %{public}zu", conditions.size());
             bool enableOnce = false;
             GetBoolFromJson(item, "enable-once", enableOnce);
             if (!name.empty() && name.length() <= MAX_JSON_STRING_LENGTH &&
                 value.length() <= MAX_JSON_STRING_LENGTH) {
-                OnDemandEvent event = {eventId, name, value, conditions, enableOnce};
+                OnDemandEvent event = {eventId, name, value, -1, conditions, enableOnce};
                 out.emplace_back(event);
             }
         }
@@ -493,7 +565,7 @@ void ParseUtil::GetOnDemandArrayFromJson(int32_t eventId, const nlohmann::json& 
 }
 
 void ParseUtil::GetOnDemandConditionsFromJson(const nlohmann::json& obj,
-    const std::string& key, std::vector<OnDemandEvent>& out)
+    const std::string& key, std::vector<OnDemandCondition>& out)
 {
     nlohmann::json conditionsJson;
     if (obj.find(key.c_str()) == obj.end() || !obj[key.c_str()].is_array()) {
@@ -522,7 +594,7 @@ void ParseUtil::GetOnDemandConditionsFromJson(const nlohmann::json& obj,
             HILOGW("invalid condition eventId: %{public}s", type.c_str());
             continue;
         }
-        OnDemandEvent conditionEvent = {eventId, name, value};
+        OnDemandCondition conditionEvent = {eventId, name, value};
         out.emplace_back(conditionEvent);
     }
 }

@@ -28,7 +28,7 @@ public:
     ~DeviceParamCollect() = default;
     void Init(const std::list<SaProfile>& saProfiles);
     void WatchParameters();
-    bool CheckCondition(const OnDemandEvent& condition) override;
+    bool CheckCondition(const OnDemandCondition& condition) override;
     int32_t OnStart() override;
     int32_t OnStop() override;
 private:

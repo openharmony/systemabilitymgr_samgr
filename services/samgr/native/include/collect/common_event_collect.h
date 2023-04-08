@@ -32,12 +32,16 @@ public:
     int32_t OnStart() override;
     int32_t OnStop() override;
     void SaveAction(const std::string& action);
-    bool CheckCondition(const OnDemandEvent& condition) override;
+    bool CheckCondition(const OnDemandCondition& condition) override;
     void Init(const std::list<SaProfile>& saProfiles);
     bool AddCommonListener();
+    int64_t SaveOnDemandReasonExtraData(const EventFwk::CommonEventData& data);
+    void RemoveOnDemandReasonExtraData(int64_t extraDataId);
+    bool GetOnDemandReasonExtraData(int64_t extraDataId, OnDemandReasonExtraData& extraData) override;
 private:
     bool IsCesReady();
     void CreateCommonEventSubscriber();
+    int64_t GenerateExtraDataIdLocked();
     std::mutex commomEventLock_;
     sptr<IRemoteObject::DeathRecipient> commonEventDeath_;
     std::vector<std::string> commonEventNames_;
@@ -45,6 +49,9 @@ private:
     std::shared_ptr<EventFwk::CommonEventSubscriber> commonEventSubscriber_ = nullptr;
     std::mutex commonEventStateLock_;
     std::set<std::string> commonEventState_;
+    std::mutex extraDataLock_;
+    int64_t extraDataId_ = 0;
+    std::map<int64_t, OnDemandReasonExtraData> extraDatas_;
 };
 
 class CommonHandler : public AppExecFwk::EventHandler {

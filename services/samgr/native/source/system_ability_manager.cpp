@@ -16,6 +16,7 @@
 #include "system_ability_manager.h"
 
 #include <cinttypes>
+#include <thread>
 #include <unistd.h>
 
 #include "ability_death_recipient.h"
@@ -47,10 +48,12 @@ const string START_SAID = "said";
 const string EVENT_TYPE = "eventId";
 const string EVENT_NAME = "name";
 const string EVENT_VALUE = "value";
+const string EVENT_EXTRA_DATA_ID = "extraDataId";
 const string PREFIX = "/system/profile/";
 const string LOCAL_DEVICE = "local";
 const string ONDEMAND_PARAM = "persist.samgr.perf.ondemand";
 constexpr const char* ONDEMAND_PERF_PARAM = "persist.samgr.perf.ondemand";
+constexpr const char* ONDEMAND_WORKER = "OndemandLoader";
 
 constexpr uint32_t REPORT_GET_SA_INTERVAL = 24 * 60 * 60 * 1000; // ms and is one day
 constexpr int32_t MAX_NAME_SIZE = 200;
@@ -75,9 +78,6 @@ SystemAbilityManager::SystemAbilityManager()
 
 SystemAbilityManager::~SystemAbilityManager()
 {
-    if (loadPool_ != nullptr) {
-        loadPool_->Stop();
-    }
     if (reportEventTimer_ != nullptr) {
         reportEventTimer_->Shutdown();
     }
@@ -101,9 +101,6 @@ void SystemAbilityManager::Init()
     abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
     InitSaProfile();
     WatchDogInit();
-    loadPool_ = std::make_unique<ThreadPool>("OndemandLoader");
-    loadPool_->Start(std::thread::hardware_concurrency());
-    loadPool_->SetMaxTaskNum(std::thread::hardware_concurrency());
     reportEventTimer_ = std::make_unique<Utils::Timer>("DfxReporter");
     OndemandLoadForPerf();
 }
@@ -150,41 +147,30 @@ sptr<SystemAbilityManager> SystemAbilityManager::GetInstance()
 
 void SystemAbilityManager::InitSaProfile()
 {
-    if (workHandler_ == nullptr) {
-        HILOGE("InitSaProfile parseHandler_ not init!");
-        return;
+    int64_t begin = GetTickCount();
+    std::vector<std::string> fileNames;
+    GetDirFiles(PREFIX, fileNames);
+    auto parser = std::make_shared<ParseUtil>();
+    for (const auto& file : fileNames) {
+        if (file.empty() ||
+            (file.find(".xml") == std::string::npos && file.find(".json") == std::string::npos)
+            || (file.find("_trust.xml") != std::string::npos && file.find("_trust.json") != std::string::npos)) {
+            continue;
+        }
+        parser->ParseSaProfiles(file);
     }
-
-    auto callback = [this] () {
-        int64_t begin = GetTickCount();
-        std::vector<std::string> fileNames;
-        GetDirFiles(PREFIX, fileNames);
-        auto parser = std::make_shared<ParseUtil>();
-        for (const auto& file : fileNames) {
-            if (file.empty() ||
-                (file.find(".xml") == std::string::npos && file.find(".json") == std::string::npos)
-                || (file.find("_trust.xml") != std::string::npos && file.find("_trust.json") != std::string::npos)) {
-                continue;
-            }
-            parser->ParseSaProfiles(file);
-        }
-        std::list<SaProfile> saInfos = parser->GetAllSaProfiles();
-        if (collectManager_ != nullptr) {
-            collectManager_->Init(saInfos);
-        }
-        if (abilityStateScheduler_ != nullptr) {
-            abilityStateScheduler_->Init(saInfos);
-        }
-        lock_guard<mutex> autoLock(saProfileMapLock_);
-        for (const auto& saInfo : saInfos) {
-            saProfileMap_[saInfo.saId] = saInfo;
-        }
-        HILOGI("[PerformanceTest] InitSaProfile spend %{public}" PRId64 " ms", GetTickCount() - begin);
-    };
-    bool ret = workHandler_->PostTask(callback);
-    if (!ret) {
-        HILOGW("SystemAbilityManager::InitSaProfile PostTask fail");
+    std::list<SaProfile> saInfos = parser->GetAllSaProfiles();
+    if (collectManager_ != nullptr) {
+        collectManager_->Init(saInfos);
     }
+    if (abilityStateScheduler_ != nullptr) {
+        abilityStateScheduler_->Init(saInfos);
+    }
+    lock_guard<mutex> autoLock(saProfileMapLock_);
+    for (const auto& saInfo : saInfos) {
+        saProfileMap_[saInfo.saId] = saInfo;
+    }
+    HILOGI("[PerformanceTest] InitSaProfile spend %{public}" PRId64 " ms", GetTickCount() - begin);
 }
 
 void SystemAbilityManager::OndemandLoadForPerf()
@@ -996,6 +982,36 @@ int32_t SystemAbilityManager::UnSubscribeSystemProcess(const sptr<ISystemProcess
     return abilityStateScheduler_->UnSubscribeSystemProcess(listener);
 }
 
+int32_t SystemAbilityManager::GetOnDemandReasonExtraData(int64_t extraDataId, MessageParcel& extraDataParcel)
+{
+    if (collectManager_ == nullptr) {
+        HILOGE("collectManager is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    OnDemandReasonExtraData extraData;
+    if (collectManager_->GetOnDemandReasonExtraData(extraDataId, extraData) != ERR_OK) {
+        HILOGE("get extra data failed");
+        return ERR_INVALID_VALUE;
+    }
+    if (!extraDataParcel.WriteParcelable(&extraData)) {
+        HILOGE("write extra data failed");
+        return ERR_INVALID_VALUE;
+    }
+    return ERR_OK;
+}
+
+int32_t SystemAbilityManager::GetOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
+    std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents)
+{
+    return ERR_OK;
+}
+
+int32_t SystemAbilityManager::UpdateOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
+    const std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents)
+{
+    return ERR_OK;
+}
+
 void SystemAbilityManager::SendSystemAbilityAddedMsg(int32_t systemAbilityId, const sptr<IRemoteObject>& remoteObject)
 {
     if (workHandler_ == nullptr) {
@@ -1156,7 +1172,7 @@ int32_t SystemAbilityManager::StartDynamicSystemProcess(const std::u16string& na
     int32_t systemAbilityId, const OnDemandEvent& event)
 {
     std::string eventStr = std::to_string(systemAbilityId) + "#" + std::to_string(event.eventId) + "#"
-        + event.name + "#" + event.value + "#";
+        + event.name + "#" + event.value + "#" + std::to_string(event.extraDataId) + "#";
     auto extraArgv = eventStr.c_str();
     auto result = ServiceControlWithExtra(Str16ToStr8(name).c_str(), ServiceAction::START, &extraArgv, 1);
     HILOGI("StartDynamicSystemProcess call ServiceControlWithExtra result:%{public}d!", result);
@@ -1370,7 +1386,7 @@ int32_t SystemAbilityManager::DoUnloadSystemAbility(int32_t systemAbilityId,
 }
 
 bool SystemAbilityManager::IdleSystemAbility(int32_t systemAbilityId, const std::u16string& procName,
-    const std::unordered_map<std::string, std::string>& idleReason, int32_t& delayTime)
+    const nlohmann::json& idleReason, int32_t& delayTime)
 {
     sptr<IRemoteObject> targetObject = CheckSystemAbility(systemAbilityId);
     if (targetObject == nullptr) {
@@ -1387,7 +1403,7 @@ bool SystemAbilityManager::IdleSystemAbility(int32_t systemAbilityId, const std:
 }
 
 bool SystemAbilityManager::ActiveSystemAbility(int32_t systemAbilityId, const std::u16string& procName,
-    const std::unordered_map<std::string, std::string>& activeReason)
+    const nlohmann::json& activeReason)
 {
     sptr<IRemoteObject> targetObject = CheckSystemAbility(systemAbilityId);
     if (targetObject == nullptr) {
@@ -1406,9 +1422,6 @@ bool SystemAbilityManager::ActiveSystemAbility(int32_t systemAbilityId, const st
 int32_t SystemAbilityManager::LoadSystemAbility(int32_t systemAbilityId, const std::string& deviceId,
     const sptr<ISystemAbilityLoadCallback>& callback)
 {
-    if (loadPool_ == nullptr) {
-        return ERR_NO_INIT;
-    }
     std::string key = ToString(systemAbilityId) + "_" + deviceId;
     {
         lock_guard<mutex> autoLock(loadRemoteLock_);
@@ -1431,7 +1444,8 @@ int32_t SystemAbilityManager::LoadSystemAbility(int32_t systemAbilityId, const s
     auto callingUid = IPCSkeleton::GetCallingUid();
     auto task = std::bind(&SystemAbilityManager::DoLoadRemoteSystemAbility, this,
         systemAbilityId, callingPid, callingUid, deviceId, callback);
-    loadPool_->AddTask(task);
+    std::thread thread(task);
+    thread.detach();
     return ERR_OK;
 }
 
@@ -1439,6 +1453,7 @@ void SystemAbilityManager::DoLoadRemoteSystemAbility(int32_t systemAbilityId, in
     int32_t callingUid, const std::string& deviceId, const sptr<ISystemAbilityLoadCallback>& callback)
 {
     Samgr::MemoryGuard cacheGuard;
+    pthread_setname_np(pthread_self(), ONDEMAND_WORKER);
     sptr<DBinderServiceStub> remoteBinder = DoMakeRemoteBinder(systemAbilityId, callingPid, callingUid, deviceId);
 
     if (callback == nullptr) {
@@ -1597,14 +1612,11 @@ std::string SystemAbilityManager::GetLocalNodeId()
 
 std::string SystemAbilityManager::EventToStr(const OnDemandEvent& event)
 {
-    std::unordered_map<std::string, std::string> stopReason;
-    stopReason[EVENT_TYPE] = std::to_string(event.eventId);
-    stopReason[EVENT_NAME] = event.name;
-    stopReason[EVENT_VALUE] = event.value;
     nlohmann::json eventJson;
-    for (auto it = stopReason.begin(); it != stopReason.end(); ++it) {
-        eventJson[it->first] = it->second;
-    }
+    eventJson[EVENT_TYPE] = event.eventId;
+    eventJson[EVENT_NAME] = event.name;
+    eventJson[EVENT_VALUE] = event.value;
+    eventJson[EVENT_EXTRA_DATA_ID] = event.extraDataId;
     std::string eventStr = eventJson.dump();
     return eventStr;
 }

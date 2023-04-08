@@ -19,6 +19,7 @@
 #include "ireport.h"
 #include "refbase.h"
 #include "sa_profiles.h"
+#include "system_ability_ondemand_reason.h"
 
 namespace OHOS {
 class ICollectPlugin : public virtual RefBase {
@@ -28,7 +29,8 @@ public:
 
     virtual int32_t OnStart() = 0;
     virtual int32_t OnStop() = 0;
-    virtual bool CheckCondition(const OnDemandEvent& condition) { return false; };
+    virtual bool CheckCondition(const OnDemandCondition& condition) { return false; };
+    virtual bool GetOnDemandReasonExtraData(int64_t extraDataId, OnDemandReasonExtraData& extraData) { return false; };
     void ReportEvent(const OnDemandEvent& event);
     void PostDelayTask(std::function<void()> callback, int32_t delayTime);
 private:

@@ -23,6 +23,9 @@
 #ifdef SUPPORT_COMMON_EVENT
 #include "common_event_collect.h"
 #endif
+#ifdef SUPPORT_SWITCH_COLLECT
+#include "device_switch_collect.h"
+#endif
 #include "device_param_collect.h"
 #include "memory_guard.h"
 #include "sam_log.h"
@@ -51,6 +54,11 @@ void DeviceStatusCollectManager::Init(const std::list<SaProfile>& saProfiles)
     eventStatuscollect->Init(onDemandSaProfiles_);
     collectPluginMap_[COMMON_EVENT] = eventStatuscollect;
 #endif
+#ifdef SUPPORT_SWITCH_COLLECT
+    sptr<DeviceSwitchCollect> deviceSwitchCollect = new DeviceSwitchCollect(this);
+    deviceSwitchCollect->Init(saProfiles);
+    collectPluginMap_[SETTING_SWITCH] = deviceSwitchCollect;
+#endif
     sptr<DeviceTimedCollect> timedCollect = new DeviceTimedCollect(this);
     timedCollect->Init(onDemandSaProfiles_);
     collectPluginMap_[TIMED_EVENT] = timedCollect;
@@ -61,7 +69,7 @@ void DeviceStatusCollectManager::Init(const std::list<SaProfile>& saProfiles)
 void DeviceStatusCollectManager::FilterOnDemandSaProfiles(const std::list<SaProfile>& saProfiles)
 {
     for (auto& saProfile : saProfiles) {
-        if (saProfile.startOnDemand.empty() && saProfile.stopOnDemand.empty()) {
+        if (saProfile.startOnDemand.onDemandEvents.empty() && saProfile.stopOnDemand.onDemandEvents.empty()) {
             continue;
         }
         onDemandSaProfiles_.emplace_back(saProfile);
@@ -73,7 +81,8 @@ void DeviceStatusCollectManager::GetSaControlListByEvent(const OnDemandEvent& ev
 {
     for (auto& profile : onDemandSaProfiles_) {
         // start on demand
-        for (auto iterStart = profile.startOnDemand.begin(); iterStart != profile.startOnDemand.end(); iterStart++) {
+        for (auto iterStart = profile.startOnDemand.onDemandEvents.begin();
+            iterStart != profile.startOnDemand.onDemandEvents.end(); iterStart++) {
             if (IsSameEvent(event, *iterStart) && CheckConditions(*iterStart)) {
                 // maybe the process is being killed, let samgr make decisions.
                 SaControlInfo control = { START_ON_DEMAND, profile.saId, iterStart->enableOnce };
@@ -82,7 +91,8 @@ void DeviceStatusCollectManager::GetSaControlListByEvent(const OnDemandEvent& ev
             }
         }
         // stop on demand
-        for (auto iterStop = profile.stopOnDemand.begin(); iterStop != profile.stopOnDemand.end(); iterStop++) {
+        for (auto iterStop = profile.stopOnDemand.onDemandEvents.begin();
+            iterStop != profile.stopOnDemand.onDemandEvents.end(); iterStop++) {
             if (IsSameEvent(event, *iterStop) && CheckConditions(*iterStop)) {
                 // maybe the process is starting, let samgr make decisions.
                 SaControlInfo control = { STOP_ON_DEMAND, profile.saId, iterStop->enableOnce };
@@ -172,5 +182,23 @@ void DeviceStatusCollectManager::PostDelayTask(std::function<void()> callback, i
 {
     HILOGI("DeviceStatusCollectManager PostDelayTask begin");
     collectHandler_->PostTask(callback, delayTime * SECOND);
+}
+
+int32_t DeviceStatusCollectManager::GetOnDemandReasonExtraData(int64_t extraDataId, OnDemandReasonExtraData& extraData)
+{
+    HILOGI("DeviceStatusCollectManager GetOnDemandReasonExtraData begin");
+    if (collectPluginMap_.count(COMMON_EVENT) == 0) {
+        HILOGE("not support get extra data");
+        return ERR_INVALID_VALUE;
+    }
+    if (collectPluginMap_[COMMON_EVENT] == nullptr) {
+        HILOGE("CommonEventCollect is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    if (!collectPluginMap_[COMMON_EVENT]->GetOnDemandReasonExtraData(extraDataId, extraData)) {
+        HILOGE("get extra data failed");
+        return ERR_INVALID_VALUE;
+    }
+    return ERR_OK;
 }
 }  // namespace OHOS

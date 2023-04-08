@@ -91,6 +91,7 @@ ohos_executable("samgr") {
       "init:libbegetutil",
       "ipc:ipc_core",
       "ipc:libdbinder",
+      "safwk:system_ability_fwk",
     ]
 
     if (build_selinux) {
@@ -121,6 +122,12 @@ ohos_executable("samgr") {
         "common_event_service:cesfwk_innerkits",
       ]
       defines += [ "SUPPORT_COMMON_EVENT" ]
+    }
+
+    if (support_common_event && bluetooth_part_enable) {
+      sources += [ "//foundation/systemabilitymgr/samgr/services/samgr/native/source/collect/device_switch_collect.cpp" ]
+      external_deps += [ "bluetooth:btframework" ]
+      defines += [ "SUPPORT_SWITCH_COLLECT" ]
     }
 
     part_name = "samgr"

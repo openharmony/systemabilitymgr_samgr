@@ -58,7 +58,7 @@ HWTEST_F(DeviceTimedCollectTest, Init001, TestSize.Level3)
     std::list<SaProfile> saProfiles;
     SaProfile saProfile;
     OnDemandEvent onDemandEvent = {TIMED_EVENT, "loopevent", "40"};
-    saProfile.startOnDemand.push_back(onDemandEvent);
+    saProfile.startOnDemand.onDemandEvents.push_back(onDemandEvent);
     saProfiles.push_back(saProfile);
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
@@ -77,7 +77,7 @@ HWTEST_F(DeviceTimedCollectTest, Init002, TestSize.Level3)
     std::list<SaProfile> saProfiles;
     SaProfile saProfile;
     OnDemandEvent onDemandEvent = {TIMED_EVENT, "mockevent", "40"};
-    saProfile.startOnDemand.push_back(onDemandEvent);
+    saProfile.startOnDemand.onDemandEvents.push_back(onDemandEvent);
     saProfiles.push_back(saProfile);
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
@@ -96,7 +96,7 @@ HWTEST_F(DeviceTimedCollectTest, Init003, TestSize.Level3)
     std::list<SaProfile> saProfiles;
     SaProfile saProfile;
     OnDemandEvent onDemandEvent = {TIMED_EVENT, "loopevent", "40"};
-    saProfile.stopOnDemand.push_back(onDemandEvent);
+    saProfile.stopOnDemand.onDemandEvents.push_back(onDemandEvent);
     saProfiles.push_back(saProfile);
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
@@ -115,7 +115,7 @@ HWTEST_F(DeviceTimedCollectTest, Init004, TestSize.Level3)
     std::list<SaProfile> saProfiles;
     SaProfile saProfile;
     OnDemandEvent onDemandEvent = {TIMED_EVENT, "mockevent", "40"};
-    saProfile.stopOnDemand.push_back(onDemandEvent);
+    saProfile.stopOnDemand.onDemandEvents.push_back(onDemandEvent);
     saProfiles.push_back(saProfile);
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
@@ -134,7 +134,7 @@ HWTEST_F(DeviceTimedCollectTest, Init005, TestSize.Level3)
     std::list<SaProfile> saProfiles;
     SaProfile saProfile;
     OnDemandEvent onDemandEvent = {TIMED_EVENT, "loopevent", "20"};
-    saProfile.stopOnDemand.push_back(onDemandEvent);
+    saProfile.stopOnDemand.onDemandEvents.push_back(onDemandEvent);
     saProfiles.push_back(saProfile);
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
@@ -153,7 +153,7 @@ HWTEST_F(DeviceTimedCollectTest, Init006, TestSize.Level3)
     std::list<SaProfile> saProfiles;
     SaProfile saProfile;
     OnDemandEvent onDemandEvent = {TIMED_EVENT, "loopevent", "20"};
-    saProfile.startOnDemand.push_back(onDemandEvent);
+    saProfile.startOnDemand.onDemandEvents.push_back(onDemandEvent);
     saProfiles.push_back(saProfile);
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
@@ -172,7 +172,7 @@ HWTEST_F(DeviceTimedCollectTest, Init007, TestSize.Level3)
     std::list<SaProfile> saProfiles;
     SaProfile saProfile;
     OnDemandEvent onDemandEvent = {TIMED_EVENT, "loopevent", "invalid"};
-    saProfile.startOnDemand.push_back(onDemandEvent);
+    saProfile.startOnDemand.onDemandEvents.push_back(onDemandEvent);
     saProfiles.push_back(saProfile);
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =

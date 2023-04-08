@@ -71,7 +71,7 @@ void DeviceStatusCollectManagerTest::PostTask(
         [&] () { return isCaseDone; });
 }
 
-bool MockCollectPlugin::CheckCondition(const OnDemandEvent& condition)
+bool MockCollectPlugin::CheckCondition(const OnDemandCondition& condition)
 {
     return mockCheckConditionResult_;
 }
@@ -90,12 +90,12 @@ HWTEST_F(DeviceStatusCollectManagerTest, FilterOnDemandSaProfiles001, TestSize.L
     EXPECT_EQ(true, collect->onDemandSaProfiles_.empty());
     SaProfile saProfile;
     OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
-    saProfile.startOnDemand.emplace_back(event);
+    saProfile.startOnDemand.onDemandEvents.emplace_back(event);
     saProfiles.emplace_back(saProfile);
     collect->FilterOnDemandSaProfiles(saProfiles);
     EXPECT_EQ(false, collect->onDemandSaProfiles_.empty());
     OnDemandEvent event1 = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "off" };
-    saProfile.stopOnDemand.emplace_back(event1);
+    saProfile.stopOnDemand.onDemandEvents.emplace_back(event1);
     saProfiles.emplace_back(saProfile);
     collect->FilterOnDemandSaProfiles(saProfiles);
     EXPECT_EQ(false, collect->onDemandSaProfiles_.empty());
@@ -118,8 +118,8 @@ HWTEST_F(DeviceStatusCollectManagerTest, GetSaControlListByEvent001, TestSize.Le
     SaProfile saProfile;
     OnDemandEvent event1 = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
     OnDemandEvent event2 = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "off" };
-    saProfile.startOnDemand.emplace_back(event1);
-    saProfile.stopOnDemand.emplace_back(event2);
+    saProfile.startOnDemand.onDemandEvents.emplace_back(event1);
+    saProfile.stopOnDemand.onDemandEvents.emplace_back(event2);
     collect->onDemandSaProfiles_.emplace_back(saProfile);
     collect->GetSaControlListByEvent(event, saControlList);
     EXPECT_EQ(false, saControlList.empty());
@@ -198,7 +198,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, CheckConditions002, TestSize.Level3)
     DTEST_LOG << " CheckConditions002 BEGIN" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     std::list<SaProfile> saProfiles;
-    OnDemandEvent condition;
+    OnDemandCondition condition;
     condition.eventId = -1;
     OnDemandEvent event;
     event.conditions.push_back(condition);
@@ -219,7 +219,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, CheckConditions003, TestSize.Level3)
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     std::list<SaProfile> saProfiles;
     collect->collectPluginMap_[MOCK_PLUGIN] = nullptr;
-    OnDemandEvent condition;
+    OnDemandCondition condition;
     condition.eventId = MOCK_PLUGIN;
     OnDemandEvent event;
     event.conditions.push_back(condition);
@@ -240,7 +240,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, CheckConditions004, TestSize.Level3)
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     std::list<SaProfile> saProfiles;
     collect->collectPluginMap_[MOCK_PLUGIN] = new MockCollectPlugin(collect);
-    OnDemandEvent condition;
+    OnDemandCondition condition;
     condition.eventId = MOCK_PLUGIN;
     OnDemandEvent event;
     event.conditions.push_back(condition);
@@ -263,7 +263,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, CheckConditions005, TestSize.Level3)
     sptr<MockCollectPlugin> mockCollectPlugin = new MockCollectPlugin(collect);
     mockCollectPlugin->mockCheckConditionResult_ = true;
     collect->collectPluginMap_[MOCK_PLUGIN] = mockCollectPlugin;
-    OnDemandEvent condition;
+    OnDemandCondition condition;
     condition.eventId = MOCK_PLUGIN;
     OnDemandEvent event;
     event.conditions.push_back(condition);
@@ -321,8 +321,8 @@ HWTEST_F(DeviceStatusCollectManagerTest, ReportEvent003, TestSize.Level3)
     SaProfile saProfile;
     OnDemandEvent event1 = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
     OnDemandEvent event2 = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "off" };
-    saProfile.startOnDemand.emplace_back(event1);
-    saProfile.stopOnDemand.emplace_back(event2);
+    saProfile.startOnDemand.onDemandEvents.emplace_back(event1);
+    saProfile.stopOnDemand.onDemandEvents.emplace_back(event2);
     collect->onDemandSaProfiles_.emplace_back(saProfile);
     collect->ReportEvent(event);
     EXPECT_EQ(true, collect->collectHandler_ != nullptr);

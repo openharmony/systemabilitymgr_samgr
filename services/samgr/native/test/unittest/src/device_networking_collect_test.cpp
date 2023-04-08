@@ -346,7 +346,7 @@ HWTEST_F(DeviceNetworkingCollectTest, CheckCondition001, TestSize.Level3)
     DTEST_LOG << " CheckCondition001 BEGIN" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
-    OnDemandEvent condition;
+    OnDemandCondition condition;
     condition.value = "on";
     networkingCollect->stateCallback_ = std::make_shared<DeviceStateCallback>(networkingCollect);
     networkingCollect->stateCallback_->deviceOnlineSet_.insert("mockDeivce");
@@ -366,7 +366,7 @@ HWTEST_F(DeviceNetworkingCollectTest, CheckCondition002, TestSize.Level3)
     DTEST_LOG << " CheckCondition002 BEGIN" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
-    OnDemandEvent condition;
+    OnDemandCondition condition;
     condition.value = "on";
     bool result = networkingCollect->CheckCondition(condition);
     EXPECT_FALSE(result);
@@ -384,7 +384,7 @@ HWTEST_F(DeviceNetworkingCollectTest, CheckCondition003, TestSize.Level3)
     DTEST_LOG << " CheckCondition003 BEGIN" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
-    OnDemandEvent condition;
+    OnDemandCondition condition;
     condition.value = "off";
     networkingCollect->stateCallback_ = std::make_shared<DeviceStateCallback>(networkingCollect);
     networkingCollect->stateCallback_->deviceOnlineSet_.insert("mockDeivce");
@@ -404,7 +404,7 @@ HWTEST_F(DeviceNetworkingCollectTest, CheckCondition004, TestSize.Level3)
     DTEST_LOG << " CheckCondition004 BEGIN" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
-    OnDemandEvent condition;
+    OnDemandCondition condition;
     condition.value = "off";
     bool result = networkingCollect->CheckCondition(condition);
     EXPECT_TRUE(result);
@@ -422,7 +422,7 @@ HWTEST_F(DeviceNetworkingCollectTest, CheckCondition005, TestSize.Level3)
     DTEST_LOG << " CheckCondition005 BEGIN" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
-    OnDemandEvent condition;
+    OnDemandCondition condition;
     condition.value = "invalid";
     networkingCollect->stateCallback_ = std::make_shared<DeviceStateCallback>(networkingCollect);
     networkingCollect->stateCallback_->deviceOnlineSet_.insert("mockDeivce");
@@ -442,7 +442,7 @@ HWTEST_F(DeviceNetworkingCollectTest, CheckCondition006, TestSize.Level3)
     DTEST_LOG << " CheckCondition006 BEGIN" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
-    OnDemandEvent condition;
+    OnDemandCondition condition;
     condition.value = "invalid";
     bool result = networkingCollect->CheckCondition(condition);
     EXPECT_FALSE(result);
