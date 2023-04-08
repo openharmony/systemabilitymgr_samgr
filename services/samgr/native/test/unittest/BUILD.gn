@@ -31,9 +31,7 @@ config("sam_test_config") {
 }
 
 config("samgr_proxy_config") {
-  include_dirs = [
-    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include"
-  ]
+  include_dirs = [ "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include" ]
 }
 
 config("samgr_proxy_private_config") {
