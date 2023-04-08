@@ -48,6 +48,7 @@ const string START_SAID = "said";
 const string EVENT_TYPE = "eventId";
 const string EVENT_NAME = "name";
 const string EVENT_VALUE = "value";
+const string EVENT_EXTRA_DATA_ID = "extraDataId";
 const string PREFIX = "/system/profile/";
 const string LOCAL_DEVICE = "local";
 const string ONDEMAND_PARAM = "persist.samgr.perf.ondemand";
@@ -981,6 +982,36 @@ int32_t SystemAbilityManager::UnSubscribeSystemProcess(const sptr<ISystemProcess
     return abilityStateScheduler_->UnSubscribeSystemProcess(listener);
 }
 
+int32_t SystemAbilityManager::GetOnDemandReasonExtraData(int64_t extraDataId, MessageParcel& extraDataParcel)
+{
+    if (collectManager_ == nullptr) {
+        HILOGE("collectManager is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    OnDemandReasonExtraData extraData;
+    if (collectManager_->GetOnDemandReasonExtraData(extraDataId, extraData) != ERR_OK) {
+        HILOGE("get extra data failed");
+        return ERR_INVALID_VALUE;
+    }
+    if (!extraDataParcel.WriteParcelable(&extraData)) {
+        HILOGE("write extra data failed");
+        return ERR_INVALID_VALUE;
+    }
+    return ERR_OK;
+}
+
+int32_t SystemAbilityManager::GetOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
+    std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents)
+{
+    return ERR_OK;
+}
+
+int32_t SystemAbilityManager::UpdateOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
+    const std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents)
+{
+    return ERR_OK;
+}
+
 void SystemAbilityManager::SendSystemAbilityAddedMsg(int32_t systemAbilityId, const sptr<IRemoteObject>& remoteObject)
 {
     if (workHandler_ == nullptr) {
@@ -1141,7 +1172,7 @@ int32_t SystemAbilityManager::StartDynamicSystemProcess(const std::u16string& na
     int32_t systemAbilityId, const OnDemandEvent& event)
 {
     std::string eventStr = std::to_string(systemAbilityId) + "#" + std::to_string(event.eventId) + "#"
-        + event.name + "#" + event.value + "#";
+        + event.name + "#" + event.value + "#" + std::to_string(event.extraDataId) + "#";
     auto extraArgv = eventStr.c_str();
     auto result = ServiceControlWithExtra(Str16ToStr8(name).c_str(), ServiceAction::START, &extraArgv, 1);
     HILOGI("StartDynamicSystemProcess call ServiceControlWithExtra result:%{public}d!", result);
@@ -1355,7 +1386,7 @@ int32_t SystemAbilityManager::DoUnloadSystemAbility(int32_t systemAbilityId,
 }
 
 bool SystemAbilityManager::IdleSystemAbility(int32_t systemAbilityId, const std::u16string& procName,
-    const std::unordered_map<std::string, std::string>& idleReason, int32_t& delayTime)
+    const nlohmann::json& idleReason, int32_t& delayTime)
 {
     sptr<IRemoteObject> targetObject = CheckSystemAbility(systemAbilityId);
     if (targetObject == nullptr) {
@@ -1372,7 +1403,7 @@ bool SystemAbilityManager::IdleSystemAbility(int32_t systemAbilityId, const std:
 }
 
 bool SystemAbilityManager::ActiveSystemAbility(int32_t systemAbilityId, const std::u16string& procName,
-    const std::unordered_map<std::string, std::string>& activeReason)
+    const nlohmann::json& activeReason)
 {
     sptr<IRemoteObject> targetObject = CheckSystemAbility(systemAbilityId);
     if (targetObject == nullptr) {
@@ -1581,14 +1612,11 @@ std::string SystemAbilityManager::GetLocalNodeId()
 
 std::string SystemAbilityManager::EventToStr(const OnDemandEvent& event)
 {
-    std::unordered_map<std::string, std::string> stopReason;
-    stopReason[EVENT_TYPE] = std::to_string(event.eventId);
-    stopReason[EVENT_NAME] = event.name;
-    stopReason[EVENT_VALUE] = event.value;
     nlohmann::json eventJson;
-    for (auto it = stopReason.begin(); it != stopReason.end(); ++it) {
-        eventJson[it->first] = it->second;
-    }
+    eventJson[EVENT_TYPE] = event.eventId;
+    eventJson[EVENT_NAME] = event.name;
+    eventJson[EVENT_VALUE] = event.value;
+    eventJson[EVENT_EXTRA_DATA_ID] = event.extraDataId;
     std::string eventStr = eventJson.dump();
     return eventStr;
 }

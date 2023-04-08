@@ -2474,7 +2474,7 @@ HWTEST_F(SystemAbilityMgrTest, IdleSystemAbility001, TestSize.Level3)
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     int32_t systemAbilityId = -1;
     std::u16string procName;
-    std::unordered_map<std::string, std::string> idleReason;
+    nlohmann::json idleReason;
     int32_t delayTime = 0;
     bool ret = saMgr->IdleSystemAbility(systemAbilityId, procName, idleReason, delayTime);
     EXPECT_FALSE(ret);
@@ -2492,7 +2492,7 @@ HWTEST_F(SystemAbilityMgrTest, IdleSystemAbility002, TestSize.Level3)
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     int32_t systemAbilityId = 401;
     std::u16string procName;
-    std::unordered_map<std::string, std::string> idleReason;
+    nlohmann::json idleReason;
     int32_t delayTime = 0;
     bool ret = saMgr->IdleSystemAbility(systemAbilityId, procName, idleReason, delayTime);
     EXPECT_FALSE(ret);
@@ -2510,7 +2510,7 @@ HWTEST_F(SystemAbilityMgrTest, ActiveSystemAbility001, TestSize.Level3)
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     int32_t systemAbilityId = -1;
     std::u16string procName;
-    std::unordered_map<std::string, std::string> activeReason;
+    nlohmann::json activeReason;
     bool ret = saMgr->ActiveSystemAbility(systemAbilityId, procName, activeReason);
     EXPECT_FALSE(ret);
 }
@@ -2527,7 +2527,7 @@ HWTEST_F(SystemAbilityMgrTest, ActiveSystemAbility002, TestSize.Level3)
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     int32_t systemAbilityId = 401;
     std::u16string procName;
-    std::unordered_map<std::string, std::string> activeReason;
+    nlohmann::json activeReason;
     bool ret = saMgr->ActiveSystemAbility(systemAbilityId, procName, activeReason);
     EXPECT_FALSE(ret);
 }

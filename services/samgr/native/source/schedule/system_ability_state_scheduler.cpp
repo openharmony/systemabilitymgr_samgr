@@ -36,6 +36,7 @@ constexpr const char* CANCEL_UNLOAD = "cancelUnload";
 const std::string KEY_EVENT_ID = "eventId";
 const std::string KEY_NAME = "name";
 const std::string KEY_VALUE = "value";
+const std::string KEY_EXTRA_DATA_ID = "extraDataId";
 }
 void SystemAbilityStateScheduler::Init(const std::list<SaProfile>& saProfiles)
 {
@@ -186,10 +187,11 @@ int32_t SystemAbilityStateScheduler::HandleLoadAbilityEventLocked(
         || abilityContext->ownProcessContext->state == SystemProcessState::STOPPING) {
         return PendLoadEventLocked(abilityContext, loadRequestInfo);
     }
-    std::unordered_map<std::string, std::string> activeReason;
-    activeReason[KEY_EVENT_ID] = std::to_string(loadRequestInfo.loadEvent.eventId);
+    nlohmann::json activeReason;
+    activeReason[KEY_EVENT_ID] = loadRequestInfo.loadEvent.eventId;
     activeReason[KEY_NAME] = loadRequestInfo.loadEvent.name;
     activeReason[KEY_VALUE] = loadRequestInfo.loadEvent.value;
+    activeReason[KEY_EXTRA_DATA_ID] = loadRequestInfo.loadEvent.extraDataId;
     int32_t result = ERR_INVALID_VALUE;
     switch (abilityContext->state) {
         case SystemAbilityState::LOADING:
@@ -259,10 +261,11 @@ int32_t SystemAbilityStateScheduler::HandleCancelUnloadAbilityEvent(int32_t syst
     if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
         return ERR_INVALID_VALUE;
     }
-    std::unordered_map<std::string, std::string> activeReason;
+    nlohmann::json activeReason;
     activeReason[KEY_EVENT_ID] = INTERFACE_CALL;
     activeReason[KEY_NAME] = CANCEL_UNLOAD;
     activeReason[KEY_VALUE] = "";
+    activeReason[KEY_EXTRA_DATA_ID] = -1;
     int32_t result = ERR_INVALID_VALUE;
     std::lock_guard<std::recursive_mutex> autoLock(abilityContext->ownProcessContext->processLock);
     switch (abilityContext->state) {
@@ -280,7 +283,7 @@ int32_t SystemAbilityStateScheduler::HandleCancelUnloadAbilityEvent(int32_t syst
 
 int32_t SystemAbilityStateScheduler::ActiveSystemAbilityLocked(
     const std::shared_ptr<SystemAbilityContext>& abilityContext,
-    const std::unordered_map<std::string, std::string>& activeReason)
+    const nlohmann::json& activeReason)
 {
     bool result = SystemAbilityManager::GetInstance()->ActiveSystemAbility(abilityContext->systemAbilityId,
         abilityContext->ownProcessContext->processName, activeReason);
@@ -736,10 +739,11 @@ int32_t SystemAbilityStateScheduler::ProcessDelayUnloadEvent(int32_t systemAbili
     }
     HILOGI("[SA Scheduler][SA: %{public}d] process delay unload event", systemAbilityId);
     int32_t delayTime = 0;
-    std::unordered_map<std::string, std::string> idleReason;
-    idleReason[KEY_EVENT_ID] = std::to_string(abilityContext->unloadRequest.unloadEvent.eventId);
+    nlohmann::json idleReason;
+    idleReason[KEY_EVENT_ID] = abilityContext->unloadRequest.unloadEvent.eventId;
     idleReason[KEY_NAME] = abilityContext->unloadRequest.unloadEvent.name;
     idleReason[KEY_VALUE] = abilityContext->unloadRequest.unloadEvent.value;
+    idleReason[KEY_EXTRA_DATA_ID] = abilityContext->unloadRequest.unloadEvent.extraDataId;
     bool result = SystemAbilityManager::GetInstance()->IdleSystemAbility(abilityContext->systemAbilityId,
         abilityContext->ownProcessContext->processName, idleReason, delayTime);
     if (!result) {

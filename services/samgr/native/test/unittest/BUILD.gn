@@ -93,6 +93,7 @@ ohos_unittest("SystemAbilityMgrTest") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "ipc:libdbinder",
+    "safwk:system_ability_fwk",
   ]
   defines = []
   if (use_musl) {
@@ -186,6 +187,7 @@ ohos_unittest("SystemAbilityMgrStubTest") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "ipc:libdbinder",
+    "safwk:system_ability_fwk",
   ]
   defines = []
   if (use_musl) {
@@ -342,6 +344,7 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "ipc:libdbinder",
+    "safwk:system_ability_fwk",
   ]
 }
 
@@ -462,6 +465,7 @@ ohos_executable("TestTool") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "ipc:libdbinder",
+    "safwk:system_ability_fwk",
   ]
   part_name = "samgr"
   subsystem_name = "systemabilitymgr"

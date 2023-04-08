@@ -22,6 +22,7 @@
 #include "iremote_object.h"
 #include "iremote_stub.h"
 #include "iremote_proxy.h"
+#include "nlohmann/json.hpp"
 
 namespace OHOS {
 class ILocalAbilityManager : public IRemoteBroker {
@@ -29,9 +30,9 @@ public:
     virtual bool StartAbility(int32_t systemAbilityId, const std::string& eventStr) = 0;
     virtual bool StopAbility(int32_t systemAbilityId, const std::string& eventStr) = 0;
     virtual bool ActiveAbility(int32_t systemAbilityId,
-        const std::unordered_map<std::string, std::string>& activeReason) = 0;
+        const nlohmann::json& activeReason) = 0;
     virtual bool IdleAbility(int32_t systemAbilityId,
-        const std::unordered_map<std::string, std::string>& idleReason, int32_t& delayTime) = 0;
+        const nlohmann::json& idleReason, int32_t& delayTime) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ILocalAbilityManager");
 protected:
     enum {

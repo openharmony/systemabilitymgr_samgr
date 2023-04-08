@@ -113,7 +113,7 @@ bool LocalAbilityManagerProxy::StopAbility(int32_t systemAbilityId, const std::s
 }
 
 bool LocalAbilityManagerProxy::ActiveAbility(int32_t systemAbilityId,
-    const std::unordered_map<std::string, std::string>& activeReason)
+    const nlohmann::json& activeReason)
 {
     if (systemAbilityId <= 0) {
         HiLog::Warn(label_, "ActiveAbility systemAbilityId invalid.");
@@ -135,11 +135,7 @@ bool LocalAbilityManagerProxy::ActiveAbility(int32_t systemAbilityId,
         HiLog::Warn(label_, "ActiveAbility write systemAbilityId failed!");
         return false;
     }
-    nlohmann::json payload;
-    for (auto it = activeReason.begin(); it != activeReason.end(); ++it) {
-        payload[it->first] = it->second;
-    }
-    if (!data.WriteString(payload.dump())) {
+    if (!data.WriteString(activeReason.dump())) {
         HiLog::Warn(label_, "ActiveAbility write activeReason failed!");
         return false;
     }
@@ -160,7 +156,7 @@ bool LocalAbilityManagerProxy::ActiveAbility(int32_t systemAbilityId,
 }
 
 bool LocalAbilityManagerProxy::IdleAbility(int32_t systemAbilityId,
-    const std::unordered_map<std::string, std::string>& idleReason, int32_t& delayTime)
+    const nlohmann::json& idleReason, int32_t& delayTime)
 {
     if (systemAbilityId <= 0) {
         HiLog::Warn(label_, "IdleAbility systemAbilityId invalid.");
@@ -182,11 +178,7 @@ bool LocalAbilityManagerProxy::IdleAbility(int32_t systemAbilityId,
         HiLog::Warn(label_, "IdleAbility write systemAbilityId failed!");
         return false;
     }
-    nlohmann::json payload;
-    for (auto it = idleReason.begin(); it != idleReason.end(); ++it) {
-        payload[it->first] = it->second;
-    }
-    if (!data.WriteString(payload.dump())) {
+    if (!data.WriteString(idleReason.dump())) {
         HiLog::Warn(label_, "IdleAbility write ildeReason failed!");
         return false;
     }

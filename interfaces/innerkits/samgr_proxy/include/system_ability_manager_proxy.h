@@ -19,6 +19,7 @@
 
 #include <string>
 #include "if_system_ability_manager.h"
+#include "system_ability_on_demand_event.h"
 
 namespace OHOS {
 class SystemAbilityManagerProxy : public IRemoteProxy<ISystemAbilityManager> {
@@ -52,6 +53,11 @@ public:
     int32_t GetRunningSystemProcess(std::list<SystemProcessInfo>& systemProcessInfos) override;
     int32_t SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener) override;
     int32_t UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener) override;
+    int32_t GetOnDemandReasonExtraData(int64_t extraDataId, MessageParcel& extraDataParcel) override;
+    int32_t GetOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
+        std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents) override;
+    int32_t UpdateOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
+        const std::vector<SystemAbilityOnDemandEvent>& sabilityOnDemandEvents) override;
 private:
     sptr<IRemoteObject> GetSystemAbilityWrapper(int32_t systemAbilityId, const std::string& deviceId = "");
     sptr<IRemoteObject> CheckSystemAbilityWrapper(int32_t code, MessageParcel& data);
