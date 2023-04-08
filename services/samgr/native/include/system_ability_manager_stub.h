@@ -53,6 +53,8 @@ private:
     int32_t UnloadSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t CancelUnloadSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t GetOnDemandReasonExtraDataInner(MessageParcel& data, MessageParcel& reply);
+    int32_t GetOnDemandPolicyInner(MessageParcel& data, MessageParcel& reply);
+    int32_t UpdateOnDemandPolicyInner(MessageParcel& data, MessageParcel& reply);
     int32_t UnmarshalingSaExtraProp(MessageParcel& data, SAExtraProp& extraProp);
     static int32_t GetHapIdMultiuser(int32_t uid);
 

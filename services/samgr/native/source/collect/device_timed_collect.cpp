@@ -35,7 +35,7 @@ DeviceTimedCollect::DeviceTimedCollect(const sptr<IReport>& report)
 {
 }
 
-int32_t DeviceTimedCollect::Init(const std::list<SaProfile>& saProfiles)
+void DeviceTimedCollect::Init(const std::list<SaProfile>& saProfiles)
 {
     lock_guard<mutex> autoLock(taskLock_);
     for (auto& saProfile : saProfiles) {
@@ -47,7 +47,6 @@ int32_t DeviceTimedCollect::Init(const std::list<SaProfile>& saProfiles)
         }
     }
     HILOGD("DeviceTimedCollect timedSet count: %{public}zu", timedSet_.size());
-    return ERR_OK;
 }
 
 void DeviceTimedCollect::SaveTimedEvent(const OnDemandEvent& onDemandEvent)
@@ -85,6 +84,28 @@ int32_t DeviceTimedCollect::OnStart()
 int32_t DeviceTimedCollect::OnStop()
 {
     HILOGI("DeviceTimedCollect OnStop called");
+    return ERR_OK;
+}
+
+int32_t DeviceTimedCollect::AddCollectEvent(const OnDemandEvent& event)
+{
+    if (event.name != LOOP_EVENT) {
+        HILOGE("DeviceTimedCollect invalid event name: %{public}s", event.name.c_str());
+        return ERR_INVALID_VALUE;
+    }
+    int32_t interval = atoi(event.value.c_str());
+    if (interval < MIN_INTERVAL) {
+        HILOGE("DeviceTimedCollect invalid interval: %{public}d", interval);
+        return ERR_INVALID_VALUE;
+    }
+    std::lock_guard<std::mutex> autoLock(taskLock_);
+    auto iter = timedSet_.find(interval);
+    if (iter != timedSet_.end()) {
+        return ERR_OK;
+    }
+    HILOGI("DeviceTimedCollect add collect events: %{public}d", interval);
+    timedSet_.insert(interval);
+    PostDelayTask(loopTask_, interval);
     return ERR_OK;
 }
 }

@@ -28,6 +28,7 @@
 #include "sam_log.h"
 #include "string_ex.h"
 #include "system_ability_manager.h"
+#include "system_ability_on_demand_event.h"
 #include "tools.h"
 
 #ifdef WITH_SELINUX
@@ -140,6 +141,10 @@ SystemAbilityManagerStub::SystemAbilityManagerStub()
         &SystemAbilityManagerStub::UnSubscribeSystemProcessInner;
     memberFuncMap_[GET_ONDEMAND_REASON_EXTRA_DATA_TRANSACTION] =
         &SystemAbilityManagerStub::GetOnDemandReasonExtraDataInner;
+    memberFuncMap_[GET_ONDEAMND_POLICY_TRANSACTION] =
+        &SystemAbilityManagerStub::GetOnDemandPolicyInner;
+    memberFuncMap_[UPDATE_ONDEAMND_POLICY_TRANSACTION] =
+        &SystemAbilityManagerStub::UpdateOnDemandPolicyInner;
 }
 
 int32_t SystemAbilityManagerStub::OnRemoteRequest(uint32_t code,
@@ -744,6 +749,66 @@ int32_t SystemAbilityManagerStub::GetOnDemandReasonExtraDataInner(MessageParcel&
     }
     if (!reply.WriteParcelable(extraData)) {
         HILOGW("SystemAbilityManagerStub::GetOnDemandReasonExtraData write extraData failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ERR_OK;
+}
+
+int32_t SystemAbilityManagerStub::GetOnDemandPolicyInner(MessageParcel& data, MessageParcel& reply)
+{
+    if (!CanRequest()) {
+        HILOGE("GetOnDemandPolicyInner PERMISSION DENIED!");
+        return ERR_PERMISSION_DENIED;
+    }
+    int32_t systemAbilityId = 0;
+    if (!data.ReadInt32(systemAbilityId)) {
+        HILOGW("GetOnDemandPolicyInner read saId failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t type = 0;
+    if (!data.ReadInt32(type)) {
+        HILOGW("GetOnDemandPolicyInner read type failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    OnDemandPolicyType typeEnum = static_cast<OnDemandPolicyType>(type);
+    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
+    int32_t result = GetOnDemandPolicy(systemAbilityId, typeEnum, abilityOnDemandEvents);
+    if (!reply.WriteInt32(result)) {
+        HILOGW("GetOnDemandPolicyInner write result failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!OnDemandEventToParcel::WriteOnDemandEventsToParcel(abilityOnDemandEvents, reply)) {
+        HILOGW("GetOnDemandPolicyInner write on demand event failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ERR_OK;
+}
+
+int32_t SystemAbilityManagerStub::UpdateOnDemandPolicyInner(MessageParcel& data, MessageParcel& reply)
+{
+    if (!CanRequest()) {
+        HILOGE("UpdateOnDemandPolicyInner PERMISSION DENIED!");
+        return ERR_PERMISSION_DENIED;
+    }
+    int32_t systemAbilityId = 0;
+    if (!data.ReadInt32(systemAbilityId)) {
+        HILOGW("UpdateOnDemandPolicyInner read saId failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t type = 0;
+    if (!data.ReadInt32(type)) {
+        HILOGW("GetOnDemandPolicyInner read type failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    OnDemandPolicyType typeEnum = static_cast<OnDemandPolicyType>(type);
+    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
+    if (!OnDemandEventToParcel::ReadOnDemandEventsFromParcel(abilityOnDemandEvents, data)) {
+        HILOGW("UpdateOnDemandPolicyInner read on demand event failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t result = UpdateOnDemandPolicy(systemAbilityId, typeEnum, abilityOnDemandEvents);
+    if (!reply.WriteInt32(result)) {
+        HILOGW("UpdateOnDemandPolicyInner write result failed.");
         return ERR_FLATTEN_OBJECT;
     }
     return ERR_OK;

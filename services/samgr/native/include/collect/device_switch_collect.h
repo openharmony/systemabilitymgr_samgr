@@ -32,7 +32,8 @@ public:
     ~DeviceSwitchCollect() = default;
     int32_t OnStart() override;
     int32_t OnStop() override;
-    void Init(const std::list<SaProfile>& saProfiles);
+    void Init(const std::list<SaProfile>& saProfiles) override;
+    int32_t AddCollectEvent(const OnDemandEvent& event) override;
     void SetSwitchEvent(const OnDemandEvent& onDemandEvent);
 private:
     std::mutex switchEventLock_;

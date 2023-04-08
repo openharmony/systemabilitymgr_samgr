@@ -77,19 +77,21 @@ void CommonEventCollect::Init(const std::list<SaProfile>& onDemandSaProfiles)
         commonEventState_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_DISCHARGING);
     }
     std::lock_guard<std::mutex> autoLock(commomEventLock_);
-    commonEventNames_.push_back(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON);
-    commonEventNames_.push_back(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
-    commonEventNames_.push_back(EventFwk::CommonEventSupport::COMMON_EVENT_CHARGING);
-    commonEventNames_.push_back(EventFwk::CommonEventSupport::COMMON_EVENT_DISCHARGING);
+    commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON);
+    commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
+    commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_CHARGING);
+    commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_DISCHARGING);
     for (auto& profile : onDemandSaProfiles) {
-        for (auto iterStart : profile.startOnDemand.onDemandEvents) {
-            if (iterStart.eventId == COMMON_EVENT) {
-                commonEventNames_.push_back(iterStart.name);
+        for (auto iterStart = profile.startOnDemand.onDemandEvents.begin();
+            iterStart != profile.startOnDemand.onDemandEvents.end(); iterStart++) {
+            if (iterStart->eventId == COMMON_EVENT) {
+                commonEventNames_.insert(iterStart->name);
             }
         }
-        for (auto iterStop : profile.stopOnDemand.onDemandEvents) {
-            if (iterStop.eventId == COMMON_EVENT) {
-                commonEventNames_.push_back(iterStop.name);
+        for (auto iterStop = profile.stopOnDemand.onDemandEvents.begin();
+            iterStop != profile.stopOnDemand.onDemandEvents.end(); iterStop++) {
+            if (iterStop->eventId == COMMON_EVENT) {
+                commonEventNames_.insert(iterStop->name);
             }
         }
     }
@@ -201,6 +203,24 @@ bool CommonEventCollect::GetOnDemandReasonExtraData(int64_t extraDataId, OnDeman
     }
     extraData = extraDatas_[extraDataId];
     return true;
+}
+
+int32_t CommonEventCollect::AddCollectEvent(const OnDemandEvent& event)
+{
+    {
+        std::lock_guard<std::mutex> autoLock(commomEventLock_);
+        auto iter = commonEventNames_.find(event.name);
+        if (iter != commonEventNames_.end()) {
+            return ERR_OK;
+        }
+        HILOGI("CommonEventCollect add collect events: %{public}s", event.name.c_str());
+        commonEventNames_.insert(event.name);
+    }
+    if (!AddCommonListener()) {
+        HILOGE("CommonEventCollect add listener failed");
+        return ERR_INVALID_VALUE;
+    }
+    return ERR_OK;
 }
 
 void CommonHandler::ProcessEvent(const InnerEvent::Pointer& event)

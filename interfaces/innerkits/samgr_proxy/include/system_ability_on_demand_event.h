@@ -48,5 +48,17 @@ struct SystemAbilityOnDemandEvent {
     std::vector<SystemAbilityOnDemandCondition> conditions;
     bool enableOnce = false;
 };
+
+class OnDemandEventToParcel {
+public:
+    static bool WriteOnDemandEventsToParcel(const std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents,
+        MessageParcel& data);
+    static bool WriteOnDemandEventToParcel(const SystemAbilityOnDemandEvent& event, MessageParcel& data);
+    static bool WriteOnDemandConditionToParcel(const SystemAbilityOnDemandCondition& condition, MessageParcel& data);
+    static bool ReadOnDemandEventsFromParcel(std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents,
+        MessageParcel& reply);
+    static bool ReadOnDemandEventFromParcel(SystemAbilityOnDemandEvent& event, MessageParcel& reply);
+    static bool ReadOnDemandConditionFromParcel(SystemAbilityOnDemandCondition& condition, MessageParcel& reply);
+};
 }
 #endif /* SAMGR_INTERFACES_INNERKITS_SAMGR_PROXY_SYSTEM_ABILITY_ON_DEMAND_EVENT_H */

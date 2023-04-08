@@ -60,7 +60,7 @@ void DeviceSwitchCollect::SetSwitchEvent(const OnDemandEvent& onDemandEvent)
     if (onDemandEvent.name == WIFI_NAME || onDemandEvent.name == BLUETOOTH_NAME) {
         std::lock_guard<std::mutex> autoLock(switchEventLock_);
         switches_.insert(onDemandEvent.name);
-    } 
+    }
 }
 
 int32_t DeviceSwitchCollect::OnStart()
@@ -83,6 +83,31 @@ int32_t DeviceSwitchCollect::OnStart()
 int32_t DeviceSwitchCollect::OnStop()
 {
     HILOGI("DeviceSwitchCollect OnStop called");
+    return ERR_OK;
+}
+
+int32_t DeviceSwitchCollect::AddCollectEvent(const OnDemandEvent& event)
+{
+    std::lock_guard<std::mutex> autoLock(switchEventLock_);
+    auto iter = switches_.find(event.name);
+    if (iter != switches_.end()) {
+        return ERR_OK;
+    }
+    HILOGI("DeviceSwitchCollect add collect events: %{public}s", event.name.c_str());
+    int32_t result = ERR_OK;
+    sptr<SwitchStateListener> listener = new SwitchStateListener(this);
+    if (event.name == WIFI_NAME) {
+        result = SystemAbilityManager::GetInstance()->SubscribeSystemAbility(COMMON_EVENT_SERVICE_ID, listener);
+    } else if (event.name == BLUETOOTH_NAME) {
+        result = SystemAbilityManager::GetInstance()->SubscribeSystemAbility(BLUETOOTH_HOST_SYS_ABILITY_ID, listener);
+    } else {
+        HILOGE("invalid event name %{public}s!", event.name.c_str());
+        result = ERR_INVALID_VALUE;
+    }
+    if (result != ERR_OK) {
+        return result;
+    }
+    switches_.insert(event.name);
     return ERR_OK;
 }
 
