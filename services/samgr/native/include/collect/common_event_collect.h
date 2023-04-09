@@ -33,7 +33,8 @@ public:
     int32_t OnStop() override;
     void SaveAction(const std::string& action);
     bool CheckCondition(const OnDemandCondition& condition) override;
-    void Init(const std::list<SaProfile>& saProfiles);
+    int32_t AddCollectEvent(const OnDemandEvent& event) override;
+    void Init(const std::list<SaProfile>& saProfiles) override;
     bool AddCommonListener();
     int64_t SaveOnDemandReasonExtraData(const EventFwk::CommonEventData& data);
     void RemoveOnDemandReasonExtraData(int64_t extraDataId);
@@ -44,7 +45,7 @@ private:
     int64_t GenerateExtraDataIdLocked();
     std::mutex commomEventLock_;
     sptr<IRemoteObject::DeathRecipient> commonEventDeath_;
-    std::vector<std::string> commonEventNames_;
+    std::set<std::string> commonEventNames_;
     std::shared_ptr<AppExecFwk::EventHandler> workHandler_;
     std::shared_ptr<EventFwk::CommonEventSubscriber> commonEventSubscriber_ = nullptr;
     std::mutex commonEventStateLock_;

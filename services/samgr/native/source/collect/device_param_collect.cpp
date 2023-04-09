@@ -91,6 +91,19 @@ void DeviceParamCollect::WatchParameters()
     }
 }
 
+int32_t DeviceParamCollect::AddCollectEvent(const OnDemandEvent& event)
+{
+    std::lock_guard<std::mutex> autoLock(paramLock_);
+    auto iter = params_.find(event.name);
+    if (iter != params_.end()) {
+        return ERR_OK;
+    }
+    HILOGI("DeviceParamCollect add collect events: %{public}s", event.name.c_str());
+    params_.insert(event.name);
+    WatchParameter(event.name.c_str(), DeviceParamCallback, this);
+    return ERR_OK;
+}
+
 void SystemAbilityStatusChange::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
 {
     HILOGI("OnAddSystemAbility systemAbilityId:%{public}d", systemAbilityId);

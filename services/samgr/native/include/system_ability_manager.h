@@ -205,6 +205,10 @@ private:
     void OndemandLoadForPerf();
     std::list<int32_t> GetAllOndemandSa();
     std::string EventToStr(const OnDemandEvent& event);
+    bool CheckCallerProcess(SaProfile& saProfile);
+    bool CheckAllowUpdate(OnDemandPolicyType type, SaProfile& saProfile);
+    void ConvertToOnDemandEvent(const SystemAbilityOnDemandEvent& from, OnDemandEvent& to);
+    void ConvertToSystemAbilityOnDemandEvent(const OnDemandEvent& from, SystemAbilityOnDemandEvent& to);
 
     std::u16string deviceName_;
     static sptr<SystemAbilityManager> instance;

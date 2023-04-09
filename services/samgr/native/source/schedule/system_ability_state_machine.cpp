@@ -70,7 +70,7 @@ int32_t SystemAbilityStateMachine::AbilityStateTransitionLocked(const std::share
         return ERR_INVALID_VALUE;
     }
     context->state = nextState;
-    HILOGI("[SA Scheduler][SA: %{public}d] transiton from state %{public}d to state %{public}d",
+    HILOGD("[SA Scheduler][SA: %{public}d] transiton from state %{public}d to state %{public}d",
         context->systemAbilityId, currentState, nextState);
     handler->OnEnter(context);
     return ERR_OK;

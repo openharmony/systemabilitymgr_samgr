@@ -18,10 +18,12 @@
 
 #include <list>
 #include <memory>
+#include <shared_mutex>
 
 #include "event_handler.h"
 #include "icollect_plugin.h"
 #include "system_ability_ondemand_reason.h"
+#include "system_ability_on_demand_event.h"
 
 namespace OHOS {
 class DeviceStatusCollectManager : public IReport {
@@ -34,13 +36,19 @@ public:
     void StartCollect();
     void PostDelayTask(std::function<void()> callback, int32_t delayTime) override;
     int32_t GetOnDemandReasonExtraData(int64_t extraDataId, OnDemandReasonExtraData& extraData);
+    int32_t GetOnDemandEvents(int32_t systemAbilityId, OnDemandPolicyType type,
+        std::vector<OnDemandEvent>& events);
+    int32_t UpdateOnDemandEvents(int32_t systemAbilityId, OnDemandPolicyType type,
+        const std::vector<OnDemandEvent>& events);
 private:
     void FilterOnDemandSaProfiles(const std::list<SaProfile>& saProfiles);
     void GetSaControlListByEvent(const OnDemandEvent& event, std::list<SaControlInfo>& saControlList);
     static bool IsSameEvent(const OnDemandEvent& ev1, const OnDemandEvent& ev2);
     bool CheckConditions(const OnDemandEvent& onDemandEvent);
+    int32_t AddCollectEvents(const std::vector<OnDemandEvent>& events);
     std::map<int32_t, sptr<ICollectPlugin>> collectPluginMap_;
     std::shared_ptr<AppExecFwk::EventHandler> collectHandler_;
+    std::shared_mutex saProfilesLock_;
     std::list<SaProfile> onDemandSaProfiles_;
 };
 } // namespace OHOS

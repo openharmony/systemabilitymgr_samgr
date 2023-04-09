@@ -238,6 +238,138 @@ bool SystemAbilityManager::GetSaProfile(int32_t saId, SaProfile& saProfile)
     return true;
 }
 
+bool SystemAbilityManager::CheckCallerProcess(SaProfile& saProfile)
+{
+    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    Security::AccessToken::NativeTokenInfo nativeTokenInfo;
+    int32_t tokenInfoResult = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
+    if (tokenInfoResult != ERR_OK) {
+        return false;
+    }
+    std::string callProcess = Str16ToStr8(saProfile.process);
+    if (nativeTokenInfo.processName!= callProcess) {
+        HILOGE("cannot unload SA by another SA, processName:%{public}s",
+            nativeTokenInfo.processName.c_str());
+        return false;
+    }
+    return true;
+}
+
+bool SystemAbilityManager::CheckAllowUpdate(OnDemandPolicyType type, SaProfile& saProfile)
+{
+    if (type == OnDemandPolicyType::START_POLICY && saProfile.startOnDemand.allowUpdate) {
+        return true;
+    } else if (type == OnDemandPolicyType::STOP_POLICY && saProfile.stopOnDemand.allowUpdate) {
+        return true;
+    }
+    return false;
+}
+
+void SystemAbilityManager::ConvertToOnDemandEvent(const SystemAbilityOnDemandEvent& from, OnDemandEvent& to)
+{
+    to.eventId = static_cast<int32_t>(from.eventId);
+    to.name = from.name;
+    to.value = from.value;
+    for (auto& item : from.conditions) {
+        OnDemandCondition condition;
+        condition.eventId = static_cast<int32_t>(item.eventId);
+        condition.name = item.name;
+        condition.value = item.value;
+        to.conditions.push_back(condition);
+    }
+    to.enableOnce = from.enableOnce;
+}
+
+void SystemAbilityManager::ConvertToSystemAbilityOnDemandEvent(const OnDemandEvent& from,
+    SystemAbilityOnDemandEvent& to)
+{
+    to.eventId = static_cast<OnDemandEventId>(from.eventId);
+    to.name = from.name;
+    to.value = from.value;
+    for (auto& item : from.conditions) {
+        SystemAbilityOnDemandCondition condition;
+        condition.eventId = static_cast<OnDemandEventId>(item.eventId);
+        condition.name = item.name;
+        condition.value = item.value;
+        to.conditions.push_back(condition);
+    }
+    to.enableOnce = from.enableOnce;
+}
+
+int32_t SystemAbilityManager::GetOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
+    std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents)
+{
+    SaProfile saProfile;
+    if (!GetSaProfile(systemAbilityId, saProfile)) {
+        HILOGE("GetOnDemandPolicy invalid saId: %{public}d", systemAbilityId);
+        return ERR_INVALID_VALUE;
+    }
+    if (!CheckCallerProcess(saProfile)) {
+        HILOGE("GetOnDemandPolicy invalid caller saId: %{public}d", systemAbilityId);
+        return ERR_INVALID_VALUE;
+    }
+    if (!CheckAllowUpdate(type, saProfile)) {
+        HILOGE("GetOnDemandPolicy not allow get saId: %{public}d", systemAbilityId);
+        return ERR_PERMISSION_DENIED;
+    }
+
+    if (collectManager_ == nullptr) {
+        HILOGE("GetOnDemandPolicy collectManager is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    std::vector<OnDemandEvent> onDemandEvents;
+    int32_t result = ERR_INVALID_VALUE;
+    result = collectManager_->GetOnDemandEvents(systemAbilityId, type, onDemandEvents);
+    if (result != ERR_OK) {
+        HILOGE("GetOnDemandPolicy add collect event failed");
+        return result;
+    }
+    for (auto& item : onDemandEvents) {
+        SystemAbilityOnDemandEvent eventOuter;
+        ConvertToSystemAbilityOnDemandEvent(item, eventOuter);
+        abilityOnDemandEvents.push_back(eventOuter);
+    }
+    HILOGI("GetOnDemandPolicy policy size : %{public}zu.", abilityOnDemandEvents.size());
+    return ERR_OK;
+}
+
+int32_t SystemAbilityManager::UpdateOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
+    const std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents)
+{
+    SaProfile saProfile;
+    if (!GetSaProfile(systemAbilityId, saProfile)) {
+        HILOGE("UpdateOnDemandPolicy invalid saId: %{public}d", systemAbilityId);
+        return ERR_INVALID_VALUE;
+    }
+    if (!CheckCallerProcess(saProfile)) {
+        HILOGE("UpdateOnDemandPolicy invalid caller saId: %{public}d", systemAbilityId);
+        return ERR_INVALID_VALUE;
+    }
+    if (!CheckAllowUpdate(type, saProfile)) {
+        HILOGE("UpdateOnDemandPolicy not allow get saId: %{public}d", systemAbilityId);
+        return ERR_PERMISSION_DENIED;
+    }
+
+    if (collectManager_ == nullptr) {
+        HILOGE("UpdateOnDemandPolicy collectManager is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    std::vector<OnDemandEvent> onDemandEvents;
+    for (auto& item : abilityOnDemandEvents) {
+        OnDemandEvent event;
+        ConvertToOnDemandEvent(item, event);
+        onDemandEvents.push_back(event);
+    }
+    int32_t result = ERR_INVALID_VALUE;
+    result = collectManager_->UpdateOnDemandEvents(systemAbilityId, type, onDemandEvents);
+    if (result != ERR_OK) {
+        HILOGE("UpdateOnDemandPolicy add collect event failed");
+        return result;
+    }
+    HILOGI("UpdateOnDemandPolicy policy size : %{public}zu.", onDemandEvents.size());
+    return ERR_OK;
+}
+
 void SystemAbilityManager::ProcessOnDemandEvent(const OnDemandEvent& event,
     const std::list<SaControlInfo>& saControlList)
 {
@@ -997,18 +1129,6 @@ int32_t SystemAbilityManager::GetOnDemandReasonExtraData(int64_t extraDataId, Me
         HILOGE("write extra data failed");
         return ERR_INVALID_VALUE;
     }
-    return ERR_OK;
-}
-
-int32_t SystemAbilityManager::GetOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
-    std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents)
-{
-    return ERR_OK;
-}
-
-int32_t SystemAbilityManager::UpdateOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
-    const std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents)
-{
     return ERR_OK;
 }
 

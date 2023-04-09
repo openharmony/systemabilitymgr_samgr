@@ -56,6 +56,7 @@ constexpr const char* SA_TAG_BOOT_PHASE = "bootphase";
 constexpr const char* SA_TAG_SAID = "said";
 constexpr const char* SA_TAG_START_ON_DEMAND = "start-on-demand";
 constexpr const char* SA_TAG_STOP_ON_DEMAND = "stop-on-demand";
+constexpr const char* SA_TAG_ALLOW_UPDATE = "allow-update";
 constexpr const char* SA_TAG_RECYCLE_DELAYTIME = "recycle-delaytime";
 constexpr const char* SA_TAG_DEVICE_ON_LINE = "deviceonline";
 constexpr const char* SA_TAG_SETTING_SWITCH = "settingswitch";
@@ -528,6 +529,7 @@ void ParseUtil::ParseStartOndemandTag(const nlohmann::json& systemAbilityJson,
         return;
     }
     ParseOndemandTag(onDemandJson, startOnDemand.onDemandEvents);
+    GetBoolFromJson(onDemandJson, SA_TAG_ALLOW_UPDATE, startOnDemand.allowUpdate);
 }
 
 void ParseUtil::ParseStopOndemandTag(const nlohmann::json& systemAbilityJson,
@@ -538,6 +540,7 @@ void ParseUtil::ParseStopOndemandTag(const nlohmann::json& systemAbilityJson,
         return;
     }
     ParseOndemandTag(onDemandJson, stopOnDemand.onDemandEvents);
+    GetBoolFromJson(onDemandJson, SA_TAG_ALLOW_UPDATE, stopOnDemand.allowUpdate);
     GetInt32FromJson(onDemandJson, SA_TAG_RECYCLE_DELAYTIME, stopOnDemand.delayTime);
 }
 

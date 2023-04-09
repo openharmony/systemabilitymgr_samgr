@@ -16,6 +16,9 @@
 #ifndef OHOS_SYSTEM_ABILITY_MANAGER_COLLECT_PLUGIN_INTERFACE_H
 #define OHOS_SYSTEM_ABILITY_MANAGER_COLLECT_PLUGIN_INTERFACE_H
 
+#include <list>
+
+#include "errors.h"
 #include "ireport.h"
 #include "refbase.h"
 #include "sa_profiles.h"
@@ -29,8 +32,10 @@ public:
 
     virtual int32_t OnStart() = 0;
     virtual int32_t OnStop() = 0;
+    virtual void Init(const std::list<SaProfile>& saProfiles) {};
     virtual bool CheckCondition(const OnDemandCondition& condition) { return false; };
     virtual bool GetOnDemandReasonExtraData(int64_t extraDataId, OnDemandReasonExtraData& extraData) { return false; };
+    virtual int32_t AddCollectEvent(const OnDemandEvent& event) { return ERR_OK; };
     void ReportEvent(const OnDemandEvent& event);
     void PostDelayTask(std::function<void()> callback, int32_t delayTime);
 private:

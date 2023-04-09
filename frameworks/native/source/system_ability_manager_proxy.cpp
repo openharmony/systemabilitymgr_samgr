@@ -919,12 +919,95 @@ int32_t SystemAbilityManagerProxy::GetOnDemandReasonExtraData(int64_t extraDataI
 int32_t SystemAbilityManagerProxy::GetOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
     std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents)
 {
+    HILOGI("GetOnDemandPolicy called");
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGI("GetOnDemandPolicy remote is nullptr");
+        return ERR_INVALID_OPERATION;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        HILOGE("GetOnDemandPolicy write interface token failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(systemAbilityId)) {
+        HILOGE("GetOnDemandPolicy write said failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(static_cast<int32_t>(type))) {
+        HILOGE("GetOnDemandPolicy write type failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t err = remote->SendRequest(GET_ONDEAMND_POLICY_TRANSACTION, data, reply, option);
+    if (err != ERR_NONE) {
+        HILOGE("GetOnDemandPolicy SendRequest error: %{public}d!", err);
+        return err;
+    }
+    HILOGI("GetOnDemandPolicy SendRequest succeed!");
+    int32_t result = 0;
+    if (!reply.ReadInt32(result)) {
+        HILOGE("GetOnDemandPolicy Read result failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (result != ERR_OK) {
+        HILOGE("GetOnDemandPolicy failed: %{public}d!", result);
+        return result;
+    }
+    if (!OnDemandEventToParcel::ReadOnDemandEventsFromParcel(abilityOnDemandEvents, reply)) {
+        HILOGE("GetOnDemandPolicy Read on demand events failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
     return ERR_OK;
 }
 
 int32_t SystemAbilityManagerProxy::UpdateOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
     const std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents)
 {
-    return ERR_OK;
+    HILOGI("UpdateOnDemandPolicy called");
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGI("UpdateOnDemandPolicy remote is nullptr");
+        return ERR_INVALID_OPERATION;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        HILOGE("UpdateOnDemandPolicy write interface token failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(systemAbilityId)) {
+        HILOGE("UpdateOnDemandPolicy write said failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(static_cast<int32_t>(type))) {
+        HILOGE("UpdateOnDemandPolicy write type failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!OnDemandEventToParcel::WriteOnDemandEventsToParcel(abilityOnDemandEvents, data)) {
+        HILOGW("UpdateOnDemandPolicy write on demand events failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t err = remote->SendRequest(UPDATE_ONDEAMND_POLICY_TRANSACTION, data, reply, option);
+    if (err != ERR_NONE) {
+        HILOGE("UpdateOnDemandPolicy SendRequest error: %{public}d!", err);
+        return err;
+    }
+    HILOGI("UpdateOnDemandPolicy SendRequest succeed!");
+    int32_t result = 0;
+    if (!reply.ReadInt32(result)) {
+        HILOGE("UpdateOnDemandPolicy Read result failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (result != ERR_OK) {
+        HILOGE("UpdateOnDemandPolicy failed: %{public}d!", result);
+    }
+    return result;
 }
 } // namespace OHOS

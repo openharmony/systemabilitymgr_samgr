@@ -42,7 +42,7 @@ void DeviceStatusCollectManager::Init(const std::list<SaProfile>& saProfiles)
     auto runner = AppExecFwk::EventRunner::Create("collect");
     collectHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     collectHandler_->PostTask([]() { Samgr::MemoryGuard cacheGuard; });
-    sptr<DeviceParamCollect> deviceParamCollect = new DeviceParamCollect(this);
+    sptr<ICollectPlugin> deviceParamCollect = new DeviceParamCollect(this);
     deviceParamCollect->Init(saProfiles);
     collectPluginMap_[PARAM] = deviceParamCollect;
 #ifdef SUPPORT_DEVICE_MANAGER
@@ -50,16 +50,16 @@ void DeviceStatusCollectManager::Init(const std::list<SaProfile>& saProfiles)
     collectPluginMap_[DEVICE_ONLINE] = networkingCollect;
 #endif
 #ifdef SUPPORT_COMMON_EVENT
-    sptr<CommonEventCollect> eventStatuscollect = new CommonEventCollect(this);
+    sptr<ICollectPlugin> eventStatuscollect = new CommonEventCollect(this);
     eventStatuscollect->Init(onDemandSaProfiles_);
     collectPluginMap_[COMMON_EVENT] = eventStatuscollect;
 #endif
 #ifdef SUPPORT_SWITCH_COLLECT
-    sptr<DeviceSwitchCollect> deviceSwitchCollect = new DeviceSwitchCollect(this);
+    sptr<ICollectPlugin> deviceSwitchCollect = new DeviceSwitchCollect(this);
     deviceSwitchCollect->Init(saProfiles);
     collectPluginMap_[SETTING_SWITCH] = deviceSwitchCollect;
 #endif
-    sptr<DeviceTimedCollect> timedCollect = new DeviceTimedCollect(this);
+    sptr<ICollectPlugin> timedCollect = new DeviceTimedCollect(this);
     timedCollect->Init(onDemandSaProfiles_);
     collectPluginMap_[TIMED_EVENT] = timedCollect;
     StartCollect();
@@ -68,6 +68,7 @@ void DeviceStatusCollectManager::Init(const std::list<SaProfile>& saProfiles)
 
 void DeviceStatusCollectManager::FilterOnDemandSaProfiles(const std::list<SaProfile>& saProfiles)
 {
+    std::unique_lock<std::shared_mutex> writeLock(saProfilesLock_);
     for (auto& saProfile : saProfiles) {
         if (saProfile.startOnDemand.onDemandEvents.empty() && saProfile.stopOnDemand.onDemandEvents.empty()) {
             continue;
@@ -79,6 +80,7 @@ void DeviceStatusCollectManager::FilterOnDemandSaProfiles(const std::list<SaProf
 void DeviceStatusCollectManager::GetSaControlListByEvent(const OnDemandEvent& event,
     std::list<SaControlInfo>& saControlList)
 {
+    std::shared_lock<std::shared_mutex> readLock(saProfilesLock_);
     for (auto& profile : onDemandSaProfiles_) {
         // start on demand
         for (auto iterStart = profile.startOnDemand.onDemandEvents.begin();
@@ -197,6 +199,80 @@ int32_t DeviceStatusCollectManager::GetOnDemandReasonExtraData(int64_t extraData
     }
     if (!collectPluginMap_[COMMON_EVENT]->GetOnDemandReasonExtraData(extraDataId, extraData)) {
         HILOGE("get extra data failed");
+        return ERR_INVALID_VALUE;
+    }
+    return ERR_OK;
+}
+
+int32_t DeviceStatusCollectManager::AddCollectEvents(const std::vector<OnDemandEvent>& events)
+{
+    if (events.size() == 0) {
+        return ERR_OK;
+    }
+    for (auto& event : events) {
+        if (collectPluginMap_.count(event.eventId) == 0) {
+            HILOGE("not support eventId: %{public}d", event.eventId);
+            return ERR_INVALID_VALUE;
+        }
+        if (collectPluginMap_[event.eventId] == nullptr) {
+            HILOGE("not support eventId: %{public}d", event.eventId);
+            return ERR_INVALID_VALUE;
+        }
+        int32_t ret = collectPluginMap_[event.eventId]->AddCollectEvent(event);
+        if (ret != ERR_OK) {
+            HILOGE("add collect event failed, eventId: %{public}d", event.eventId);
+            return ret;
+        }
+    }
+    return ERR_OK;
+}
+
+int32_t DeviceStatusCollectManager::GetOnDemandEvents(int32_t systemAbilityId, OnDemandPolicyType type,
+    std::vector<OnDemandEvent>& events)
+{
+    HILOGI("DeviceStatusCollectManager GetOnDemandEvents begin");
+    std::shared_lock<std::shared_mutex> readLock(saProfilesLock_);
+    auto iter = std::find_if(onDemandSaProfiles_.begin(), onDemandSaProfiles_.end(), [systemAbilityId](auto saProfile) {
+        return saProfile.saId == systemAbilityId;
+    });
+    if (iter == onDemandSaProfiles_.end()) {
+        HILOGI("DeviceStatusCollectManager GetOnDemandEvents invalid saId:%{public}d", systemAbilityId);
+        return ERR_INVALID_VALUE;
+    }
+    if (type == OnDemandPolicyType::START_POLICY) {
+        events = (*iter).startOnDemand.onDemandEvents;
+    } else if (type == OnDemandPolicyType::STOP_POLICY) {
+        events = (*iter).stopOnDemand.onDemandEvents;
+    } else {
+        HILOGE("DeviceStatusCollectManager GetOnDemandEvents invalid policy types");
+        return ERR_INVALID_VALUE;
+    }
+    return ERR_OK;
+}
+
+int32_t DeviceStatusCollectManager::UpdateOnDemandEvents(int32_t systemAbilityId, OnDemandPolicyType type,
+    const std::vector<OnDemandEvent>& events)
+{
+    HILOGI("DeviceStatusCollectManager UpdateOnDemandEvents begin");
+    std::unique_lock<std::shared_mutex> writeLock(saProfilesLock_);
+    auto iter = std::find_if(onDemandSaProfiles_.begin(), onDemandSaProfiles_.end(), [systemAbilityId](auto saProfile) {
+        return saProfile.saId == systemAbilityId;
+    });
+    if (iter == onDemandSaProfiles_.end()) {
+        HILOGI("DeviceStatusCollectManager UpdateOnDemandEvents invalid saId:%{public}d", systemAbilityId);
+        return ERR_INVALID_VALUE;
+    }
+    if (AddCollectEvents(events) != ERR_OK) {
+        HILOGI("DeviceStatusCollectManager AddCollectEvents failed saId:%{public}d", systemAbilityId);
+        return ERR_INVALID_VALUE;
+    }
+
+    if (type == OnDemandPolicyType::START_POLICY) {
+        (*iter).startOnDemand.onDemandEvents = events;
+    } else if (type == OnDemandPolicyType::STOP_POLICY) {
+        (*iter).stopOnDemand.onDemandEvents = events;
+    } else {
+        HILOGE("DeviceStatusCollectManager UpdateOnDemandEvents policy types");
         return ERR_INVALID_VALUE;
     }
     return ERR_OK;
