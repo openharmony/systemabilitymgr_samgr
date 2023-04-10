@@ -17,6 +17,7 @@
 
 #include "refbase.h"
 #include "system_ability_load_callback_stub.h"
+#include "system_ability_on_demand_event.h"
 #include "system_process_status_change_stub.h"
 namespace OHOS {
 class OnDemandHelper {
@@ -42,6 +43,9 @@ public:
     void GetSystemProcess();
     void SubscribeSystemProcess();
     void UnSubscribeSystemProcess();
+    void GetOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type);
+    void UpdateOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
+        std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents);
 protected:
     class OnDemandLoadCallback : public SystemAbilityLoadCallbackStub {
     public:
