@@ -888,4 +888,36 @@ HWTEST_F(SystemAbilityMgrProxyTest, CancelUnloadSystemAbility001, TestSize.Level
     int32_t result = samgrProxy->CancelUnloadSystemAbility(said);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
 }
+
+/**
+ * @tc.name: GetOnDemandPolicy001
+ * @tc.desc: GetOnDemandPolicy001
+ * @tc.type: FUNC
+ * @tc.require: I6T116
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, GetOnDemandPolicy001, TestSize.Level3)
+{
+    sptr<ISystemAbilityManager> samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    int32_t systemAbilityId = -1;
+    OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
+    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
+    int32_t result = samgrProxy->GetOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
+    EXPECT_NE(result, ERR_OK);
+}
+
+/**
+ * @tc.name: UpdateOnDemandPolicy001
+ * @tc.desc: UpdateOnDemandPolicy001
+ * @tc.type: FUNC
+ * @tc.require: I6T116
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, UpdateOnDemandPolicy001, TestSize.Level3)
+{
+    sptr<ISystemAbilityManager> samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    int32_t systemAbilityId = -1;
+    OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
+    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
+    int32_t result = samgrProxy->UpdateOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
+    EXPECT_NE(result, ERR_OK);
+}
 }

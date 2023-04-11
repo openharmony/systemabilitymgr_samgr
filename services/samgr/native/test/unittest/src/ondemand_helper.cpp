@@ -67,6 +67,7 @@ void OnDemandHelper::GetSystemProcess()
     int32_t ret = sm->GetRunningSystemProcess(systemProcessInfos);
     if (ret != ERR_OK) {
         cout << "GetRunningSystemProcess failed" << endl;
+        return;
     }
     cout << "GetRunningSystemProcess size: "<< systemProcessInfos.size() << endl;
     for (const auto& systemProcessInfo : systemProcessInfos) {
@@ -89,6 +90,7 @@ void OnDemandHelper::SubscribeSystemProcess()
     int32_t ret = sm->SubscribeSystemProcess(systemProcessStatusChange_);
     if (ret != ERR_OK) {
         cout << "SubscribeSystemProcess failed" << endl;
+        return;
     }
     cout << "SubscribeSystemProcess success" << endl;
 }
@@ -103,6 +105,7 @@ void OnDemandHelper::UnSubscribeSystemProcess()
     int32_t ret = sm->UnSubscribeSystemProcess(systemProcessStatusChange_);
     if (ret != ERR_OK) {
         cout << "UnSubscribeSystemProcess failed" << endl;
+        return;
     }
     cout << "UnSubscribeSystemProcess success" << endl;
 }
@@ -332,6 +335,48 @@ sptr<IRemoteObject> OnDemandHelper::GetSystemAbility(int32_t systemAbilityId)
     return remoteObject;
 }
 
+void OnDemandHelper::GetOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type)
+{
+    SamMockPermission::MockProcess("listen_test");
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (sm == nullptr) {
+        cout << "GetSystemAbilityManager samgr object null!" << endl;
+        return;
+    }
+    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
+    int32_t ret = sm->GetOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
+    if (ret != ERR_OK) {
+        cout << "GetOnDemandPolicy failed" << endl;
+        return;
+    }
+    cout << "GetOnDemandPolicy success" << endl;
+    for (auto& event : abilityOnDemandEvents) {
+        cout << "eventId: " << static_cast<int32_t>(event.eventId) << " name:" << event.name
+            << " value:" << event.value << endl;
+    }
+}
+
+void OnDemandHelper::UpdateOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
+    std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents)
+{
+    SamMockPermission::MockProcess("listen_test");
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (sm == nullptr) {
+        cout << "GetSystemAbilityManager samgr object null!" << endl;
+        return;
+    }
+    for (auto& event : abilityOnDemandEvents) {
+        cout << "update eventId: " << static_cast<int32_t>(event.eventId) << " name:" << event.name
+            << " value:" << event.value << endl;
+    }
+    int32_t ret = sm->UpdateOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
+    if (ret != ERR_OK) {
+        cout << "UpdateOnDemandPolicy failed" << endl;
+        return;
+    }
+    cout << "UpdateOnDemandPolicy success" << endl;
+}
+
 void OnDemandHelper::OnLoadSystemAbility(int32_t systemAbilityId)
 {
 }
@@ -437,13 +482,119 @@ static void TestParamPlugin(OHOS::OnDemandHelper& ondemandHelper)
     }
 }
 
+static void CreateOnDemandStartPolicy(SystemAbilityOnDemandEvent& event)
+{
+    int eventId = 1;
+    cout << "please input on demand event id(1,2,3,4,5)" << endl;
+    cin >> eventId;
+    if (eventId == static_cast<int32_t>(OnDemandEventId::DEVICE_ONLINE)) {
+        event.eventId = OnDemandEventId::DEVICE_ONLINE;
+        event.name = "deviceonline";
+        event.value = "on";
+    } else if (eventId == static_cast<int32_t>(OnDemandEventId::SETTING_SWITCH)) {
+        event.eventId = OnDemandEventId::SETTING_SWITCH;
+        event.name = "wifi_status";
+        event.value = "on";
+    } else if (eventId == static_cast<int32_t>(OnDemandEventId::PARAM)) {
+        event.eventId = OnDemandEventId::PARAM;
+        event.name = "persist.samgr.deviceparam";
+        event.value = "true";
+    } else if (eventId == static_cast<int32_t>(OnDemandEventId::COMMON_EVENT)) {
+        event.eventId = OnDemandEventId::COMMON_EVENT;
+        event.name = "usual.event.SCREEN_ON";
+        event.value = "";
+    } else if (eventId == static_cast<int32_t>(OnDemandEventId::TIMED_EVENT)) {
+        event.eventId = OnDemandEventId::TIMED_EVENT;
+        event.name = "loopevent";
+        event.value = "60";
+    }
+}
+
+static void CreateOnDemandStopPolicy(SystemAbilityOnDemandEvent& event)
+{
+    int eventId = 1;
+    cout << "please input on demand event id(1,2,3,4,5)" << endl;
+    cin >> eventId;
+    if (eventId == static_cast<int32_t>(OnDemandEventId::DEVICE_ONLINE)) {
+        event.eventId = OnDemandEventId::DEVICE_ONLINE;
+        event.name = "deviceonline";
+        event.value = "off";
+    } else if (eventId == static_cast<int32_t>(OnDemandEventId::SETTING_SWITCH)) {
+        event.eventId = OnDemandEventId::SETTING_SWITCH;
+        event.name = "wifi_status";
+        event.value = "off";
+    } else if (eventId == static_cast<int32_t>(OnDemandEventId::PARAM)) {
+        event.eventId = OnDemandEventId::PARAM;
+        event.name = "persist.samgr.deviceparam";
+        event.value = "false";
+    } else if (eventId == static_cast<int32_t>(OnDemandEventId::COMMON_EVENT)) {
+        event.eventId = OnDemandEventId::COMMON_EVENT;
+        event.name = "usual.event.SCREEN_OFF";
+        event.value = "";
+    } else if (eventId == static_cast<int32_t>(OnDemandEventId::TIMED_EVENT)) {
+        event.eventId = OnDemandEventId::TIMED_EVENT;
+        event.name = "loopevent";
+        event.value = "70";
+    }
+}
+
+static void TestOnDemandPolicy(OHOS::OnDemandHelper& ondemandHelper)
+{
+    std::string cmd = "";
+    cout << "please input on demand policy test case(get/update)" << endl;
+    cin >> cmd;
+    std::string type = "";
+    cout << "please input on demand type test case(start/stop)" << endl;
+    cin >> type;
+    int32_t systemAbilityId = 0;
+    cout << "please input systemAbilityId for " << cmd << " operation" << endl;
+    cin >> systemAbilityId;
+    if (cmd == "get" && type == "start") {
+        ondemandHelper.GetOnDemandPolicy(systemAbilityId, OnDemandPolicyType::START_POLICY);
+    } else if (cmd == "get" && type == "stop") {
+        ondemandHelper.GetOnDemandPolicy(systemAbilityId, OnDemandPolicyType::STOP_POLICY);
+    } else if (cmd == "update" && type == "start") {
+        SystemAbilityOnDemandEvent event;
+        CreateOnDemandStartPolicy(event);
+        std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
+        abilityOnDemandEvents.push_back(event);
+        ondemandHelper.UpdateOnDemandPolicy(systemAbilityId, OnDemandPolicyType::START_POLICY, abilityOnDemandEvents);
+    } else if (cmd == "update" && type == "start_multi") {
+        SystemAbilityOnDemandEvent event;
+        CreateOnDemandStartPolicy(event);
+        SystemAbilityOnDemandEvent event2;
+        CreateOnDemandStartPolicy(event2);
+        std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
+        abilityOnDemandEvents.push_back(event);
+        abilityOnDemandEvents.push_back(event2);
+        ondemandHelper.UpdateOnDemandPolicy(systemAbilityId, OnDemandPolicyType::START_POLICY, abilityOnDemandEvents);
+    } else if (cmd == "update" && type == "stop") {
+        SystemAbilityOnDemandEvent event;
+        CreateOnDemandStopPolicy(event);
+        std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
+        abilityOnDemandEvents.push_back(event);
+        ondemandHelper.UpdateOnDemandPolicy(systemAbilityId, OnDemandPolicyType::STOP_POLICY, abilityOnDemandEvents);
+    } else if (cmd == "update" && type == "stop_multi") {
+        SystemAbilityOnDemandEvent event;
+        CreateOnDemandStopPolicy(event);
+        SystemAbilityOnDemandEvent event2;
+        CreateOnDemandStopPolicy(event2);
+        std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
+        abilityOnDemandEvents.push_back(event);
+        abilityOnDemandEvents.push_back(event2);
+        ondemandHelper.UpdateOnDemandPolicy(systemAbilityId, OnDemandPolicyType::STOP_POLICY, abilityOnDemandEvents);
+    } else {
+        cout << "invalid input" << endl;
+    }
+}
+
 int main(int argc, char* argv[])
 {
     SamMockPermission::MockPermission();
     OHOS::OnDemandHelper& ondemandHelper = OnDemandHelper::GetInstance();
     string cmd = "load";
     do {
-        cout << "please input operation(sa/proc/param)" << endl;
+        cout << "please input operation(sa/proc/param/policy)" << endl;
         cin >> cmd;
         if (cmd == "param") {
             TestParamPlugin(ondemandHelper);
@@ -451,6 +602,8 @@ int main(int argc, char* argv[])
             TestSystemAbility(ondemandHelper);
         } else if (cmd == "proc") {
             TestProcess(ondemandHelper);
+        } else if (cmd == "policy") {
+            TestOnDemandPolicy(ondemandHelper);
         } else {
             cout << "invalid input" << endl;
         }
