@@ -16,10 +16,11 @@
 #include "device_switch_collect_test.h"
 
 #include "device_status_collect_manager.h"
+#include "icollect_plugin.h"
 #include "sa_profiles.h"
 #include "system_ability_definition.h"
 #include "test_log.h"
-#include "icollect_plugin.h"
+#include "sam_log.h"
 
 #define private public
 #include "collect/device_switch_collect.h"
@@ -31,6 +32,8 @@ using namespace OHOS;
 
 namespace OHOS {
 namespace {
+static const std::string BLUETOOTH_NAME = "bluetooth_status";
+static const std::string UNRELATED_NAME = "test";
 static const std::string WIFI_NAME = "wifi_status";
 }
 
@@ -56,28 +59,28 @@ void DeviceSwitchCollectTest::TearDown()
 
 /**
  * @tc.name: DeviceSwitchCollectInit001
- * @tc.desc: test DeviceSwitchCollectInit
+ * @tc.desc: test DeviceSwitchCollectInit with wifi event
  * @tc.type: FUNC
  * @tc.require: I6UI1S
  */
 
 HWTEST_F(DeviceSwitchCollectTest, DeviceSwitchCollectInit001, TestSize.Level3)
-{   
+{
     std::list<SaProfile> saProfiles;
     SaProfile saProfile;
     OnDemandEvent onDemandEvent = {SETTING_SWITCH, WIFI_NAME, "on"};
     saProfile.startOnDemand.onDemandEvents.emplace_back(onDemandEvent);
     saProfiles.emplace_back(saProfile);
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
-    std::shared_ptr<DeviceSwitchCollect> deviceSwitchCollect =
-        std::make_shared<DeviceSwitchCollect>(collect);
+    sptr<DeviceSwitchCollect> deviceSwitchCollect =
+        new DeviceSwitchCollect(collect);
     deviceSwitchCollect->Init(saProfiles);
     EXPECT_FALSE(deviceSwitchCollect->switches_.empty());
 }
 
 /**
  * @tc.name: SetSwitchEvent001
- * @tc.desc: test SetSwitchEvent
+ * @tc.desc: test SetSwitchEvent with wifi event
  * @tc.type: FUNC
  * @tc.require: I6UI1S
  */
@@ -86,9 +89,93 @@ HWTEST_F(DeviceSwitchCollectTest, SetSwitchEvent001, TestSize.Level3)
 {
     OnDemandEvent onDemandEvent = {SETTING_SWITCH, WIFI_NAME, "on"};
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
-    std::shared_ptr<DeviceSwitchCollect> deviceSwitchCollect =
-        std::make_shared<DeviceSwitchCollect>(collect);
+    sptr<DeviceSwitchCollect> deviceSwitchCollect =
+        new DeviceSwitchCollect(collect);
     deviceSwitchCollect->SetSwitchEvent(onDemandEvent);
     EXPECT_FALSE(deviceSwitchCollect->switches_.empty());
+}
+
+/**
+ * @tc.name: DeviceSwitchCollectOnStart001
+ * @tc.desc: test DeviceSwitchCollectOnStart with swithes is empty
+ * @tc.type: FUNC
+ * @tc.require: I6UI1S
+ */
+
+HWTEST_F(DeviceSwitchCollectTest, DeviceSwitchCollectOnStart001, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceSwitchCollect> deviceSwitchCollect =
+        new DeviceSwitchCollect(collect);
+    deviceSwitchCollect->switches_.clear();
+    int32_t ret = deviceSwitchCollect->OnStart();
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: DeviceSwitchCollectOnStop001
+ * @tc.desc: test DeviceSwitchCollectOnStop
+ * @tc.type: FUNC
+ * @tc.require: I6UI1S
+ */
+
+HWTEST_F(DeviceSwitchCollectTest, DeviceSwitchCollectOnStop001, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceSwitchCollect> deviceSwitchCollect =
+        new DeviceSwitchCollect(collect);
+    int32_t ret = deviceSwitchCollect->OnStop();
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: AddCollectEvent001
+ * @tc.desc: test AddCollectEvent with wifi event
+ * @tc.type: FUNC
+ * @tc.require: I6UI1S
+ */
+
+HWTEST_F(DeviceSwitchCollectTest, AddCollectEvent001, TestSize.Level3)
+{
+    OnDemandEvent onDemandEvent = {SETTING_SWITCH, WIFI_NAME, "on"};
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceSwitchCollect> deviceSwitchCollect =
+        new DeviceSwitchCollect(collect);
+    deviceSwitchCollect->AddCollectEvent(onDemandEvent);
+    EXPECT_FALSE(deviceSwitchCollect->switches_.empty());
+}
+
+/**
+ * @tc.name: AddCollectEvent002
+ * @tc.desc: test AddCollectEvent with bluetooth event
+ * @tc.type: FUNC
+ * @tc.require: I6UI1S
+ */
+
+HWTEST_F(DeviceSwitchCollectTest, AddCollectEvent002, TestSize.Level3)
+{
+    OnDemandEvent onDemandEvent = {SETTING_SWITCH, BLUETOOTH_NAME, "on"};
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceSwitchCollect> deviceSwitchCollect =
+        new DeviceSwitchCollect(collect);
+    deviceSwitchCollect->AddCollectEvent(onDemandEvent);
+    EXPECT_FALSE(deviceSwitchCollect->switches_.empty());
+}
+
+/**
+ * @tc.name: AddCollectEvent003
+ * @tc.desc: test AddCollectEvent with unrelated event
+ * @tc.type: FUNC
+ * @tc.require: I6UI1S
+ */
+
+HWTEST_F(DeviceSwitchCollectTest, AddCollectEvent003, TestSize.Level3)
+{
+    OnDemandEvent onDemandEvent = {SETTING_SWITCH, UNRELATED_NAME, "on"};
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceSwitchCollect> deviceSwitchCollect =
+        new DeviceSwitchCollect(collect);
+    int32_t ret = deviceSwitchCollect->AddCollectEvent(onDemandEvent);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
 }

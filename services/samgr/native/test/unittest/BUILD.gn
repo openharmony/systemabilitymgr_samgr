@@ -150,10 +150,10 @@ ohos_unittest("SystemAbilityMgrTest") {
   }
 
   if (support_common_event && bluetooth_part_enable) {
-      sources += [ "//foundation/systemabilitymgr/samgr/services/samgr/native/source/collect/device_switch_collect.cpp" ]
-      external_deps += [ "bluetooth:btframework" ]
-      defines += [ "SUPPORT_SWITCH_COLLECT" ]
-    }
+    sources += [ "//foundation/systemabilitymgr/samgr/services/samgr/native/source/collect/device_switch_collect.cpp" ]
+    external_deps += [ "bluetooth:btframework" ]
+    defines += [ "SUPPORT_SWITCH_COLLECT" ]
+  }
 }
 
 ohos_unittest("SystemAbilityMgrStubTest") {
