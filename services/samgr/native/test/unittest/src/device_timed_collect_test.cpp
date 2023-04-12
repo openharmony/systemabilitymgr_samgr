@@ -226,4 +226,22 @@ HWTEST_F(DeviceTimedCollectTest, PostDelayTask002, TestSize.Level3)
     deviceTimedCollect->PostDelayTask(deviceTimedCollect->loopTask_, 0);
     EXPECT_NE(collect, nullptr);
 }
+
+/**
+ * @tc.name: AddCollectEvent001
+ * @tc.desc: test AddCollectEvent, with event
+ * @tc.type: FUNC
+ * @tc.require: I6UUNW
+ */
+HWTEST_F(DeviceTimedCollectTest, AddCollectEvent001, TestSize.Level3)
+{
+    DTEST_LOG << "AddCollectEvent001 begin" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
+        std::make_shared<DeviceTimedCollect>(collect);
+    OnDemandEvent event;
+    int32_t ret = deviceTimedCollect->AddCollectEvent(event);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "AddCollectEvent001 end" << std::endl;
+}
 }

@@ -2694,4 +2694,36 @@ HWTEST_F(SystemAbilityMgrStubTest, CanRequestProcessInfo001, TestSize.Level3)
     int32_t ret = saMgr->CanRequestProcessInfo();
     EXPECT_EQ(ret, false);
 }
+
+/**
+ * @tc.name: Test GetOnDemandPolicyInner001
+ * @tc.desc: GetOnDemandPolicyInner001
+ * @tc.type: FUNC
+ * @tc.require: I6T116
+ */
+HWTEST_F(SystemAbilityMgrStubTest, GetOnDemandPolicyInner001, TestSize.Level3)
+{
+    DTEST_LOG << "GetOnDemandPolicyInner001" << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = saMgr->GetOnDemandPolicyInner(data, reply);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: Test UpdateOnDemandPolicyInner001
+ * @tc.desc: UpdateOnDemandPolicyInner001
+ * @tc.type: FUNC
+ * @tc.require: I6T116
+ */
+HWTEST_F(SystemAbilityMgrStubTest, UpdateOnDemandPolicyInner001, TestSize.Level3)
+{
+    DTEST_LOG << "UpdateOnDemandPolicyInner001" << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = saMgr->GetOnDemandPolicyInner(data, reply);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+}
 }

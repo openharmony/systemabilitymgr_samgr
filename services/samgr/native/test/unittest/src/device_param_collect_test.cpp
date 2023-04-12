@@ -147,4 +147,23 @@ HWTEST_F(DeviceParamCollectTest, OnAddSystemAbility002, TestSize.Level3)
     statusChangeListener->OnAddSystemAbility(PARAM_WATCHER_DISTRIBUTED_SERVICE_ID, "");
     EXPECT_NE(-1, PARAM_WATCHER_DISTRIBUTED_SERVICE_ID);
 }
+
+/**
+ * @tc.name: AddCollectEvent001
+ * @tc.desc: test AddCollectEvent, with event
+ * @tc.type: FUNC
+ * @tc.require: I6UUNW
+ */
+
+HWTEST_F(DeviceParamCollectTest, AddCollectEvent001, TestSize.Level3)
+{
+    DTEST_LOG << "AddCollectEvent001 begin" << std::endl;
+    sptr<IReport> report;
+    std::shared_ptr<DeviceParamCollect> deviceParamCollect =
+        std::make_shared<DeviceParamCollect>(report);
+    OnDemandEvent event;
+    int32_t ret = deviceParamCollect->AddCollectEvent(event);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "AddCollectEvent001 end" << std::endl;
+}
 }  // namespace OHOS

@@ -329,4 +329,92 @@ HWTEST_F(DeviceStatusCollectManagerTest, ReportEvent003, TestSize.Level3)
     PostTask(collect->collectHandler_);
     DTEST_LOG << " ReportEvent003 END" << std::endl;
 }
+
+/**
+ * @tc.name: AddCollectEvents001
+ * @tc.desc: test AddCollectEvents, with events
+ * @tc.type: FUNC
+ * @tc.require: I6UUNW
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, AddCollectEvents001, TestSize.Level3)
+{
+    DTEST_LOG << "AddCollectEvents001 begin" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    std::vector<OnDemandEvent> events;
+    int32_t ret = collect->AddCollectEvents(events);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "AddCollectEvents001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetOnDemandEvents001
+ * @tc.desc: test GetOnDemandEvents, systemAbilityId is invalid, OnDemandPolicyType is START_POLICY
+ * @tc.type: FUNC
+ * @tc.require: I6UUNW
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, GetOnDemandEvents001, TestSize.Level3)
+{
+    DTEST_LOG << "GetOnDemandEvents001 begin" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    int32_t systemAbilityId = -1;
+    OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
+    std::vector<OnDemandEvent> events;
+    int32_t ret = collect->GetOnDemandEvents(systemAbilityId, type, events);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "GetOnDemandEvents001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetOnDemandEvents002
+ * @tc.desc: test GetOnDemandEvents, systemAbilityId is valid, OnDemandPolicyType is STOP_POLICY
+ * @tc.type: FUNC
+ * @tc.require: I6UUNW
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, GetOnDemandEvents002, TestSize.Level3)
+{
+    DTEST_LOG << "GetOnDemandEvents002 begin" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    int32_t systemAbilityId = 0;
+    OnDemandPolicyType type = OnDemandPolicyType::STOP_POLICY;
+    std::vector<OnDemandEvent> events;
+    int32_t ret = collect->GetOnDemandEvents(systemAbilityId, type, events);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "GetOnDemandEvents002 end" << std::endl;
+}
+
+/**
+ * @tc.name: UpdateOnDemandEvents001
+ * @tc.desc: test UpdateOnDemandEvents, systemAbilityId is invalid, OnDemandPolicyType is START_POLICY
+ * @tc.type: FUNC
+ * @tc.require: I6UUNW
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, UpdateOnDemandEvents001, TestSize.Level3)
+{
+    DTEST_LOG << "UpdateOnDemandEvents001 begin" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    int32_t systemAbilityId = -1;
+    OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
+    std::vector<OnDemandEvent> events;
+    int32_t ret = collect->UpdateOnDemandEvents(systemAbilityId, type, events);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "UpdateOnDemandEvents001 end" << std::endl;
+}
+
+/**
+ * @tc.name: UpdateOnDemandEvents002
+ * @tc.desc: test UpdateOnDemandEvents, systemAbilityId is valid, OnDemandPolicyType is STOP_POLICY
+ * @tc.type: FUNC
+ * @tc.require: I6UUNW
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, UpdateOnDemandEvents002, TestSize.Level3)
+{
+    DTEST_LOG << "UpdateOnDemandEvents002 begin" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    int32_t systemAbilityId = 0;
+    OnDemandPolicyType type = OnDemandPolicyType::STOP_POLICY;
+    std::vector<OnDemandEvent> events;
+    int32_t ret = collect->UpdateOnDemandEvents(systemAbilityId, type, events);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "UpdateOnDemandEvents002 end" << std::endl;
+}
 } // namespace OHOS

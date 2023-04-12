@@ -280,4 +280,20 @@ HWTEST_F(CommonEventCollectTest, OnReceiveEvent001, TestSize.Level3)
     int32_t ret = commonEventCollect->OnStop();
     EXPECT_EQ(ERR_OK, ret);
 }
+
+/**
+ * @tc.name: AddCollectEvent001
+ * @tc.desc: test AddCollectEvent, with event
+ * @tc.type: FUNC
+ * @tc.require: I6UUNW
+ */
+HWTEST_F(CommonEventCollectTest, AddCollectEvent001, TestSize.Level3)
+{
+    DTEST_LOG << "AddCollectEvent001 begin" << std::endl;
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
+    OnDemandEvent event;
+    int32_t ret = commonEventCollect->AddCollectEvent(event);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "AddCollectEvent001 end" << std::endl;
+}
 } // namespace OHOS
