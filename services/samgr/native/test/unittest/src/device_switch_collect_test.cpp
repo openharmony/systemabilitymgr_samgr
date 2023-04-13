@@ -61,7 +61,7 @@ void DeviceSwitchCollectTest::TearDown()
  * @tc.name: DeviceSwitchCollectInit001
  * @tc.desc: test DeviceSwitchCollectInit with wifi event
  * @tc.type: FUNC
- * @tc.require: I6UI1S
+ * @tc.require: I6V388
  */
 
 HWTEST_F(DeviceSwitchCollectTest, DeviceSwitchCollectInit001, TestSize.Level3)
@@ -82,7 +82,7 @@ HWTEST_F(DeviceSwitchCollectTest, DeviceSwitchCollectInit001, TestSize.Level3)
  * @tc.name: SetSwitchEvent001
  * @tc.desc: test SetSwitchEvent with wifi event
  * @tc.type: FUNC
- * @tc.require: I6UI1S
+ * @tc.require: I6V388
  */
 
 HWTEST_F(DeviceSwitchCollectTest, SetSwitchEvent001, TestSize.Level3)
@@ -99,7 +99,7 @@ HWTEST_F(DeviceSwitchCollectTest, SetSwitchEvent001, TestSize.Level3)
  * @tc.name: DeviceSwitchCollectOnStart001
  * @tc.desc: test DeviceSwitchCollectOnStart with swithes is empty
  * @tc.type: FUNC
- * @tc.require: I6UI1S
+ * @tc.require: I6V388
  */
 
 HWTEST_F(DeviceSwitchCollectTest, DeviceSwitchCollectOnStart001, TestSize.Level3)
@@ -116,7 +116,7 @@ HWTEST_F(DeviceSwitchCollectTest, DeviceSwitchCollectOnStart001, TestSize.Level3
  * @tc.name: DeviceSwitchCollectOnStop001
  * @tc.desc: test DeviceSwitchCollectOnStop
  * @tc.type: FUNC
- * @tc.require: I6UI1S
+ * @tc.require: I6V388
  */
 
 HWTEST_F(DeviceSwitchCollectTest, DeviceSwitchCollectOnStop001, TestSize.Level3)
@@ -132,7 +132,7 @@ HWTEST_F(DeviceSwitchCollectTest, DeviceSwitchCollectOnStop001, TestSize.Level3)
  * @tc.name: AddCollectEvent001
  * @tc.desc: test AddCollectEvent with wifi event
  * @tc.type: FUNC
- * @tc.require: I6UI1S
+ * @tc.require: I6V388
  */
 
 HWTEST_F(DeviceSwitchCollectTest, AddCollectEvent001, TestSize.Level3)
@@ -149,7 +149,7 @@ HWTEST_F(DeviceSwitchCollectTest, AddCollectEvent001, TestSize.Level3)
  * @tc.name: AddCollectEvent002
  * @tc.desc: test AddCollectEvent with bluetooth event
  * @tc.type: FUNC
- * @tc.require: I6UI1S
+ * @tc.require: I6V388
  */
 
 HWTEST_F(DeviceSwitchCollectTest, AddCollectEvent002, TestSize.Level3)
@@ -166,7 +166,7 @@ HWTEST_F(DeviceSwitchCollectTest, AddCollectEvent002, TestSize.Level3)
  * @tc.name: AddCollectEvent003
  * @tc.desc: test AddCollectEvent with unrelated event
  * @tc.type: FUNC
- * @tc.require: I6UI1S
+ * @tc.require: I6V388
  */
 
 HWTEST_F(DeviceSwitchCollectTest, AddCollectEvent003, TestSize.Level3)

@@ -68,7 +68,6 @@ ohos_unittest("SystemAbilityMgrTest") {
     "${samgr_services_dir}/source/system_process_status_change_proxy.cpp",
     "${samgr_services_dir}/test/unittest/src/device_param_collect_test.cpp",
     "${samgr_services_dir}/test/unittest/src/device_status_collect_manager_test.cpp",
-    "${samgr_services_dir}/test/unittest/src/device_switch_collect_test.cpp",
     "${samgr_services_dir}/test/unittest/src/device_timed_collect_test.cpp",
     "${samgr_services_dir}/test/unittest/src/itest_transaction_service.cpp",
     "${samgr_services_dir}/test/unittest/src/mock_permission.cpp",
@@ -150,7 +149,10 @@ ohos_unittest("SystemAbilityMgrTest") {
   }
 
   if (support_common_event && bluetooth_part_enable) {
-    sources += [ "//foundation/systemabilitymgr/samgr/services/samgr/native/source/collect/device_switch_collect.cpp" ]
+    sources += [
+      "${samgr_services_dir}/source/collect/device_switch_collect.cpp",
+      "${samgr_services_dir}/test/unittest/src/device_switch_collect_test.cpp",
+    ]
     external_deps += [ "bluetooth:btframework" ]
     defines += [ "SUPPORT_SWITCH_COLLECT" ]
   }

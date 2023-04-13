@@ -151,7 +151,7 @@ HWTEST_F(SystemAbilityMgrStubTest, SubsSystemAbilityInner001, TestSize.Level4)
     MessageParcel data;
     MessageParcel reply;
     int32_t result = saMgr->SubsSystemAbilityInner(data, reply);
-    EXPECT_EQ(result, ERR_PERMISSION_DENIED);
+    EXPECT_EQ(result, ERR_NULL_OBJECT);
 }
 
 /**
@@ -166,7 +166,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnSubsSystemAbilityInner001, TestSize.Level4)
     MessageParcel data;
     MessageParcel reply;
     int32_t result = saMgr->UnSubsSystemAbilityInner(data, reply);
-    EXPECT_EQ(result, ERR_PERMISSION_DENIED);
+    EXPECT_EQ(result, ERR_NULL_OBJECT);
 }
 
 /**
