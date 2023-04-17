@@ -266,6 +266,8 @@ HWTEST_F(CommonEventCollectTest, OnReceiveEvent001, TestSize.Level3)
     std::shared_ptr<CommonEventSubscriber> commonEventStatusSubscriber
         = std::make_shared<CommonEventSubscriber>(info, commonEventCollect);
     EXPECT_NE(commonEventStatusSubscriber, nullptr);
+    auto runner = AppExecFwk::EventRunner::Create("collect_test1");
+    commonEventCollect->workHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     EventFwk::CommonEventData eventData;
     commonEventStatusSubscriber->OnReceiveEvent(eventData);
     std::string action = EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON;
@@ -295,5 +297,79 @@ HWTEST_F(CommonEventCollectTest, AddCollectEvent001, TestSize.Level3)
     int32_t ret = commonEventCollect->AddCollectEvent(event);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     DTEST_LOG << "AddCollectEvent001 end" << std::endl;
+}
+
+/**
+ * @tc.name: SaveOnDemandReasonExtraData001
+ * @tc.desc: test SaveOnDemandReasonExtraData with one CommonEventData
+ * @tc.type: FUNC
+ * @tc.require: I6W735
+ */
+HWTEST_F(CommonEventCollectTest, SaveOnDemandReasonExtraData001, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
+    auto runner = AppExecFwk::EventRunner::Create("collect_test1");
+    commonEventCollect->workHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    EventFwk::CommonEventData eventData;
+    int64_t ret = commonEventCollect->SaveOnDemandReasonExtraData(eventData);
+    EXPECT_EQ(ret, 1);
+}
+
+/**
+ * @tc.name: RemoveOnDemandReasonExtraData001
+ * @tc.desc: test RemoveOnDemandReasonExtraData
+ * @tc.type: FUNC
+ * @tc.require: I6W735
+ */
+HWTEST_F(CommonEventCollectTest, RemoveOnDemandReasonExtraData001, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
+    auto runner = AppExecFwk::EventRunner::Create("collect_test1");
+    commonEventCollect->workHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    EventFwk::CommonEventData eventData;
+    commonEventCollect->extraDatas_.clear();
+    commonEventCollect->SaveOnDemandReasonExtraData(eventData);
+    commonEventCollect->RemoveOnDemandReasonExtraData(1);
+    EXPECT_TRUE(commonEventCollect->extraDatas_.empty());
+}
+
+/**
+ * @tc.name: GetOnDemandReasonExtraData001
+ * @tc.desc: test GetOnDemandReasonExtraData while ExtraData is not exist
+ * @tc.type: FUNC
+ * @tc.require: I6W735
+ */
+HWTEST_F(CommonEventCollectTest, GetOnDemandReasonExtraData001, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
+    auto runner = AppExecFwk::EventRunner::Create("collect_test1");
+    commonEventCollect->workHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    commonEventCollect->extraDatas_.clear();
+    OnDemandReasonExtraData onDemandReasonExtraData;
+    bool ret = commonEventCollect->GetOnDemandReasonExtraData(1, onDemandReasonExtraData);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: RemoveOnDemandReasonExtraData002
+ * @tc.desc: test GetOnDemandReasonExtraData while ExtraData is exist
+ * @tc.type: FUNC
+ * @tc.require: I6W735
+ */
+HWTEST_F(CommonEventCollectTest, GetOnDemandReasonExtraData002, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
+    auto runner = AppExecFwk::EventRunner::Create("collect_test1");
+    commonEventCollect->workHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    commonEventCollect->extraDatas_.clear();
+    OnDemandReasonExtraData onDemandReasonExtraData;
+    EventFwk::CommonEventData eventData;
+    commonEventCollect->SaveOnDemandReasonExtraData(eventData);
+    bool ret = commonEventCollect->GetOnDemandReasonExtraData(1, onDemandReasonExtraData);
+    EXPECT_TRUE(ret);
 }
 } // namespace OHOS

@@ -21,6 +21,9 @@
 
 #define private public
 #include "device_status_collect_manager.h"
+#ifdef SUPPORT_COMMON_EVENT
+#include "common_event_collect.h"
+#endif
 
 using namespace std;
 using namespace testing;
@@ -30,6 +33,7 @@ using namespace OHOS;
 namespace OHOS {
 namespace {
 constexpr int32_t MAX_WAIT_TIME = 10000;
+constexpr int64_t EXTRA_ID = 1;
 const std::string SA_TAG_DEVICE_ON_LINE = "deviceonline";
 constexpr int32_t MOCK_PLUGIN = 20;
 }
@@ -416,5 +420,73 @@ HWTEST_F(DeviceStatusCollectManagerTest, UpdateOnDemandEvents002, TestSize.Level
     int32_t ret = collect->UpdateOnDemandEvents(systemAbilityId, type, events);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     DTEST_LOG << "UpdateOnDemandEvents002 end" << std::endl;
+}
+/**
+ * @tc.name: GetOnDemandReasonExtraData001
+ * @tc.desc: test GetOnDemandReasonExtraData with COMMON_EVENT is not in collectPluginMap_
+ * @tc.type: FUNC
+ * @tc.require: I6W735
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, GetOnDemandReasonExtraData001, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
+    collectManager->collectPluginMap_.clear();
+    OnDemandReasonExtraData onDemandReasonExtraData;
+    int32_t ret = collectManager->GetOnDemandReasonExtraData(EXTRA_ID, onDemandReasonExtraData);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: GetOnDemandReasonExtraData002
+ * @tc.desc: test GetOnDemandReasonExtraData with collectPluginMap_[COMMON_EVENT] is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6W735
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, GetOnDemandReasonExtraData002, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
+    collectManager->collectPluginMap_.clear();
+    collectManager->collectPluginMap_[COMMON_EVENT] = nullptr;
+    OnDemandReasonExtraData onDemandReasonExtraData;
+    int32_t ret = collectManager->GetOnDemandReasonExtraData(EXTRA_ID, onDemandReasonExtraData);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: GetOnDemandReasonExtraData003
+ * @tc.desc: test GetOnDemandReasonExtraData with collectPluginMap_[COMMON_EVENT]'s extraDataId is not correct
+ * @tc.type: FUNC
+ * @tc.require: I6W735
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, GetOnDemandReasonExtraData003, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
+    collectManager->collectPluginMap_.clear();
+    collectManager->collectPluginMap_[COMMON_EVENT] = commonEventCollect;
+    OnDemandReasonExtraData onDemandReasonExtraData;
+    int32_t ret = collectManager->GetOnDemandReasonExtraData(EXTRA_ID, onDemandReasonExtraData);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: GetOnDemandReasonExtraData004
+ * @tc.desc: test GetOnDemandReasonExtraData, get extraData
+ * @tc.type: FUNC
+ * @tc.require: I6W735
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, GetOnDemandReasonExtraData004, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
+    auto runner = AppExecFwk::EventRunner::Create("collect_test1");
+    commonEventCollect->workHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    EventFwk::CommonEventData eventData;
+    commonEventCollect->SaveOnDemandReasonExtraData(eventData);
+    collectManager->collectPluginMap_.clear();
+    collectManager->collectPluginMap_[COMMON_EVENT] = commonEventCollect;
+    OnDemandReasonExtraData onDemandReasonExtraData;
+    int32_t ret = collectManager->GetOnDemandReasonExtraData(EXTRA_ID, onDemandReasonExtraData);
+    EXPECT_EQ(ret, ERR_OK);
 }
 } // namespace OHOS

@@ -24,6 +24,7 @@
 
 #define private public
 #include "collect/device_switch_collect.h"
+#include "system_ability_manager.h"
 
 using namespace std;
 using namespace testing;
@@ -141,6 +142,8 @@ HWTEST_F(DeviceSwitchCollectTest, AddCollectEvent001, TestSize.Level3)
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->subscribeCountMap_.clear();
     deviceSwitchCollect->AddCollectEvent(onDemandEvent);
     EXPECT_FALSE(deviceSwitchCollect->switches_.empty());
 }
