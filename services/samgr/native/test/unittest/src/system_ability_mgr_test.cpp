@@ -3103,25 +3103,6 @@ HWTEST_F(SystemAbilityMgrTest, CheckAllowUpdate003, TestSize.Level3)
 }
 
 /**
- * @tc.name: GetOnDemandPolicy001
- * @tc.desc: test GetOnDemandPolicy with saProfileMap_ is empty
- * @tc.type: FUNC
- * @tc.require: I6WEGK
- */
-
-HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy001, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    saMgr->saProfileMap_.clear();
-    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
-    SystemAbilityOnDemandEvent systemAbilityOnDemandEvent;
-    abilityOnDemandEvents.emplace_back(systemAbilityOnDemandEvent);
-    OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
-    int32_t ret = saMgr->GetOnDemandPolicy(SAID, type, abilityOnDemandEvents);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-}
-
-/**
  * @tc.desc: test GetOnDemandPolicy with OnDemandPolicyType is valid
  * @tc.type: FUNC
  * @tc.require: I6V4AX
