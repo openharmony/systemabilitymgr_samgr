@@ -3011,6 +3011,98 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandReasonExtraData003, TestSize.Level3)
 }
 
 /**
+ * @tc.name: CheckCallerProcess001
+ * @tc.desc: test CheckCallerProcess with process is null
+ * @tc.type: FUNC
+ * @tc.require: I6V4AX
+ */
+HWTEST_F(SystemAbilityMgrTest, CheckCallerProcess001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    SaProfile saProfile;
+    saProfile.process = u"";
+    /**
+     * @tc.steps: step1. test ConvertToOnDemandEvent
+     */
+    SystemAbilityOnDemandEvent from;
+    OnDemandEvent to;
+    saMgr->ConvertToOnDemandEvent(from, to);
+
+    bool ret = saMgr->CheckCallerProcess(saProfile);
+    EXPECT_EQ(false, ret);
+}
+
+/**
+ * @tc.name: CheckCallerProcess002
+ * @tc.desc: test CheckCallerProcess with process is PROCESS_NAME
+ * @tc.type: FUNC
+ * @tc.require: I6V4AX
+ */
+HWTEST_F(SystemAbilityMgrTest, CheckCallerProcess002, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    SaProfile saProfile;
+    saProfile.process = PROCESS_NAME;
+    /**
+     * @tc.steps: step1. test ConvertToSystemAbilityOnDemandEvent
+     */
+    OnDemandEvent from;
+    SystemAbilityOnDemandEvent to;
+    saMgr->ConvertToSystemAbilityOnDemandEvent(from, to);
+
+    bool ret = saMgr->CheckCallerProcess(saProfile);
+    EXPECT_EQ(false, ret);
+}
+
+/**
+ * @tc.name: CheckAllowUpdate001
+ * @tc.desc: test CheckAllowUpdate with OnDemandPolicyType is START_POLICY, allowUpdate is true
+ * @tc.type: FUNC
+ * @tc.require: I6V4AX
+ */
+HWTEST_F(SystemAbilityMgrTest, CheckAllowUpdate001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
+    SaProfile saProfile;
+    saProfile.startOnDemand.allowUpdate = true;
+    bool ret = saMgr->CheckAllowUpdate(type, saProfile);
+    EXPECT_EQ(true, ret);
+}
+
+/**
+ * @tc.name: CheckAllowUpdate002
+ * @tc.desc: test CheckAllowUpdate with OnDemandPolicyType is STOP_POLICY, allowUpdate is true
+ * @tc.type: FUNC
+ * @tc.require: I6V4AX
+ */
+HWTEST_F(SystemAbilityMgrTest, CheckAllowUpdate002, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    OnDemandPolicyType type = OnDemandPolicyType::STOP_POLICY;
+    SaProfile saProfile;
+    saProfile.stopOnDemand.allowUpdate = true;
+    bool ret = saMgr->CheckAllowUpdate(type, saProfile);
+    EXPECT_EQ(true, ret);
+}
+
+/**
+ * @tc.name: CheckAllowUpdate003
+ * @tc.desc: test CheckAllowUpdate with OnDemandPolicyType is START_POLICY, allowUpdate is false
+ * @tc.type: FUNC
+ * @tc.require: I6V4AX
+ */
+HWTEST_F(SystemAbilityMgrTest, CheckAllowUpdate003, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
+    SaProfile saProfile;
+    saProfile.startOnDemand.allowUpdate = false;
+    bool ret = saMgr->CheckAllowUpdate(type, saProfile);
+    EXPECT_EQ(false, ret);
+}
+
+/**
  * @tc.name: GetOnDemandPolicy001
  * @tc.desc: test GetOnDemandPolicy with saProfileMap_ is empty
  * @tc.type: FUNC
@@ -3027,5 +3119,36 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy001, TestSize.Level3)
     OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
     int32_t ret = saMgr->GetOnDemandPolicy(SAID, type, abilityOnDemandEvents);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.desc: test GetOnDemandPolicy with OnDemandPolicyType is valid
+ * @tc.type: FUNC
+ * @tc.require: I6V4AX
+ */
+HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t systemAbilityId = 1;
+    OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
+    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
+    int32_t ret = saMgr->GetOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
+    EXPECT_EQ(ERR_INVALID_VALUE, ret);
+}
+
+/**
+ * @tc.name: UpdateOnDemandPolicy001
+ * @tc.desc: test UpdateOnDemandPolicy with OnDemandPolicyType is valid
+ * @tc.type: FUNC
+ * @tc.require: I6V4AX
+ */
+HWTEST_F(SystemAbilityMgrTest, UpdateOnDemandPolicy001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t systemAbilityId = 0;
+    OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
+    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
+    int32_t ret = saMgr->UpdateOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
+    EXPECT_EQ(ERR_INVALID_VALUE, ret);
 }
 } // namespace OHOS
