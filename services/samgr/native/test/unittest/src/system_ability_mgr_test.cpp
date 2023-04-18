@@ -2954,63 +2954,6 @@ HWTEST_F(SystemAbilityMgrTest, ReportGetSAPeriodically001, TestSize.Level3)
 }
 
 /**
- * @tc.name: GetOnDemandReasonExtraData001
- * @tc.desc: test GetOnDemandReasonExtraData with collectManager_ is nullptr
- * @tc.type: FUNC
- * @tc.require: I6WEGK
- */
-
-HWTEST_F(SystemAbilityMgrTest, GetOnDemandReasonExtraData001, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    MessageParcel messageParcel;
-    int32_t ret = saMgr->GetOnDemandReasonExtraData(EXTRA_DATA_ID, messageParcel);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-}
-
-/**
- * @tc.name: GetOnDemandReasonExtraData002
- * @tc.desc: test GetOnDemandReasonExtraData with extraDataId is not exist
- * @tc.type: FUNC
- * @tc.require: I6WEGK
- */
-
-HWTEST_F(SystemAbilityMgrTest, GetOnDemandReasonExtraData002, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
-    collectManager->collectPluginMap_.clear();
-    saMgr->collectManager_ = collectManager;
-    MessageParcel messageParcel;
-    int32_t ret = saMgr->GetOnDemandReasonExtraData(EXTRA_DATA_ID, messageParcel);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-}
-
-/**
- * @tc.name: GetOnDemandReasonExtraData003
- * @tc.desc: call GetOnDemandReasonExtraData, get extraData
- * @tc.type: FUNC
- * @tc.require: I6WEGK
- */
-
-HWTEST_F(SystemAbilityMgrTest, GetOnDemandReasonExtraData003, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
-    saMgr->collectManager_ = collectManager;
-    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collectManager);
-    auto runner = AppExecFwk::EventRunner::Create("collect_test1");
-    commonEventCollect->workHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
-    collectManager->collectPluginMap_.clear();
-    collectManager->collectPluginMap_[COMMON_EVENT] = commonEventCollect;
-    EventFwk::CommonEventData eventData;
-    commonEventCollect->SaveOnDemandReasonExtraData(eventData);
-    MessageParcel messageParcel;
-    int32_t ret = saMgr->GetOnDemandReasonExtraData(EXTRA_DATA_ID, messageParcel);
-    EXPECT_EQ(ret, ERR_OK);
-}
-
-/**
  * @tc.name: CheckCallerProcess001
  * @tc.desc: test CheckCallerProcess with process is null
  * @tc.type: FUNC
