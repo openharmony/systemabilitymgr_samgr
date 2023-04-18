@@ -279,7 +279,7 @@ enum {
     STORAGE_SERVICE_ID                               = 5001,
     STORAGE_MANAGER_DAEMON_ID                        = 5002,
     STORAGE_MANAGER_MANAGER_ID                       = 5003,
-    FILE_MANAGER_SERVICE_ID                          = 5010,
+    FILE_ACCESS_SERVICE_ID                           = 5010,
     DEVICE_SERVICE_MANAGER_SA_ID                     = 5100,
     HDF_EXTERNAL_DEVICE_MANAGER_SA_ID                = 5110,
     SUBSYS_FILEMANAGEMENT_SYS_ABILITY_ID_BEGIN       = 5200,
@@ -469,6 +469,7 @@ static const std::map<int, std::string> saNameMap_ = {
     { ADVERTISING_SA_ID, "Advertising" },
     { LOCAL_CODE_SIGN_SERVICE_ID, "LocalCodeSignService" },
     { INTELL_VOICE_SERVICE_ID, "IntellVoiceService" },
+    { FILE_ACCESS_SERVICE_ID, "FileAccessService" },
 };
 } // namespace OHOS
 
