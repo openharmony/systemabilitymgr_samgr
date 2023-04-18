@@ -20,6 +20,6 @@
 namespace OHOS {
 void ReportAddSystemAbilityFailed(int32_t said, const std::string& filaName);
 
-void ReportGetSAFrequency(uint32_t callerPid, uint32_t said, int32_t count);
+void ReportGetSAFrequency(uint32_t callerUid, uint32_t said, int32_t count);
 } // OHOS
 #endif // SAMGR_SERVICES_DFX_INCLUDE__HISYSEVENT_ADAPTER_H

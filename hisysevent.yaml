@@ -15,7 +15,7 @@ domain: SAMGR
 
 SAMGR_GETSA_FREQUENCY:
   __BASE: {type: STATISTIC, level: MINOR, tag: statistic, desc: get system ability times event}
-  CALLER_PID: {type: UINT32, desc: caller pid}
+  CALLER_UID: {type: UINT32, desc: caller uid}
   SAID: {type: UINT32, desc: system ability id}
   COUNT: {type: INT32, desc: the caller process get sa count}
 
