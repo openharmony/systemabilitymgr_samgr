@@ -54,7 +54,6 @@ constexpr int32_t TEST_SYSTEM_ABILITY2 = 1492;
 constexpr int32_t SHFIT_BIT = 32;
 constexpr int32_t ONDEMAND_SLEEP_TIME = 600 * 1000; // us
 constexpr int32_t MAX_COUNT = INT32_MAX - 1000000;
-constexpr int64_t EXTRA_DATA_ID = 1;
 const std::string SA_TAG_DEVICE_ON_LINE = "deviceonline";
 
 const std::u16string PROCESS_NAME = u"test_process_name";
