@@ -108,7 +108,7 @@ void DeviceStatusCollectManager::GetSaControlListByEvent(const OnDemandEvent& ev
 
 bool DeviceStatusCollectManager::IsSameEvent(const OnDemandEvent& ev1, const OnDemandEvent& ev2)
 {
-    return (ev1.eventId == ev2.eventId && ev1.name == ev2.name && ev1.value == ev2.value);
+    return (ev1.eventId == ev2.eventId && ev1.name == ev2.name && (ev1.value == ev2.value || "" == ev2.value));
 }
 
 bool DeviceStatusCollectManager::CheckConditions(const OnDemandEvent& onDemandEvent)
