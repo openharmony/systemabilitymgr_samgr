@@ -34,9 +34,11 @@ using namespace OHOS;
 namespace OHOS {
 namespace {
 std::u16string SAMANAGER_INTERFACE_TOKEN = u"OHOS.ISystemProcessStatusChange";
+constexpr int RESULT = 0;
 constexpr int32_t TEST_ID_NORANGE_SAID = -1;
 constexpr int32_t TEST_ID_VAILD = 9999;
 constexpr int32_t TEST_ID_INVAILD = 9990;
+constexpr int64_t EXTRA_DATA_ID = 1;
 }
 void SystemProcessStatusChange::OnSystemProcessStarted(SystemProcessInfo& systemProcessInfo)
 {
@@ -919,5 +921,20 @@ HWTEST_F(SystemAbilityMgrProxyTest, UpdateOnDemandPolicy001, TestSize.Level3)
     std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
     int32_t result = samgrProxy->UpdateOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
     EXPECT_NE(result, ERR_OK);
+}
+
+/**
+ * @tc.name: GetOnDemandReasonExtraData001
+ * @tc.desc: test GetOnDemandReasonExtraData
+ * @tc.type: FUNC
+ * @tc.require: I6XB42
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, GetOnDemandReasonExtraData001, TestSize.Level3)
+{
+    sptr<ISystemAbilityManager> samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    MessageParcel extraDataParcel;
+    extraDataParcel.WriteInt32(RESULT);
+    int32_t ret = samgrProxy->GetOnDemandReasonExtraData(EXTRA_DATA_ID, extraDataParcel);
+    EXPECT_EQ(ret, 0);
 }
 }
