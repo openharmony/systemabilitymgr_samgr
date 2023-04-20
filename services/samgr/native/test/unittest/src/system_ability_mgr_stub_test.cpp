@@ -325,6 +325,21 @@ HWTEST_F(SystemAbilityMgrStubTest, UpdateOnDemandPolicyInner001, TestSize.Level3
 }
 
 /**
+ * @tc.name: GetOnDemandReasonExtraDataInner001
+ * @tc.desc: test GetOnDemandReasonExtraDataInner with permission is denied
+ * @tc.type: FUNC
+ * @tc.require: I6XB42
+ */
+HWTEST_F(SystemAbilityMgrStubTest, GetOnDemandReasonExtraDataInner001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = saMgr->GetOnDemandReasonExtraDataInner(data, reply);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+}
+
+/**
  * @tc.name: ListSystemAbilityInner002
  * @tc.desc: test ListSystemAbilityInner, read dumpflag failed!
  * @tc.type: FUNC

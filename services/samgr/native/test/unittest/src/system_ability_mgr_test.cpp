@@ -54,6 +54,7 @@ constexpr int32_t TEST_SYSTEM_ABILITY2 = 1492;
 constexpr int32_t SHFIT_BIT = 32;
 constexpr int32_t ONDEMAND_SLEEP_TIME = 600 * 1000; // us
 constexpr int32_t MAX_COUNT = INT32_MAX - 1000000;
+constexpr int64_t ONDEMAND_EXTRA_DATA_ID = 1;
 const std::string SA_TAG_DEVICE_ON_LINE = "deviceonline";
 
 const std::u16string PROCESS_NAME = u"test_process_name";
@@ -3073,5 +3074,62 @@ HWTEST_F(SystemAbilityMgrTest, UpdateOnDemandPolicy001, TestSize.Level3)
     std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
     int32_t ret = saMgr->UpdateOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
     EXPECT_EQ(ERR_INVALID_VALUE, ret);
+}
+
+/**
+ * @tc.name: GetOnDemandReasonExtraData001
+ * @tc.desc: test GetOnDemandReasonExtraData with collectManager_ is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6XB42
+ */
+
+HWTEST_F(SystemAbilityMgrTest, GetOnDemandReasonExtraData001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel messageParcel;
+    int32_t ret = saMgr->GetOnDemandReasonExtraData(ONDEMAND_EXTRA_DATA_ID, messageParcel);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: GetOnDemandReasonExtraData002
+ * @tc.desc: test GetOnDemandReasonExtraData with extraDataId is not exist
+ * @tc.type: FUNC
+ * @tc.require: I6XB42
+ */
+
+HWTEST_F(SystemAbilityMgrTest, GetOnDemandReasonExtraData002, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
+    collectManager->collectPluginMap_.clear();
+    saMgr->collectManager_ = collectManager;
+    MessageParcel messageParcel;
+    int32_t ret = saMgr->GetOnDemandReasonExtraData(ONDEMAND_EXTRA_DATA_ID, messageParcel);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: GetOnDemandReasonExtraData003
+ * @tc.desc: call GetOnDemandReasonExtraData, get extraData
+ * @tc.type: FUNC
+ * @tc.require: I6XB42
+ */
+
+HWTEST_F(SystemAbilityMgrTest, GetOnDemandReasonExtraData003, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
+    saMgr->collectManager_ = collectManager;
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collectManager);
+    auto runner = AppExecFwk::EventRunner::Create("collect_test1");
+    commonEventCollect->workHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    collectManager->collectPluginMap_.clear();
+    collectManager->collectPluginMap_[COMMON_EVENT] = commonEventCollect;
+    EventFwk::CommonEventData eventData;
+    commonEventCollect->SaveOnDemandReasonExtraData(eventData);
+    MessageParcel messageParcel;
+    int32_t ret = saMgr->GetOnDemandReasonExtraData(ONDEMAND_EXTRA_DATA_ID, messageParcel);
+    EXPECT_EQ(ret, ERR_OK);
 }
 } // namespace OHOS
