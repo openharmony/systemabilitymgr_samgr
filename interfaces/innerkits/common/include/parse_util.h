@@ -33,7 +33,7 @@ public:
     const std::list<SaProfile>& GetAllSaProfiles() const;
     bool GetProfile(int32_t saId, SaProfile& saProfile);
     void ClearResource();
-    void OpenSo();
+    void OpenSo(uint32_t bootPhase);
     void CloseSo(int32_t systemAbilityId);
     bool LoadSaLib(int32_t systemAbilityId);
     bool ParseTrustConfig(const std::string& profilePath, std::map<std::u16string, std::set<int32_t>>& values);
@@ -45,6 +45,7 @@ public:
     static std::unordered_map<std::string, std::string> JsonObjToMap(const nlohmann::json& eventJson);
 private:
     void CloseSo();
+    uint32_t GetBootPriorityPara(const std::string& bootPhase);
     void OpenSo(SaProfile& saProfile);
     void CloseHandle(SaProfile& saProfile);
     bool ParseSystemAbility(const xmlNode& rootNode, const std::u16string& processName);

@@ -206,7 +206,6 @@ HWTEST_F(ParseUtilTest, GetSaProfiles002, TestSize.Level3)
     SaProfile saRunOnCreateFalse;
     parser_->saProfiles_.emplace_back(saRunOnCreateTrue);
     parser_->saProfiles_.emplace_back(saRunOnCreateFalse);
-    parser_->OpenSo();
     list<SaProfile> profiles = parser_->GetAllSaProfiles();
     if (!profiles.empty()) {
         SaProfile& profile = *(profiles.begin());
@@ -749,7 +748,7 @@ HWTEST_F(ParseUtilTest, ParseSAProp005, TestSize.Level3)
     string nodeContent = "TEST";
     SaProfile saProfile;
     parser_->ParseSAProp(nodeName, nodeContent, saProfile);
-    EXPECT_EQ(nodeContent, saProfile.bootPhase);
+    EXPECT_EQ(3, saProfile.bootPhase);
 }
 
 /**
