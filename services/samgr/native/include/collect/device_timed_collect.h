@@ -18,6 +18,7 @@
 #include "icollect_plugin.h"
 
 #include <list>
+#include <map>
 #include <mutex>
 #include <set>
 
@@ -33,9 +34,10 @@ public:
     int32_t AddCollectEvent(const OnDemandEvent& event) override;
 private:
     void SaveTimedEvent(const OnDemandEvent& onDemandEvent);
+    void PostLoopTaskLocked(int32_t interval);
     std::set<int32_t> timedSet_;
     std::mutex taskLock_;
-    std::function<void()> loopTask_;
+    std::map<int32_t, std::function<void()>> loopTasks_;
 };
 } // namespace OHOS
 #endif // OHOS_SYSTEM_ABILITY_MANAGER_DEVICE_TIMED_COLLECT_H

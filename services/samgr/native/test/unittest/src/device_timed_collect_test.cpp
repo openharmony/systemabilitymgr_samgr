@@ -208,7 +208,7 @@ HWTEST_F(DeviceTimedCollectTest, PostDelayTask001, TestSize.Level3)
     sptr<DeviceStatusCollectManager> collect = nullptr;
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(collect);
-    deviceTimedCollect->PostDelayTask(deviceTimedCollect->loopTask_, 0);
+    deviceTimedCollect->PostDelayTask(deviceTimedCollect->loopTasks_[0], 0);
     EXPECT_EQ(collect, nullptr);
 }
 
@@ -223,7 +223,7 @@ HWTEST_F(DeviceTimedCollectTest, PostDelayTask002, TestSize.Level3)
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(collect);
-    deviceTimedCollect->PostDelayTask(deviceTimedCollect->loopTask_, 0);
+    deviceTimedCollect->PostDelayTask(deviceTimedCollect->loopTasks_[0], 0);
     EXPECT_NE(collect, nullptr);
 }
 
