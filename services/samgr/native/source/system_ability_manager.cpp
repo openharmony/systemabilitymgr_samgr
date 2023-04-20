@@ -505,12 +505,11 @@ sptr<IRemoteObject> SystemAbilityManager::GetSystemAbilityFromRemote(int32_t sys
 sptr<IRemoteObject> SystemAbilityManager::CheckSystemAbility(int32_t systemAbilityId)
 {
     HILOGD("%{public}s called, systemAbilityId = %{public}d", __func__, systemAbilityId);
-    UpdateSaFreMap(IPCSkeleton::GetCallingPid(), systemAbilityId);
     if (!CheckInputSysAbilityId(systemAbilityId)) {
         HILOGW("CheckSystemAbility CheckSystemAbility invalid!");
         return nullptr;
     }
-
+    UpdateSaFreMap(IPCSkeleton::GetCallingUid(), systemAbilityId);
     shared_lock<shared_mutex> readLock(abilityMapLock_);
     auto iter = abilityMap_.find(systemAbilityId);
     if (iter != abilityMap_.end()) {
@@ -1741,14 +1740,14 @@ std::string SystemAbilityManager::EventToStr(const OnDemandEvent& event)
     return eventStr;
 }
 
-void SystemAbilityManager::UpdateSaFreMap(int32_t pid, int32_t saId)
+void SystemAbilityManager::UpdateSaFreMap(int32_t uid, int32_t saId)
 {
-    if (pid <= 0) {
-        HILOGW("UpdateSaFreMap return, pid not valid!");
+    if (uid < 0) {
+        HILOGW("UpdateSaFreMap return, uid not valid!");
         return;
     }
 
-    uint64_t key = GenerateFreKey(pid, saId);
+    uint64_t key = GenerateFreKey(uid, saId);
     lock_guard<mutex> autoLock(saFrequencyLock_);
     auto& count = saFrequencyMap_[key];
     if (count < MAX_SA_FREQUENCY_COUNT) {
@@ -1756,10 +1755,10 @@ void SystemAbilityManager::UpdateSaFreMap(int32_t pid, int32_t saId)
     }
 }
 
-uint64_t SystemAbilityManager::GenerateFreKey(int32_t pid, int32_t saId) const
+uint64_t SystemAbilityManager::GenerateFreKey(int32_t uid, int32_t saId) const
 {
     uint32_t uSaid = static_cast<uint32_t>(saId);
-    uint64_t key = static_cast<uint64_t>(pid);
+    uint64_t key = static_cast<uint64_t>(uid);
     return (key << SHFIT_BIT) | uSaid;
 }
 
@@ -1769,8 +1768,8 @@ void SystemAbilityManager::ReportGetSAPeriodically()
     lock_guard<mutex> autoLock(saFrequencyLock_);
     for (const auto& [key, count] : saFrequencyMap_) {
         uint32_t saId = static_cast<uint32_t>(key);
-        uint32_t pid = key >> SHFIT_BIT;
-        ReportGetSAFrequency(pid, saId, count);
+        uint32_t uid = key >> SHFIT_BIT;
+        ReportGetSAFrequency(uid, saId, count);
     }
     saFrequencyMap_.clear();
 }

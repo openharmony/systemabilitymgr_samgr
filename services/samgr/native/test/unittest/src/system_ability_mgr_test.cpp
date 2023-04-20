@@ -1779,14 +1779,14 @@ HWTEST_F(SystemAbilityMgrTest, ReportGetSAFre001, TestSize.Level3)
     DTEST_LOG << " ReportGetSAFre001 start " << std::endl;
     ReportGetSAFrequency(1, 1, 1);
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    uint32_t realPid = 1;
+    uint32_t realUid = 1;
     uint32_t readSaid = 1;
-    uint64_t key = saMgr->GenerateFreKey(realPid, readSaid);
+    uint64_t key = saMgr->GenerateFreKey(realUid, readSaid);
     DTEST_LOG << " key 001 :  " << key << std::endl;
     uint32_t expectSid = static_cast<uint32_t>(key);
-    uint32_t expectPid = key >> SHFIT_BIT;
+    uint32_t expectUid = key >> SHFIT_BIT;
     DTEST_LOG << " key 002 :  " << key << std::endl;
-    ASSERT_EQ(expectPid, realPid);
+    ASSERT_EQ(expectUid, realUid);
     ASSERT_EQ(readSaid, expectSid);
 }
 
@@ -1800,9 +1800,9 @@ HWTEST_F(SystemAbilityMgrTest, ReportGetSAFre002, TestSize.Level3)
 {
     DTEST_LOG << " ReportGetSAFre002 start " << std::endl;
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    int32_t pid = 1;
+    int32_t uid = 1;
     saMgr->saFrequencyMap_.clear();
-    saMgr->UpdateSaFreMap(pid, TEST_SYSTEM_ABILITY1);
+    saMgr->UpdateSaFreMap(uid, TEST_SYSTEM_ABILITY1);
     ASSERT_EQ(saMgr->saFrequencyMap_.size(), 1);
     saMgr->ReportGetSAPeriodically();
     ASSERT_EQ(saMgr->saFrequencyMap_.size(), 0);
@@ -1818,9 +1818,9 @@ HWTEST_F(SystemAbilityMgrTest, ReportGetSAFre003, TestSize.Level3)
 {
     DTEST_LOG << " ReportGetSAFre003 start " << std::endl;
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    int32_t pid = -1;
+    int32_t uid = -1;
     saMgr->saFrequencyMap_.clear();
-    saMgr->UpdateSaFreMap(pid, TEST_SYSTEM_ABILITY1);
+    saMgr->UpdateSaFreMap(uid, TEST_SYSTEM_ABILITY1);
     saMgr->ReportGetSAPeriodically();
     ASSERT_EQ(saMgr->saFrequencyMap_.size(), 0);
 }
@@ -1835,10 +1835,10 @@ HWTEST_F(SystemAbilityMgrTest, ReportGetSAFre004, TestSize.Level3)
 {
     DTEST_LOG << " ReportGetSAFre004 start " << std::endl;
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    int32_t pid = 1;
-    uint64_t key = saMgr->GenerateFreKey(pid, TEST_SYSTEM_ABILITY1);
+    int32_t uid = 1;
+    uint64_t key = saMgr->GenerateFreKey(uid, TEST_SYSTEM_ABILITY1);
     saMgr->saFrequencyMap_[key] = MAX_COUNT;
-    saMgr->UpdateSaFreMap(pid, TEST_SYSTEM_ABILITY1);
+    saMgr->UpdateSaFreMap(uid, TEST_SYSTEM_ABILITY1);
     EXPECT_EQ(saMgr->saFrequencyMap_[key], MAX_COUNT);
     saMgr->saFrequencyMap_.clear();
 }

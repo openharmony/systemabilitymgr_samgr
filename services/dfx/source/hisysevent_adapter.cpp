@@ -24,7 +24,7 @@ namespace OHOS {
 using namespace OHOS::HiviewDFX;
 namespace {
 const std::string ADD_SYSTEMABILITY_FAIL = "ADD_SYSTEMABILITY_FAIL";
-const std::string CALLER_PID = "CALLER_PID";
+const std::string CALLER_UID = "CALLER_UID";
 const std::string SAID = "SAID";
 const std::string COUNT = "COUNT";
 const std::string FILE_NAME = "FILE_NAME";
@@ -43,12 +43,12 @@ void ReportAddSystemAbilityFailed(int32_t said, const std::string& filaName)
     }
 }
 
-void ReportGetSAFrequency(uint32_t callerPid, uint32_t said, int32_t count)
+void ReportGetSAFrequency(uint32_t callerUid, uint32_t said, int32_t count)
 {
     int ret = HiSysEventWrite(HiSysEvent::Domain::SAMGR,
         GETSA__TAG,
         HiSysEvent::EventType::STATISTIC,
-        CALLER_PID, callerPid,
+        CALLER_UID, callerUid,
         SAID, said,
         COUNT, count);
     if (ret != 0) {
