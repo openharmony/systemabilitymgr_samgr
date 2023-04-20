@@ -200,6 +200,7 @@ enum {
     TOKEN_SYNC_MANAGER_SERVICE_ID                    = 3504,
     PRIVACY_MANAGER_SERVICE_ID                       = 3505,
     SECURITY_COMPONENT_SERVICE_ID                    = 3506,
+    LOCAL_CODE_SIGN_SERVICE_ID                       = 3507,
     DEVICE_SECURITY_LEVEL_MANAGER_SA_ID              = 3511,
     CERT_MANAGER_SERVICE_SA_ID                       = 3512,
     DEVICE_THREAT_DETECTION_SERVICE_SA_ID            = 3513,
@@ -453,6 +454,7 @@ static const std::map<int, std::string> saNameMap_ = {
     { AIDISPATCHER_ENGINE_SERVICE, "AIDispatcherEngineService" },
     { SECURITY_COMPONENT_SERVICE_ID, "SecurityComponentService" },
     { PUSH_MANAGER_SERVICE_SA_ID, "PushManagerService" },
+    { LOCAL_CODE_SIGN_SERVICE_ID, "LocalCodeSignService" },
 };
 } // namespace OHOS
 

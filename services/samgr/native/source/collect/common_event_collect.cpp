@@ -35,6 +35,7 @@ constexpr uint32_t REMOVE_EXTRA_DATA_DELAY_TIME = 300000;
 constexpr int64_t DELAY_TIME = 1000;
 constexpr int64_t MAX_EXTRA_DATA_ID = 1000000000;
 const std::string UID = "uid";
+const std::string NET_TYPE = "NetType";
 }
 
 CommonEventCollect::CommonEventCollect(const sptr<IReport>& report)
@@ -177,8 +178,10 @@ int64_t CommonEventCollect::SaveOnDemandReasonExtraData(const EventFwk::CommonEv
     HILOGD("CommonEventCollect extraData code: %{public}d, data: %{public}s", data.GetCode(),
         data.GetData().c_str());
     int32_t uid = data.GetWant().GetIntParam(UID, -1);
+    int32_t netType = data.GetWant().GetIntParam(NET_TYPE, -1);
     std::map<std::string, std::string> want;
     want[UID] = std::to_string(uid);
+    want[NET_TYPE] = std::to_string(netType);
     OnDemandReasonExtraData extraData(data.GetCode(), data.GetData(), want);
     int64_t extraDataId = GenerateExtraDataIdLocked();
     extraDatas_[extraDataId] = extraData;
@@ -258,7 +261,8 @@ CommonEventSubscriber::CommonEventSubscriber(const EventFwk::CommonEventSubscrib
 void CommonEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData& data)
 {
     std::string action = data.GetWant().GetAction();
-    HILOGI("OnReceiveEvent get action: %{public}s", action.c_str());
+    int32_t code = data.GetCode();
+    HILOGI("OnReceiveEvent get action: %{public}s code: %{public}d", action.c_str(), code);
     auto collect = collect_.promote();
     if (collect == nullptr) {
         HILOGE("CommonEventCollect collect is nullptr");
@@ -266,7 +270,7 @@ void CommonEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData& data
     }
     collect->SaveAction(action);
     int64_t extraDataId = collect->SaveOnDemandReasonExtraData(data);
-    OnDemandEvent event = {COMMON_EVENT, action, "", extraDataId};
+    OnDemandEvent event = {COMMON_EVENT, action, std::to_string(code), extraDataId};
     collect->ReportEvent(event);
 }
 

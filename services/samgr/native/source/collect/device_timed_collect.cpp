@@ -62,6 +62,22 @@ void DeviceTimedCollect::SaveTimedEvent(const OnDemandEvent& onDemandEvent)
     }
 }
 
+void DeviceTimedCollect::PostLoopTaskLocked(int32_t interval)
+{
+    if (loopTasks_.count(interval) > 0) {
+        HILOGE("DeviceTimedCollect interval has been post");
+        return;
+    }
+    loopTasks_[interval] = [this, interval] () {
+        OnDemandEvent event = { TIMED_EVENT, LOOP_EVENT, to_string(interval) };
+        HILOGI("DeviceTimedCollect ReportEvent interval: %{public}d", interval);
+        ReportEvent(event);
+        lock_guard<mutex> autoLock(taskLock_);
+        PostDelayTask(loopTasks_[interval], interval);
+    };
+    PostDelayTask(loopTasks_[interval], interval);
+}
+
 int32_t DeviceTimedCollect::OnStart()
 {
     HILOGI("DeviceTimedCollect OnStart called");
@@ -69,14 +85,7 @@ int32_t DeviceTimedCollect::OnStart()
     for (std::set<int32_t>::iterator it = timedSet_.begin(); it != timedSet_.end(); ++it) {
         int32_t interval = *it;
         HILOGI("DeviceTimedCollect send task: %{public}d", interval);
-        loopTask_ = [this, interval] () {
-            OnDemandEvent event = { TIMED_EVENT, LOOP_EVENT, to_string(interval) };
-            HILOGI("DeviceTimedCollect ReportEvent interval: %{public}d", interval);
-            ReportEvent(event);
-            lock_guard<mutex> autoLock(taskLock_);
-            PostDelayTask(loopTask_, interval);
-        };
-        PostDelayTask(loopTask_, interval);
+        PostLoopTaskLocked(interval);
     }
     return ERR_OK;
 }
@@ -105,7 +114,7 @@ int32_t DeviceTimedCollect::AddCollectEvent(const OnDemandEvent& event)
     }
     HILOGI("DeviceTimedCollect add collect events: %{public}d", interval);
     timedSet_.insert(interval);
-    PostDelayTask(loopTask_, interval);
+    PostLoopTaskLocked(interval);
     return ERR_OK;
 }
 }
