@@ -166,8 +166,8 @@ private:
     void CleanCallbackForLoadFailed(int32_t systemAbilityId, const std::u16string& name,
         const std::string& srcDeviceId, const sptr<ISystemAbilityLoadCallback>& callback);
 
-    void UpdateSaFreMap(int32_t pid, int32_t saId);
-    uint64_t GenerateFreKey(int32_t pid, int32_t saId) const;
+    void UpdateSaFreMap(int32_t uid, int32_t saId);
+    uint64_t GenerateFreKey(int32_t uid, int32_t saId) const;
     void ReportGetSAPeriodically();
     void OndemandLoad();
     void OndemandLoadForPerf();
