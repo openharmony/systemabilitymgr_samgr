@@ -29,6 +29,7 @@ namespace SAMGR {
 namespace {
     const std::string TEST_RESOURCE_PATH = "/data/test/resource/samgr/profile/";
     const std::u16string TEST_PROCESS_NAME = u"sa_test";
+    const std::string EVENT_STRING;
     const std::string EVENT_TYPE ;
     const std::string EVENT_NAME ;
     const std::string EVENT_VALUE ;
@@ -1314,6 +1315,18 @@ HWTEST_F(ParseUtilTest, JsonObjToMap011, TestSize.Level3)
     std::unordered_map<std::string, std::string> res = parser_->JsonObjToMap(systemAbilityJson);
     EXPECT_EQ(res.size(), 3);
     DTEST_LOG << " JsonObjToMap011 END" << std::endl;
+}
+
+/**
+ * @tc.name: StringToMap001
+ * @tc.desc: test StringToMap with empty string
+ * @tc.type: FUNC
+ * @tc.require: I6YJH6
+ */
+HWTEST_F(ParseUtilTest, StringtoMap001, TestSize.Level3)
+{
+    unordered_map<std::string, std::string> ret = parser_->StringToMap(EVENT_STRING);
+    EXPECT_FALSE(ret.empty());
 }
 } // namespace SAMGR
 } // namespace OHOS
