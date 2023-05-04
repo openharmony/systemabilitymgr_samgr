@@ -68,6 +68,12 @@ constexpr int32_t MAX_JSON_STRING_LENGTH = 128;
 const string BOOT_START_PHASE = "BootStartPhase";
 const string CORE_START_PHASE = "CoreStartPhase";
 
+enum {
+    BOOT_START = 1,
+    CORE_START = 2,
+    OTHER_START = 3,
+};
+
 void ParseLibPath(const string& libPath, string& fileName, string& libDir)
 {
     std::vector<string> libPathVec;
@@ -130,10 +136,10 @@ void ParseUtil::ClearResource()
     saProfiles_.clear();
 }
 
-void ParseUtil::OpenSo()
+void ParseUtil::OpenSo(uint32_t bootPhase)
 {
     for (auto& saProfile : saProfiles_) {
-        if (saProfile.runOnCreate) {
+        if (saProfile.runOnCreate && saProfile.bootPhase == bootPhase) {
             OpenSo(saProfile);
         }
     }
@@ -247,7 +253,18 @@ void ParseUtil::ParseSAProp(const string& nodeName, const string& nodeContent, S
     } else if (nodeName == SA_TAG_PERMISSION) {
         saProfile.permission = Str8ToStr16(nodeContent);
     } else if (nodeName == SA_TAG_BOOT_PHASE) {
-        saProfile.bootPhase = nodeContent;
+        saProfile.bootPhase = GetBootPriorityPara(nodeContent);
+    }
+}
+
+uint32_t ParseUtil::GetBootPriorityPara(const std::string& bootPhase)
+{
+    if (bootPhase == BOOT_START_PHASE) {
+        return static_cast<uint32_t>(BOOT_START);
+    } else if (bootPhase == CORE_START_PHASE) {
+        return static_cast<uint32_t>(CORE_START);
+    } else {
+        return static_cast<uint32_t>(OTHER_START);
     }
 }
 
@@ -486,11 +503,9 @@ bool ParseUtil::ParseSystemAbility(SaProfile& saProfile, nlohmann::json& systemA
     string permission;
     GetStringFromJson(systemAbilityJson, SA_TAG_PERMISSION, permission);
     saProfile.permission = permission.length() <= MAX_JSON_STRING_LENGTH ? Str8ToStr16(permission) : u"";
-    GetStringFromJson(systemAbilityJson, SA_TAG_BOOT_PHASE, saProfile.bootPhase);
-    if (!saProfile.bootPhase.empty() && saProfile.bootPhase != BOOT_START_PHASE &&
-        saProfile.bootPhase != CORE_START_PHASE) {
-        saProfile.bootPhase = "";
-    }
+    string bootPhase;
+    GetStringFromJson(systemAbilityJson, SA_TAG_BOOT_PHASE, bootPhase);
+    saProfile.bootPhase = GetBootPriorityPara(bootPhase);
     // parse start-on-demand tag
     ParseStartOndemandTag(systemAbilityJson, SA_TAG_START_ON_DEMAND, saProfile.startOnDemand);
     // parse stop-on-demand tag
