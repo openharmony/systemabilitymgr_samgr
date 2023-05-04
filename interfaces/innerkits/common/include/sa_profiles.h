@@ -90,6 +90,7 @@ struct SaProfile {
     int32_t dumpLevel = 0;
     std::u16string capability;
     std::u16string permission;
+    // default OTHER_START
     uint32_t bootPhase = 3;
     StartOnDemand startOnDemand;
     StopOnDemand stopOnDemand;
