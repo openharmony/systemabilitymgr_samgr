@@ -1841,4 +1841,38 @@ HWTEST_F(SystemAbilityStateSchedulerTest, ProcessEvent003, TestSize.Level3)
     unloadEventHandler->ProcessEvent(AppExecFwk::InnerEvent::Pointer(event, destructor));
     EXPECT_NE(event, nullptr);
 }
+
+/**
+ * @tc.name: CanRestartProcessLocked001
+ * @tc.desc: test CanRestartProcessLocked, with enableRestart is true
+ * @tc.type: FUNC
+ * @tc.require: I70I3W
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, CanRestartProcessLocked001, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::shared_ptr<SystemProcessContext> processContext = std::make_shared<SystemProcessContext>();
+    processContext->enableRestart = true;
+    bool ret = systemAbilityStateScheduler->CanRestartProcessLocked(processContext);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: TryRestartDiedAbility001
+ * @tc.desc: test TryRestartDiedAbility, with isAutoRestart is false
+ * @tc.type: FUNC
+ * @tc.require: I70I3W
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, TryRestartDiedAbility001, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::shared_ptr<SystemAbilityContext> abilityContext = std::make_shared<SystemAbilityContext>();
+    abilityContext->isAutoRestart = false;
+    int32_t ret = systemAbilityStateScheduler->TryRestartDiedAbility(abilityContext);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
 }

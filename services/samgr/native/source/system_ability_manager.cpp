@@ -792,7 +792,7 @@ int32_t SystemAbilityManager::RemoveSystemAbility(const sptr<IRemoteObject>& abi
             HILOGE("abilityStateScheduler is nullptr");
             return ERR_INVALID_VALUE;
         }
-        abilityStateScheduler_->SendAbilityStateEvent(saId, AbilityStateEvent::ABILITY_UNLOAD_SUCCESS_EVENT);
+        abilityStateScheduler_->HandleAbilityDiedEvent(saId);
         SendSystemAbilityRemovedMsg(saId);
     }
     return ERR_OK;

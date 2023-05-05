@@ -38,6 +38,7 @@ public:
     virtual ~SystemAbilityStateScheduler() = default;
     void Init(const std::list<SaProfile>& saProfiles);
     
+    int32_t HandleAbilityDiedEvent(int32_t systemAbilityId);
     int32_t HandleLoadAbilityEvent(const LoadRequestInfo& loadRequestInfo);
     int32_t HandleLoadAbilityEvent(int32_t systemAbilityId, bool& isExist);
     int32_t HandleUnloadAbilityEvent(const UnloadRequestInfo& unloadRequestInfo);
@@ -58,6 +59,12 @@ private:
     bool GetSystemProcessContext(const std::u16string& processName,
         std::shared_ptr<SystemProcessContext>& processContext);
 
+    void PostRestartAbilityTask(const std::shared_ptr<SystemAbilityContext>& abilityContext);
+    bool CanRestartProcessLocked(const std::shared_ptr<SystemProcessContext>& processContext);
+    int32_t TryRestartDiedAbility(const std::shared_ptr<SystemAbilityContext>& abilityContext);
+    int32_t HandleAbnormallyDiedAbilityLocked(
+        const std::shared_ptr<SystemAbilityContext>& abilityContext,
+        bool& isJudged, bool& canRestartProcess);
     int32_t HandleLoadAbilityEventLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext,
         const LoadRequestInfo& loadRequestInfo);
     int32_t HandleUnloadAbilityEventLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext,
