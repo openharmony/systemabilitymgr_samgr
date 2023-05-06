@@ -179,6 +179,7 @@ enum {
     CAMERA_SERVICE_ID                                = 3008,
     AUDIO_POLICY_SERVICE_ID                          = 3009,
     AVSESSION_SERVICE_ID                             = 3010,
+    AVCODEC_SERVICE_ID                               = 3011,
     SUBSYS_MULTIMODAINPUT_SYS_ABILITY_ID_BEGIN       = 3100,
     MULTIMODAL_INPUT_SERVICE_ID                      = 3101,
     MULTIMODAL_CHANNEL_SERVICE_ID                    = 3102,
