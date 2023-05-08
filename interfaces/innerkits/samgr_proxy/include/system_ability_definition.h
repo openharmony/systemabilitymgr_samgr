@@ -447,6 +447,7 @@ static const std::map<int, std::string> saNameMap_ = {
     { SYSPARAM_DEVICE_SERVICE_ID, "SysParamDevice" },
     { TIME_SERVICE_ID, "TimeService" },
     { PLAYER_DISTRIBUTED_SERVICE_ID, "PlayerDistributedService"},
+    { AVCODEC_SERVICE_ID, "AVCodecService"},
     { CAMERA_SERVICE_ID, "CameraService"},
     { AUDIO_POLICY_SERVICE_ID, "AudioPolicyService"},
     { DLP_CREDENTIAL_SERVICE_ID, "DlpCreService"},
