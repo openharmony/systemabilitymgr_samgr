@@ -71,6 +71,8 @@ struct SystemProcessContext {
     SystemProcessState state = SystemProcessState::NOT_STARTED;
     std::shared_mutex stateCountLock;
     std::map<SystemAbilityState, uint32_t> abilityStateCountMap;
+    std::list<int64_t> restartCountsCtrl;
+    bool enableRestart = true;
 };
 
 struct SystemAbilityContext {
@@ -83,6 +85,7 @@ struct SystemAbilityContext {
     std::list<LoadRequestInfo> pendingLoadEventList;
     UnloadRequestInfo pendingUnloadEvent;
     UnloadRequestInfo unloadRequest;
+    bool isAutoRestart = false;
 };
 } // namespace OHOS
 

@@ -48,6 +48,7 @@ constexpr const char* SA_TAG_NAME = "name";
 constexpr const char* SA_TAG_DEPEND = "depend";
 constexpr const char* SA_TAG_DEPEND_TIMEOUT = "depend-time-out";
 constexpr const char* SA_TAG_RUN_ON_CREATE = "run-on-create";
+constexpr const char* SA_TAG_AUTO_RESTART = "auto-restart";
 constexpr const char* SA_TAG_DISTRIBUTED = "distributed";
 constexpr const char* SA_TAG_DUMP_LEVEL = "dump-level";
 constexpr const char* SA_TAG_CAPABILITY = "capability";
@@ -243,6 +244,8 @@ void ParseUtil::ParseSAProp(const string& nodeName, const string& nodeContent, S
         StrToInt(nodeContent.c_str(), saProfile.dependTimeout);
     } else if (nodeName == SA_TAG_RUN_ON_CREATE) {
         std::istringstream(nodeContent) >> std::boolalpha >> saProfile.runOnCreate;
+    } else if (nodeName == SA_TAG_AUTO_RESTART) {
+        std::istringstream(nodeContent) >> std::boolalpha >> saProfile.autoRestart;
     } else if (nodeName == SA_TAG_DISTRIBUTED) {
         std::istringstream(nodeContent) >> std::boolalpha >> saProfile.distributed;
     } else if (nodeName == SA_TAG_DUMP_LEVEL) {
@@ -493,6 +496,7 @@ bool ParseUtil::ParseSystemAbility(SaProfile& saProfile, nlohmann::json& systemA
         return false;
     }
     GetBoolFromJson(systemAbilityJson, SA_TAG_RUN_ON_CREATE, saProfile.runOnCreate);
+    GetBoolFromJson(systemAbilityJson, SA_TAG_AUTO_RESTART, saProfile.autoRestart);
     GetBoolFromJson(systemAbilityJson, SA_TAG_DISTRIBUTED, saProfile.distributed);
     GetIntArrayFromJson(systemAbilityJson, SA_TAG_DEPEND, saProfile.dependSa);
     GetInt32FromJson(systemAbilityJson, SA_TAG_DEPEND_TIMEOUT, saProfile.dependTimeout);
