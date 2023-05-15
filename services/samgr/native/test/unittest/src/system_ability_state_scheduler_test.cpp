@@ -16,6 +16,7 @@
 #include "system_ability_state_scheduler_test.h"
 
 #include "ability_death_recipient.h"
+#include "datetime_ex.h"
 #include "sa_status_change_mock.h"
 #include "test_log.h"
 
@@ -30,6 +31,8 @@ using namespace OHOS;
 namespace OHOS {
 namespace {
 
+constexpr int64_t RESTART_TIME_INTERVAL_LIMIT = 20 * 1000;
+constexpr int32_t RESTART_TIMES_LIMIT = 4;
 constexpr int32_t SAID_INVALID = -1;
 constexpr int32_t SAID = 1234;
 constexpr int32_t STATENUMS = 1;
@@ -1860,6 +1863,86 @@ HWTEST_F(SystemAbilityStateSchedulerTest, CanRestartProcessLocked001, TestSize.L
 }
 
 /**
+ * @tc.name: CanRestartProcessLocked002
+ * @tc.desc: test CanRestartProcessLocked, with enableRestart is false
+ * @tc.type: FUNC
+ * @tc.require: I736XA
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, CanRestartProcessLocked002, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::shared_ptr<SystemProcessContext> processContext = std::make_shared<SystemProcessContext>();
+    processContext->enableRestart = false;
+    bool ret = systemAbilityStateScheduler->CanRestartProcessLocked(processContext);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: CanRestartProcessLocked003
+ * @tc.desc: test CanRestartProcessLocked, with restartCountsCtrl size is 4, the time limit is reached
+ * @tc.type: FUNC
+ * @tc.require: I736XA
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, CanRestartProcessLocked003, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::shared_ptr<SystemProcessContext> processContext = std::make_shared<SystemProcessContext>();
+    processContext->enableRestart = true;
+    int64_t curtime = GetTickCount();
+    for (int i = 0; i < RESTART_TIMES_LIMIT; i++) {
+        processContext->restartCountsCtrl.push_back(curtime);
+    }
+    bool ret = systemAbilityStateScheduler->CanRestartProcessLocked(processContext);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: CanRestartProcessLocked004
+ * @tc.desc: test CanRestartProcessLocked, with restartCountsCtrl size is 4, the time limit is not reached
+ * @tc.type: FUNC
+ * @tc.require: I736XA
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, CanRestartProcessLocked004, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::shared_ptr<SystemProcessContext> processContext = std::make_shared<SystemProcessContext>();
+    processContext->enableRestart = true;
+    int64_t curtime = GetTickCount() - RESTART_TIME_INTERVAL_LIMIT;
+    for (int i = 0; i < RESTART_TIMES_LIMIT; i++) {
+        processContext->restartCountsCtrl.push_back(curtime);
+    }
+    bool ret = systemAbilityStateScheduler->CanRestartProcessLocked(processContext);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: CanRestartProcessLocked005
+ * @tc.desc: test CanRestartProcessLocked, with restartCountsCtrl size is invalid
+ * @tc.type: FUNC
+ * @tc.require: I736XA
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, CanRestartProcessLocked005, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::shared_ptr<SystemProcessContext> processContext = std::make_shared<SystemProcessContext>();
+    processContext->enableRestart = true;
+    int64_t curtime = GetTickCount();
+    for (int i = 0; i <= RESTART_TIMES_LIMIT; i++) {
+        processContext->restartCountsCtrl.push_back(curtime);
+    }
+    bool ret = systemAbilityStateScheduler->CanRestartProcessLocked(processContext);
+    EXPECT_EQ(ret, false);
+}
+
+/**
  * @tc.name: TryRestartDiedAbility001
  * @tc.desc: test TryRestartDiedAbility, with isAutoRestart is false
  * @tc.type: FUNC
@@ -1874,5 +1957,133 @@ HWTEST_F(SystemAbilityStateSchedulerTest, TryRestartDiedAbility001, TestSize.Lev
     abilityContext->isAutoRestart = false;
     int32_t ret = systemAbilityStateScheduler->TryRestartDiedAbility(abilityContext);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: TryRestartDiedAbility002
+ * @tc.desc: test TryRestartDiedAbility, with isAutoRestart is true
+ * @tc.type: FUNC
+ * @tc.require: I736XA
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, TryRestartDiedAbility002, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::list<SaProfile> saProfiles;
+    systemAbilityStateScheduler->Init(saProfiles);
+    std::shared_ptr<SystemAbilityContext> abilityContext = std::make_shared<SystemAbilityContext>();
+    std::shared_ptr<SystemProcessContext> processContext = std::make_shared<SystemProcessContext>();
+    abilityContext->isAutoRestart = true;
+    systemAbilityStateScheduler->abilityContextMap_.clear();
+    abilityContext->ownProcessContext = processContext;
+    systemAbilityStateScheduler->abilityContextMap_[SAID] = abilityContext;
+    abilityContext->systemAbilityId = SAID;
+    int32_t ret = systemAbilityStateScheduler->TryRestartDiedAbility(abilityContext);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: HandleAbnormallyDiedAbilityLocked001
+ * @tc.desc: test HandleAbnormallyDiedAbilityLocked, with ability state is loaded
+ * @tc.type: FUNC
+ * @tc.require: I736XA
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, HandleAbnormallyDiedAbilityLocked001, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::list<SaProfile> saProfiles;
+    systemAbilityStateScheduler->Init(saProfiles);
+    std::shared_ptr<SystemAbilityContext> abilityContext = std::make_shared<SystemAbilityContext>();
+    std::shared_ptr<SystemProcessContext> processContext = std::make_shared<SystemProcessContext>();
+    abilityContext->isAutoRestart = true;
+    systemAbilityStateScheduler->abilityContextMap_.clear();
+    abilityContext->ownProcessContext = processContext;
+    abilityContext->systemAbilityId = SAID;
+    abilityContext->state = SystemAbilityState::LOADED;
+    systemAbilityStateScheduler->abilityContextMap_[SAID] = abilityContext;
+    bool isJudged = false;
+    bool canRestartProcess = true;
+    int32_t ret = systemAbilityStateScheduler->HandleAbnormallyDiedAbilityLocked(
+        abilityContext, isJudged, canRestartProcess);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: HandleAbnormallyDiedAbilityLocked002
+ * @tc.desc: test HandleAbnormallyDiedAbilityLocked, with ability state is unloading
+ * @tc.type: FUNC
+ * @tc.require: I736XA
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, HandleAbnormallyDiedAbilityLocked002, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::list<SaProfile> saProfiles;
+    systemAbilityStateScheduler->Init(saProfiles);
+    std::shared_ptr<SystemAbilityContext> abilityContext = std::make_shared<SystemAbilityContext>();
+    std::shared_ptr<SystemProcessContext> processContext = std::make_shared<SystemProcessContext>();
+    abilityContext->isAutoRestart = true;
+    systemAbilityStateScheduler->abilityContextMap_.clear();
+    abilityContext->ownProcessContext = processContext;
+    abilityContext->systemAbilityId = SAID;
+    abilityContext->state = SystemAbilityState::UNLOADING;
+    systemAbilityStateScheduler->abilityContextMap_[SAID] = abilityContext;
+    bool isJudged = false;
+    bool canRestartProcess = true;
+    int32_t ret = systemAbilityStateScheduler->HandleAbnormallyDiedAbilityLocked(
+        abilityContext, isJudged, canRestartProcess);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: HandleAbnormallyDiedAbilityLocked003
+ * @tc.desc: test HandleAbnormallyDiedAbilityLocked, with ability state is invalid
+ * @tc.type: FUNC
+ * @tc.require: I736XA
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, HandleAbnormallyDiedAbilityLocked003, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::list<SaProfile> saProfiles;
+    systemAbilityStateScheduler->Init(saProfiles);
+    std::shared_ptr<SystemAbilityContext> abilityContext = std::make_shared<SystemAbilityContext>();
+    std::shared_ptr<SystemProcessContext> processContext = std::make_shared<SystemProcessContext>();
+    processContext->processName = process;
+    abilityContext->isAutoRestart = true;
+    systemAbilityStateScheduler->abilityContextMap_.clear();
+    abilityContext->ownProcessContext = processContext;
+    abilityContext->systemAbilityId = SAID;
+    SystemAbilityState invalidState = (SystemAbilityState)5;
+    abilityContext->state = invalidState;
+    systemAbilityStateScheduler->abilityContextMap_[SAID] = abilityContext;
+    bool isJudged = false;
+    bool canRestartProcess = true;
+    int32_t ret = systemAbilityStateScheduler->HandleAbnormallyDiedAbilityLocked(
+        abilityContext, isJudged, canRestartProcess);
+    systemAbilityStateScheduler->OnProcessNotStartedLocked(processContext->processName);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: HandleAbilityDiedEvent001
+ * @tc.desc: test HandleAbilityDiedEvent, with saId is valid
+ * @tc.type: FUNC
+ * @tc.require: I736XA
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, HandleAbilityDiedEvent001, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::shared_ptr<SystemAbilityContext> abilityContext = std::make_shared<SystemAbilityContext>();
+    abilityContext->systemAbilityId = SAID;
+    int32_t ret = systemAbilityStateScheduler->HandleAbilityDiedEvent(abilityContext->systemAbilityId);
+    EXPECT_EQ(ret, ERR_OK);
 }
 }
