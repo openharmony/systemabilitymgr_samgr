@@ -28,10 +28,12 @@ using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
 namespace {
+const std::string BLUETOOTH_NAME = "bluetooth_status";
+const std::string WIFI_NAME = "wifi_status";
 constexpr int32_t WIFI_ON = 3;
 constexpr int32_t WIFI_OFF = 1;
-static const std::string BLUETOOTH_NAME = "bluetooth_status";
-static const std::string WIFI_NAME = "wifi_status";
+constexpr int32_t BLUETOOTH_STATE_TURN_ON = 1;
+constexpr int32_t BLUETOOTH_STATE_TURN_OFF = 3;
 }
 
 DeviceSwitchCollect::DeviceSwitchCollect(const sptr<IReport>& report)
@@ -72,7 +74,7 @@ int32_t DeviceSwitchCollect::OnStart()
         if (switchItem == WIFI_NAME) {
             SystemAbilityManager::GetInstance()->SubscribeSystemAbility(COMMON_EVENT_SERVICE_ID, listener);
         } else if (switchItem == BLUETOOTH_NAME) {
-            SystemAbilityManager::GetInstance()->SubscribeSystemAbility(BLUETOOTH_HOST_SYS_ABILITY_ID, listener);
+            SystemAbilityManager::GetInstance()->SubscribeSystemAbility(COMMON_EVENT_SERVICE_ID, listener);
         } else {
             HILOGI("invalid item!");
         }
@@ -99,7 +101,7 @@ int32_t DeviceSwitchCollect::AddCollectEvent(const OnDemandEvent& event)
     if (event.name == WIFI_NAME) {
         result = SystemAbilityManager::GetInstance()->SubscribeSystemAbility(COMMON_EVENT_SERVICE_ID, listener);
     } else if (event.name == BLUETOOTH_NAME) {
-        result = SystemAbilityManager::GetInstance()->SubscribeSystemAbility(BLUETOOTH_HOST_SYS_ABILITY_ID, listener);
+        result = SystemAbilityManager::GetInstance()->SubscribeSystemAbility(COMMON_EVENT_SERVICE_ID, listener);
     } else {
         HILOGE("invalid event name %{public}s!", event.name.c_str());
         result = ERR_INVALID_VALUE;
@@ -111,6 +113,12 @@ int32_t DeviceSwitchCollect::AddCollectEvent(const OnDemandEvent& event)
     return ERR_OK;
 }
 
+bool DeviceSwitchCollect::isContainSwitch(const std::string& switches)
+{
+    std::lock_guard<std::mutex> autoLock(switchEventLock_);
+    return switches_.find(switches) != switches_.end();
+}
+
 SwitchStateListener::SwitchStateListener(const sptr<DeviceSwitchCollect>& deviceSwitchCollect)
     : deviceSwitchCollect_(deviceSwitchCollect) {}
 
@@ -118,11 +126,15 @@ void SwitchStateListener::OnAddSystemAbility(int32_t systemAbilityId, const std:
 {
     HILOGI("DeviceSwitchCollect OnAddSystemAbility systemAbilityId:%{public}d", systemAbilityId);
     if (systemAbilityId == COMMON_EVENT_SERVICE_ID) {
-        std::shared_ptr<WifiSwitchCollect> wifiSwitchCollect = std::make_shared<WifiSwitchCollect>();
-        wifiSwitchCollect->WatchState(deviceSwitchCollect_);
-    } else if (systemAbilityId == BLUETOOTH_HOST_SYS_ABILITY_ID) {
-        std::shared_ptr<BlueToothSwitchCollect> btSwitchCollect = std::make_shared<BlueToothSwitchCollect>();
-        btSwitchCollect->WatchState(deviceSwitchCollect_);
+        HILOGI("OnAddSystemAbility COMMON_EVENT_SERVICE_ID!");
+        if (deviceSwitchCollect_->isContainSwitch(WIFI_NAME)) {
+            std::shared_ptr<WifiSwitchCollect> wifiSwitchCollect = std::make_shared<WifiSwitchCollect>();
+            wifiSwitchCollect->WatchState(deviceSwitchCollect_);
+        }
+        if (deviceSwitchCollect_->isContainSwitch(BLUETOOTH_NAME)) {
+            std::shared_ptr<BlueToothSwitchCollect> btSwitchCollect = std::make_shared<BlueToothSwitchCollect>();
+            btSwitchCollect->WatchState(deviceSwitchCollect_);
+        }
     } else {
         HILOGI("DeviceSwitchCollect OnAddSystemAbility unhandled sysabilityId:%{public}d", systemAbilityId);
     }
@@ -135,36 +147,38 @@ void SwitchStateListener::OnRemoveSystemAbility(int32_t systemAbilityId, const s
 
 void BlueToothSwitchCollect::WatchState(const sptr<DeviceSwitchCollect>& deviceSwitchCollect)
 {
-    BluetoothEventSubscriber* bluetoothEventSubscriber = new BluetoothEventSubscriber(deviceSwitchCollect);
-    OHOS::Bluetooth::BluetoothHost::GetDefaultHost().RegisterObserver(*bluetoothEventSubscriber);
+    HILOGI("DeviceSwitchCollect Watch bluetooth state");
+    EventFwk::MatchingSkills skill = EventFwk::MatchingSkills();
+    skill.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_BLUETOOTH_HOST_STATE_UPDATE);
+    EventFwk::CommonEventSubscribeInfo info(skill);
+    std::shared_ptr<EventFwk::CommonEventSubscriber> bluetoothEventSubscriber
+        = std::make_shared<BluetoothEventSubscriber>(info, deviceSwitchCollect);
+    EventFwk::CommonEventManager::SubscribeCommonEvent(bluetoothEventSubscriber);
 }
 
-BluetoothEventSubscriber::BluetoothEventSubscriber(const sptr<DeviceSwitchCollect>& deviceSwitchCollect)
-    : deviceSwitchCollect_(deviceSwitchCollect) {}
-
-void BluetoothEventSubscriber::OnStateChanged(const int transport, const int status)
+void BluetoothEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData& data)
 {
-    HILOGI("DeviceSwitchCollect OnStateChanged, %{public}d", status);
-    if (transport == OHOS::Bluetooth::BTTransport::ADAPTER_BREDR) {
+    HILOGI("DeviceSwitchCollect Bluetooth state changed");
+    std::string action = data.GetWant().GetAction();
+    if (action != EventFwk::CommonEventSupport::COMMON_EVENT_BLUETOOTH_HOST_STATE_UPDATE) {
+        HILOGE("invalid action: %{public}s", action.c_str());
         return;
     }
     std::string eventValue;
-    switch (status) {
-        case OHOS::Bluetooth::BTStateID::STATE_TURN_ON:
-            HILOGD("Bluetooth turn on");
-            eventValue = "on";
-            break;
-        case OHOS::Bluetooth::BTStateID::STATE_TURN_OFF:
-            HILOGD("Bluetooth turn off");
-            eventValue = "off";
-            break;
-        default:
-            HILOGD("invalid status");
-            return;
+    int32_t code = data.GetCode();
+    if (code ==  BLUETOOTH_STATE_TURN_ON) {
+        HILOGD("Bluetooth turn on");
+        eventValue = "on";
+    } else if (code ==  BLUETOOTH_STATE_TURN_OFF) {
+        HILOGD("Bluetooth turn off");
+        eventValue = "off";
+    } else {
+        HILOGE("value error!");
+        return;
     }
     OnDemandEvent event = {SETTING_SWITCH, BLUETOOTH_NAME, eventValue};
     if (deviceSwitchCollect_ == nullptr) {
-        HILOGE("collect is nullptr");
+        HILOGE("deviceSwitchCollect is nullptr");
         return;
     }
     deviceSwitchCollect_->ReportEvent(event);
@@ -172,6 +186,7 @@ void BluetoothEventSubscriber::OnStateChanged(const int transport, const int sta
 
 void WifiSwitchCollect::WatchState(const sptr<DeviceSwitchCollect>& deviceSwitchCollect)
 {
+    HILOGI("DeviceSwitchCollect Watch wifi state");
     EventFwk::MatchingSkills skill = EventFwk::MatchingSkills();
     skill.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_WIFI_POWER_STATE);
     EventFwk::CommonEventSubscribeInfo info(skill);
@@ -180,15 +195,12 @@ void WifiSwitchCollect::WatchState(const sptr<DeviceSwitchCollect>& deviceSwitch
     EventFwk::CommonEventManager::SubscribeCommonEvent(wifiEventSubscriber);
 }
 
-WifiEventSubscriber::WifiEventSubscriber(const EventFwk::CommonEventSubscribeInfo& subscribeInfo,
-    const sptr<DeviceSwitchCollect>& deviceSwitchCollect)
-    :EventFwk::CommonEventSubscriber(subscribeInfo), deviceSwitchCollect_(deviceSwitchCollect) {}
-
 void WifiEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData& data)
 {
+    HILOGI("DeviceSwitchCollect Wifi state changed");
     std::string action = data.GetWant().GetAction();
     if (action != EventFwk::CommonEventSupport::COMMON_EVENT_WIFI_POWER_STATE) {
-        HILOGI("invalid action: %{public}s", action.c_str());
+        HILOGE("invalid action: %{public}s", action.c_str());
         return;
     }
     std::string eventValue;
@@ -200,6 +212,7 @@ void WifiEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData& data)
         HILOGD("Wifi turn off");
         eventValue = "off";
     } else {
+        HILOGE("value error!");
         return;
     }
     OnDemandEvent event = {SETTING_SWITCH, WIFI_NAME, eventValue};
