@@ -20,7 +20,6 @@
 #include <mutex>
 #include <set>
 
-#include "bluetooth_host.h"
 #include "common_event_subscriber.h"
 #include "icollect_plugin.h"
 #include "system_ability_status_change_stub.h"
@@ -35,6 +34,7 @@ public:
     void Init(const std::list<SaProfile>& saProfiles) override;
     int32_t AddCollectEvent(const OnDemandEvent& event) override;
     void SetSwitchEvent(const OnDemandEvent& onDemandEvent);
+    bool isContainSwitch(const std::string& swithes);
 private:
     std::mutex switchEventLock_;
     std::set<std::string> switches_;
@@ -68,17 +68,13 @@ public:
     void WatchState(const sptr<DeviceSwitchCollect>& deviceSwitchCollect) override;
 };
 
-class BluetoothEventSubscriber : public Bluetooth::BluetoothHostObserver {
+class BluetoothEventSubscriber : public EventFwk::CommonEventSubscriber {
 public:
-    BluetoothEventSubscriber(const sptr<DeviceSwitchCollect>& deviceSwitchCollect);
-    void OnStateChanged(const int transport, const int status) override;
-    void OnDiscoveryStateChanged(int status) override {};
-    void OnDiscoveryResult(const Bluetooth::BluetoothRemoteDevice& device) override {};
-    void OnPairRequested(const Bluetooth::BluetoothRemoteDevice& device) override {};
-    void OnPairConfirmed(const Bluetooth::BluetoothRemoteDevice& device, int reqType, int number) override {};
-    void OnScanModeChanged(int mode) override {};
-    void OnDeviceNameChanged(const std::string& deviceName) override {};
-    void OnDeviceAddrChanged(const std::string& address) override {};
+    BluetoothEventSubscriber(const EventFwk::CommonEventSubscribeInfo& subscribeInfo,
+    const sptr<DeviceSwitchCollect>& deviceSwitchCollect):EventFwk::CommonEventSubscriber(subscribeInfo),
+        deviceSwitchCollect_(deviceSwitchCollect) {}
+    ~BluetoothEventSubscriber() override = default;
+    void OnReceiveEvent(const EventFwk::CommonEventData& data) override;
 private:
     sptr<DeviceSwitchCollect> deviceSwitchCollect_;
 };
@@ -86,7 +82,8 @@ private:
 class WifiEventSubscriber : public EventFwk::CommonEventSubscriber {
 public:
     WifiEventSubscriber(const EventFwk::CommonEventSubscribeInfo& subscribeInfo,
-        const sptr<DeviceSwitchCollect>& deviceSwitchCollect);
+    const sptr<DeviceSwitchCollect>& deviceSwitchCollect):EventFwk::CommonEventSubscriber(subscribeInfo),
+        deviceSwitchCollect_(deviceSwitchCollect) {}
     ~WifiEventSubscriber() override = default;
     void OnReceiveEvent(const EventFwk::CommonEventData& data) override;
 private:
