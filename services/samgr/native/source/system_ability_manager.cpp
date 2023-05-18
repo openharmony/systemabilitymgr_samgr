@@ -22,6 +22,7 @@
 #include "ability_death_recipient.h"
 #include "accesstoken_kit.h"
 #include "datetime_ex.h"
+#include "device_manager.h"
 #include "directory_ex.h"
 #include "errors.h"
 #include "hicollie_helper.h"
@@ -42,6 +43,8 @@
 
 using namespace std;
 
+using namespace OHOS::DistributedHardware;
+
 namespace OHOS {
 namespace {
 const string START_SAID = "said";
@@ -49,6 +52,7 @@ const string EVENT_TYPE = "eventId";
 const string EVENT_NAME = "name";
 const string EVENT_VALUE = "value";
 const string EVENT_EXTRA_DATA_ID = "extraDataId";
+const string PKG_NAME = "Samgr_Networking";
 const string PREFIX = "/system/profile/";
 const string LOCAL_DEVICE = "local";
 const string ONDEMAND_PARAM = "persist.samgr.perf.ondemand";
@@ -1598,14 +1602,24 @@ sptr<DBinderServiceStub> SystemAbilityManager::DoMakeRemoteBinder(int32_t system
     int32_t callingUid, const std::string& deviceId)
 {
     HILOGI("MakeRemoteBinder begin, said : %{public}d", systemAbilityId);
+    std::string networkId = deviceId;
+    std::vector<DmDeviceInfo> devList;
+    if (DeviceManager::GetInstance().GetTrustedDeviceList(PKG_NAME, "", devList) == ERR_OK) {
+        for (DmDeviceInfo& devInfo : devList) {
+            if (networkId == devInfo.deviceId) {
+                networkId = devInfo.networkId;
+                break;
+            }
+        }
+    }
     sptr<DBinderServiceStub> remoteBinder = nullptr;
     if (dBinderService_ != nullptr) {
         string strName = to_string(systemAbilityId);
         remoteBinder = dBinderService_->MakeRemoteBinder(Str8ToStr16(strName),
-            deviceId, systemAbilityId, callingPid, callingUid);
+            networkId, systemAbilityId, callingPid, callingUid);
     }
-    HILOGI("MakeRemoteBinder end, result %{public}s, said : %{public}d, deviceId : %{public}s",
-        remoteBinder == nullptr ? " failed" : "succeed", systemAbilityId, AnonymizeDeviceId(deviceId).c_str());
+    HILOGI("MakeRemoteBinder end, result %{public}s, said : %{public}d, networkId : %{public}s",
+        remoteBinder == nullptr ? " failed" : "succeed", systemAbilityId, AnonymizeDeviceId(networkId).c_str());
     return remoteBinder;
 }
 
