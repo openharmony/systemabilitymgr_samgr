@@ -158,10 +158,10 @@ void BlueToothSwitchCollect::WatchState(const sptr<DeviceSwitchCollect>& deviceS
 
 void BluetoothEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData& data)
 {
-    HILOGE("DeviceSwitchCollect Bluetooth state changed");
+    HILOGI("DeviceSwitchCollect Bluetooth state changed");
     std::string action = data.GetWant().GetAction();
     if (action != EventFwk::CommonEventSupport::COMMON_EVENT_BLUETOOTH_HOST_STATE_UPDATE) {
-        HILOGI("invalid action: %{public}s", action.c_str());
+        HILOGE("invalid action: %{public}s", action.c_str());
         return;
     }
     std::string eventValue;
