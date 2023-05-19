@@ -18,7 +18,6 @@
 #include "parameters.h"
 #include "sa_profiles.h"
 #include "sam_log.h"
-#include "system_ability_definition.h"
 #include "system_ability_manager.h"
 #include "system_ability_status_change_stub.h"
 
@@ -26,6 +25,9 @@ using namespace std;
 using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
+namespace {
+constexpr int32_t PARAM_WATCHER_DISTRIBUTED_SERVICE_ID = 3901;
+}
 static void DeviceParamCallback(const char* key, const char* value, void* context)
 {
     HILOGI("key : %{public}s, value : %{public}s", key, value);

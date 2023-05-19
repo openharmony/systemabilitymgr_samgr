@@ -37,7 +37,6 @@
 #include "sam_log.h"
 #include "service_control.h"
 #include "string_ex.h"
-#include "system_ability_definition.h"
 #include "tools.h"
 
 using namespace std;
@@ -66,6 +65,7 @@ constexpr int32_t MAX_SA_FREQUENCY_COUNT = INT32_MAX - 1000000;
 constexpr int32_t SHFIT_BIT = 32;
 constexpr int64_t ONDEMAND_PERF_DELAY_TIME = 60 * 1000; // ms
 constexpr int64_t CHECK_LOADED_DELAY_TIME = 4 * 1000; // ms
+constexpr int32_t SOFTBUS_SERVER_SA_ID = 4700;
 }
 
 std::mutex SystemAbilityManager::instanceLock;

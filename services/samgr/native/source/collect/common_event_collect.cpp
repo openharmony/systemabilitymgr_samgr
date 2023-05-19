@@ -22,7 +22,6 @@
 #include "want.h"
 #include "sam_log.h"
 #include "sa_profiles.h"
-#include "system_ability_definition.h"
 #include "system_ability_manager.h"
 
 using namespace OHOS::AppExecFwk;
@@ -34,6 +33,7 @@ constexpr uint32_t REMOVE_EXTRA_DATA_EVENT = 12;
 constexpr uint32_t REMOVE_EXTRA_DATA_DELAY_TIME = 300000;
 constexpr int64_t DELAY_TIME = 1000;
 constexpr int64_t MAX_EXTRA_DATA_ID = 1000000000;
+constexpr int32_t COMMON_EVENT_SERVICE_ID = 3299;
 const std::string UID = "uid";
 const std::string NET_TYPE = "NetType";
 }

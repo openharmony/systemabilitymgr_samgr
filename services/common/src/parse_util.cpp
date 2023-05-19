@@ -30,7 +30,6 @@
 #include "libxml/xmlstring.h"
 #include "sam_log.h"
 #include "string_ex.h"
-#include "system_ability_definition.h"
 
 namespace OHOS {
 using std::string;
@@ -66,6 +65,8 @@ constexpr const char* SA_TAG_PARAM = "param";
 constexpr const char* SA_TAG_TIEMD_EVENT = "timedevent";
 constexpr int32_t MAX_JSON_OBJECT_SIZE = 50 * 1024;
 constexpr int32_t MAX_JSON_STRING_LENGTH = 128;
+constexpr int32_t FIRST_SYS_ABILITY_ID = 0x00000001;
+constexpr int32_t LAST_SYS_ABILITY_ID = 0x00ffffff;
 const string BOOT_START_PHASE = "BootStartPhase";
 const string CORE_START_PHASE = "CoreStartPhase";
 
