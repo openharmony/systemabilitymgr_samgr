@@ -21,9 +21,12 @@
 #include "message_parcel.h"
 #include "refbase.h"
 #include "sam_log.h"
-#include "system_ability_definition.h"
 
 namespace OHOS {
+namespace {
+constexpr int32_t FIRST_SYS_ABILITY_ID = 0x00000001;
+constexpr int32_t LAST_SYS_ABILITY_ID = 0x00ffffff;
+}
 int32_t SystemAbilityLoadCallbackStub::OnRemoteRequest(uint32_t code,
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {

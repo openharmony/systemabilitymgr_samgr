@@ -31,7 +31,6 @@
 #include "thread_pool.h"
 #include "timer.h"
 #include "sa_profiles.h"
-#include "system_ability_definition.h"
 #include "system_ability_manager_stub.h"
 #include "schedule/system_ability_state_scheduler.h"
 

@@ -20,7 +20,6 @@
 #include "matching_skills.h"
 #include "sa_profiles.h"
 #include "sam_log.h"
-#include "system_ability_definition.h"
 #include "system_ability_manager.h"
 
 using namespace std;
@@ -34,6 +33,7 @@ constexpr int32_t WIFI_ON = 3;
 constexpr int32_t WIFI_OFF = 1;
 constexpr int32_t BLUETOOTH_STATE_TURN_ON = 1;
 constexpr int32_t BLUETOOTH_STATE_TURN_OFF = 3;
+constexpr int32_t COMMON_EVENT_SERVICE_ID = 3299;
 }
 
 DeviceSwitchCollect::DeviceSwitchCollect(const sptr<IReport>& report)

@@ -19,7 +19,6 @@
 
 #include "sam_log.h"
 #include "sa_profiles.h"
-#include "system_ability_definition.h"
 #include "system_ability_manager.h"
 
 using namespace std;

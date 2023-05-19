@@ -22,7 +22,6 @@
 #include "message_parcel.h"
 #include "refbase.h"
 #include "sam_log.h"
-#include "system_ability_definition.h"
 
 namespace OHOS {
 SystemProcessStatusChangeStub::SystemProcessStatusChangeStub()

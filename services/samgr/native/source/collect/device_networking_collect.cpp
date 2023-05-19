@@ -17,7 +17,6 @@
 
 #include "sam_log.h"
 #include "sa_profiles.h"
-#include "system_ability_definition.h"
 #include "system_ability_manager.h"
 
 using namespace std;
@@ -32,6 +31,7 @@ const std::string SA_TAG_DEVICE_ON_LINE = "deviceonline";
 constexpr uint32_t INIT_EVENT = 10;
 constexpr uint32_t DM_DIED_EVENT = 11;
 constexpr int64_t DELAY_TIME = 1000;
+constexpr int32_t DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID = 4802;
 }
 DeviceNetworkingCollect::DeviceNetworkingCollect(const sptr<IReport>& report)
     : ICollectPlugin(report)
