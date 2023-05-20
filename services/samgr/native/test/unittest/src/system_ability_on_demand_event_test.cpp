@@ -33,6 +33,10 @@ namespace OHOS {
 namespace {
     const std::string TESTNAME = "testname";
     const std::string VALUE = "testvalue";
+    constexpr bool TEST_ENABLEONCE = false;
+    constexpr int32_t BELOW_SIZE = -1;
+    constexpr int32_t OVER_SIZE = 10000;
+    constexpr int32_t TEST_SIZE = 1;
 }
 void SystemAbilityOnDemandEventTest::SetUpTestCase()
 {
@@ -146,5 +150,180 @@ HWTEST_F(SystemAbilityOnDemandEventTest, ReadOnDemandConditionFromParcel001, Tes
     MessageParcel reply;
     bool ret = OnDemandEventToParcel::ReadOnDemandConditionFromParcel(condition, reply);
     EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: WriteOnDemandEventsToParcel003
+ * @tc.desc: Test WriteOnDemandEventsToParcel with event has condition
+ * @tc.type: FUNC
+ * @tc.require: I76Z5F
+ */
+HWTEST_F(SystemAbilityOnDemandEventTest, WriteOnDemandEventsToParcel003, TestSize.Level3)
+{
+    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
+    SystemAbilityOnDemandEvent event;
+    SystemAbilityOnDemandCondition condition;
+    event.conditions.emplace_back(condition);
+    abilityOnDemandEvents.emplace_back(event);
+    MessageParcel data;
+    bool ret = OnDemandEventToParcel::WriteOnDemandEventsToParcel(abilityOnDemandEvents, data);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: ReadOnDemandEventsFromParcel002
+ * @tc.desc: Test ReadOnDemandEventsFromParcel with size is oversized
+ * @tc.type: FUNC
+ * @tc.require: I76Z5F
+ */
+HWTEST_F(SystemAbilityOnDemandEventTest, ReadOnDemandEventsFromParcel002, TestSize.Level3)
+{
+    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
+    SystemAbilityOnDemandEvent event;
+    SystemAbilityOnDemandCondition condition;
+    event.conditions.emplace_back(condition);
+    abilityOnDemandEvents.emplace_back(event);
+    MessageParcel reply;
+    reply.WriteInt32(OVER_SIZE);
+    bool ret = OnDemandEventToParcel::ReadOnDemandEventsFromParcel(abilityOnDemandEvents, reply);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: ReadOnDemandEventsFromParcel003
+ * @tc.desc: Test ReadOnDemandEventsFromParcel with size is less than 0
+ * @tc.type: FUNC
+ * @tc.require: I76Z5F
+ */
+HWTEST_F(SystemAbilityOnDemandEventTest, ReadOnDemandEventsFromParcel003, TestSize.Level3)
+{
+    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
+    SystemAbilityOnDemandEvent event;
+    SystemAbilityOnDemandCondition condition;
+    event.conditions.emplace_back(condition);
+    abilityOnDemandEvents.emplace_back(event);
+    MessageParcel reply;
+    reply.WriteInt32(BELOW_SIZE);
+    bool ret = OnDemandEventToParcel::ReadOnDemandEventsFromParcel(abilityOnDemandEvents, reply);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: ReadOnDemandEventsFromParcel004
+ * @tc.desc: Test ReadOnDemandEventsFromParcel with conditionSize is oversized
+ * @tc.type: FUNC
+ * @tc.require: I76Z5F
+ */
+HWTEST_F(SystemAbilityOnDemandEventTest, ReadOnDemandEventsFromParcel004, TestSize.Level3)
+{
+    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
+    SystemAbilityOnDemandEvent event;
+    event.eventId = OnDemandEventId::DEVICE_ONLINE;
+    event.name = TESTNAME;
+    event.value = VALUE;
+    SystemAbilityOnDemandCondition condition;
+    condition.eventId = OnDemandEventId::DEVICE_ONLINE;
+    condition.name = TESTNAME;
+    condition.value = VALUE;
+    MessageParcel reply;
+    reply.WriteInt32(TEST_SIZE);
+    OnDemandEventToParcel::WriteOnDemandEventToParcel(event, reply);
+    reply.WriteInt32(OVER_SIZE);
+    OnDemandEventToParcel::WriteOnDemandConditionToParcel(condition, reply);
+    bool ret = OnDemandEventToParcel::ReadOnDemandEventsFromParcel(abilityOnDemandEvents, reply);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: ReadOnDemandEventsFromParcel005
+ * @tc.desc: Test ReadOnDemandEventsFromParcel with less than 0
+ * @tc.type: FUNC
+ * @tc.require: I76Z5F
+ */
+HWTEST_F(SystemAbilityOnDemandEventTest, ReadOnDemandEventsFromParcel005, TestSize.Level3)
+{
+    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
+    SystemAbilityOnDemandEvent event;
+    event.eventId = OnDemandEventId::DEVICE_ONLINE;
+    event.name = TESTNAME;
+    event.value = VALUE;
+    SystemAbilityOnDemandCondition condition;
+    condition.eventId = OnDemandEventId::DEVICE_ONLINE;
+    condition.name = TESTNAME;
+    condition.value = VALUE;
+    MessageParcel reply;
+    reply.WriteInt32(TEST_SIZE);
+    OnDemandEventToParcel::WriteOnDemandEventToParcel(event, reply);
+    reply.WriteInt32(BELOW_SIZE);
+    OnDemandEventToParcel::WriteOnDemandConditionToParcel(condition, reply);
+    bool ret = OnDemandEventToParcel::ReadOnDemandEventsFromParcel(abilityOnDemandEvents, reply);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: ReadOnDemandEventsFromParcel006
+ * @tc.desc: Test ReadOnDemandEventsFromParcel, read onDemandEvent successfully
+ * @tc.type: FUNC
+ * @tc.require: I76Z5F
+ */
+HWTEST_F(SystemAbilityOnDemandEventTest, ReadOnDemandEventsFromParcel006, TestSize.Level3)
+{
+    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
+    SystemAbilityOnDemandEvent event;
+    event.eventId = OnDemandEventId::DEVICE_ONLINE;
+    event.name = TESTNAME;
+    event.value = VALUE;
+    SystemAbilityOnDemandCondition condition;
+    condition.eventId = OnDemandEventId::DEVICE_ONLINE;
+    condition.name = TESTNAME;
+    condition.value = VALUE;
+    MessageParcel reply;
+    reply.WriteInt32(TEST_SIZE);
+    OnDemandEventToParcel::WriteOnDemandEventToParcel(event, reply);
+    reply.WriteInt32(TEST_SIZE);
+    OnDemandEventToParcel::WriteOnDemandConditionToParcel(condition, reply);
+    reply.WriteBool(TEST_ENABLEONCE);
+    bool ret = OnDemandEventToParcel::ReadOnDemandEventsFromParcel(abilityOnDemandEvents, reply);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: ReadOnDemandEventFromParcel002
+ * @tc.desc: Test ReadOnDemandEventsFromParcel with eventID, name and value
+ * @tc.type: FUNC
+ * @tc.require: I76Z5F
+ */
+HWTEST_F(SystemAbilityOnDemandEventTest, ReadOnDemandEventFromParcel002, TestSize.Level3)
+{
+    SystemAbilityOnDemandEvent event;
+    event.eventId = OnDemandEventId::DEVICE_ONLINE;
+    event.name = TESTNAME;
+    event.value = VALUE;
+    MessageParcel reply;
+    reply.WriteInt32(static_cast<int32_t>(OnDemandEventId::DEVICE_ONLINE));
+    reply.WriteString(TESTNAME);
+    reply.WriteString(VALUE);
+    bool ret = OnDemandEventToParcel::ReadOnDemandEventFromParcel(event, reply);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: ReadOnDemandConditionFromParcel002
+ * @tc.desc: Test ReadOnDemandConditionFromParcel with eventID, name and value
+ * @tc.type: FUNC
+ * @tc.require: I76Z5F
+ */
+HWTEST_F(SystemAbilityOnDemandEventTest, ReadOnDemandConditionFromParcel002, TestSize.Level3)
+{
+    SystemAbilityOnDemandCondition condition;
+    condition.eventId = OnDemandEventId::DEVICE_ONLINE;
+    condition.name = TESTNAME;
+    condition.value = VALUE;
+    MessageParcel reply;
+    reply.WriteInt32(static_cast<int32_t>(OnDemandEventId::DEVICE_ONLINE));
+    reply.WriteString(TESTNAME);
+    reply.WriteString(VALUE);
+    bool ret = OnDemandEventToParcel::ReadOnDemandConditionFromParcel(condition, reply);
+    EXPECT_TRUE(ret);
 }
 } // namespace OHOS
