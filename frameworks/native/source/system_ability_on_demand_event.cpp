@@ -108,7 +108,7 @@ bool OnDemandEventToParcel::ReadOnDemandEventsFromParcel(
             return false;
         }
         if (static_cast<size_t>(conditionsSize) > reply.GetReadableBytes() || conditionsSize < 0) {
-            HILOGW("invalid condition list size: %{public}d", size);
+            HILOGW("invalid condition list size: %{public}d", conditionsSize);
             return false;
         }
         for (int32_t j = 0; j < conditionsSize; j++) {
