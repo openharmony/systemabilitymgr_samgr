@@ -279,6 +279,8 @@ HWTEST_F(DeviceNetworkingCollectTest, OnDeviceOffline002, TestSize.Level3)
         .deviceTypeId = 1,
     };
     networkingCollect->stateCallback_->OnDeviceOffline(dmDeviceInfo);
+    networkingCollect->stateCallback_->OnDeviceChanged(dmDeviceInfo);
+    networkingCollect->stateCallback_->OnDeviceReady(dmDeviceInfo);
     EXPECT_TRUE(networkingCollect->IsOnline());
     DTEST_LOG << " OnDeviceOffline002 END" << std::endl;
 }
