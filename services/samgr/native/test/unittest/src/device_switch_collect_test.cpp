@@ -114,6 +114,28 @@ HWTEST_F(DeviceSwitchCollectTest, DeviceSwitchCollectOnStart001, TestSize.Level3
 }
 
 /**
+ * @tc.name: DeviceSwitchCollectOnStart002
+ * @tc.desc: test DeviceSwitchCollectOnStart with swithes is not empty
+ * @tc.type: FUNC
+ * @tc.require: I76X9Q
+ */
+
+HWTEST_F(DeviceSwitchCollectTest, DeviceSwitchCollectOnStart002, TestSize.Level3)
+{
+    OnDemandEvent onDemandEvent1 = {SETTING_SWITCH, WIFI_NAME, "on"};
+    OnDemandEvent onDemandEvent2 = {SETTING_SWITCH, BLUETOOTH_NAME, "on"};
+    OnDemandEvent onDemandEvent3 = {SETTING_SWITCH, UNRELATED_NAME, "on"};
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceSwitchCollect> deviceSwitchCollect =
+        new DeviceSwitchCollect(collect);
+    deviceSwitchCollect->SetSwitchEvent(onDemandEvent1);
+    deviceSwitchCollect->SetSwitchEvent(onDemandEvent2);
+    deviceSwitchCollect->SetSwitchEvent(onDemandEvent3);
+    int32_t ret = deviceSwitchCollect->OnStart();
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
  * @tc.name: DeviceSwitchCollectOnStop001
  * @tc.desc: test DeviceSwitchCollectOnStop
  * @tc.type: FUNC
@@ -175,6 +197,23 @@ HWTEST_F(DeviceSwitchCollectTest, AddCollectEvent002, TestSize.Level3)
 HWTEST_F(DeviceSwitchCollectTest, AddCollectEvent003, TestSize.Level3)
 {
     OnDemandEvent onDemandEvent = {SETTING_SWITCH, UNRELATED_NAME, "on"};
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceSwitchCollect> deviceSwitchCollect =
+        new DeviceSwitchCollect(collect);
+    int32_t ret = deviceSwitchCollect->AddCollectEvent(onDemandEvent);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: AddCollectEvent004
+ * @tc.desc: test AddCollectEvent with no event
+ * @tc.type: FUNC
+ * @tc.require: I76X9Q
+ */
+
+HWTEST_F(DeviceSwitchCollectTest, AddCollectEvent004, TestSize.Level3)
+{
+    OnDemandEvent onDemandEvent;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);

@@ -166,4 +166,31 @@ HWTEST_F(DeviceParamCollectTest, AddCollectEvent001, TestSize.Level3)
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "AddCollectEvent001 end" << std::endl;
 }
+
+/**
+ * @tc.name: CheckCondition001
+ * @tc.desc: test CheckCondition, with condition
+ * @tc.type: FUNC
+ * @tc.require: I76X9Q
+ */
+
+HWTEST_F(DeviceParamCollectTest, CheckCondition001, TestSize.Level3)
+{
+    DTEST_LOG << "CheckCondition001 begin" << std::endl;
+    sptr<IReport> report;
+    std::shared_ptr<DeviceParamCollect> deviceParamCollect =
+        std::make_shared<DeviceParamCollect>(report);
+    sptr<DeviceParamCollect> collect = new DeviceParamCollect(report);
+    sptr<SystemAbilityStatusChange> statusChangeListener = new SystemAbilityStatusChange();
+    statusChangeListener->Init(collect);
+    OnDemandCondition condition;
+    condition.value = "on";
+    condition.name = "test";
+    int32_t saId = 123;
+    std::string deviceId = "test_deviceId";
+    bool ret = deviceParamCollect->CheckCondition(condition);
+    statusChangeListener->OnRemoveSystemAbility(saId, deviceId);
+    EXPECT_FALSE(ret);
+    DTEST_LOG << "CheckCondition001 end" << std::endl;
+}
 }  // namespace OHOS

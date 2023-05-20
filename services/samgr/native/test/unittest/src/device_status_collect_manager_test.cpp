@@ -35,6 +35,7 @@ namespace {
 constexpr int32_t MAX_WAIT_TIME = 10000;
 constexpr int64_t EXTRA_ID = 1;
 const std::string SA_TAG_DEVICE_ON_LINE = "deviceonline";
+const std::string WIFI_NAME = "wifi_status";
 constexpr int32_t MOCK_PLUGIN = 20;
 }
 
@@ -351,6 +352,40 @@ HWTEST_F(DeviceStatusCollectManagerTest, AddCollectEvents001, TestSize.Level3)
 }
 
 /**
+ * @tc.name: AddCollectEvents002
+ * @tc.desc: test AddCollectEvents, with event wifi on
+ * @tc.type: FUNC
+ * @tc.require: I76X9Q
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, AddCollectEvents002, TestSize.Level3)
+{
+    DTEST_LOG << "AddCollectEvents002 begin" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    OnDemandEvent onDemandEvent = {SETTING_SWITCH, WIFI_NAME, "on"};
+    std::vector<OnDemandEvent> events {onDemandEvent};
+    int32_t ret = collect->AddCollectEvents(events);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "AddCollectEvents002 end" << std::endl;
+}
+
+/**
+ * @tc.name: AddCollectEvents003
+ * @tc.desc: test AddCollectEvents, with eventID is invalid
+ * @tc.type: FUNC
+ * @tc.require: I76X9Q
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, AddCollectEvents003, TestSize.Level3)
+{
+    DTEST_LOG << "AddCollectEvents003 begin" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    OnDemandEvent onDemandEvent = {-1, WIFI_NAME, "on"};
+    std::vector<OnDemandEvent> events {onDemandEvent};
+    int32_t ret = collect->AddCollectEvents(events);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "AddCollectEvents003 end" << std::endl;
+}
+
+/**
  * @tc.name: GetOnDemandEvents001
  * @tc.desc: test GetOnDemandEvents, systemAbilityId is invalid, OnDemandPolicyType is START_POLICY
  * @tc.type: FUNC
@@ -384,6 +419,67 @@ HWTEST_F(DeviceStatusCollectManagerTest, GetOnDemandEvents002, TestSize.Level3)
     int32_t ret = collect->GetOnDemandEvents(systemAbilityId, type, events);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     DTEST_LOG << "GetOnDemandEvents002 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetOnDemandEvents003
+ * @tc.desc: test GetOnDemandEvents, with event wifi on, OnDemandPolicyType is STOP_POLICY
+ * @tc.type: FUNC
+ * @tc.require: I76X9Q
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, GetOnDemandEvents003, TestSize.Level3)
+{
+    DTEST_LOG << "GetOnDemandEvents003 begin" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    int32_t systemAbilityId = 123;
+    OnDemandPolicyType type = OnDemandPolicyType::STOP_POLICY;
+    OnDemandEvent onDemandEvent = {SETTING_SWITCH, WIFI_NAME, "on"};
+    SaProfile saprofile = {u"test", systemAbilityId};
+    collect->onDemandSaProfiles_.push_back(saprofile);
+    std::vector<OnDemandEvent> events {onDemandEvent};
+    int32_t ret = collect->GetOnDemandEvents(systemAbilityId, type, events);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "GetOnDemandEvents003 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetOnDemandEvents004
+ * @tc.desc: test GetOnDemandEvents, with event wifi on, OnDemandPolicyType is START_POLICY
+ * @tc.type: FUNC
+ * @tc.require: I76X9Q
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, GetOnDemandEvents004, TestSize.Level3)
+{
+    DTEST_LOG << "GetOnDemandEvents004 begin" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    int32_t systemAbilityId = 123;
+    OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
+    OnDemandEvent onDemandEvent = {SETTING_SWITCH, WIFI_NAME, "on"};
+    SaProfile saprofile = {u"test", systemAbilityId};
+    collect->onDemandSaProfiles_.push_back(saprofile);
+    std::vector<OnDemandEvent> events {onDemandEvent};
+    int32_t ret = collect->GetOnDemandEvents(systemAbilityId, type, events);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "GetOnDemandEvents004 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetOnDemandEvents005
+ * @tc.desc: test GetOnDemandEvents, with event wifi on, OnDemandPolicyType is invalid
+ * @tc.type: FUNC
+ * @tc.require: I76X9Q
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, GetOnDemandEvents005, TestSize.Level3)
+{
+    DTEST_LOG << "GetOnDemandEvents005 begin" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    int32_t systemAbilityId = 123;
+    OnDemandPolicyType invalidType = (OnDemandPolicyType)2;
+    OnDemandEvent onDemandEvent = {SETTING_SWITCH, WIFI_NAME, "on"};
+    std::vector<OnDemandEvent> events {onDemandEvent};
+    int32_t ret = collect->GetOnDemandEvents(systemAbilityId, invalidType, events);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "GetOnDemandEvents005 end" << std::endl;
 }
 
 /**
@@ -421,6 +517,28 @@ HWTEST_F(DeviceStatusCollectManagerTest, UpdateOnDemandEvents002, TestSize.Level
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     DTEST_LOG << "UpdateOnDemandEvents002 end" << std::endl;
 }
+
+/**
+ * @tc.name: UpdateOnDemandEvents003
+ * @tc.desc: test UpdateOnDemandEvents, with event wifi on
+ * @tc.type: FUNC
+ * @tc.require: I76X9Q
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, UpdateOnDemandEvents003, TestSize.Level3)
+{
+    DTEST_LOG << "UpdateOnDemandEvents003 begin" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    int32_t systemAbilityId = 123;
+    OnDemandPolicyType type = OnDemandPolicyType::STOP_POLICY;
+    OnDemandEvent onDemandEvent = {SETTING_SWITCH, WIFI_NAME, "on"};
+    SaProfile saprofile = {u"test", systemAbilityId};
+    collect->onDemandSaProfiles_.push_back(saprofile);
+    std::vector<OnDemandEvent> events {onDemandEvent};
+    int32_t ret = collect->UpdateOnDemandEvents(systemAbilityId, type, events);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "UpdateOnDemandEvents003 end" << std::endl;
+}
+
 /**
  * @tc.name: GetOnDemandReasonExtraData001
  * @tc.desc: test GetOnDemandReasonExtraData with COMMON_EVENT is not in collectPluginMap_

@@ -70,6 +70,25 @@ HWTEST_F(SystemAbilityOnDemandEventTest, WriteOnDemandEventsToParcel001, TestSiz
 }
 
 /**
+ * @tc.name: WriteOnDemandEventsToParcel002
+ * @tc.desc: Test WriteOnDemandEventsToParcel, with ondemandeventId is online
+ * @tc.type: FUNC
+ * @tc.require: I76X9Q
+ */
+HWTEST_F(SystemAbilityOnDemandEventTest, WriteOnDemandEventsToParcel002, TestSize.Level3)
+{
+    DTEST_LOG << "WriteOnDemandEventsToParcel002" << std::endl;
+    SystemAbilityOnDemandCondition condition = {OnDemandEventId::DEVICE_ONLINE, TESTNAME, VALUE};
+    std::vector<SystemAbilityOnDemandCondition> conditions {condition};
+    SystemAbilityOnDemandEvent abilityOnDemandEvent = {OnDemandEventId::DEVICE_ONLINE,
+        TESTNAME, VALUE, conditions, false};
+    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents {abilityOnDemandEvent};
+    MessageParcel data;
+    bool ret = OnDemandEventToParcel::WriteOnDemandEventsToParcel(abilityOnDemandEvents, data);
+    EXPECT_EQ(ret, true);
+}
+
+/**
  * @tc.name: WriteOnDemandEventToParcel001
  * @tc.desc: Test WriteOnDemandEventToParcel, with event and data
  * @tc.type: FUNC
@@ -85,6 +104,23 @@ HWTEST_F(SystemAbilityOnDemandEventTest, WriteOnDemandEventToParcel001, TestSize
 }
 
 /**
+ * @tc.name: WriteOnDemandEventToParcel002
+ * @tc.desc: Test WriteOnDemandEventToParcel, with ondemandeventId is online
+ * @tc.type: FUNC
+ * @tc.require: I76X9Q
+ */
+HWTEST_F(SystemAbilityOnDemandEventTest, WriteOnDemandEventToParcel002, TestSize.Level3)
+{
+    DTEST_LOG << "WriteOnDemandEventToParcel002" << std::endl;
+    SystemAbilityOnDemandCondition condition = {OnDemandEventId::DEVICE_ONLINE, TESTNAME, VALUE};
+    std::vector<SystemAbilityOnDemandCondition> conditions {condition};
+    SystemAbilityOnDemandEvent event = {OnDemandEventId::DEVICE_ONLINE, TESTNAME, VALUE, conditions, false};
+    MessageParcel data;
+    bool ret = OnDemandEventToParcel::WriteOnDemandEventToParcel(event, data);
+    EXPECT_EQ(ret, true);
+}
+
+/**
  * @tc.name: WriteOnDemandConditionToParcel001
  * @tc.desc: Test WriteOnDemandConditionToParcel, with condition and data
  * @tc.type: FUNC
@@ -94,6 +130,54 @@ HWTEST_F(SystemAbilityOnDemandEventTest, WriteOnDemandConditionToParcel001, Test
 {
     DTEST_LOG << "WriteOnDemandConditionToParcel001" << std::endl;
     SystemAbilityOnDemandCondition condition;
+    MessageParcel data;
+    bool ret = OnDemandEventToParcel::WriteOnDemandConditionToParcel(condition, data);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: WriteOnDemandConditionToParcel002
+ * @tc.desc: Test WriteOnDemandConditionToParcel, with invalid ondemandeventId
+ * @tc.type: FUNC
+ * @tc.require: I76X9Q
+ */
+HWTEST_F(SystemAbilityOnDemandEventTest, WriteOnDemandConditionToParcel002, TestSize.Level3)
+{
+    DTEST_LOG << "WriteOnDemandConditionToParcel002" << std::endl;
+    SystemAbilityOnDemandCondition condition;
+    condition.eventId = (OnDemandEventId)6;
+    MessageParcel data;
+    bool ret = OnDemandEventToParcel::WriteOnDemandConditionToParcel(condition, data);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: WriteOnDemandConditionToParcel003
+ * @tc.desc: Test WriteOnDemandConditionToParcel, with condition.name is null
+ * @tc.type: FUNC
+ * @tc.require: I76X9Q
+ */
+HWTEST_F(SystemAbilityOnDemandEventTest, WriteOnDemandConditionToParcel003, TestSize.Level3)
+{
+    DTEST_LOG << "WriteOnDemandConditionToParcel003" << std::endl;
+    SystemAbilityOnDemandCondition condition;
+    condition.name = "";
+    MessageParcel data;
+    bool ret = OnDemandEventToParcel::WriteOnDemandConditionToParcel(condition, data);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: WriteOnDemandConditionToParcel004
+ * @tc.desc: Test WriteOnDemandConditionToParcel, with condition.value is null
+ * @tc.type: FUNC
+ * @tc.require: I76X9Q
+ */
+HWTEST_F(SystemAbilityOnDemandEventTest, WriteOnDemandConditionToParcel004, TestSize.Level3)
+{
+    DTEST_LOG << "WriteOnDemandConditionToParcel004" << std::endl;
+    SystemAbilityOnDemandCondition condition;
+    condition.value = "";
     MessageParcel data;
     bool ret = OnDemandEventToParcel::WriteOnDemandConditionToParcel(condition, data);
     EXPECT_EQ(ret, true);
