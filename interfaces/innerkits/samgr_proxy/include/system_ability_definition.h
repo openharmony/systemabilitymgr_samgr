@@ -288,6 +288,7 @@ enum {
     DEVICE_ATTEST_PROFILE_SA_ID                      = 5501,
     DISTRIBUTED_DEVICE_PROFILE_SA_ID                 = 6001,
     PUSH_MANAGER_SERVICE_SA_ID                       = 6103,
+    ADVERTISING_SA_ID                                = 6104,
     SUBSYS_ACE_SYS_ABILITY_ID_BEGIN                  = 7001,
     ARKUI_UI_APPEARANCE_SERVICE_ID                   = 7002,
     CA_DAEMON_ID                                     = 8001,
@@ -460,6 +461,7 @@ static const std::map<int, std::string> saNameMap_ = {
     { AIDISPATCHER_ENGINE_SERVICE, "AIDispatcherEngineService" },
     { SECURITY_COMPONENT_SERVICE_ID, "SecurityComponentService" },
     { PUSH_MANAGER_SERVICE_SA_ID, "PushManagerService" },
+    { ADVERTISING_SA_ID, "Advertising" },
     { LOCAL_CODE_SIGN_SERVICE_ID, "LocalCodeSignService" },
 };
 } // namespace OHOS
