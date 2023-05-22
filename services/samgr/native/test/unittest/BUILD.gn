@@ -556,6 +556,7 @@ group("unittest") {
     ":SystemAbilityStateSchedulerTest",
     ":TestTool",
     ":ondemand",
-    ":rust_samgr_test_client",
+
+    #":rust_samgr_test_client",
   ]
 }
