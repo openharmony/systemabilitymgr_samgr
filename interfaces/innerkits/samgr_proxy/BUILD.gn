@@ -18,6 +18,11 @@ config("samgr_proxy_config") {
   include_dirs = [ "include" ]
 }
 
+config("lsamgr_proxy_config") {
+  include_dirs =
+      [ "//foundation/systemabilitymgr/samgr/services/lsamgr/include" ]
+}
+
 config("samgr_proxy_private_config") {
   include_dirs = [
     "include",
@@ -48,6 +53,7 @@ ohos_shared_library("samgr_proxy") {
     "//foundation/systemabilitymgr/samgr/test/resource:coverage_flags",
   ]
 
+  public_configs = [ ":lsamgr_proxy_config" ]
   all_dependent_configs = [ ":samgr_proxy_config" ]
 
   if (is_standard_system) {
