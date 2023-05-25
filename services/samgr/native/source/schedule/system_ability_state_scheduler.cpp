@@ -29,6 +29,7 @@
 
 namespace OHOS {
 namespace {
+constexpr int32_t DELAY_LOAD_TIME = 100;
 constexpr int32_t DELAY_RESTART_TIME = 1000;
 constexpr int64_t RESTART_TIME_INTERVAL_LIMIT = 20 * 1000;
 constexpr int32_t RESTART_TIMES_LIMIT = 4;
@@ -710,7 +711,14 @@ void SystemAbilityStateScheduler::OnProcessNotStartedLocked(const std::u16string
             continue;
         }
         if (abilityContext->state == SystemAbilityState::NOT_LOADED) {
-            HandlePendingLoadEventLocked(abilityContext);
+            auto restartAbilityTask = [this, abilityContext]() {
+                HandlePendingLoadEventLocked(abilityContext);
+            };
+            bool result = processHandler_->PostTask(restartAbilityTask, DELAY_LOAD_TIME);
+            if (!result) {
+                HILOGE("[SA Scheduler] sa:%{public}d post restart ability task failed",
+                    abilityContext->systemAbilityId);
+            }
         } else {
             HandleAbnormallyDiedAbilityLocked(abilityContext, isJudged, canRestartProcess);
         }
