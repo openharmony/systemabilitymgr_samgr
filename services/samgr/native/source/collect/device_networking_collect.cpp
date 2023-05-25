@@ -98,7 +98,7 @@ bool DeviceNetworkingCollect::ReportMissedEvents()
         } else {
             // update the online set;
             for (DmDeviceInfo& devInfo : devList) {
-                UpdateDeviceOnlineSet(devInfo.deviceId);
+                UpdateDeviceOnlineSet(devInfo.networkId);
             }
         }
     } else {
@@ -106,7 +106,7 @@ bool DeviceNetworkingCollect::ReportMissedEvents()
         if (!devList.empty()) {
             // update the online set;
             for (DmDeviceInfo& devInfo : devList) {
-                UpdateDeviceOnlineSet(devInfo.deviceId);
+                UpdateDeviceOnlineSet(devInfo.networkId);
             }
             // send online msg
             OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
@@ -189,7 +189,7 @@ void DeviceStateCallback::OnDeviceOnline(const DmDeviceInfo& deviceInfo)
     {
         lock_guard<mutex> autoLock(deviceOnlineLock_);
         isOnline = deviceOnlineSet_.empty();
-        deviceOnlineSet_.emplace(deviceInfo.deviceId);
+        deviceOnlineSet_.emplace(deviceInfo.networkId);
     }
     if (isOnline) {
         OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
@@ -205,7 +205,7 @@ void DeviceStateCallback::OnDeviceOffline(const DmDeviceInfo& deviceInfo)
     bool isOffline = false;
     {
         lock_guard<mutex> autoLock(deviceOnlineLock_);
-        deviceOnlineSet_.erase(deviceInfo.deviceId);
+        deviceOnlineSet_.erase(deviceInfo.networkId);
         isOffline = deviceOnlineSet_.empty();
     }
     if (isOffline) {
