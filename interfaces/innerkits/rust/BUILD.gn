@@ -19,10 +19,11 @@ ohos_rust_shared_library("rust_samgr") {
     "src/rust_samgr.rs",
   ]
 
-  deps = [
-    "../../../../../../base/hiviewdfx/hilog/interfaces/rust:hilog_rust",
-    "../../../../../communication/ipc/interfaces/innerkits/rust:ipc_rust",
+  external_deps = [
+    "hilog_native:hilog_rust",
+    "ipc:ipc_rust",
   ]
+
   crate_name = "rust_samgr"
   crate_type = "dylib"
 

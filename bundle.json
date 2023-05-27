@@ -86,6 +86,13 @@
                         ]
                     },
                     "name": "//foundation/systemabilitymgr/samgr/interfaces/innerkits/common:samgr_common"
+                },
+                {
+                    "header": {
+                        "header_base": [],
+                        "header_files": []
+                    },
+                    "name": "//foundation/systemabilitymgr/samgr/interfaces/innerkits/rust:rust_samgr"
                 }
             ],
             "test": [
