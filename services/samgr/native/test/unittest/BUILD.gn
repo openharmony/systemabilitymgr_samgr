@@ -362,7 +362,6 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
     "access_token:libnativetoken",
     "access_token:libtoken_setproc",
     "c_utils:utils",
-    "device_manager:devicemanagersdk",
     "eventhandler:libeventhandler",
     "hisysevent_native:libhisysevent",
     "hitrace_native:hitrace_meter",
@@ -373,6 +372,11 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
     "ipc:libdbinder",
     "safwk:system_ability_fwk",
   ]
+
+  if (support_device_manager) {
+    external_deps += [ "device_manager:devicemanagersdk" ]
+    defines += [ "SUPPORT_DEVICE_MANAGER" ]
+  }
 }
 
 ohos_executable("ondemand") {

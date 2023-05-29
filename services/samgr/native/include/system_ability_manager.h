@@ -196,7 +196,6 @@ private:
         sptr<ISystemAbilityLoadCallback> callback);
     int32_t CheckStopEnableOnce(const OnDemandEvent& event, const SaControlInfo& saControl);
     bool IsSameEvent(const OnDemandEvent& event, std::list<OnDemandEvent>& enableOnceList);
-
     void UpdateSaFreMap(int32_t uid, int32_t saId);
     uint64_t GenerateFreKey(int32_t uid, int32_t saId) const;
     void ReportGetSAPeriodically();
@@ -208,6 +207,9 @@ private:
     bool CheckAllowUpdate(OnDemandPolicyType type, SaProfile& saProfile);
     void ConvertToOnDemandEvent(const SystemAbilityOnDemandEvent& from, OnDemandEvent& to);
     void ConvertToSystemAbilityOnDemandEvent(const OnDemandEvent& from, SystemAbilityOnDemandEvent& to);
+#ifdef SUPPORT_DEVICE_MANAGER
+    void DeviceIdToNetworkId(std::string& networkId);
+#endif
 
     std::u16string deviceName_;
     static sptr<SystemAbilityManager> instance;

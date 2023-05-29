@@ -22,7 +22,6 @@
 #include "ability_death_recipient.h"
 #include "accesstoken_kit.h"
 #include "datetime_ex.h"
-#include "device_manager.h"
 #include "directory_ex.h"
 #include "errors.h"
 #include "hicollie_helper.h"
@@ -40,9 +39,12 @@
 #include "string_ex.h"
 #include "tools.h"
 
-using namespace std;
-
+#ifdef SUPPORT_DEVICE_MANAGER
+#include "device_manager.h"
 using namespace OHOS::DistributedHardware;
+#endif
+
+using namespace std;
 
 namespace OHOS {
 namespace {
@@ -1598,11 +1600,9 @@ void SystemAbilityManager::DoLoadRemoteSystemAbility(int32_t systemAbilityId, in
     }
 }
 
-sptr<DBinderServiceStub> SystemAbilityManager::DoMakeRemoteBinder(int32_t systemAbilityId, int32_t callingPid,
-    int32_t callingUid, const std::string& deviceId)
+#ifdef SUPPORT_DEVICE_MANAGER
+void SystemAbilityManager::DeviceIdToNetworkId(std::string& networkId)
 {
-    HILOGI("MakeRemoteBinder begin, said : %{public}d", systemAbilityId);
-    std::string networkId = deviceId;
     std::vector<DmDeviceInfo> devList;
     if (DeviceManager::GetInstance().GetTrustedDeviceList(PKG_NAME, "", devList) == ERR_OK) {
         for (DmDeviceInfo& devInfo : devList) {
@@ -1612,6 +1612,17 @@ sptr<DBinderServiceStub> SystemAbilityManager::DoMakeRemoteBinder(int32_t system
             }
         }
     }
+}
+#endif
+
+sptr<DBinderServiceStub> SystemAbilityManager::DoMakeRemoteBinder(int32_t systemAbilityId, int32_t callingPid,
+    int32_t callingUid, const std::string& deviceId)
+{
+    HILOGI("MakeRemoteBinder begin, said : %{public}d", systemAbilityId);
+    std::string networkId = deviceId;
+#ifdef SUPPORT_DEVICE_MANAGER
+    DeviceIdToNetworkId(networkId);
+#endif
     sptr<DBinderServiceStub> remoteBinder = nullptr;
     if (dBinderService_ != nullptr) {
         string strName = to_string(systemAbilityId);
