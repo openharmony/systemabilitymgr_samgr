@@ -681,7 +681,7 @@ void SystemAbilityStateScheduler::OnProcessStartedLocked(const std::u16string& p
     std::shared_lock<std::shared_mutex> readLock(listenerSetLock_);
     for (auto& listener : processListeners_) {
         if (listener->AsObject() != nullptr) {
-             SystemProcessInfo systemProcessInfo = {Str16ToStr8(processContext->processName), processContext->pid,
+            SystemProcessInfo systemProcessInfo = {Str16ToStr8(processContext->processName), processContext->pid,
                 processContext->uid};
             listener->OnSystemProcessStarted(systemProcessInfo);
         }
