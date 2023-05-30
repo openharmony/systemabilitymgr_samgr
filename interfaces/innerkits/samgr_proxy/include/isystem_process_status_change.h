@@ -26,6 +26,7 @@ namespace OHOS {
 struct SystemProcessInfo {
     std::string processName;
     int32_t pid = -1;
+    int32_t uid = -1;
 };
 
 class ISystemProcessStatusChange : public IRemoteBroker {
