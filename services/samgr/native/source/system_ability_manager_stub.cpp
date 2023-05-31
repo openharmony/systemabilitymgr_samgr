@@ -650,6 +650,11 @@ int32_t SystemAbilityManagerStub::GetRunningSystemProcessInner(MessageParcel& da
             HILOGW("GetRunningSystemProcessInner write pid failed.");
             return ERR_FLATTEN_OBJECT;
         }
+        ret = reply.WriteInt32(systemProcessInfo.uid);
+        if (!ret) {
+            HILOGW("GetRunningSystemProcessInner write uid failed.");
+            return ERR_FLATTEN_OBJECT;
+        }
     }
     return ERR_OK;
 }

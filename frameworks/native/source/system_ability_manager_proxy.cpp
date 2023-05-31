@@ -795,6 +795,11 @@ int32_t SystemAbilityManagerProxy::ReadSystemProcessFromParcel(std::list<SystemP
             HILOGW("GetRunningSystemProcess Read pid failed!");
             return ERR_FLATTEN_OBJECT;
         }
+        ret = reply.ReadInt32(systemProcessInfo.uid);
+        if (!ret) {
+            HILOGW("GetRunningSystemProcess Read uid failed!");
+            return ERR_FLATTEN_OBJECT;
+        }
         systemProcessInfos.emplace_back(systemProcessInfo);
     }
     return ERR_OK;

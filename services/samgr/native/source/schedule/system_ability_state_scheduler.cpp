@@ -681,7 +681,8 @@ void SystemAbilityStateScheduler::OnProcessStartedLocked(const std::u16string& p
     std::shared_lock<std::shared_mutex> readLock(listenerSetLock_);
     for (auto& listener : processListeners_) {
         if (listener->AsObject() != nullptr) {
-            SystemProcessInfo systemProcessInfo = {Str16ToStr8(processContext->processName), processContext->pid};
+            SystemProcessInfo systemProcessInfo = {Str16ToStr8(processContext->processName), processContext->pid,
+                processContext->uid};
             listener->OnSystemProcessStarted(systemProcessInfo);
         }
     }
@@ -698,7 +699,8 @@ void SystemAbilityStateScheduler::OnProcessNotStartedLocked(const std::u16string
         std::shared_lock<std::shared_mutex> readLock(listenerSetLock_);
         for (auto& listener : processListeners_) {
             if (listener->AsObject() != nullptr) {
-                SystemProcessInfo systemProcessInfo = {Str16ToStr8(processContext->processName), processContext->pid};
+                SystemProcessInfo systemProcessInfo = {Str16ToStr8(processContext->processName), processContext->pid,
+                    processContext->uid};
                 listener->OnSystemProcessStopped(systemProcessInfo);
             }
         }
@@ -803,7 +805,8 @@ int32_t SystemAbilityStateScheduler::GetRunningSystemProcess(std::list<SystemPro
         }
         std::lock_guard<std::recursive_mutex> autoLock(processContext->processLock);
         if (processContext->state == SystemProcessState::STARTED) {
-            SystemProcessInfo systemProcessInfo = {Str16ToStr8(processContext->processName), processContext->pid};
+            SystemProcessInfo systemProcessInfo = {Str16ToStr8(processContext->processName), processContext->pid,
+                processContext->uid};
             systemProcessInfos.emplace_back(systemProcessInfo);
         }
     }

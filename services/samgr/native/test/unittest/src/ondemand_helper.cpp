@@ -113,13 +113,13 @@ void OnDemandHelper::UnSubscribeSystemProcess()
 void OnDemandHelper::SystemProcessStatusChange::OnSystemProcessStarted(SystemProcessInfo& systemProcessInfo)
 {
     cout << "OnSystemProcessStarted, processName: " << systemProcessInfo.processName << " pid:"
-        << systemProcessInfo.pid << endl;
+        << systemProcessInfo.pid << " uid:" << systemProcessInfo.uid << endl;
 }
 
 void OnDemandHelper::SystemProcessStatusChange::OnSystemProcessStopped(SystemProcessInfo& systemProcessInfo)
 {
     cout << "OnSystemProcessStopped, processName: " << systemProcessInfo.processName << " pid:"
-        << systemProcessInfo.pid << endl;
+        << systemProcessInfo.pid << " uid:" << systemProcessInfo.uid << endl;
 }
 
 int32_t OnDemandHelper::LoadSystemAbility(int32_t systemAbilityId, const sptr<ISystemAbilityLoadCallback>& callback)
