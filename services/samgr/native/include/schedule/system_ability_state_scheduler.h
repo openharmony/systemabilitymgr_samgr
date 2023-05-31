@@ -53,18 +53,12 @@ public:
 private:
     void InitStateContext(const std::list<SaProfile>& saProfiles);
 
-    int32_t LimitDelayTime(int32_t delayTime);
+    int32_t LimitDelayUnloadTime(int32_t delayUnloadTime);
     bool GetSystemAbilityContext(int32_t systemAbilityId,
         std::shared_ptr<SystemAbilityContext>& abilityContext);
     bool GetSystemProcessContext(const std::u16string& processName,
         std::shared_ptr<SystemProcessContext>& processContext);
 
-    void PostRestartAbilityTask(const std::shared_ptr<SystemAbilityContext>& abilityContext);
-    bool CanRestartProcessLocked(const std::shared_ptr<SystemProcessContext>& processContext);
-    int32_t TryRestartDiedAbility(const std::shared_ptr<SystemAbilityContext>& abilityContext);
-    int32_t HandleAbnormallyDiedAbilityLocked(
-        const std::shared_ptr<SystemAbilityContext>& abilityContext,
-        bool& isJudged, bool& canRestartProcess);
     int32_t HandleLoadAbilityEventLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext,
         const LoadRequestInfo& loadRequestInfo);
     int32_t HandleUnloadAbilityEventLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext,
@@ -85,6 +79,12 @@ private:
     int32_t DoLoadSystemAbilityLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext,
         const LoadRequestInfo& loadRequestInfo);
     int32_t DoUnloadSystemAbilityLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext);
+
+    int32_t PostTryUnloadAllAbilityTask(const std::shared_ptr<SystemProcessContext>& processContext);
+    int32_t PostUnloadTimeoutTask(const std::shared_ptr<SystemProcessContext>& processContext);
+    void RemoveUnloadTimeoutTask(const std::shared_ptr<SystemProcessContext>& processContext);
+    int32_t PostTryKillProcessTask(const std::shared_ptr<SystemProcessContext>& processContext);
+
     int32_t TryUnloadAllSystemAbility(const std::shared_ptr<SystemProcessContext>& processContext);
     bool CanUnloadAllSystemAbility(const std::shared_ptr<SystemProcessContext>& processContext);
     int32_t UnloadAllSystemAbilityLocked(const std::shared_ptr<SystemProcessContext>& processContext);
@@ -93,6 +93,14 @@ private:
     bool CanKillSystemProcess(const std::shared_ptr<SystemProcessContext>& processContext);
     int32_t KillSystemProcessLocked(const std::shared_ptr<SystemProcessContext>& processContext);
 
+    bool CanRestartProcessLocked(const std::shared_ptr<SystemProcessContext>& processContext);
+    int32_t GetAbnormallyDiedAbilityLocked(std::shared_ptr<SystemProcessContext>& processContext,
+        std::list<std::shared_ptr<SystemAbilityContext>>& abnormallyDiedAbilityList);
+    int32_t HandleAbnormallyDiedAbilityLocked(std::shared_ptr<SystemProcessContext>& processContext,
+        std::list<std::shared_ptr<SystemAbilityContext>>& abnormallyDiedAbilityList);
+
+    void NotifyProcessStarted(const std::shared_ptr<SystemProcessContext>& processContext);
+    void NotifyProcessStopped(const std::shared_ptr<SystemProcessContext>& processContext);
     void OnAbilityNotLoadedLocked(int32_t systemAbilityId) override;
     void OnAbilityLoadedLocked(int32_t systemAbilityId) override;
     void OnAbilityUnloadableLocked(int32_t systemAbilityId) override;

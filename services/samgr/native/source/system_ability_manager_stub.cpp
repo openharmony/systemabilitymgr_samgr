@@ -827,21 +827,4 @@ bool SystemAbilityManagerStub::CanRequest()
         accessTokenId, tokenType);
     return (tokenType == AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
 }
-
-bool SystemAbilityManagerStub::CanRequestProcessInfo()
-{
-    AccessToken::NativeTokenInfo nativeTokenInfo;
-    int32_t tokenInfoResult = AccessToken::AccessTokenKit::GetNativeTokenInfo(
-        IPCSkeleton::GetCallingTokenID(), nativeTokenInfo);
-    if (tokenInfoResult != ERR_OK) {
-        HILOGE("get token info failed");
-        return false;
-    }
-    if (nativeTokenInfo.processName != "resource_schedule_service") {
-        HILOGE("cannot request from other process: %{public}s",
-            nativeTokenInfo.processName.c_str());
-        return false;
-    }
-    return true;
-}
 } // namespace OHOS

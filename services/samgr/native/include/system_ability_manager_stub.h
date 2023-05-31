@@ -30,7 +30,6 @@ public:
 
 protected:
     static bool CanRequest();
-    static bool CanRequestProcessInfo();
     static bool EnforceInterceToken(MessageParcel& data);
 
 private:
