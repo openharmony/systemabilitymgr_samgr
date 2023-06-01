@@ -248,12 +248,13 @@ bool SystemAbilityManager::CheckCallerProcess(SaProfile& saProfile)
     Security::AccessToken::NativeTokenInfo nativeTokenInfo;
     int32_t tokenInfoResult = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
     if (tokenInfoResult != ERR_OK) {
+        HILOGE("get token info failed");
         return false;
     }
     std::string callProcess = Str16ToStr8(saProfile.process);
     if (nativeTokenInfo.processName!= callProcess) {
-        HILOGE("cannot unload SA by another SA, processName:%{public}s",
-            nativeTokenInfo.processName.c_str());
+        HILOGE("cannot operate SA: %{public}d by process: %{public}s",
+            saProfile.saId, nativeTokenInfo.processName.c_str());
         return false;
     }
     return true;
@@ -731,6 +732,11 @@ bool SystemAbilityManager::DoLoadOnDemandAbility(int32_t systemAbilityId, bool& 
         isExist = true;
         return true;
     }
+    auto onDemandIter = onDemandAbilityMap_.find(systemAbilityId);
+    if (onDemandIter == onDemandAbilityMap_.end()) {
+        isExist = false;
+        return false;
+    }
     auto& abilityItem = startingAbilityMap_[systemAbilityId];
     abilityItem.event = {INTERFACE_CALL, "get", ""};
     return StartOnDemandAbility(systemAbilityId, isExist) == ERR_OK;
@@ -1061,6 +1067,9 @@ int32_t SystemAbilityManager::RemoveSystemProcess(const sptr<IRemoteObject>& pro
         }
     }
     if (result == ERR_OK) {
+        // Waiting for the init subsystem to perceive process death
+        ServiceWaitForStatus(Str16ToStr8(processName).c_str(), ServiceStatus::SERVICE_STOPPED, 1);
+
         if (abilityStateScheduler_ == nullptr) {
             HILOGE("abilityStateScheduler is nullptr");
             return ERR_INVALID_VALUE;
@@ -1439,16 +1448,8 @@ int32_t SystemAbilityManager::UnloadSystemAbility(int32_t systemAbilityId)
         HILOGE("UnloadSystemAbility systemAbilityId:%{public}d not supported!", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
-    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
-    Security::AccessToken::NativeTokenInfo nativeTokenInfo;
-    int32_t tokenInfoResult = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
-    if (tokenInfoResult != ERR_OK) {
-        return ERR_INVALID_VALUE;
-    }
-    std::string callProcess = Str16ToStr8(saProfile.process);
-    if (nativeTokenInfo.processName!= callProcess) {
-        HILOGE("cannot unload SA by another SA, processName:%{public}s",
-            nativeTokenInfo.processName.c_str());
+    if (!CheckCallerProcess(saProfile)) {
+        HILOGE("UnloadSystemAbility invalid caller process, saId: %{public}d", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
     if (abilityStateScheduler_ == nullptr) {
@@ -1472,17 +1473,8 @@ int32_t SystemAbilityManager::CancelUnloadSystemAbility(int32_t systemAbilityId)
         HILOGE("CancelUnloadSystemAbility systemAbilityId:%{public}d not supported!", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
-    Security::AccessToken::NativeTokenInfo nativeTokenInfo;
-    int32_t tokenInfoResult = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(
-        IPCSkeleton::GetCallingTokenID(), nativeTokenInfo);
-    if (tokenInfoResult != ERR_OK) {
-        HILOGE("cannot get token info, processName:%{public}s",
-            nativeTokenInfo.processName.c_str());
-        return ERR_INVALID_VALUE;
-    }
-    if (nativeTokenInfo.processName != Str16ToStr8(saProfile.process)) {
-        HILOGE("cannot cancel unload SA by another SA, processName:%{public}s",
-            nativeTokenInfo.processName.c_str());
+    if (!CheckCallerProcess(saProfile)) {
+        HILOGE("CancelUnloadSystemAbility invalid caller process, saId: %{public}d", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
     if (abilityStateScheduler_ == nullptr) {

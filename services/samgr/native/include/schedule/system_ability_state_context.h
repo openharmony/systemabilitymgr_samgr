@@ -77,13 +77,13 @@ struct SystemProcessContext {
 
 struct SystemAbilityContext {
     int32_t systemAbilityId = -1;
-    int32_t delayTime = 0;
     std::shared_ptr<SystemProcessContext> ownProcessContext;
     SystemAbilityState state = SystemAbilityState::NOT_LOADED;
     PendingEvent pendingEvent = PendingEvent::NO_EVENT;
     std::map<int32_t, int32_t> pendingLoadEventCountMap;
     std::list<LoadRequestInfo> pendingLoadEventList;
     UnloadRequestInfo pendingUnloadEvent;
+    int32_t delayUnloadTime = 0;
     UnloadRequestInfo unloadRequest;
     bool isAutoRestart = false;
 };

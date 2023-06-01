@@ -29,8 +29,6 @@
 
 namespace OHOS {
 namespace {
-constexpr int32_t DELAY_LOAD_TIME = 100;
-constexpr int32_t DELAY_RESTART_TIME = 1000;
 constexpr int64_t RESTART_TIME_INTERVAL_LIMIT = 20 * 1000;
 constexpr int32_t RESTART_TIMES_LIMIT = 4;
 constexpr int32_t MAX_SUBSCRIBE_COUNT = 256;
@@ -42,6 +40,7 @@ const std::string KEY_EVENT_ID = "eventId";
 const std::string KEY_NAME = "name";
 const std::string KEY_VALUE = "value";
 const std::string KEY_EXTRA_DATA_ID = "extraDataId";
+const std::string KEY_UNLOAD_TIMEOUT = "unloadTimeout";
 }
 void SystemAbilityStateScheduler::Init(const std::list<SaProfile>& saProfiles)
 {
@@ -84,23 +83,23 @@ void SystemAbilityStateScheduler::InitStateContext(const std::list<SaProfile>& s
         auto abilityContext = std::make_shared<SystemAbilityContext>();
         abilityContext->systemAbilityId = saProfile.saId;
         abilityContext->isAutoRestart = saProfile.autoRestart;
-        int32_t delayTime = LimitDelayTime(saProfile.stopOnDemand.delayTime);
-        abilityContext->delayTime = delayTime;
+        int32_t delayUnloadTime = LimitDelayUnloadTime(saProfile.stopOnDemand.delayTime);
+        abilityContext->delayUnloadTime = delayUnloadTime;
         abilityContext->ownProcessContext = processContextMap_[saProfile.process];
         std::unique_lock<std::shared_mutex> abiltyWriteLock(abiltyMapLock_);
         abilityContextMap_[saProfile.saId] = abilityContext;
     }
 }
 
-int32_t SystemAbilityStateScheduler::LimitDelayTime(int32_t delayTime)
+int32_t SystemAbilityStateScheduler::LimitDelayUnloadTime(int32_t delayUnloadTime)
 {
-    if (delayTime < 0) {
+    if (delayUnloadTime < 0) {
         return 0;
     }
-    if (delayTime > MAX_DELAY_TIME) {
+    if (delayUnloadTime > MAX_DELAY_TIME) {
         return MAX_DELAY_TIME;
     }
-    return delayTime;
+    return delayUnloadTime;
 }
 
 bool SystemAbilityStateScheduler::GetSystemAbilityContext(int32_t systemAbilityId,
@@ -159,19 +158,24 @@ int32_t SystemAbilityStateScheduler::HandleLoadAbilityEvent(int32_t systemAbilit
         systemAbilityId);
     std::shared_ptr<SystemAbilityContext> abilityContext;
     if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
+        isExist = false;
         return ERR_INVALID_VALUE;
     }
     std::lock_guard<std::recursive_mutex> autoLock(abilityContext->ownProcessContext->processLock);
-    if (abilityContext->state ==SystemAbilityState::UNLOADING
-        || abilityContext->ownProcessContext->state == SystemProcessState::STOPPING) {
-        isExist = true;
-        return ERR_OK;
+    if (abilityContext->ownProcessContext->state == SystemProcessState::NOT_STARTED) {
+        isExist = false;
+        return ERR_INVALID_VALUE;
     }
-    bool result = SystemAbilityManager::GetInstance()->DoLoadOnDemandAbility(systemAbilityId, isExist);
-    if (result && abilityContext->state == SystemAbilityState::NOT_LOADED) {
-        return stateMachine_->AbilityStateTransitionLocked(abilityContext, SystemAbilityState::LOADING);
+    if (abilityContext->ownProcessContext->state == SystemProcessState::STARTED
+        && abilityContext->state ==SystemAbilityState::NOT_LOADED) {
+        bool result = SystemAbilityManager::GetInstance()->DoLoadOnDemandAbility(systemAbilityId, isExist);
+        if (result) {
+            return stateMachine_->AbilityStateTransitionLocked(abilityContext, SystemAbilityState::LOADING);
+        }
+        return ERR_INVALID_VALUE;
     }
-    return result ? ERR_OK : ERR_INVALID_VALUE;
+    isExist = true;
+    return ERR_OK;
 }
 
 int32_t SystemAbilityStateScheduler::HandleLoadAbilityEvent(const LoadRequestInfo& loadRequestInfo)
@@ -248,7 +252,7 @@ int32_t SystemAbilityStateScheduler::HandleUnloadAbilityEventLocked(
             if (unloadRequestInfo.unloadEvent.eventId == INTERFACE_CALL) {
                 result = ProcessDelayUnloadEvent(abilityContext->systemAbilityId);
             } else {
-                result = SendDelayUnloadEventLocked(abilityContext->systemAbilityId, abilityContext->delayTime);
+                result = SendDelayUnloadEventLocked(abilityContext->systemAbilityId, abilityContext->delayUnloadTime);
             }
             break;
         default:
@@ -488,6 +492,69 @@ bool SystemAbilityStateScheduler::CanUnloadAllSystemAbility(
     return false;
 }
 
+int32_t SystemAbilityStateScheduler::PostTryUnloadAllAbilityTask(
+    const std::shared_ptr<SystemProcessContext>& processContext)
+{
+    bool result = processHandler_->PostTask([this, processContext] () {
+        int32_t ret = TryUnloadAllSystemAbility(processContext);
+        if (ret != ERR_OK) {
+            HILOGE("[SA Scheduler][process: %{public}s] unload all SA failed",
+                Str16ToStr8(processContext->processName).c_str());
+        }
+    });
+    if (!result) {
+        HILOGW("[SA Scheduler][process: %{public}s] post task failed",
+            Str16ToStr8(processContext->processName).c_str());
+        return ERR_INVALID_VALUE;
+    }
+    return ERR_OK;
+}
+
+int32_t SystemAbilityStateScheduler::PostUnloadTimeoutTask(const std::shared_ptr<SystemProcessContext>& processContext)
+{
+    auto timeoutTask = [this, processContext] () {
+        std::lock_guard<std::recursive_mutex> autoLock(processContext->processLock);
+        if (processContext->state == SystemProcessState::STOPPING) {
+            HILOGW("[SA Scheduler][process: %{public}s] unload SA timeout",
+                Str16ToStr8(processContext->processName).c_str());
+            int32_t result = KillSystemProcessLocked(processContext);
+            HILOGI("[SA Scheduler][process: %{public}s] kill timeout process ret: %{public}d",
+                Str16ToStr8(processContext->processName).c_str(), result);
+        }
+    };
+    bool ret = processHandler_->PostTask(timeoutTask, KEY_UNLOAD_TIMEOUT + Str16ToStr8(processContext->processName),
+        UNLOAD_TIMEOUT_TIME);
+    if (!ret) {
+        HILOGW("[SA Scheduler][process: %{public}s] post timeout task failed",
+            Str16ToStr8(processContext->processName).c_str());
+        return ERR_INVALID_VALUE;
+    }
+    return ERR_OK;
+}
+
+void SystemAbilityStateScheduler::RemoveUnloadTimeoutTask(const std::shared_ptr<SystemProcessContext>& processContext)
+{
+    processHandler_->RemoveTask(KEY_UNLOAD_TIMEOUT + Str16ToStr8(processContext->processName));
+}
+
+int32_t SystemAbilityStateScheduler::PostTryKillProcessTask(
+    const std::shared_ptr<SystemProcessContext>& processContext)
+{
+    bool result = processHandler_->PostTask([this, processContext] () {
+        int32_t ret = TryKillSystemProcess(processContext);
+        if (ret != ERR_OK) {
+            HILOGE("[SA Scheduler][process: %{public}s] kill process failed",
+                Str16ToStr8(processContext->processName).c_str());
+        }
+    });
+    if (!result) {
+        HILOGW("[SA Scheduler][process: %{public}s] post task failed",
+            Str16ToStr8(processContext->processName).c_str());
+        return ERR_INVALID_VALUE;
+    }
+    return ERR_OK;
+}
+
 int32_t SystemAbilityStateScheduler::UnloadAllSystemAbilityLocked(
     const std::shared_ptr<SystemProcessContext>& processContext)
 {
@@ -505,15 +572,7 @@ int32_t SystemAbilityStateScheduler::UnloadAllSystemAbilityLocked(
             HILOGE("[SA Scheduler][SA: %{public}d] unload failed", saId);
         }
     }
-    auto timeoutTask = [this, processContext] () {
-        std::lock_guard<std::recursive_mutex> autoLock(processContext->processLock);
-        if (processContext->state == SystemProcessState::STOPPING) {
-            HILOGW("[SA Scheduler][process: %{public}s] unload SA timeout",
-                Str16ToStr8(processContext->processName).c_str());
-            KillSystemProcessLocked(processContext);
-        }
-    };
-    processHandler_->PostTask(timeoutTask, UNLOAD_TIMEOUT_TIME);
+    PostUnloadTimeoutTask(processContext);
     return stateMachine_->ProcessStateTransitionLocked(processContext, SystemProcessState::STOPPING);
 }
 
@@ -560,16 +619,17 @@ bool SystemAbilityStateScheduler::CanKillSystemProcess(
 int32_t SystemAbilityStateScheduler::KillSystemProcessLocked(
     const std::shared_ptr<SystemProcessContext>& processContext)
 {
+    int32_t result = ERR_OK;
     #ifdef RESSCHED_ENABLE
-    HILOGI("[SA Scheduler][process: %{public}s] kill system process start, pid: %{public}d, uid: %{public}d",
-        Str16ToStr8(processContext->processName).c_str(), processContext->pid, processContext->uid);
     std::unordered_map<std::string, std::string> payload;
     payload["pid"] = std::to_string(processContext->pid);
     payload["uid"] = std::to_string(processContext->uid);
     payload["processName"] = Str16ToStr8(processContext->processName);
-    ResourceSchedule::ResSchedClient::GetInstance().KillProcess(payload);
+    result = ResourceSchedule::ResSchedClient::GetInstance().KillProcess(payload);
+    HILOGI("[SA Scheduler][process: %{public}s] kill process, pid: %{public}d, uid: %{public}d, result: %{public}d",
+        Str16ToStr8(processContext->processName).c_str(), processContext->pid, processContext->uid, result);
     #endif
-    return ERR_OK;
+    return result;
 }
 
 bool SystemAbilityStateScheduler::CanRestartProcessLocked(const std::shared_ptr<SystemProcessContext>& processContext)
@@ -596,88 +656,52 @@ bool SystemAbilityStateScheduler::CanRestartProcessLocked(const std::shared_ptr<
     return false;
 }
 
-void SystemAbilityStateScheduler::PostRestartAbilityTask(const std::shared_ptr<SystemAbilityContext>& abilityContext)
+int32_t SystemAbilityStateScheduler::GetAbnormallyDiedAbilityLocked(
+    std::shared_ptr<SystemProcessContext>& processContext,
+    std::list<std::shared_ptr<SystemAbilityContext>>& abnormallyDiedAbilityList)
 {
-    auto restartAbilityTask = [this, abilityContext]() {
-        sptr<ISystemAbilityLoadCallback> callback(new SystemAbilityLoadCallbackStub());
-        OnDemandEvent onDemandEvent = {INTERFACE_CALL, "restart"};
-        LoadRequestInfo loadRequestInfo = {abilityContext->systemAbilityId,
-            LOCAL_DEVICE, callback, -1, onDemandEvent};
-        HandleLoadAbilityEvent(loadRequestInfo);
-    };
-    bool result = processHandler_->PostTask(restartAbilityTask, DELAY_RESTART_TIME);
-    if (!result) {
-        HILOGE("[SA Scheduler] sa:%{public}d post restart ability task failed",
-            abilityContext->systemAbilityId);
-    }
-}
-
-int32_t SystemAbilityStateScheduler::TryRestartDiedAbility(const std::shared_ptr<SystemAbilityContext>& abilityContext)
-{
-    if (abilityContext->isAutoRestart) {
-        PostRestartAbilityTask(abilityContext);
-        return ERR_OK;
-    }
-    return ERR_INVALID_VALUE;
-}
-
-int32_t SystemAbilityStateScheduler::HandleAbnormallyDiedAbilityLocked(
-    const std::shared_ptr<SystemAbilityContext>& abilityContext, bool& isJudged,
-    bool& canRestartProcess)
-{
-    HILOGI("[SA Scheduler][sa: %{public}d] died abnormally", abilityContext->systemAbilityId);
-    int32_t result = 0;
-    switch (abilityContext->state) {
-        case SystemAbilityState::LOADING:
-        case SystemAbilityState::LOADED: {
-            HILOGI("[SA Scheduler][sa: %{public}d] restart abnormally died system ability locked",
-                abilityContext->systemAbilityId);
-            result = stateMachine_->AbilityStateTransitionLocked(abilityContext, SystemAbilityState::NOT_LOADED);
-            if (result != ERR_OK) {
-                HILOGI("[SA Scheduler][sa: %{public}d] ability state transition locked failed",
-                    abilityContext->systemAbilityId);
-                return ERR_INVALID_VALUE;
-            }
-            HandlePendingLoadEventLocked(abilityContext);
-            if (!isJudged) {
-                isJudged = true;
-                canRestartProcess = CanRestartProcessLocked(abilityContext->ownProcessContext);
-            }
-            if (canRestartProcess) {
-                TryRestartDiedAbility(abilityContext);
-            } else {
-                HILOGW("[SA Scheduler][sa: %{public}d] can't restart: More than 4 restarts in 20 seconds",
-                    abilityContext->systemAbilityId);
-            }
-            break;
+    for (auto& saId : processContext->saList) {
+        std::shared_ptr<SystemAbilityContext> abilityContext;
+        if (!GetSystemAbilityContext(saId, abilityContext)) {
+            continue;
         }
-        case SystemAbilityState::UNLOADABLE:
-        case SystemAbilityState::UNLOADING: {
-            result = stateMachine_->AbilityStateTransitionLocked(abilityContext, SystemAbilityState::NOT_LOADED);
-            if (result != ERR_OK) {
-                HILOGI("[SA Scheduler][sa: %{public}d] ability state transition locked failed",
-                    abilityContext->systemAbilityId);
-                return ERR_INVALID_VALUE;
+        if (abilityContext->state == SystemAbilityState::LOADED
+            || abilityContext->state == SystemAbilityState::LOADING) {
+            HILOGI("[SA Scheduler][SA: %{public}d] abnormally died", abilityContext->systemAbilityId);
+            if (abilityContext->isAutoRestart) {
+                HILOGI("[SA Scheduler][SA: %{public}d] is auto restart", abilityContext->systemAbilityId);
+                abnormallyDiedAbilityList.emplace_back(abilityContext);
             }
-            HandlePendingLoadEventLocked(abilityContext);
-            break;
-        }
-        default: {
-            HILOGW("[SA Scheduler][sa: %{public}d] invalid system ability state",
-                abilityContext->systemAbilityId);
-            return ERR_INVALID_VALUE;
         }
     }
     return ERR_OK;
 }
 
-void SystemAbilityStateScheduler::OnProcessStartedLocked(const std::u16string& processName)
+
+int32_t SystemAbilityStateScheduler::HandleAbnormallyDiedAbilityLocked(
+    std::shared_ptr<SystemProcessContext>& processContext,
+    std::list<std::shared_ptr<SystemAbilityContext>>& abnormallyDiedAbilityList)
 {
-    HILOGI("[SA Scheduler][process: %{public}s] started", Str16ToStr8(processName).c_str());
-    std::shared_ptr<SystemProcessContext> processContext;
-    if (!GetSystemProcessContext(processName, processContext)) {
-        return;
+    if (abnormallyDiedAbilityList.empty()) {
+        return ERR_OK;
     }
+    if (!CanRestartProcessLocked(processContext)) {
+        HILOGW("[SA Scheduler][process: %{public}s] can't restart: More than 4 restarts in 20 seconds",
+            Str16ToStr8(processContext->processName).c_str());
+        return ERR_OK;
+    }
+    OnDemandEvent onDemandEvent = {INTERFACE_CALL, "restart"};
+    sptr<ISystemAbilityLoadCallback> callback(new SystemAbilityLoadCallbackStub());
+    for (auto& abilityContext : abnormallyDiedAbilityList) {
+        LoadRequestInfo loadRequestInfo = {abilityContext->systemAbilityId,
+            LOCAL_DEVICE, callback, -1, onDemandEvent};
+        HandleLoadAbilityEventLocked(abilityContext, loadRequestInfo);
+    }
+    return ERR_OK;
+}
+
+void SystemAbilityStateScheduler::NotifyProcessStarted(const std::shared_ptr<SystemProcessContext>& processContext)
+{
     std::shared_lock<std::shared_mutex> readLock(listenerSetLock_);
     for (auto& listener : processListeners_) {
         if (listener->AsObject() != nullptr) {
@@ -688,6 +712,28 @@ void SystemAbilityStateScheduler::OnProcessStartedLocked(const std::u16string& p
     }
 }
 
+void SystemAbilityStateScheduler::NotifyProcessStopped(const std::shared_ptr<SystemProcessContext>& processContext)
+{
+    std::shared_lock<std::shared_mutex> readLock(listenerSetLock_);
+    for (auto& listener : processListeners_) {
+        if (listener->AsObject() != nullptr) {
+            SystemProcessInfo systemProcessInfo = {Str16ToStr8(processContext->processName), processContext->pid,
+                processContext->uid};
+            listener->OnSystemProcessStopped(systemProcessInfo);
+        }
+    }
+}
+
+void SystemAbilityStateScheduler::OnProcessStartedLocked(const std::u16string& processName)
+{
+    HILOGI("[SA Scheduler][process: %{public}s] started", Str16ToStr8(processName).c_str());
+    std::shared_ptr<SystemProcessContext> processContext;
+    if (!GetSystemProcessContext(processName, processContext)) {
+        return;
+    }
+    NotifyProcessStarted(processContext);
+}
+
 void SystemAbilityStateScheduler::OnProcessNotStartedLocked(const std::u16string& processName)
 {
     HILOGI("[SA Scheduler][process: %{public}s] stopped", Str16ToStr8(processName).c_str());
@@ -695,41 +741,28 @@ void SystemAbilityStateScheduler::OnProcessNotStartedLocked(const std::u16string
     if (!GetSystemProcessContext(processName, processContext)) {
         return;
     }
-    {
-        std::shared_lock<std::shared_mutex> readLock(listenerSetLock_);
-        for (auto& listener : processListeners_) {
-            if (listener->AsObject() != nullptr) {
-                SystemProcessInfo systemProcessInfo = {Str16ToStr8(processContext->processName), processContext->pid,
-                    processContext->uid};
-                listener->OnSystemProcessStopped(systemProcessInfo);
-            }
-        }
-    }
-    bool isJudged = false;
-    bool canRestartProcess = false;
+    NotifyProcessStopped(processContext);
+    RemoveUnloadTimeoutTask(processContext);
+    
+    std::list<std::shared_ptr<SystemAbilityContext>> abnormallyDiedAbilityList;
+    GetAbnormallyDiedAbilityLocked(processContext, abnormallyDiedAbilityList);
     for (auto& saId : processContext->saList) {
         std::shared_ptr<SystemAbilityContext> abilityContext;
         if (!GetSystemAbilityContext(saId, abilityContext)) {
             continue;
         }
-        if (abilityContext->state == SystemAbilityState::NOT_LOADED) {
-            auto restartAbilityTask = [this, abilityContext]() {
-                HandlePendingLoadEventLocked(abilityContext);
-            };
-            bool result = processHandler_->PostTask(restartAbilityTask, DELAY_LOAD_TIME);
-            if (!result) {
-                HILOGE("[SA Scheduler] sa:%{public}d post restart ability task failed",
-                    abilityContext->systemAbilityId);
-            }
-        } else {
-            HandleAbnormallyDiedAbilityLocked(abilityContext, isJudged, canRestartProcess);
+        int32_t result = stateMachine_->AbilityStateTransitionLocked(abilityContext, SystemAbilityState::NOT_LOADED);
+        if (result != ERR_OK) {
+            continue;
         }
+        HandlePendingLoadEventLocked(abilityContext);
     }
+    HandleAbnormallyDiedAbilityLocked(processContext, abnormallyDiedAbilityList);
 }
 
 int32_t SystemAbilityStateScheduler::HandleAbilityDiedEvent(int32_t systemAbilityId)
 {
-    HILOGI("[SA Scheduler][SA: %{public}d] handle ability died event", systemAbilityId);
+    HILOGD("[SA Scheduler][SA: %{public}d] handle ability died event", systemAbilityId);
     return ERR_OK;
 }
 
@@ -742,26 +775,10 @@ void SystemAbilityStateScheduler::OnAbilityNotLoadedLocked(int32_t systemAbility
     }
     RemoveDelayUnloadEventLocked(abilityContext->systemAbilityId);
     RemovePendingUnloadEventLocked(abilityContext);
-    bool result = true;
     if (abilityContext->ownProcessContext->state == SystemProcessState::STOPPING) {
-        result = processHandler_->PostTask([this, abilityContext] () {
-            int32_t ret = TryKillSystemProcess(abilityContext->ownProcessContext);
-            if (ret != ERR_OK) {
-                HILOGE("[SA Scheduler][process: %{public}s] kill process failed",
-                    Str16ToStr8(abilityContext->ownProcessContext->processName).c_str());
-            }
-        });
+        PostTryKillProcessTask(abilityContext->ownProcessContext);
     } else if (abilityContext->ownProcessContext->state == SystemProcessState::STARTED) {
-        result = processHandler_->PostTask([this, abilityContext] () {
-            int32_t ret = TryUnloadAllSystemAbility(abilityContext->ownProcessContext);
-            if (ret != ERR_OK) {
-                HILOGE("[SA Scheduler][process: %{public}s] unload all SA failed",
-                    Str16ToStr8(abilityContext->ownProcessContext->processName).c_str());
-            }
-        });
-    }
-    if (!result) {
-        HILOGE("[SA Scheduler] post task failed");
+        PostTryUnloadAllAbilityTask(abilityContext->ownProcessContext);
     }
 }
 
@@ -782,16 +799,7 @@ void SystemAbilityStateScheduler::OnAbilityUnloadableLocked(int32_t systemAbilit
     if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
         return;
     }
-    bool result = processHandler_->PostTask([this, abilityContext] () {
-        int32_t ret = TryUnloadAllSystemAbility(abilityContext->ownProcessContext);
-        if (ret != ERR_OK) {
-            HILOGE("[SA Scheduler][process: %{public}s] unload all SA failed",
-                Str16ToStr8(abilityContext->ownProcessContext->processName).c_str());
-        }
-    });
-    if (!result) {
-        HILOGE("[SA Scheduler] post unload all SA task failed");
-    }
+    PostTryUnloadAllAbilityTask(abilityContext->ownProcessContext);
 }
 
 int32_t SystemAbilityStateScheduler::GetRunningSystemProcess(std::list<SystemProcessInfo>& systemProcessInfos)

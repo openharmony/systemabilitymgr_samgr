@@ -1487,6 +1487,7 @@ HWTEST_F(SystemAbilityMgrStubTest, CheckSystemAbility006, TestSize.Level3)
     abilityItem.state = SystemAbilityManager::AbilityState::STARTING;
     saMgr->startingAbilityMap_[SAID] = abilityItem;
     AddSystemAbilityContext(SAID, u"test");
+    saMgr->abilityStateScheduler_->processContextMap_[u"test"]->state = SystemProcessState::STARTED;
     bool isExist = false;
     sptr<IRemoteObject> res = saMgr->CheckSystemAbility(SAID, isExist);
     saMgr->startingAbilityMap_.clear();
@@ -1509,6 +1510,7 @@ HWTEST_F(SystemAbilityMgrStubTest, CheckSystemAbility007, TestSize.Level3)
     u16string proName = u"test";
     saMgr->onDemandAbilityMap_[SAID] = proName;
     AddSystemAbilityContext(SAID, u"test");
+    saMgr->abilityStateScheduler_->processContextMap_[u"test"]->state = SystemProcessState::STARTED;
     bool isExist = false;
     sptr<IRemoteObject> res = saMgr->CheckSystemAbility(SAID, isExist);
     saMgr->startingAbilityMap_.clear();
@@ -2726,19 +2728,5 @@ HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemProcessInner003, TestSize.Le
     MessageParcel reply;
     int32_t ret = saMgr->UnSubscribeSystemProcessInner(data, reply);
     EXPECT_EQ(ret, ERR_OK);
-}
-
-/**
- * @tc.name: Test CanRequestProcessInfo001
- * @tc.desc: CanRequestProcessInfo001
- * @tc.type: FUNC
- * @tc.require: I6H10P
- */
-HWTEST_F(SystemAbilityMgrStubTest, CanRequestProcessInfo001, TestSize.Level3)
-{
-    DTEST_LOG << "CanRequestProcessInfo001" << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    int32_t ret = saMgr->CanRequestProcessInfo();
-    EXPECT_EQ(ret, false);
 }
 }
