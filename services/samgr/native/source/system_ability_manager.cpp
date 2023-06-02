@@ -1618,12 +1618,22 @@ sptr<DBinderServiceStub> SystemAbilityManager::DoMakeRemoteBinder(int32_t system
 void SystemAbilityManager::NotifyRpcLoadCompleted(const std::string& srcDeviceId, int32_t systemAbilityId,
     const sptr<IRemoteObject>& remoteObject)
 {
-    if (dBinderService_ != nullptr) {
-        dBinderService_->LoadSystemAbilityComplete(srcDeviceId, systemAbilityId, remoteObject);
+    if (workHandler_ == nullptr) {
+        HILOGE("NotifyRpcLoadCompleted work handler not initialized!");
         return;
     }
-    HILOGW("NotifyRpcLoadCompleted failed, said: %{public}d, deviceId : %{public}s",
-        systemAbilityId, AnonymizeDeviceId(srcDeviceId).c_str());
+    auto notifyTask = [srcDeviceId, systemAbilityId, remoteObject, this]() {
+        if (dBinderService_ != nullptr) {
+            dBinderService_->LoadSystemAbilityComplete(srcDeviceId, systemAbilityId, remoteObject);
+            return;
+        }
+        HILOGW("NotifyRpcLoadCompleted failed, said: %{public}d, deviceId : %{public}s",
+            systemAbilityId, AnonymizeDeviceId(srcDeviceId).c_str());
+    };
+    bool ret = workHandler_->PostTask(notifyTask);
+    if (!ret) {
+        HILOGW("NotifyRpcLoadCompleted PostTask failed!");
+    }
 }
 
 void SystemAbilityManager::RemoveStartingAbilityCallbackLocked(
