@@ -33,6 +33,7 @@
                 "eventhandler",
                 "device_manager",
                 "hicollie_native",
+                "hilog_native",
                 "hisysevent_native",
                 "hitrace_native",
                 "hiviewdfx_hilog_native",
