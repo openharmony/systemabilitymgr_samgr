@@ -15,23 +15,19 @@
 <configuration ver="2.0">
     <target name="ParseUtilTest">
         <preparer>
-            <option name="push" value="profile/profile.xml -> /data/test/resource/samgr/profile/" src="res"/>
-            <option name="push" value="profile/profile_audio.xml -> /data/test/resource/samgr/profile/" src="res"/>
-            <option name="push" value="profile/invalid_root.xml -> /data/test/resource/samgr/profile/" src="res"/>
+            <option name="push" value="profile/profile.json -> /data/test/resource/samgr/profile/" src="res"/>
             <option name="push" value="profile/test_trust_muti_sa.json -> /data/test/resource/samgr/profile/" src="res"/>
             <option name="push" value="profile/invalid_root_trust.json -> /data/test/resource/samgr/profile/" src="res"/>
             <option name="push" value="profile/invalid_element_trust.json -> /data/test/resource/samgr/profile/" src="res"/>
             <option name="push" value="profile/test_trust_one_sa.json -> /data/test/resource/samgr/profile/" src="res"/>
             <option name="push" value="profile/invalid_muti_root_trust.json -> /data/test/resource/samgr/profile/" src="res"/>
-            <option name="push" value="profile/multi_sa_profile.xml -> /data/test/resource/samgr/profile/" src="res"/>
+            <option name="push" value="profile/multi_sa_profile.json -> /data/test/resource/samgr/profile/" src="res"/>
             <option name="push" value="profile/test_trust_not_all_allow.json -> /data/test/resource/samgr/profile/" src="res"/>
             <option name="push" value="profile/test_trust_all_allow.json -> /data/test/resource/samgr/profile/" src="res"/>
             <option name="push" value="profile/no_xml_file -> /data/test/resource/samgr/profile/" src="res"/>
-            <option name="push" value="profile/mock.xml -> /data/test/resource/samgr/profile/" src="res"/>
-            <option name="push" value="profile/empty_process.xml -> /data/test/resource/samgr/profile/" src="res"/>
-            <option name="push" value="profile/empty_systemability.xml -> /data/test/resource/samgr/profile/" src="res"/>
-            <option name="push" value="profile/empty_libpath.xml -> /data/test/resource/samgr/profile/" src="res"/>
+            <option name="push" value="profile/mock.json -> /data/test/resource/samgr/profile/" src="res"/>
             <option name="push" value="profile/sa_profile.json -> /data/test/resource/samgr/profile/" src="res"/>
+            <option name="push" value="profile/empty_libpath.json -> /data/test/resource/samgr/profile/" src="res"/>
             <option name="push" value="profile/sa_profile_error_bootphase.json -> /data/test/resource/samgr/profile/" src="res"/>
             <option name="push" value="profile/sa_profile_error_ondemanad_tag.json -> /data/test/resource/samgr/profile/" src="res"/>
             <option name="push" value="profile/sa_profile_error_said.json -> /data/test/resource/samgr/profile/" src="res"/>

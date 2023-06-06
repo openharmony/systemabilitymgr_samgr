@@ -158,9 +158,8 @@ void SystemAbilityManager::InitSaProfile()
     GetDirFiles(PREFIX, fileNames);
     auto parser = std::make_shared<ParseUtil>();
     for (const auto& file : fileNames) {
-        if (file.empty() ||
-            (file.find(".xml") == std::string::npos && file.find(".json") == std::string::npos)
-            || (file.find("_trust.xml") != std::string::npos && file.find("_trust.json") != std::string::npos)) {
+        if (file.empty() || file.find(".json") == std::string::npos ||
+            file.find("_trust.json") != std::string::npos) {
             continue;
         }
         parser->ParseSaProfiles(file);

@@ -1,0 +1,12 @@
+{
+    "process": "sa_test",
+    "systemability": [
+        {
+            "name": 9999,
+            "libpath": "liboos_ability.z.so",
+            "run-on-create": true,
+            "distributed": false,
+            "dump-level": 1
+        }
+    ]
+}

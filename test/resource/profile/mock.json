@@ -1,0 +1,12 @@
+{
+    "process": "mock_test",
+    "systemability": [
+        {
+            "name": 1492,
+            "libpath": "libmock_sa.z.so",
+            "run-on-create": true,
+            "distributed": false,
+            "dump-level": 1
+        }
+    ]
+}
