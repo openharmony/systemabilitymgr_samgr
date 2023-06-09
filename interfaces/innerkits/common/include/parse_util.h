@@ -21,8 +21,6 @@
 #include <set>
 #include <string>
 #include "sa_profiles.h"
-#include "libxml/parser.h"
-#include "libxml/xpath.h"
 #include "nlohmann/json.hpp"
 
 namespace OHOS {
@@ -48,11 +46,6 @@ private:
     uint32_t GetBootPriorityPara(const std::string& bootPhase);
     void OpenSo(SaProfile& saProfile);
     void CloseHandle(SaProfile& saProfile);
-    bool ParseSystemAbility(const xmlNode& rootNode, const std::u16string& processName);
-    bool ParseProcess(const xmlNodePtr& rootNode, std::u16string& processName);
-    void ParseSAProp(const std::string& nodeName, const std::string& nodeContent, SaProfile& saProfile);
-    bool CheckRootTag(const xmlNodePtr& rootNodePtr);
-    bool ParseXmlFile(const std::string& realPath);
     bool ParseJsonFile(const std::string& realPath);
     bool ParseJsonObj(nlohmann::json& jsonObj, const std::string& jsonPath);
     bool ParseSystemAbility(SaProfile& saProfile, nlohmann::json& systemAbilityJson);

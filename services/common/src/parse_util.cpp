@@ -25,9 +25,6 @@
 #include "datetime_ex.h"
 #include "hisysevent_adapter.h"
 #include "hitrace_meter.h"
-#include "libxml/globals.h"
-#include "libxml/tree.h"
-#include "libxml/xmlstring.h"
 #include "sam_log.h"
 #include "string_ex.h"
 
@@ -38,8 +35,6 @@ namespace {
 constexpr const char* EVENT_TYPE = "eventId";
 constexpr const char* EVENT_NAME = "name";
 constexpr const char* EVENT_VALUE = "value";
-constexpr const char* SA_TAG_PROFILE = "profile";
-constexpr const char* SA_TAG_INFO = "info";
 constexpr const char* SA_TAG_SYSTEM_ABILITY = "systemability";
 constexpr const char* SA_TAG_PROCESS = "process";
 constexpr const char* SA_TAG_LIB_PATH = "libpath";
@@ -231,36 +226,6 @@ void ParseUtil::RemoveSaProfile(int32_t saId)
     saProfiles_.remove_if([saId] (auto saInfo) -> bool { return saInfo.saId == saId; });
 }
 
-void ParseUtil::ParseSAProp(const string& nodeName, const string& nodeContent, SaProfile& saProfile)
-{
-    if (nodeName == SA_TAG_NAME) {
-        StrToInt(nodeContent.c_str(), saProfile.saId);
-    } else if (nodeName == SA_TAG_LIB_PATH) {
-        saProfile.libPath = nodeContent;
-    } else if (nodeName == SA_TAG_DEPEND) {
-        int32_t saId = 0;
-        StrToInt(nodeContent.c_str(), saId);
-        saProfile.dependSa.emplace_back(saId);
-    } else if (nodeName == SA_TAG_DEPEND_TIMEOUT) {
-        StrToInt(nodeContent.c_str(), saProfile.dependTimeout);
-    } else if (nodeName == SA_TAG_RUN_ON_CREATE) {
-        std::istringstream(nodeContent) >> std::boolalpha >> saProfile.runOnCreate;
-    } else if (nodeName == SA_TAG_AUTO_RESTART) {
-        std::istringstream(nodeContent) >> std::boolalpha >> saProfile.autoRestart;
-    } else if (nodeName == SA_TAG_DISTRIBUTED) {
-        std::istringstream(nodeContent) >> std::boolalpha >> saProfile.distributed;
-    } else if (nodeName == SA_TAG_DUMP_LEVEL) {
-        std::stringstream ss(nodeContent);
-        ss >> saProfile.dumpLevel;
-    } else if (nodeName == SA_TAG_CAPABILITY) {
-        saProfile.capability = Str8ToStr16(nodeContent);
-    } else if (nodeName == SA_TAG_PERMISSION) {
-        saProfile.permission = Str8ToStr16(nodeContent);
-    } else if (nodeName == SA_TAG_BOOT_PHASE) {
-        saProfile.bootPhase = GetBootPriorityPara(nodeContent);
-    }
-}
-
 uint32_t ParseUtil::GetBootPriorityPara(const std::string& bootPhase)
 {
     if (bootPhase == BOOT_START_PHASE) {
@@ -272,46 +237,6 @@ uint32_t ParseUtil::GetBootPriorityPara(const std::string& bootPhase)
     }
 }
 
-bool ParseUtil::ParseSystemAbility(const xmlNode& rootNode, const std::u16string& process)
-{
-    auto currNodePtr = rootNode.xmlChildrenNode;
-    if (currNodePtr == nullptr) {
-        return false;
-    }
-    SaProfile saProfile;
-    saProfile.process = process;
-    for (; currNodePtr != nullptr; currNodePtr = currNodePtr->next) {
-        if (currNodePtr->name == nullptr || currNodePtr->type == XML_COMMENT_NODE) {
-            continue;
-        }
-        auto contentPtr = xmlNodeGetContent(currNodePtr);
-        if (contentPtr == nullptr) {
-            continue;
-        }
-        string nodeName(reinterpret_cast<const char*>(currNodePtr->name));
-        string nodeContent(reinterpret_cast<char*>(contentPtr));
-        ParseSAProp(nodeName, nodeContent, saProfile);
-        xmlFree(contentPtr);
-    }
-    saProfiles_.emplace_back(saProfile);
-    return true;
-}
-
-bool ParseUtil::ParseProcess(const xmlNodePtr& rootNode, std::u16string& processName)
-{
-    if (rootNode->name == nullptr || rootNode->type == XML_COMMENT_NODE) {
-        return false;
-    }
-    auto contentPtr = xmlNodeGetContent(rootNode);
-    if (contentPtr == nullptr) {
-        return false;
-    }
-    string nodeContent(reinterpret_cast<char*>(contentPtr));
-    processName = Str8ToStr16(nodeContent);
-    xmlFree(contentPtr);
-    return true;
-}
-
 bool ParseUtil::ParseSaProfiles(const string& profilePath)
 {
     HILOGD("profilePath:%{private}s", profilePath.c_str());
@@ -321,12 +246,10 @@ bool ParseUtil::ParseSaProfiles(const string& profilePath)
         return false;
     }
 
-    if (Endswith(realPath, ".xml")) {
-        return ParseXmlFile(realPath);
-    } else if (Endswith(realPath, ".json")) {
+    if (Endswith(realPath, ".json")) {
         return ParseJsonFile(realPath);
     } else {
-        HILOGE("bad profile!");
+        HILOGE("Invalid file format, please use json file!");
         return false;
     }
 }
@@ -380,58 +303,6 @@ std::unordered_map<std::string, std::string> ParseUtil::JsonObjToMap(const nlohm
         eventMap[EVENT_VALUE] = "";
     }
     return eventMap;
-}
-
-bool ParseUtil::CheckRootTag(const xmlNodePtr& rootNodePtr)
-{
-    if (rootNodePtr == nullptr || rootNodePtr->name == nullptr ||
-        (xmlStrcmp(rootNodePtr->name, reinterpret_cast<const xmlChar*>(SA_TAG_PROFILE)) != 0 &&
-        xmlStrcmp(rootNodePtr->name, reinterpret_cast<const xmlChar*>(SA_TAG_INFO)) != 0)) {
-        return false;
-    }
-    return true;
-}
-
-bool ParseUtil::ParseXmlFile(const string& realPath)
-{
-    std::unique_ptr<xmlDoc, decltype(&xmlFreeDoc)> ptrDoc(
-        xmlReadFile(realPath.c_str(), nullptr, XML_PARSE_NOBLANKS), xmlFreeDoc);
-
-    if (ptrDoc == nullptr) {
-        HILOGE("xmlReadFile error!");
-        return false;
-    }
-    xmlNodePtr rootNodePtr = xmlDocGetRootElement(ptrDoc.get());
-    if (!CheckRootTag(rootNodePtr)) {
-        HILOGW("wrong root element tag!");
-        return false;
-    }
-    bool isParseCorrect = false;
-    xmlNodePtr currNodePtr = rootNodePtr->xmlChildrenNode;
-    std::u16string process = u"";
-    for (; currNodePtr != nullptr; currNodePtr = currNodePtr->next) {
-        if (currNodePtr->name == nullptr || currNodePtr->type == XML_COMMENT_NODE) {
-            continue;
-        }
-
-        string nodeName(reinterpret_cast<const char*>(currNodePtr->name));
-        HILOGD("profile nodeName:%{public}s", nodeName.c_str());
-        if (nodeName == SA_TAG_PROCESS && process.empty()) {
-            if (!ParseProcess(currNodePtr, process)) {
-                HILOGW("profile %{public}s wrong tag!", currNodePtr->name);
-                return false;
-            }
-        }
-        if (nodeName == SA_TAG_SYSTEM_ABILITY) {
-            if (!ParseSystemAbility(*currNodePtr, process)) {
-                HILOGW("profile %{public}s wrong tag!", currNodePtr->name);
-                return false;
-            }
-            isParseCorrect = true;
-        }
-    }
-    procName_ = process;
-    return isParseCorrect;
 }
 
 bool ParseUtil::ParseJsonFile(const string& realPath)

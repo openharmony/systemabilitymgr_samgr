@@ -1,5 +1,5 @@
 {
-    "name": "@ohos/systemabilitymgr_samgr",
+    "name": "@ohos/samgr",
     "description": "system ability manager",
     "homePage": "https://gitee.com/openharmony",
     "version": "3.1",
@@ -42,8 +42,7 @@
                 "resource_schedule_service",
                 "safwk",
                 "selinux"
-            ],
-            "third_party": [ "libxml2" ]
+            ]
         },
         "build": {
             "group_type": {
@@ -54,8 +53,7 @@
                 ],
                 "service_group": [
                     "//foundation/systemabilitymgr/samgr/etc:samgr_etc",
-                    "//foundation/systemabilitymgr/samgr/services/samgr/native:samgr",
-                    "//third_party/libxml2:libxml2"
+                    "//foundation/systemabilitymgr/samgr/services/samgr/native:samgr"
                 ]
             },
             "inner_kits": [

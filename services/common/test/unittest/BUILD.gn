@@ -39,7 +39,6 @@ ohos_unittest("ParseUtilTest") {
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/common:samgr_common",
     "//foundation/systemabilitymgr/samgr/services/common/test/mock:mock_sa",
     "//third_party/googletest:gtest_main",
-    "//third_party/libxml2:libxml2",
   ]
 
   cflags = []

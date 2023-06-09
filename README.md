@@ -144,7 +144,7 @@ Figure 1 Architecture of Samgr
 >{
 >"services" : [{
 >    "name" : "listen_test",
->    "path" : ["/system/bin/sa_main", "/system/profile/listen_test.xml"],
+>    "path" : ["/system/bin/sa_main", "/system/profile/listen_test.json"],
 >    "ondemand" : true,
 >    "uid" : "system",
 >    "gid" : ["system", "shell"]

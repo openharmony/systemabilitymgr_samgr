@@ -139,7 +139,7 @@ samgr组件是OpenHarmony的核心组件，提供OpenHarmony系统服务启动�
 >{
 >     "services" : [{
 >         "name" : "listen_test",
->         "path" : ["/system/bin/sa_main", "/system/profile/listen_test.xml"],
+>         "path" : ["/system/bin/sa_main", "/system/profile/listen_test.json"],
 >         "ondemand" : true,
 >         "uid" : "system",
 >         "gid" : ["system", "shell"]
