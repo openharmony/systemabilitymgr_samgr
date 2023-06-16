@@ -207,6 +207,9 @@ void DeviceStateCallback::OnDeviceOffline(const DmDeviceInfo& deviceInfo)
         lock_guard<mutex> autoLock(deviceOnlineLock_);
         deviceOnlineSet_.erase(deviceInfo.networkId);
         isOffline = deviceOnlineSet_.empty();
+        if (isOffline) {
+            isExistDeviceReady_ = false;
+        }
     }
     if (isOffline) {
         OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "off" };
@@ -241,7 +244,15 @@ void DeviceStateCallback::OnDeviceChanged(const DmDeviceInfo& deviceInfo)
 
 void DeviceStateCallback::OnDeviceReady(const DmDeviceInfo& deviceInfo)
 {
-    HILOGD("DeviceNetworkingCollect OnDeviceReady called");
+    HILOGI("DeviceNetworkingCollect DeviceStateCallback OnDeviceReady");
+    lock_guard<mutex> autoLock(deviceOnlineLock_);
+    if (!isExistDeviceReady_) {
+        OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "ready" };
+        if (collect_ != nullptr) {
+            collect_->ReportEvent(event);
+        }
+        isExistDeviceReady_ = true;
+    }
 }
 
 void WorkHandler::ProcessEvent(const InnerEvent::Pointer& event)

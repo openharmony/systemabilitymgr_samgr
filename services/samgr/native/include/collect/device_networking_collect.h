@@ -38,6 +38,7 @@ class DeviceStateCallback : public DistributedHardware::DeviceStateCallback {
     private:
        sptr<ICollectPlugin> collect_;
        std::set<std::string> deviceOnlineSet_;
+       bool isExistDeviceReady_ = false;
        std::mutex deviceOnlineLock_;
 };
 
