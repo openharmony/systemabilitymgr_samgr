@@ -20,7 +20,7 @@ ohos_rust_shared_library("rust_samgr") {
   ]
 
   external_deps = [
-    "hilog_native:hilog_rust",
+    "hilog:hilog_rust",
     "ipc:ipc_rust",
   ]
 

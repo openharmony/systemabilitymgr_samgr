@@ -49,9 +49,9 @@ ohos_shared_library("samgr_common") {
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
-      "hisysevent_native:libhisysevent",
-      "hitrace_native:hitrace_meter",
-      "hiviewdfx_hilog_native:libhilog",
+      "hilog:libhilog",
+      "hisysevent:libhisysevent",
+      "hitrace:hitrace_meter",
     ]
     part_name = "samgr"
   }
