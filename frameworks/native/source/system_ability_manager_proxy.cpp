@@ -119,7 +119,8 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t system
         HILOGW("CheckSystemAbility Write systemAbilityId failed!");
         return nullptr;
     }
-    return CheckSystemAbilityWrapper(CHECK_SYSTEM_ABILITY_TRANSACTION, data);
+    return CheckSystemAbilityWrapper(
+        static_cast<uint32_t>(SamgrInterfaceCode::CHECK_SYSTEM_ABILITY_TRANSACTION), data);
 }
 
 sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
@@ -153,7 +154,8 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t system
         return nullptr;
     }
 
-    return CheckSystemAbilityWrapper(CHECK_REMOTE_SYSTEM_ABILITY_TRANSACTION, data);
+    return CheckSystemAbilityWrapper(
+        static_cast<uint32_t>(SamgrInterfaceCode::CHECK_REMOTE_SYSTEM_ABILITY_TRANSACTION), data);
 }
 
 sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t systemAbilityId, bool& isExist)
@@ -194,7 +196,8 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t system
 
     MessageParcel reply;
     MessageOption option;
-    int32_t err = remote->SendRequest(CHECK_SYSTEM_ABILITY_IMMEDIATELY_TRANSACTION, data, reply, option);
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::CHECK_SYSTEM_ABILITY_IMMEDIATELY_TRANSACTION), data, reply, option);
     if (err != ERR_NONE) {
         return nullptr;
     }
@@ -242,7 +245,8 @@ int32_t SystemAbilityManagerProxy::AddOnDemandSystemAbilityInfo(int32_t systemAb
 
     MessageParcel reply;
     MessageOption option;
-    int32_t err = remote->SendRequest(ADD_ONDEMAND_SYSTEM_ABILITY_TRANSACTION, data, reply, option);
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::ADD_ONDEMAND_SYSTEM_ABILITY_TRANSACTION), data, reply, option);
 
     HILOGI("%{public}s:add ondemand system ability %{public}d %{public}s, return %{public}d",
         __func__, systemAbilityId, err ? "fail" : "succ", err);
@@ -302,7 +306,8 @@ int32_t SystemAbilityManagerProxy::RemoveSystemAbility(int32_t systemAbilityId)
         return ERR_FLATTEN_OBJECT;
     }
 
-    int32_t result = RemoveSystemAbilityWrapper(REMOVE_SYSTEM_ABILITY_TRANSACTION, data);
+    int32_t result = RemoveSystemAbilityWrapper(
+        static_cast<uint32_t>(SamgrInterfaceCode::REMOVE_SYSTEM_ABILITY_TRANSACTION), data);
     if (result == ERR_OK) {
         LocalAbilitys::GetInstance().RemoveAbility(systemAbilityId);
     }
@@ -332,7 +337,8 @@ std::vector<u16string> SystemAbilityManagerProxy::ListSystemAbilities(unsigned i
     }
     MessageParcel reply;
     MessageOption option;
-    int32_t err = remote->SendRequest(LIST_SYSTEM_ABILITY_TRANSACTION, data, reply, option);
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::LIST_SYSTEM_ABILITY_TRANSACTION), data, reply, option);
     if (err != ERR_NONE) {
         HILOGW("ListSystemAbilities transact failed!");
         return saNames;
@@ -381,7 +387,8 @@ int32_t SystemAbilityManagerProxy::SubscribeSystemAbility(int32_t systemAbilityI
 
     MessageParcel reply;
     MessageOption option;
-    int32_t err = remote->SendRequest(SUBSCRIBE_SYSTEM_ABILITY_TRANSACTION, data, reply, option);
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::SUBSCRIBE_SYSTEM_ABILITY_TRANSACTION), data, reply, option);
     if (err != ERR_NONE) {
         HILOGE("SubscribeSystemAbility SendRequest error:%{public}d!", err);
         return err;
@@ -430,7 +437,8 @@ int32_t SystemAbilityManagerProxy::UnSubscribeSystemAbility(int32_t systemAbilit
 
     MessageParcel reply;
     MessageOption option;
-    int32_t err = remote->SendRequest(UNSUBSCRIBE_SYSTEM_ABILITY_TRANSACTION, data, reply, option);
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::UNSUBSCRIBE_SYSTEM_ABILITY_TRANSACTION), data, reply, option);
     if (err != ERR_NONE) {
         HILOGE("UnSubscribeSystemAbility SendRequest error:%{public}d!", err);
         return err;
@@ -478,7 +486,8 @@ int32_t SystemAbilityManagerProxy::LoadSystemAbility(int32_t systemAbilityId,
 
     MessageParcel reply;
     MessageOption option;
-    int32_t err = remote->SendRequest(LOAD_SYSTEM_ABILITY_TRANSACTION, data, reply, option);
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::LOAD_SYSTEM_ABILITY_TRANSACTION), data, reply, option);
     if (err != ERR_NONE) {
         HILOGE("LoadSystemAbility systemAbilityId : %{public}d invalid error:%{public}d!", systemAbilityId, err);
         return err;
@@ -529,7 +538,8 @@ int32_t SystemAbilityManagerProxy::LoadSystemAbility(int32_t systemAbilityId, co
 
     MessageParcel reply;
     MessageOption option;
-    int32_t err = remote->SendRequest(LOAD_REMOTE_SYSTEM_ABILITY_TRANSACTION, data, reply, option);
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::LOAD_REMOTE_SYSTEM_ABILITY_TRANSACTION), data, reply, option);
     if (err != ERR_NONE) {
         HILOGE("LoadSystemAbility systemAbilityId : %{public}d invalid error:%{public}d!", systemAbilityId, err);
         return err;
@@ -570,7 +580,8 @@ int32_t SystemAbilityManagerProxy::UnloadSystemAbility(int32_t systemAbilityId)
 
     MessageParcel reply;
     MessageOption option;
-    int32_t err = remote->SendRequest(UNLOAD_SYSTEM_ABILITY_TRANSACTION, data, reply, option);
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::UNLOAD_SYSTEM_ABILITY_TRANSACTION), data, reply, option);
     if (err != ERR_NONE) {
         HILOGE("UnloadSystemAbility systemAbilityId : %{public}d invalid error:%{public}d!", systemAbilityId, err);
         return err;
@@ -611,7 +622,8 @@ int32_t SystemAbilityManagerProxy::CancelUnloadSystemAbility(int32_t systemAbili
 
     MessageParcel reply;
     MessageOption option;
-    int32_t err = remote->SendRequest(CANCEL_UNLOAD_SYSTEM_ABILITY_TRANSACTION, data, reply, option);
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::CANCEL_UNLOAD_SYSTEM_ABILITY_TRANSACTION), data, reply, option);
     if (err != ERR_NONE) {
         HILOGE("CancelUnloadSystemAbility systemAbilityId : %{public}d SendRequest failed, error:%{public}d!",
             systemAbilityId, err);
@@ -676,7 +688,8 @@ int32_t SystemAbilityManagerProxy::AddSystemAbility(int32_t systemAbilityId, con
         return ret;
     }
 
-    int32_t result = AddSystemAbilityWrapper(ADD_SYSTEM_ABILITY_TRANSACTION, data);
+    int32_t result = AddSystemAbilityWrapper(
+        static_cast<uint32_t>(SamgrInterfaceCode::ADD_SYSTEM_ABILITY_TRANSACTION), data);
     if (result == ERR_OK) {
         LocalAbilitys::GetInstance().AddAbility(systemAbilityId, ability);
     }
@@ -728,7 +741,8 @@ int32_t SystemAbilityManagerProxy::AddSystemProcess(const u16string& procName, c
         HILOGW("AddSystemProcess Write ability failed!");
         return ERR_FLATTEN_OBJECT;
     }
-    return AddSystemAbilityWrapper(ADD_SYSTEM_PROCESS_TRANSACTION, data);
+    return AddSystemAbilityWrapper(
+        static_cast<uint32_t>(SamgrInterfaceCode::ADD_SYSTEM_PROCESS_TRANSACTION), data);
 }
 
 int32_t SystemAbilityManagerProxy::GetRunningSystemProcess(std::list<SystemProcessInfo>& systemProcessInfos)
@@ -747,7 +761,8 @@ int32_t SystemAbilityManagerProxy::GetRunningSystemProcess(std::list<SystemProce
 
     MessageParcel reply;
     MessageOption option;
-    int32_t err = remote->SendRequest(GET_RUNNING_SYSTEM_PROCESS_TRANSACTION, data, reply, option);
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::GET_RUNNING_SYSTEM_PROCESS_TRANSACTION), data, reply, option);
     if (err != ERR_NONE) {
         HILOGE("GetRunningSystemProcess SendRequest error: %{public}d!", err);
         return err;
@@ -831,7 +846,8 @@ int32_t SystemAbilityManagerProxy::SubscribeSystemProcess(const sptr<ISystemProc
 
     MessageParcel reply;
     MessageOption option;
-    int32_t err = remote->SendRequest(SUBSCRIBE_SYSTEM_PROCESS_TRANSACTION, data, reply, option);
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::SUBSCRIBE_SYSTEM_PROCESS_TRANSACTION), data, reply, option);
     if (err != ERR_NONE) {
         HILOGE("SubscribeSystemProcess SendRequest error:%{public}d!", err);
         return err;
@@ -872,7 +888,8 @@ int32_t SystemAbilityManagerProxy::UnSubscribeSystemProcess(const sptr<ISystemPr
 
     MessageParcel reply;
     MessageOption option;
-    int32_t err = remote->SendRequest(UNSUBSCRIBE_SYSTEM_PROCESS_TRANSACTION, data, reply, option);
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::UNSUBSCRIBE_SYSTEM_PROCESS_TRANSACTION), data, reply, option);
     if (err != ERR_NONE) {
         HILOGE("UnSubscribeSystemProcess SendRequest error:%{public}d!", err);
         return err;
@@ -907,7 +924,9 @@ int32_t SystemAbilityManagerProxy::GetOnDemandReasonExtraData(int64_t extraDataI
     }
 
     MessageOption option;
-    int32_t err = remote->SendRequest(GET_ONDEMAND_REASON_EXTRA_DATA_TRANSACTION, data, extraDataParcel, option);
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::GET_ONDEMAND_REASON_EXTRA_DATA_TRANSACTION),
+        data, extraDataParcel, option);
     if (err != ERR_NONE) {
         HILOGE("GetOnDemandReasonExtraData SendRequest error:%{public}d", err);
         return err;
@@ -947,7 +966,8 @@ int32_t SystemAbilityManagerProxy::GetOnDemandPolicy(int32_t systemAbilityId, On
 
     MessageParcel reply;
     MessageOption option;
-    int32_t err = remote->SendRequest(GET_ONDEAMND_POLICY_TRANSACTION, data, reply, option);
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::GET_ONDEAMND_POLICY_TRANSACTION), data, reply, option);
     if (err != ERR_NONE) {
         HILOGE("GetOnDemandPolicy SendRequest error: %{public}d!", err);
         return err;
@@ -999,7 +1019,8 @@ int32_t SystemAbilityManagerProxy::UpdateOnDemandPolicy(int32_t systemAbilityId,
 
     MessageParcel reply;
     MessageOption option;
-    int32_t err = remote->SendRequest(UPDATE_ONDEAMND_POLICY_TRANSACTION, data, reply, option);
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::UPDATE_ONDEAMND_POLICY_TRANSACTION), data, reply, option);
     if (err != ERR_NONE) {
         HILOGE("UpdateOnDemandPolicy SendRequest error: %{public}d!", err);
         return err;

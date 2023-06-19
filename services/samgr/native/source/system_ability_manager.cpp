@@ -555,11 +555,11 @@ void SystemAbilityManager::NotifySystemAbilityChanged(int32_t systemAbilityId, c
     }
 
     switch (code) {
-        case ADD_SYSTEM_ABILITY_TRANSACTION: {
+        case static_cast<uint32_t>(SamgrInterfaceCode::ADD_SYSTEM_ABILITY_TRANSACTION): {
             listener->OnAddSystemAbility(systemAbilityId, deviceId);
             break;
         }
-        case REMOVE_SYSTEM_ABILITY_TRANSACTION: {
+        case static_cast<uint32_t>(SamgrInterfaceCode::REMOVE_SYSTEM_ABILITY_TRANSACTION): {
             listener->OnRemoveSystemAbility(systemAbilityId, deviceId);
             break;
         }
@@ -853,7 +853,8 @@ int32_t SystemAbilityManager::SubscribeSystemAbility(int32_t systemAbilityId,
     }
     sptr<IRemoteObject> targetObject = CheckSystemAbility(systemAbilityId);
     if (targetObject != nullptr) {
-        NotifySystemAbilityChanged(systemAbilityId, "", ADD_SYSTEM_ABILITY_TRANSACTION, listener);
+        NotifySystemAbilityChanged(systemAbilityId, "",
+            static_cast<uint32_t>(SamgrInterfaceCode::ADD_SYSTEM_ABILITY_TRANSACTION), listener);
     }
     return ERR_OK;
 }
@@ -1151,7 +1152,8 @@ void SystemAbilityManager::SendSystemAbilityAddedMsg(int32_t systemAbilityId, co
         return;
     }
     auto notifyAddedTask = [systemAbilityId, remoteObject, this]() {
-        FindSystemAbilityNotify(systemAbilityId, ADD_SYSTEM_ABILITY_TRANSACTION);
+        FindSystemAbilityNotify(systemAbilityId,
+            static_cast<uint32_t>(SamgrInterfaceCode::ADD_SYSTEM_ABILITY_TRANSACTION));
         NotifySystemAbilityLoaded(systemAbilityId, remoteObject);
     };
     bool ret = workHandler_->PostTask(notifyAddedTask);
@@ -1167,7 +1169,8 @@ void SystemAbilityManager::SendSystemAbilityRemovedMsg(int32_t systemAbilityId)
         return;
     }
     auto notifyRemovedTask = [systemAbilityId, this]() {
-        FindSystemAbilityNotify(systemAbilityId, REMOVE_SYSTEM_ABILITY_TRANSACTION);
+        FindSystemAbilityNotify(systemAbilityId,
+            static_cast<uint32_t>(SamgrInterfaceCode::REMOVE_SYSTEM_ABILITY_TRANSACTION));
     };
     bool ret = workHandler_->PostTask(notifyRemovedTask);
     if (!ret) {
