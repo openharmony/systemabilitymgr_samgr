@@ -86,7 +86,7 @@ ohos_fuzztest("SystemAbilityManagerFuzzTest") {
   ]
   defines = []
   if (hicollie_able) {
-    external_deps += [ "hicollie:libhicollie" ]
+    external_deps += [ "hicollie_native:libhicollie" ]
     defines += [ "HICOLLIE_ENABLE" ]
   }
 
