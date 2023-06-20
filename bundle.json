@@ -32,7 +32,7 @@
                 "common_event_service",
                 "eventhandler",
                 "device_manager",
-                "hicollie_native",
+                "hicollie",
                 "hilog",
                 "hisysevent",
                 "hitrace",

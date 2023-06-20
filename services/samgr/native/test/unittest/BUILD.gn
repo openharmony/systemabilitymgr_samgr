@@ -117,7 +117,7 @@ ohos_unittest("SystemAbilityMgrTest") {
     }
   }
   if (hicollie_able) {
-    external_deps += [ "hicollie_native:libhicollie" ]
+    external_deps += [ "hicollie:libhicollie" ]
     defines += [ "HICOLLIE_ENABLE" ]
   }
 
@@ -222,7 +222,7 @@ ohos_unittest("SystemAbilityMgrStubTest") {
     }
   }
   if (hicollie_able) {
-    external_deps += [ "hicollie_native:libhicollie" ]
+    external_deps += [ "hicollie:libhicollie" ]
     defines += [ "HICOLLIE_ENABLE" ]
   }
 
@@ -466,7 +466,7 @@ ohos_executable("TestTool") {
     }
   }
   if (hicollie_able) {
-    external_deps += [ "hicollie_native:libhicollie" ]
+    external_deps += [ "hicollie:libhicollie" ]
     defines += [ "HICOLLIE_ENABLE" ]
   }
 
