@@ -1596,7 +1596,7 @@ void SystemAbilityManager::DeviceIdToNetworkId(std::string& networkId)
 {
     std::vector<DmDeviceInfo> devList;
     if (DeviceManager::GetInstance().GetTrustedDeviceList(PKG_NAME, "", devList) == ERR_OK) {
-        for (DmDeviceInfo& devInfo : devList) {
+        for (const DmDeviceInfo& devInfo : devList) {
             if (networkId == devInfo.deviceId) {
                 networkId = devInfo.networkId;
                 break;
