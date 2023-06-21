@@ -23,6 +23,7 @@
 #include "device_status_collect_manager.h"
 #ifdef SUPPORT_COMMON_EVENT
 #include "common_event_collect.h"
+#include "device_switch_collect.h"
 #endif
 
 using namespace std;
@@ -606,5 +607,39 @@ HWTEST_F(DeviceStatusCollectManagerTest, GetOnDemandReasonExtraData004, TestSize
     OnDemandReasonExtraData onDemandReasonExtraData;
     int32_t ret = collectManager->GetOnDemandReasonExtraData(EXTRA_ID, onDemandReasonExtraData);
     EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: AddCollectEvents004
+ * @tc.desc: test AddCollectEvents with nullptr
+ * @tc.type: FUNC
+ * @tc.require: I7FBV6
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, AddCollectEvents004, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    collect->collectPluginMap_[SETTING_SWITCH] = nullptr;
+    OnDemandEvent onDemandEvent = { SETTING_SWITCH, WIFI_NAME, "on" };
+    std::vector<OnDemandEvent> events {onDemandEvent};
+    int32_t ret = collect->AddCollectEvents(events);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: AddCollectEvents005
+ * @tc.desc: test AddCollectEvents with invalid event name
+ * @tc.type: FUNC
+ * @tc.require: I7FBV6
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, AddCollectEvents005, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceSwitchCollect> deviceSwitchCollect =
+        new DeviceSwitchCollect(collect);
+    collect->collectPluginMap_[SETTING_SWITCH] = deviceSwitchCollect;
+    OnDemandEvent onDemandEvent = { SETTING_SWITCH, "test", "on" };
+    std::vector<OnDemandEvent> events {onDemandEvent};
+    int32_t ret = collect->AddCollectEvents(events);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
 } // namespace OHOS

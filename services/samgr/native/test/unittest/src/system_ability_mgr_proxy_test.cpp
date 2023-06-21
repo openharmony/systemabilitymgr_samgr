@@ -937,4 +937,17 @@ HWTEST_F(SystemAbilityMgrProxyTest, GetOnDemandReasonExtraData001, TestSize.Leve
     int32_t ret = samgrProxy->GetOnDemandReasonExtraData(EXTRA_DATA_ID, extraDataParcel);
     EXPECT_EQ(ret, 0);
 }
+
+/**
+ * @tc.name: SubscribeSystemProcess002
+ * @tc.desc: test SubscribeSystemProcess
+ * @tc.type: FUNC
+ * @tc.require: I7FBV6
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, SubscribeSystemProcess002, TestSize.Level3)
+{
+    sptr<ISystemAbilityManager> samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    int32_t ret = samgrProxy->SubscribeSystemProcess(nullptr);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
 }

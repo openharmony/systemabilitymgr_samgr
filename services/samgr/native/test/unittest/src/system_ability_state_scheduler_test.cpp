@@ -37,6 +37,9 @@ constexpr int32_t SAID_INVALID = -1;
 constexpr int32_t SAID = 1234;
 constexpr int32_t STATENUMS = 1;
 constexpr int32_t DELAY_TIME = 2;
+constexpr int32_t INVALID_DELAY_TIME = -1;
+constexpr int32_t MAX_DELAY_TIME_TEST = 5 * 60 * 1000;
+constexpr int32_t BEYOND_DELAY_TIME_TEST = 5 * 60 * 1000 + 1;
 const std::u16string process = u"test";
 const std::u16string process_invalid = u"test_invalid";
 const std::string LOCAL_DEVICE = "local";
@@ -2061,6 +2064,74 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleAbilityDiedEvent001, TestSize.Le
     std::shared_ptr<SystemAbilityContext> abilityContext = std::make_shared<SystemAbilityContext>();
     abilityContext->systemAbilityId = SAID;
     int32_t ret = systemAbilityStateScheduler->HandleAbilityDiedEvent(abilityContext->systemAbilityId);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: LimitDelayUnloadTime001
+ * @tc.desc: test LimitDelayUnloadTime with delay time is less than 0
+ * @tc.type: FUNC
+ * @tc.require: I7FBV6
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, LimitDelayUnloadTime001, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    int32_t ret = systemAbilityStateScheduler->LimitDelayUnloadTime(INVALID_DELAY_TIME);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
+ * @tc.name: LimitDelayUnloadTime002
+ * @tc.desc: test LimitDelayUnloadTime with delay time is more than max_delay_time
+ * @tc.type: FUNC
+ * @tc.require: I7FBV6
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, LimitDelayUnloadTime002, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    int32_t ret = systemAbilityStateScheduler->LimitDelayUnloadTime(BEYOND_DELAY_TIME_TEST);
+    EXPECT_EQ(ret, MAX_DELAY_TIME_TEST);
+}
+
+/**
+ * @tc.name: PostUnloadTimeoutTask001
+ * @tc.desc: test PostUnloadTimeoutTask with state is SystemProcessState::STOPPING
+ * @tc.type: FUNC
+ * @tc.require: I7FBV6
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, PostUnloadTimeoutTask001, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::shared_ptr<SystemProcessContext> systemProcessContext = std::make_shared<SystemProcessContext>();
+    std::list<SaProfile> saProfiles;
+    systemAbilityStateScheduler->Init(saProfiles);
+    systemProcessContext->state = SystemProcessState::STOPPING;
+    int32_t ret = systemAbilityStateScheduler->PostUnloadTimeoutTask(systemProcessContext);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: PostUnloadTimeoutTask002
+ * @tc.desc: test PostUnloadTimeoutTask with state is SystemProcessState::STARTED
+ * @tc.type: FUNC
+ * @tc.require: I7FBV6
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, PostUnloadTimeoutTask002, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::shared_ptr<SystemProcessContext> systemProcessContext = std::make_shared<SystemProcessContext>();
+    std::list<SaProfile> saProfiles;
+    systemAbilityStateScheduler->Init(saProfiles);
+    systemProcessContext->state = SystemProcessState::STARTED;
+    int32_t ret = systemAbilityStateScheduler->PostUnloadTimeoutTask(systemProcessContext);
     EXPECT_EQ(ret, ERR_OK);
 }
 }
