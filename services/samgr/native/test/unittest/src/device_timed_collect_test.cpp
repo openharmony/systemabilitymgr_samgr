@@ -244,4 +244,20 @@ HWTEST_F(DeviceTimedCollectTest, AddCollectEvent001, TestSize.Level3)
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     DTEST_LOG << "AddCollectEvent001 end" << std::endl;
 }
+
+/**
+ * @tc.name: AddCollectEvent002
+ * @tc.desc: test AddCollectEvent, with interval is less than MIN_INTERVAL
+ * @tc.type: FUNC
+ * @tc.require: I7FBV6
+ */
+HWTEST_F(DeviceTimedCollectTest, AddCollectEvent002, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
+        std::make_shared<DeviceTimedCollect>(collect);
+    OnDemandEvent event = {TIMED_EVENT, "mockevent", "10"};
+    int32_t ret = deviceTimedCollect->AddCollectEvent(event);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
 }

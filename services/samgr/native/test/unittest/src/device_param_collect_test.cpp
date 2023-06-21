@@ -193,4 +193,24 @@ HWTEST_F(DeviceParamCollectTest, CheckCondition001, TestSize.Level3)
     EXPECT_FALSE(ret);
     DTEST_LOG << "CheckCondition001 end" << std::endl;
 }
+
+/**
+ * @tc.name: AddCollectEvent002
+ * @tc.desc: test AddCollectEvent, with param is already existed
+ * @tc.type: FUNC
+ * @tc.require: I7FBV6
+ */
+
+HWTEST_F(DeviceParamCollectTest, AddCollectEvent002, TestSize.Level3)
+{
+    sptr<IReport> report;
+    std::shared_ptr<DeviceParamCollect> deviceParamCollect =
+        std::make_shared<DeviceParamCollect>(report);
+    deviceParamCollect->params_.insert("test");
+    OnDemandEvent event;
+    event.eventId = PARAM;
+    event.name = "test";
+    int32_t ret = deviceParamCollect->AddCollectEvent(event);
+    EXPECT_EQ(ret, ERR_OK);
+}
 }  // namespace OHOS
