@@ -40,7 +40,7 @@
                 "ipc",
                 "resource_schedule_service",
                 "safwk",
-                "selinux"
+                "selinux_adapter"
             ]
         },
         "build": {

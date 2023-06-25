@@ -94,7 +94,7 @@ ohos_executable("samgr") {
     ]
 
     if (build_selinux) {
-      external_deps += [ "selinux:libservice_checker" ]
+      external_deps += [ "selinux_adapter:libservice_checker" ]
       defines += [ "WITH_SELINUX" ]
     }
 
