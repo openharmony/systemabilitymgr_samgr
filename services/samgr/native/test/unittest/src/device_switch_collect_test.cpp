@@ -516,7 +516,7 @@ HWTEST_F(DeviceSwitchCollectTest, WifiEventSubscriberOnReceiveEvent001, TestSize
     data.SetWant(want);
     data.SetCode(BLUETOOTH_STATE_TURN_ON);
     EventFwk::MatchingSkills skill = EventFwk::MatchingSkills();
-    skill.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_BLUETOOTH_HOST_STATE_UPDATE);
+    skill.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_WIFI_POWER_STATE);
     EventFwk::CommonEventSubscribeInfo info(skill);
     std::shared_ptr<EventFwk::CommonEventSubscriber> wifiEventSubscriber
         = std::make_shared<WifiEventSubscriber>(info, deviceSwitchCollect);
@@ -538,11 +538,11 @@ HWTEST_F(DeviceSwitchCollectTest, WifiEventSubscriberOnReceiveEvent002, TestSize
         new DeviceSwitchCollect(collect);
     AAFwk::Want want;
     EventFwk::CommonEventData data;
-    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_BLUETOOTH_HOST_STATE_UPDATE);
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_WIFI_POWER_STATE);
     data.SetWant(want);
     data.SetCode(WIFI_ON);
     EventFwk::MatchingSkills skill = EventFwk::MatchingSkills();
-    skill.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_BLUETOOTH_HOST_STATE_UPDATE);
+    skill.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_WIFI_POWER_STATE);
     EventFwk::CommonEventSubscribeInfo info(skill);
     std::shared_ptr<EventFwk::CommonEventSubscriber> wifiEventSubscriber
         = std::make_shared<WifiEventSubscriber>(info, deviceSwitchCollect);
@@ -564,11 +564,11 @@ HWTEST_F(DeviceSwitchCollectTest, WifiEventSubscriberOnReceiveEvent003, TestSize
         new DeviceSwitchCollect(collect);
     AAFwk::Want want;
     EventFwk::CommonEventData data;
-    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_BLUETOOTH_HOST_STATE_UPDATE);
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_WIFI_POWER_STATE);
     data.SetWant(want);
     data.SetCode(WIFI_OFF);
     EventFwk::MatchingSkills skill = EventFwk::MatchingSkills();
-    skill.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_BLUETOOTH_HOST_STATE_UPDATE);
+    skill.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_WIFI_POWER_STATE);
     EventFwk::CommonEventSubscribeInfo info(skill);
     std::shared_ptr<EventFwk::CommonEventSubscriber> wifiEventSubscriber
         = std::make_shared<WifiEventSubscriber>(info, deviceSwitchCollect);
@@ -590,11 +590,11 @@ HWTEST_F(DeviceSwitchCollectTest, WifiEventSubscriberOnReceiveEvent004, TestSize
         new DeviceSwitchCollect(collect);
     AAFwk::Want want;
     EventFwk::CommonEventData data;
-    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_BLUETOOTH_HOST_STATE_UPDATE);
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_WIFI_POWER_STATE);
     data.SetWant(want);
     data.SetCode(INVALID_CODE);
     EventFwk::MatchingSkills skill = EventFwk::MatchingSkills();
-    skill.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_BLUETOOTH_HOST_STATE_UPDATE);
+    skill.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_WIFI_POWER_STATE);
     EventFwk::CommonEventSubscribeInfo info(skill);
     std::shared_ptr<EventFwk::CommonEventSubscriber> wifiEventSubscriber
         = std::make_shared<WifiEventSubscriber>(info, deviceSwitchCollect);

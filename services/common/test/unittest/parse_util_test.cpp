@@ -1097,5 +1097,18 @@ HWTEST_F(ParseUtilTest, StringtoMap001, TestSize.Level3)
     unordered_map<std::string, std::string> ret = parser_->StringToMap(EVENT_STRING);
     EXPECT_FALSE(ret.empty());
 }
+
+/**
+ * @tc.name: CloseHandle001
+ * @tc.desc: test CloseHandle with nullptr
+ * @tc.type: FUNC
+ * @tc.require: I7G775
+ */
+HWTEST_F(ParseUtilTest, CloseHandle001, TestSize.Level3)
+{
+    SaProfile saProfile;
+    parser_->CloseHandle(saProfile);
+    EXPECT_EQ(saProfile.handle, nullptr);
+}
 } // namespace SAMGR
 } // namespace OHOS

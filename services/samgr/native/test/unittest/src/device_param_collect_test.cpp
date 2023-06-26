@@ -149,6 +149,24 @@ HWTEST_F(DeviceParamCollectTest, OnAddSystemAbility002, TestSize.Level3)
 }
 
 /**
+ * @tc.name: OnAddSystemAbility003
+ * @tc.desc: test OnAddSystemAbility, with deviceParamCollect_ is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I7G775
+ */
+
+HWTEST_F(DeviceParamCollectTest, OnAddSystemAbility003, TestSize.Level3)
+{
+    sptr<IReport> report;
+    sptr<DeviceParamCollect> deviceParamCollect = new DeviceParamCollect(report);
+    sptr<SystemAbilityStatusChange> statusChangeListener = new SystemAbilityStatusChange();
+    statusChangeListener->Init(deviceParamCollect);
+    statusChangeListener->deviceParamCollect_ = nullptr;
+    statusChangeListener->OnAddSystemAbility(PARAM_WATCHER_DISTRIBUTED_SERVICE_ID, "");
+    EXPECT_EQ(statusChangeListener->deviceParamCollect_, nullptr);
+}
+
+/**
  * @tc.name: AddCollectEvent001
  * @tc.desc: test AddCollectEvent, with event
  * @tc.type: FUNC
