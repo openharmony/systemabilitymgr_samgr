@@ -61,7 +61,8 @@ bool LocalAbilityManagerProxy::StartAbility(int32_t systemAbilityId, const std::
     }
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
-    int32_t status = iro->SendRequest(START_ABILITY_TRANSACTION, data, reply, option);
+    int32_t status = iro->SendRequest(
+        static_cast<uint32_t>(SafwkInterfaceCode::START_ABILITY_TRANSACTION), data, reply, option);
     if (status != NO_ERROR) {
         HiLog::Error(label_, "StartAbility SendRequest failed, return value : %{public}d", status);
         return false;
@@ -104,7 +105,8 @@ bool LocalAbilityManagerProxy::StopAbility(int32_t systemAbilityId, const std::s
     }
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
-    int32_t status = iro->SendRequest(STOP_ABILITY_TRANSACTION, data, reply, option);
+    int32_t status = iro->SendRequest(
+        static_cast<uint32_t>(SafwkInterfaceCode::STOP_ABILITY_TRANSACTION), data, reply, option);
     if (status != NO_ERROR) {
         HiLog::Error(label_, "StopAbility SendRequest failed, return value : %{public}d", status);
         return false;
@@ -142,7 +144,8 @@ bool LocalAbilityManagerProxy::ActiveAbility(int32_t systemAbilityId,
 
     MessageParcel reply;
     MessageOption option;
-    int32_t status = iro->SendRequest(ACTIVE_ABILITY_TRANSACTION, data, reply, option);
+    int32_t status = iro->SendRequest(
+        static_cast<uint32_t>(SafwkInterfaceCode::ACTIVE_ABILITY_TRANSACTION), data, reply, option);
     if (status != NO_ERROR) {
         HiLog::Error(label_, "ActiveAbility SendRequest failed, return value : %{public}d", status);
         return false;
@@ -185,7 +188,8 @@ bool LocalAbilityManagerProxy::IdleAbility(int32_t systemAbilityId,
 
     MessageParcel reply;
     MessageOption option;
-    int32_t status = iro->SendRequest(IDLE_ABILITY_TRANSACTION, data, reply, option);
+    int32_t status = iro->SendRequest(
+        static_cast<uint32_t>(SafwkInterfaceCode::IDLE_ABILITY_TRANSACTION), data, reply, option);
     if (status != NO_ERROR) {
         HiLog::Error(label_, "IdleAbility SendRequest failed, return value : %{public}d", status);
         return false;

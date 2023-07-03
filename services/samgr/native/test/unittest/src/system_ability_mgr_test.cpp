@@ -502,7 +502,7 @@ HWTEST_F(SystemAbilityMgrTest, LoadSystemAbility005, TestSize.Level1)
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
-    int32_t result = saMgr->OnRemoteRequest(ISystemAbilityManager::LOAD_SYSTEM_ABILITY_TRANSACTION,
+    int32_t result = saMgr->OnRemoteRequest(static_cast<uint32_t>(SamgrInterfaceCode::LOAD_SYSTEM_ABILITY_TRANSACTION),
         data, reply, option);
     EXPECT_TRUE(result != ERR_NONE);
 }
@@ -520,7 +520,7 @@ HWTEST_F(SystemAbilityMgrTest, LoadSystemAbility006, TestSize.Level1)
     data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN);
     MessageParcel reply;
     MessageOption option;
-    int32_t result = saMgr->OnRemoteRequest(ISystemAbilityManager::LOAD_SYSTEM_ABILITY_TRANSACTION,
+    int32_t result = saMgr->OnRemoteRequest(static_cast<uint32_t>(SamgrInterfaceCode::LOAD_SYSTEM_ABILITY_TRANSACTION),
         data, reply, option);
     EXPECT_TRUE(result != ERR_NONE);
 }
@@ -539,7 +539,7 @@ HWTEST_F(SystemAbilityMgrTest, LoadSystemAbility007, TestSize.Level1)
     data.WriteInt32(TEST_EXCEPTION_HIGH_SA_ID);
     MessageParcel reply;
     MessageOption option;
-    int32_t result = saMgr->OnRemoteRequest(ISystemAbilityManager::LOAD_SYSTEM_ABILITY_TRANSACTION,
+    int32_t result = saMgr->OnRemoteRequest(static_cast<uint32_t>(SamgrInterfaceCode::LOAD_SYSTEM_ABILITY_TRANSACTION),
         data, reply, option);
     EXPECT_TRUE(result != ERR_NONE);
 }
@@ -558,7 +558,7 @@ HWTEST_F(SystemAbilityMgrTest, LoadSystemAbility008, TestSize.Level1)
     data.WriteInt32(DISTRIBUTED_SCHED_TEST_SO_ID);
     MessageParcel reply;
     MessageOption option;
-    int32_t result = saMgr->OnRemoteRequest(ISystemAbilityManager::LOAD_SYSTEM_ABILITY_TRANSACTION,
+    int32_t result = saMgr->OnRemoteRequest(static_cast<uint32_t>(SamgrInterfaceCode::LOAD_SYSTEM_ABILITY_TRANSACTION),
         data, reply, option);
     EXPECT_TRUE(result != ERR_NONE);
 }
@@ -579,7 +579,7 @@ HWTEST_F(SystemAbilityMgrTest, LoadSystemAbility009, TestSize.Level1)
     data.WriteRemoteObject(callback->AsObject());
     MessageParcel reply;
     MessageOption option;
-    int32_t result = saMgr->OnRemoteRequest(ISystemAbilityManager::LOAD_SYSTEM_ABILITY_TRANSACTION,
+    int32_t result = saMgr->OnRemoteRequest(static_cast<uint32_t>(SamgrInterfaceCode::LOAD_SYSTEM_ABILITY_TRANSACTION),
         data, reply, option);
     EXPECT_TRUE(result != ERR_NONE);
 }

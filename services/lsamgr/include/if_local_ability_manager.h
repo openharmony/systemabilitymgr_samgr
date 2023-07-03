@@ -23,6 +23,7 @@
 #include "iremote_stub.h"
 #include "iremote_proxy.h"
 #include "nlohmann/json.hpp"
+#include "safwk_ipc_interface_code.h"
 
 namespace OHOS {
 class ILocalAbilityManager : public IRemoteBroker {
@@ -35,12 +36,6 @@ public:
         const nlohmann::json& idleReason, int32_t& delayTime) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ILocalAbilityManager");
 protected:
-    enum {
-        START_ABILITY_TRANSACTION = 1,
-        STOP_ABILITY_TRANSACTION = 2,
-        ACTIVE_ABILITY_TRANSACTION = 3,
-        IDLE_ABILITY_TRANSACTION = 4,
-    };
     static inline const std::u16string LOCAL_ABILITY_MANAGER_INTERFACE_TOKEN = u"ohos.localabilitymanager.accessToken";
 };
 }
