@@ -158,6 +158,7 @@ enum {
     IVIHARDWARE_ADAS_SA_ID                           = 2602,
     IVIHARDWARE_TBOX_SA_ID                           = 2603,
     IVIHARDWARE_CLUSTER_SA_ID                        = 2604,
+    INTELL_VOICE_SERVICE_ID                          = 2688,
     SUBSYS_KERNEL_SYS_ABILITY_ID_BEGIN               = 2700,
     SUBSYS_LOCATION_SYS_ABILITY_ID_BEGIN             = 2800,
     LOCATION_GEO_CONVERT_SA_ID                       = 2801,
