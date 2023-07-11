@@ -468,6 +468,7 @@ static const std::map<int, std::string> saNameMap_ = {
     { SECURITY_COMPONENT_SERVICE_ID, "SecurityComponentService" },
     { ADVERTISING_SA_ID, "Advertising" },
     { LOCAL_CODE_SIGN_SERVICE_ID, "LocalCodeSignService" },
+    { INTELL_VOICE_SERVICE_ID, "IntellVoiceService" },
 };
 } // namespace OHOS
 
