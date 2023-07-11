@@ -41,6 +41,7 @@ enum {
     SUBSYS_AI_SYS_ABILITY_ID_BEGIN                   = 300,
     SUBSYS_AI_DS_SYS_ABILITY_ID                      = 310,
     AIDISPATCHER_ENGINE_SERVICE                      = 311,
+    INTELL_VOICE_SERVICE_ID                          = 312,
     SUBSYS_APPEXECFWK_SYS_ABILITY_ID_BEGIN           = 400,
     BUNDLE_MGR_SERVICE_SYS_ABILITY_ID                = 401,
     DISTRIBUTED_BUNDLE_MGR_SERVICE_SYS_ABILITY_ID    = 402,
@@ -467,6 +468,7 @@ static const std::map<int, std::string> saNameMap_ = {
     { SECURITY_COMPONENT_SERVICE_ID, "SecurityComponentService" },
     { ADVERTISING_SA_ID, "Advertising" },
     { LOCAL_CODE_SIGN_SERVICE_ID, "LocalCodeSignService" },
+    { INTELL_VOICE_SERVICE_ID, "IntellVoiceService" },
 };
 } // namespace OHOS
 
