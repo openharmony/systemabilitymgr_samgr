@@ -41,6 +41,7 @@ constexpr const char* SA_TAG_LIB_PATH = "libpath";
 constexpr const char* SA_TAG_NAME = "name";
 constexpr const char* SA_TAG_DEPEND = "depend";
 constexpr const char* SA_TAG_DEPEND_TIMEOUT = "depend-time-out";
+constexpr const char* SA_TAG_DEPEND_TIMEOUT_COMPATIBILITY = "depend_time_out";
 constexpr const char* SA_TAG_RUN_ON_CREATE = "run-on-create";
 constexpr const char* SA_TAG_AUTO_RESTART = "auto-restart";
 constexpr const char* SA_TAG_DISTRIBUTED = "distributed";
@@ -372,6 +373,9 @@ bool ParseUtil::ParseSystemAbility(SaProfile& saProfile, nlohmann::json& systemA
     GetBoolFromJson(systemAbilityJson, SA_TAG_DISTRIBUTED, saProfile.distributed);
     GetIntArrayFromJson(systemAbilityJson, SA_TAG_DEPEND, saProfile.dependSa);
     GetInt32FromJson(systemAbilityJson, SA_TAG_DEPEND_TIMEOUT, saProfile.dependTimeout);
+    if (saProfile.dependTimeout == 0) {
+        GetInt32FromJson(systemAbilityJson, SA_TAG_DEPEND_TIMEOUT_COMPATIBILITY, saProfile.dependTimeout);
+    }
     GetInt32FromJson(systemAbilityJson, SA_TAG_DUMP_LEVEL, saProfile.dumpLevel);
     string capability;
     GetStringFromJson(systemAbilityJson, SA_TAG_CAPABILITY, capability);
