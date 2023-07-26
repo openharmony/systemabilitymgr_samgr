@@ -303,7 +303,7 @@ enum {
     LAST_SYS_ABILITY_ID                              = 0x00ffffff,  // 16777215
 };
 
-static const std::map<int, std::string> saNameMap_ = {
+inline const std::map<int, std::string> saNameMap_ = {
     { 200, "AccountMgr" },
     { 301, "AIEngine" },
     { ABILITY_MGR_SERVICE_ID, "AbilityManagerService" },
