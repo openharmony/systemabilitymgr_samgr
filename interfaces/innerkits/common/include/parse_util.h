@@ -38,6 +38,7 @@ public:
     void RemoveSaProfile(int32_t saId);
     bool CheckPathExist(const std::string& profilePath);
     std::u16string GetProcessName() const;
+    void SetUpdateList(const std::vector<std::string>& updateVec);
     static std::unordered_map<std::string, std::string> StringToMap(const std::string& eventStr);
     static nlohmann::json StringToJsonObj(const std::string& eventStr);
     static std::unordered_map<std::string, std::string> JsonObjToMap(const nlohmann::json& eventJson);
@@ -45,6 +46,7 @@ private:
     void CloseSo();
     uint32_t GetBootPriorityPara(const std::string& bootPhase);
     void OpenSo(SaProfile& saProfile);
+    bool IsUpdateSA(const std::string& saId);
     void CloseHandle(SaProfile& saProfile);
     bool ParseJsonFile(const std::string& realPath);
     bool ParseJsonObj(nlohmann::json& jsonObj, const std::string& jsonPath);
@@ -121,6 +123,7 @@ private:
     std::string GetRealPath(const std::string& profilePath) const;
     std::list<SaProfile> saProfiles_;
     std::u16string procName_;
+    std::vector<std::string> updateVec_;
 };
 } // namespace OHOS
 

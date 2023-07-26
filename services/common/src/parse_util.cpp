@@ -134,6 +134,11 @@ void ParseUtil::ClearResource()
     saProfiles_.clear();
 }
 
+void ParseUtil::SetUpdateList(const std::vector<std::string>& updateVec)
+{
+    updateVec_ = updateVec;
+}
+
 void ParseUtil::OpenSo(uint32_t bootPhase)
 {
     for (auto& saProfile : saProfiles_) {
@@ -141,6 +146,11 @@ void ParseUtil::OpenSo(uint32_t bootPhase)
             OpenSo(saProfile);
         }
     }
+}
+
+bool ParseUtil::IsUpdateSA(const std::string& saId)
+{
+    return std::find(updateVec_.begin(), updateVec_.end(), saId) != updateVec_.end();
 }
 
 void ParseUtil::OpenSo(SaProfile& saProfile)
@@ -157,7 +167,8 @@ void ParseUtil::OpenSo(SaProfile& saProfile)
         Dl_namespace dlNs;
         string updateLibPath = GetRealPath("/module_update/" + ToString(saProfile.saId) + "/" + libDir + "/"
             + fileName);
-        if (CheckPathExist(updateLibPath)) {
+        if (IsUpdateSA(ToString(saProfile.saId)) && CheckPathExist(updateLibPath)) {
+            HILOGI("create namespace to load so");
             Dl_namespace currentNs;
             string nsName = "module_update_" + ToString(saProfile.saId);
             dlns_init(&dlNs, nsName.c_str());
