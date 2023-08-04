@@ -1110,5 +1110,20 @@ HWTEST_F(ParseUtilTest, CloseHandle001, TestSize.Level3)
     parser_->CloseHandle(saProfile);
     EXPECT_EQ(saProfile.handle, nullptr);
 }
+
+/**
+ * @tc.name: SetUpdateList001
+ * @tc.desc: cover SetUpdateList
+ * @tc.type: FUNC
+ * @tc.require: 
+ */
+HWTEST_F(ParseUtilTest, SetUpdateList001, TestSize.Level3)
+{
+    std::string test = "test";
+    std::vector<std::string> updateVec;
+    updateVec.emplace_back(test);
+    parser_->SetUpdateList(updateVec);
+    EXPECT_FALSE(parser_->updateVec_.empty());
+}
 } // namespace SAMGR
 } // namespace OHOS
