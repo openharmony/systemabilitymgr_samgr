@@ -76,12 +76,15 @@ void CommonEventCollect::Init(const std::list<SaProfile>& onDemandSaProfiles)
         std::lock_guard<std::mutex> autoLock(commonEventStateLock_);
         commonEventState_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON);
         commonEventState_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_DISCHARGING);
+        commonEventState_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_POWER_DISCONNECTED);
     }
     std::lock_guard<std::mutex> autoLock(commomEventLock_);
     commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON);
     commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
     commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_CHARGING);
     commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_DISCHARGING);
+    commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_POWER_CONNECTED);
+    commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_POWER_DISCONNECTED);
     for (auto& profile : onDemandSaProfiles) {
         for (auto iterStart = profile.startOnDemand.onDemandEvents.begin();
             iterStart != profile.startOnDemand.onDemandEvents.end(); iterStart++) {
@@ -154,6 +157,12 @@ void CommonEventCollect::SaveAction(const std::string& action)
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_DISCHARGING) {
         commonEventState_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_DISCHARGING);
         commonEventState_.erase(EventFwk::CommonEventSupport::COMMON_EVENT_CHARGING);
+    } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_POWER_CONNECTED) {
+        commonEventState_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_POWER_CONNECTED);
+        commonEventState_.erase(EventFwk::CommonEventSupport::COMMON_EVENT_POWER_DISCONNECTED);
+    } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_POWER_DISCONNECTED) {
+        commonEventState_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_POWER_DISCONNECTED);
+        commonEventState_.erase(EventFwk::CommonEventSupport::COMMON_EVENT_POWER_CONNECTED);
     }
 }
 
