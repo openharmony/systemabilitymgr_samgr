@@ -1115,7 +1115,7 @@ HWTEST_F(ParseUtilTest, CloseHandle001, TestSize.Level3)
  * @tc.name: SetUpdateList001
  * @tc.desc: cover SetUpdateList
  * @tc.type: FUNC
- * @tc.require: 
+ * @tc.require: I7QLDO
  */
 HWTEST_F(ParseUtilTest, SetUpdateList001, TestSize.Level3)
 {
