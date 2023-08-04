@@ -973,6 +973,12 @@ int32_t SystemAbilityManager::AddSystemAbility(int32_t systemAbilityId, const sp
         saInfo.isDistributed = extraProp.isDistributed;
         saInfo.capability = extraProp.capability;
         saInfo.permission = Str16ToStr8(extraProp.permission);
+        if (abilityMap_.count(systemAbilityId) > 0) {
+            auto callingPid = IPCSkeleton::GetCallingPid();
+            auto callingUid = IPCSkeleton::GetCallingUid();
+            HILOGW("systemAbility: %{public}d is being covered, callingPid is %{public}d, callingUid is %{public}d",
+                systemAbilityId, callingPid, callingUid);
+        }
         abilityMap_[systemAbilityId] = std::move(saInfo);
         HILOGI("insert %{public}d. size : %{public}zu", systemAbilityId, abilityMap_.size());
     }
