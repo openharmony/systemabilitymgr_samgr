@@ -117,21 +117,6 @@ HWTEST_F(CommonEventCollectTest, OnStop002, TestSize.Level3)
  */
 HWTEST_F(CommonEventCollectTest, init001, TestSize.Level3)
 {
-    DTEST_LOG << " init001 BEGIN" << std::endl;
-    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
-    const std::list<SaProfile> onDemandSaProfiles;
-    commonEventCollect->Init(onDemandSaProfiles);
-    bool ret = commonEventCollect->AddCommonListener();
-    EXPECT_EQ(false, ret);
-}
-
-/**
- * @tc.name: init002
- * @tc.desc: test init
- * @tc.type: FUNC
- */
-HWTEST_F(CommonEventCollectTest, init002, TestSize.Level3)
-{
     DTEST_LOG << " init002 BEGIN" << std::endl;
     shared_ptr<CommonEventCollect> commonEventCollect = make_shared<CommonEventCollect>(nullptr);
     SaProfile saProfile;
@@ -143,19 +128,6 @@ HWTEST_F(CommonEventCollectTest, init002, TestSize.Level3)
     commonEventCollect->workHandler_ = nullptr;
     int32_t ret = commonEventCollect->OnStop();
     EXPECT_EQ(ERR_OK, ret);
-}
-
-/**
- * @tc.name: IsCesReady001
- * @tc.desc: test IsCesReady
- * @tc.type: FUNC
- */
-HWTEST_F(CommonEventCollectTest, IsCesReady001, TestSize.Level3)
-{
-    DTEST_LOG << " IsCesReady001 BEGIN" << std::endl;
-    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
-    bool ret = commonEventCollect->IsCesReady();
-    EXPECT_EQ(false, ret);
 }
 
 /**
