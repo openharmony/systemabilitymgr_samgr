@@ -28,6 +28,7 @@ using namespace OHOS::AppExecFwk;
 namespace OHOS {
 namespace {
 constexpr uint32_t INIT_EVENT = 10;
+constexpr uint32_t SUB_COMMON_EVENT = 11;
 constexpr uint32_t REMOVE_EXTRA_DATA_EVENT = 12;
 constexpr uint32_t REMOVE_EXTRA_DATA_DELAY_TIME = 300000;
 constexpr int64_t MAX_EXTRA_DATA_ID = 1000000000;
@@ -127,6 +128,15 @@ bool CommonEventCollect::CreateCommonEventSubscriber()
     return EventFwk::CommonEventManager::SubscribeCommonEvent(commonEventSubscriber_);
 }
 
+bool CommonEventCollect::SendEvent(uint32_t eventId)
+{
+    if (workHandler_ == nullptr) {
+        HILOGI("CommonEventCollect workHandler is nullptr");
+        return false;
+    }
+    return workHandler_->SendEvent(eventId);
+}
+
 CommonEventListener::CommonEventListener(const sptr<CommonEventCollect>& commonEventCollect)
     : commonEventCollect_(commonEventCollect) {}
 
@@ -134,9 +144,7 @@ void CommonEventListener::OnAddSystemAbility(int32_t systemAbilityId, const std:
 {
     if (systemAbilityId == COMMON_EVENT_SERVICE_ID) {
         HILOGI("CommonEventCollect ces is ready");
-        if (!commonEventCollect_->CreateCommonEventSubscriber()) {
-            HILOGE("OnAddSystemAbility CreateCommonEventSubscriber failed!");
-        }
+        commonEventCollect_->SendEvent(SUB_COMMON_EVENT);
     }
 }
 
@@ -243,7 +251,7 @@ void CommonHandler::ProcessEvent(const InnerEvent::Pointer& event)
         return;
     }
     auto eventId = event->GetInnerEventId();
-    if (eventId != INIT_EVENT && eventId != REMOVE_EXTRA_DATA_EVENT) {
+    if (eventId != INIT_EVENT && eventId != REMOVE_EXTRA_DATA_EVENT && eventId != SUB_COMMON_EVENT) {
         HILOGE("CommonEventCollect ProcessEvent error event code!");
         return;
     }
@@ -254,6 +262,12 @@ void CommonHandler::ProcessEvent(const InnerEvent::Pointer& event)
     }
     if (eventId == REMOVE_EXTRA_DATA_EVENT) {
         commonCollect->RemoveOnDemandReasonExtraData(event->GetParam());
+        return;
+    }
+    if (eventId == SUB_COMMON_EVENT) {
+        if (!commonCollect->CreateCommonEventSubscriber()) {
+            HILOGE("OnAddSystemAbility CreateCommonEventSubscriber failed!");
+        }
         return;
     }
     sptr<CommonEventListener> listener = new CommonEventListener(commonCollect);
