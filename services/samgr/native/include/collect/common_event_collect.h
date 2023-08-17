@@ -40,6 +40,7 @@ public:
     void RemoveOnDemandReasonExtraData(int64_t extraDataId);
     bool GetOnDemandReasonExtraData(int64_t extraDataId, OnDemandReasonExtraData& extraData) override;
     bool CreateCommonEventSubscriber();
+    bool SendEvent(uint32_t eventId);
 private:
     int64_t GenerateExtraDataIdLocked();
     void AddSkillsEvent(EventFwk::MatchingSkills& skill);
