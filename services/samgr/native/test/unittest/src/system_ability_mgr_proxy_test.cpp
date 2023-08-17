@@ -38,6 +38,7 @@ constexpr int RESULT = 0;
 constexpr int32_t TEST_ID_NORANGE_SAID = -1;
 constexpr int32_t TEST_ID_VAILD = 9999;
 constexpr int32_t TEST_ID_INVAILD = 9990;
+constexpr int32_t TEST_SAID_INVALID = 54321;
 constexpr int64_t EXTRA_DATA_ID = 1;
 }
 void SystemProcessStatusChange::OnSystemProcessStarted(SystemProcessInfo& systemProcessInfo)
@@ -174,7 +175,7 @@ HWTEST_F(SystemAbilityMgrProxyTest, CheckSystemAbility004, TestSize.Level1)
     sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     EXPECT_NE(sm, nullptr);
     bool isExist = true;
-    sptr<IRemoteObject> ret = sm->CheckSystemAbility(TEST_ID_VAILD, isExist);
+    sptr<IRemoteObject> ret = sm->CheckSystemAbility(TEST_SAID_INVALID, isExist);
     EXPECT_EQ(ret, nullptr);
 }
 
