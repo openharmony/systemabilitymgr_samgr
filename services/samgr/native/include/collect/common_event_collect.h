@@ -43,9 +43,11 @@ public:
     bool SendEvent(uint32_t eventId);
 private:
     int64_t GenerateExtraDataIdLocked();
+    bool AddCommonEventName(const std::string& eventName);
     void AddSkillsEvent(EventFwk::MatchingSkills& skill);
+    void CleanFailedEventLocked(const std::string& eventName);
     std::mutex commomEventLock_;
-    std::mutex commonEventSubscriberLock_;
+    std::recursive_mutex commonEventSubscriberLock_;
     sptr<IRemoteObject::DeathRecipient> commonEventDeath_;
     std::set<std::string> commonEventNames_;
     std::shared_ptr<AppExecFwk::EventHandler> workHandler_;
