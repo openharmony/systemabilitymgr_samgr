@@ -63,6 +63,7 @@ ohos_unittest("SystemAbilityMgrTest") {
     "${samgr_services_dir}/source/schedule/system_ability_state_scheduler.cpp",
     "${samgr_services_dir}/source/system_ability_load_callback_proxy.cpp",
     "${samgr_services_dir}/source/system_ability_manager.cpp",
+    "${samgr_services_dir}/source/system_ability_manager_dumper.cpp",
     "${samgr_services_dir}/source/system_ability_manager_stub.cpp",
     "${samgr_services_dir}/source/system_ability_status_change_proxy.cpp",
     "${samgr_services_dir}/source/system_process_status_change_proxy.cpp",
@@ -175,6 +176,7 @@ ohos_unittest("SystemAbilityMgrStubTest") {
     "${samgr_services_dir}/source/schedule/system_ability_state_machine.cpp",
     "${samgr_services_dir}/source/schedule/system_ability_state_scheduler.cpp",
     "${samgr_services_dir}/source/system_ability_manager.cpp",
+    "${samgr_services_dir}/source/system_ability_manager_dumper.cpp",
     "${samgr_services_dir}/source/system_ability_manager_stub.cpp",
     "${samgr_services_dir}/test/unittest/src/itest_transaction_service.cpp",
     "${samgr_services_dir}/test/unittest/src/mock_permission.cpp",
@@ -327,6 +329,7 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
     "${samgr_services_dir}/source/schedule/system_ability_state_machine.cpp",
     "${samgr_services_dir}/source/schedule/system_ability_state_scheduler.cpp",
     "${samgr_services_dir}/source/system_ability_manager.cpp",
+    "${samgr_services_dir}/source/system_ability_manager_dumper.cpp",
     "${samgr_services_dir}/source/system_ability_manager_stub.cpp",
     "${samgr_services_dir}/test/unittest/src/sa_status_change_mock.cpp",
     "${samgr_services_dir}/test/unittest/src/system_ability_event_handler_test.cpp",
@@ -379,6 +382,57 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
   }
 }
 
+ohos_unittest("SystemAbilityMgrDumperTest") {
+  module_out_path = module_output_path
+
+  sources = [
+    "${samgr_dir}/utils/native/source/tools.cpp",
+    "${samgr_services_dir}/source/ability_death_recipient.cpp",
+    "${samgr_services_dir}/source/collect/device_status_collect_manager.cpp",
+    "${samgr_services_dir}/source/collect/icollect_plugin.cpp",
+    "${samgr_services_dir}/source/memory_guard.cpp",
+    "${samgr_services_dir}/source/rpc_callback_imp.cpp",
+    "${samgr_services_dir}/source/schedule/system_ability_event_handler.cpp",
+    "${samgr_services_dir}/source/schedule/system_ability_state_machine.cpp",
+    "${samgr_services_dir}/source/schedule/system_ability_state_scheduler.cpp",
+    "${samgr_services_dir}/source/system_ability_manager.cpp",
+    "${samgr_services_dir}/source/system_ability_manager_dumper.cpp",
+    "${samgr_services_dir}/source/system_ability_manager_stub.cpp",
+    "${samgr_services_dir}/test/unittest/src/system_ability_manager_dumper_test.cpp",
+  ]
+
+  configs = [
+    ":sam_test_config",
+    "${samgr_dir}/services/samgr/native:sam_config",
+    "//foundation/systemabilitymgr/samgr/test/resource:coverage_flags",
+  ]
+
+  if (target_cpu == "arm") {
+    cflags = [ "-DBINDER_IPC_32BIT" ]
+  }
+
+  deps = [
+    ":samgr_proxy_tdd",
+    "//third_party/googletest:gtest_main",
+  ]
+
+  external_deps = [
+    "access_token:libaccesstoken_sdk",
+    "access_token:libnativetoken",
+    "access_token:libtoken_setproc",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
+    "init:libbeget_proxy",
+    "init:libbegetutil",
+    "ipc:ipc_core",
+    "ipc:libdbinder",
+    "safwk:system_ability_fwk",
+  ]
+}
+
 ohos_executable("ondemand") {
   sources = [
     "${samgr_services_dir}/test/unittest/src/mock_permission.cpp",
@@ -428,6 +482,7 @@ ohos_executable("TestTool") {
     "${samgr_services_dir}/source/schedule/system_ability_state_scheduler.cpp",
     "${samgr_services_dir}/source/system_ability_load_callback_proxy.cpp",
     "${samgr_services_dir}/source/system_ability_manager.cpp",
+    "${samgr_services_dir}/source/system_ability_manager_dumper.cpp",
     "${samgr_services_dir}/source/system_ability_manager_stub.cpp",
     "${samgr_services_dir}/source/system_ability_status_change_proxy.cpp",
     "${samgr_services_dir}/source/system_process_status_change_proxy.cpp",
@@ -556,6 +611,7 @@ group("unittest") {
   testonly = true
   deps = [
     ":LocalAbilityManagerProxyTest",
+    ":SystemAbilityMgrDumperTest",
     ":SystemAbilityMgrProxyTest",
     ":SystemAbilityMgrStubTest",
     ":SystemAbilityMgrTest",

@@ -25,6 +25,7 @@ System ability definition should be a number between FIRST_SYS_ABILITY_ID and LA
 And for vendor, should be a number between VENDOR_SYS_ABILITY_ID_BEGIN and VENDOR_SYS_ABILITY_ID_END.
 */
 enum {
+    SAMGR_DUMP_SAID                                  = 0,
     FIRST_SYS_ABILITY_ID                             = 0x00000001,
     SUBSYS_COMMON_SYS_ABILITY_ID_BEGIN               = 1,
     RENDER_SERVICE                                   = 10,
@@ -304,6 +305,7 @@ enum {
 };
 
 inline const std::map<int, std::string> saNameMap_ = {
+    { 0, "SystemAbilityManager" },
     { 200, "AccountMgr" },
     { 301, "AIEngine" },
     { ABILITY_MGR_SERVICE_ID, "AbilityManagerService" },

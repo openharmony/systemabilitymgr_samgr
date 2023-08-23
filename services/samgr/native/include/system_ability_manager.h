@@ -90,6 +90,8 @@ public:
     std::string GetLocalNodeId();
     void Init();
     void WatchDogInit();
+    int32_t Dump(int32_t fd, const std::vector<std::u16string>& args) override;
+    void AddSamgrToAbilityMap();
 
     int32_t AddSystemProcess(const std::u16string& procName, const sptr<IRemoteObject>& procObject) override;
     int32_t RemoveSystemProcess(const sptr<IRemoteObject>& procObject);

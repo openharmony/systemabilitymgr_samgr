@@ -241,7 +241,7 @@ public:
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISystemAbilityManager");
 protected:
-    static constexpr int32_t FIRST_SYS_ABILITY_ID = 0x00000001;
+    static constexpr int32_t FIRST_SYS_ABILITY_ID = 0x00000000;
     static constexpr int32_t LAST_SYS_ABILITY_ID = 0x00ffffff;
     bool CheckInputSysAbilityId(int32_t sysAbilityId) const
     {

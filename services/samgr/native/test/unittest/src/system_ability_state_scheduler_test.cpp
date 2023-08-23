@@ -2134,4 +2134,133 @@ HWTEST_F(SystemAbilityStateSchedulerTest, PostUnloadTimeoutTask002, TestSize.Lev
     int32_t ret = systemAbilityStateScheduler->PostUnloadTimeoutTask(systemProcessContext);
     EXPECT_EQ(ret, ERR_OK);
 }
+
+/**
+ * @tc.name: GetAllSystemAbilityInfo001
+ * @tc.desc: test GetAllSystemAbilityInfo
+ * @tc.type: FUNC
+ * @tc.require: I7VEPG
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, GetAllSystemAbilityInfo001, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::list<SaProfile> saProfiles;
+    systemAbilityStateScheduler->Init(saProfiles);
+    std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
+    std::shared_ptr<SystemProcessContext> systemProcessContext = std::make_shared<SystemProcessContext>();
+    systemAbilityStateScheduler->abilityContextMap_.clear();
+    systemAbilityContext->ownProcessContext = systemProcessContext;
+    systemAbilityStateScheduler->abilityContextMap_[SAID] = systemAbilityContext;
+    string result;
+    systemAbilityStateScheduler->GetAllSystemAbilityInfo(result);
+    EXPECT_NE(result.size(), 0);
+}
+
+/**
+ * @tc.name: GetSystemAbilityInfo001
+ * @tc.desc: test GetSystemAbilityInfo001, GetSystemAbilityContext failed
+ * @tc.type: FUNC
+ * @tc.require: I7VEPG
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemAbilityInfo001, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    string result;
+    int32_t invalidSaid = 101;
+    systemAbilityStateScheduler->GetSystemAbilityInfo(invalidSaid, result);
+    EXPECT_EQ(result, "said is not exist");
+}
+
+/**
+ * @tc.name: GetSystemAbilityInfo002
+ * @tc.desc: test GetSystemAbilityInfo001, GetSystemAbilityContext success
+ * @tc.type: FUNC
+ * @tc.require: I7VEPG
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemAbilityInfo002, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    int said = 401;
+    std::list<SaProfile> saProfiles;
+    systemAbilityStateScheduler->Init(saProfiles);
+    std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
+    std::shared_ptr<SystemProcessContext> systemProcessContext = std::make_shared<SystemProcessContext>();
+    systemAbilityStateScheduler->abilityContextMap_.clear();
+    systemAbilityContext->ownProcessContext = systemProcessContext;
+    systemAbilityStateScheduler->abilityContextMap_[said] = systemAbilityContext;
+    string result;
+    systemAbilityStateScheduler->GetSystemAbilityInfo(said, result);
+    EXPECT_NE(result, "said is not exist");
+}
+
+/**
+ * @tc.name: GetProcessInfo001
+ * @tc.desc: test GetProcessInfo, GetSystemProcessContext failed
+ * @tc.type: FUNC
+ * @tc.require: I7VEPG
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, GetProcessInfo001, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    string result;
+    string processName = "invalid process";
+    systemAbilityStateScheduler->GetProcessInfo(processName, result);
+    EXPECT_EQ(result, "process is not exist");
+}
+
+/**
+ * @tc.name: GetProcessInfo002
+ * @tc.desc: test GetProcessInfo, GetSystemProcessContext success
+ * @tc.type: FUNC
+ * @tc.require: I7VEPG
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, GetProcessInfo002, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    string processName = "deviceprofile";
+    std::list<SaProfile> saProfiles;
+    systemAbilityStateScheduler->Init(saProfiles);
+    std::shared_ptr<SystemProcessContext> systemProcessContext = std::make_shared<SystemProcessContext>();
+    systemAbilityStateScheduler->processContextMap_.clear();
+    systemAbilityStateScheduler->processContextMap_[Str8ToStr16(processName)] = systemProcessContext;
+    string result;
+    systemAbilityStateScheduler->GetProcessInfo(processName, result);
+    EXPECT_NE(result, "process is not exist");
+}
+
+/**
+ * @tc.name: GetAllSystemAbilityInfoByState001
+ * @tc.desc: test GetAllSystemAbilityInfoByState
+ * @tc.type: FUNC
+ * @tc.require: I7VEPG
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, GetAllSystemAbilityInfoByState001, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    int said = 401;
+    std::list<SaProfile> saProfiles;
+    systemAbilityStateScheduler->Init(saProfiles);
+    std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
+    std::shared_ptr<SystemProcessContext> systemProcessContext = std::make_shared<SystemProcessContext>();
+    systemAbilityStateScheduler->abilityContextMap_.clear();
+    systemAbilityContext->ownProcessContext = systemProcessContext;
+    systemAbilityContext->state = SystemAbilityState::LOADED;
+    systemAbilityStateScheduler->abilityContextMap_[said] = systemAbilityContext;
+    string result;
+    string state = "LOADED";
+    systemAbilityStateScheduler->GetAllSystemAbilityInfoByState(state, result);
+    EXPECT_NE(result.size(), 0);
+}
 }
