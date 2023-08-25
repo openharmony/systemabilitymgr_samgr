@@ -108,9 +108,17 @@ void CommonEventCollect::AddSkillsEvent(EventFwk::MatchingSkills& skill)
     }
 }
 
+void CommonEventCollect::CleanFailedEventLocked(const std::string& eventName)
+{
+    EventFwk::MatchingSkills skill = commonEventSubscriber_->GetSubscribeInfo().GetMatchingSkills();
+    skill.RemoveEvent(eventName);
+    std::lock_guard<std::mutex> autoLock(commomEventLock_);
+    commonEventNames_.erase(eventName);
+}
+
 bool CommonEventCollect::CreateCommonEventSubscriber()
 {
-    std::lock_guard<std::mutex> autoLock(commonEventSubscriberLock_);
+    std::lock_guard<std::recursive_mutex> autoLock(commonEventSubscriberLock_);
     EventFwk::MatchingSkills skill;
     if (commonEventSubscriber_ != nullptr) {
         skill = commonEventSubscriber_->GetSubscribeInfo().GetMatchingSkills();
@@ -227,19 +235,29 @@ bool CommonEventCollect::GetOnDemandReasonExtraData(int64_t extraDataId, OnDeman
     return true;
 }
 
+bool CommonEventCollect::AddCommonEventName(const std::string& eventName)
+{
+    std::lock_guard<std::mutex> autoLock(commomEventLock_);
+    auto iter = commonEventNames_.find(eventName);
+    if (iter != commonEventNames_.end()) {
+        return false;
+    }
+    HILOGI("CommonEventCollect add collect events: %{public}s", eventName.c_str());
+    commonEventNames_.insert(eventName);
+    return true;
+}
+
 int32_t CommonEventCollect::AddCollectEvent(const OnDemandEvent& event)
 {
-    {
-        std::lock_guard<std::mutex> autoLock(commomEventLock_);
-        auto iter = commonEventNames_.find(event.name);
-        if (iter != commonEventNames_.end()) {
-            return ERR_OK;
-        }
-        HILOGI("CommonEventCollect add collect events: %{public}s", event.name.c_str());
-        commonEventNames_.insert(event.name);
-    }
+    std::lock_guard<std::recursive_mutex> autoLock(commonEventSubscriberLock_);
+    bool isInsertEventName = AddCommonEventName(event.name);
     if (!CreateCommonEventSubscriber()) {
+        if (isInsertEventName) {
+            CleanFailedEventLocked(event.name);
+            CreateCommonEventSubscriber();
+        }
         HILOGE("AddCollectEvent CreateCommonEventSubscriber failed!");
+        return ERR_INVALID_VALUE;
     }
     return ERR_OK;
 }
