@@ -34,6 +34,7 @@ public:
     int32_t OnStop() override;
 private:
     std::mutex paramLock_;
+    std::set<std::string> pendingParams_;
     std::set<std::string> params_;
 };
 
