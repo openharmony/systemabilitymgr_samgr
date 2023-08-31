@@ -17,77 +17,58 @@
 #define OHOS_SYSTEM_ABILITY_MANAGER_DEVICE_SWITCH_COLLECT_H
 
 #include <memory>
-#include <mutex>
-#include <set>
 
 #include "common_event_subscriber.h"
 #include "icollect_plugin.h"
 #include "system_ability_status_change_stub.h"
 
 namespace OHOS {
+class DeviceSwitchCollect;
+class SwitchEventSubscriber : public EventFwk::CommonEventSubscriber,
+    public std::enable_shared_from_this<SwitchEventSubscriber> {
+public:
+    SwitchEventSubscriber(const EventFwk::CommonEventSubscribeInfo& subscribeInfo,
+        const sptr<DeviceSwitchCollect>& deviceSwitchCollect)
+        : EventFwk::CommonEventSubscriber(subscribeInfo),
+        deviceSwitchCollect_(deviceSwitchCollect) {};
+    virtual ~SwitchEventSubscriber() = default;
+    int32_t SubscribeSwitchEvent();
+    int32_t UnSubscribeSwitchEvent();
+    void OnReceiveEvent(const EventFwk::CommonEventData& data) override;
+private:
+    void OnReceiveWifiEvent(const EventFwk::CommonEventData& data);
+    void OnReceiveBluetoothEvent(const EventFwk::CommonEventData& data);
+    void ReportEvent(const OnDemandEvent& event);
+    std::mutex isListenEventLock_;
+    bool isListenSwitchEvent_ = false;
+    wptr<DeviceSwitchCollect> deviceSwitchCollect_;
+};
+
+class CesStateListener : public SystemAbilityStatusChangeStub {
+public:
+    CesStateListener(const sptr<DeviceSwitchCollect>& deviceSwitchCollect)
+        : deviceSwitchCollect_(deviceSwitchCollect) {};
+    void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+    void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+private:
+    wptr<DeviceSwitchCollect> deviceSwitchCollect_;
+};
+
 class DeviceSwitchCollect : public ICollectPlugin {
 public:
     explicit DeviceSwitchCollect(const sptr<IReport>& report);
     ~DeviceSwitchCollect() = default;
+    void Init(const std::list<SaProfile>& saProfiles) override;
     int32_t OnStart() override;
     int32_t OnStop() override;
-    void Init(const std::list<SaProfile>& saProfiles) override;
     int32_t AddCollectEvent(const OnDemandEvent& event) override;
-    void SetSwitchEvent(const OnDemandEvent& onDemandEvent);
-    bool isContainSwitch(const std::string& swithes);
+    int32_t SubscribeSwitchEvent();
 private:
-    std::mutex switchEventLock_;
-    std::set<std::string> switches_;
-};
-
-class SwitchStateListener : public SystemAbilityStatusChangeStub {
-public:
-    SwitchStateListener(const sptr<DeviceSwitchCollect>& deviceSwitchCollect);
-    void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
-    void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
-private:
-    sptr<DeviceSwitchCollect> deviceSwitchCollect_;
-};
-
-class ISwitchCollect {
-public:
-    virtual void WatchState(const sptr<DeviceSwitchCollect>& deviceSwitchCollect) = 0;
-};
-
-class BlueToothSwitchCollect : public ISwitchCollect {
-public:
-    BlueToothSwitchCollect() = default;
-    virtual ~BlueToothSwitchCollect() = default;
-    void WatchState(const sptr<DeviceSwitchCollect>& deviceSwitchCollect) override;
-};
-
-class WifiSwitchCollect : public ISwitchCollect {
-public:
-    WifiSwitchCollect() = default;
-    virtual ~WifiSwitchCollect() = default;
-    void WatchState(const sptr<DeviceSwitchCollect>& deviceSwitchCollect) override;
-};
-
-class BluetoothEventSubscriber : public EventFwk::CommonEventSubscriber {
-public:
-    BluetoothEventSubscriber(const EventFwk::CommonEventSubscribeInfo& subscribeInfo,
-    const sptr<DeviceSwitchCollect>& deviceSwitchCollect):EventFwk::CommonEventSubscriber(subscribeInfo),
-        deviceSwitchCollect_(deviceSwitchCollect) {}
-    ~BluetoothEventSubscriber() override = default;
-    void OnReceiveEvent(const EventFwk::CommonEventData& data) override;
-private:
-    sptr<DeviceSwitchCollect> deviceSwitchCollect_;
-};
-
-class WifiEventSubscriber : public EventFwk::CommonEventSubscriber {
-public:
-    WifiEventSubscriber(const EventFwk::CommonEventSubscribeInfo& subscribeInfo,
-    const sptr<DeviceSwitchCollect>& deviceSwitchCollect):EventFwk::CommonEventSubscriber(subscribeInfo),
-        deviceSwitchCollect_(deviceSwitchCollect) {}
-    ~WifiEventSubscriber() override = default;
-    void OnReceiveEvent(const EventFwk::CommonEventData& data) override;
-private:
-    sptr<DeviceSwitchCollect> deviceSwitchCollect_;
+    void InitCommonEventSubscriber();
+    int32_t CheckSwitchEvent(const OnDemandEvent& onDemandEvent);
+    std::shared_ptr<SwitchEventSubscriber> switchEventSubscriber_;
+    sptr<CesStateListener> cesStateListener_;
+    std::atomic<bool> needListenSwitchEvent_ {false};
 };
 } // namespace OHOS
 #endif // OHOS_SYSTEM_ABILITY_MANAGER_DEVICE_PARAM_COLLECT_H

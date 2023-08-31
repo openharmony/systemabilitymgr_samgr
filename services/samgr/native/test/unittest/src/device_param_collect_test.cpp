@@ -71,9 +71,9 @@ HWTEST_F(DeviceParamCollectTest, DeviceParamInit001, TestSize.Level3)
     OnDemandEvent onDemandEvent = {3, TEST_NAME, "true"};
     saProfile.startOnDemand.onDemandEvents.push_back(onDemandEvent);
     SaProfiles.push_back(saProfile);
-    deviceParamCollect->params_.clear();
+    deviceParamCollect->pendingParams_.clear();
     deviceParamCollect->Init(SaProfiles);
-    EXPECT_FALSE(deviceParamCollect->params_.empty());
+    EXPECT_FALSE(deviceParamCollect->pendingParams_.empty());
 }
 
 /**
@@ -93,9 +93,9 @@ HWTEST_F(DeviceParamCollectTest, DeviceParamInit002, TestSize.Level3)
     OnDemandEvent onDemandEvent = {3, TEST_NAME, "false"};
     saProfile.stopOnDemand.onDemandEvents.push_back(onDemandEvent);
     SaProfiles.push_back(saProfile);
-    deviceParamCollect->params_.clear();
+    deviceParamCollect->pendingParams_.clear();
     deviceParamCollect->Init(SaProfiles);
-    EXPECT_FALSE(deviceParamCollect->params_.empty());
+    EXPECT_FALSE(deviceParamCollect->pendingParams_.empty());
 }
 
 /**
@@ -181,7 +181,7 @@ HWTEST_F(DeviceParamCollectTest, AddCollectEvent001, TestSize.Level3)
         std::make_shared<DeviceParamCollect>(report);
     OnDemandEvent event;
     int32_t ret = deviceParamCollect->AddCollectEvent(event);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_NE(ret, ERR_OK);
     DTEST_LOG << "AddCollectEvent001 end" << std::endl;
 }
 
