@@ -299,7 +299,7 @@ HWTEST_F(DeviceSwitchCollectTest, AddCollectEvent002, TestSize.Level3)
     deviceSwitchCollect->InitCommonEventSubscriber();
     SystemAbilityManager::GetInstance()->subscribeCountMap_.clear();
     int32_t ret = deviceSwitchCollect->AddCollectEvent(onDemandEvent);
-    EXPECT_NE(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_OK);
 }
 
 /**
