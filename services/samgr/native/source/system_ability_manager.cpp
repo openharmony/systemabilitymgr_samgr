@@ -882,6 +882,7 @@ void SystemAbilityManager::UnSubscribeSystemAbilityLocked(
                 subscribeCountMap_.erase(iterPair);
             }
         }
+        HILOGI("Remove the systemAbilityStatus listener added by callingPid: %{public}d", item.second);
         iter = listenerList.erase(iter);
         break;
     }
