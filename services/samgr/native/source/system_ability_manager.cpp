@@ -1075,9 +1075,6 @@ int32_t SystemAbilityManager::RemoveSystemProcess(const sptr<IRemoteObject>& pro
         }
     }
     if (result == ERR_OK) {
-        // Waiting for the init subsystem to perceive process death
-        ServiceWaitForStatus(Str16ToStr8(processName).c_str(), ServiceStatus::SERVICE_STOPPED, 1);
-
         if (abilityStateScheduler_ == nullptr) {
             HILOGE("abilityStateScheduler is nullptr");
             return ERR_INVALID_VALUE;
