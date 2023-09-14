@@ -147,6 +147,38 @@ HWTEST_F(DeviceStatusCollectManagerTest, GetSaControlListByEvent001, TestSize.Le
 }
 
 /**
+ * @tc.name: SortSaControlListByLoadPriority001
+ * @tc.desc: test SortSaControlListByLoadPriority with saprofiles that have different ondemand priority
+ * @tc.type: FUNC
+ * @tc.require: I7VXXO
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, SortSaControlListByLoadPriority001, TestSize.Level3)
+{
+    DTEST_LOG << " SaControlListByEvent001 BEGIN" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
+    OnDemandEvent event1 = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
+    event1.loadPriority = 2;
+    OnDemandEvent event2 = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
+    event2.loadPriority = 1;
+    SaProfile saProfile1;
+    saProfile1.startOnDemand.onDemandEvents.emplace_back(event1);
+    SaProfile saProfile2;
+    saProfile2.startOnDemand.onDemandEvents.emplace_back(event2);
+    collect->onDemandSaProfiles_.emplace_back(saProfile1);
+    collect->onDemandSaProfiles_.emplace_back(saProfile2);
+
+    std::list<SaControlInfo> saControlList;
+    collect->GetSaControlListByEvent(event, saControlList);
+    EXPECT_EQ(2, saControlList.front().loadPriority);
+    EXPECT_EQ(1, saControlList.back().loadPriority);
+
+    collect->SortSaControlListByLoadPriority(saControlList);
+    EXPECT_EQ(1, saControlList.front().loadPriority);
+    EXPECT_EQ(2, saControlList.back().loadPriority);
+}
+
+/**
  * @tc.name: UnInit001
  * @tc.desc: test UnInit
  * @tc.type: FUNC
