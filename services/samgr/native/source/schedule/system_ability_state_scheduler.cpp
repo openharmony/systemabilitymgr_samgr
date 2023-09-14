@@ -802,6 +802,22 @@ void SystemAbilityStateScheduler::OnAbilityUnloadableLocked(int32_t systemAbilit
     PostTryUnloadAllAbilityTask(abilityContext->ownProcessContext);
 }
 
+int32_t SystemAbilityStateScheduler::GetSystemProcessInfo(int32_t systemAbilityId,
+    SystemProcessInfo& systemProcessInfo)
+{
+    HILOGI("[SA Scheduler] get process info by [SA: %{public}d]", systemAbilityId);
+    std::shared_ptr<SystemAbilityContext> abilityContext;
+    if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
+        HILOGI("[SA Scheduler] get ability context by said failed");
+        return ERR_INVALID_VALUE;
+    }
+    std::shared_ptr<SystemProcessContext> processContext = abilityContext->ownProcessContext;
+    std::lock_guard<std::recursive_mutex> autoLock(processContext->processLock);
+    systemProcessInfo = {Str16ToStr8(processContext->processName), processContext->pid,
+                processContext->uid};
+    return ERR_OK;
+}
+
 int32_t SystemAbilityStateScheduler::GetRunningSystemProcess(std::list<SystemProcessInfo>& systemProcessInfos)
 {
     HILOGI("[SA Scheduler] get running process");

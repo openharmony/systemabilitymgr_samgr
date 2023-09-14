@@ -1107,6 +1107,15 @@ sptr<IRemoteObject> SystemAbilityManager::GetSystemProcess(const u16string& proc
     return nullptr;
 }
 
+int32_t SystemAbilityManager::GetSystemProcessInfo(int32_t systemAbilityId, SystemProcessInfo& systemProcessInfo)
+{
+    if (abilityStateScheduler_ == nullptr) {
+        HILOGE("abilityStateScheduler is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    return abilityStateScheduler_->GetSystemProcessInfo(systemAbilityId, systemProcessInfo);
+}
+
 int32_t SystemAbilityManager::GetRunningSystemProcess(std::list<SystemProcessInfo>& systemProcessInfos)
 {
     if (abilityStateScheduler_ == nullptr) {
