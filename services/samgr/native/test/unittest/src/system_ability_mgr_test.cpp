@@ -3132,4 +3132,35 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandReasonExtraData003, TestSize.Level3)
     int32_t ret = saMgr->GetOnDemandReasonExtraData(ONDEMAND_EXTRA_DATA_ID, messageParcel);
     EXPECT_EQ(ret, ERR_OK);
 }
+
+/**
+ * @tc.name: Dump001
+ * @tc.desc: call Dump, return ERR_OK
+ * @tc.type: FUNC
+ * @tc.require: I7VEPG
+ */
+
+HWTEST_F(SystemAbilityMgrTest, Dump001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    vector<std::u16string> args;
+    int32_t result = saMgr->Dump(1, args);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: AddSamgrToAbilityMap001
+ * @tc.desc: call AddSamgrToAbilityMap, return ERR_OK
+ * @tc.type: FUNC
+ * @tc.require: I7VEPG
+ */
+
+HWTEST_F(SystemAbilityMgrTest, AddSamgrToAbilityMap001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->AddSamgrToAbilityMap();
+    vector<std::u16string> args;
+    int32_t result = saMgr->Dump(1, args);
+    EXPECT_EQ(result, ERR_OK);
+}
 } // namespace OHOS

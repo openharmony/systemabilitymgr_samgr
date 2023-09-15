@@ -34,6 +34,7 @@ int main(int argc, char *argv[])
     if (!IPCSkeleton::SetContextObject(serv)) {
         HILOGE("set context fail!"); // add log for dfx
     }
+    manager->AddSamgrToAbilityMap();
     int result = SetParameter("bootevent.samgr.ready", "true");
     HILOGI("set samgr ready ret : %{public}s", result == 0 ? "succeed" : "failed");
     manager->StartDfxTimer();
