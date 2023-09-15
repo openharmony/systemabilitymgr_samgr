@@ -745,6 +745,66 @@ int32_t SystemAbilityManagerProxy::AddSystemProcess(const u16string& procName, c
         static_cast<uint32_t>(SamgrInterfaceCode::ADD_SYSTEM_PROCESS_TRANSACTION), data);
 }
 
+int32_t SystemAbilityManagerProxy::GetSystemProcessInfo(int32_t systemAbilityId, SystemProcessInfo& systemProcessInfo)
+{
+    HILOGI("GetSystemProcessInfo called");
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGI("GetSystemProcessInfo remote is nullptr");
+        return ERR_INVALID_OPERATION;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(systemAbilityId)) {
+        HILOGW("GetSystemProcessInfo Write saId failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::GET_SYSTEM_PROCESS_INFO_TRANSACTION), data, reply, option);
+    if (err != ERR_NONE) {
+        HILOGE("GetSystemProcessInfo SendRequest error: %{public}d!", err);
+        return err;
+    }
+    HILOGI("GetSystemProcessInfo SendRequest succeed!");
+    int32_t result = 0;
+    bool ret = reply.ReadInt32(result);
+    if (!ret) {
+        HILOGW("GetSystemProcessInfo Read result failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (result != ERR_OK) {
+        HILOGE("GetSystemProcessInfo failed: %{public}d!", result);
+        return result;
+    }
+    return ReadProcessInfoFromParcel(reply, systemProcessInfo);
+}
+
+int32_t SystemAbilityManagerProxy::ReadProcessInfoFromParcel(MessageParcel& reply,
+    SystemProcessInfo& systemProcessInfo)
+{
+    bool ret = reply.ReadString(systemProcessInfo.processName);
+    if (!ret) {
+        HILOGW("GetSystemProcessInfo Read processName failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    ret = reply.ReadInt32(systemProcessInfo.pid);
+    if (!ret) {
+        HILOGW("GetSystemProcessInfo Read pid failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    ret = reply.ReadInt32(systemProcessInfo.uid);
+    if (!ret) {
+        HILOGW("GetSystemProcessInfo Read uid failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ERR_OK;
+}
+
 int32_t SystemAbilityManagerProxy::GetRunningSystemProcess(std::list<SystemProcessInfo>& systemProcessInfos)
 {
     HILOGI("GetRunningSystemProcess called");
@@ -771,18 +831,18 @@ int32_t SystemAbilityManagerProxy::GetRunningSystemProcess(std::list<SystemProce
     int32_t result = 0;
     bool ret = reply.ReadInt32(result);
     if (!ret) {
-        HILOGW("SubscribeSystemProcess Read result failed!");
+        HILOGW("GetRunningSystemProcess Read result failed!");
         return ERR_FLATTEN_OBJECT;
     }
     if (result != ERR_OK) {
         HILOGE("GetRunningSystemProcess failed: %{public}d!", result);
         return result;
     }
-    return ReadSystemProcessFromParcel(systemProcessInfos, reply);
+    return ReadSystemProcessFromParcel(reply, systemProcessInfos);
 }
 
-int32_t SystemAbilityManagerProxy::ReadSystemProcessFromParcel(std::list<SystemProcessInfo>& systemProcessInfos,
-    MessageParcel& reply)
+int32_t SystemAbilityManagerProxy::ReadSystemProcessFromParcel(MessageParcel& reply,
+    std::list<SystemProcessInfo>& systemProcessInfos)
 {
     int32_t size = 0;
     bool ret = reply.ReadInt32(size);

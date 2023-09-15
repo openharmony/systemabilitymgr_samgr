@@ -731,6 +731,23 @@ HWTEST_F(SystemAbilityMgrProxyTest, DestroySystemAbilityManagerObject001, TestSi
 }
 
 /**
+ * @tc.name: GetSystemProcessInfo001
+ * @tc.desc: GetSystemProcessInfo
+ * @tc.type: FUNC
+ * @tc.require: I7VQQG
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, GetSystemProcessInfo001, TestSize.Level3)
+{
+    DTEST_LOG << " GetSystemProcessInfo001 start " << std::endl;
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    EXPECT_NE(sm, nullptr);
+    SystemProcessInfo processInfo;
+    int32_t systemAbilityId = 401;
+    int32_t ret = sm->GetSystemProcessInfo(systemAbilityId, processInfo);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
  * @tc.name: GetRunningSystemProcess001
  * @tc.desc: GetRunningSystemProcess
  * @tc.type: FUNC

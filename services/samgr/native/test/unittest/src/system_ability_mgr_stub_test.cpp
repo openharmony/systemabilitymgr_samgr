@@ -261,6 +261,22 @@ HWTEST_F(SystemAbilityMgrStubTest, SubscribeSystemProcessInner001, TestSize.Leve
 }
 
 /**
+ * @tc.name: Test GetSystemProcessInfoInner001
+ * @tc.desc: GetSystemProcessInfoInner001, permission denied!
+ * @tc.type: FUNC
+ * @tc.require: I7VQQG
+ */
+HWTEST_F(SystemAbilityMgrStubTest, GetSystemProcessInfoInner001, TestSize.Level3)
+{
+    DTEST_LOG << "GetSystemProcessInfoInner001" << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = saMgr->GetSystemProcessInfoInner(data, reply);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+}
+
+/**
  * @tc.name: Test GetRunningSystemProcessInner001
  * @tc.desc: GetRunningSystemProcessInner001, permission denied!
  * @tc.type: FUNC

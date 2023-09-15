@@ -133,6 +133,8 @@ SystemAbilityManagerStub::SystemAbilityManagerStub()
         &SystemAbilityManagerStub::UnloadSystemAbilityInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::CANCEL_UNLOAD_SYSTEM_ABILITY_TRANSACTION)] =
         &SystemAbilityManagerStub::CancelUnloadSystemAbilityInner;
+    memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_SYSTEM_PROCESS_INFO_TRANSACTION)] =
+        &SystemAbilityManagerStub::GetSystemProcessInfoInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_RUNNING_SYSTEM_PROCESS_TRANSACTION)] =
         &SystemAbilityManagerStub::GetRunningSystemProcessInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::SUBSCRIBE_SYSTEM_PROCESS_TRANSACTION)] =
@@ -613,6 +615,47 @@ int32_t SystemAbilityManagerStub::UnloadSystemAbilityInner(MessageParcel& data, 
         return ERR_FLATTEN_OBJECT;
     }
     return result;
+}
+
+int32_t SystemAbilityManagerStub::GetSystemProcessInfoInner(MessageParcel& data, MessageParcel& reply)
+{
+    HILOGI("GetSystemProcessInfoInner called");
+    if (!CanRequest()) {
+        HILOGE("GetSystemProcessInfoInner PERMISSION DENIED!");
+        return ERR_PERMISSION_DENIED;
+    }
+    int32_t systemAbilityId = data.ReadInt32();
+    if (!CheckInputSysAbilityId(systemAbilityId)) {
+        HILOGW("SystemAbilityManagerStub::GetSystemProcessInfoInner read systemAbilityId failed!");
+        return ERR_NULL_OBJECT;
+    }
+    SystemProcessInfo processInfo;
+    int32_t result = GetSystemProcessInfo(systemAbilityId, processInfo);
+    bool ret = reply.WriteInt32(result);
+    if (!ret) {
+        HILOGW("GetSystemProcessInfoInner write reply failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (result != ERR_OK) {
+        return ERR_OK;
+    }
+
+    ret = reply.WriteString(processInfo.processName);
+    if (!ret) {
+        HILOGW("GetSystemProcessInfoInner write processName failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    ret = reply.WriteInt32(processInfo.pid);
+    if (!ret) {
+        HILOGW("GetSystemProcessInfoInner write pid failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    ret = reply.WriteInt32(processInfo.uid);
+    if (!ret) {
+        HILOGW("GetSystemProcessInfoInner write uid failed.");
+            return ERR_FLATTEN_OBJECT;
+    }
+    return ERR_OK;
 }
 
 int32_t SystemAbilityManagerStub::GetRunningSystemProcessInner(MessageParcel& data, MessageParcel& reply)

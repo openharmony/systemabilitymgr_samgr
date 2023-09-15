@@ -2194,6 +2194,40 @@ HWTEST_F(SystemAbilityMgrTest, CheckStopEnableOnce003, TestSize.Level3)
 }
 
 /**
+ * @tc.name: Test GetSystemProcessInfo001
+ * @tc.desc: GetRunningSystemProcess001
+ * @tc.type: FUNC
+ * @tc.require: I7VQQG
+ */
+HWTEST_F(SystemAbilityMgrTest, GetSystemProcessInfo001, TestSize.Level3)
+{
+    DTEST_LOG << " GetSystemProcessInfo001 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    saMgr->abilityStateScheduler_ = systemAbilityStateScheduler;
+    SystemProcessInfo ProcessInfo;
+    int32_t ret = saMgr->GetSystemProcessInfo(SAID, ProcessInfo);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: Test GetSystemProcessInfo002
+ * @tc.desc: GetRunningSystemProcess002
+ * @tc.type: FUNC
+ * @tc.require: I7VQQG
+ */
+HWTEST_F(SystemAbilityMgrTest, GetSystemProcessInfo002, TestSize.Level3)
+{
+    DTEST_LOG << " GetSystemProcessInfo002 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    SystemProcessInfo ProcessInfo;
+    saMgr->abilityStateScheduler_ = nullptr;
+    int32_t ret = saMgr->GetSystemProcessInfo(SAID, ProcessInfo);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
  * @tc.name: Test GetRunningSystemProcess001
  * @tc.desc: GetRunningSystemProcess001
  * @tc.type: FUNC
@@ -2203,6 +2237,9 @@ HWTEST_F(SystemAbilityMgrTest, GetRunningSystemProcess001, TestSize.Level3)
 {
     DTEST_LOG << " GetRunningSystemProcess001 " << std::endl;
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    saMgr->abilityStateScheduler_ = systemAbilityStateScheduler;
     std::list<SystemProcessInfo> systemProcessInfos;
     int32_t ret = saMgr->GetRunningSystemProcess(systemProcessInfos);
     EXPECT_EQ(ret, ERR_OK);
