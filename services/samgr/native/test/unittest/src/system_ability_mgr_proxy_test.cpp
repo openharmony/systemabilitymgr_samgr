@@ -382,6 +382,21 @@ HWTEST_F(SystemAbilityMgrProxyTest, LoadSystemAbility004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: LoadSystemAbility005
+ * @tc.desc: cover LoadSystemAbility
+ * @tc.type: FUNC
+ * @tc.require: I7XT8Z
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, LoadSystemAbility005, TestSize.Level1)
+{
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    EXPECT_NE(sm, nullptr);
+    int32_t timeout = 0;
+    sptr<IRemoteObject> res = sm->LoadSystemAbility(TEST_SAID_INVALID, timeout);
+    EXPECT_EQ(res, nullptr);
+}
+
+/**
  * @tc.name: UnloadSystemAbility001
  * @tc.desc: call UnloadSystemAbility with invalid said
  * @tc.type: FUNC

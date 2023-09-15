@@ -15,6 +15,7 @@
 
 #include "system_ability_manager_proxy.h"
 
+#include <condition_variable>
 #include <unistd.h>
 #include <vector>
 
@@ -30,14 +31,44 @@
 #include "string_ex.h"
 
 #include "local_abilitys.h"
+#include "system_ability_load_callback_stub.h"
 
 using namespace std;
 namespace OHOS {
 namespace {
+const int32_t MAX_TIMEOUT = 4;
+const int32_t MIN_TIMEOUT = 0;
 const int32_t RETRY_TIME_OUT_NUMBER = 10;
 const int32_t SLEEP_INTERVAL_TIME = 100;
 const int32_t SLEEP_ONE_MILLI_SECOND_TIME = 1000;
 }
+class SystemAbilityProxyCallback : public SystemAbilityLoadCallbackStub {
+public:
+    void OnLoadSystemAbilitySuccess(int32_t systemAbilityId,
+        const sptr<IRemoteObject> &remoteObject) override;
+    void OnLoadSystemAbilityFail(int32_t systemAbilityId) override;
+    std::condition_variable cv_;
+    sptr<IRemoteObject> loadproxy_;
+    std::mutex callbackLock_;
+};
+
+void SystemAbilityProxyCallback::OnLoadSystemAbilitySuccess(
+    int32_t systemAbilityId, const sptr<IRemoteObject> &remoteObject)
+{
+    std::lock_guard<std::mutex> lock(callbackLock_);
+    loadproxy_ = remoteObject;
+    cv_.notify_one();
+    HILOGI("LoadSystemAbility on load system ability %{public}d success!", systemAbilityId);
+}
+
+void SystemAbilityProxyCallback::OnLoadSystemAbilityFail(int32_t systemAbilityId)
+{
+    std::lock_guard<std::mutex> lock(callbackLock_);
+    loadproxy_ = nullptr;
+    cv_.notify_one();
+    HILOGI("LoadSystemAbility on load system ability %{public}d failed!", systemAbilityId);
+}
+
 sptr<IRemoteObject> SystemAbilityManagerProxy::GetSystemAbility(int32_t systemAbilityId)
 {
     return GetSystemAbilityWrapper(systemAbilityId);
@@ -452,6 +483,29 @@ int32_t SystemAbilityManagerProxy::UnSubscribeSystemAbility(int32_t systemAbilit
     }
 
     return result;
+}
+
+sptr<IRemoteObject> SystemAbilityManagerProxy::LoadSystemAbility(int32_t systemAbilityId, int32_t timeout)
+{
+    if (timeout < MIN_TIMEOUT) {
+        timeout = MIN_TIMEOUT;
+    } else if (timeout > MAX_TIMEOUT) {
+        timeout = MAX_TIMEOUT;
+    }
+    sptr<SystemAbilityProxyCallback> callback = new SystemAbilityProxyCallback();
+    std::unique_lock<std::mutex> lock(callback->callbackLock_);
+    int32_t ret = LoadSystemAbility(systemAbilityId, callback);
+    if (ret != ERR_OK) {
+        HILOGE("LoadSystemAbility failed!");
+        return nullptr;
+    }
+    auto waitStatus = callback->cv_.wait_for(lock, std::chrono::seconds(timeout),
+        [&callback]() { return callback->loadproxy_ != nullptr; });
+    if (!waitStatus) {
+        HILOGE("LoadSystemAbility systemAbilityId timeout");
+        return nullptr;
+    }
+    return callback->loadproxy_;
 }
 
 int32_t SystemAbilityManagerProxy::LoadSystemAbility(int32_t systemAbilityId,

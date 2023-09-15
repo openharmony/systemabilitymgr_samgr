@@ -178,6 +178,15 @@ public:
      * LoadSystemAbility, Load sa.
      *
      * @param systemAbilityId, Need to load the said of sa.
+     * @param timeout, limited time to load sa.
+     * @return remote object means that the load was successful.
+     */
+    virtual sptr<IRemoteObject> LoadSystemAbility(int32_t systemAbilityId, int32_t timeout) = 0;
+    
+    /**
+     * LoadSystemAbility, Load sa.
+     *
+     * @param systemAbilityId, Need to load the said of sa.
      * @param callback, OnLoadSystemAbilityFail and OnLoadSystemAbilitySuccess need be rewritten.
      * @return ERR_OK It does not mean that the load was successful.
      */

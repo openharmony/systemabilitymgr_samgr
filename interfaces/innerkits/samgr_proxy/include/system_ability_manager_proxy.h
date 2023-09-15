@@ -139,6 +139,15 @@ public:
      * LoadSystemAbility, Load sa.
      *
      * @param systemAbilityId, Need to load the said of sa.
+     * @param timeout, OnLoadSystemAbilityFail and OnLoadSystemAbilitySuccess need be rewritten.
+     * @return return is not nullptr means that the load was successful.
+     */
+    sptr<IRemoteObject> LoadSystemAbility(int32_t systemAbilityId, int32_t timeout) override;
+    
+    /**
+     * LoadSystemAbility, Load sa.
+     *
+     * @param systemAbilityId, Need to load the said of sa.
      * @param callback, OnLoadSystemAbilityFail and OnLoadSystemAbilitySuccess need be rewritten.
      * @return ERR_OK It does not mean that the load was successful, but a callback function is.
      required to confirm whether it was successful.
