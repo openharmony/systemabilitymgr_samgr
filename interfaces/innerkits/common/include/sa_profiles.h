@@ -42,6 +42,12 @@ enum {
     FREEZE,
 };
 
+enum {
+    HIGH_PRIORITY = 1,
+    MEDIUM_PRIORITY = 2,
+    LOW_PRIORITY = 3,
+};
+
 struct OnDemandCondition {
     int32_t eventId;
     std::string name;
@@ -55,6 +61,7 @@ struct OnDemandEvent {
     int64_t extraDataId = -1;
     std::vector<OnDemandCondition> conditions;
     bool enableOnce = false;
+    uint32_t loadPriority = LOW_PRIORITY;
 
     bool operator==(const OnDemandEvent& event) const
     {
@@ -66,6 +73,7 @@ struct SaControlInfo {
     int32_t ondemandId;
     int32_t saId;
     bool enableOnce = false;
+    uint32_t loadPriority = LOW_PRIORITY;
 };
 
 struct StartOnDemand {

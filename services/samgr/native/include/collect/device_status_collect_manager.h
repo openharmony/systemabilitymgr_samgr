@@ -43,6 +43,7 @@ public:
 private:
     void FilterOnDemandSaProfiles(const std::list<SaProfile>& saProfiles);
     void GetSaControlListByEvent(const OnDemandEvent& event, std::list<SaControlInfo>& saControlList);
+    void SortSaControlListByLoadPriority(std::list<SaControlInfo>& saControlList);
     static bool IsSameEvent(const OnDemandEvent& ev1, const OnDemandEvent& ev2);
     bool CheckConditions(const OnDemandEvent& onDemandEvent);
     int32_t AddCollectEvents(const std::vector<OnDemandEvent>& events);

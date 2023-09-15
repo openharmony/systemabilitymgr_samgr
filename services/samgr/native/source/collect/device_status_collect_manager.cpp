@@ -87,7 +87,8 @@ void DeviceStatusCollectManager::GetSaControlListByEvent(const OnDemandEvent& ev
             iterStart != profile.startOnDemand.onDemandEvents.end(); iterStart++) {
             if (IsSameEvent(event, *iterStart) && CheckConditions(*iterStart)) {
                 // maybe the process is being killed, let samgr make decisions.
-                SaControlInfo control = { START_ON_DEMAND, profile.saId, iterStart->enableOnce };
+                SaControlInfo control = { START_ON_DEMAND, profile.saId, iterStart->enableOnce,
+                    iterStart->loadPriority };
                 saControlList.emplace_back(control);
                 break;
             }
@@ -97,13 +98,21 @@ void DeviceStatusCollectManager::GetSaControlListByEvent(const OnDemandEvent& ev
             iterStop != profile.stopOnDemand.onDemandEvents.end(); iterStop++) {
             if (IsSameEvent(event, *iterStop) && CheckConditions(*iterStop)) {
                 // maybe the process is starting, let samgr make decisions.
-                SaControlInfo control = { STOP_ON_DEMAND, profile.saId, iterStop->enableOnce };
+                SaControlInfo control = { STOP_ON_DEMAND, profile.saId, iterStop->enableOnce,
+                    iterStop->loadPriority };
                 saControlList.emplace_back(control);
                 break;
             }
         }
     }
     HILOGD("DeviceStatusCollectManager saControlList size %{public}zu", saControlList.size());
+}
+
+void DeviceStatusCollectManager::SortSaControlListByLoadPriority(std::list<SaControlInfo>& saControlList)
+{
+    saControlList.sort([](const SaControlInfo& control1, const SaControlInfo& control2) {
+        return control1.loadPriority < control2.loadPriority;
+    });
 }
 
 bool DeviceStatusCollectManager::IsSameEvent(const OnDemandEvent& ev1, const OnDemandEvent& ev2)
@@ -170,6 +179,7 @@ void DeviceStatusCollectManager::ReportEvent(const OnDemandEvent& event)
     }
     std::list<SaControlInfo> saControlList;
     GetSaControlListByEvent(event, saControlList);
+    SortSaControlListByLoadPriority(saControlList);
     if (saControlList.empty()) {
         HILOGW("DeviceStatusCollectManager no matched event");
         return;
