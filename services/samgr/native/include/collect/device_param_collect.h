@@ -30,6 +30,7 @@ public:
     void WatchParameters();
     bool CheckCondition(const OnDemandCondition& condition) override;
     int32_t AddCollectEvent(const OnDemandEvent& event) override;
+    int32_t RemoveUnusedEvent(const OnDemandEvent& event) override;
     int32_t OnStart() override;
     int32_t OnStop() override;
 private:

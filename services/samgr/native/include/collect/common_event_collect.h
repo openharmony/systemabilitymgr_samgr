@@ -35,6 +35,7 @@ public:
     void SaveAction(const std::string& action);
     bool CheckCondition(const OnDemandCondition& condition) override;
     int32_t AddCollectEvent(const OnDemandEvent& event) override;
+    int32_t RemoveUnusedEvent(const OnDemandEvent& event) override;
     void Init(const std::list<SaProfile>& saProfiles) override;
     int64_t SaveOnDemandReasonExtraData(const EventFwk::CommonEventData& data);
     void RemoveOnDemandReasonExtraData(int64_t extraDataId);

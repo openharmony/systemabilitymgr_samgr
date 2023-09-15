@@ -186,6 +186,39 @@ HWTEST_F(DeviceParamCollectTest, AddCollectEvent001, TestSize.Level3)
 }
 
 /**
+ * @tc.name: RemoveUnusedEvent001
+ * @tc.desc: test RemoveUnusedEvent, with event.name is not in params_
+ * @tc.type: FUNC
+ * @tc.require: I7VZ98
+ */
+HWTEST_F(DeviceParamCollectTest, RemoveUnusedEvent001, TestSize.Level3)
+{
+    sptr<IReport> report;
+    std::shared_ptr<DeviceParamCollect> deviceParamCollect =
+        std::make_shared<DeviceParamCollect>(report);
+    OnDemandEvent event = {3, TEST_NAME, "true"};
+    int32_t ret = deviceParamCollect->RemoveUnusedEvent(event);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: RemoveUnusedEvent002
+ * @tc.desc: test RemoveUnusedEvent, with event.name in params_
+ * @tc.type: FUNC
+ * @tc.require: I7VZ98
+ */
+HWTEST_F(DeviceParamCollectTest, RemoveUnusedEvent002, TestSize.Level3)
+{
+    sptr<IReport> report;
+    std::shared_ptr<DeviceParamCollect> deviceParamCollect =
+        std::make_shared<DeviceParamCollect>(report);
+    OnDemandEvent event = {3, TEST_NAME, "true"};
+    deviceParamCollect->params_.insert(TEST_NAME);
+    deviceParamCollect->RemoveUnusedEvent(event);
+    EXPECT_NE(deviceParamCollect->params_.size(), 0);
+}
+
+/**
  * @tc.name: CheckCondition001
  * @tc.desc: test CheckCondition, with condition
  * @tc.type: FUNC
