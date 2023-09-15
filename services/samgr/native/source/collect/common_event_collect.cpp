@@ -262,6 +262,17 @@ int32_t CommonEventCollect::AddCollectEvent(const OnDemandEvent& event)
     return ERR_OK;
 }
 
+int32_t CommonEventCollect::RemoveUnusedEvent(const OnDemandEvent& event)
+{
+    std::lock_guard<std::mutex> autoLock(commomEventLock_);
+    auto iter = commonEventNames_.find(event.name);
+    if (iter != commonEventNames_.end()) {
+        HILOGI("CommonEventCollect remove event name: %{public}s", event.name.c_str());
+        commonEventNames_.erase(iter);
+    }
+    return ERR_OK;
+}
+
 void CommonHandler::ProcessEvent(const InnerEvent::Pointer& event)
 {
     if (commonCollect_ == nullptr || event == nullptr) {

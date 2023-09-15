@@ -44,9 +44,12 @@ private:
     void FilterOnDemandSaProfiles(const std::list<SaProfile>& saProfiles);
     void GetSaControlListByEvent(const OnDemandEvent& event, std::list<SaControlInfo>& saControlList);
     void SortSaControlListByLoadPriority(std::list<SaControlInfo>& saControlList);
+    bool CheckEventUsedLocked(const OnDemandEvent& events);
     static bool IsSameEvent(const OnDemandEvent& ev1, const OnDemandEvent& ev2);
+    bool IsSameEventName(const OnDemandEvent& ev1, const OnDemandEvent& ev2);
     bool CheckConditions(const OnDemandEvent& onDemandEvent);
     int32_t AddCollectEvents(const std::vector<OnDemandEvent>& events);
+    int32_t RemoveUnusedEventsLocked(const std::vector<OnDemandEvent>& events);
     std::map<int32_t, sptr<ICollectPlugin>> collectPluginMap_;
     std::shared_ptr<AppExecFwk::EventHandler> collectHandler_;
     std::shared_mutex saProfilesLock_;

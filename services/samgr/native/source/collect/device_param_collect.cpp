@@ -114,6 +114,22 @@ int32_t DeviceParamCollect::AddCollectEvent(const OnDemandEvent& event)
     return result;
 }
 
+int32_t DeviceParamCollect::RemoveUnusedEvent(const OnDemandEvent& event)
+{
+    std::lock_guard<std::mutex> autoLock(paramLock_);
+    auto iter = params_.find(event.name);
+    if (iter != params_.end()) {
+        int32_t result = RemoveParameterWatcher(event.name.c_str(), nullptr, nullptr);
+        if (result != ERR_OK) {
+            HILOGE("DeviceParamCollect RemoveUnusedEvent failed");
+            return result;
+        }
+        HILOGI("DeviceParamCollect remove event name: %{public}s", event.name.c_str());
+        params_.erase(iter);
+    }
+    return ERR_OK;
+}
+
 void SystemAbilityStatusChange::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
 {
     HILOGI("OnAddSystemAbility systemAbilityId:%{public}d", systemAbilityId);

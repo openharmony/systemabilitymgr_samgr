@@ -69,10 +69,14 @@ void DeviceTimedCollect::PostLoopTaskLocked(int32_t interval)
     }
     loopTasks_[interval] = [this, interval] () {
         OnDemandEvent event = { TIMED_EVENT, LOOP_EVENT, to_string(interval) };
-        HILOGI("DeviceTimedCollect ReportEvent interval: %{public}d", interval);
-        ReportEvent(event);
         lock_guard<mutex> autoLock(taskLock_);
-        PostDelayTask(loopTasks_[interval], interval);
+        if (timedSet_.find(interval) != timedSet_.end()) {
+            HILOGI("DeviceTimedCollect ReportEvent interval: %{public}d", interval);
+            ReportEvent(event);
+            PostDelayTask(loopTasks_[interval], interval);
+        } else {
+            HILOGD("DeviceTimedCollect interval %{public}d has been remove", interval);
+        }
     };
     PostDelayTask(loopTasks_[interval], interval);
 }
@@ -114,6 +118,23 @@ int32_t DeviceTimedCollect::AddCollectEvent(const OnDemandEvent& event)
     HILOGI("DeviceTimedCollect add collect events: %{public}d", interval);
     timedSet_.insert(interval);
     PostLoopTaskLocked(interval);
+    return ERR_OK;
+}
+
+int32_t DeviceTimedCollect::RemoveUnusedEvent(const OnDemandEvent& event)
+{
+    if (event.name != LOOP_EVENT) {
+        HILOGE("DeviceTimedCollect invalid event name: %{public}s", event.name.c_str());
+        return ERR_INVALID_VALUE;
+    }
+    int32_t interval = atoi(event.value.c_str());
+    std::lock_guard<std::mutex> autoLock(taskLock_);
+    auto iter = timedSet_.find(interval);
+    if (iter != timedSet_.end()) {
+        HILOGI("DeviceTimedCollect remove interval: %{public}d", interval);
+        timedSet_.erase(iter);
+        loopTasks_.erase(interval);
+    }
     return ERR_OK;
 }
 }

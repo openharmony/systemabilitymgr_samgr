@@ -272,6 +272,35 @@ HWTEST_F(CommonEventCollectTest, AddCollectEvent001, TestSize.Level3)
 }
 
 /**
+ * @tc.name: RemoveUnusedEvent001
+ * @tc.desc: test RemoveUnusedEvent, with event.name is not in commonEventNames_
+ * @tc.type: FUNC
+ * @tc.require: I7VZ98
+ */
+HWTEST_F(CommonEventCollectTest, RemoveUnusedEvent001, TestSize.Level3)
+{
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
+    OnDemandEvent event = {COMMON_EVENT, "", ""};
+    int32_t ret = commonEventCollect->RemoveUnusedEvent(event);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: RemoveUnusedEvent002
+ * @tc.desc: test RemoveUnusedEvent, with event.name in commonEventNames_
+ * @tc.type: FUNC
+ * @tc.require: I7VZ98
+ */
+HWTEST_F(CommonEventCollectTest, RemoveUnusedEvent002, TestSize.Level3)
+{
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
+    commonEventCollect->commonEventNames_.insert("usual.event.SCREEN_ON");
+    OnDemandEvent event = {COMMON_EVENT, "usual.event.SCREEN_ON", ""};
+    commonEventCollect->RemoveUnusedEvent(event);
+    EXPECT_EQ(commonEventCollect->commonEventNames_.size(), 0);
+}
+
+/**
  * @tc.name: SaveOnDemandReasonExtraData001
  * @tc.desc: test SaveOnDemandReasonExtraData with one CommonEventData
  * @tc.type: FUNC

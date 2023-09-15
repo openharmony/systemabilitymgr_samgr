@@ -120,6 +120,20 @@ bool DeviceStatusCollectManager::IsSameEvent(const OnDemandEvent& ev1, const OnD
     return (ev1.eventId == ev2.eventId && ev1.name == ev2.name && (ev1.value == ev2.value || "" == ev2.value));
 }
 
+bool DeviceStatusCollectManager::IsSameEventName(const OnDemandEvent& ev1, const OnDemandEvent& ev2)
+{
+    if (ev1.eventId != TIMED_EVENT) {
+        if (ev1.eventId == ev2.eventId && ev1.name == ev2.name) {
+            return true;
+        }
+    } else {
+        if (ev1.eventId == ev2.eventId && ev1.name == ev2.name && ev1.value == ev2.value) {
+            return true;
+        }
+    }
+    return false;
+}
+
 bool DeviceStatusCollectManager::CheckConditions(const OnDemandEvent& onDemandEvent)
 {
     if (onDemandEvent.conditions.empty()) {
@@ -260,6 +274,54 @@ int32_t DeviceStatusCollectManager::GetOnDemandEvents(int32_t systemAbilityId, O
     return ERR_OK;
 }
 
+int32_t DeviceStatusCollectManager::RemoveUnusedEventsLocked(const std::vector<OnDemandEvent>& events)
+{
+    HILOGD("DeviceStatusCollectManager RemoveUnusedEventsLocked start");
+    if (events.size() == 0) {
+        return ERR_OK;
+    }
+    for (auto& event : events) {
+        if (collectPluginMap_.count(event.eventId) == 0) {
+            HILOGE("not support eventId: %{public}d", event.eventId);
+            continue;
+        }
+        if (collectPluginMap_[event.eventId] == nullptr) {
+            HILOGE("not support eventId: %{public}d", event.eventId);
+            continue;
+        }
+        bool eventUsed = CheckEventUsedLocked(event);
+        if (!eventUsed) {
+            HILOGI("DeviceStatusCollectManager CheckEventUsedLocked name: %{public}s", event.name.c_str());
+            int32_t ret = collectPluginMap_[event.eventId]->RemoveUnusedEvent(event);
+            if (ret != ERR_OK) {
+                HILOGE("Remove event failed, eventId: %{public}d", event.eventId);
+            }
+        }
+    }
+    return ERR_OK;
+}
+
+bool DeviceStatusCollectManager::CheckEventUsedLocked(const OnDemandEvent& event)
+{
+    for (auto& profile : onDemandSaProfiles_) {
+        // start on demand
+        for (auto iterStart = profile.startOnDemand.onDemandEvents.begin();
+            iterStart != profile.startOnDemand.onDemandEvents.end(); iterStart++) {
+            if (IsSameEventName(event, *iterStart)) {
+                return true;
+            }
+        }
+        // stop on demand
+        for (auto iterStop = profile.stopOnDemand.onDemandEvents.begin();
+            iterStop != profile.stopOnDemand.onDemandEvents.end(); iterStop++) {
+            if (IsSameEventName(event, *iterStop)) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 int32_t DeviceStatusCollectManager::UpdateOnDemandEvents(int32_t systemAbilityId, OnDemandPolicyType type,
     const std::vector<OnDemandEvent>& events)
 {
@@ -276,14 +338,19 @@ int32_t DeviceStatusCollectManager::UpdateOnDemandEvents(int32_t systemAbilityId
         HILOGI("DeviceStatusCollectManager AddCollectEvents failed saId:%{public}d", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
-
+    std::vector<OnDemandEvent> oldEvents;
     if (type == OnDemandPolicyType::START_POLICY) {
+        oldEvents = (*iter).startOnDemand.onDemandEvents;
         (*iter).startOnDemand.onDemandEvents = events;
     } else if (type == OnDemandPolicyType::STOP_POLICY) {
+        oldEvents = (*iter).stopOnDemand.onDemandEvents;
         (*iter).stopOnDemand.onDemandEvents = events;
     } else {
         HILOGE("DeviceStatusCollectManager UpdateOnDemandEvents policy types");
         return ERR_INVALID_VALUE;
+    }
+    if (RemoveUnusedEventsLocked(oldEvents) != ERR_OK) {
+        HILOGE("DeviceStatusCollectManager RemoveUnusedEventsLocked failed saId:%{public}d", systemAbilityId);
     }
     return ERR_OK;
 }

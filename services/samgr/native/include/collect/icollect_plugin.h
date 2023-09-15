@@ -36,6 +36,7 @@ public:
     virtual bool CheckCondition(const OnDemandCondition& condition) { return false; };
     virtual bool GetOnDemandReasonExtraData(int64_t extraDataId, OnDemandReasonExtraData& extraData) { return false; };
     virtual int32_t AddCollectEvent(const OnDemandEvent& event) { return ERR_OK; };
+    virtual int32_t RemoveUnusedEvent(const OnDemandEvent& event) { return ERR_OK; };
     void ReportEvent(const OnDemandEvent& event);
     void PostDelayTask(std::function<void()> callback, int32_t delayTime);
 private:
