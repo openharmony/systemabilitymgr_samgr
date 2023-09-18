@@ -48,7 +48,7 @@ constexpr int32_t REPEAT = 10;
 constexpr int32_t OVERFLOW_TIME = 257;
 constexpr int32_t TEST_OVERFLOW_SAID = 99999;
 constexpr int32_t TEST_EXCEPTION_HIGH_SA_ID = LAST_SYS_ABILITY_ID + 1;
-constexpr int32_t TEST_EXCEPTION_LOW_SA_ID = FIRST_SYS_ABILITY_ID - 1;
+constexpr int32_t TEST_EXCEPTION_LOW_SA_ID = -1;
 constexpr int32_t TEST_SYSTEM_ABILITY1 = 1491;
 constexpr int32_t TEST_SYSTEM_ABILITY2 = 1492;
 constexpr int32_t SHFIT_BIT = 32;
@@ -187,7 +187,7 @@ HWTEST_F(SystemAbilityMgrTest, RemoveSystemAbility001, TestSize.Level1)
 {
     sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     EXPECT_TRUE(sm != nullptr);
-    int32_t result = sm->RemoveSystemAbility(0);
+    int32_t result = sm->RemoveSystemAbility(-1);
     EXPECT_TRUE(result != ERR_OK);
 }
 
