@@ -1585,7 +1585,6 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemProcessInfo001, TestSize.Leve
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
 
-
 /**
  * @tc.name: GetSystemProcessInfo002
  * @tc.desc: test GetSystemProcessInfo, processContext is nullptr
@@ -1607,8 +1606,6 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemProcessInfo002, TestSize.Leve
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
 
-
-
 /**
  * @tc.name: GetSystemProcessInfo003
  * @tc.desc: test GetSystemProcessInfo, valid process info
@@ -1622,7 +1619,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemProcessInfo003, TestSize.Leve
         std::make_shared<SystemAbilityStateScheduler>();
     std::shared_ptr<SystemAbilityContext> systemAbilityContext =
         std::make_shared<SystemAbilityContext>();
-    std::shared_ptr<SystemProcessContext> systemProcessContext = 
+    std::shared_ptr<SystemProcessContext> systemProcessContext =
         std::make_shared<SystemProcessContext>();
     systemAbilityContext->ownProcessContext = systemProcessContext;
     systemAbilityStateScheduler->abilityContextMap_.clear();
