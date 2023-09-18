@@ -1569,6 +1569,67 @@ HWTEST_F(SystemAbilityStateSchedulerTest, OnAbilityUnloadableLocked001, TestSize
 }
 
 /**
+ * @tc.name: GetSystemProcessInfo001
+ * @tc.desc: test GetSystemProcessInfo, systemAbilityContext is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I7VQQG
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemProcessInfo001, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    systemAbilityStateScheduler->abilityContextMap_[SAID] = nullptr;
+    SystemProcessInfo processInfo;
+    int32_t ret = systemAbilityStateScheduler->GetSystemProcessInfo(SAID, processInfo);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: GetSystemProcessInfo002
+ * @tc.desc: test GetSystemProcessInfo, processContext is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I7VQQG
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemProcessInfo002, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::shared_ptr<SystemAbilityContext> systemAbilityContext =
+        std::make_shared<SystemAbilityContext>();
+    systemAbilityContext->ownProcessContext = nullptr;
+    systemAbilityStateScheduler->abilityContextMap_.clear();
+    systemAbilityStateScheduler->abilityContextMap_[SAID] = systemAbilityContext;
+    SystemProcessInfo processInfo;
+    int32_t ret = systemAbilityStateScheduler->GetSystemProcessInfo(SAID, processInfo);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: GetSystemProcessInfo003
+ * @tc.desc: test GetSystemProcessInfo, valid process info
+ * @tc.type: FUNC
+ * @tc.require: I7VQQG
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemProcessInfo003, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::shared_ptr<SystemAbilityContext> systemAbilityContext =
+        std::make_shared<SystemAbilityContext>();
+    std::shared_ptr<SystemProcessContext> systemProcessContext =
+        std::make_shared<SystemProcessContext>();
+    systemAbilityContext->ownProcessContext = systemProcessContext;
+    systemAbilityStateScheduler->abilityContextMap_.clear();
+    systemAbilityStateScheduler->abilityContextMap_[SAID] = systemAbilityContext;
+    SystemProcessInfo processInfo;
+    int32_t ret = systemAbilityStateScheduler->GetSystemProcessInfo(SAID, processInfo);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
  * @tc.name: GetRunningSystemProcess001
  * @tc.desc: test GetRunningSystemProcess, processContext is nullptr
  * @tc.type: FUNC
