@@ -182,6 +182,15 @@ public:
     int32_t CancelUnloadSystemAbility(int32_t systemAbilityId) override;
     
     /**
+     * GetSystemProcessInfo, Get process info by said.
+     *
+     * @param systemAbilityId, Need the said of sa which wants to get process info.
+     * @param systemProcessInfo, Issue a parameter and return it as a result.
+     * @return ERR_OK indicates that the get successfully.
+     */
+    int32_t GetSystemProcessInfo(int32_t systemAbilityId, SystemProcessInfo& systemProcessInfo) override;
+
+    /**
      * GetRunningSystemProcess, Get all processes currently running.
      *
      * @param systemProcessInfos, Issue a parameter and return it as a result.
@@ -215,7 +224,8 @@ private:
     int32_t MarshalSAExtraProp(const SAExtraProp& extraProp, MessageParcel& data) const;
     int32_t AddSystemAbilityWrapper(int32_t code, MessageParcel& data);
     int32_t RemoveSystemAbilityWrapper(int32_t code, MessageParcel& data);
-    int32_t ReadSystemProcessFromParcel(std::list<SystemProcessInfo>& systemProcessInfos, MessageParcel& reply);
+    int32_t ReadSystemProcessFromParcel(MessageParcel& reply, std::list<SystemProcessInfo>& systemProcessInfos);
+    int32_t ReadProcessInfoFromParcel(MessageParcel& reply, SystemProcessInfo& systemProcessInfo);
 private:
     static inline BrokerDelegator<SystemAbilityManagerProxy> delegator_;
 };

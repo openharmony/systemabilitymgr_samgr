@@ -38,7 +38,6 @@ namespace OHOS {
 namespace {
 constexpr int32_t COMMON_EVENT_ID = 3299;
 constexpr int32_t INVALID_SAID = -1;
-constexpr int32_t INVALID_CODE = -1;
 constexpr int32_t BLUETOOTH_STATE_TURN_ON = 1;
 constexpr int32_t BLUETOOTH_STATE_TURN_OFF = 3;
 constexpr int32_t WIFI_ON = 3;
@@ -71,10 +70,46 @@ void DeviceSwitchCollectTest::TearDown()
 }
 
 /**
- * @tc.name: DeviceSwitchCollectInit001
- * @tc.desc: test DeviceSwitchCollectInit with wifi event
+ * @tc.name: InitCommonEventSubscriber001
+ * @tc.desc: test InitCommonEventSubscriber, initialize deviceswitchcollect's CommonEventSubscriber_
  * @tc.type: FUNC
- * @tc.require: I6V388
+ * @tc.require: I7RSCL
+ */
+
+HWTEST_F(DeviceSwitchCollectTest, InitCommonEventSubscriber001, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceSwitchCollect> deviceSwitchCollect =
+        new DeviceSwitchCollect(collect);
+    deviceSwitchCollect->InitCommonEventSubscriber();
+    EXPECT_NE(deviceSwitchCollect->cesStateListener_, nullptr);
+}
+
+/**
+ * @tc.name: CheckSwitchEvent001
+ * @tc.desc: test CheckSwitchEvent with ondemand event
+ * @tc.type: FUNC
+ * @tc.require: I7RSCL
+ */
+
+HWTEST_F(DeviceSwitchCollectTest, CheckSwitchEvent001, TestSize.Level3)
+{
+    OnDemandEvent onDemandEvent;
+    onDemandEvent.eventId = SETTING_SWITCH;
+    onDemandEvent.name = WIFI_NAME;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceSwitchCollect> deviceSwitchCollect =
+        new DeviceSwitchCollect(collect);
+    int32_t result = deviceSwitchCollect->CheckSwitchEvent(onDemandEvent);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+
+/**
+ * @tc.name: DeviceSwitchCollectInit001
+ * @tc.desc: test DeviceSwitchCollectInit, initialize deviceswitchcollect
+ * @tc.type: FUNC
+ * @tc.require: I7RSCL
  */
 
 HWTEST_F(DeviceSwitchCollectTest, DeviceSwitchCollectInit001, TestSize.Level3)
@@ -88,73 +123,88 @@ HWTEST_F(DeviceSwitchCollectTest, DeviceSwitchCollectInit001, TestSize.Level3)
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     deviceSwitchCollect->Init(saProfiles);
-    EXPECT_FALSE(deviceSwitchCollect->switches_.empty());
+    EXPECT_TRUE(deviceSwitchCollect->needListenSwitchEvent_);
 }
 
 /**
- * @tc.name: SetSwitchEvent001
- * @tc.desc: test SetSwitchEvent with wifi event
+ * @tc.name: CollectSubscribeSwitchEvent001
+ * @tc.desc: test SubscribeSwitchEvent with switchEventSubscriber_ is nullptr
  * @tc.type: FUNC
- * @tc.require: I6V388
+ * @tc.require: I7RSCL
  */
 
-HWTEST_F(DeviceSwitchCollectTest, SetSwitchEvent001, TestSize.Level3)
-{
-    OnDemandEvent onDemandEvent = {SETTING_SWITCH, WIFI_NAME, "on"};
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
-    sptr<DeviceSwitchCollect> deviceSwitchCollect =
-        new DeviceSwitchCollect(collect);
-    deviceSwitchCollect->SetSwitchEvent(onDemandEvent);
-    EXPECT_FALSE(deviceSwitchCollect->switches_.empty());
-}
-
-/**
- * @tc.name: DeviceSwitchCollectOnStart001
- * @tc.desc: test DeviceSwitchCollectOnStart with swithes is empty
- * @tc.type: FUNC
- * @tc.require: I6V388
- */
-
-HWTEST_F(DeviceSwitchCollectTest, DeviceSwitchCollectOnStart001, TestSize.Level3)
+HWTEST_F(DeviceSwitchCollectTest, CollectSubscribeSwitchEvent001, TestSize.Level3)
 {
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
-    deviceSwitchCollect->switches_.clear();
+    deviceSwitchCollect->switchEventSubscriber_ = nullptr;
+    int32_t ret = deviceSwitchCollect->SubscribeSwitchEvent();
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: CollectSubscribeSwitchEvent002
+ * @tc.desc: test SubscribeCommonEventService
+ * @tc.type: FUNC
+ * @tc.require: I7RSCL
+ */
+
+HWTEST_F(DeviceSwitchCollectTest, CollectSubscribeSwitchEvent002, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceSwitchCollect> deviceSwitchCollect =
+        new DeviceSwitchCollect(collect);
+    deviceSwitchCollect->InitCommonEventSubscriber();
+    deviceSwitchCollect->switchEventSubscriber_->isListenSwitchEvent_ = true;
+    int32_t ret = deviceSwitchCollect->SubscribeSwitchEvent();
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: OnStart001
+ * @tc.desc: test OnStart with needListenSwitchEvent_ is false
+ * @tc.type: FUNC
+ * @tc.require: I7RSCL
+ */
+
+HWTEST_F(DeviceSwitchCollectTest, OnStart001, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceSwitchCollect> deviceSwitchCollect =
+        new DeviceSwitchCollect(collect);
+    deviceSwitchCollect->needListenSwitchEvent_ = false;
     int32_t ret = deviceSwitchCollect->OnStart();
     EXPECT_EQ(ret, ERR_OK);
 }
 
 /**
- * @tc.name: DeviceSwitchCollectOnStart002
- * @tc.desc: test DeviceSwitchCollectOnStart with swithes is not empty
+ * @tc.name: OnStart002
+ * @tc.desc: test OnStart with needListenSwitchEvent_ is true
  * @tc.type: FUNC
- * @tc.require: I76X9Q
+ * @tc.require: I7RSCL
  */
 
-HWTEST_F(DeviceSwitchCollectTest, DeviceSwitchCollectOnStart002, TestSize.Level3)
+HWTEST_F(DeviceSwitchCollectTest, OnStart002, TestSize.Level3)
 {
-    OnDemandEvent onDemandEvent1 = {SETTING_SWITCH, WIFI_NAME, "on"};
-    OnDemandEvent onDemandEvent2 = {SETTING_SWITCH, BLUETOOTH_NAME, "on"};
-    OnDemandEvent onDemandEvent3 = {SETTING_SWITCH, UNRELATED_NAME, "on"};
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
-    deviceSwitchCollect->SetSwitchEvent(onDemandEvent1);
-    deviceSwitchCollect->SetSwitchEvent(onDemandEvent2);
-    deviceSwitchCollect->SetSwitchEvent(onDemandEvent3);
+    deviceSwitchCollect->InitCommonEventSubscriber();
+    deviceSwitchCollect->needListenSwitchEvent_ = true;
+    SystemAbilityManager::GetInstance()->subscribeCountMap_.clear();
     int32_t ret = deviceSwitchCollect->OnStart();
     EXPECT_EQ(ret, ERR_OK);
 }
 
 /**
- * @tc.name: DeviceSwitchCollectOnStop001
- * @tc.desc: test DeviceSwitchCollectOnStop
+ * @tc.name: OnStop001
+ * @tc.desc: test OnStop with both cesStateListener_ and switchEventSubscriber_ are nullptr
  * @tc.type: FUNC
- * @tc.require: I6V388
+ * @tc.require: I7RSCL
  */
 
-HWTEST_F(DeviceSwitchCollectTest, DeviceSwitchCollectOnStop001, TestSize.Level3)
+HWTEST_F(DeviceSwitchCollectTest, OnStop001, TestSize.Level3)
 {
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
@@ -164,66 +214,66 @@ HWTEST_F(DeviceSwitchCollectTest, DeviceSwitchCollectOnStop001, TestSize.Level3)
 }
 
 /**
- * @tc.name: AddCollectEvent001
- * @tc.desc: test AddCollectEvent with wifi event
+ * @tc.name: OnStop002
+ * @tc.desc: test OnStop with both cesStateListener_ is not nullptr
  * @tc.type: FUNC
- * @tc.require: I6V388
+ * @tc.require: I7RSCL
+ */
+
+HWTEST_F(DeviceSwitchCollectTest, OnStop002, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceSwitchCollect> deviceSwitchCollect =
+        new DeviceSwitchCollect(collect);
+    deviceSwitchCollect->InitCommonEventSubscriber();
+    deviceSwitchCollect->switchEventSubscriber_ = nullptr;
+    int32_t ret = deviceSwitchCollect->OnStop();
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: OnStop003
+ * @tc.desc: test OnStop with both switchEventSubscriber_ is not nullptr
+ * @tc.type: FUNC
+ * @tc.require: I7RSCL
+ */
+
+HWTEST_F(DeviceSwitchCollectTest, OnStop003, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceSwitchCollect> deviceSwitchCollect =
+        new DeviceSwitchCollect(collect);
+    deviceSwitchCollect->InitCommonEventSubscriber();
+    deviceSwitchCollect->cesStateListener_ = nullptr;
+    int32_t ret = deviceSwitchCollect->OnStop();
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: OnStop004
+ * @tc.desc: test OnStop with both cesStateListener_ and switchEventSubscriber_ are not nullptr
+ * @tc.type: FUNC
+ * @tc.require: I7RSCL
+ */
+
+HWTEST_F(DeviceSwitchCollectTest, OnStop004, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceSwitchCollect> deviceSwitchCollect =
+        new DeviceSwitchCollect(collect);
+    deviceSwitchCollect->InitCommonEventSubscriber();
+    int32_t ret = deviceSwitchCollect->OnStop();
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: AddCollectEvent001
+ * @tc.desc: test AddCollectEvent with ondemandevent's name is not SETTING_SWITCH
+ * @tc.type: FUNC
+ * @tc.require: I7RSCL
  */
 
 HWTEST_F(DeviceSwitchCollectTest, AddCollectEvent001, TestSize.Level3)
-{
-    OnDemandEvent onDemandEvent = {SETTING_SWITCH, WIFI_NAME, "on"};
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
-    sptr<DeviceSwitchCollect> deviceSwitchCollect =
-        new DeviceSwitchCollect(collect);
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    saMgr->subscribeCountMap_.clear();
-    deviceSwitchCollect->AddCollectEvent(onDemandEvent);
-    EXPECT_FALSE(deviceSwitchCollect->switches_.empty());
-}
-
-/**
- * @tc.name: AddCollectEvent002
- * @tc.desc: test AddCollectEvent with bluetooth event
- * @tc.type: FUNC
- * @tc.require: I6V388
- */
-
-HWTEST_F(DeviceSwitchCollectTest, AddCollectEvent002, TestSize.Level3)
-{
-    OnDemandEvent onDemandEvent = {SETTING_SWITCH, BLUETOOTH_NAME, "on"};
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
-    sptr<DeviceSwitchCollect> deviceSwitchCollect =
-        new DeviceSwitchCollect(collect);
-    deviceSwitchCollect->AddCollectEvent(onDemandEvent);
-    EXPECT_FALSE(deviceSwitchCollect->switches_.empty());
-}
-
-/**
- * @tc.name: AddCollectEvent003
- * @tc.desc: test AddCollectEvent with unrelated event
- * @tc.type: FUNC
- * @tc.require: I6V388
- */
-
-HWTEST_F(DeviceSwitchCollectTest, AddCollectEvent003, TestSize.Level3)
-{
-    OnDemandEvent onDemandEvent = {SETTING_SWITCH, UNRELATED_NAME, "on"};
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
-    sptr<DeviceSwitchCollect> deviceSwitchCollect =
-        new DeviceSwitchCollect(collect);
-    int32_t ret = deviceSwitchCollect->AddCollectEvent(onDemandEvent);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-}
-
-/**
- * @tc.name: AddCollectEvent004
- * @tc.desc: test AddCollectEvent with no event
- * @tc.type: FUNC
- * @tc.require: I76X9Q
- */
-
-HWTEST_F(DeviceSwitchCollectTest, AddCollectEvent004, TestSize.Level3)
 {
     OnDemandEvent onDemandEvent;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
@@ -234,45 +284,29 @@ HWTEST_F(DeviceSwitchCollectTest, AddCollectEvent004, TestSize.Level3)
 }
 
 /**
- * @tc.name: AddCollectEvent005
- * @tc.desc: test AddCollectEvent with event is already existed
+ * @tc.name: AddCollectEvent002
+ * @tc.desc: test AddCollectEvent with proper ondemandevent name
  * @tc.type: FUNC
- * @tc.require: I6V388
+ * @tc.require: I7RSCL
  */
 
-HWTEST_F(DeviceSwitchCollectTest, AddCollectEvent005, TestSize.Level3)
+HWTEST_F(DeviceSwitchCollectTest, AddCollectEvent002, TestSize.Level3)
 {
-    OnDemandEvent onDemandEvent = {SETTING_SWITCH, BLUETOOTH_NAME, "on"};
+    OnDemandEvent onDemandEvent = {SETTING_SWITCH, WIFI_NAME, "on"};
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
-    deviceSwitchCollect->switches_.insert(BLUETOOTH_NAME);
+    deviceSwitchCollect->InitCommonEventSubscriber();
+    SystemAbilityManager::GetInstance()->subscribeCountMap_.clear();
     int32_t ret = deviceSwitchCollect->AddCollectEvent(onDemandEvent);
     EXPECT_EQ(ret, ERR_OK);
 }
 
 /**
- * @tc.name: isContainSwitch001
- * @tc.desc: cover isContainSwitch
- * @tc.type: FUNC
- * @tc.require: I7FBV6
- */
-
-HWTEST_F(DeviceSwitchCollectTest, isContainSwitch001, TestSize.Level3)
-{
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
-    sptr<DeviceSwitchCollect> deviceSwitchCollect =
-        new DeviceSwitchCollect(collect);
-    deviceSwitchCollect->switches_.insert(WIFI_NAME);
-    bool ret = deviceSwitchCollect->isContainSwitch(WIFI_NAME);
-    EXPECT_TRUE(ret);
-}
-
-/**
  * @tc.name: OnAddSystemAbility001
- * @tc.desc: test OnAddSystemAbility with correct saID and does not have switch
+ * @tc.desc: test OnAddSystemAbility with said is not COMMON_EVENT_SERVICE_ID
  * @tc.type: FUNC
- * @tc.require: I7FBV6
+ * @tc.require: I7RSCL
  */
 
 HWTEST_F(DeviceSwitchCollectTest, OnAddSystemAbility001, TestSize.Level3)
@@ -280,325 +314,289 @@ HWTEST_F(DeviceSwitchCollectTest, OnAddSystemAbility001, TestSize.Level3)
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
-    sptr<SwitchStateListener> listener = new SwitchStateListener(deviceSwitchCollect);
-    listener->OnAddSystemAbility(COMMON_EVENT_ID, DEVICE_ID);
-    EXPECT_TRUE(deviceSwitchCollect->switches_.empty());
+    deviceSwitchCollect->InitCommonEventSubscriber();
+    EventFwk::MatchingSkills skill = EventFwk::MatchingSkills();
+    skill.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_WIFI_POWER_STATE);
+    EventFwk::CommonEventSubscribeInfo info(skill);
+    std::shared_ptr<EventFwk::CommonEventSubscriber> switchEventSubscriber
+        = std::make_shared<SwitchEventSubscriber>(info, deviceSwitchCollect);
+    deviceSwitchCollect->cesStateListener_->OnAddSystemAbility(INVALID_SAID, DEVICE_ID);
+    EXPECT_NE(deviceSwitchCollect->cesStateListener_, nullptr);
 }
 
 /**
  * @tc.name: OnAddSystemAbility002
- * @tc.desc: test OnAddSystemAbility with correct said and has wifi status
+ * @tc.desc: test OnAddSystemAbility with deviceSwitchCollect is nullptr
  * @tc.type: FUNC
- * @tc.require: I7FBV6
+ * @tc.require: I7RSCL
  */
 
 HWTEST_F(DeviceSwitchCollectTest, OnAddSystemAbility002, TestSize.Level3)
 {
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
-    sptr<DeviceSwitchCollect> deviceSwitchCollect =
-        new DeviceSwitchCollect(collect);
-    deviceSwitchCollect->switches_.clear();
-    deviceSwitchCollect->switches_.insert(WIFI_NAME);
-    sptr<SwitchStateListener> listener = new SwitchStateListener(deviceSwitchCollect);
-    listener->OnAddSystemAbility(COMMON_EVENT_ID, DEVICE_ID);
-    EXPECT_EQ(deviceSwitchCollect->switches_.size(), 1);
+    sptr<CesStateListener> cesStateListener = new CesStateListener(nullptr);
+    cesStateListener->OnAddSystemAbility(COMMON_EVENT_ID, DEVICE_ID);
+    auto deviceSwitchCollect = cesStateListener->deviceSwitchCollect_.promote();
+    EXPECT_EQ(deviceSwitchCollect, nullptr);
 }
 
 /**
- * @tc.name: OnAddSystemAbility003
- * @tc.desc: test OnAddSystemAbility with correct said and has bluetooth status
+ * @tc.name: SubscribeSwitchEvent001
+ * @tc.desc: test SubscribeSwitchEvent with deviceswitchcollect is initialized
  * @tc.type: FUNC
- * @tc.require: I7FBV6
+ * @tc.require: I7RSCL
  */
 
-HWTEST_F(DeviceSwitchCollectTest, OnAddSystemAbility003, TestSize.Level3)
+HWTEST_F(DeviceSwitchCollectTest, SubscribeSwitchEvent001, TestSize.Level3)
+{
+    std::list<SaProfile> saProfiles;
+    SaProfile saProfile;
+    OnDemandEvent onDemandEvent = {SETTING_SWITCH, WIFI_NAME, "on"};
+    saProfile.startOnDemand.onDemandEvents.emplace_back(onDemandEvent);
+    saProfiles.emplace_back(saProfile);
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceSwitchCollect> deviceSwitchCollect =
+        new DeviceSwitchCollect(collect);
+    deviceSwitchCollect->Init(saProfiles);
+    deviceSwitchCollect->switchEventSubscriber_->SubscribeSwitchEvent();
+    EXPECT_NE(deviceSwitchCollect->switchEventSubscriber_, nullptr);
+}
+
+/**
+ * @tc.name: UnSubscribeSwitchEvent001
+ * @tc.desc: test UnSubscribeSwitchEvent with deviceswitchcollect is initialized
+ * @tc.type: FUNC
+ * @tc.require: I7RSCL
+ */
+
+HWTEST_F(DeviceSwitchCollectTest, UnSubscribeSwitchEvent001, TestSize.Level3)
+{
+    std::list<SaProfile> saProfiles;
+    SaProfile saProfile;
+    OnDemandEvent onDemandEvent = {SETTING_SWITCH, WIFI_NAME, "on"};
+    saProfile.startOnDemand.onDemandEvents.emplace_back(onDemandEvent);
+    saProfiles.emplace_back(saProfile);
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceSwitchCollect> deviceSwitchCollect =
+        new DeviceSwitchCollect(collect);
+    deviceSwitchCollect->Init(saProfiles);
+    deviceSwitchCollect->switchEventSubscriber_->SubscribeSwitchEvent();
+    deviceSwitchCollect->switchEventSubscriber_->UnSubscribeSwitchEvent();
+    EXPECT_NE(deviceSwitchCollect->switchEventSubscriber_, nullptr);
+}
+
+/**
+ * @tc.name: ReportEvent001
+ * @tc.desc: test ReportEvent with deviceswitchcollect is not nullptr
+ * @tc.type: FUNC
+ * @tc.require: I7RSCL
+ */
+
+HWTEST_F(DeviceSwitchCollectTest, ReportEvent001, TestSize.Level3)
+{
+    OnDemandEvent onDemandEvent = {SETTING_SWITCH, WIFI_NAME, "on"};
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceSwitchCollect> deviceSwitchCollect =
+        new DeviceSwitchCollect(collect);
+    deviceSwitchCollect->InitCommonEventSubscriber();
+    deviceSwitchCollect->switchEventSubscriber_->ReportEvent(onDemandEvent);
+    EXPECT_NE(deviceSwitchCollect->switchEventSubscriber_->deviceSwitchCollect_, nullptr);
+}
+
+/**
+ * @tc.name: OnReceiveWifiEvent001
+ * @tc.desc: test OnReceiveWifiEvent with wifi is turn on
+ * @tc.type: FUNC
+ * @tc.require: I7RSCL
+ */
+
+HWTEST_F(DeviceSwitchCollectTest, OnReceiveWifiEvent001, TestSize.Level3)
 {
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
-        deviceSwitchCollect->switches_.clear();
-    deviceSwitchCollect->switches_.insert(BLUETOOTH_NAME);
-    sptr<SwitchStateListener> listener = new SwitchStateListener(deviceSwitchCollect);
-    listener->OnAddSystemAbility(COMMON_EVENT_ID, DEVICE_ID);
-    EXPECT_EQ(deviceSwitchCollect->switches_.size(), 1);
-}
-
-/**
- * @tc.name: OnAddSystemAbility004
- * @tc.desc: test OnAddSystemAbility with correct said and has both wifi status and bluetooth status
- * @tc.type: FUNC
- * @tc.require: I7FBV6
- */
-
-HWTEST_F(DeviceSwitchCollectTest, OnAddSystemAbility004, TestSize.Level3)
-{
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
-    sptr<DeviceSwitchCollect> deviceSwitchCollect =
-        new DeviceSwitchCollect(collect);
-    deviceSwitchCollect->switches_.clear();
-    deviceSwitchCollect->switches_.insert(WIFI_NAME);
-    deviceSwitchCollect->switches_.insert(BLUETOOTH_NAME);
-    sptr<SwitchStateListener> listener = new SwitchStateListener(deviceSwitchCollect);
-    listener->OnAddSystemAbility(COMMON_EVENT_ID, DEVICE_ID);
-    EXPECT_EQ(deviceSwitchCollect->switches_.size(), 2);
-}
-
-/**
- * @tc.name: OnAddSystemAbility005
- * @tc.desc: test OnAddSystemAbility with incorrect saID
- * @tc.type: FUNC
- * @tc.require: I7FBV6
- */
-
-HWTEST_F(DeviceSwitchCollectTest, OnAddSystemAbility005, TestSize.Level3)
-{
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
-    sptr<DeviceSwitchCollect> deviceSwitchCollect =
-        new DeviceSwitchCollect(collect);
-    sptr<SwitchStateListener> listener = new SwitchStateListener(deviceSwitchCollect);
-    listener->OnAddSystemAbility(INVALID_SAID, DEVICE_ID);
-    EXPECT_TRUE(deviceSwitchCollect->switches_.empty());
-}
-
-/**
- * @tc.name: BlueToothSwitchCollectWatchState001
- * @tc.desc: cover BlueToothSwitchCollectWatchState
- * @tc.type: FUNC
- * @tc.require: I7FBV6
- */
-
-HWTEST_F(DeviceSwitchCollectTest, BlueToothSwitchCollectWatchState001, TestSize.Level3)
-{
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
-    sptr<DeviceSwitchCollect> deviceSwitchCollect =
-        new DeviceSwitchCollect(collect);
-    std::shared_ptr<WifiSwitchCollect> btSwitchCollect = std::make_shared<WifiSwitchCollect>();
-    btSwitchCollect->WatchState(deviceSwitchCollect);
-    EXPECT_TRUE(deviceSwitchCollect->switches_.empty());
-}
-
-/**
- * @tc.name: BluetoothEventSubscriberOnReceiveEvent001
- * @tc.desc: test BluetoothEventSubscriberOnReceiveEvent with incorrect action
- * @tc.type: FUNC
- * @tc.require: I7FBV6
- */
-
-HWTEST_F(DeviceSwitchCollectTest, BlueToothSwitchCollectOnReceiveEvent001, TestSize.Level3)
-{
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
-    sptr<DeviceSwitchCollect> deviceSwitchCollect =
-        new DeviceSwitchCollect(collect);
-    AAFwk::Want want;
-    EventFwk::CommonEventData data;
-    want.SetAction(INVALID_ACTION);
-    data.SetWant(want);
-    data.SetCode(BLUETOOTH_STATE_TURN_ON);
-    EventFwk::MatchingSkills skill = EventFwk::MatchingSkills();
-    skill.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_BLUETOOTH_HOST_STATE_UPDATE);
-    EventFwk::CommonEventSubscribeInfo info(skill);
-    std::shared_ptr<EventFwk::CommonEventSubscriber> bluetoothEventSubscriber
-        = std::make_shared<BluetoothEventSubscriber>(info, deviceSwitchCollect);
-    bluetoothEventSubscriber->OnReceiveEvent(data);
-    EXPECT_TRUE(deviceSwitchCollect->switches_.empty());
-}
-
-/**
- * @tc.name: BluetoothEventSubscriberOnReceiveEvent002
- * @tc.desc: test BlueToothSwitchCollectOnReceiveEvent with bluetooth status is turn on
- * @tc.type: FUNC
- * @tc.require: I7FBV6
- */
-
-HWTEST_F(DeviceSwitchCollectTest, BluetoothEventSubscriberOnReceiveEvent002, TestSize.Level3)
-{
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
-    sptr<DeviceSwitchCollect> deviceSwitchCollect =
-        new DeviceSwitchCollect(collect);
-    AAFwk::Want want;
-    EventFwk::CommonEventData data;
-    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_BLUETOOTH_HOST_STATE_UPDATE);
-    data.SetWant(want);
-    data.SetCode(BLUETOOTH_STATE_TURN_ON);
-    EventFwk::MatchingSkills skill = EventFwk::MatchingSkills();
-    skill.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_BLUETOOTH_HOST_STATE_UPDATE);
-    EventFwk::CommonEventSubscribeInfo info(skill);
-    std::shared_ptr<EventFwk::CommonEventSubscriber> bluetoothEventSubscriber
-        = std::make_shared<BluetoothEventSubscriber>(info, deviceSwitchCollect);
-    bluetoothEventSubscriber->OnReceiveEvent(data);
-    EXPECT_TRUE(deviceSwitchCollect->switches_.empty());
-}
-
-/**
- * @tc.name: BluetoothEventSubscriberOnReceiveEvent003
- * @tc.desc: test BluetoothEventSubscriberOnReceiveEvent with bluetooth status is turn off
- * @tc.type: FUNC
- * @tc.require: I7FBV6
- */
-
-HWTEST_F(DeviceSwitchCollectTest, BluetoothEventSubscriberOnReceiveEvent003, TestSize.Level3)
-{
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
-    sptr<DeviceSwitchCollect> deviceSwitchCollect =
-        new DeviceSwitchCollect(collect);
-    AAFwk::Want want;
-    EventFwk::CommonEventData data;
-    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_BLUETOOTH_HOST_STATE_UPDATE);
-    data.SetWant(want);
-    data.SetCode(BLUETOOTH_STATE_TURN_OFF);
-    EventFwk::MatchingSkills skill = EventFwk::MatchingSkills();
-    skill.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_BLUETOOTH_HOST_STATE_UPDATE);
-    EventFwk::CommonEventSubscribeInfo info(skill);
-    std::shared_ptr<EventFwk::CommonEventSubscriber> bluetoothEventSubscriber
-        = std::make_shared<BluetoothEventSubscriber>(info, deviceSwitchCollect);
-    bluetoothEventSubscriber->OnReceiveEvent(data);
-    EXPECT_TRUE(deviceSwitchCollect->switches_.empty());
-}
-
-/**
- * @tc.name:BluetoothEventSubscriberOnReceiveEvent004
- * @tc.desc: test BluetoothEventSubscriberOnReceiveEvent with incorrect code
- * @tc.type: FUNC
- * @tc.require: I7FBV6
- */
-
-HWTEST_F(DeviceSwitchCollectTest, BluetoothEventSubscriberOnReceiveEvent004, TestSize.Level3)
-{
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
-    sptr<DeviceSwitchCollect> deviceSwitchCollect =
-        new DeviceSwitchCollect(collect);
-    AAFwk::Want want;
-    EventFwk::CommonEventData data;
-    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_BLUETOOTH_HOST_STATE_UPDATE);
-    data.SetWant(want);
-    data.SetCode(INVALID_CODE);
-    EventFwk::MatchingSkills skill = EventFwk::MatchingSkills();
-    skill.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_BLUETOOTH_HOST_STATE_UPDATE);
-    EventFwk::CommonEventSubscribeInfo info(skill);
-    std::shared_ptr<EventFwk::CommonEventSubscriber> bluetoothEventSubscriber
-        = std::make_shared<BluetoothEventSubscriber>(info, deviceSwitchCollect);
-    bluetoothEventSubscriber->OnReceiveEvent(data);
-    EXPECT_TRUE(deviceSwitchCollect->switches_.empty());
-}
-
-/**
- * @tc.name:  WifiSwitchCollecttWatchState001
- * @tc.desc: cover  WifiSwitchCollectCollectWatchState
- * @tc.type: FUNC
- * @tc.require: I7FBV6
- */
-
-HWTEST_F(DeviceSwitchCollectTest, WifiSwitchCollecttWatchState001, TestSize.Level3)
-{
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
-    sptr<DeviceSwitchCollect> deviceSwitchCollect =
-        new DeviceSwitchCollect(collect);
-    std::shared_ptr<WifiSwitchCollect> wifiSwitchCollect = std::make_shared<WifiSwitchCollect>();
-    wifiSwitchCollect->WatchState(deviceSwitchCollect);
-    EXPECT_TRUE(deviceSwitchCollect->switches_.empty());
-}
-
-/**
- * @tc.name: WifiEventSubscriberOnReceiveEvent001
- * @tc.desc: test WifiEventSubscriberOnReceiveEvent with incorrect action
- * @tc.type: FUNC
- * @tc.require: I7FBV6
- */
-
-HWTEST_F(DeviceSwitchCollectTest, WifiEventSubscriberOnReceiveEvent001, TestSize.Level3)
-{
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
-    sptr<DeviceSwitchCollect> deviceSwitchCollect =
-        new DeviceSwitchCollect(collect);
-    AAFwk::Want want;
-    EventFwk::CommonEventData data;
-    want.SetAction(INVALID_ACTION);
-    data.SetWant(want);
-    data.SetCode(BLUETOOTH_STATE_TURN_ON);
-    EventFwk::MatchingSkills skill = EventFwk::MatchingSkills();
-    skill.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_WIFI_POWER_STATE);
-    EventFwk::CommonEventSubscribeInfo info(skill);
-    std::shared_ptr<EventFwk::CommonEventSubscriber> wifiEventSubscriber
-        = std::make_shared<WifiEventSubscriber>(info, deviceSwitchCollect);
-    wifiEventSubscriber->OnReceiveEvent(data);
-    EXPECT_TRUE(deviceSwitchCollect->switches_.empty());
-}
-
-/**
- * @tc.name: WifiEventSubscriberOnReceiveEvent002
- * @tc.desc: test WifiEventSubscriberOnReceiveEvent with wifi status is turn on
- * @tc.type: FUNC
- * @tc.require: I7FBV6
- */
-
-HWTEST_F(DeviceSwitchCollectTest, WifiEventSubscriberOnReceiveEvent002, TestSize.Level3)
-{
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
-    sptr<DeviceSwitchCollect> deviceSwitchCollect =
-        new DeviceSwitchCollect(collect);
+    deviceSwitchCollect->InitCommonEventSubscriber();
     AAFwk::Want want;
     EventFwk::CommonEventData data;
     want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_WIFI_POWER_STATE);
     data.SetWant(want);
     data.SetCode(WIFI_ON);
-    EventFwk::MatchingSkills skill = EventFwk::MatchingSkills();
-    skill.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_WIFI_POWER_STATE);
-    EventFwk::CommonEventSubscribeInfo info(skill);
-    std::shared_ptr<EventFwk::CommonEventSubscriber> wifiEventSubscriber
-        = std::make_shared<WifiEventSubscriber>(info, deviceSwitchCollect);
-    wifiEventSubscriber->OnReceiveEvent(data);
-    EXPECT_TRUE(deviceSwitchCollect->switches_.empty());
+    deviceSwitchCollect->switchEventSubscriber_->OnReceiveWifiEvent(data);
+    EXPECT_NE(deviceSwitchCollect->switchEventSubscriber_->deviceSwitchCollect_, nullptr);
 }
 
 /**
- * @tc.name: WifiEventSubscriberOnReceiveEvent003
- * @tc.desc: test WifiEventSubscriberOnReceiveEvent with wifi status is turn off
+ * @tc.name: OnReceiveWifiEvent002
+ * @tc.desc: test OnReceiveWifiEvent with wifi is turn off
  * @tc.type: FUNC
- * @tc.require: I7FBV6
+ * @tc.require: I7RSCL
  */
 
-HWTEST_F(DeviceSwitchCollectTest, WifiEventSubscriberOnReceiveEvent003, TestSize.Level3)
+HWTEST_F(DeviceSwitchCollectTest, OnReceiveWifiEvent002, TestSize.Level3)
 {
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
+    deviceSwitchCollect->InitCommonEventSubscriber();
     AAFwk::Want want;
     EventFwk::CommonEventData data;
     want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_WIFI_POWER_STATE);
     data.SetWant(want);
     data.SetCode(WIFI_OFF);
-    EventFwk::MatchingSkills skill = EventFwk::MatchingSkills();
-    skill.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_WIFI_POWER_STATE);
-    EventFwk::CommonEventSubscribeInfo info(skill);
-    std::shared_ptr<EventFwk::CommonEventSubscriber> wifiEventSubscriber
-        = std::make_shared<WifiEventSubscriber>(info, deviceSwitchCollect);
-    wifiEventSubscriber->OnReceiveEvent(data);
-    EXPECT_TRUE(deviceSwitchCollect->switches_.empty());
+    deviceSwitchCollect->switchEventSubscriber_->OnReceiveWifiEvent(data);
+    EXPECT_NE(deviceSwitchCollect->switchEventSubscriber_->deviceSwitchCollect_, nullptr);
 }
 
 /**
- * @tc.name: WifiEventSubscriberOnReceiveEvent004
- * @tc.desc: test WifiEventSubscriberOnReceiveEvent with incorrect code
+ * @tc.name: OnReceiveWifiEvent003
+ * @tc.desc: test OnReceiveWifiEvent with invalid action
  * @tc.type: FUNC
- * @tc.require: I7FBV6
+ * @tc.require: I7RSCL
  */
 
-HWTEST_F(DeviceSwitchCollectTest, WifiEventSubscriberOnReceiveEvent004, TestSize.Level3)
+HWTEST_F(DeviceSwitchCollectTest, OnReceiveWifiEvent003, TestSize.Level3)
 {
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
+    deviceSwitchCollect->InitCommonEventSubscriber();
+    AAFwk::Want want;
+    EventFwk::CommonEventData data;
+    want.SetAction(INVALID_ACTION);
+    data.SetWant(want);
+    data.SetCode(WIFI_OFF);
+    deviceSwitchCollect->switchEventSubscriber_->OnReceiveWifiEvent(data);
+    EXPECT_NE(deviceSwitchCollect->switchEventSubscriber_->deviceSwitchCollect_, nullptr);
+}
+
+/**
+ * @tc.name: OnReceiveBluetoothEvent001
+ * @tc.desc: test OnReceiveBluetoothEvent with bluetooth is turn on
+ * @tc.type: FUNC
+ * @tc.require: I7RSCL
+ */
+
+HWTEST_F(DeviceSwitchCollectTest, OnReceiveBluetoothEvent001, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceSwitchCollect> deviceSwitchCollect =
+        new DeviceSwitchCollect(collect);
+    deviceSwitchCollect->InitCommonEventSubscriber();
+    AAFwk::Want want;
+    EventFwk::CommonEventData data;
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_BLUETOOTH_HOST_STATE_UPDATE);
+    data.SetWant(want);
+    data.SetCode(BLUETOOTH_STATE_TURN_ON);
+    deviceSwitchCollect->switchEventSubscriber_->OnReceiveBluetoothEvent(data);
+    EXPECT_NE(deviceSwitchCollect->switchEventSubscriber_->deviceSwitchCollect_, nullptr);
+}
+
+/**
+ * @tc.name: OnReceiveBluetoothEvent002
+ * @tc.desc: test OnReceiveBluetoothEvent with bluetooth is turn off
+ * @tc.type: FUNC
+ * @tc.require: I7RSCL
+ */
+
+HWTEST_F(DeviceSwitchCollectTest, OnReceiveBluetoothEvent002, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceSwitchCollect> deviceSwitchCollect =
+        new DeviceSwitchCollect(collect);
+    deviceSwitchCollect->InitCommonEventSubscriber();
+    AAFwk::Want want;
+    EventFwk::CommonEventData data;
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_BLUETOOTH_HOST_STATE_UPDATE);
+    data.SetWant(want);
+    data.SetCode(BLUETOOTH_STATE_TURN_OFF);
+    deviceSwitchCollect->switchEventSubscriber_->OnReceiveBluetoothEvent(data);
+    EXPECT_NE(deviceSwitchCollect->switchEventSubscriber_->deviceSwitchCollect_, nullptr);
+}
+
+/**
+ * @tc.name: OnReceiveBluetoothEvent003
+ * @tc.desc: test OnReceiveBluetoothEvent with invalid action
+ * @tc.type: FUNC
+ * @tc.require: I7RSCL
+ */
+
+HWTEST_F(DeviceSwitchCollectTest, OnReceiveBluetoothEvent003, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceSwitchCollect> deviceSwitchCollect =
+        new DeviceSwitchCollect(collect);
+    deviceSwitchCollect->InitCommonEventSubscriber();
+    AAFwk::Want want;
+    EventFwk::CommonEventData data;
+    want.SetAction(INVALID_ACTION);
+    data.SetWant(want);
+    data.SetCode(BLUETOOTH_STATE_TURN_ON);
+    deviceSwitchCollect->switchEventSubscriber_->OnReceiveBluetoothEvent(data);
+    EXPECT_NE(deviceSwitchCollect->switchEventSubscriber_->deviceSwitchCollect_, nullptr);
+}
+
+/**
+ * @tc.name: OnReceiveEvent001
+ * @tc.desc: test OnReceiveEvent with wifi event
+ * @tc.type: FUNC
+ * @tc.require: I7RSCL
+ */
+
+HWTEST_F(DeviceSwitchCollectTest, OnReceiveEvent001, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceSwitchCollect> deviceSwitchCollect =
+        new DeviceSwitchCollect(collect);
+    deviceSwitchCollect->InitCommonEventSubscriber();
     AAFwk::Want want;
     EventFwk::CommonEventData data;
     want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_WIFI_POWER_STATE);
     data.SetWant(want);
-    data.SetCode(INVALID_CODE);
-    EventFwk::MatchingSkills skill = EventFwk::MatchingSkills();
-    skill.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_WIFI_POWER_STATE);
-    EventFwk::CommonEventSubscribeInfo info(skill);
-    std::shared_ptr<EventFwk::CommonEventSubscriber> wifiEventSubscriber
-        = std::make_shared<WifiEventSubscriber>(info, deviceSwitchCollect);
-    wifiEventSubscriber->OnReceiveEvent(data);
-    EXPECT_TRUE(deviceSwitchCollect->switches_.empty());
+    data.SetCode(WIFI_ON);
+    deviceSwitchCollect->switchEventSubscriber_->OnReceiveEvent(data);
+    EXPECT_NE(deviceSwitchCollect->switchEventSubscriber_->deviceSwitchCollect_, nullptr);
+}
+
+/**
+ * @tc.name: OnReceiveEvent002
+ * @tc.desc: test OnReceiveEvent with bluetooth event
+ * @tc.type: FUNC
+ * @tc.require: I7RSCL
+ */
+
+HWTEST_F(DeviceSwitchCollectTest, OnReceiveEvent002, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceSwitchCollect> deviceSwitchCollect =
+        new DeviceSwitchCollect(collect);
+    deviceSwitchCollect->InitCommonEventSubscriber();
+    AAFwk::Want want;
+    EventFwk::CommonEventData data;
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_BLUETOOTH_HOST_STATE_UPDATE);
+    data.SetWant(want);
+    data.SetCode(BLUETOOTH_STATE_TURN_ON);
+    deviceSwitchCollect->switchEventSubscriber_->OnReceiveEvent(data);
+    EXPECT_NE(deviceSwitchCollect->switchEventSubscriber_->deviceSwitchCollect_, nullptr);
+}
+
+/**
+ * @tc.name: OnReceiveEvent003
+ * @tc.desc: test OnReceiveEvent with invalid action
+ * @tc.type: FUNC
+ * @tc.require: I7RSCL
+ */
+
+HWTEST_F(DeviceSwitchCollectTest, OnReceiveEvent003, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceSwitchCollect> deviceSwitchCollect =
+        new DeviceSwitchCollect(collect);
+    deviceSwitchCollect->InitCommonEventSubscriber();
+    AAFwk::Want want;
+    EventFwk::CommonEventData data;
+    want.SetAction(INVALID_ACTION);
+    data.SetWant(want);
+    data.SetCode(BLUETOOTH_STATE_TURN_ON);
+    deviceSwitchCollect->switchEventSubscriber_->OnReceiveEvent(data);
+    EXPECT_NE(deviceSwitchCollect->switchEventSubscriber_->deviceSwitchCollect_, nullptr);
 }
 }

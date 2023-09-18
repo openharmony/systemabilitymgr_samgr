@@ -25,6 +25,7 @@ System ability definition should be a number between FIRST_SYS_ABILITY_ID and LA
 And for vendor, should be a number between VENDOR_SYS_ABILITY_ID_BEGIN and VENDOR_SYS_ABILITY_ID_END.
 */
 enum {
+    SAMGR_DUMP_SAID                                  = 0,
     FIRST_SYS_ABILITY_ID                             = 0x00000001,
     SUBSYS_COMMON_SYS_ABILITY_ID_BEGIN               = 1,
     RENDER_SERVICE                                   = 10,
@@ -280,7 +281,7 @@ enum {
     STORAGE_SERVICE_ID                               = 5001,
     STORAGE_MANAGER_DAEMON_ID                        = 5002,
     STORAGE_MANAGER_MANAGER_ID                       = 5003,
-    FILE_MANAGER_SERVICE_ID                          = 5010,
+    FILE_ACCESS_SERVICE_ID                           = 5010,
     DEVICE_SERVICE_MANAGER_SA_ID                     = 5100,
     HDF_EXTERNAL_DEVICE_MANAGER_SA_ID                = 5110,
     SUBSYS_FILEMANAGEMENT_SYS_ABILITY_ID_BEGIN       = 5200,
@@ -304,6 +305,7 @@ enum {
 };
 
 inline const std::map<int, std::string> saNameMap_ = {
+    { 0, "SystemAbilityManager" },
     { 200, "AccountMgr" },
     { 301, "AIEngine" },
     { ABILITY_MGR_SERVICE_ID, "AbilityManagerService" },
@@ -471,6 +473,7 @@ inline const std::map<int, std::string> saNameMap_ = {
     { ADVERTISING_SA_ID, "Advertising" },
     { LOCAL_CODE_SIGN_SERVICE_ID, "LocalCodeSignService" },
     { INTELL_VOICE_SERVICE_ID, "IntellVoiceService" },
+    { FILE_ACCESS_SERVICE_ID, "FileAccessService" },
 };
 } // namespace OHOS
 

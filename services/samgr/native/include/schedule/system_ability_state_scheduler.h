@@ -47,7 +47,12 @@ public:
     int32_t SendProcessStateEvent(const ProcessInfo& processInfo, ProcessStateEvent event);
     bool IsSystemAbilityUnloading(int32_t systemAbilityId);
 
+    int32_t GetSystemProcessInfo(int32_t systemAbilityId, SystemProcessInfo& systemProcessInfo);
     int32_t GetRunningSystemProcess(std::list<SystemProcessInfo>& systemProcessInfos);
+    void GetAllSystemAbilityInfo(std::string& result);
+    void GetSystemAbilityInfo(int32_t said, std::string& result);
+    void GetProcessInfo(const std::string& processName, std::string& result);
+    void GetAllSystemAbilityInfoByState(const std::string& state, std::string& result);
     int32_t SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener);
     int32_t UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener);
 private:

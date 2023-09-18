@@ -22,6 +22,7 @@
 #include "event_handler.h"
 #include "icollect_plugin.h"
 #include "iremote_object.h"
+#include "system_ability_status_change_stub.h"
 
 namespace OHOS {
 class CommonEventCollect : public ICollectPlugin {
@@ -34,16 +35,20 @@ public:
     void SaveAction(const std::string& action);
     bool CheckCondition(const OnDemandCondition& condition) override;
     int32_t AddCollectEvent(const OnDemandEvent& event) override;
+    int32_t RemoveUnusedEvent(const OnDemandEvent& event) override;
     void Init(const std::list<SaProfile>& saProfiles) override;
-    bool AddCommonListener();
     int64_t SaveOnDemandReasonExtraData(const EventFwk::CommonEventData& data);
     void RemoveOnDemandReasonExtraData(int64_t extraDataId);
     bool GetOnDemandReasonExtraData(int64_t extraDataId, OnDemandReasonExtraData& extraData) override;
+    bool CreateCommonEventSubscriber();
+    bool SendEvent(uint32_t eventId);
 private:
-    bool IsCesReady();
-    void CreateCommonEventSubscriber();
     int64_t GenerateExtraDataIdLocked();
+    bool AddCommonEventName(const std::string& eventName);
+    void AddSkillsEvent(EventFwk::MatchingSkills& skill);
+    void CleanFailedEventLocked(const std::string& eventName);
     std::mutex commomEventLock_;
+    std::recursive_mutex commonEventSubscriberLock_;
     sptr<IRemoteObject::DeathRecipient> commonEventDeath_;
     std::set<std::string> commonEventNames_;
     std::shared_ptr<AppExecFwk::EventHandler> workHandler_;
@@ -55,6 +60,14 @@ private:
     std::map<int64_t, OnDemandReasonExtraData> extraDatas_;
 };
 
+class CommonEventListener : public SystemAbilityStatusChangeStub {
+public:
+    CommonEventListener(const sptr<CommonEventCollect>& commonEventCollect);
+    void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+    void OnRemoveSystemAbility(int32_t systemAblityId, const std::string& deviceId) override;
+private:
+    sptr<CommonEventCollect> commonEventCollect_;
+};
 class CommonHandler : public AppExecFwk::EventHandler {
     public:
         CommonHandler(const std::shared_ptr<AppExecFwk::EventRunner>& runner,
@@ -75,15 +88,6 @@ public:
     void OnReceiveEvent(const EventFwk::CommonEventData& data) override;
 private:
     wptr<CommonEventCollect> collect_;
-};
-
-class CommonEventDeathRecipient : public IRemoteObject::DeathRecipient {
-public:
-    void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
-    explicit CommonEventDeathRecipient(const std::shared_ptr<AppExecFwk::EventHandler>& handler) : handler_(handler) {}
-    ~CommonEventDeathRecipient() override = default;
-private:
-    std::shared_ptr<AppExecFwk::EventHandler> handler_;
 };
 } // namespace OHOS
 #endif // SYSTEM_ABILITY_MANAGER_COMMON_EVENT_COLLECT_H

@@ -24,6 +24,7 @@
 #include "datetime_ex.h"
 #include "directory_ex.h"
 #include "errors.h"
+#include "file_ex.h"
 #include "hicollie_helper.h"
 #include "hisysevent_adapter.h"
 #include "hitrace_meter.h"
@@ -37,6 +38,7 @@
 #include "sam_log.h"
 #include "service_control.h"
 #include "string_ex.h"
+#include "system_ability_manager_dumper.h"
 #include "tools.h"
 
 #ifdef SUPPORT_DEVICE_MANAGER
@@ -127,6 +129,33 @@ void SystemAbilityManager::WatchDogInit()
     if (!result) {
         HILOGE("Watchdog start failed");
     }
+}
+
+int32_t SystemAbilityManager::Dump(int32_t fd, const std::vector<std::u16string>& args)
+{
+    std::vector<std::string> argsWithStr8;
+    for (const auto& arg : args) {
+        argsWithStr8.emplace_back(Str16ToStr8(arg));
+    }
+    std::string result;
+    SystemAbilityManagerDumper::Dump(abilityStateScheduler_, argsWithStr8, result);
+    if (!SaveStringToFd(fd, result)) {
+        HILOGE("save to fd failed");
+        return ERR_INVALID_VALUE;
+    }
+    return ERR_OK;
+}
+
+void SystemAbilityManager::AddSamgrToAbilityMap()
+{
+    unique_lock<shared_mutex> writeLock(abilityMapLock_);
+    int32_t systemAbilityId = 0;
+    SAInfo saInfo;
+    saInfo.remoteObj = this;
+    saInfo.isDistributed = false;
+    saInfo.capability = u"";
+    abilityMap_[systemAbilityId] = std::move(saInfo);
+    HILOGD("samgr inserted");
 }
 
 const sptr<DBinderService> SystemAbilityManager::GetDBinder() const
@@ -882,6 +911,7 @@ void SystemAbilityManager::UnSubscribeSystemAbilityLocked(
                 subscribeCountMap_.erase(iterPair);
             }
         }
+        HILOGI("Remove the systemAbilityStatus listener added by callingPid: %{public}d", item.second);
         iter = listenerList.erase(iter);
         break;
     }
@@ -973,6 +1003,12 @@ int32_t SystemAbilityManager::AddSystemAbility(int32_t systemAbilityId, const sp
         saInfo.isDistributed = extraProp.isDistributed;
         saInfo.capability = extraProp.capability;
         saInfo.permission = Str16ToStr8(extraProp.permission);
+        if (abilityMap_.count(systemAbilityId) > 0) {
+            auto callingPid = IPCSkeleton::GetCallingPid();
+            auto callingUid = IPCSkeleton::GetCallingUid();
+            HILOGW("systemAbility: %{public}d is being covered, callingPid is %{public}d, callingUid is %{public}d",
+                systemAbilityId, callingPid, callingUid);
+        }
         abilityMap_[systemAbilityId] = std::move(saInfo);
         HILOGI("insert %{public}d. size : %{public}zu", systemAbilityId, abilityMap_.size());
     }
@@ -1099,6 +1135,15 @@ sptr<IRemoteObject> SystemAbilityManager::GetSystemProcess(const u16string& proc
     }
     HILOGE("process:%{public}s not exist", Str16ToStr8(procName).c_str());
     return nullptr;
+}
+
+int32_t SystemAbilityManager::GetSystemProcessInfo(int32_t systemAbilityId, SystemProcessInfo& systemProcessInfo)
+{
+    if (abilityStateScheduler_ == nullptr) {
+        HILOGE("abilityStateScheduler is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    return abilityStateScheduler_->GetSystemProcessInfo(systemAbilityId, systemProcessInfo);
 }
 
 int32_t SystemAbilityManager::GetRunningSystemProcess(std::list<SystemProcessInfo>& systemProcessInfos)

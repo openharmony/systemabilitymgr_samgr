@@ -44,6 +44,7 @@ private:
     int32_t CheckSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t AddSystemProcessInner(MessageParcel& data, MessageParcel& reply);
     int32_t RemoveSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
+    int32_t GetSystemProcessInfoInner(MessageParcel& data, MessageParcel& reply);
     int32_t GetRunningSystemProcessInner(MessageParcel& data, MessageParcel& reply);
     int32_t SubscribeSystemProcessInner(MessageParcel& data, MessageParcel& reply);
     int32_t UnSubscribeSystemProcessInner(MessageParcel& data, MessageParcel& reply);

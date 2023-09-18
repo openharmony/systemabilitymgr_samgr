@@ -57,12 +57,12 @@ void DeviceParamCollect::Init(const std::list<SaProfile>& saProfiles)
     for (auto saProfile : saProfiles) {
         for (auto onDemandEvent : saProfile.startOnDemand.onDemandEvents) {
             if (onDemandEvent.eventId == PARAM) {
-                params_.insert(onDemandEvent.name);
+                pendingParams_.insert(onDemandEvent.name);
             }
         }
         for (auto onDemandEvent : saProfile.stopOnDemand.onDemandEvents) {
             if (onDemandEvent.eventId == PARAM) {
-                params_.insert(onDemandEvent.name);
+                pendingParams_.insert(onDemandEvent.name);
             }
         }
     }
@@ -87,10 +87,16 @@ int32_t DeviceParamCollect::OnStop()
 void DeviceParamCollect::WatchParameters()
 {
     std::lock_guard<std::mutex> autoLock(paramLock_);
-    for (auto param : params_) {
+    for (auto param : pendingParams_) {
         HILOGD("DeviceParamCollect watch param: %{puhlic}s", param.c_str());
-        WatchParameter(param.c_str(), DeviceParamCallback, this);
+        int32_t result = WatchParameter(param.c_str(), DeviceParamCallback, this);
+        if (result != ERR_OK) {
+            HILOGE("DeviceParamCollect watch events: %{public}s failed", param.c_str());
+            continue;
+        }
+        params_.insert(param);
     }
+    pendingParams_.clear();
 }
 
 int32_t DeviceParamCollect::AddCollectEvent(const OnDemandEvent& event)
@@ -101,8 +107,26 @@ int32_t DeviceParamCollect::AddCollectEvent(const OnDemandEvent& event)
         return ERR_OK;
     }
     HILOGI("DeviceParamCollect add collect events: %{public}s", event.name.c_str());
-    params_.insert(event.name);
-    WatchParameter(event.name.c_str(), DeviceParamCallback, this);
+    int32_t result = WatchParameter(event.name.c_str(), DeviceParamCallback, this);
+    if (result == ERR_OK) {
+        params_.insert(event.name);
+    }
+    return result;
+}
+
+int32_t DeviceParamCollect::RemoveUnusedEvent(const OnDemandEvent& event)
+{
+    std::lock_guard<std::mutex> autoLock(paramLock_);
+    auto iter = params_.find(event.name);
+    if (iter != params_.end()) {
+        int32_t result = RemoveParameterWatcher(event.name.c_str(), nullptr, nullptr);
+        if (result != ERR_OK) {
+            HILOGE("DeviceParamCollect RemoveUnusedEvent failed");
+            return result;
+        }
+        HILOGI("DeviceParamCollect remove event name: %{public}s", event.name.c_str());
+        params_.erase(iter);
+    }
     return ERR_OK;
 }
 
@@ -110,22 +134,25 @@ void SystemAbilityStatusChange::OnAddSystemAbility(int32_t systemAbilityId, cons
 {
     HILOGI("OnAddSystemAbility systemAbilityId:%{public}d", systemAbilityId);
     switch (systemAbilityId) {
-        case PARAM_WATCHER_DISTRIBUTED_SERVICE_ID:
+        case PARAM_WATCHER_DISTRIBUTED_SERVICE_ID: {
             if (deviceParamCollect_ == nullptr) {
                 HILOGE("DeviceParamCollect is nullptr");
                 return;
             }
-            deviceParamCollect_->WatchParameters();
+            auto task = [this] () {
+                deviceParamCollect_->WatchParameters();
+            };
+            deviceParamCollect_->PostDelayTask(task, 0);
             break;
+        }
         default:
-            HILOGI("OnAddSystemAbility unhandled sysabilityId:%{public}d", systemAbilityId);
+            HILOGE("OnAddSystemAbility unhandled sysabilityId:%{public}d", systemAbilityId);
     }
 }
 
 void SystemAbilityStatusChange::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
 {
     HILOGI("OnRemoveSystemAbility: start!");
-    return;
 }
 
 void SystemAbilityStatusChange::Init(const sptr<DeviceParamCollect>& deviceParamCollect)

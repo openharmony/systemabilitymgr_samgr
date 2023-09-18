@@ -24,7 +24,7 @@
 
 namespace OHOS {
 namespace {
-constexpr int32_t FIRST_SYS_ABILITY_ID = 0x00000001;
+constexpr int32_t FIRST_SYS_ABILITY_ID = 0x00000000;
 constexpr int32_t LAST_SYS_ABILITY_ID = 0x00ffffff;
 }
 int32_t SystemAbilityLoadCallbackStub::OnRemoteRequest(uint32_t code,
@@ -50,7 +50,11 @@ int32_t SystemAbilityLoadCallbackStub::OnRemoteRequest(uint32_t code,
 
 int32_t SystemAbilityLoadCallbackStub::OnLoadSystemAbilitySuccessInner(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t systemAbilityId = data.ReadInt32();
+    int32_t systemAbilityId = -1;
+    bool ret = data.ReadInt32(systemAbilityId);
+    if (!ret) {
+        return ERR_INVALID_VALUE;
+    }
     if (!CheckInputSystemAbilityId(systemAbilityId)) {
         HILOGW("OnLoadSystemAbilitySuccessInner invalid systemAbilityId:%{public}d !", systemAbilityId);
         return ERR_INVALID_VALUE;
@@ -62,7 +66,11 @@ int32_t SystemAbilityLoadCallbackStub::OnLoadSystemAbilitySuccessInner(MessagePa
 
 int32_t SystemAbilityLoadCallbackStub::OnLoadSystemAbilityFailInner(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t systemAbilityId = data.ReadInt32();
+    int32_t systemAbilityId = -1;
+    bool ret = data.ReadInt32(systemAbilityId);
+    if (!ret) {
+        return ERR_INVALID_VALUE;
+    }
     if (!CheckInputSystemAbilityId(systemAbilityId)) {
         HILOGW("OnLoadSystemAbilityFailInner invalid systemAbilityId:%{public}d !", systemAbilityId);
         return ERR_INVALID_VALUE;
@@ -74,12 +82,16 @@ int32_t SystemAbilityLoadCallbackStub::OnLoadSystemAbilityFailInner(MessageParce
 int32_t SystemAbilityLoadCallbackStub::OnLoadSACompleteForRemoteInner(MessageParcel& data, MessageParcel& reply)
 {
     std::string deviceId = data.ReadString();
-    int32_t systemAbilityId = data.ReadInt32();
+    int32_t systemAbilityId = -1;
+    bool ret = data.ReadInt32(systemAbilityId);
+    if (!ret) {
+        return ERR_INVALID_VALUE;
+    }
     if (!CheckInputSystemAbilityId(systemAbilityId)) {
         HILOGW("OnLoadSACompleteForRemoteInner invalid systemAbilityId:%{public}d !", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
-    bool ret = data.ReadBool();
+    ret = data.ReadBool();
     HILOGI("OnLoadSACompleteForRemoteInner load : %{public}s", ret ? "succeed" : "failed");
     sptr<IRemoteObject> remoteObject = ret ? data.ReadRemoteObject() : nullptr;
     OnLoadSACompleteForRemote(deviceId, systemAbilityId, remoteObject);
