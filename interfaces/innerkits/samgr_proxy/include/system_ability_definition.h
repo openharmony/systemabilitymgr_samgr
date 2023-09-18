@@ -475,6 +475,7 @@ inline const std::map<int, std::string> saNameMap_ = {
     { LOCAL_CODE_SIGN_SERVICE_ID, "LocalCodeSignService" },
     { INTELL_VOICE_SERVICE_ID, "IntellVoiceService" },
     { FILE_ACCESS_SERVICE_ID, "FileAccessService" },
+    { MSDP_USER_STATUS_SERVICE_ID, "UserStatusAwarenessService" },
 };
 } // namespace OHOS
 
