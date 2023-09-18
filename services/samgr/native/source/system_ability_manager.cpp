@@ -691,10 +691,12 @@ int32_t SystemAbilityManager::AddOnDemandSystemAbilityInfo(int32_t systemAbility
             onDemandAbilityMap_.size());
         return ERR_INVALID_VALUE;
     }
-
-    if (systemProcessMap_.count(procName) == 0) {
-        HILOGW("AddOnDemandSystemAbilityInfo procName:%{public}s not exist.", Str16ToStr8(procName).c_str());
-        return ERR_INVALID_VALUE;
+    {
+        lock_guard<mutex> autoLock(systemProcessMapLock_);
+        if (systemProcessMap_.count(procName) == 0) {
+            HILOGW("AddOnDemandSystemAbilityInfo procName:%{public}s not exist.", Str16ToStr8(procName).c_str());
+            return ERR_INVALID_VALUE;
+        }
     }
     onDemandAbilityMap_[systemAbilityId] = procName;
     HILOGI("insert onDemand systemAbilityId:%{public}d. size : %{public}zu", systemAbilityId,
@@ -1044,21 +1046,23 @@ int32_t SystemAbilityManager::AddSystemProcess(const u16string& procName,
         HILOGE("AddSystemProcess empty name or null object!");
         return ERR_INVALID_VALUE;
     }
-
     {
-        lock_guard<recursive_mutex> autoLock(onDemandLock_);
+        lock_guard<mutex> autoLock(systemProcessMapLock_);
         size_t procNum = systemProcessMap_.size();
         if (procNum >= MAX_SERVICES) {
             HILOGE("AddSystemProcess map size reach MAX_SERVICES already");
             return ERR_INVALID_VALUE;
         }
         systemProcessMap_[procName] = procObject;
-        if (systemProcessDeath_ != nullptr) {
-            bool ret = procObject->AddDeathRecipient(systemProcessDeath_);
-            HILOGW("AddSystemProcess AddDeathRecipient %{public}s!", ret ? "succeed" : "failed");
-        }
         HILOGI("AddSystemProcess insert %{public}s. size : %{public}zu", Str16ToStr8(procName).c_str(),
             systemProcessMap_.size());
+    }
+    if (systemProcessDeath_ != nullptr) {
+        bool ret = procObject->AddDeathRecipient(systemProcessDeath_);
+        HILOGW("AddSystemProcess AddDeathRecipient %{public}s!", ret ? "succeed" : "failed");
+    }
+    {
+        lock_guard<mutex> autoLock(startingProcessMapLock_);
         auto iterStarting = startingProcessMap_.find(procName);
         if (iterStarting != startingProcessMap_.end()) {
             int64_t end = GetTickCount();
@@ -1087,21 +1091,22 @@ int32_t SystemAbilityManager::RemoveSystemProcess(const sptr<IRemoteObject>& pro
 
     int32_t result = ERR_INVALID_VALUE;
     std::u16string processName;
+    if (systemProcessDeath_ != nullptr) {
+        procObject->RemoveDeathRecipient(systemProcessDeath_);
+    }
     {
-        lock_guard<recursive_mutex> autoLock(onDemandLock_);
+        lock_guard<mutex> autoLock(systemProcessMapLock_);
         for (const auto& [procName, object] : systemProcessMap_) {
-            if (object == procObject) {
-                if (systemProcessDeath_ != nullptr) {
-                    procObject->RemoveDeathRecipient(systemProcessDeath_);
-                }
-                std::string name = Str16ToStr8(procName);
-                processName = procName;
-                (void)systemProcessMap_.erase(procName);
-                HILOGI("RemoveSystemProcess process:%{public}s dead, size : %{public}zu", name.c_str(),
-                    systemProcessMap_.size());
-                result = ERR_OK;
-                break;
+            if (object != procObject) {
+                continue;
             }
+            std::string name = Str16ToStr8(procName);
+            processName = procName;
+            (void)systemProcessMap_.erase(procName);
+            HILOGI("RemoveSystemProcess process:%{public}s dead, size : %{public}zu", name.c_str(),
+                systemProcessMap_.size());
+            result = ERR_OK;
+            break;
         }
     }
     if (result == ERR_OK) {
@@ -1127,7 +1132,7 @@ sptr<IRemoteObject> SystemAbilityManager::GetSystemProcess(const u16string& proc
         return nullptr;
     }
 
-    lock_guard<recursive_mutex> autoLock(onDemandLock_);
+    lock_guard<mutex> autoLock(systemProcessMapLock_);
     auto iter = systemProcessMap_.find(procName);
     if (iter != systemProcessMap_.end()) {
         HILOGD("process:%{public}s found", Str16ToStr8(procName).c_str());
@@ -1254,12 +1259,15 @@ void SystemAbilityManager::SendCheckLoadedMsg(int32_t systemAbilityId, const std
 void SystemAbilityManager::CleanCallbackForLoadFailed(int32_t systemAbilityId, const std::u16string& name,
     const std::string& srcDeviceId, const sptr<ISystemAbilityLoadCallback>& callback)
 {
-    lock_guard<recursive_mutex> autoLock(onDemandLock_);
-    auto iterStarting = startingProcessMap_.find(name);
-    if (iterStarting != startingProcessMap_.end()) {
-        HILOGI("CleanCallback clean process:%{public}s", Str16ToStr8(name).c_str());
-        startingProcessMap_.erase(iterStarting);
+    {
+        lock_guard<mutex> autoLock(startingProcessMapLock_);
+        auto iterStarting = startingProcessMap_.find(name);
+        if (iterStarting != startingProcessMap_.end()) {
+            HILOGI("CleanCallback clean process:%{public}s", Str16ToStr8(name).c_str());
+            startingProcessMap_.erase(iterStarting);
+        }
     }
+    lock_guard<recursive_mutex> autoLock(onDemandLock_);
     auto iter = startingAbilityMap_.find(systemAbilityId);
     if (iter == startingAbilityMap_.end()) {
         HILOGI("CleanCallback SA : %{public}d not in startingAbilityMap.", systemAbilityId);
@@ -1363,13 +1371,12 @@ int32_t SystemAbilityManager::StartDynamicSystemProcess(const std::u16string& na
 int32_t SystemAbilityManager::StartingSystemProcess(const std::u16string& procName,
     int32_t systemAbilityId, const OnDemandEvent& event)
 {
-    lock_guard<recursive_mutex> autoLock(onDemandLock_);
-    if (startingProcessMap_.count(procName) != 0) {
-        HILOGI("StartingSystemProcess process:%{public}s already starting!", Str16ToStr8(procName).c_str());
-        return ERR_OK;
+    bool isProcessStarted = false;
+    {
+        lock_guard<mutex> autoLock(systemProcessMapLock_);
+        isProcessStarted = (systemProcessMap_.count(procName) != 0);
     }
-    auto iter = systemProcessMap_.find(procName);
-    if (iter != systemProcessMap_.end()) {
+    if (isProcessStarted) {
         bool isExist = false;
         StartOnDemandAbility(systemAbilityId, isExist);
         if (!isExist) {
@@ -1378,10 +1385,20 @@ int32_t SystemAbilityManager::StartingSystemProcess(const std::u16string& procNa
         return ERR_OK;
     }
     // call init start process
+    {
+        lock_guard<mutex> autoLock(startingProcessMapLock_);
+        if (startingProcessMap_.count(procName) != 0) {
+            HILOGI("StartingSystemProcess process:%{public}s already starting!", Str16ToStr8(procName).c_str());
+            return ERR_OK;
+        }
+    }
     int64_t begin = GetTickCount();
     int32_t result = StartDynamicSystemProcess(procName, systemAbilityId, event);
     if (result == ERR_OK) {
-        startingProcessMap_.emplace(procName, begin);
+        lock_guard<mutex> autoLock(startingProcessMapLock_);
+        if (startingProcessMap_.count(procName) == 0) {
+            startingProcessMap_.emplace(procName, begin);
+        }
     }
     return result;
 }

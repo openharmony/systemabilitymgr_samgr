@@ -239,7 +239,9 @@ private:
     std::recursive_mutex onDemandLock_;
     std::map<int32_t, std::u16string> onDemandAbilityMap_;
     std::map<int32_t, AbilityItem> startingAbilityMap_;
+    std::mutex systemProcessMapLock_;
     std::map<std::u16string, sptr<IRemoteObject>> systemProcessMap_;
+    std::mutex startingProcessMapLock_;
     std::map<std::u16string, int64_t> startingProcessMap_;
     std::map<int32_t, int32_t> callbackCountMap_;
     std::mutex startEnableOnceLock_;
