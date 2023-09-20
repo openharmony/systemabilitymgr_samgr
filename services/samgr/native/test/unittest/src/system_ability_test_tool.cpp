@@ -48,7 +48,7 @@ namespace {
                             "These are common samgr test tool commands list:\n"
                             "  h            list available commands\n"
                             "  ls           list all said\n"
-                            "  parse        list all sa xml in profile\n"
+                            "  parse        list all sa json in profile\n"
                             "  get          get loacl system ability with given said\n"
                             "  getrmt       get remote system ability with given said and deviceid\n"
                             "  add          add mock system ability\n"

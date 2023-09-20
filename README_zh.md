@@ -137,18 +137,18 @@ samgr组件是OpenHarmony的核心组件，提供OpenHarmony系统服务启动�
 >2.动态加载的进程cfg文件不能配置为开机启动，需指定"ondemand" : true, 示例如下:
 >```
 >{
->     "services" : [{
->         "name" : "listen_test",
->         "path" : ["/system/bin/sa_main", "/system/profile/listen_test.json"],
->         "ondemand" : true,
->         "uid" : "system",
->         "gid" : ["system", "shell"]
->         }
->     ]
+>   "services" : [{
+>           "name" : "listen_test",
+>           "path" : ["/system/bin/sa_main", "/system/profile/listen_test.json"],
+>           "ondemand" : true,
+>           "uid" : "system",
+>           "gid" : ["system", "shell"]
+>       }   
+>   ]
 >}
 >```
 >3.LoadSystemAbility方法适用于动态加载场景，其他获取SystemAbility场景建议使用CheckSystemAbility方法。  
->4.cfg里进程名称需要与SA的配置xml文件里进程名保持一致
+>4.cfg里进程名称需要与SA的配置json文件里进程名保持一致
 
 ## 相关仓<a name="section1371113476307"></a>
 
