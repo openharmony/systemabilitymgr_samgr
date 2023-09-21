@@ -41,8 +41,17 @@ public:
     explicit MockCollectPlugin(const sptr<IReport>& report) : ICollectPlugin(report) {};
     ~MockCollectPlugin() = default;
     bool CheckCondition(const OnDemandCondition& condition) override;
-    int32_t OnStart() override { return 0; };
-    int32_t OnStop() override { return 0; };
+
+    int32_t OnStart() override
+    {
+        return 0;
+    }
+
+    int32_t OnStop() override
+    {
+        return 0;
+    }
+    
     bool mockCheckConditionResult_ = false;
 };
 } // OHOS

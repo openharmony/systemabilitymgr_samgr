@@ -97,7 +97,12 @@ public:
     int32_t SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener) override;
     int32_t UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener) override;
     int32_t GetOnDemandReasonExtraData(int64_t extraDataId, MessageParcel& extraDataParcel) override;
-    sptr<IRemoteObject> LoadSystemAbility(int32_t systemAbilityId, int32_t timeout) override { return nullptr; };
+
+    sptr<IRemoteObject> LoadSystemAbility(int32_t systemAbilityId, int32_t timeout) override
+    {
+        return nullptr;
+    }
+    
     int32_t LoadSystemAbility(int32_t systemAbilityId, const sptr<ISystemAbilityLoadCallback>& callback) override;
     int32_t DoLoadSystemAbility(int32_t systemAbilityId, const std::u16string& procName,
         const sptr<ISystemAbilityLoadCallback>& callback, int32_t callingPid, const OnDemandEvent& event);
