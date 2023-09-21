@@ -90,9 +90,12 @@ public:
     std::string GetLocalNodeId();
     void Init();
     void WatchDogInit();
+    int32_t Dump(int32_t fd, const std::vector<std::u16string>& args) override;
+    void AddSamgrToAbilityMap();
 
     int32_t AddSystemProcess(const std::u16string& procName, const sptr<IRemoteObject>& procObject) override;
     int32_t RemoveSystemProcess(const sptr<IRemoteObject>& procObject);
+    int32_t GetSystemProcessInfo(int32_t systemAbilityId, SystemProcessInfo& systemProcessInfo) override;
     int32_t GetRunningSystemProcess(std::list<SystemProcessInfo>& systemProcessInfos) override;
     int32_t SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener) override;
     int32_t UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener) override;
@@ -241,7 +244,9 @@ private:
     std::recursive_mutex onDemandLock_;
     std::map<int32_t, std::u16string> onDemandAbilityMap_;
     std::map<int32_t, AbilityItem> startingAbilityMap_;
+    std::mutex systemProcessMapLock_;
     std::map<std::u16string, sptr<IRemoteObject>> systemProcessMap_;
+    std::mutex startingProcessMapLock_;
     std::map<std::u16string, int64_t> startingProcessMap_;
     std::map<int32_t, int32_t> callbackCountMap_;
     std::mutex startEnableOnceLock_;

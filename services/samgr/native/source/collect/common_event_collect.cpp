@@ -28,10 +28,9 @@ using namespace OHOS::AppExecFwk;
 namespace OHOS {
 namespace {
 constexpr uint32_t INIT_EVENT = 10;
-constexpr uint32_t COMMON_DIED_EVENT = 11;
+constexpr uint32_t SUB_COMMON_EVENT = 11;
 constexpr uint32_t REMOVE_EXTRA_DATA_EVENT = 12;
 constexpr uint32_t REMOVE_EXTRA_DATA_DELAY_TIME = 300000;
-constexpr int64_t DELAY_TIME = 1000;
 constexpr int64_t MAX_EXTRA_DATA_ID = 1000000000;
 constexpr int32_t COMMON_EVENT_SERVICE_ID = 3299;
 const std::string UID = "uid";
@@ -56,7 +55,6 @@ int32_t CommonEventCollect::OnStart()
         return ERR_INVALID_VALUE;
     }
     workHandler_ = std::make_shared<CommonHandler>(handler->GetEventRunner(), this);
-    commonEventDeath_ = sptr<IRemoteObject::DeathRecipient>(new CommonEventDeathRecipient(workHandler_));
     workHandler_->SendEvent(INIT_EVENT);
     return ERR_OK;
 }
@@ -101,47 +99,67 @@ void CommonEventCollect::Init(const std::list<SaProfile>& onDemandSaProfiles)
     }
 }
 
-bool CommonEventCollect::AddCommonListener()
+void CommonEventCollect::AddSkillsEvent(EventFwk::MatchingSkills& skill)
 {
-    if (!IsCesReady()) {
-        return false;
+    std::lock_guard<std::mutex> autoLock(commomEventLock_);
+    for (auto& commonEventName : commonEventNames_) {
+        HILOGD("CommonEventCollect add event: %{puhlic}s", commonEventName.c_str());
+        skill.AddEvent(commonEventName);
     }
-    HILOGI("CommonEventCollect AddCommonListener ces is ready");
-    CreateCommonEventSubscriber();
+}
+
+void CommonEventCollect::CleanFailedEventLocked(const std::string& eventName)
+{
+    EventFwk::MatchingSkills skill = commonEventSubscriber_->GetSubscribeInfo().GetMatchingSkills();
+    skill.RemoveEvent(eventName);
+    std::lock_guard<std::mutex> autoLock(commomEventLock_);
+    commonEventNames_.erase(eventName);
+}
+
+bool CommonEventCollect::CreateCommonEventSubscriber()
+{
+    std::lock_guard<std::recursive_mutex> autoLock(commonEventSubscriberLock_);
+    EventFwk::MatchingSkills skill;
+    if (commonEventSubscriber_ != nullptr) {
+        skill = commonEventSubscriber_->GetSubscribeInfo().GetMatchingSkills();
+        AddSkillsEvent(skill);
+        bool isUnsubscribe = EventFwk::CommonEventManager::UnSubscribeCommonEvent(commonEventSubscriber_);
+        if (!isUnsubscribe) {
+            HILOGE("OnAddSystemAbility isUnsubscribe failed!");
+        }
+    } else {
+        skill = EventFwk::MatchingSkills();
+        AddSkillsEvent(skill);
+        EventFwk::CommonEventSubscribeInfo info(skill);
+        commonEventSubscriber_ = std::make_shared<CommonEventSubscriber>(info, this);
+    }
     return EventFwk::CommonEventManager::SubscribeCommonEvent(commonEventSubscriber_);
 }
 
-void CommonEventCollect::CreateCommonEventSubscriber()
+bool CommonEventCollect::SendEvent(uint32_t eventId)
 {
-    EventFwk::MatchingSkills skill = EventFwk::MatchingSkills();
-    {
-        std::lock_guard<std::mutex> autoLock(commomEventLock_);
-        for (auto& commonEventName : commonEventNames_) {
-            HILOGD("CommonEventCollect add event: %{puhlic}s", commonEventName.c_str());
-            skill.AddEvent(commonEventName);
-        }
+    if (workHandler_ == nullptr) {
+        HILOGI("CommonEventCollect workHandler is nullptr");
+        return false;
     }
-    EventFwk::CommonEventSubscribeInfo info(skill);
-    commonEventSubscriber_ = std::make_shared<CommonEventSubscriber>(info, this);
+    return workHandler_->SendEvent(eventId);
 }
 
-bool CommonEventCollect::IsCesReady()
+CommonEventListener::CommonEventListener(const sptr<CommonEventCollect>& commonEventCollect)
+    : commonEventCollect_(commonEventCollect) {}
+
+void CommonEventListener::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
 {
-    auto cesProxy = SystemAbilityManager::GetInstance()->CheckSystemAbility(
-        COMMON_EVENT_SERVICE_ID);
-    if (cesProxy != nullptr) {
-        IPCObjectProxy* proxy = reinterpret_cast<IPCObjectProxy*>(cesProxy.GetRefPtr());
-        if (commonEventDeath_ != nullptr) {
-            cesProxy->AddDeathRecipient(commonEventDeath_);
-        }
-        // make sure the proxy is not dead
-        if (proxy != nullptr && !proxy->IsObjectDead()) {
-            return true;
-        }
+    if (systemAbilityId == COMMON_EVENT_SERVICE_ID) {
+        HILOGI("CommonEventCollect ces is ready");
+        commonEventCollect_->SendEvent(SUB_COMMON_EVENT);
     }
-    return false;
 }
 
+void CommonEventListener::OnRemoveSystemAbility(int32_t systemAblityId, const std::string& deviceId)
+{
+    HILOGI("CommonEventListener OnRemoveSystemAblity systemAblityId:%{public}d", systemAblityId);
+}
 void CommonEventCollect::SaveAction(const std::string& action)
 {
     std::lock_guard<std::mutex> autoLock(commonEventStateLock_);
@@ -217,20 +235,40 @@ bool CommonEventCollect::GetOnDemandReasonExtraData(int64_t extraDataId, OnDeman
     return true;
 }
 
+bool CommonEventCollect::AddCommonEventName(const std::string& eventName)
+{
+    std::lock_guard<std::mutex> autoLock(commomEventLock_);
+    auto iter = commonEventNames_.find(eventName);
+    if (iter != commonEventNames_.end()) {
+        return false;
+    }
+    HILOGI("CommonEventCollect add collect events: %{public}s", eventName.c_str());
+    commonEventNames_.insert(eventName);
+    return true;
+}
+
 int32_t CommonEventCollect::AddCollectEvent(const OnDemandEvent& event)
 {
-    {
-        std::lock_guard<std::mutex> autoLock(commomEventLock_);
-        auto iter = commonEventNames_.find(event.name);
-        if (iter != commonEventNames_.end()) {
-            return ERR_OK;
+    std::lock_guard<std::recursive_mutex> autoLock(commonEventSubscriberLock_);
+    bool isInsertEventName = AddCommonEventName(event.name);
+    if (!CreateCommonEventSubscriber()) {
+        if (isInsertEventName) {
+            CleanFailedEventLocked(event.name);
+            CreateCommonEventSubscriber();
         }
-        HILOGI("CommonEventCollect add collect events: %{public}s", event.name.c_str());
-        commonEventNames_.insert(event.name);
-    }
-    if (!AddCommonListener()) {
-        HILOGE("CommonEventCollect add listener failed");
+        HILOGE("AddCollectEvent CreateCommonEventSubscriber failed!");
         return ERR_INVALID_VALUE;
+    }
+    return ERR_OK;
+}
+
+int32_t CommonEventCollect::RemoveUnusedEvent(const OnDemandEvent& event)
+{
+    std::lock_guard<std::mutex> autoLock(commomEventLock_);
+    auto iter = commonEventNames_.find(event.name);
+    if (iter != commonEventNames_.end()) {
+        HILOGI("CommonEventCollect remove event name: %{public}s", event.name.c_str());
+        commonEventNames_.erase(iter);
     }
     return ERR_OK;
 }
@@ -242,7 +280,7 @@ void CommonHandler::ProcessEvent(const InnerEvent::Pointer& event)
         return;
     }
     auto eventId = event->GetInnerEventId();
-    if (eventId != INIT_EVENT && eventId != COMMON_DIED_EVENT && eventId != REMOVE_EXTRA_DATA_EVENT) {
+    if (eventId != INIT_EVENT && eventId != REMOVE_EXTRA_DATA_EVENT && eventId != SUB_COMMON_EVENT) {
         HILOGE("CommonEventCollect ProcessEvent error event code!");
         return;
     }
@@ -255,12 +293,14 @@ void CommonHandler::ProcessEvent(const InnerEvent::Pointer& event)
         commonCollect->RemoveOnDemandReasonExtraData(event->GetParam());
         return;
     }
-    if (!commonCollect->AddCommonListener()) {
-        HILOGW("CommonEventCollect AddCommonListener retry");
-        SendEvent(INIT_EVENT, DELAY_TIME);
+    if (eventId == SUB_COMMON_EVENT) {
+        if (!commonCollect->CreateCommonEventSubscriber()) {
+            HILOGE("OnAddSystemAbility CreateCommonEventSubscriber failed!");
+        }
         return;
     }
-    HILOGI("CommonEventCollect AddCommonListener success");
+    sptr<CommonEventListener> listener = new CommonEventListener(commonCollect);
+    SystemAbilityManager::GetInstance()->SubscribeSystemAbility(COMMON_EVENT_SERVICE_ID, listener);
 }
 
 CommonEventSubscriber::CommonEventSubscriber(const EventFwk::CommonEventSubscribeInfo& subscribeInfo,
@@ -281,13 +321,5 @@ void CommonEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData& data
     int64_t extraDataId = collect->SaveOnDemandReasonExtraData(data);
     OnDemandEvent event = {COMMON_EVENT, action, std::to_string(code), extraDataId};
     collect->ReportEvent(event);
-}
-
-void CommonEventDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
-{
-    HILOGI("CommonEventDeathRecipient called!");
-    if (handler_ != nullptr) {
-        handler_->SendEvent(COMMON_DIED_EVENT, DELAY_TIME);
-    }
 }
 } // namespace OHOS

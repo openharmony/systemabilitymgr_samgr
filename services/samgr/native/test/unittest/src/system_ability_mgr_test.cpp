@@ -48,7 +48,7 @@ constexpr int32_t REPEAT = 10;
 constexpr int32_t OVERFLOW_TIME = 257;
 constexpr int32_t TEST_OVERFLOW_SAID = 99999;
 constexpr int32_t TEST_EXCEPTION_HIGH_SA_ID = LAST_SYS_ABILITY_ID + 1;
-constexpr int32_t TEST_EXCEPTION_LOW_SA_ID = FIRST_SYS_ABILITY_ID - 1;
+constexpr int32_t TEST_EXCEPTION_LOW_SA_ID = -1;
 constexpr int32_t TEST_SYSTEM_ABILITY1 = 1491;
 constexpr int32_t TEST_SYSTEM_ABILITY2 = 1492;
 constexpr int32_t SHFIT_BIT = 32;
@@ -187,7 +187,7 @@ HWTEST_F(SystemAbilityMgrTest, RemoveSystemAbility001, TestSize.Level1)
 {
     sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     EXPECT_TRUE(sm != nullptr);
-    int32_t result = sm->RemoveSystemAbility(0);
+    int32_t result = sm->RemoveSystemAbility(-1);
     EXPECT_TRUE(result != ERR_OK);
 }
 
@@ -2194,6 +2194,40 @@ HWTEST_F(SystemAbilityMgrTest, CheckStopEnableOnce003, TestSize.Level3)
 }
 
 /**
+ * @tc.name: Test GetSystemProcessInfo001
+ * @tc.desc: GetRunningSystemProcess001
+ * @tc.type: FUNC
+ * @tc.require: I7VQQG
+ */
+HWTEST_F(SystemAbilityMgrTest, GetSystemProcessInfo001, TestSize.Level3)
+{
+    DTEST_LOG << " GetSystemProcessInfo001 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    saMgr->abilityStateScheduler_ = systemAbilityStateScheduler;
+    SystemProcessInfo ProcessInfo;
+    int32_t ret = saMgr->GetSystemProcessInfo(SAID, ProcessInfo);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: Test GetSystemProcessInfo002
+ * @tc.desc: GetRunningSystemProcess002
+ * @tc.type: FUNC
+ * @tc.require: I7VQQG
+ */
+HWTEST_F(SystemAbilityMgrTest, GetSystemProcessInfo002, TestSize.Level3)
+{
+    DTEST_LOG << " GetSystemProcessInfo002 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    SystemProcessInfo ProcessInfo;
+    saMgr->abilityStateScheduler_ = nullptr;
+    int32_t ret = saMgr->GetSystemProcessInfo(SAID, ProcessInfo);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
  * @tc.name: Test GetRunningSystemProcess001
  * @tc.desc: GetRunningSystemProcess001
  * @tc.type: FUNC
@@ -2203,6 +2237,9 @@ HWTEST_F(SystemAbilityMgrTest, GetRunningSystemProcess001, TestSize.Level3)
 {
     DTEST_LOG << " GetRunningSystemProcess001 " << std::endl;
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    saMgr->abilityStateScheduler_ = systemAbilityStateScheduler;
     std::list<SystemProcessInfo> systemProcessInfos;
     int32_t ret = saMgr->GetRunningSystemProcess(systemProcessInfos);
     EXPECT_EQ(ret, ERR_OK);
@@ -3131,5 +3168,36 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandReasonExtraData003, TestSize.Level3)
     MessageParcel messageParcel;
     int32_t ret = saMgr->GetOnDemandReasonExtraData(ONDEMAND_EXTRA_DATA_ID, messageParcel);
     EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: Dump001
+ * @tc.desc: call Dump, return ERR_OK
+ * @tc.type: FUNC
+ * @tc.require: I7VEPG
+ */
+
+HWTEST_F(SystemAbilityMgrTest, Dump001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    vector<std::u16string> args;
+    int32_t result = saMgr->Dump(1, args);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: AddSamgrToAbilityMap001
+ * @tc.desc: call AddSamgrToAbilityMap, return ERR_OK
+ * @tc.type: FUNC
+ * @tc.require: I7VEPG
+ */
+
+HWTEST_F(SystemAbilityMgrTest, AddSamgrToAbilityMap001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->AddSamgrToAbilityMap();
+    vector<std::u16string> args;
+    int32_t result = saMgr->Dump(1, args);
+    EXPECT_EQ(result, ERR_OK);
 }
 } // namespace OHOS

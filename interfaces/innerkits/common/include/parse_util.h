@@ -45,6 +45,7 @@ public:
 private:
     void CloseSo();
     uint32_t GetBootPriorityPara(const std::string& bootPhase);
+    uint32_t GetOndemandPriorityPara(const std::string& loadpriority);
     void OpenSo(SaProfile& saProfile);
     bool IsUpdateSA(const std::string& saId);
     void CloseHandle(SaProfile& saProfile);

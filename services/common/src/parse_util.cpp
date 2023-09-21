@@ -61,10 +61,12 @@ constexpr const char* SA_TAG_PARAM = "param";
 constexpr const char* SA_TAG_TIEMD_EVENT = "timedevent";
 constexpr int32_t MAX_JSON_OBJECT_SIZE = 50 * 1024;
 constexpr int32_t MAX_JSON_STRING_LENGTH = 128;
-constexpr int32_t FIRST_SYS_ABILITY_ID = 0x00000001;
+constexpr int32_t FIRST_SYS_ABILITY_ID = 0x00000000;
 constexpr int32_t LAST_SYS_ABILITY_ID = 0x00ffffff;
 const string BOOT_START_PHASE = "BootStartPhase";
 const string CORE_START_PHASE = "CoreStartPhase";
+const string HIGH_LOAD_PRIORITY = "HighPriority";
+const string MEDIUM_LOAD_PRIORITY = "MediumPriority";
 
 enum {
     BOOT_START = 1,
@@ -246,6 +248,17 @@ uint32_t ParseUtil::GetBootPriorityPara(const std::string& bootPhase)
         return static_cast<uint32_t>(CORE_START);
     } else {
         return static_cast<uint32_t>(OTHER_START);
+    }
+}
+
+uint32_t ParseUtil::GetOndemandPriorityPara(const std::string& loadPriority)
+{
+    if (loadPriority == HIGH_LOAD_PRIORITY) {
+        return static_cast<uint32_t>(HIGH_PRIORITY);
+    } else if (loadPriority == MEDIUM_LOAD_PRIORITY) {
+        return static_cast<uint32_t>(MEDIUM_PRIORITY);
+    } else {
+        return static_cast<uint32_t>(LOW_PRIORITY);
     }
 }
 
@@ -465,9 +478,12 @@ void ParseUtil::GetOnDemandArrayFromJson(int32_t eventId, const nlohmann::json& 
             HILOGD("conditions size: %{public}zu", conditions.size());
             bool enableOnce = false;
             GetBoolFromJson(item, "enable-once", enableOnce);
+            std::string priority;
+            GetStringFromJson(item, "load-priority", priority);
+            uint32_t loadPriority = GetOndemandPriorityPara(priority);
             if (!name.empty() && name.length() <= MAX_JSON_STRING_LENGTH &&
                 value.length() <= MAX_JSON_STRING_LENGTH) {
-                OnDemandEvent event = {eventId, name, value, -1, conditions, enableOnce};
+                OnDemandEvent event = {eventId, name, value, -1, conditions, enableOnce, loadPriority };
                 out.emplace_back(event);
             }
         }

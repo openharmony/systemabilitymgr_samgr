@@ -291,4 +291,54 @@ HWTEST_F(DeviceTimedCollectTest, OnStop001, TestSize.Level3)
     int32_t ret = deviceTimedCollect->OnStop();
     EXPECT_EQ(ret, ERR_OK);
 }
+
+/**
+ * @tc.name: RemoveUnusedEvent001
+ * @tc.desc: test RemoveUnusedEvent, with event.name is invalid
+ * @tc.type: FUNC
+ * @tc.require: I7VZ98
+ */
+HWTEST_F(DeviceTimedCollectTest, RemoveUnusedEvent001, TestSize.Level3)
+{
+    sptr<IReport> report;
+    std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
+        std::make_shared<DeviceTimedCollect>(report);
+    OnDemandEvent event = {TIMED_EVENT, "invalid", "10"};
+    int32_t ret = deviceTimedCollect->RemoveUnusedEvent(event);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: RemoveUnusedEvent002
+ * @tc.desc: test RemoveUnusedEvent, with event.name is not in timedSet_
+ * @tc.type: FUNC
+ * @tc.require: I7VZ98
+ */
+HWTEST_F(DeviceTimedCollectTest, RemoveUnusedEvent002, TestSize.Level3)
+{
+    sptr<IReport> report;
+    std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
+        std::make_shared<DeviceTimedCollect>(report);
+    OnDemandEvent event = {TIMED_EVENT, "loopevent", "10"};
+    deviceTimedCollect->timedSet_.clear();
+    int32_t ret = deviceTimedCollect->RemoveUnusedEvent(event);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: RemoveUnusedEvent003
+ * @tc.desc: test RemoveUnusedEvent, with event.name in timedSet_
+ * @tc.type: FUNC
+ * @tc.require: I7VZ98
+ */
+HWTEST_F(DeviceTimedCollectTest, RemoveUnusedEvent003, TestSize.Level3)
+{
+    sptr<IReport> report;
+    std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
+        std::make_shared<DeviceTimedCollect>(report);
+    OnDemandEvent event = {TIMED_EVENT, "loopevent", "10"};
+    deviceTimedCollect->timedSet_.insert(10);
+    int32_t ret = deviceTimedCollect->RemoveUnusedEvent(event);
+    EXPECT_EQ(ret, ERR_OK);
+}
 }

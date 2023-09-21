@@ -133,6 +133,8 @@ SystemAbilityManagerStub::SystemAbilityManagerStub()
         &SystemAbilityManagerStub::UnloadSystemAbilityInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::CANCEL_UNLOAD_SYSTEM_ABILITY_TRANSACTION)] =
         &SystemAbilityManagerStub::CancelUnloadSystemAbilityInner;
+    memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_SYSTEM_PROCESS_INFO_TRANSACTION)] =
+        &SystemAbilityManagerStub::GetSystemProcessInfoInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_RUNNING_SYSTEM_PROCESS_TRANSACTION)] =
         &SystemAbilityManagerStub::GetRunningSystemProcessInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::SUBSCRIBE_SYSTEM_PROCESS_TRANSACTION)] =
@@ -215,7 +217,11 @@ int32_t SystemAbilityManagerStub::ListSystemAbilityInner(MessageParcel& data, Me
 
 int32_t SystemAbilityManagerStub::SubsSystemAbilityInner(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t systemAbilityId = data.ReadInt32();
+    int32_t systemAbilityId = -1;
+    bool ret = data.ReadInt32(systemAbilityId);
+    if (!ret) {
+        return ERR_NULL_OBJECT;
+    }
     if (!CheckInputSysAbilityId(systemAbilityId)) {
         HILOGW("SystemAbilityManagerStub::SubsSystemAbilityInner read systemAbilityId failed!");
         return ERR_NULL_OBJECT;
@@ -232,7 +238,7 @@ int32_t SystemAbilityManagerStub::SubsSystemAbilityInner(MessageParcel& data, Me
     }
     int32_t result = SubscribeSystemAbility(systemAbilityId, listener);
     HILOGD("SystemAbilityManagerStub::SubsSystemAbilityInner result is %d", result);
-    bool ret = reply.WriteInt32(result);
+    ret = reply.WriteInt32(result);
     if (!ret) {
         HILOGW("SystemAbilityManagerStub::SubsSystemAbilityInner write reply failed.");
         return ERR_FLATTEN_OBJECT;
@@ -243,7 +249,11 @@ int32_t SystemAbilityManagerStub::SubsSystemAbilityInner(MessageParcel& data, Me
 
 int32_t SystemAbilityManagerStub::UnSubsSystemAbilityInner(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t systemAbilityId = data.ReadInt32();
+    int32_t systemAbilityId = -1;
+    bool ret = data.ReadInt32(systemAbilityId);
+    if (!ret) {
+        return ERR_NULL_OBJECT;
+    }
     if (!CheckInputSysAbilityId(systemAbilityId)) {
         HILOGW("SystemAbilityManagerStub::UnSubsSystemAbilityInner read systemAbilityId failed!");
         return ERR_NULL_OBJECT;
@@ -260,7 +270,7 @@ int32_t SystemAbilityManagerStub::UnSubsSystemAbilityInner(MessageParcel& data, 
     }
     int32_t result = UnSubscribeSystemAbility(systemAbilityId, listener);
     HILOGD("SystemAbilityManagerStub::UnSubscribeSystemAbility result is %d", result);
-    bool ret = reply.WriteInt32(result);
+    ret = reply.WriteInt32(result);
     if (!ret) {
         HILOGW("SystemAbilityManagerStub::UnSubscribeSystemAbility write reply failed.");
         return ERR_FLATTEN_OBJECT;
@@ -275,7 +285,11 @@ int32_t SystemAbilityManagerStub::CheckRemtSystemAbilityInner(MessageParcel& dat
         HILOGE("CheckRemoteSystemAbilityInner PERMISSION DENIED!");
         return ERR_PERMISSION_DENIED;
     }
-    int32_t systemAbilityId = data.ReadInt32();
+    int32_t systemAbilityId = -1;
+    bool ret = data.ReadInt32(systemAbilityId);
+    if (!ret) {
+        return ERR_NULL_OBJECT;
+    }
     if (!CheckInputSysAbilityId(systemAbilityId)) {
         HILOGW("SystemAbilityManagerStub::CheckRemtSystemAbilityInner read systemAbilityId failed!");
         return ERR_NULL_OBJECT;
@@ -287,7 +301,7 @@ int32_t SystemAbilityManagerStub::CheckRemtSystemAbilityInner(MessageParcel& dat
     }
 
     std::string deviceId;
-    bool ret = data.ReadString(deviceId);
+    ret = data.ReadString(deviceId);
     if (!ret) {
         HILOGW("SystemAbilityManagerStub::CheckRemtSystemAbilityInner read deviceId failed!");
         return ERR_FLATTEN_OBJECT;
@@ -308,7 +322,11 @@ int32_t SystemAbilityManagerStub::AddOndemandSystemAbilityInner(MessageParcel& d
         HILOGE("AddOndemandSystemAbilityInner PERMISSION DENIED!");
         return ERR_PERMISSION_DENIED;
     }
-    int32_t systemAbilityId = data.ReadInt32();
+    int32_t systemAbilityId = -1;
+    bool ret = data.ReadInt32(systemAbilityId);
+    if (!ret) {
+        return ERR_NULL_OBJECT;
+    }
     if (!CheckInputSysAbilityId(systemAbilityId)) {
         HILOGW("SystemAbilityManagerStub::AddOndemandSystemAbilityInner read systemAbilityId failed!");
         return ERR_NULL_OBJECT;
@@ -327,7 +345,7 @@ int32_t SystemAbilityManagerStub::AddOndemandSystemAbilityInner(MessageParcel& d
 
     int32_t result = AddOnDemandSystemAbilityInfo(systemAbilityId, localManagerName);
     HILOGD("SystemAbilityManagerStub::AddOndemandSystemAbilityInner result is %d", result);
-    bool ret = reply.WriteInt32(result);
+    ret = reply.WriteInt32(result);
     if (!ret) {
         HILOGW("SystemAbilityManagerStub::AddOndemandSystemAbilityInner write reply failed.");
         return ERR_FLATTEN_OBJECT;
@@ -338,7 +356,11 @@ int32_t SystemAbilityManagerStub::AddOndemandSystemAbilityInner(MessageParcel& d
 
 int32_t SystemAbilityManagerStub::CheckSystemAbilityImmeInner(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t systemAbilityId = data.ReadInt32();
+    int32_t systemAbilityId = -1;
+    bool ret = data.ReadInt32(systemAbilityId);
+    if (!ret) {
+        return ERR_NULL_OBJECT;
+    }
     if (!CheckInputSysAbilityId(systemAbilityId)) {
         HILOGW("SystemAbilityManagerStub::CheckSystemAbilityImmeInner read systemAbilityId failed!");
         return ERR_NULL_OBJECT;
@@ -350,7 +372,7 @@ int32_t SystemAbilityManagerStub::CheckSystemAbilityImmeInner(MessageParcel& dat
     }
 
     bool isExist = false;
-    bool ret = data.ReadBool(isExist);
+    ret = data.ReadBool(isExist);
     if (!ret) {
         HILOGW("SystemAbilityManagerStub::CheckSystemAbilityImmeInner read isExist failed!");
         return ERR_FLATTEN_OBJECT;
@@ -399,7 +421,11 @@ int32_t SystemAbilityManagerStub::AddSystemAbilityInner(MessageParcel& data, Mes
         HILOGE("AddSystemAbilityInner PERMISSION DENIED!");
         return ERR_PERMISSION_DENIED;
     }
-    int32_t systemAbilityId = data.ReadInt32();
+    int32_t systemAbilityId = -1;
+    bool ret = data.ReadInt32(systemAbilityId);
+    if (!ret) {
+        return ERR_NULL_OBJECT;
+    }
     if (!CheckInputSysAbilityId(systemAbilityId)) {
         HILOGW("SystemAbilityManagerStub::AddSystemAbilityExtraInner read systemAbilityId failed!");
         return ERR_NULL_OBJECT;
@@ -422,7 +448,7 @@ int32_t SystemAbilityManagerStub::AddSystemAbilityInner(MessageParcel& data, Mes
         return result;
     }
     result = AddSystemAbility(systemAbilityId, object, extraProp);
-    bool ret = reply.WriteInt32(result);
+    ret = reply.WriteInt32(result);
     if (!ret) {
         HILOGW("SystemAbilityManagerStub::AddSystemAbilityExtraInner write reply failed.");
         return ERR_FLATTEN_OBJECT;
@@ -432,7 +458,11 @@ int32_t SystemAbilityManagerStub::AddSystemAbilityInner(MessageParcel& data, Mes
 
 int32_t SystemAbilityManagerStub::GetSystemAbilityInner(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t systemAbilityId = data.ReadInt32();
+    int32_t systemAbilityId = -1;
+    bool ret = data.ReadInt32(systemAbilityId);
+    if (!ret) {
+        return ERR_NULL_OBJECT;
+    }
     if (!CheckInputSysAbilityId(systemAbilityId)) {
         HILOGW("SystemAbilityManagerStub::GetSystemAbilityInner read systemAbilityId failed!");
         return ERR_NULL_OBJECT;
@@ -443,7 +473,7 @@ int32_t SystemAbilityManagerStub::GetSystemAbilityInner(MessageParcel& data, Mes
         return ERR_PERMISSION_DENIED;
     }
 
-    bool ret = reply.WriteRemoteObject(GetSystemAbility(systemAbilityId));
+    ret = reply.WriteRemoteObject(GetSystemAbility(systemAbilityId));
     if (!ret) {
         HILOGW("SystemAbilityManagerStub:GetSystemAbilityInner write reply failed.");
         return ERR_FLATTEN_OBJECT;
@@ -453,7 +483,11 @@ int32_t SystemAbilityManagerStub::GetSystemAbilityInner(MessageParcel& data, Mes
 
 int32_t SystemAbilityManagerStub::CheckSystemAbilityInner(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t systemAbilityId = data.ReadInt32();
+    int32_t systemAbilityId = -1;
+    bool ret = data.ReadInt32(systemAbilityId);
+    if (!ret) {
+        return ERR_NULL_OBJECT;
+    }
     if (!CheckInputSysAbilityId(systemAbilityId)) {
         HILOGW("SystemAbilityManagerStub::CheckSystemAbilityInner read systemAbilityId failed!");
         return ERR_NULL_OBJECT;
@@ -464,7 +498,7 @@ int32_t SystemAbilityManagerStub::CheckSystemAbilityInner(MessageParcel& data, M
         return ERR_PERMISSION_DENIED;
     }
 
-    bool ret = reply.WriteRemoteObject(CheckSystemAbility(systemAbilityId));
+    ret = reply.WriteRemoteObject(CheckSystemAbility(systemAbilityId));
     if (!ret) {
         return ERR_FLATTEN_OBJECT;
     }
@@ -477,7 +511,11 @@ int32_t SystemAbilityManagerStub::RemoveSystemAbilityInner(MessageParcel& data, 
         HILOGE("RemoveSystemAbilityInner PERMISSION DENIED!");
         return ERR_PERMISSION_DENIED;
     }
-    int32_t systemAbilityId = data.ReadInt32();
+    int32_t systemAbilityId = -1;
+    bool ret = data.ReadInt32(systemAbilityId);
+    if (!ret) {
+        return ERR_NULL_OBJECT;
+    }
     if (!CheckInputSysAbilityId(systemAbilityId)) {
         HILOGW("SystemAbilityManagerStub::RemoveSystemAbilityInner read systemAbilityId failed!");
         return ERR_NULL_OBJECT;
@@ -489,7 +527,7 @@ int32_t SystemAbilityManagerStub::RemoveSystemAbilityInner(MessageParcel& data, 
     }
 
     int32_t result = RemoveSystemAbility(systemAbilityId);
-    bool ret = reply.WriteInt32(result);
+    ret = reply.WriteInt32(result);
     if (!ret) {
         HILOGW("SystemAbilityManagerStub::RemoveSystemAbilityInner write reply failed.");
         return ERR_FLATTEN_OBJECT;
@@ -527,7 +565,11 @@ int32_t SystemAbilityManagerStub::AddSystemProcessInner(MessageParcel& data, Mes
 
 int32_t SystemAbilityManagerStub::LoadSystemAbilityInner(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t systemAbilityId = data.ReadInt32();
+    int32_t systemAbilityId = -1;
+    bool ret = data.ReadInt32(systemAbilityId);
+    if (!ret) {
+        return ERR_INVALID_VALUE;
+    }
     std::string loadSystemAbilityTag = ToString(systemAbilityId) + "_LoadSystemAbility";
     HITRACE_METER_NAME(HITRACE_TAG_SAMGR, loadSystemAbilityTag);
     if (!CheckInputSysAbilityId(systemAbilityId)) {
@@ -552,7 +594,7 @@ int32_t SystemAbilityManagerStub::LoadSystemAbilityInner(MessageParcel& data, Me
     }
     int32_t result = LoadSystemAbility(systemAbilityId, callback);
     HILOGD("SystemAbilityManagerStub::LoadSystemAbilityInner result is %{public}d", result);
-    bool ret = reply.WriteInt32(result);
+    ret = reply.WriteInt32(result);
     if (!ret) {
         HILOGW("SystemAbilityManagerStub::LoadSystemAbilityInner write reply failed.");
         return ERR_FLATTEN_OBJECT;
@@ -562,7 +604,11 @@ int32_t SystemAbilityManagerStub::LoadSystemAbilityInner(MessageParcel& data, Me
 
 int32_t SystemAbilityManagerStub::LoadRemoteSystemAbilityInner(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t systemAbilityId = data.ReadInt32();
+    int32_t systemAbilityId = -1;
+    bool ret = data.ReadInt32(systemAbilityId);
+    if (!ret) {
+        return ERR_INVALID_VALUE;
+    }
     if (!CheckInputSysAbilityId(systemAbilityId)) {
         HILOGW("SystemAbilityManagerStub::LoadRemoteSystemAbilityInner systemAbilityId invalid");
         return ERR_INVALID_VALUE;
@@ -590,7 +636,7 @@ int32_t SystemAbilityManagerStub::LoadRemoteSystemAbilityInner(MessageParcel& da
     }
     int32_t result = LoadSystemAbility(systemAbilityId, deviceId, callback);
     HILOGD("SystemAbilityManagerStub::LoadRemoteSystemAbilityInner result is %{public}d", result);
-    bool ret = reply.WriteInt32(result);
+    ret = reply.WriteInt32(result);
     if (!ret) {
         HILOGW("SystemAbilityManagerStub::LoadRemoteSystemAbilityInner write reply failed.");
         return ERR_FLATTEN_OBJECT;
@@ -600,19 +646,68 @@ int32_t SystemAbilityManagerStub::LoadRemoteSystemAbilityInner(MessageParcel& da
 
 int32_t SystemAbilityManagerStub::UnloadSystemAbilityInner(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t systemAbilityId = data.ReadInt32();
+    int32_t systemAbilityId = -1;
+    bool ret = data.ReadInt32(systemAbilityId);
+    if (!ret) {
+        return ERR_INVALID_VALUE;
+    }
     if (!CheckInputSysAbilityId(systemAbilityId)) {
         HILOGW("SystemAbilityManagerStub::UnloadSystemAbilityInner systemAbilityId invalid");
         return ERR_INVALID_VALUE;
     }
     int32_t result = UnloadSystemAbility(systemAbilityId);
     HILOGD("SystemAbilityManagerStub::UnloadSystemAbilityInner result is %{public}d", result);
-    bool ret = reply.WriteInt32(result);
+    ret = reply.WriteInt32(result);
     if (!ret) {
         HILOGW("SystemAbilityManagerStub::UnloadSystemAbilityInner write reply failed.");
         return ERR_FLATTEN_OBJECT;
     }
     return result;
+}
+
+int32_t SystemAbilityManagerStub::GetSystemProcessInfoInner(MessageParcel& data, MessageParcel& reply)
+{
+    HILOGI("GetSystemProcessInfoInner called");
+    if (!CanRequest()) {
+        HILOGE("GetSystemProcessInfoInner PERMISSION DENIED!");
+        return ERR_PERMISSION_DENIED;
+    }
+    int32_t systemAbilityId = -1;
+    bool ret = data.ReadInt32(systemAbilityId);
+    if (!ret) {
+        return ERR_NULL_OBJECT;
+    }
+    if (!CheckInputSysAbilityId(systemAbilityId)) {
+        HILOGW("SystemAbilityManagerStub::GetSystemProcessInfoInner read systemAbilityId failed!");
+        return ERR_NULL_OBJECT;
+    }
+    SystemProcessInfo processInfo;
+    int32_t result = GetSystemProcessInfo(systemAbilityId, processInfo);
+    ret = reply.WriteInt32(result);
+    if (!ret) {
+        HILOGW("GetSystemProcessInfoInner write reply failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (result != ERR_OK) {
+        return ERR_OK;
+    }
+
+    ret = reply.WriteString(processInfo.processName);
+    if (!ret) {
+        HILOGW("GetSystemProcessInfoInner write processName failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    ret = reply.WriteInt32(processInfo.pid);
+    if (!ret) {
+        HILOGW("GetSystemProcessInfoInner write pid failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    ret = reply.WriteInt32(processInfo.uid);
+    if (!ret) {
+        HILOGW("GetSystemProcessInfoInner write uid failed.");
+            return ERR_FLATTEN_OBJECT;
+    }
+    return ERR_OK;
 }
 
 int32_t SystemAbilityManagerStub::GetRunningSystemProcessInner(MessageParcel& data, MessageParcel& reply)
@@ -713,14 +808,18 @@ int32_t SystemAbilityManagerStub::UnSubscribeSystemProcessInner(MessageParcel& d
 
 int32_t SystemAbilityManagerStub::CancelUnloadSystemAbilityInner(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t systemAbilityId = data.ReadInt32();
+    int32_t systemAbilityId = -1;
+    bool ret = data.ReadInt32(systemAbilityId);
+    if (!ret) {
+        return ERR_INVALID_VALUE;
+    }
     if (!CheckInputSysAbilityId(systemAbilityId)) {
         HILOGW("SystemAbilityManagerStub::CancelUnloadSystemAbilityInner systemAbilityId invalid");
         return ERR_INVALID_VALUE;
     }
     int32_t result = CancelUnloadSystemAbility(systemAbilityId);
     HILOGD("SystemAbilityManagerStub::CancelUnloadSystemAbilityInner result is %{public}d", result);
-    bool ret = reply.WriteInt32(result);
+    ret = reply.WriteInt32(result);
     if (!ret) {
         HILOGW("SystemAbilityManagerStub::CancelUnloadSystemAbilityInner write reply failed.");
         return ERR_FLATTEN_OBJECT;
@@ -765,7 +864,7 @@ int32_t SystemAbilityManagerStub::GetOnDemandPolicyInner(MessageParcel& data, Me
         HILOGE("GetOnDemandPolicyInner PERMISSION DENIED!");
         return ERR_PERMISSION_DENIED;
     }
-    int32_t systemAbilityId = 0;
+    int32_t systemAbilityId = -1;
     if (!data.ReadInt32(systemAbilityId)) {
         HILOGW("GetOnDemandPolicyInner read saId failed.");
         return ERR_FLATTEN_OBJECT;
@@ -795,7 +894,7 @@ int32_t SystemAbilityManagerStub::UpdateOnDemandPolicyInner(MessageParcel& data,
         HILOGE("UpdateOnDemandPolicyInner PERMISSION DENIED!");
         return ERR_PERMISSION_DENIED;
     }
-    int32_t systemAbilityId = 0;
+    int32_t systemAbilityId = -1;
     if (!data.ReadInt32(systemAbilityId)) {
         HILOGW("UpdateOnDemandPolicyInner read saId failed.");
         return ERR_FLATTEN_OBJECT;

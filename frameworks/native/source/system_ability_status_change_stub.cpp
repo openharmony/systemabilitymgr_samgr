@@ -25,7 +25,7 @@
 
 namespace OHOS {
 namespace {
-constexpr int32_t FIRST_SYS_ABILITY_ID = 0x00000001;
+constexpr int32_t FIRST_SYS_ABILITY_ID = 0x00000000;
 constexpr int32_t LAST_SYS_ABILITY_ID = 0x00ffffff;
 }
 SystemAbilityStatusChangeStub::SystemAbilityStatusChangeStub()
@@ -57,7 +57,11 @@ int32_t SystemAbilityStatusChangeStub::OnRemoteRequest(uint32_t code,
 
 int32_t SystemAbilityStatusChangeStub::OnAddSystemAbilityInner(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t systemAbilityId = data.ReadInt32();
+    int32_t systemAbilityId = -1;
+    bool ret = data.ReadInt32(systemAbilityId);
+    if (!ret) {
+        return ERR_NULL_OBJECT;
+    }
     if (!CheckInputSysAbilityId(systemAbilityId)) {
         HILOGW("read systemAbilityId failed!");
         return ERR_NULL_OBJECT;
@@ -69,7 +73,11 @@ int32_t SystemAbilityStatusChangeStub::OnAddSystemAbilityInner(MessageParcel& da
 
 int32_t SystemAbilityStatusChangeStub::OnRemoveSystemAbilityInner(MessageParcel& data, MessageParcel& reply)
 {
-    int32_t systemAbilityId = data.ReadInt32();
+    int32_t systemAbilityId = -1;
+    bool ret = data.ReadInt32(systemAbilityId);
+    if (!ret) {
+        return ERR_NULL_OBJECT;
+    }
     if (!CheckInputSysAbilityId(systemAbilityId)) {
         HILOGW("read systemAbilityId failed!");
         return ERR_NULL_OBJECT;

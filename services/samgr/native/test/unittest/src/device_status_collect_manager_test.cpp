@@ -147,6 +147,38 @@ HWTEST_F(DeviceStatusCollectManagerTest, GetSaControlListByEvent001, TestSize.Le
 }
 
 /**
+ * @tc.name: SortSaControlListByLoadPriority001
+ * @tc.desc: test SortSaControlListByLoadPriority with saprofiles that have different ondemand priority
+ * @tc.type: FUNC
+ * @tc.require: I7VXXO
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, SortSaControlListByLoadPriority001, TestSize.Level3)
+{
+    DTEST_LOG << " SaControlListByEvent001 BEGIN" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
+    OnDemandEvent event1 = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
+    event1.loadPriority = 2;
+    OnDemandEvent event2 = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
+    event2.loadPriority = 1;
+    SaProfile saProfile1;
+    saProfile1.startOnDemand.onDemandEvents.emplace_back(event1);
+    SaProfile saProfile2;
+    saProfile2.startOnDemand.onDemandEvents.emplace_back(event2);
+    collect->onDemandSaProfiles_.emplace_back(saProfile1);
+    collect->onDemandSaProfiles_.emplace_back(saProfile2);
+
+    std::list<SaControlInfo> saControlList;
+    collect->GetSaControlListByEvent(event, saControlList);
+    EXPECT_EQ(2, saControlList.front().loadPriority);
+    EXPECT_EQ(1, saControlList.back().loadPriority);
+
+    collect->SortSaControlListByLoadPriority(saControlList);
+    EXPECT_EQ(1, saControlList.front().loadPriority);
+    EXPECT_EQ(2, saControlList.back().loadPriority);
+}
+
+/**
  * @tc.name: UnInit001
  * @tc.desc: test UnInit
  * @tc.type: FUNC
@@ -641,5 +673,160 @@ HWTEST_F(DeviceStatusCollectManagerTest, AddCollectEvents005, TestSize.Level3)
     std::vector<OnDemandEvent> events {onDemandEvent};
     int32_t ret = collect->AddCollectEvents(events);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: RemoveUnusedEventsLocked001
+ * @tc.desc: test RemoveUnusedEventsLocked, with events is empty
+ * @tc.type: FUNC
+ * @tc.require: I7VZ98
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, RemoveUnusedEventsLocked001, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    std::vector<OnDemandEvent> events;
+    int32_t ret = collect->RemoveUnusedEventsLocked(events);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: RemoveUnusedEventsLocked002
+ * @tc.desc: test RemoveUnusedEventsLocked, with event not in collectPluginMap_
+ * @tc.type: FUNC
+ * @tc.require: I7VZ98
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, RemoveUnusedEventsLocked002, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    OnDemandEvent onDemandEvent = {-1, WIFI_NAME, "on"};
+    std::vector<OnDemandEvent> events {onDemandEvent};
+    int32_t ret = collect->RemoveUnusedEventsLocked(events);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: RemoveUnusedEventsLocked003
+ * @tc.desc: test RemoveUnusedEventsLocked with nullptr
+ * @tc.type: FUNC
+ * @tc.require: I7VZ98
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, RemoveUnusedEventsLocked003, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    collect->collectPluginMap_[SETTING_SWITCH] = nullptr;
+    OnDemandEvent onDemandEvent = { SETTING_SWITCH, WIFI_NAME, "on" };
+    std::vector<OnDemandEvent> events {onDemandEvent};
+    int32_t ret = collect->RemoveUnusedEventsLocked(events);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: RemoveUnusedEventsLocked004
+ * @tc.desc: test RemoveUnusedEventsLocked with eventUsed is false
+ * @tc.type: FUNC
+ * @tc.require: I7VZ98
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, RemoveUnusedEventsLocked004, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceSwitchCollect> deviceSwitchCollect =
+        new DeviceSwitchCollect(collect);
+    collect->collectPluginMap_[SETTING_SWITCH] = deviceSwitchCollect;
+    OnDemandEvent onDemandEvent = { SETTING_SWITCH, "test", "on" };
+    std::vector<OnDemandEvent> events {onDemandEvent};
+    int32_t ret = collect->RemoveUnusedEventsLocked(events);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: IsSameEventName001
+ * @tc.desc: test IsSameEventName with event1 and event2 is the same
+ * @tc.type: FUNC
+ * @tc.require: I7VZ98
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, IsSameEventName001, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    OnDemandEvent event1 = { SETTING_SWITCH, "test", "on" };
+    OnDemandEvent event2 = { SETTING_SWITCH, "test", "off" };
+    bool ret = collect->IsSameEventName(event1, event2);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: IsSameEventName002
+ * @tc.desc: test IsSameEventName with event1 and event2 is not the same
+ * @tc.type: FUNC
+ * @tc.require: I7VZ98
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, IsSameEventName002, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    OnDemandEvent event1 = { SETTING_SWITCH, "test", "on" };
+    OnDemandEvent event2 = { SETTING_SWITCH, "test1", "off" };
+    bool ret = collect->IsSameEventName(event1, event2);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: IsSameEventName003
+ * @tc.desc: test IsSameEventName with event1 and event2 is the same
+ * @tc.type: FUNC
+ * @tc.require: I7VZ98
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, IsSameEventName003, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    OnDemandEvent event1 = { TIMED_EVENT, "loopevent", "60" };
+    OnDemandEvent event2 = { TIMED_EVENT, "loopevent", "60" };
+    bool ret = collect->IsSameEventName(event1, event2);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: IsSameEventName004
+ * @tc.desc: test IsSameEventName with event1 and event2 is not the same
+ * @tc.type: FUNC
+ * @tc.require: I7VZ98
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, IsSameEventName004, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    OnDemandEvent event1 = { TIMED_EVENT, "loopevent", "60" };
+    OnDemandEvent event2 = { TIMED_EVENT, "loopevent", "30" };
+    bool ret = collect->IsSameEventName(event1, event2);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: CheckEventUsedLocked001
+ * @tc.desc: test CheckEventUsedLocked with event exist
+ * @tc.require: I7VZ98
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, CheckEventUsedLocked001, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    SaProfile saProfile;
+    OnDemandEvent event1 = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
+    OnDemandEvent event2 = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "off" };
+    saProfile.startOnDemand.onDemandEvents.emplace_back(event1);
+    saProfile.stopOnDemand.onDemandEvents.emplace_back(event2);
+    collect->onDemandSaProfiles_.emplace_back(saProfile);
+    bool ret = collect->CheckEventUsedLocked(event1);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: CheckEventUsedLocked002
+ * @tc.desc: test CheckEventUsedLocked with onDemandSaProfiles_ is empty
+ * @tc.require: I7VZ98
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, CheckEventUsedLocked002, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    collect->onDemandSaProfiles_.clear();
+    OnDemandEvent event1 = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
+    bool ret = collect->CheckEventUsedLocked(event1);
+    EXPECT_EQ(ret, false);
 }
 } // namespace OHOS

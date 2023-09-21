@@ -220,6 +220,15 @@ public:
     virtual int32_t CancelUnloadSystemAbility(int32_t systemAbilityId) = 0;
 
     /**
+     * GetSystemProcessInfo, Get process info by said.
+     *
+     * @param systemAbilityId, Need the said of sa which wants to get process info.
+     * @param systemProcessInfo, Issue a parameter and return it as a result.
+     * @return ERR_OK indicates that the get successfully.
+     */
+    virtual int32_t GetSystemProcessInfo(int32_t systemAbilityId, SystemProcessInfo& systemProcessInfo) = 0;
+
+    /**
      * GetRunningSystemProcess, Get all processes currently running.
      *
      * @param systemProcessInfos, Issue a parameter and return it as a result.
@@ -250,7 +259,7 @@ public:
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISystemAbilityManager");
 protected:
-    static constexpr int32_t FIRST_SYS_ABILITY_ID = 0x00000001;
+    static constexpr int32_t FIRST_SYS_ABILITY_ID = 0x00000000;
     static constexpr int32_t LAST_SYS_ABILITY_ID = 0x00ffffff;
     bool CheckInputSysAbilityId(int32_t sysAbilityId) const
     {
