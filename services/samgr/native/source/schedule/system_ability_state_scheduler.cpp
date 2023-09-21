@@ -23,9 +23,10 @@
 #include "res_sched_client.h"
 #endif
 #include "sam_log.h"
+#include "schedule/system_ability_state_scheduler.h"
+#include "service_control.h"
 #include "string_ex.h"
 #include "system_ability_manager.h"
-#include "schedule/system_ability_state_scheduler.h"
 
 namespace OHOS {
 namespace {
@@ -696,6 +697,8 @@ int32_t SystemAbilityStateScheduler::HandleAbnormallyDiedAbilityLocked(
             Str16ToStr8(processContext->processName).c_str());
         return ERR_OK;
     }
+    // Waiting for the init subsystem to perceive process death
+    ServiceWaitForStatus(Str16ToStr8(processContext->processName).c_str(), ServiceStatus::SERVICE_STOPPED, 1);
     OnDemandEvent onDemandEvent = {INTERFACE_CALL, "restart"};
     sptr<ISystemAbilityLoadCallback> callback(new SystemAbilityLoadCallbackStub());
     for (auto& abilityContext : abnormallyDiedAbilityList) {
