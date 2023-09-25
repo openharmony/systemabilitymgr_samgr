@@ -2504,6 +2504,27 @@ HWTEST_F(SystemAbilityMgrTest, CancelUnloadSystemAbility004, TestSize.Level3)
 }
 
 /**
+ * @tc.name: CancelUnloadSystemAbility005
+ * @tc.desc: test CancelUnloadSystemAbility, abilityStateScheduler_ is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6J4T7
+ */
+HWTEST_F(SystemAbilityMgrTest, CancelUnloadSystemAbility005, TestSize.Level3)
+{
+    DTEST_LOG << " CancelUnloadSystemAbility005 " << std::endl;
+    SamMockPermission::MockProcess("mockProcess");
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    SaProfile saProfile;
+    saProfile.process = u"mockProcess";
+    saMgr->saProfileMap_[1] = saProfile;
+    int32_t systemAbilityId = 1;
+    saMgr->abilityStateScheduler_ = nullptr;
+    int32_t ret = saMgr->CancelUnloadSystemAbility(systemAbilityId);
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
  * @tc.name: IdleSystemAbility001
  * @tc.desc: test IdleSystemAbility, said is invalid
  * @tc.type: FUNC
