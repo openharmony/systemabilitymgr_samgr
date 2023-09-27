@@ -380,6 +380,24 @@ HWTEST_F(SystemAbilityMgrTest, CheckSystemAbility004, TestSize.Level3)
 }
 
 /**
+ * @tc.name: CheckSystemAbility005
+ * @tc.desc: check system ability. abilityStateScheduler_ is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+HWTEST_F(SystemAbilityMgrTest, CheckSystemAbility005, TestSize.Level3)
+{
+    DTEST_LOG << " CheckSystemAbility005 " << std::endl;
+    int32_t systemAbilityId = DISTRIBUTED_SCHED_TEST_TT_ID;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    bool isExist = true;
+    saMgr->abilityStateScheduler_ = nullptr;
+    sptr<IRemoteObject> abilityObj = saMgr->CheckSystemAbility(systemAbilityId, isExist);
+    saMgr->abilityStateScheduler_ = make_shared<SystemAbilityStateScheduler>();
+    EXPECT_EQ(abilityObj, nullptr);
+}
+
+/**
  * @tc.name: CheckOnDemandSystemAbility001
  * @tc.desc: check on demand system ability.
  * @tc.type: FUNC
@@ -670,6 +688,21 @@ HWTEST_F(SystemAbilityMgrTest, StartOnDemandAbility004, TestSize.Level0)
 }
 
 /**
+ * @tc.name: StartOnDemandAbility005
+ * @tc.desc: test StartOnDemandAbility, invalid systemAbilityId.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, StartOnDemandAbility005, TestSize.Level0)
+{
+    DTEST_LOG << " StartOnDemandAbility005 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    bool isExist = false;
+    int32_t result = saMgr->StartOnDemandAbility(TEST_EXCEPTION_LOW_SA_ID, isExist);
+    EXPECT_TRUE(result != ERR_NONE);
+}
+
+/**
  * @tc.name: AddOnDemandSystemAbilityInfo001
  * @tc.desc: test AddOnDemandSystemAbilityInfo, invalid systemAbilityId.
  * @tc.type: FUNC
@@ -778,6 +811,21 @@ HWTEST_F(SystemAbilityMgrTest, OnLoadSystemAbilitySuccess003, TestSize.Level1)
     saMgr->NotifySystemAbilityLoaded(DISTRIBUTED_SCHED_TEST_SO_ID, remoteObject, callback);
     EXPECT_TRUE(callback->GetSystemAbilityId() == DISTRIBUTED_SCHED_TEST_SO_ID);
     EXPECT_TRUE(callback->GetRemoteObject() == remoteObject);
+}
+
+/**
+ * @tc.name: OnLoadSystemAbilitySuccess004
+ * @tc.desc: test OnLoadSystemAbilitySuccess, null callback.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, OnLoadSystemAbilitySuccess004, TestSize.Level1)
+{
+    DTEST_LOG << " OnLoadSystemAbilitySuccess004 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
+    saMgr->NotifySystemAbilityLoaded(DISTRIBUTED_SCHED_TEST_SO_ID, nullptr, nullptr);
+    EXPECT_TRUE(callback->GetSystemAbilityId() == 0);
 }
 
 /**
@@ -913,6 +961,23 @@ HWTEST_F(SystemAbilityMgrTest, LoadRemoteSystemAbility006, TestSize.Level2)
 }
 
 /**
+ * @tc.name: LoadRemoteSystemAbility007
+ * @tc.desc: load system ability with invalid systemAbilityId.
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrTest, LoadRemoteSystemAbility007, TestSize.Level2)
+{
+    DTEST_LOG << " LoadRemoteSystemAbility007 " << std::endl;
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    EXPECT_TRUE(sm != nullptr);
+    int32_t systemAbilityId = -1;
+    std::string deviceId = "1234567890";
+    int32_t result = sm->LoadSystemAbility(systemAbilityId, deviceId, nullptr);
+    EXPECT_TRUE(result != ERR_OK);
+}
+
+/**
  * @tc.name: LoadSystemAbilityFromRpc001
  * @tc.desc: load system ability with invalid systemAbilityId.
  * @tc.type: FUNC
@@ -975,6 +1040,22 @@ HWTEST_F(SystemAbilityMgrTest, LoadSystemAbilityFromRpc004, TestSize.Level2)
 }
 
 /**
+ * @tc.name: LoadSystemAbilityFromRpc005
+ * @tc.desc: load system ability with callback is nullptr.
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrTest, LoadSystemAbilityFromRpc005, TestSize.Level2)
+{
+    DTEST_LOG << " LoadSystemAbilityFromRpc005 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::string deviceId = "2222222";
+    int32_t systemAbilityId = 1;
+    bool ret = saMgr->LoadSystemAbilityFromRpc(deviceId, systemAbilityId, nullptr);
+    EXPECT_FALSE(ret);
+}
+
+/**
  * @tc.name: DoMakeRemoteBinder001
  * @tc.desc: load system ability with invalid systemAbilityId.
  * @tc.type: FUNC
@@ -985,6 +1066,22 @@ HWTEST_F(SystemAbilityMgrTest, DoMakeRemoteBinder001, TestSize.Level2)
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     std::string deviceId = "1111111";
     int32_t systemAbilityId = 0;
+    auto remoteObject = saMgr->DoMakeRemoteBinder(systemAbilityId, 0, 0, deviceId);
+    EXPECT_TRUE(remoteObject == nullptr);
+}
+
+/**
+ * @tc.name: DoMakeRemoteBinder002
+ * @tc.desc: load system ability with invalid systemAbilityId.
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrTest, DoMakeRemoteBinder002, TestSize.Level2)
+{
+    DTEST_LOG << " DoMakeRemoteBinder002 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::string deviceId = "2222222";
+    int32_t systemAbilityId = -1;
     auto remoteObject = saMgr->DoMakeRemoteBinder(systemAbilityId, 0, 0, deviceId);
     EXPECT_TRUE(remoteObject == nullptr);
 }
@@ -2732,6 +2829,25 @@ HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent006, TestSize.Level3)
 }
 
 /**
+ * @tc.name: ProcessOnDemandEvent007
+ * @tc.desc: test ProcessOnDemandEvent, saControl.ondemandId == START_ON_DEMAND
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent007, TestSize.Level3)
+{
+    DTEST_LOG << " ProcessOnDemandEvent007 " << std::endl;
+    OnDemandEvent event;
+    std::list<SaControlInfo> saControlList;
+    SaControlInfo saControlInfo;
+    saControlInfo.ondemandId = START_ON_DEMAND;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+    saMgr->ProcessOnDemandEvent(event, saControlList);
+    EXPECT_NE(saMgr, nullptr);
+}
+
+/**
  * @tc.name: IsNameInValid001
  * @tc.desc: test IsNameInValid, name is empty
  * @tc.type: FUNC
@@ -2772,6 +2888,21 @@ HWTEST_F(SystemAbilityMgrTest, IsNameInValid003, TestSize.Level3)
     DTEST_LOG << " IsNameInValid003 " << std::endl;
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     std::u16string name = u"test";
+    bool ret = saMgr->IsNameInValid(name);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: IsNameInValid004
+ * @tc.desc: test IsNameInValid, DeleteBlank is not empty
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+HWTEST_F(SystemAbilityMgrTest, IsNameInValid004, TestSize.Level3)
+{
+    DTEST_LOG << " IsNameInValid004 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::u16string name = u"name";
     bool ret = saMgr->IsNameInValid(name);
     EXPECT_EQ(ret, false);
 }
@@ -3097,6 +3228,23 @@ HWTEST_F(SystemAbilityMgrTest, CheckAllowUpdate003, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
+    SaProfile saProfile;
+    saProfile.startOnDemand.allowUpdate = false;
+    bool ret = saMgr->CheckAllowUpdate(type, saProfile);
+    EXPECT_EQ(false, ret);
+}
+
+/**
+ * @tc.name: CheckAllowUpdate004
+ * @tc.desc: test CheckAllowUpdate with OnDemandPolicyType is STOP_POLICY, allowUpdate is false
+ * @tc.type: FUNC
+ * @tc.require: I6V4AX
+ */
+HWTEST_F(SystemAbilityMgrTest, CheckAllowUpdate004, TestSize.Level3)
+{
+    DTEST_LOG << " CheckAllowUpdate004 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    OnDemandPolicyType type = OnDemandPolicyType::STOP_POLICY;
     SaProfile saProfile;
     saProfile.startOnDemand.allowUpdate = false;
     bool ret = saMgr->CheckAllowUpdate(type, saProfile);
