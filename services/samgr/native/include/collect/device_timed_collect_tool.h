@@ -35,7 +35,7 @@ public:
     std::map<std::string, NativePreferences::PreferencesValue> ObtainAll();
 
     bool IsExist(const std::string& key);
-
+    bool Remove(const std::string &key);
 private:
     bool GetPreference();
     bool RefreshSync();

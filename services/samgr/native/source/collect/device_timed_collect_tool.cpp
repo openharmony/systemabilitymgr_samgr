@@ -143,4 +143,16 @@ bool PreferencesUtil::IsExist(const std::string& key)
     }
     return ptr_->HasKey(key);
 }
+
+bool PreferencesUtil::Remove(const std::string &key)
+{
+    if (!GetPreference()) {
+        HILOGI("Remove GetPreference failed");
+        return false;
+    }
+    if (ptr_->Delete(key) != NativePreferences::E_OK) {
+        return false;
+    }
+    return RefreshSync();
+}
 }
