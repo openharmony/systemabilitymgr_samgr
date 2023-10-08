@@ -41,7 +41,14 @@ public:
     int32_t UpdateOnDemandEvents(int32_t systemAbilityId, OnDemandPolicyType type,
         const std::vector<OnDemandEvent>& events);
 private:
+    bool NeedPersistOnDemandEvent(const OnDemandEvent& event);
+    void PersistOnDemandEvent(int32_t systemAbilityId, OnDemandPolicyType type,
+        const std::vector<OnDemandEvent>& events);
+    void StringToTypeAndSaid(const std::string& str, OnDemandPolicyType& type, int32_t& systemAbilityId);
+    std::string TypeAndSaidToString(OnDemandPolicyType type, int32_t systemAbilityId);
     void FilterOnDemandSaProfiles(const std::list<SaProfile>& saProfiles);
+    void GetSaControlListByPersistEvent(const OnDemandEvent& event,
+        std::list<SaControlInfo>& saControlList);
     void GetSaControlListByEvent(const OnDemandEvent& event, std::list<SaControlInfo>& saControlList);
     void SortSaControlListByLoadPriority(std::list<SaControlInfo>& saControlList);
     bool CheckEventUsedLocked(const OnDemandEvent& events);

@@ -33,6 +33,7 @@ namespace OHOS {
 namespace {
     const std::string TESTNAME = "testname";
     const std::string VALUE = "testvalue";
+    constexpr bool TEST_PERSISTENCE = false;
     constexpr bool TEST_ENABLEONCE = false;
     constexpr int32_t BELOW_SIZE = -1;
     constexpr int32_t OVER_SIZE = 10000;
@@ -85,7 +86,7 @@ HWTEST_F(SystemAbilityOnDemandEventTest, WriteOnDemandEventsToParcel002, TestSiz
     SystemAbilityOnDemandCondition condition = {OnDemandEventId::DEVICE_ONLINE, TESTNAME, VALUE};
     std::vector<SystemAbilityOnDemandCondition> conditions {condition};
     SystemAbilityOnDemandEvent abilityOnDemandEvent = {OnDemandEventId::DEVICE_ONLINE,
-        TESTNAME, VALUE, conditions, false};
+        TESTNAME, VALUE, false, conditions, false};
     std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents {abilityOnDemandEvent};
     MessageParcel data;
     bool ret = OnDemandEventToParcel::WriteOnDemandEventsToParcel(abilityOnDemandEvents, data);
@@ -118,7 +119,8 @@ HWTEST_F(SystemAbilityOnDemandEventTest, WriteOnDemandEventToParcel002, TestSize
     DTEST_LOG << "WriteOnDemandEventToParcel002" << std::endl;
     SystemAbilityOnDemandCondition condition = {OnDemandEventId::DEVICE_ONLINE, TESTNAME, VALUE};
     std::vector<SystemAbilityOnDemandCondition> conditions {condition};
-    SystemAbilityOnDemandEvent event = {OnDemandEventId::DEVICE_ONLINE, TESTNAME, VALUE, conditions, false};
+    SystemAbilityOnDemandEvent event = {OnDemandEventId::DEVICE_ONLINE, TESTNAME, VALUE, false,
+        conditions, false};
     MessageParcel data;
     bool ret = OnDemandEventToParcel::WriteOnDemandEventToParcel(event, data);
     EXPECT_EQ(ret, true);
@@ -364,6 +366,7 @@ HWTEST_F(SystemAbilityOnDemandEventTest, ReadOnDemandEventsFromParcel006, TestSi
     MessageParcel reply;
     reply.WriteInt32(TEST_SIZE);
     OnDemandEventToParcel::WriteOnDemandEventToParcel(event, reply);
+    reply.WriteInt32(TEST_PERSISTENCE);
     reply.WriteInt32(TEST_SIZE);
     OnDemandEventToParcel::WriteOnDemandConditionToParcel(condition, reply);
     reply.WriteBool(TEST_ENABLEONCE);

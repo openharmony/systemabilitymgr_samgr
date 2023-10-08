@@ -15,10 +15,12 @@
 
 #ifndef OHOS_SYSTEM_ABILITY_MANAGER_DEVICE_TIMED_COLLECT_H
 #define OHOS_SYSTEM_ABILITY_MANAGER_DEVICE_TIMED_COLLECT_H
+
+#ifdef PREFERENCES_ENABLE
+#include "device_timed_collect_tool.h"
+#endif
 #include "icollect_plugin.h"
 
-#include <list>
-#include <map>
 #include <mutex>
 #include <set>
 
@@ -35,10 +37,37 @@ public:
     int32_t RemoveUnusedEvent(const OnDemandEvent& event) override;
 private:
     void SaveTimedEvent(const OnDemandEvent& onDemandEvent);
-    void PostLoopTaskLocked(int32_t interval);
-    std::set<int32_t> timedSet_;
-    std::mutex taskLock_;
-    std::map<int32_t, std::function<void()>> loopTasks_;
+    int32_t CalculateDelayTime(const std::string& timeString);
+    void PostPersistenceLoopTasks();
+    void PostNonPersistenceLoopTasks();
+
+    void PostPersistenceLoopTaskLocked(int32_t interval);
+    void PostNonPersistenceLoopTaskLocked(int32_t interval);
+    void PostPersistenceTimedTaskLocked(std::string timeString, int32_t timeGap);
+    void PostNonPersistenceTimedTaskLocked(std::string timeString, int32_t timeGap);
+
+    void ProcessPersistenceTasks();
+    void ProcessPersistenceLoopTask(int64_t disTime, int64_t triggerTime, std::string strInterval);
+    void ProcessPersistenceTimedTask(int64_t disTime, std::string strInterval);
+
+    void PostPersistenceDelayTask(std::function<void()> loopTask,
+        int32_t interval, int32_t disTime);
+
+    void RemoveNonPersistenceLoopTask(int32_t interval);
+    void RemovePersistenceLoopTask(int32_t interval);
+    std::set<int32_t> nonPersitenceLoopEventSet_;
+    std::set<int32_t> nonPersitenceTimedEventSet_;
+    std::set<int32_t> persitenceLoopEventSet_;
+    std::set<int32_t> persitenceTimedEventSet_;
+    std::mutex nonPersitenceLoopEventSetLock_;
+    std::mutex nonPersitenceTimedEventSetLock;
+    std::mutex persitenceLoopEventSetLock_;
+    std::mutex persitenceTimedEventSetLock_;
+    std::map<int32_t, std::function<void()>> nonPersitenceLoopTasks_;
+    std::map<int32_t, std::function<void()>> persitenceLoopTasks_;
+#ifdef PREFERENCES_ENABLE
+    std::shared_ptr<PreferencesUtil> preferencesUtil_;
+#endif
 };
 } // namespace OHOS
 #endif // OHOS_SYSTEM_ABILITY_MANAGER_DEVICE_TIMED_COLLECT_H

@@ -130,6 +130,11 @@ ohos_executable("samgr") {
       ]
     }
 
+    if (preferences_enable) {
+      sources += [ "//foundation/systemabilitymgr/samgr/services/samgr/native/source/collect/device_timed_collect_tool.cpp" ]
+      external_deps += [ "preferences:native_preferences" ]
+      defines += [ "PREFERENCES_ENABLE" ]
+    }
     part_name = "samgr"
   }
   subsystem_name = "systemabilitymgr"
