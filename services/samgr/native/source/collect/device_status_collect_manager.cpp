@@ -77,6 +77,38 @@ void DeviceStatusCollectManager::FilterOnDemandSaProfiles(const std::list<SaProf
     }
 }
 
+void DeviceStatusCollectManager::GetSaControlListByPersistEvent(const OnDemandEvent& event,
+    std::list<SaControlInfo>& saControlList)
+{
+#ifdef PREFERENCES_ENABLE
+    std::shared_ptr<PreferencesUtil> preferencesUtil = PreferencesUtil::GetInstance();
+    if (preferencesUtil == nullptr) {
+        HILOGW("GetSaControlListByPersistEvent preferencesUtil is nullptr");
+        return;
+    }
+    std::string value = preferencesUtil->ObtainString(event.ToString(), std::string());
+    if (value == std::string()) {
+        return;
+    }
+    std::vector<std::string> strVector;
+    SplitStr(value, "+", strVector);
+    size_t vectorSize = strVector.size();
+    for (size_t i = 0; i < vectorSize; i++) {
+        OnDemandPolicyType type;
+        int32_t systemAbilityId = -1;
+        HILOGD("vector is : %{public}s", strVector[i].c_str());
+        StringToTypeAndSaid(strVector[i], type, systemAbilityId);
+        SaControlInfo control;
+        if (type == OnDemandPolicyType::START_POLICY) {
+            control = {START_ON_DEMAND, systemAbilityId };
+        } else {
+            control = {STOP_ON_DEMAND, systemAbilityId };
+        }
+        saControlList.emplace_back(control);
+    }
+#endif
+}
+
 void DeviceStatusCollectManager::GetSaControlListByEvent(const OnDemandEvent& event,
     std::list<SaControlInfo>& saControlList)
 {
@@ -117,7 +149,8 @@ void DeviceStatusCollectManager::SortSaControlListByLoadPriority(std::list<SaCon
 
 bool DeviceStatusCollectManager::IsSameEvent(const OnDemandEvent& ev1, const OnDemandEvent& ev2)
 {
-    return (ev1.eventId == ev2.eventId && ev1.name == ev2.name && (ev1.value == ev2.value || "" == ev2.value));
+    return (ev1.eventId == ev2.eventId && ev1.name == ev2.name &&
+        ev1.persistence == ev2.persistence && (ev1.value == ev2.value || "" == ev2.value));
 }
 
 bool DeviceStatusCollectManager::IsSameEventName(const OnDemandEvent& ev1, const OnDemandEvent& ev2)
@@ -127,7 +160,8 @@ bool DeviceStatusCollectManager::IsSameEventName(const OnDemandEvent& ev1, const
             return true;
         }
     } else {
-        if (ev1.eventId == ev2.eventId && ev1.name == ev2.name && ev1.value == ev2.value) {
+        if (ev1.eventId == ev2.eventId && ev1.name == ev2.name && ev1.value == ev2.value &&
+            ev1.persistence == ev2.persistence) {
             return true;
         }
     }
@@ -193,6 +227,7 @@ void DeviceStatusCollectManager::ReportEvent(const OnDemandEvent& event)
     }
     std::list<SaControlInfo> saControlList;
     GetSaControlListByEvent(event, saControlList);
+    GetSaControlListByPersistEvent(event, saControlList);
     SortSaControlListByLoadPriority(saControlList);
     if (saControlList.empty()) {
         HILOGW("DeviceStatusCollectManager no matched event");
@@ -322,6 +357,70 @@ bool DeviceStatusCollectManager::CheckEventUsedLocked(const OnDemandEvent& event
     return false;
 }
 
+bool DeviceStatusCollectManager::NeedPersistOnDemandEvent(const OnDemandEvent& event)
+{
+    if (event.eventId == TIMED_EVENT && event.name == "timedevent" && event.persistence) {
+        return true;
+    }
+    return false;
+}
+
+void DeviceStatusCollectManager::PersistOnDemandEvent(int32_t systemAbilityId, OnDemandPolicyType type,
+    const std::vector<OnDemandEvent>& events)
+{
+#ifdef PREFERENCES_ENABLE
+    std::shared_ptr<PreferencesUtil> preferencesUtil = PreferencesUtil::GetInstance();
+    if (preferencesUtil == nullptr) {
+        return;
+    }
+    for (OnDemandEvent event : events) {
+        if (!NeedPersistOnDemandEvent(event)) {
+            continue;
+        }
+        std::string strEvent = event.ToString();
+        std::string strTypeAndSaid = TypeAndSaidToString(type, systemAbilityId);
+        if (preferencesUtil->IsExist(strEvent)) {
+            std::string orgStrTypeAndSaid = preferencesUtil->ObtainString(strEvent, "");
+            orgStrTypeAndSaid += "+";
+            orgStrTypeAndSaid += strTypeAndSaid;
+            HILOGI("PersistOnDemandEvent Save orgStrTypeAndSaid is : %{public}s", orgStrTypeAndSaid.c_str());
+            preferencesUtil->SaveString(strEvent, orgStrTypeAndSaid);
+        } else {
+            preferencesUtil->SaveString(strEvent, strTypeAndSaid);
+            HILOGI("PersistOnDemandEvent Save strTypeAndSaid is : %{public}s", strTypeAndSaid.c_str());
+        }
+    }
+#endif
+}
+
+std::string DeviceStatusCollectManager::TypeAndSaidToString(OnDemandPolicyType type, int32_t systemAbilityId)
+{
+    std::string strSaid = std::to_string(systemAbilityId);
+    if (type == OnDemandPolicyType::START_POLICY) {
+        return "start#" + strSaid + "#";
+    } else if (type == OnDemandPolicyType::STOP_POLICY) {
+        return "stop#" + strSaid + "#";
+    }
+    return "";
+}
+
+void DeviceStatusCollectManager::StringToTypeAndSaid(const std::string& eventStr, OnDemandPolicyType& type,
+    int32_t& systemAbilityId)
+{
+    std::size_t pos = eventStr.find("#");
+    std::string strType = eventStr.substr(0, pos);
+    if (strType == "start") {
+        type = OnDemandPolicyType::START_POLICY;
+    } else if (strType == "stop") {
+        type = OnDemandPolicyType::STOP_POLICY;
+    } else {
+        HILOGW("DeviceStatusCollectManager StringToTypeAndSaid failed");
+        return;
+    }
+    systemAbilityId = atoi((eventStr.substr(pos + 1, eventStr.size() - pos - 1)).c_str());
+    HILOGD("systemAbilityId is : %{public}d", systemAbilityId);
+}
+
 int32_t DeviceStatusCollectManager::UpdateOnDemandEvents(int32_t systemAbilityId, OnDemandPolicyType type,
     const std::vector<OnDemandEvent>& events)
 {
@@ -349,6 +448,7 @@ int32_t DeviceStatusCollectManager::UpdateOnDemandEvents(int32_t systemAbilityId
         HILOGE("DeviceStatusCollectManager UpdateOnDemandEvents policy types");
         return ERR_INVALID_VALUE;
     }
+    PersistOnDemandEvent(systemAbilityId, type, events);
     if (RemoveUnusedEventsLocked(oldEvents) != ERR_OK) {
         HILOGE("DeviceStatusCollectManager RemoveUnusedEventsLocked failed saId:%{public}d", systemAbilityId);
     }

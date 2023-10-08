@@ -64,7 +64,7 @@ HWTEST_F(DeviceTimedCollectTest, Init001, TestSize.Level3)
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(collect);
     deviceTimedCollect->Init(saProfiles);
-    EXPECT_EQ(deviceTimedCollect->timedSet_.size(), 1);
+    EXPECT_EQ(deviceTimedCollect->nonPersitenceLoopEventSet_.size(), 1);
 }
 
 /**
@@ -83,7 +83,7 @@ HWTEST_F(DeviceTimedCollectTest, Init002, TestSize.Level3)
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(collect);
     deviceTimedCollect->Init(saProfiles);
-    EXPECT_EQ(deviceTimedCollect->timedSet_.size(), 0);
+    EXPECT_EQ(deviceTimedCollect->nonPersitenceLoopEventSet_.size(), 0);
 }
 
 /**
@@ -102,7 +102,7 @@ HWTEST_F(DeviceTimedCollectTest, Init003, TestSize.Level3)
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(collect);
     deviceTimedCollect->Init(saProfiles);
-    EXPECT_EQ(deviceTimedCollect->timedSet_.size(), 1);
+    EXPECT_EQ(deviceTimedCollect->nonPersitenceLoopEventSet_.size(), 1);
 }
 
 /**
@@ -121,7 +121,7 @@ HWTEST_F(DeviceTimedCollectTest, Init004, TestSize.Level3)
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(collect);
     deviceTimedCollect->Init(saProfiles);
-    EXPECT_EQ(deviceTimedCollect->timedSet_.size(), 0);
+    EXPECT_EQ(deviceTimedCollect->nonPersitenceLoopEventSet_.size(), 0);
 }
 
 /**
@@ -140,7 +140,7 @@ HWTEST_F(DeviceTimedCollectTest, Init005, TestSize.Level3)
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(collect);
     deviceTimedCollect->Init(saProfiles);
-    EXPECT_EQ(deviceTimedCollect->timedSet_.size(), 0);
+    EXPECT_EQ(deviceTimedCollect->nonPersitenceLoopEventSet_.size(), 0);
 }
 
 /**
@@ -159,7 +159,7 @@ HWTEST_F(DeviceTimedCollectTest, Init006, TestSize.Level3)
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(collect);
     deviceTimedCollect->Init(saProfiles);
-    EXPECT_EQ(deviceTimedCollect->timedSet_.size(), 0);
+    EXPECT_EQ(deviceTimedCollect->nonPersitenceLoopEventSet_.size(), 0);
 }
 
 /**
@@ -178,7 +178,7 @@ HWTEST_F(DeviceTimedCollectTest, Init007, TestSize.Level3)
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(collect);
     deviceTimedCollect->Init(saProfiles);
-    EXPECT_EQ(deviceTimedCollect->timedSet_.size(), 0);
+    EXPECT_EQ(deviceTimedCollect->nonPersitenceLoopEventSet_.size(), 0);
 }
 
 /**
@@ -208,7 +208,7 @@ HWTEST_F(DeviceTimedCollectTest, PostDelayTask001, TestSize.Level3)
     sptr<DeviceStatusCollectManager> collect = nullptr;
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(collect);
-    deviceTimedCollect->PostDelayTask(deviceTimedCollect->loopTasks_[0], 0);
+    deviceTimedCollect->PostDelayTask(deviceTimedCollect->nonPersitenceLoopTasks_[0], 0);
     EXPECT_EQ(collect, nullptr);
 }
 
@@ -223,7 +223,7 @@ HWTEST_F(DeviceTimedCollectTest, PostDelayTask002, TestSize.Level3)
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(collect);
-    deviceTimedCollect->PostDelayTask(deviceTimedCollect->loopTasks_[0], 0);
+    deviceTimedCollect->PostDelayTask(deviceTimedCollect->nonPersitenceLoopTasks_[0], 0);
     EXPECT_NE(collect, nullptr);
 }
 
@@ -310,7 +310,7 @@ HWTEST_F(DeviceTimedCollectTest, RemoveUnusedEvent001, TestSize.Level3)
 
 /**
  * @tc.name: RemoveUnusedEvent002
- * @tc.desc: test RemoveUnusedEvent, with event.name is not in timedSet_
+ * @tc.desc: test RemoveUnusedEvent, with event.name is not in nonPersitenceLoopEventSet_
  * @tc.type: FUNC
  * @tc.require: I7VZ98
  */
@@ -320,14 +320,14 @@ HWTEST_F(DeviceTimedCollectTest, RemoveUnusedEvent002, TestSize.Level3)
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(report);
     OnDemandEvent event = {TIMED_EVENT, "loopevent", "10"};
-    deviceTimedCollect->timedSet_.clear();
+    deviceTimedCollect->nonPersitenceLoopEventSet_.clear();
     int32_t ret = deviceTimedCollect->RemoveUnusedEvent(event);
     EXPECT_EQ(ret, ERR_OK);
 }
 
 /**
  * @tc.name: RemoveUnusedEvent003
- * @tc.desc: test RemoveUnusedEvent, with event.name in timedSet_
+ * @tc.desc: test RemoveUnusedEvent, with event.name in nonPersitenceLoopEventSet_
  * @tc.type: FUNC
  * @tc.require: I7VZ98
  */
@@ -337,7 +337,7 @@ HWTEST_F(DeviceTimedCollectTest, RemoveUnusedEvent003, TestSize.Level3)
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(report);
     OnDemandEvent event = {TIMED_EVENT, "loopevent", "10"};
-    deviceTimedCollect->timedSet_.insert(10);
+    deviceTimedCollect->nonPersitenceLoopEventSet_.insert(10);
     int32_t ret = deviceTimedCollect->RemoveUnusedEvent(event);
     EXPECT_EQ(ret, ERR_OK);
 }

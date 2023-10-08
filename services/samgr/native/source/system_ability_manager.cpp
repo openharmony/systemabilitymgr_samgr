@@ -194,11 +194,11 @@ void SystemAbilityManager::InitSaProfile()
         parser->ParseSaProfiles(file);
     }
     std::list<SaProfile> saInfos = parser->GetAllSaProfiles();
-    if (collectManager_ != nullptr) {
-        collectManager_->Init(saInfos);
-    }
     if (abilityStateScheduler_ != nullptr) {
         abilityStateScheduler_->Init(saInfos);
+    }
+    if (collectManager_ != nullptr) {
+        collectManager_->Init(saInfos);
     }
     lock_guard<mutex> autoLock(saProfileMapLock_);
     for (const auto& saInfo : saInfos) {
@@ -305,6 +305,7 @@ void SystemAbilityManager::ConvertToOnDemandEvent(const SystemAbilityOnDemandEve
     to.eventId = static_cast<int32_t>(from.eventId);
     to.name = from.name;
     to.value = from.value;
+    to.persistence = from.persistence;
     for (auto& item : from.conditions) {
         OnDemandCondition condition;
         condition.eventId = static_cast<int32_t>(item.eventId);
@@ -321,6 +322,7 @@ void SystemAbilityManager::ConvertToSystemAbilityOnDemandEvent(const OnDemandEve
     to.eventId = static_cast<OnDemandEventId>(from.eventId);
     to.name = from.name;
     to.value = from.value;
+    to.persistence = from.persistence;
     for (auto& item : from.conditions) {
         SystemAbilityOnDemandCondition condition;
         condition.eventId = static_cast<OnDemandEventId>(item.eventId);

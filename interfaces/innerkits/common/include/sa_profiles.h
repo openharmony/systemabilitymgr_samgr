@@ -59,6 +59,7 @@ struct OnDemandEvent {
     std::string name;
     std::string value;
     int64_t extraDataId = -1;
+    bool persistence = false;
     std::vector<OnDemandCondition> conditions;
     bool enableOnce = false;
     uint32_t loadPriority = LOW_PRIORITY;
@@ -66,6 +67,11 @@ struct OnDemandEvent {
     bool operator==(const OnDemandEvent& event) const
     {
         return this->eventId == event.eventId && this->name == event.name && this->value == event.value;
+    }
+
+    std::string ToString() const
+    {
+        return this->name + "_" + this->value;
     }
 };
 

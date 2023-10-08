@@ -17,6 +17,11 @@
 
 #include <algorithm>
 
+#ifdef PREFERENCES_ENABLE
+#include "preferences_errno.h"
+#include "preferences_helper.h"
+#include "preferences_value.h"
+#endif
 #include "sam_log.h"
 #include "sa_profiles.h"
 #include "system_ability_manager.h"
@@ -26,6 +31,7 @@ using namespace std;
 namespace OHOS {
 namespace {
 const std::string LOOP_EVENT = "loopevent";
+const std::string ORDER_TIMED_EVENT = "timedevent";
 constexpr int32_t MIN_INTERVAL = 30;
 }
 
@@ -36,7 +42,6 @@ DeviceTimedCollect::DeviceTimedCollect(const sptr<IReport>& report)
 
 void DeviceTimedCollect::Init(const std::list<SaProfile>& saProfiles)
 {
-    lock_guard<mutex> autoLock(taskLock_);
     for (auto& saProfile : saProfiles) {
         for (auto& onDemandEvent : saProfile.startOnDemand.onDemandEvents) {
             SaveTimedEvent(onDemandEvent);
@@ -45,7 +50,67 @@ void DeviceTimedCollect::Init(const std::list<SaProfile>& saProfiles)
             SaveTimedEvent(onDemandEvent);
         }
     }
-    HILOGD("DeviceTimedCollect timedSet count: %{public}zu", timedSet_.size());
+    HILOGD("DeviceTimedCollect timedSet count: %{public}zu", nonPersitenceLoopEventSet_.size());
+}
+
+void DeviceTimedCollect::ProcessPersistenceTasks()
+{
+#ifdef PREFERENCES_ENABLE
+    preferencesUtil_ = PreferencesUtil::GetInstance();
+    std::map<std::string, NativePreferences::PreferencesValue> allData = preferencesUtil_->ObtainAll();
+    int64_t currentTime = TimeUtils::GetTimestamp();
+    for (const auto& [strInterval, triggerTime] : allData) {
+        if (strInterval.find("_") != std::string::npos) {
+            continue;
+        }
+        int64_t disTime = static_cast<int64_t>(triggerTime) - currentTime;
+        HILOGI("DeviceTimedCollect key is %{public}s, %{public}lld", strInterval.c_str(), int64_t(triggerTime));
+        if (strInterval.find(':') != string::npos) {
+            ProcessPersistenceTimedTask(disTime, strInterval);
+            return;
+        }
+        ProcessPersistenceLoopTask(disTime, static_cast<int64_t>(triggerTime), strInterval);
+    }
+#endif
+}
+
+void DeviceTimedCollect::ProcessPersistenceTimedTask(int64_t disTime, std::string strInterval)
+{
+    HILOGI("disTime is %{public}lld, strInterval is %{public}s", disTime, strInterval.c_str());
+}
+
+void DeviceTimedCollect::ProcessPersistenceLoopTask(int64_t disTime, int64_t triggerTime, std::string strInterval)
+{
+    int64_t interval = atoi(strInterval.c_str());
+    if (persitenceLoopTasks_.count(interval) > 0) {
+        return;
+    }
+#ifdef PREFERENCES_ENABLE
+    int64_t currentTime = TimeUtils::GetTimestamp();
+    if (static_cast<int64_t>(triggerTime) - interval > currentTime) {
+        HILOGW("currentTime maybe to small, currentTime is %{public}lld", int64_t(currentTime));
+        return;
+    }
+#endif
+    if (interval < MIN_INTERVAL) {
+        HILOGW("interval maybe to small, interval is %{public}lld", int64_t(interval));
+        return;
+    }
+    persitenceLoopTasks_[interval] = [this, interval] () {
+        OnDemandEvent event = { TIMED_EVENT, LOOP_EVENT, to_string(interval), -1, true };
+        ReportEvent(event);
+        PostPersistenceDelayTask(persitenceLoopTasks_[interval], interval, interval);
+    };
+    HILOGD("distime is %{public}lld", int64_t(disTime));
+    if (disTime <= 0) {
+        OnDemandEvent event = { TIMED_EVENT, LOOP_EVENT, strInterval, -1, true };
+        ReportEvent(event);
+        // In order to enable the timer to start on time next time and make up for the missing time
+        disTime = interval - abs(disTime) % interval;
+        PostPersistenceDelayTask(persitenceLoopTasks_[interval], interval, disTime);
+    } else {
+        PostDelayTask(persitenceLoopTasks_[interval], disTime);
+    }
 }
 
 void DeviceTimedCollect::SaveTimedEvent(const OnDemandEvent& onDemandEvent)
@@ -53,44 +118,90 @@ void DeviceTimedCollect::SaveTimedEvent(const OnDemandEvent& onDemandEvent)
     if (onDemandEvent.eventId == TIMED_EVENT && onDemandEvent.name == LOOP_EVENT) {
         HILOGI("DeviceTimedCollect save timed task: %{public}s", onDemandEvent.value.c_str());
         int32_t interval = atoi(onDemandEvent.value.c_str());
-        if (interval >= MIN_INTERVAL) {
-            timedSet_.insert(interval);
-        } else {
+        if (interval < MIN_INTERVAL) {
             HILOGE("DeviceTimedCollect invalid interval %{public}s", onDemandEvent.value.c_str());
+            return;
+        }
+        if (onDemandEvent.persistence) {
+            lock_guard<mutex> autoLock(persitenceLoopEventSetLock_);
+            persitenceLoopEventSet_.insert(interval);
+        } else {
+            lock_guard<mutex> autoLock(nonPersitenceLoopEventSetLock_);
+            nonPersitenceLoopEventSet_.insert(interval);
         }
     }
 }
 
-void DeviceTimedCollect::PostLoopTaskLocked(int32_t interval)
+void DeviceTimedCollect::PostPersistenceLoopTaskLocked(int32_t interval)
 {
-    if (loopTasks_.count(interval) > 0) {
+    if (persitenceLoopTasks_.count(interval) > 0) {
+        return;
+    }
+    persitenceLoopTasks_[interval] = [this, interval] () {
+        OnDemandEvent event = { TIMED_EVENT, LOOP_EVENT, to_string(interval), -1, true };
+        ReportEvent(event);
+        PostPersistenceDelayTask(persitenceLoopTasks_[interval], interval, interval);
+    };
+    PostPersistenceDelayTask(persitenceLoopTasks_[interval], interval, interval);
+}
+
+void DeviceTimedCollect::PostNonPersistenceLoopTaskLocked(int32_t interval)
+{
+    if (nonPersitenceLoopTasks_.count(interval) > 0) {
         HILOGE("DeviceTimedCollect interval has been post");
         return;
     }
-    loopTasks_[interval] = [this, interval] () {
+    nonPersitenceLoopTasks_[interval] = [this, interval] () {
         OnDemandEvent event = { TIMED_EVENT, LOOP_EVENT, to_string(interval) };
-        lock_guard<mutex> autoLock(taskLock_);
-        if (timedSet_.find(interval) != timedSet_.end()) {
+        lock_guard<mutex> autoLock(nonPersitenceLoopEventSetLock_);
+        if (nonPersitenceLoopEventSet_.find(interval) != nonPersitenceLoopEventSet_.end()) {
             HILOGI("DeviceTimedCollect ReportEvent interval: %{public}d", interval);
             ReportEvent(event);
-            PostDelayTask(loopTasks_[interval], interval);
+            PostDelayTask(nonPersitenceLoopTasks_[interval], interval);
         } else {
             HILOGD("DeviceTimedCollect interval %{public}d has been remove", interval);
         }
     };
-    PostDelayTask(loopTasks_[interval], interval);
+    PostDelayTask(nonPersitenceLoopTasks_[interval], interval);
+}
+
+void DeviceTimedCollect::PostPersistenceDelayTask(std::function<void()> postTask,
+    int32_t interval, int32_t disTime)
+{
+#ifdef PREFERENCES_ENABLE
+    int64_t currentTime = TimeUtils::GetTimestamp();
+    int64_t upgradeTime = currentTime + static_cast<int64_t>(disTime);
+    preferencesUtil_->SaveLong(to_string(interval), upgradeTime);
+    PostDelayTask(postTask, disTime);
+    HILOGI("DeviceTimedCollect save persistence time %{public}lld, interval time %{public}d", upgradeTime, interval);
+#endif
 }
 
 int32_t DeviceTimedCollect::OnStart()
 {
     HILOGI("DeviceTimedCollect OnStart called");
-    lock_guard<mutex> autoLock(taskLock_);
-    for (std::set<int32_t>::iterator it = timedSet_.begin(); it != timedSet_.end(); ++it) {
-        int32_t interval = *it;
-        HILOGI("DeviceTimedCollect send task: %{public}d", interval);
-        PostLoopTaskLocked(interval);
-    }
+    ProcessPersistenceTasks();
+    PostNonPersistenceLoopTasks();
+    PostPersistenceLoopTasks();
     return ERR_OK;
+}
+
+void DeviceTimedCollect::PostNonPersistenceLoopTasks()
+{
+    lock_guard<mutex> autoLock(nonPersitenceLoopEventSetLock_);
+    for (auto it = nonPersitenceLoopEventSet_.begin(); it != nonPersitenceLoopEventSet_.end(); ++it) {
+        HILOGI("DeviceTimedCollect send task: %{public}d", *it);
+        PostNonPersistenceLoopTaskLocked(*it);
+    }
+}
+
+void DeviceTimedCollect::PostPersistenceLoopTasks()
+{
+    lock_guard<mutex> autoLock(persitenceLoopEventSetLock_);
+    for (auto it = persitenceLoopEventSet_.begin(); it != persitenceLoopEventSet_.end(); ++it) {
+        HILOGI("DeviceTimedCollect send persitence task: %{public}d", *it);
+        PostPersistenceLoopTaskLocked(*it);
+    }
 }
 
 int32_t DeviceTimedCollect::OnStop()
@@ -99,10 +210,44 @@ int32_t DeviceTimedCollect::OnStop()
     return ERR_OK;
 }
 
+int32_t DeviceTimedCollect::CalculateDelayTime(const std::string& timeString)
+{
+    return 0;
+}
+
+void DeviceTimedCollect::PostPersistenceTimedTaskLocked(std::string timeString, int32_t timeGap)
+{
+    HILOGI("DeviceTimedCollect PostPersistenceTimedTaskLocked entry");
+}
+
+void DeviceTimedCollect::PostNonPersistenceTimedTaskLocked(std::string timeString, int32_t timeGap)
+{
+    HILOGI("DeviceTimedCollect PostNonPersistenceTimedTaskLocked entry");
+}
+
 int32_t DeviceTimedCollect::AddCollectEvent(const OnDemandEvent& event)
 {
-    if (event.name != LOOP_EVENT) {
+    if (event.name != LOOP_EVENT && event.name != ORDER_TIMED_EVENT) {
         HILOGE("DeviceTimedCollect invalid event name: %{public}s", event.name.c_str());
+        return ERR_INVALID_VALUE;
+    }
+    if (event.name == ORDER_TIMED_EVENT) {
+        int32_t timeGap = CalculateDelayTime(event.value);
+#ifdef PREFERENCES_ENABLE
+        if (event.persistence) {
+            std::lock_guard<std::mutex> autoLock(persitenceTimedEventSetLock_);
+            persitenceTimedEventSet_.insert(timeGap);
+            PostPersistenceTimedTaskLocked(event.value, timeGap);
+            return ERR_OK;
+        }
+#endif
+        std::lock_guard<std::mutex> autoLock(nonPersitenceTimedEventSetLock);
+        nonPersitenceTimedEventSet_.insert(timeGap);
+        PostNonPersistenceTimedTaskLocked(event.value, timeGap);
+        return ERR_OK;
+    }
+    if (event.persistence) {
+        HILOGE("invalid event persistence, loopevent is not support persistence");
         return ERR_INVALID_VALUE;
     }
     int32_t interval = atoi(event.value.c_str());
@@ -110,14 +255,14 @@ int32_t DeviceTimedCollect::AddCollectEvent(const OnDemandEvent& event)
         HILOGE("DeviceTimedCollect invalid interval: %{public}d", interval);
         return ERR_INVALID_VALUE;
     }
-    std::lock_guard<std::mutex> autoLock(taskLock_);
-    auto iter = timedSet_.find(interval);
-    if (iter != timedSet_.end()) {
+    std::lock_guard<std::mutex> autoLock(nonPersitenceLoopEventSetLock_);
+    auto iter = nonPersitenceLoopEventSet_.find(interval);
+    if (iter != nonPersitenceLoopEventSet_.end()) {
         return ERR_OK;
     }
     HILOGI("DeviceTimedCollect add collect events: %{public}d", interval);
-    timedSet_.insert(interval);
-    PostLoopTaskLocked(interval);
+    nonPersitenceLoopEventSet_.insert(interval);
+    PostNonPersistenceLoopTaskLocked(interval);
     return ERR_OK;
 }
 
@@ -128,13 +273,31 @@ int32_t DeviceTimedCollect::RemoveUnusedEvent(const OnDemandEvent& event)
         return ERR_INVALID_VALUE;
     }
     int32_t interval = atoi(event.value.c_str());
-    std::lock_guard<std::mutex> autoLock(taskLock_);
-    auto iter = timedSet_.find(interval);
-    if (iter != timedSet_.end()) {
-        HILOGI("DeviceTimedCollect remove interval: %{public}d", interval);
-        timedSet_.erase(iter);
-        loopTasks_.erase(interval);
+    if (event.persistence) {
+        RemovePersistenceLoopTask(interval);
+    } else {
+        RemoveNonPersistenceLoopTask(interval);
     }
     return ERR_OK;
+}
+
+void DeviceTimedCollect::RemoveNonPersistenceLoopTask(int32_t interval)
+{
+    std::lock_guard<std::mutex> autoLock(nonPersitenceLoopEventSetLock_);
+    auto iter = nonPersitenceLoopEventSet_.find(interval);
+    if (iter != nonPersitenceLoopEventSet_.end()) {
+        nonPersitenceLoopEventSet_.erase(iter);
+        nonPersitenceLoopTasks_.erase(interval);
+    }
+}
+
+void DeviceTimedCollect::RemovePersistenceLoopTask(int32_t interval)
+{
+    std::lock_guard<std::mutex> autoLock(persitenceLoopEventSetLock_);
+    auto iter = persitenceLoopEventSet_.find(interval);
+    if (iter != persitenceLoopEventSet_.end()) {
+        persitenceLoopEventSet_.erase(iter);
+        persitenceLoopTasks_.erase(interval);
+    }
 }
 }

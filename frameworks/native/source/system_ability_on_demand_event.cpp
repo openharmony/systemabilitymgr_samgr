@@ -31,6 +31,10 @@ bool OnDemandEventToParcel::WriteOnDemandEventsToParcel(
             HILOGW("WriteOnDemandEvents write event failed!");
             return false;
         }
+        if (!data.WriteBool(event.persistence)) {
+            HILOGW("WriteOnDemandEvents write persistence failed!");
+            return false;
+        }
         if (!data.WriteInt32(event.conditions.size())) {
             HILOGW("WriteOnDemandEvents write conditions size failed!");
             return false;
@@ -100,6 +104,10 @@ bool OnDemandEventToParcel::ReadOnDemandEventsFromParcel(
         SystemAbilityOnDemandEvent event;
         if (!ReadOnDemandEventFromParcel(event, reply)) {
             HILOGW("ReadOnDemandEvents read event failed!");
+            return false;
+        }
+        if (!reply.ReadBool(event.persistence)) {
+            HILOGW("ReadOnDemandEvents read persistence failed!");
             return false;
         }
         int32_t conditionsSize = 0;

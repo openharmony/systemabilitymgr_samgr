@@ -473,6 +473,8 @@ void ParseUtil::GetOnDemandArrayFromJson(int32_t eventId, const nlohmann::json& 
             GetStringFromJson(item, "name", name);
             std::string value;
             GetStringFromJson(item, "value", value);
+            bool persistence = false;
+            GetBoolFromJson(item, "persistence", persistence);
             std::vector<OnDemandCondition> conditions;
             GetOnDemandConditionsFromJson(item, "conditions", conditions);
             HILOGD("conditions size: %{public}zu", conditions.size());
@@ -483,7 +485,7 @@ void ParseUtil::GetOnDemandArrayFromJson(int32_t eventId, const nlohmann::json& 
             uint32_t loadPriority = GetOndemandPriorityPara(priority);
             if (!name.empty() && name.length() <= MAX_JSON_STRING_LENGTH &&
                 value.length() <= MAX_JSON_STRING_LENGTH) {
-                OnDemandEvent event = {eventId, name, value, -1, conditions, enableOnce, loadPriority };
+                OnDemandEvent event = {eventId, name, value, -1, persistence, conditions, enableOnce, loadPriority};
                 out.emplace_back(event);
             }
         }

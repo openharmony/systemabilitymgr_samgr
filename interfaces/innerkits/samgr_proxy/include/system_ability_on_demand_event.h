@@ -45,6 +45,7 @@ struct SystemAbilityOnDemandEvent {
     OnDemandEventId eventId;
     std::string name;
     std::string value;
+    bool persistence = false;
     std::vector<SystemAbilityOnDemandCondition> conditions;
     bool enableOnce = false;
 };
