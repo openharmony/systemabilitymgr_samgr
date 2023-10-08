@@ -64,7 +64,6 @@ void DeviceTimedCollect::ProcessPersistenceTasks()
             continue;
         }
         int64_t disTime = static_cast<int64_t>(triggerTime) - currentTime;
-        HILOGI("DeviceTimedCollect key is %{public}s, %{public}lld", strInterval.c_str(), int64_t(triggerTime));
         if (strInterval.find(':') != string::npos) {
             ProcessPersistenceTimedTask(disTime, strInterval);
             return;
@@ -76,7 +75,7 @@ void DeviceTimedCollect::ProcessPersistenceTasks()
 
 void DeviceTimedCollect::ProcessPersistenceTimedTask(int64_t disTime, std::string strInterval)
 {
-    HILOGI("disTime is %{public}lld, strInterval is %{public}s", disTime, strInterval.c_str());
+    HILOGI("strInterval is %{public}s", strInterval.c_str());
 }
 
 void DeviceTimedCollect::ProcessPersistenceLoopTask(int64_t disTime, int64_t triggerTime, std::string strInterval)
@@ -88,12 +87,12 @@ void DeviceTimedCollect::ProcessPersistenceLoopTask(int64_t disTime, int64_t tri
 #ifdef PREFERENCES_ENABLE
     int64_t currentTime = TimeUtils::GetTimestamp();
     if (static_cast<int64_t>(triggerTime) - interval > currentTime) {
-        HILOGW("currentTime maybe to small, currentTime is %{public}lld", int64_t(currentTime));
+        HILOGW("currentTime is not true");
         return;
     }
 #endif
     if (interval < MIN_INTERVAL) {
-        HILOGW("interval maybe to small, interval is %{public}lld", int64_t(interval));
+        HILOGW("interval is not true");
         return;
     }
     persitenceLoopTasks_[interval] = [this, interval] () {
@@ -101,7 +100,6 @@ void DeviceTimedCollect::ProcessPersistenceLoopTask(int64_t disTime, int64_t tri
         ReportEvent(event);
         PostPersistenceDelayTask(persitenceLoopTasks_[interval], interval, interval);
     };
-    HILOGD("distime is %{public}lld", int64_t(disTime));
     if (disTime <= 0) {
         OnDemandEvent event = { TIMED_EVENT, LOOP_EVENT, strInterval, -1, true };
         ReportEvent(event);
@@ -173,7 +171,7 @@ void DeviceTimedCollect::PostPersistenceDelayTask(std::function<void()> postTask
     int64_t upgradeTime = currentTime + static_cast<int64_t>(disTime);
     preferencesUtil_->SaveLong(to_string(interval), upgradeTime);
     PostDelayTask(postTask, disTime);
-    HILOGI("DeviceTimedCollect save persistence time %{public}lld, interval time %{public}d", upgradeTime, interval);
+    HILOGI("save persistence time %{public}d, interval time %{public}d", static_cast<int32_t>(upgradeTime), interval);
 #endif
 }
 
