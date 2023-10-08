@@ -73,9 +73,22 @@ void DeviceTimedCollect::ProcessPersistenceTasks()
 #endif
 }
 
-void DeviceTimedCollect::ProcessPersistenceTimedTask(int64_t disTime, std::string strInterval)
+void DeviceTimedCollect::ProcessPersistenceTimedTask(int64_t disTime, std::string timeString)
 {
-    HILOGI("strInterval is %{public}s", strInterval.c_str());
+#ifdef PREFERENCES_ENABLE
+    if (disTime <= 0) {
+        OnDemandEvent event = { TIMED_EVENT, ORDER_TIMED_EVENT, timeString, -1, true };
+        ReportEvent(event);
+        preferencesUtil_->Remove(timeString);
+        return;
+    }
+    auto timedTask = [this, timeString] () {
+        OnDemandEvent event = { TIMED_EVENT, ORDER_TIMED_EVENT, timeString, -1, true };
+        ReportEvent(event);
+        preferencesUtil_->Remove(timeString);
+    };
+    PostDelayTask(timedTask, disTime);
+#endif
 }
 
 void DeviceTimedCollect::ProcessPersistenceLoopTask(int64_t disTime, int64_t triggerTime, std::string strInterval)
@@ -208,19 +221,37 @@ int32_t DeviceTimedCollect::OnStop()
     return ERR_OK;
 }
 
-int32_t DeviceTimedCollect::CalculateDelayTime(const std::string& timeString)
+int64_t DeviceTimedCollect::CalculateDelayTime(const std::string& timeString)
 {
-    return 0;
+    std::tm inputTime;
+    strptime(const_cast<char*>(timeString.c_str()), "%Y-%m-%d-%H:%M:%S", &inputTime);
+    std::time_t orderTime = mktime(&inputTime);
+    int64_t timeGap = orderTime - time(nullptr);
+    return timeGap;
 }
 
-void DeviceTimedCollect::PostPersistenceTimedTaskLocked(std::string timeString, int32_t timeGap)
+void DeviceTimedCollect::PostPersistenceTimedTaskLocked(std::string timeString, int64_t timeGap)
 {
-    HILOGI("DeviceTimedCollect PostPersistenceTimedTaskLocked entry");
+#ifdef PREFERENCES_ENABLE
+    auto timedTask = [this, timeString] () {
+        OnDemandEvent event = { TIMED_EVENT, ORDER_TIMED_EVENT, timeString, -1, true };
+        ReportEvent(event);
+        preferencesUtil_->Remove(timeString);
+    };
+    int64_t currentTime = TimeUtils::GetTimestamp();
+    int64_t upgradeTime = currentTime + timeGap;
+    preferencesUtil_->SaveLong(timeString, upgradeTime);
+    PostDelayTask(timedTask, timeGap);
+#endif
 }
 
-void DeviceTimedCollect::PostNonPersistenceTimedTaskLocked(std::string timeString, int32_t timeGap)
+void DeviceTimedCollect::PostNonPersistenceTimedTaskLocked(std::string timeString, int64_t timeGap)
 {
-    HILOGI("DeviceTimedCollect PostNonPersistenceTimedTaskLocked entry");
+    auto timedTask = [this, timeString] () {
+        OnDemandEvent event = { TIMED_EVENT, ORDER_TIMED_EVENT, timeString };
+        ReportEvent(event);
+    };
+    PostDelayTask(timedTask, timeGap);
 }
 
 int32_t DeviceTimedCollect::AddCollectEvent(const OnDemandEvent& event)
@@ -230,17 +261,15 @@ int32_t DeviceTimedCollect::AddCollectEvent(const OnDemandEvent& event)
         return ERR_INVALID_VALUE;
     }
     if (event.name == ORDER_TIMED_EVENT) {
-        int32_t timeGap = CalculateDelayTime(event.value);
+        int64_t timeGap = CalculateDelayTime(event.value);
 #ifdef PREFERENCES_ENABLE
         if (event.persistence) {
             std::lock_guard<std::mutex> autoLock(persitenceTimedEventSetLock_);
-            persitenceTimedEventSet_.insert(timeGap);
             PostPersistenceTimedTaskLocked(event.value, timeGap);
             return ERR_OK;
         }
 #endif
         std::lock_guard<std::mutex> autoLock(nonPersitenceTimedEventSetLock);
-        nonPersitenceTimedEventSet_.insert(timeGap);
         PostNonPersistenceTimedTaskLocked(event.value, timeGap);
         return ERR_OK;
     }

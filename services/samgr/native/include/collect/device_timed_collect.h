@@ -37,18 +37,18 @@ public:
     int32_t RemoveUnusedEvent(const OnDemandEvent& event) override;
 private:
     void SaveTimedEvent(const OnDemandEvent& onDemandEvent);
-    int32_t CalculateDelayTime(const std::string& timeString);
+    int64_t CalculateDelayTime(const std::string& timeString);
     void PostPersistenceLoopTasks();
     void PostNonPersistenceLoopTasks();
 
     void PostPersistenceLoopTaskLocked(int32_t interval);
     void PostNonPersistenceLoopTaskLocked(int32_t interval);
-    void PostPersistenceTimedTaskLocked(std::string timeString, int32_t timeGap);
-    void PostNonPersistenceTimedTaskLocked(std::string timeString, int32_t timeGap);
+    void PostPersistenceTimedTaskLocked(std::string timeString, int64_t timeGap);
+    void PostNonPersistenceTimedTaskLocked(std::string timeString, int64_t timeGap);
 
     void ProcessPersistenceTasks();
     void ProcessPersistenceLoopTask(int64_t disTime, int64_t triggerTime, std::string strInterval);
-    void ProcessPersistenceTimedTask(int64_t disTime, std::string strInterval);
+    void ProcessPersistenceTimedTask(int64_t disTime, std::string timeString);
 
     void PostPersistenceDelayTask(std::function<void()> loopTask,
         int32_t interval, int32_t disTime);
@@ -56,9 +56,7 @@ private:
     void RemoveNonPersistenceLoopTask(int32_t interval);
     void RemovePersistenceLoopTask(int32_t interval);
     std::set<int32_t> nonPersitenceLoopEventSet_;
-    std::set<int32_t> nonPersitenceTimedEventSet_;
     std::set<int32_t> persitenceLoopEventSet_;
-    std::set<int32_t> persitenceTimedEventSet_;
     std::mutex nonPersitenceLoopEventSetLock_;
     std::mutex nonPersitenceTimedEventSetLock;
     std::mutex persitenceLoopEventSetLock_;
