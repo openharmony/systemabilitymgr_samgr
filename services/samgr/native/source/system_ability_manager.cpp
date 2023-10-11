@@ -1362,6 +1362,8 @@ int32_t SystemAbilityManager::StartDynamicSystemProcess(const std::u16string& na
     std::string eventStr = std::to_string(systemAbilityId) + "#" + std::to_string(event.eventId) + "#"
         + event.name + "#" + event.value + "#" + std::to_string(event.extraDataId) + "#";
     auto extraArgv = eventStr.c_str();
+    // Waiting for the init subsystem to perceive process death
+    ServiceWaitForStatus(Str16ToStr8(name).c_str(), ServiceStatus::SERVICE_STOPPED, 1);
     auto result = ServiceControlWithExtra(Str16ToStr8(name).c_str(), ServiceAction::START, &extraArgv, 1);
     HILOGI("StartDynamicSystemProcess call ServiceControlWithExtra result:%{public}d!", result);
     return (result == 0) ? ERR_OK : ERR_INVALID_VALUE;
