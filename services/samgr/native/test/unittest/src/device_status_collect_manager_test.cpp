@@ -20,9 +20,11 @@
 #include "test_log.h"
 
 #define private public
+#include "common_event_collect.h"
 #include "device_status_collect_manager.h"
 #ifdef SUPPORT_COMMON_EVENT
 #include "common_event_collect.h"
+#include "common_event_manager.h"
 #include "device_switch_collect.h"
 #endif
 
@@ -309,6 +311,116 @@ HWTEST_F(DeviceStatusCollectManagerTest, CheckConditions005, TestSize.Level3)
     EXPECT_EQ(result, true);
     DTEST_LOG << " CheckConditions005 END" << std::endl;
 }
+
+/**
+ * @tc.name: CheckExtraMessages001
+ * @tc.desc: test CheckExtraMessages, with empty OnDemandEvent.
+ * @tc.type: FUNC
+ * @tc.require: I6JE38
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, CheckExtraMessages001, TestSize.Level3)
+{
+    DTEST_LOG << " CheckExtraMessages001 BEGIN" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    OnDemandEvent event;
+    bool result = collect->CheckExtraMessages(event, event);
+    EXPECT_EQ(result, true);
+    DTEST_LOG << " CheckExtraMessages001 END" << std::endl;
+}
+
+/**
+ * @tc.name: CheckExtraMessages002
+ * @tc.desc: test CheckExtraMessages with COMMON_EVENT is not in collectPluginMap_
+ * @tc.type: FUNC
+ * @tc.require: I6W735
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, CheckExtraMessages002, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
+    collectManager->collectPluginMap_.clear();
+    OnDemandEvent event;
+    event.eventId = COMMON_EVENT;
+    int32_t ret = collectManager->CheckExtraMessages(event, event);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: CheckExtraMessages003
+ * @tc.desc: test CheckExtraMessages with collectPluginMap_[COMMON_EVENT] is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6W735
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, CheckExtraMessages003, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
+    collectManager->collectPluginMap_.clear();
+    collectManager->collectPluginMap_[COMMON_EVENT] = nullptr;
+    OnDemandEvent event;
+    event.eventId = COMMON_EVENT;
+    int32_t ret = collectManager->CheckExtraMessages(event, event);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: CheckExtraMessages004
+ * @tc.desc: test CheckExtraMessages, pass
+ * @tc.type: FUNC
+ * @tc.require: I6W735
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, CheckExtraMessages004, TestSize.Level3)
+{
+    DTEST_LOG << " CheckExtraMessages004 BEGIN" << std::endl;
+    sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
+    auto runner = AppExecFwk::EventRunner::Create("collect_test1");
+    commonEventCollect->workHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+
+    std::map<std::string, std::string> want;
+    want["1"] = "1";
+    OnDemandReasonExtraData extraData = OnDemandReasonExtraData(1, "", want);
+    commonEventCollect->extraDatas_[1] = extraData;
+    OnDemandEvent event, profile;
+    event.extraDataId = 1;
+    profile.eventId = COMMON_EVENT;
+    profile.extraMessages["1"] = "1";
+
+    collectManager->collectPluginMap_.clear();
+    collectManager->collectPluginMap_[COMMON_EVENT] = commonEventCollect;
+    bool result = collectManager->CheckExtraMessages(event, profile);
+    EXPECT_EQ(result, true);
+    DTEST_LOG << " CheckExtraMessages004 END" << std::endl;
+}
+
+/**
+ * @tc.name: CheckExtraMessages005
+ * @tc.desc: test CheckExtraMessages, not pass
+ * @tc.type: FUNC
+ * @tc.require: I6W735
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, CheckExtraMessages005, TestSize.Level3)
+{
+    DTEST_LOG << " CheckExtraMessages005 BEGIN" << std::endl;
+    sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
+    auto runner = AppExecFwk::EventRunner::Create("collect_test1");
+    commonEventCollect->workHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+
+    std::map<std::string, std::string> want;
+    want["1"] = "1";
+    OnDemandReasonExtraData extraData = OnDemandReasonExtraData(1, "", want);
+    commonEventCollect->extraDatas_[1] = extraData;
+    OnDemandEvent event, profile;
+    event.extraDataId = 1;
+    profile.eventId = COMMON_EVENT;
+    profile.extraMessages["1"] = "2";
+    
+    collectManager->collectPluginMap_.clear();
+    collectManager->collectPluginMap_[COMMON_EVENT] = commonEventCollect;
+    bool result = collectManager->CheckExtraMessages(event, profile);
+    EXPECT_EQ(result, false);
+    DTEST_LOG << " CheckExtraMessages005 END" << std::endl;
+}
+
 
 /**
  * @tc.name: ReportEvent001

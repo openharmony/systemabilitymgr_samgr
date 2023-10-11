@@ -318,6 +318,53 @@ HWTEST_F(CommonEventCollectTest, SaveOnDemandReasonExtraData001, TestSize.Level3
 }
 
 /**
+ * @tc.name: SaveOnDemandReasonExtraData002
+ * @tc.desc: test SaveOnDemandReasonExtraData ,parse Want
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonEventCollectTest, SaveOnDemandReasonExtraData002, TestSize.Level3)
+{
+    DTEST_LOG << "SaveOnDemandReasonExtraData002 begin" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
+    auto runner = AppExecFwk::EventRunner::Create("collect_test1");
+    commonEventCollect->workHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    SaProfile saProfile;
+    std::map<std::string, std::string> extraMessages;
+    extraMessages["12"] = "56";
+    extraMessages["34"] = "34";
+    extraMessages["abc"] = "abc";
+    extraMessages["xxx"] = "true";
+    extraMessages["yyy"] = "false";
+    std::vector<OnDemandCondition> condition;
+    OnDemandEvent event = {COMMON_EVENT, "", "", -1, false, condition, false, 3, extraMessages};
+    saProfile.startOnDemand.onDemandEvents.push_back(event);
+    std::list<SaProfile> onDemandSaProfiles;
+    onDemandSaProfiles.push_back(saProfile);
+    commonEventCollect->Init(onDemandSaProfiles);
+    for (auto pair: extraMessages) {
+        EXPECT_TRUE(commonEventCollect->extraDataKey_[""].count(pair.first));
+    }
+
+    EventFwk::CommonEventData eventData;
+    auto want = eventData.GetWant();
+    want.SetParam((const std::string)"12", 56);
+    want.SetParam((const std::string)"34", (const std::string)"34");
+    want.SetParam((const std::string)"abc", (const std::string)"abc");
+    want.SetParam((const std::string)"xxx", true);
+    want.SetParam((const std::string)"yyy", false);
+    eventData.SetWant(want);
+    int64_t extraDataId = commonEventCollect->SaveOnDemandReasonExtraData(eventData);
+    OnDemandReasonExtraData onDemandReasonExtraData;
+    commonEventCollect->GetOnDemandReasonExtraData(extraDataId, onDemandReasonExtraData);
+    std::map<std::string, std::string> want2 = onDemandReasonExtraData.GetWant();
+    for (auto pair : extraMessages) {
+        EXPECT_TRUE(want2[pair.first] == pair.second);
+    }
+    DTEST_LOG << "SaveOnDemandReasonExtraData002 end" << std::endl;
+}
+
+/**
  * @tc.name: RemoveOnDemandReasonExtraData001
  * @tc.desc: test RemoveOnDemandReasonExtraData
  * @tc.type: FUNC

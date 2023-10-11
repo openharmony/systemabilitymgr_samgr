@@ -55,6 +55,7 @@ private:
     static bool IsSameEvent(const OnDemandEvent& ev1, const OnDemandEvent& ev2);
     bool IsSameEventName(const OnDemandEvent& ev1, const OnDemandEvent& ev2);
     bool CheckConditions(const OnDemandEvent& onDemandEvent);
+    bool CheckExtraMessages(const OnDemandEvent& ev1, const OnDemandEvent& ev2);
     int32_t AddCollectEvents(const std::vector<OnDemandEvent>& events);
     int32_t RemoveUnusedEventsLocked(const std::vector<OnDemandEvent>& events);
     std::map<int32_t, sptr<ICollectPlugin>> collectPluginMap_;

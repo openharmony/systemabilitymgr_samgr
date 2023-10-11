@@ -16,6 +16,7 @@
 #ifndef SAMGR_INTERFACE_INNERKITS_COMMOM_INCLUDE_SAPROFILE_H
 #define SAMGR_INTERFACE_INNERKITS_COMMOM_INCLUDE_SAPROFILE_H
 
+#include <map>
 #include <string>
 #include <vector>
 
@@ -52,6 +53,7 @@ struct OnDemandCondition {
     int32_t eventId;
     std::string name;
     std::string value;
+    std::map<std::string, std::string> extraMessages;
 };
 
 struct OnDemandEvent {
@@ -63,6 +65,7 @@ struct OnDemandEvent {
     std::vector<OnDemandCondition> conditions;
     bool enableOnce = false;
     uint32_t loadPriority = LOW_PRIORITY;
+    std::map<std::string, std::string> extraMessages;
 
     bool operator==(const OnDemandEvent& event) const
     {

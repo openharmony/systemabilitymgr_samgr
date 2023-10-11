@@ -38,6 +38,11 @@ public:
     {
         return false;
     }
+    
+    virtual bool CheckExtraMessage(int64_t extraDataId, const OnDemandEvent& profileEvent)
+    {
+        return true;
+    }
 
     virtual bool GetOnDemandReasonExtraData(int64_t extraDataId, OnDemandReasonExtraData& extraData)
     {

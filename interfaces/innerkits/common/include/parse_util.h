@@ -42,6 +42,7 @@ public:
     static std::unordered_map<std::string, std::string> StringToMap(const std::string& eventStr);
     static nlohmann::json StringToJsonObj(const std::string& eventStr);
     static std::unordered_map<std::string, std::string> JsonObjToMap(const nlohmann::json& eventJson);
+    static bool CheckLogicRelationship(const std::string& state, const std::string& profile);
 private:
     void CloseSo();
     uint32_t GetBootPriorityPara(const std::string& bootPhase);
@@ -63,6 +64,8 @@ private:
         const std::string& key, std::vector<OnDemandEvent>& out);
     void GetOnDemandConditionsFromJson(const nlohmann::json& obj,
         const std::string& key, std::vector<OnDemandCondition>& out);
+    void GetOnDemandExtraMessagesFromJson(const nlohmann::json& obj,
+        const std::string& key, std::map<std::string, std::string>& out);
 
     static inline void GetBoolFromJson(const nlohmann::json& obj, const std::string& key, bool& out)
     {

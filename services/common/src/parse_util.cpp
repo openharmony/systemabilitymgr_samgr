@@ -74,6 +74,14 @@ enum {
     OTHER_START = 3,
 };
 
+enum {
+    EQ = 1,
+    GREATER_EQ = 2,
+    GREATER = 3,
+    LESS_EQ = 4,
+    LESS = 5
+};
+
 void ParseLibPath(const string& libPath, string& fileName, string& libDir)
 {
     std::vector<string> libPathVec;
@@ -483,11 +491,30 @@ void ParseUtil::GetOnDemandArrayFromJson(int32_t eventId, const nlohmann::json& 
             std::string priority;
             GetStringFromJson(item, "load-priority", priority);
             uint32_t loadPriority = GetOndemandPriorityPara(priority);
+            std::map<std::string, std::string> extraMessages;
+            GetOnDemandExtraMessagesFromJson(item, "extra-messages", extraMessages);
+            HILOGD("extraMessages size: %{public}zu", extraMessages.size());
             if (!name.empty() && name.length() <= MAX_JSON_STRING_LENGTH &&
                 value.length() <= MAX_JSON_STRING_LENGTH) {
-                OnDemandEvent event = {eventId, name, value, -1, persistence, conditions, enableOnce, loadPriority};
+                OnDemandEvent event = {eventId, name, value, -1, persistence,
+                    conditions, enableOnce, loadPriority, extraMessages};
                 out.emplace_back(event);
             }
+        }
+    }
+}
+
+void ParseUtil::GetOnDemandExtraMessagesFromJson(const nlohmann::json& obj,
+    const std::string& key, std::map<std::string, std::string>& out)
+{
+    if (obj.find(key.c_str()) == obj.end() || !obj[key.c_str()].is_object()) {
+        return;
+    }
+    for (auto &it: obj[key.c_str()].items()) {
+        if (it.value().is_string()) {
+            out[it.key()] = it.value();
+        } else {
+            HILOGW("extra-mesasge: not string type");
         }
     }
 }
@@ -522,7 +549,9 @@ void ParseUtil::GetOnDemandConditionsFromJson(const nlohmann::json& obj,
             HILOGW("invalid condition eventId: %{public}s", type.c_str());
             continue;
         }
-        OnDemandCondition conditionEvent = {eventId, name, value};
+        std::map<std::string, std::string> extraMessages;
+        GetOnDemandExtraMessagesFromJson(condition, "extra-messages", extraMessages);
+        OnDemandCondition conditionEvent = {eventId, name, value, extraMessages};
         out.emplace_back(conditionEvent);
     }
 }
@@ -609,5 +638,54 @@ bool ParseUtil::ParseJsonObj(nlohmann::json& jsonObj, const string& jsonPath)
         return false;
     }
     return true;
+}
+
+bool ParseUtil::CheckLogicRelationship(const std::string& state, const std::string& profile)
+{
+    HILOGD("CheckLogicRelationship State:%{public}s || Profile:%{public}s", state.c_str(), profile.c_str());
+    if (profile.empty() || state == profile) {
+        return true;
+    }
+    if (state.empty()) {
+        return false;
+    }
+    int32_t logicRelationship = EQ;
+    int32_t valueStartPosition = 0;
+    if (profile[0] == '>') {
+        valueStartPosition ++;
+        if (profile[1] == '=') {
+            valueStartPosition ++;
+            logicRelationship = GREATER_EQ;
+        } else {
+            logicRelationship = GREATER;
+        }
+    } else if (profile[0] == '<') {
+        valueStartPosition ++;
+        if (profile[1] == '=') {
+            valueStartPosition ++;
+            logicRelationship = LESS_EQ;
+        } else {
+            logicRelationship = LESS;
+        }
+    }
+    int32_t profileInt, stateInt;
+    if (!StrToInt(profile.substr(valueStartPosition, profile.length() - 1), profileInt)) {
+        return false;
+    }
+    if (!StrToInt(state, stateInt)) {
+        return false;
+    }
+    if (logicRelationship == EQ) {
+        return profileInt == stateInt;
+    } else if (logicRelationship == GREATER_EQ) {
+        return profileInt >= stateInt;
+    } else if (logicRelationship == GREATER) {
+        return profileInt > stateInt;
+    } else if (logicRelationship == LESS_EQ) {
+        return profileInt <= stateInt;
+    } else if (logicRelationship == LESS) {
+        return profileInt < stateInt;
+    }
+    return false;
 }
 } // namespace OHOS
