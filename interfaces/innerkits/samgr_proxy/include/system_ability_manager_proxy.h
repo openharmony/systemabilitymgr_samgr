@@ -18,11 +18,14 @@
 #define INTERFACES_INNERKITS_SAMGR_INCLUDE_SYSTEM_ABILITY_MANAGER_PROXY_H
 
 #include <string>
+#include <set>
+#include "dynamic_cache.h"
 #include "if_system_ability_manager.h"
 #include "system_ability_on_demand_event.h"
 
 namespace OHOS {
-class SystemAbilityManagerProxy : public IRemoteProxy<ISystemAbilityManager> {
+class SystemAbilityManagerProxy :
+    public DynamicCache<int32_t, sptr<IRemoteObject>>, public IRemoteProxy<ISystemAbilityManager> {
 public:
     explicit SystemAbilityManagerProxy(const sptr<IRemoteObject>& impl)
         : IRemoteProxy<ISystemAbilityManager>(impl) {}
@@ -218,6 +221,8 @@ public:
         std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents) override;
     int32_t UpdateOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
         const std::vector<SystemAbilityOnDemandEvent>& sabilityOnDemandEvents) override;
+    sptr<IRemoteObject> Recompute(int32_t systemAbilityId, int32_t code) override;
+    int32_t GetOnDemandSystemAbilityIds(std::vector<int32_t>& systemAbilityIds) override;
 private:
     sptr<IRemoteObject> GetSystemAbilityWrapper(int32_t systemAbilityId, const std::string& deviceId = "");
     sptr<IRemoteObject> CheckSystemAbilityWrapper(int32_t code, MessageParcel& data);
@@ -226,8 +231,11 @@ private:
     int32_t RemoveSystemAbilityWrapper(int32_t code, MessageParcel& data);
     int32_t ReadSystemProcessFromParcel(MessageParcel& reply, std::list<SystemProcessInfo>& systemProcessInfos);
     int32_t ReadProcessInfoFromParcel(MessageParcel& reply, SystemProcessInfo& systemProcessInfo);
+    sptr<IRemoteObject> CheckSystemAbilityTransaction(int32_t systemAbilityId);
+    bool IsOnDemandSystemAbility(int32_t systemAbilityId);
 private:
     static inline BrokerDelegator<SystemAbilityManagerProxy> delegator_;
+    std::set<int32_t> onDemandSystemAbilityIdsSet_;
 };
 } // namespace OHOS
 

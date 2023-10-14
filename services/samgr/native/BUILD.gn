@@ -91,6 +91,7 @@ ohos_executable("samgr") {
       "init:libbegetutil",
       "ipc:ipc_core",
       "ipc:libdbinder",
+      "safwk:dynamic_cache",
       "safwk:system_ability_fwk",
     ]
 
@@ -137,5 +138,6 @@ ohos_executable("samgr") {
     }
     part_name = "samgr"
   }
+
   subsystem_name = "systemabilitymgr"
 }

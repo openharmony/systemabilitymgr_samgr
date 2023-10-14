@@ -59,6 +59,7 @@ const string PKG_NAME = "Samgr_Networking";
 const string PREFIX = "/system/profile/";
 const string LOCAL_DEVICE = "local";
 const string ONDEMAND_PARAM = "persist.samgr.perf.ondemand";
+const string DYNAMIC_CACHE_PARAM = "persist.samgr.cache.sa";
 constexpr const char* ONDEMAND_PERF_PARAM = "persist.samgr.perf.ondemand";
 constexpr const char* ONDEMAND_WORKER = "OndemandLoader";
 
@@ -71,6 +72,8 @@ constexpr int32_t UID_SYSTEM = 1000;
 constexpr int32_t MAX_SUBSCRIBE_COUNT = 256;
 constexpr int32_t MAX_SA_FREQUENCY_COUNT = INT32_MAX - 1000000;
 constexpr int32_t SHFIT_BIT = 32;
+constexpr int32_t DEVICE_INFO_SERVICE_SA = 3902;
+constexpr int32_t HIDUMPER_SERVICE_SA = 1212;
 constexpr int64_t ONDEMAND_PERF_DELAY_TIME = 60 * 1000; // ms
 constexpr int64_t CHECK_LOADED_DELAY_TIME = 4 * 1000; // ms
 constexpr int32_t SOFTBUS_SERVER_SA_ID = 4700;
@@ -111,6 +114,7 @@ void SystemAbilityManager::Init()
     WatchDogInit();
     reportEventTimer_ = std::make_unique<Utils::Timer>("DfxReporter");
     OndemandLoadForPerf();
+    SetKey(DYNAMIC_CACHE_PARAM);
 }
 
 void SystemAbilityManager::WatchDogInit()
@@ -201,8 +205,14 @@ void SystemAbilityManager::InitSaProfile()
         collectManager_->Init(saInfos);
     }
     lock_guard<mutex> autoLock(saProfileMapLock_);
+    onDemandSaIdsSet_.insert(DEVICE_INFO_SERVICE_SA);
+    onDemandSaIdsSet_.insert(HIDUMPER_SERVICE_SA);
     for (const auto& saInfo : saInfos) {
         saProfileMap_[saInfo.saId] = saInfo;
+        if (!saInfo.runOnCreate) {
+            HILOGI("[InitSaProfile] saId %{public}d", saInfo.saId);
+            onDemandSaIdsSet_.insert(saInfo.saId);
+        }
     }
     HILOGI("[PerformanceTest] InitSaProfile spend %{public}" PRId64 " ms", GetTickCount() - begin);
 }
@@ -542,6 +552,7 @@ sptr<IRemoteObject> SystemAbilityManager::GetSystemAbilityFromRemote(int32_t sys
 sptr<IRemoteObject> SystemAbilityManager::CheckSystemAbility(int32_t systemAbilityId)
 {
     HILOGD("%{public}s called, systemAbilityId = %{public}d", __func__, systemAbilityId);
+
     if (!CheckInputSysAbilityId(systemAbilityId)) {
         HILOGW("CheckSystemAbility CheckSystemAbility invalid!");
         return nullptr;
@@ -801,6 +812,7 @@ int32_t SystemAbilityManager::RemoveSystemAbility(int32_t systemAbilityId)
         HILOGE("abilityStateScheduler is nullptr");
         return ERR_INVALID_VALUE;
     }
+    SystemAbilityInvalidateCache(systemAbilityId);
     abilityStateScheduler_->SendAbilityStateEvent(systemAbilityId, AbilityStateEvent::ABILITY_UNLOAD_SUCCESS_EVENT);
     SendSystemAbilityRemovedMsg(systemAbilityId);
     return ERR_OK;
@@ -1036,9 +1048,20 @@ int32_t SystemAbilityManager::AddSystemAbility(int32_t systemAbilityId, const sp
         HILOGE("abilityStateScheduler is nullptr");
         return ERR_INVALID_VALUE;
     }
+    SystemAbilityInvalidateCache(systemAbilityId);
     abilityStateScheduler_->SendAbilityStateEvent(systemAbilityId, AbilityStateEvent::ABILITY_LOAD_SUCCESS_EVENT);
     SendSystemAbilityAddedMsg(systemAbilityId, ability);
     return ERR_OK;
+}
+
+void SystemAbilityManager::SystemAbilityInvalidateCache(int32_t systemAbilityId)
+{
+    auto pos = onDemandSaIdsSet_.find(systemAbilityId);
+    if (pos == onDemandSaIdsSet_.end()) {
+        if (!InvalidateCache()) {
+            HILOGE("InvalidateCache error!");
+        }
+    }
 }
 
 int32_t SystemAbilityManager::AddSystemProcess(const u16string& procName,
@@ -1862,5 +1885,18 @@ void SystemAbilityManager::ReportGetSAPeriodically()
         ReportGetSAFrequency(uid, saId, count);
     }
     saFrequencyMap_.clear();
+}
+
+int32_t SystemAbilityManager::GetOnDemandSystemAbilityIds(std::vector<int32_t>& systemAbilityIds)
+{
+    HILOGD("GetOnDemandSystemAbilityIds start!");
+    if (onDemandSaIdsSet_.empty()) {
+        HILOGD("GetOnDemandSystemAbilityIds error!");
+        return ERR_INVALID_VALUE;
+    }
+    for (int32_t onDemandSaId : onDemandSaIdsSet_) {
+        systemAbilityIds.emplace_back(onDemandSaId);
+    }
+    return ERR_OK;
 }
 } // namespace OHOS
