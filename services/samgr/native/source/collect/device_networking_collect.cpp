@@ -21,7 +21,6 @@
 
 using namespace std;
 
-using namespace OHOS::AppExecFwk;
 using namespace OHOS::DistributedHardware;
 
 namespace OHOS {
@@ -41,12 +40,7 @@ DeviceNetworkingCollect::DeviceNetworkingCollect(const sptr<IReport>& report)
 int32_t DeviceNetworkingCollect::OnStart()
 {
     HILOGI("DeviceNetworkingCollect OnStart called");
-    std::shared_ptr<EventHandler> handler = EventHandler::Current();
-    if (handler == nullptr) {
-        HILOGW("DeviceNetworkingCollect current handler is nullptr");
-        return ERR_INVALID_VALUE;
-    }
-    workHandler_ = std::make_shared<WorkHandler>(handler->GetEventRunner(), this);
+    workHandler_ = std::make_shared<WorkHandler>(this);
     initCallback_ = std::make_shared<DeviceInitCallBack>(workHandler_);
     stateCallback_ = std::make_shared<DeviceStateCallback>(this);
     workHandler_->SendEvent(INIT_EVENT);
@@ -57,7 +51,6 @@ int32_t DeviceNetworkingCollect::OnStop()
 {
     DeviceManager::GetInstance().UnRegisterDevStateCallback(PKG_NAME);
     if (workHandler_ != nullptr) {
-        workHandler_->SetEventRunner(nullptr);
         workHandler_ = nullptr;
     }
     initCallback_ = nullptr;
@@ -255,21 +248,41 @@ void DeviceStateCallback::OnDeviceReady(const DmDeviceInfo& deviceInfo)
     }
 }
 
-void WorkHandler::ProcessEvent(const InnerEvent::Pointer& event)
+void WorkHandler::ProcessEvent(uint32_t eventId)
 {
-    if (collect_ == nullptr || event == nullptr) {
+    if (collect_ == nullptr) {
         HILOGE("DeviceNetworkingCollect ProcessEvent collect or event is null!");
         return;
     }
-    auto eventId = event->GetInnerEventId();
     if (eventId != INIT_EVENT && eventId != DM_DIED_EVENT) {
         HILOGE("DeviceNetworkingCollect ProcessEvent error event code!");
         return;
     }
     if (!collect_->AddDeviceChangeListener()) {
         HILOGW("DeviceNetworkingCollect AddDeviceChangeListener retry");
-        SendEvent(INIT_EVENT, DELAY_TIME);
+        auto task = std::bind(&WorkHandler::ProcessEvent, this, INIT_EVENT);
+        handler_->PostTask(task, DELAY_TIME);
     }
     HILOGI("DeviceNetworkingCollect AddDeviceChangeListener success");
+}
+
+bool WorkHandler::SendEvent(uint32_t eventId)
+{
+    if (handler_ == nullptr) {
+        HILOGE("DeviceNetworkingCollect SendEvent handler is null!");
+        return false;
+    }
+    auto task = std::bind(&WorkHandler::ProcessEvent, this, eventId);
+    return handler_->PostTask(task);
+}
+
+bool WorkHandler::SendEvent(uint32_t eventId, uint64_t delayTime)
+{
+    if (handler_ == nullptr) {
+        HILOGE("DeviceNetworkingCollect SendEvent handler is null!");
+        return false;
+    }
+    auto task = std::bind(&WorkHandler::ProcessEvent, this, eventId);
+    return handler_->PostTask(task, delayTime);
 }
 }  // namespace OHOS

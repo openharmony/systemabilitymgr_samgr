@@ -21,7 +21,7 @@
 #include <set>
 
 #include "device_manager.h"
-#include "event_handler.h"
+#include "ffrt_handler.h"
 
 namespace OHOS {
 class DeviceStateCallback : public DistributedHardware::DeviceStateCallback {
@@ -42,13 +42,14 @@ class DeviceStateCallback : public DistributedHardware::DeviceStateCallback {
        std::mutex deviceOnlineLock_;
 };
 
+class WorkHandler;
 class DeviceInitCallBack : public DistributedHardware::DmInitCallback {
     public:
-        explicit DeviceInitCallBack(const std::shared_ptr<AppExecFwk::EventHandler>& handler) : handler_(handler) {}
+        explicit DeviceInitCallBack(const std::shared_ptr<WorkHandler>& handler) : handler_(handler) {}
         ~DeviceInitCallBack() = default;
         void OnRemoteDied() override;
     private:
-        std::shared_ptr<AppExecFwk::EventHandler> handler_;
+        std::shared_ptr<WorkHandler> handler_;
 };
 
 class DeviceNetworkingCollect : public ICollectPlugin {
@@ -63,7 +64,7 @@ public:
 private:
     std::shared_ptr<DeviceStateCallback> stateCallback_;
     std::shared_ptr<DistributedHardware::DmInitCallback> initCallback_;
-    std::shared_ptr<AppExecFwk::EventHandler> workHandler_;
+    std::shared_ptr<WorkHandler> workHandler_;
 
     bool IsDmReady();
     void ClearDeviceOnlineSet();
@@ -72,15 +73,20 @@ private:
     bool ReportMissedEvents();
 };
 
-class WorkHandler : public AppExecFwk::EventHandler {
+class WorkHandler {
     public:
-        WorkHandler(const std::shared_ptr<AppExecFwk::EventRunner>& runner,
-            const sptr<DeviceNetworkingCollect>& collect) : AppExecFwk::EventHandler(runner), collect_(collect) {}
+        WorkHandler(const sptr<DeviceNetworkingCollect>& collect) : collect_(collect)
+        {
+            handler_ = std::make_shared<FFRTHandler>("WorkHandler");
+        }
         ~WorkHandler() = default;
-        void ProcessEvent(const OHOS::AppExecFwk::InnerEvent::Pointer& event) override;
+        void ProcessEvent(uint32_t eventId);
+        bool SendEvent(uint32_t eventId);
+        bool SendEvent(uint32_t eventId, uint64_t delayTime);
 
     private:
         sptr<DeviceNetworkingCollect> collect_;
+        std::shared_ptr<FFRTHandler> handler_;
 };
 } // namespace OHOS
 #endif // OHOS_SYSTEM_ABILITY_MANAGER_DEVICE_NETWORKING_COLLECT_H

@@ -19,7 +19,7 @@
 #include <condition_variable>
 #include <shared_mutex>
 
-#include "event_handler.h"
+#include "ffrt_handler.h"
 #include "gtest/gtest.h"
 #include "icollect_plugin.h"
 
@@ -30,7 +30,7 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
-    void PostTask(std::shared_ptr<AppExecFwk::EventHandler>& collectHandler);
+    void PostTask(std::shared_ptr<FFRTHandler>& collectHandler);
     bool isCaseDone;
     std::mutex caseDoneLock_;
     std::condition_variable caseDoneCondition_;

@@ -20,7 +20,7 @@
 #include <memory>
 #include <shared_mutex>
 
-#include "event_handler.h"
+#include "ffrt_handler.h"
 #include "icollect_plugin.h"
 #include "system_ability_ondemand_reason.h"
 #include "system_ability_on_demand_event.h"
@@ -58,7 +58,7 @@ private:
     int32_t AddCollectEvents(const std::vector<OnDemandEvent>& events);
     int32_t RemoveUnusedEventsLocked(const std::vector<OnDemandEvent>& events);
     std::map<int32_t, sptr<ICollectPlugin>> collectPluginMap_;
-    std::shared_ptr<AppExecFwk::EventHandler> collectHandler_;
+    std::shared_ptr<FFRTHandler> collectHandler_;
     std::shared_mutex saProfilesLock_;
     std::list<SaProfile> onDemandSaProfiles_;
 };

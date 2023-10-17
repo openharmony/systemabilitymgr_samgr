@@ -309,7 +309,7 @@ HWTEST_F(DeviceNetworkingCollectTest, ProcessEvent001, TestSize.Level3)
     caseDoneCondition_.wait_for(lock, std::chrono::milliseconds(MAX_WAIT_TIME),
         [&] () { return isCaseDone_; });
     isCaseDone_ = false;
-    int32_t ret = networkingCollect->workHandler_->SendEvent(DM_DIED_EVENT + 1);
+    auto ret = networkingCollect->workHandler_->SendEvent(DM_DIED_EVENT + 1);
     EXPECT_EQ(true, ret);
     auto workHandler = std::static_pointer_cast<WorkHandler>(networkingCollect->workHandler_);
     workHandler->collect_ = nullptr;

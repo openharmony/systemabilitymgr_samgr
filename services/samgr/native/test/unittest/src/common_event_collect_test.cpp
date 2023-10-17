@@ -80,7 +80,7 @@ HWTEST_F(CommonEventCollectTest, OnStart002, TestSize.Level3)
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
     commonEventCollect->commonEventNames_.insert("test");
     int32_t ret = commonEventCollect->OnStart();
-    EXPECT_EQ(ERR_INVALID_VALUE, ret);
+    EXPECT_EQ(ERR_OK, ret);
 }
 
 /**
@@ -140,8 +140,7 @@ HWTEST_F(CommonEventCollectTest, ProcessEvent001, TestSize.Level3)
     DTEST_LOG << " ProcessEvent001 BEGIN" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
-    auto runner = AppExecFwk::EventRunner::Create("collect_test1");
-    commonEventCollect->workHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
     int32_t ret = commonEventCollect->workHandler_->SendEvent(COMMON_DIED_EVENT + 1);
     EXPECT_EQ(true, ret);
     auto workHandler = std::static_pointer_cast<CommonHandler>(commonEventCollect->workHandler_);
@@ -164,15 +163,14 @@ HWTEST_F(CommonEventCollectTest, ProcessEvent002, TestSize.Level3)
     DTEST_LOG << "ProcessEvent002 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
-    auto runner = AppExecFwk::EventRunner::Create("collect_test1");
-    std::shared_ptr<CommonHandler> commonHandler = std::make_shared<CommonHandler>(runner, commonEventCollect);
+    std::shared_ptr<CommonHandler> commonHandler = std::make_shared<CommonHandler>(commonEventCollect);
     AppExecFwk::InnerEvent *event = nullptr;
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
         }
     };
-    commonHandler->ProcessEvent(AppExecFwk::InnerEvent::Pointer(event, destructor));
+    commonHandler->ProcessEvent(COMMON_DIED_EVENT, 0);
     EXPECT_EQ(event, nullptr);
     DTEST_LOG << "ProcessEvent002 end" << std::endl;
 }
@@ -187,15 +185,14 @@ HWTEST_F(CommonEventCollectTest, ProcessEvent003, TestSize.Level3)
 {
     DTEST_LOG << "ProcessEvent003 begin" << std::endl;
     sptr<CommonEventCollect> commonEventCollect = nullptr;
-    auto runner = AppExecFwk::EventRunner::Create("collect_test1");
-    std::shared_ptr<CommonHandler> commonHandler = std::make_shared<CommonHandler>(runner, commonEventCollect);
+    std::shared_ptr<CommonHandler> commonHandler = std::make_shared<CommonHandler>(commonEventCollect);
     AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
         }
     };
-    commonHandler->ProcessEvent(AppExecFwk::InnerEvent::Pointer(event, destructor));
+    commonHandler->ProcessEvent(COMMON_DIED_EVENT, 0);
     EXPECT_NE(event, nullptr);
     DTEST_LOG << "ProcessEvent003 end" << std::endl;
 }
@@ -210,8 +207,7 @@ HWTEST_F(CommonEventCollectTest, ProcessEvent004, TestSize.Level3)
 {
     DTEST_LOG << "ProcessEvent004 begin" << std::endl;
     sptr<CommonEventCollect> commonEventCollect = nullptr;
-    auto runner = AppExecFwk::EventRunner::Create("collect_test1");
-    std::shared_ptr<CommonHandler> commonHandler = std::make_shared<CommonHandler>(runner, commonEventCollect);
+    std::shared_ptr<CommonHandler> commonHandler = std::make_shared<CommonHandler>(commonEventCollect);
     AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
     event->innerEventId_ = -1;
     auto destructor = [](AppExecFwk::InnerEvent *event) {
@@ -219,7 +215,7 @@ HWTEST_F(CommonEventCollectTest, ProcessEvent004, TestSize.Level3)
             delete event;
         }
     };
-    commonHandler->ProcessEvent(AppExecFwk::InnerEvent::Pointer(event, destructor));
+    commonHandler->ProcessEvent(-1, 0);
     EXPECT_NE(event, nullptr);
     DTEST_LOG << "ProcessEvent004 end" << std::endl;
 }
@@ -238,8 +234,7 @@ HWTEST_F(CommonEventCollectTest, OnReceiveEvent001, TestSize.Level3)
     std::shared_ptr<CommonEventSubscriber> commonEventStatusSubscriber
         = std::make_shared<CommonEventSubscriber>(info, commonEventCollect);
     EXPECT_NE(commonEventStatusSubscriber, nullptr);
-    auto runner = AppExecFwk::EventRunner::Create("collect_test1");
-    commonEventCollect->workHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
     EventFwk::CommonEventData eventData;
     commonEventStatusSubscriber->OnReceiveEvent(eventData);
     std::string action = EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON;
@@ -310,8 +305,7 @@ HWTEST_F(CommonEventCollectTest, SaveOnDemandReasonExtraData001, TestSize.Level3
 {
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
-    auto runner = AppExecFwk::EventRunner::Create("collect_test1");
-    commonEventCollect->workHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
     EventFwk::CommonEventData eventData;
     int64_t ret = commonEventCollect->SaveOnDemandReasonExtraData(eventData);
     EXPECT_EQ(ret, 1);
@@ -327,8 +321,7 @@ HWTEST_F(CommonEventCollectTest, RemoveOnDemandReasonExtraData001, TestSize.Leve
 {
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
-    auto runner = AppExecFwk::EventRunner::Create("collect_test1");
-    commonEventCollect->workHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
     EventFwk::CommonEventData eventData;
     commonEventCollect->extraDatas_.clear();
     commonEventCollect->SaveOnDemandReasonExtraData(eventData);
@@ -346,8 +339,7 @@ HWTEST_F(CommonEventCollectTest, GetOnDemandReasonExtraData001, TestSize.Level3)
 {
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
-    auto runner = AppExecFwk::EventRunner::Create("collect_test1");
-    commonEventCollect->workHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
     commonEventCollect->extraDatas_.clear();
     OnDemandReasonExtraData onDemandReasonExtraData;
     bool ret = commonEventCollect->GetOnDemandReasonExtraData(1, onDemandReasonExtraData);
@@ -364,8 +356,7 @@ HWTEST_F(CommonEventCollectTest, GetOnDemandReasonExtraData002, TestSize.Level3)
 {
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
-    auto runner = AppExecFwk::EventRunner::Create("collect_test1");
-    commonEventCollect->workHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
     commonEventCollect->extraDatas_.clear();
     OnDemandReasonExtraData onDemandReasonExtraData;
     EventFwk::CommonEventData eventData;

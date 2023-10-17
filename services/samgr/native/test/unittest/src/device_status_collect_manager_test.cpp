@@ -61,7 +61,7 @@ void DeviceStatusCollectManagerTest::TearDown()
 }
 
 void DeviceStatusCollectManagerTest::PostTask(
-    std::shared_ptr<AppExecFwk::EventHandler>& collectHandler)
+    std::shared_ptr<FFRTHandler>& collectHandler)
 {
     isCaseDone = false;
     auto caseDoneNotifyTask = [this]() {
@@ -630,8 +630,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, GetOnDemandReasonExtraData004, TestSize
 {
     sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
-    auto runner = AppExecFwk::EventRunner::Create("collect_test1");
-    commonEventCollect->workHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
     EventFwk::CommonEventData eventData;
     commonEventCollect->SaveOnDemandReasonExtraData(eventData);
     collectManager->collectPluginMap_.clear();

@@ -22,7 +22,6 @@
 #include "system_ability_status_change_stub.h"
 
 using namespace std;
-using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
 namespace {
