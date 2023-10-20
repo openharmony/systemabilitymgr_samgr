@@ -434,6 +434,7 @@ ohos_unittest("SystemAbilityMgrDumperTest") {
 }
 
 ohos_executable("ondemand") {
+  testonly = true
   sources = [
     "${samgr_services_dir}/test/unittest/src/mock_permission.cpp",
     "./src/ondemand_helper.cpp",
@@ -467,6 +468,8 @@ ohos_executable("ondemand") {
 }
 
 ohos_executable("TestTool") {
+  testonly = true
+
   #module_out_path = module_output_path
   sources = [
     "${samgr_dir}/utils/native/source/tools.cpp",
