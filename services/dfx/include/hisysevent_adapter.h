@@ -24,5 +24,11 @@ void ReportGetSAFrequency(uint32_t callerUid, uint32_t said, int32_t count);
 
 void WatchDogSendEvent(int32_t pid, uint32_t uid, const std::string& sendMsg,
     const std::string& eventName);
+
+void ReportSamgrSaLoadFail(int32_t said, const std::string& reason);
+
+void ReportSamgrSaLoad(int32_t said, int32_t eventId);
+
+void ReportSamgrSaUnload(int32_t said, int32_t eventId);
 } // OHOS
 #endif // SAMGR_SERVICES_DFX_INCLUDE__HISYSEVENT_ADAPTER_H
