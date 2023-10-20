@@ -55,7 +55,11 @@ void ReportSamgrSaLoad(int32_t said, int32_t eventId)
         ONDEMAND_SA_LOAD,
         HiSysEvent::EventType::BEHAVIOR,
         SAID, said,
+<<<<<<< HEAD
         EVENT, eventId);
+=======
+        EVENT_ID, eventId);
+>>>>>>> 6ff4d6fb5c0114ebf93075abca9767764c95d788
     if (ret != 0) {
         HILOGE("hisysevent report samgr sa load event failed! ret %{public}d.", ret);
     }
@@ -67,7 +71,11 @@ void ReportSamgrSaUnload(int32_t said, int32_t eventId)
         ONDEMAND_SA_UNLOAD,
         HiSysEvent::EventType::BEHAVIOR,
         SAID, said,
+<<<<<<< HEAD
         EVENT, eventId);
+=======
+        EVENT_ID, eventId);
+>>>>>>> 6ff4d6fb5c0114ebf93075abca9767764c95d788
     if (ret != 0) {
         HILOGE("hisysevent report samgr sa unload event failed! ret %{public}d.", ret);
     }
