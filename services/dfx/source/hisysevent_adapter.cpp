@@ -29,6 +29,48 @@ const std::string SAID = "SAID";
 const std::string COUNT = "COUNT";
 const std::string FILE_NAME = "FILE_NAME";
 const std::string GETSA__TAG = "GETSA_FREQUENCY";
+
+const std::string REASON = "REASON";
+const std::string ONDEMAND_SA_LOAD_FAIL = "ONDEMAND_SA_LOAD_FAIL";
+const std::string ONDEMAND_SA_LOAD = "ONDEMAND_SA_LOAD";
+const std::string EVENT = "EVENT";
+const std::string ONDEMAND_SA_UNLOAD = "ONDEMAND_SA_UNLOAD";
+}
+
+void ReportSamgrSaLoadFail(int32_t said, const std::string& reason)
+{
+    int ret = HiSysEventWrite(HiSysEvent::Domain::SAMGR,
+        ONDEMAND_SA_LOAD_FAIL,
+        HiSysEvent::EventType::FAULT,
+        SAID, said,
+        REASON, reason);
+    if (ret != 0) {
+        HILOGE("hisysevent report samgr sa load fail event failed! ret %{public}d.", ret);
+    }
+}
+
+void ReportSamgrSaLoad(int32_t said, int32_t eventId)
+{
+    int ret = HiSysEventWrite(HiSysEvent::Domain::SAMGR,
+        ONDEMAND_SA_LOAD,
+        HiSysEvent::EventType::BEHAVIOR,
+        SAID, said,
+        EVENT, eventId);
+    if (ret != 0) {
+        HILOGE("hisysevent report samgr sa load event failed! ret %{public}d.", ret);
+    }
+}
+
+void ReportSamgrSaUnload(int32_t said, int32_t eventId)
+{
+    int ret = HiSysEventWrite(HiSysEvent::Domain::SAMGR,
+        ONDEMAND_SA_UNLOAD,
+        HiSysEvent::EventType::BEHAVIOR,
+        SAID, said,
+        EVENT, eventId);
+    if (ret != 0) {
+        HILOGE("hisysevent report samgr sa unload event failed! ret %{public}d.", ret);
+    }
 }
 
 void ReportAddSystemAbilityFailed(int32_t said, const std::string& filaName)
