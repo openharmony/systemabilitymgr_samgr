@@ -1235,6 +1235,7 @@ void SystemAbilityManager::SendCheckLoadedMsg(int32_t systemAbilityId, const std
             HILOGE("abilityStateScheduler is nullptr");
             return;
         }
+        ReportSamgrSaLoadFail(systemAbilityId, "time out");
         abilityStateScheduler_->SendAbilityStateEvent(systemAbilityId, AbilityStateEvent::ABILITY_LOAD_FAILED_EVENT);
         (void)GetSystemProcess(name);
     };
@@ -1459,6 +1460,7 @@ int32_t SystemAbilityManager::DoLoadSystemAbility(int32_t systemAbilityId, const
                 systemAbilityId, ret ? "succeed" : "failed");
         }
         result = StartingSystemProcessLocked(procName, systemAbilityId, event);
+        ReportSamgrSaLoad(systemAbilityId, event.eventId);
         HILOGI("LoadSystemAbility systemAbilityId:%{public}d size : %{public}zu",
             systemAbilityId, abilityItem.callbackMap[LOCAL_DEVICE].size());
     }
@@ -1587,6 +1589,7 @@ int32_t SystemAbilityManager::DoUnloadSystemAbility(int32_t systemAbilityId,
         HILOGE("unload system ability failed, systemAbilityId: %{public}d", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
+    ReportSamgrSaUnload(systemAbilityId, event.eventId);
     return ERR_OK;
 }
 

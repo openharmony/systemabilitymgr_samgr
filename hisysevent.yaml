@@ -13,6 +13,21 @@
 
 domain: SAMGR
 
+ONDEMAND_SA_LOAD_FAIL:
+  __BASE: {type: FAULT, level: CRITICAL, desc: samgr sa load failed event}
+  SAID: {type: INT32, desc: system ability id}
+  REASON: {type: STRING, desc: fail reason}
+
+ONDEMAND_SA_LOAD:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: samgr sa load event}
+  SAID: {type: INT32, desc: system ability id}
+  EVENT: {type: INT32, desc: load event id}
+
+ONDEMAND_SA_UNLOAD:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: samgr sa unload event}
+  SAID: {type: INT32, desc: system ability id}
+  EVENT: {type: INT32, desc: unload event id}
+
 GETSA_FREQUENCY:
   __BASE: {type: STATISTIC, level: MINOR, desc: get system ability times event}
   CALLER_UID: {type: UINT32, desc: caller uid}

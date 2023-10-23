@@ -184,6 +184,7 @@ ohos_unittest("SystemAbilityMgrStubTest") {
     "${samgr_services_dir}/test/unittest/src/mock_permission.cpp",
     "${samgr_services_dir}/test/unittest/src/sa_status_change_mock.cpp",
     "${samgr_services_dir}/test/unittest/src/system_ability_mgr_stub_test.cpp",
+    "//foundation/systemabilitymgr/samgr/services/dfx/source/hisysevent_adapter.cpp",
   ]
 
   configs = [
@@ -258,6 +259,7 @@ ohos_unittest("SystemAbilityMgrProxyTest") {
     "${samgr_services_dir}/test/unittest/src/system_ability_mgr_proxy_test.cpp",
     "//foundation/systemabilitymgr/samgr/frameworks/native/source/system_ability_manager_proxy.cpp",
     "//foundation/systemabilitymgr/samgr/frameworks/native/source/system_process_status_change_stub.cpp",
+    "//foundation/systemabilitymgr/samgr/services/dfx/source/hisysevent_adapter.cpp",
     "//foundation/systemabilitymgr/samgr/services/lsamgr/src/local_ability_manager_proxy.cpp",
     "//foundation/systemabilitymgr/samgr/services/lsamgr/src/local_abilitys.cpp",
   ]
@@ -295,6 +297,7 @@ ohos_unittest("LocalAbilityManagerProxyTest") {
     "${samgr_services_dir}/test/unittest/src/itest_transaction_service.cpp",
     "${samgr_services_dir}/test/unittest/src/local_ability_manager_proxy_test.cpp",
     "${samgr_services_dir}/test/unittest/src/mock_iro_sendrequest.cpp",
+    "//foundation/systemabilitymgr/samgr/services/dfx/source/hisysevent_adapter.cpp",
     "//foundation/systemabilitymgr/samgr/services/lsamgr/src/local_ability_manager_proxy.cpp",
   ]
 
@@ -338,6 +341,7 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
     "${samgr_services_dir}/test/unittest/src/system_ability_event_handler_test.cpp",
     "${samgr_services_dir}/test/unittest/src/system_ability_state_machine_test.cpp",
     "${samgr_services_dir}/test/unittest/src/system_ability_state_scheduler_test.cpp",
+    "//foundation/systemabilitymgr/samgr/services/dfx/source/hisysevent_adapter.cpp",
   ]
 
   defines = []
@@ -404,6 +408,7 @@ ohos_unittest("SystemAbilityMgrDumperTest") {
     "${samgr_services_dir}/source/system_ability_manager_dumper.cpp",
     "${samgr_services_dir}/source/system_ability_manager_stub.cpp",
     "${samgr_services_dir}/test/unittest/src/system_ability_manager_dumper_test.cpp",
+    "//foundation/systemabilitymgr/samgr/services/dfx/source/hisysevent_adapter.cpp",
   ]
 
   configs = [
@@ -439,6 +444,7 @@ ohos_unittest("SystemAbilityMgrDumperTest") {
 }
 
 ohos_executable("ondemand") {
+  testonly = true
   sources = [
     "${samgr_services_dir}/test/unittest/src/mock_permission.cpp",
     "./src/ondemand_helper.cpp",
@@ -472,6 +478,8 @@ ohos_executable("ondemand") {
 }
 
 ohos_executable("TestTool") {
+  testonly = true
+
   #module_out_path = module_output_path
   sources = [
     "${samgr_dir}/utils/native/source/tools.cpp",
