@@ -285,8 +285,10 @@ ohos_unittest("SystemAbilityMgrProxyTest") {
     "access_token:libtoken_setproc",
     "c_utils:utils",
     "hilog:libhilog",
+    "init:libbegetutil",
     "ipc:ipc_core",
     "ipc:ipc_single",
+    "safwk:dynamic_cache",
   ]
 }
 
@@ -594,7 +596,9 @@ ohos_static_library("samgr_proxy_tdd") {
     external_deps = [
       "c_utils:utils",
       "hilog:libhilog",
+      "init:libbegetutil",
       "ipc:ipc_single",
+      "safwk:dynamic_cache",
     ]
     part_name = "samgr"
   }

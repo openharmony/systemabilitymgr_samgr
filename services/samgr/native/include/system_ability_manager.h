@@ -27,6 +27,7 @@
 #include "dbinder_service_stub.h"
 #include "device_status_collect_manager.h"
 #include "ffrt_handler.h"
+#include "dynamic_cache.h"
 #include "rpc_callback_imp.h"
 #include "thread_pool.h"
 #include "timer.h"
@@ -48,7 +49,7 @@ enum {
     UNKNOWN,
 };
 
-class SystemAbilityManager : public SystemAbilityManagerStub {
+class SystemAbilityManager : public DynamicCache<int32_t, sptr<IRemoteObject>>, public SystemAbilityManagerStub {
 public:
     virtual ~SystemAbilityManager();
     static sptr<SystemAbilityManager> GetInstance();
@@ -134,6 +135,7 @@ public:
         std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents) override;
     int32_t UpdateOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
         const std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents) override;
+    int32_t GetOnDemandSystemAbilityIds(std::vector<int32_t>& systemAbilityIds) override;
 private:
     enum class AbilityState {
         INIT,
@@ -219,6 +221,7 @@ private:
     bool CheckAllowUpdate(OnDemandPolicyType type, SaProfile& saProfile);
     void ConvertToOnDemandEvent(const SystemAbilityOnDemandEvent& from, OnDemandEvent& to);
     void ConvertToSystemAbilityOnDemandEvent(const OnDemandEvent& from, SystemAbilityOnDemandEvent& to);
+    void SystemAbilityInvalidateCache(int32_t systemAbilityId);
 #ifdef SUPPORT_DEVICE_MANAGER
     void DeviceIdToNetworkId(std::string& networkId);
 #endif
@@ -260,6 +263,7 @@ private:
     std::shared_ptr<FFRTHandler> workHandler_;
 
     std::map<int32_t, SaProfile> saProfileMap_;
+    std::set<int32_t> onDemandSaIdsSet_;
     std::mutex saProfileMapLock_;
     std::mutex loadRemoteLock_;
     std::map<std::string, std::list<sptr<ISystemAbilityLoadCallback>>> remoteCallbacks_; // key : said_deviceId

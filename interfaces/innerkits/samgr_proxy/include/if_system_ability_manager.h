@@ -256,6 +256,7 @@ public:
         std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents) = 0;
     virtual int32_t UpdateOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
         const std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents) = 0;
+    virtual int32_t GetOnDemandSystemAbilityIds(std::vector<int32_t>& systemAbilityIds) = 0;
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISystemAbilityManager");
 protected:
