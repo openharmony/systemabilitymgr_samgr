@@ -67,7 +67,7 @@ struct SystemProcessContext {
     int32_t pid = -1;
     int32_t uid = -1;
     std::list<int32_t> saList;
-    std::recursive_mutex processLock;
+    std::mutex processLock;
     SystemProcessState state = SystemProcessState::NOT_STARTED;
     std::shared_mutex stateCountLock;
     std::map<SystemAbilityState, uint32_t> abilityStateCountMap;

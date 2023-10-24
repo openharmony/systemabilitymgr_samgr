@@ -39,9 +39,7 @@ void DeviceStatusCollectManager::Init(const std::list<SaProfile>& saProfiles)
 {
     HILOGI("DeviceStatusCollectManager Init begin");
     FilterOnDemandSaProfiles(saProfiles);
-    auto runner = AppExecFwk::EventRunner::Create("collect");
-    collectHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
-    collectHandler_->PostTask([]() { Samgr::MemoryGuard cacheGuard; });
+    collectHandler_ = std::make_shared<FFRTHandler>("collect");
     sptr<ICollectPlugin> deviceParamCollect = new DeviceParamCollect(this);
     deviceParamCollect->Init(saProfiles);
     collectPluginMap_[PARAM] = deviceParamCollect;
@@ -200,7 +198,6 @@ void DeviceStatusCollectManager::UnInit()
     collectPluginMap_.clear();
 
     if (collectHandler_ != nullptr) {
-        collectHandler_->SetEventRunner(nullptr);
         collectHandler_ = nullptr;
     }
 }

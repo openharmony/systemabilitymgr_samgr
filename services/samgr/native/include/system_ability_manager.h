@@ -23,10 +23,10 @@
 #include <string>
 #include <utility>
 
-#include "event_handler.h"
 #include "dbinder_service.h"
 #include "dbinder_service_stub.h"
 #include "device_status_collect_manager.h"
+#include "ffrt_handler.h"
 #include "dynamic_cache.h"
 #include "rpc_callback_imp.h"
 #include "thread_pool.h"
@@ -90,7 +90,6 @@ public:
     std::string TransformDeviceId(const std::string& deviceId, int32_t type, bool isPrivate);
     std::string GetLocalNodeId();
     void Init();
-    void WatchDogInit();
     int32_t Dump(int32_t fd, const std::vector<std::u16string>& args) override;
     void AddSamgrToAbilityMap();
 
@@ -157,6 +156,7 @@ private:
     void DoInsertSaData(const std::u16string& name, const sptr<IRemoteObject>& ability, const SAExtraProp& extraProp);
     bool IsNameInValid(const std::u16string& name);
     int32_t StartOnDemandAbility(int32_t systemAbilityId, bool& isExist);
+	int32_t StartOnDemandAbilityLocked(int32_t systemAbilityId, bool& isExist);
     void ParseRemoteSaName(const std::u16string& name, std::string& deviceId, std::u16string& saName);
     bool IsLocalDeviceId(const std::string& deviceId);
     bool CheckDistributedPermission();
@@ -182,7 +182,10 @@ private:
         const sptr<ISystemAbilityLoadCallback>& callback);
     void NotifySystemAbilityLoadFail(int32_t systemAbilityId, const sptr<ISystemAbilityLoadCallback>& callback);
     int32_t StartingSystemProcess(const std::u16string& name, int32_t systemAbilityId, const OnDemandEvent& event);
+	int32_t StartingSystemProcessLocked(const std::u16string& name, int32_t systemAbilityId,
+	    const OnDemandEvent& event);
     void StartOnDemandAbility(const std::u16string& name, int32_t systemAbilityId);
+	void StartOnDemandAbilityLocked(const std::u16string& name, int32_t systemAbilityId);
     int32_t StartOnDemandAbilityInner(const std::u16string& name, int32_t systemAbilityId, AbilityItem& abilityItem);
     int32_t StartDynamicSystemProcess(const std::u16string& name, int32_t systemAbilityId, const OnDemandEvent& event);
     bool StopOnDemandAbility(const std::u16string& name, int32_t systemAbilityId, const OnDemandEvent& event);
@@ -240,11 +243,11 @@ private:
     std::map<int32_t, SAInfo> abilityMap_;
 
     // maybe hold listenerMapLock_ and then access onDemandLock_
-    std::recursive_mutex listenerMapLock_;
+    std::mutex listenerMapLock_;
     std::map<int32_t, std::list<std::pair<sptr<ISystemAbilityStatusChange>, int32_t>>> listenerMap_;
     std::map<int32_t, int32_t> subscribeCountMap_;
 
-    std::recursive_mutex onDemandLock_;
+    std::mutex onDemandLock_;
     std::map<int32_t, std::u16string> onDemandAbilityMap_;
     std::map<int32_t, AbilityItem> startingAbilityMap_;
     std::mutex systemProcessMapLock_;
@@ -257,7 +260,7 @@ private:
     std::mutex stopEnableOnceLock_;
     std::map<int32_t, std::list<OnDemandEvent>> stopEnableOnceMap_;
 
-    std::shared_ptr<AppExecFwk::EventHandler> workHandler_;
+    std::shared_ptr<FFRTHandler> workHandler_;
 
     std::map<int32_t, SaProfile> saProfileMap_;
     std::set<int32_t> onDemandSaIdsSet_;

@@ -22,7 +22,7 @@
 #include <string>
 #include <shared_mutex>
 
-#include "event_handler.h"
+#include "ffrt_handler.h"
 #include "isystem_process_status_change.h"
 #include "nlohmann/json.hpp"
 #include "sa_profiles.h"
@@ -72,6 +72,7 @@ private:
     int32_t SendDelayUnloadEventLocked(uint32_t systemAbilityId, int32_t delayTime = UNLOAD_DELAY_TIME);
     int32_t RemoveDelayUnloadEventLocked(uint32_t systemAbilityId);
     int32_t ProcessDelayUnloadEvent(int32_t systemAbilityId);
+	int32_t ProcessDelayUnloadEventLocked(int32_t systemAbilityId);
 
     int32_t PendLoadEventLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext,
         const LoadRequestInfo& loadRequestInfo);
@@ -92,10 +93,12 @@ private:
 
     int32_t TryUnloadAllSystemAbility(const std::shared_ptr<SystemProcessContext>& processContext);
     bool CanUnloadAllSystemAbility(const std::shared_ptr<SystemProcessContext>& processContext);
+	bool CanUnloadAllSystemAbilityLocked(const std::shared_ptr<SystemProcessContext>& processContext);
     int32_t UnloadAllSystemAbilityLocked(const std::shared_ptr<SystemProcessContext>& processContext);
 
     int32_t TryKillSystemProcess(const std::shared_ptr<SystemProcessContext>& processContext);
     bool CanKillSystemProcess(const std::shared_ptr<SystemProcessContext>& processContext);
+	bool CanKillSystemProcessLocked(const std::shared_ptr<SystemProcessContext>& processContext);
     int32_t KillSystemProcessLocked(const std::shared_ptr<SystemProcessContext>& processContext);
 
     bool CanRestartProcessLocked(const std::shared_ptr<SystemProcessContext>& processContext);
@@ -115,15 +118,21 @@ private:
     int32_t ActiveSystemAbilityLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext,
         const nlohmann::json& activeReason);
 
-    class UnloadEventHandler : public AppExecFwk::EventHandler {
+    class UnloadEventHandler {
     public:
-        UnloadEventHandler(const std::shared_ptr<AppExecFwk::EventRunner>& runner,
-            const std::weak_ptr<SystemAbilityStateScheduler>& stateScheduler)
-            : AppExecFwk::EventHandler(runner), stateScheduler_(stateScheduler) {}
+        UnloadEventHandler(const std::weak_ptr<SystemAbilityStateScheduler>& stateScheduler)
+            : stateScheduler_(stateScheduler)
+        {
+            handler_ = std::make_shared<FFRTHandler>("UnloadEventHandler");
+        }
         ~UnloadEventHandler() = default;
-        void ProcessEvent(const OHOS::AppExecFwk::InnerEvent::Pointer& event) override;
+        void ProcessEvent(uint32_t eventId);
+        bool SendEvent(uint32_t eventId, int64_t extraDataId, uint64_t delayTime);
+        void RemoveEvent(uint32_t eventId);
+        bool HasInnerEvent(uint32_t eventId);
     private:
         std::weak_ptr<SystemAbilityStateScheduler> stateScheduler_;
+        std::shared_ptr<FFRTHandler> handler_;
     };
     std::shared_ptr<SystemAbilityStateMachine> stateMachine_;
     std::shared_ptr<SystemAbilityEventHandler> stateEventHandler_;
@@ -132,7 +141,7 @@ private:
     std::map<int32_t, std::shared_ptr<SystemAbilityContext>> abilityContextMap_;
     std::map<std::u16string, std::shared_ptr<SystemProcessContext>> processContextMap_;
     std::shared_ptr<UnloadEventHandler> unloadEventHandler_;
-    std::shared_ptr<AppExecFwk::EventHandler> processHandler_;
+    std::shared_ptr<FFRTHandler> processHandler_;
     std::shared_mutex listenerSetLock_;
     std::list<sptr<ISystemProcessStatusChange>> processListeners_;
     sptr<IRemoteObject::DeathRecipient> processListenerDeath_;

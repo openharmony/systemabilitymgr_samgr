@@ -49,12 +49,8 @@ int32_t CommonEventCollect::OnStart()
         HILOGW("CommonEventCollect commonEventNames_ is empty");
         return ERR_OK;
     }
-    std::shared_ptr<EventHandler> handler = EventHandler::Current();
-    if (handler == nullptr) {
-        HILOGW("CommonEventCollect current handler is nullptr");
-        return ERR_INVALID_VALUE;
-    }
-    workHandler_ = std::make_shared<CommonHandler>(handler->GetEventRunner(), this);
+
+    workHandler_ = std::make_shared<CommonHandler>(this);
     workHandler_->SendEvent(INIT_EVENT);
     return ERR_OK;
 }
@@ -62,7 +58,6 @@ int32_t CommonEventCollect::OnStart()
 int32_t CommonEventCollect::OnStop()
 {
     if (workHandler_ != nullptr) {
-        workHandler_->SetEventRunner(nullptr);
         workHandler_ = nullptr;
     }
     return ERR_OK;
@@ -118,7 +113,12 @@ void CommonEventCollect::CleanFailedEventLocked(const std::string& eventName)
 
 bool CommonEventCollect::CreateCommonEventSubscriber()
 {
-    std::lock_guard<std::recursive_mutex> autoLock(commonEventSubscriberLock_);
+    std::lock_guard<std::mutex> autoLock(commonEventSubscriberLock_);
+	return CreateCommonEventSubscriberLocked();
+}
+
+bool CommonEventCollect::CreateCommonEventSubscriberLocked()
+{ 
     EventFwk::MatchingSkills skill;
     if (commonEventSubscriber_ != nullptr) {
         skill = commonEventSubscriber_->GetSubscribeInfo().GetMatchingSkills();
@@ -249,12 +249,12 @@ bool CommonEventCollect::AddCommonEventName(const std::string& eventName)
 
 int32_t CommonEventCollect::AddCollectEvent(const OnDemandEvent& event)
 {
-    std::lock_guard<std::recursive_mutex> autoLock(commonEventSubscriberLock_);
+    std::lock_guard<std::mutex> autoLock(commonEventSubscriberLock_);
     bool isInsertEventName = AddCommonEventName(event.name);
-    if (!CreateCommonEventSubscriber()) {
+    if (!CreateCommonEventSubscriberLocked()) {
         if (isInsertEventName) {
             CleanFailedEventLocked(event.name);
-            CreateCommonEventSubscriber();
+            CreateCommonEventSubscriberLocked();
         }
         HILOGE("AddCollectEvent CreateCommonEventSubscriber failed!");
         return ERR_INVALID_VALUE;
@@ -273,13 +273,12 @@ int32_t CommonEventCollect::RemoveUnusedEvent(const OnDemandEvent& event)
     return ERR_OK;
 }
 
-void CommonHandler::ProcessEvent(const InnerEvent::Pointer& event)
+void CommonHandler::ProcessEvent(uint32_t eventId, int64_t extraDataId)
 {
-    if (commonCollect_ == nullptr || event == nullptr) {
+    if (commonCollect_ == nullptr) {
         HILOGE("CommonEventCollect ProcessEvent collect or event is null!");
         return;
     }
-    auto eventId = event->GetInnerEventId();
     if (eventId != INIT_EVENT && eventId != REMOVE_EXTRA_DATA_EVENT && eventId != SUB_COMMON_EVENT) {
         HILOGE("CommonEventCollect ProcessEvent error event code!");
         return;
@@ -290,7 +289,7 @@ void CommonHandler::ProcessEvent(const InnerEvent::Pointer& event)
         return;
     }
     if (eventId == REMOVE_EXTRA_DATA_EVENT) {
-        commonCollect->RemoveOnDemandReasonExtraData(event->GetParam());
+        commonCollect->RemoveOnDemandReasonExtraData(extraDataId);
         return;
     }
     if (eventId == SUB_COMMON_EVENT) {
@@ -301,6 +300,26 @@ void CommonHandler::ProcessEvent(const InnerEvent::Pointer& event)
     }
     sptr<CommonEventListener> listener = new CommonEventListener(commonCollect);
     SystemAbilityManager::GetInstance()->SubscribeSystemAbility(COMMON_EVENT_SERVICE_ID, listener);
+}
+
+bool CommonHandler::SendEvent(uint32_t eventId)
+{
+    if (handler_ == nullptr) {
+        HILOGE("CommonEventCollect SendEvent handler is null!");
+        return false;
+    }
+    auto task = std::bind(&CommonHandler::ProcessEvent, this, eventId, 0);
+    return handler_->PostTask(task);
+}
+
+bool CommonHandler::SendEvent(uint32_t eventId, int64_t extraDataId, uint64_t delayTime)
+{
+    if (handler_ == nullptr) {
+        HILOGE("CommonEventCollect SendEvent handler is null!");
+        return false;
+    }
+    auto task = std::bind(&CommonHandler::ProcessEvent, this, eventId, extraDataId);
+    return handler_->PostTask(task, delayTime);
 }
 
 CommonEventSubscriber::CommonEventSubscriber(const EventFwk::CommonEventSubscribeInfo& subscribeInfo,

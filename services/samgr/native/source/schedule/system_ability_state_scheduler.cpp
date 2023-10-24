@@ -54,17 +54,13 @@ void SystemAbilityStateScheduler::Init(const std::list<SaProfile>& saProfiles)
     HILOGI("[SA Scheduler] init start");
     InitStateContext(saProfiles);
     processListenerDeath_ = sptr<IRemoteObject::DeathRecipient>(new SystemProcessListenerDeathRecipient());
-    auto unloadRunner = AppExecFwk::EventRunner::Create("UnloadHandler");
-    unloadEventHandler_ = std::make_shared<UnloadEventHandler>(unloadRunner, weak_from_this());
-    unloadEventHandler_->PostTask([]() { Samgr::MemoryGuard cacheGuard; });
+    unloadEventHandler_ = std::make_shared<UnloadEventHandler>(weak_from_this());
 
     auto listener =  std::dynamic_pointer_cast<SystemAbilityStateListener>(shared_from_this());
     stateMachine_ = std::make_shared<SystemAbilityStateMachine>(listener);
     stateEventHandler_ = std::make_shared<SystemAbilityEventHandler>(stateMachine_);
 
-    auto processRunner = AppExecFwk::EventRunner::Create("ProcessHandler");
-    processHandler_ = std::make_shared<AppExecFwk::EventHandler>(processRunner);
-    processHandler_->PostTask([]() { Samgr::MemoryGuard cacheGuard; });
+    processHandler_ = std::make_shared<FFRTHandler>("ProcessHandler");
     HILOGI("[SA Scheduler] init end");
 }
 
@@ -151,7 +147,7 @@ bool SystemAbilityStateScheduler::IsSystemAbilityUnloading(int32_t systemAbility
     if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
         return false;
     }
-    std::lock_guard<std::recursive_mutex> autoLock(abilityContext->ownProcessContext->processLock);
+    std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
     if (abilityContext->state ==SystemAbilityState::UNLOADING
         || abilityContext->ownProcessContext->state == SystemProcessState::STOPPING) {
         return true;
@@ -168,7 +164,7 @@ int32_t SystemAbilityStateScheduler::HandleLoadAbilityEvent(int32_t systemAbilit
         isExist = false;
         return ERR_INVALID_VALUE;
     }
-    std::lock_guard<std::recursive_mutex> autoLock(abilityContext->ownProcessContext->processLock);
+    std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
     if (abilityContext->ownProcessContext->state == SystemProcessState::NOT_STARTED) {
         isExist = false;
         return ERR_INVALID_VALUE;
@@ -193,7 +189,7 @@ int32_t SystemAbilityStateScheduler::HandleLoadAbilityEvent(const LoadRequestInf
     if (!GetSystemAbilityContext(loadRequestInfo.systemAbilityId, abilityContext)) {
         return ERR_INVALID_VALUE;
     }
-    std::lock_guard<std::recursive_mutex> autoLock(abilityContext->ownProcessContext->processLock);
+    std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
     return HandleLoadAbilityEventLocked(abilityContext, loadRequestInfo);
 }
 
@@ -242,7 +238,7 @@ int32_t SystemAbilityStateScheduler::HandleUnloadAbilityEvent(const UnloadReques
     if (!GetSystemAbilityContext(unloadRequestInfo.systemAbilityId, abilityContext)) {
         return ERR_INVALID_VALUE;
     }
-    std::lock_guard<std::recursive_mutex> autoLock(abilityContext->ownProcessContext->processLock);
+    std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
     return HandleUnloadAbilityEventLocked(abilityContext, unloadRequestInfo);
 }
 
@@ -257,7 +253,7 @@ int32_t SystemAbilityStateScheduler::HandleUnloadAbilityEventLocked(
             break;
         case SystemAbilityState::LOADED:
             if (unloadRequestInfo.unloadEvent.eventId == INTERFACE_CALL) {
-                result = ProcessDelayUnloadEvent(abilityContext->systemAbilityId);
+                result = ProcessDelayUnloadEventLocked(abilityContext->systemAbilityId);
             } else {
                 result = SendDelayUnloadEventLocked(abilityContext->systemAbilityId, abilityContext->delayUnloadTime);
             }
@@ -284,7 +280,7 @@ int32_t SystemAbilityStateScheduler::HandleCancelUnloadAbilityEvent(int32_t syst
     activeReason[KEY_VALUE] = "";
     activeReason[KEY_EXTRA_DATA_ID] = -1;
     int32_t result = ERR_INVALID_VALUE;
-    std::lock_guard<std::recursive_mutex> autoLock(abilityContext->ownProcessContext->processLock);
+    std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
     switch (abilityContext->state) {
         case SystemAbilityState::UNLOADABLE:
             result = ActiveSystemAbilityLocked(abilityContext, activeReason);
@@ -318,7 +314,7 @@ int32_t SystemAbilityStateScheduler::SendAbilityStateEvent(int32_t systemAbility
     if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
         return ERR_INVALID_VALUE;
     }
-    std::lock_guard<std::recursive_mutex> autoLock(abilityContext->ownProcessContext->processLock);
+    std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
     return stateEventHandler_->HandleAbilityEventLocked(abilityContext, event);
 }
 
@@ -330,7 +326,7 @@ int32_t SystemAbilityStateScheduler::SendProcessStateEvent(const ProcessInfo& pr
     if (!GetSystemProcessContext(processInfo.processName, processContext)) {
         return ERR_INVALID_VALUE;
     }
-    std::lock_guard<std::recursive_mutex> autoLock(processContext->processLock);
+    std::lock_guard<std::mutex> autoLock(processContext->processLock);
     return stateEventHandler_->HandleProcessEventLocked(processContext, processInfo, event);
 }
 
@@ -474,8 +470,8 @@ int32_t SystemAbilityStateScheduler::TryUnloadAllSystemAbility(
         HILOGE("[SA Scheduler] process context is nullptr");
         return ERR_INVALID_VALUE;
     }
-    std::lock_guard<std::recursive_mutex> autoLock(processContext->processLock);
-    if (CanUnloadAllSystemAbility(processContext)) {
+    std::lock_guard<std::mutex> autoLock(processContext->processLock);
+    if (CanUnloadAllSystemAbilityLocked(processContext)) {
         return UnloadAllSystemAbilityLocked(processContext);
     }
     return ERR_OK;
@@ -485,6 +481,12 @@ bool SystemAbilityStateScheduler::CanUnloadAllSystemAbility(
     const std::shared_ptr<SystemProcessContext>& processContext)
 {
     std::shared_lock<std::shared_mutex> sharedLock(processContext->stateCountLock);
+	return CanUnloadAllSystemAbilityLocked(processContext);
+}
+
+bool SystemAbilityStateScheduler::CanUnloadAllSystemAbilityLocked(
+    const std::shared_ptr<SystemProcessContext>& processContext)
+{
     uint32_t notLoadAbilityCount = processContext->abilityStateCountMap[SystemAbilityState::NOT_LOADED];
     uint32_t unloadableAbilityCount = processContext->abilityStateCountMap[SystemAbilityState::UNLOADABLE];
     HILOGI("[SA Scheduler][process: %{public}s] SA num: %{public}zu, notloaded: %{public}d, unloadable: %{public}d",
@@ -520,7 +522,7 @@ int32_t SystemAbilityStateScheduler::PostTryUnloadAllAbilityTask(
 int32_t SystemAbilityStateScheduler::PostUnloadTimeoutTask(const std::shared_ptr<SystemProcessContext>& processContext)
 {
     auto timeoutTask = [this, processContext] () {
-        std::lock_guard<std::recursive_mutex> autoLock(processContext->processLock);
+        std::lock_guard<std::mutex> autoLock(processContext->processLock);
         if (processContext->state == SystemProcessState::STOPPING) {
             HILOGW("[SA Scheduler][process: %{public}s] unload SA timeout",
                 Str16ToStr8(processContext->processName).c_str());
@@ -603,8 +605,8 @@ int32_t SystemAbilityStateScheduler::TryKillSystemProcess(
         HILOGE("[SA Scheduler] process context is nullptr");
         return ERR_INVALID_VALUE;
     }
-    std::lock_guard<std::recursive_mutex> autoLock(processContext->processLock);
-    if (CanKillSystemProcess(processContext)) {
+    std::lock_guard<std::mutex> autoLock(processContext->processLock);
+    if (CanKillSystemProcessLocked(processContext)) {
         return KillSystemProcessLocked(processContext);
     }
     return ERR_OK;
@@ -614,6 +616,12 @@ bool SystemAbilityStateScheduler::CanKillSystemProcess(
     const std::shared_ptr<SystemProcessContext>& processContext)
 {
     std::shared_lock<std::shared_mutex> sharedLock(processContext->stateCountLock);
+	return CanKillSystemProcessLocked(processContext);
+}
+
+bool SystemAbilityStateScheduler::CanKillSystemProcessLocked(
+    const std::shared_ptr<SystemProcessContext>& processContext)
+{
     uint32_t notLoadAbilityCount = processContext->abilityStateCountMap[SystemAbilityState::NOT_LOADED];
     HILOGI("[SA Scheduler][process: %{public}s] SA num: %{public}zu, not loaded num: %{public}d",
         Str16ToStr8(processContext->processName).c_str(), processContext->saList.size(), notLoadAbilityCount);
@@ -819,7 +827,7 @@ int32_t SystemAbilityStateScheduler::GetSystemProcessInfo(int32_t systemAbilityI
         return ERR_INVALID_VALUE;
     }
     std::shared_ptr<SystemProcessContext> processContext = abilityContext->ownProcessContext;
-    std::lock_guard<std::recursive_mutex> autoLock(processContext->processLock);
+    std::lock_guard<std::mutex> autoLock(processContext->processLock);
     systemProcessInfo = {Str16ToStr8(processContext->processName), processContext->pid,
                 processContext->uid};
     return ERR_OK;
@@ -834,7 +842,7 @@ int32_t SystemAbilityStateScheduler::GetRunningSystemProcess(std::list<SystemPro
         if (processContext == nullptr) {
             continue;
         }
-        std::lock_guard<std::recursive_mutex> autoLock(processContext->processLock);
+        std::lock_guard<std::mutex> autoLock(processContext->processLock);
         if (processContext->state == SystemProcessState::STARTED) {
             SystemProcessInfo systemProcessInfo = {Str16ToStr8(processContext->processName), processContext->pid,
                 processContext->uid};
@@ -870,7 +878,7 @@ void SystemAbilityStateScheduler::GetSystemAbilityInfo(int32_t said, std::string
         result.append("said is not exist");
         return;
     }
-    std::lock_guard<std::recursive_mutex> autoLock(abilityContext->ownProcessContext->processLock);
+    std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
     result += "said:                           ";
     result += std::to_string(said);
     result += "\n";
@@ -898,7 +906,7 @@ void SystemAbilityStateScheduler::GetProcessInfo(const std::string& processName,
         result.append("process is not exist");
         return;
     }
-    std::lock_guard<std::recursive_mutex> autoLock(processContext->processLock);
+    std::lock_guard<std::mutex> autoLock(processContext->processLock);
     result += "process_name:                   ";
     result += Str16ToStr8(processContext->processName);
     result += "\n";
@@ -989,7 +997,16 @@ int32_t SystemAbilityStateScheduler::ProcessDelayUnloadEvent(int32_t systemAbili
     if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
         return ERR_INVALID_VALUE;
     }
-    std::lock_guard<std::recursive_mutex> autoLock(abilityContext->ownProcessContext->processLock);
+    std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
+	return ProcessDelayUnloadEventLocked(systemAbilityId);
+}
+
+int32_t SystemAbilityStateScheduler::ProcessDelayUnloadEventLocked(int32_t systemAbilityId)
+{
+    std::shared_ptr<SystemAbilityContext> abilityContext;
+    if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
+        return ERR_INVALID_VALUE;
+    }
     if (abilityContext->state != SystemAbilityState::LOADED) {
         HILOGW("[SA Scheduler][SA: %{public}d] cannot process delay unload event", systemAbilityId);
         return ERR_OK;
@@ -1019,13 +1036,8 @@ int32_t SystemAbilityStateScheduler::ProcessDelayUnloadEvent(int32_t systemAbili
     }
 }
 
-void SystemAbilityStateScheduler::UnloadEventHandler::ProcessEvent(const OHOS::AppExecFwk::InnerEvent::Pointer& event)
+void SystemAbilityStateScheduler::UnloadEventHandler::ProcessEvent(uint32_t eventId)
 {
-    if (event == nullptr) {
-        HILOGE("[SA Scheduler] ProcessEvent event is nullptr!");
-        return;
-    }
-    auto eventId = event->GetInnerEventId();
     int32_t systemAbilityId = static_cast<int32_t>(eventId);
     auto stateScheduler = stateScheduler_.lock();
     int32_t result = ERR_OK;
@@ -1035,5 +1047,33 @@ void SystemAbilityStateScheduler::UnloadEventHandler::ProcessEvent(const OHOS::A
     if (result != ERR_OK) {
         HILOGE("[SA Scheduler][SA: %{public}d] process delay unload event failed", systemAbilityId);
     }
+}
+
+bool SystemAbilityStateScheduler::UnloadEventHandler::SendEvent(uint32_t eventId, int64_t extraDataId, uint64_t delayTime)
+{
+    if (handler_ == nullptr) {
+        HILOGE("SystemAbilityStateScheduler SendEvent handler is null!");
+        return false;
+    }
+    auto task = std::bind(&SystemAbilityStateScheduler::UnloadEventHandler::ProcessEvent, this, eventId);
+    return handler_->PostTask(task, std::to_string(eventId), delayTime);
+}
+
+void SystemAbilityStateScheduler::UnloadEventHandler::RemoveEvent(uint32_t eventId)
+{
+    if (handler_ == nullptr) {
+        HILOGE("SystemAbilityStateScheduler SendEvent handler is null!");
+        return;
+    }
+    handler_->RemoveTask(std::to_string(eventId));
+}
+
+bool SystemAbilityStateScheduler::UnloadEventHandler::HasInnerEvent(uint32_t eventId)
+{
+    if (handler_ == nullptr) {
+        HILOGE("SystemAbilityStateScheduler SendEvent handler is null!");
+        return false;
+    }
+    return handler_->HasInnerEvent(std::to_string(eventId));
 }
 }  // namespace OHOS

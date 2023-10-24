@@ -22,6 +22,7 @@
 
 #define private public
 #include "schedule/system_ability_state_scheduler.h"
+#include "event_handler.h"
 
 using namespace std;
 using namespace testing;
@@ -1900,16 +1901,15 @@ HWTEST_F(SystemAbilityStateSchedulerTest, ProcessEvent001, TestSize.Level3)
         std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
-    auto unloadRunner = AppExecFwk::EventRunner::Create("UnloadHandler");
     std::shared_ptr<SystemAbilityStateScheduler::UnloadEventHandler> unloadEventHandler =
-        std::make_shared<SystemAbilityStateScheduler::UnloadEventHandler>(unloadRunner, systemAbilityStateScheduler);
+        std::make_shared<SystemAbilityStateScheduler::UnloadEventHandler>(systemAbilityStateScheduler);
     AppExecFwk::InnerEvent *event = nullptr;
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
         }
     };
-    unloadEventHandler->ProcessEvent(AppExecFwk::InnerEvent::Pointer(event, destructor));
+    unloadEventHandler->ProcessEvent(0);
     EXPECT_EQ(event, nullptr);
 }
 
@@ -1922,16 +1922,15 @@ HWTEST_F(SystemAbilityStateSchedulerTest, ProcessEvent001, TestSize.Level3)
 HWTEST_F(SystemAbilityStateSchedulerTest, ProcessEvent002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler = nullptr;
-    auto unloadRunner = AppExecFwk::EventRunner::Create("UnloadHandler");
     std::shared_ptr<SystemAbilityStateScheduler::UnloadEventHandler> unloadEventHandler =
-        std::make_shared<SystemAbilityStateScheduler::UnloadEventHandler>(unloadRunner, systemAbilityStateScheduler);
+        std::make_shared<SystemAbilityStateScheduler::UnloadEventHandler>(systemAbilityStateScheduler);
     AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
         }
     };
-    unloadEventHandler->ProcessEvent(AppExecFwk::InnerEvent::Pointer(event, destructor));
+    unloadEventHandler->ProcessEvent(0);
     EXPECT_NE(event, nullptr);
 }
 
@@ -1947,16 +1946,15 @@ HWTEST_F(SystemAbilityStateSchedulerTest, ProcessEvent003, TestSize.Level3)
         std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
-    auto unloadRunner = AppExecFwk::EventRunner::Create("UnloadHandler");
     std::shared_ptr<SystemAbilityStateScheduler::UnloadEventHandler> unloadEventHandler =
-        std::make_shared<SystemAbilityStateScheduler::UnloadEventHandler>(unloadRunner, systemAbilityStateScheduler);
+        std::make_shared<SystemAbilityStateScheduler::UnloadEventHandler>(systemAbilityStateScheduler);
     AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
         }
     };
-    unloadEventHandler->ProcessEvent(AppExecFwk::InnerEvent::Pointer(event, destructor));
+    unloadEventHandler->ProcessEvent(0);
     EXPECT_NE(event, nullptr);
 }
 

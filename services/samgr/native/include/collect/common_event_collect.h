@@ -19,12 +19,13 @@
 #include <mutex>
 
 #include "common_event_subscriber.h"
-#include "event_handler.h"
+#include "ffrt_handler.h"
 #include "icollect_plugin.h"
 #include "iremote_object.h"
 #include "system_ability_status_change_stub.h"
 
 namespace OHOS {
+class CommonHandler;
 class CommonEventCollect : public ICollectPlugin {
 public:
     explicit CommonEventCollect(const sptr<IReport>& report);
@@ -41,6 +42,7 @@ public:
     void RemoveOnDemandReasonExtraData(int64_t extraDataId);
     bool GetOnDemandReasonExtraData(int64_t extraDataId, OnDemandReasonExtraData& extraData) override;
     bool CreateCommonEventSubscriber();
+    bool CreateCommonEventSubscriberLocked();
     bool SendEvent(uint32_t eventId);
 private:
     int64_t GenerateExtraDataIdLocked();
@@ -48,10 +50,10 @@ private:
     void AddSkillsEvent(EventFwk::MatchingSkills& skill);
     void CleanFailedEventLocked(const std::string& eventName);
     std::mutex commomEventLock_;
-    std::recursive_mutex commonEventSubscriberLock_;
+    std::mutex commonEventSubscriberLock_;
     sptr<IRemoteObject::DeathRecipient> commonEventDeath_;
     std::set<std::string> commonEventNames_;
-    std::shared_ptr<AppExecFwk::EventHandler> workHandler_;
+    std::shared_ptr<CommonHandler> workHandler_;
     std::shared_ptr<EventFwk::CommonEventSubscriber> commonEventSubscriber_ = nullptr;
     std::mutex commonEventStateLock_;
     std::set<std::string> commonEventState_;
@@ -68,16 +70,19 @@ public:
 private:
     sptr<CommonEventCollect> commonEventCollect_;
 };
-class CommonHandler : public AppExecFwk::EventHandler {
+class CommonHandler {
     public:
-        CommonHandler(const std::shared_ptr<AppExecFwk::EventRunner>& runner,
-            const sptr<CommonEventCollect>& collect)
-            :AppExecFwk::EventHandler(runner), commonCollect_(collect) {}
+        CommonHandler(const sptr<CommonEventCollect>& collect) :commonCollect_(collect) {
+            handler_ = std::make_shared<FFRTHandler>("CommonHandler");
+        }
         ~CommonHandler() = default;
-        void ProcessEvent(const OHOS::AppExecFwk::InnerEvent::Pointer& event) override;
+        void ProcessEvent(uint32_t eventId, int64_t extraDataId);
+        bool SendEvent(uint32_t eventId);
+        bool SendEvent(uint32_t eventId, int64_t extraDataId, uint64_t delayTime);
 
     private:
         wptr<CommonEventCollect> commonCollect_;
+        std::shared_ptr<FFRTHandler> handler_;
 };
 
 class CommonEventSubscriber : public EventFwk::CommonEventSubscriber {

@@ -2700,7 +2700,6 @@ HWTEST_F(SystemAbilityMgrTest, WatchDogInit001, TestSize.Level3)
 {
     DTEST_LOG << " WatchDogInit001 " << std::endl;
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    saMgr->WatchDogInit();
     EXPECT_NE(saMgr, nullptr);
 }
 
@@ -3328,8 +3327,7 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandReasonExtraData003, TestSize.Level3)
     sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
     saMgr->collectManager_ = collectManager;
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collectManager);
-    auto runner = AppExecFwk::EventRunner::Create("collect_test1");
-    commonEventCollect->workHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
     collectManager->collectPluginMap_.clear();
     collectManager->collectPluginMap_[COMMON_EVENT] = commonEventCollect;
     EventFwk::CommonEventData eventData;
