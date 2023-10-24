@@ -147,6 +147,8 @@ SystemAbilityManagerStub::SystemAbilityManagerStub()
         &SystemAbilityManagerStub::GetOnDemandPolicyInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::UPDATE_ONDEAMND_POLICY_TRANSACTION)] =
         &SystemAbilityManagerStub::UpdateOnDemandPolicyInner;
+    memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_ONDEMAND_SYSTEM_ABILITY_IDS_TRANSACTION)] =
+        &SystemAbilityManagerStub::GetOnDemandSystemAbilityIdsInner;
 }
 
 int32_t SystemAbilityManagerStub::OnRemoteRequest(uint32_t code,
@@ -913,6 +915,21 @@ int32_t SystemAbilityManagerStub::UpdateOnDemandPolicyInner(MessageParcel& data,
     int32_t result = UpdateOnDemandPolicy(systemAbilityId, typeEnum, abilityOnDemandEvents);
     if (!reply.WriteInt32(result)) {
         HILOGW("UpdateOnDemandPolicyInner write result failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ERR_OK;
+}
+
+int32_t SystemAbilityManagerStub::GetOnDemandSystemAbilityIdsInner(MessageParcel& data, MessageParcel& reply)
+{
+    std::vector<int32_t> systemAbilityIds;
+    int32_t result = GetOnDemandSystemAbilityIds(systemAbilityIds);
+    if (!reply.WriteInt32(result)) {
+        HILOGE("GetOnDemandSystemAbilityIdsInner write result failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.WriteInt32Vector(systemAbilityIds)) {
+        HILOGE("GetOnDemandSystemAbilityIdsInner write result failed.");
         return ERR_FLATTEN_OBJECT;
     }
     return ERR_OK;

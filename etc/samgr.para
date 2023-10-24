@@ -12,3 +12,5 @@
 # limitations under the License.
 
 persist.samgr.perf.ondemand = false
+
+persist.samgr.cache.sa = 0

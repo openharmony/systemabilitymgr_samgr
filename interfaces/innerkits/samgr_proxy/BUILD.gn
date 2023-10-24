@@ -60,7 +60,9 @@ ohos_shared_library("samgr_proxy") {
     external_deps = [
       "c_utils:utils",
       "hilog:libhilog",
+      "init:libbegetutil",
       "ipc:ipc_single",
+      "safwk:dynamic_cache",
     ]
 
     part_name = "samgr"

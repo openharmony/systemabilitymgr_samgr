@@ -40,7 +40,10 @@ const int32_t MAX_TIMEOUT = 4;
 const int32_t MIN_TIMEOUT = 0;
 const int32_t RETRY_TIME_OUT_NUMBER = 10;
 const int32_t SLEEP_INTERVAL_TIME = 100;
+const int32_t GET_SYSTEM_ABILITY_CODE = 1;
+const int32_t CHECK_SYSTEM_ABILITY_CODE = 2;
 const int32_t SLEEP_ONE_MILLI_SECOND_TIME = 1000;
+const string PARAM_KEY = "persist.samgr.cache.sa";
 }
 class SystemAbilityProxyCallback : public SystemAbilityLoadCallbackStub {
 public:
@@ -71,7 +74,42 @@ void SystemAbilityProxyCallback::OnLoadSystemAbilityFail(int32_t systemAbilityId
 
 sptr<IRemoteObject> SystemAbilityManagerProxy::GetSystemAbility(int32_t systemAbilityId)
 {
-    return GetSystemAbilityWrapper(systemAbilityId);
+    if (IsOnDemandSystemAbility(systemAbilityId)) {
+        return GetSystemAbilityWrapper(systemAbilityId);
+    }
+
+    bool ret = SetKey(PARAM_KEY);
+    if (!ret) {
+        return GetSystemAbilityWrapper(systemAbilityId);
+    }
+    return QueryResult(systemAbilityId, GET_SYSTEM_ABILITY_CODE);
+}
+
+bool SystemAbilityManagerProxy::IsOnDemandSystemAbility(int32_t systemAbilityId)
+{
+    if (onDemandSystemAbilityIdsSet_.empty()) {
+        std::vector<int32_t> onDemandSystemAbilityIds;
+        GetOnDemandSystemAbilityIds(onDemandSystemAbilityIds);
+        for (auto onDemandSystemAbilityId : onDemandSystemAbilityIds) {
+            onDemandSystemAbilityIdsSet_.insert(onDemandSystemAbilityId);
+        }
+    }
+
+    auto pos = onDemandSystemAbilityIdsSet_.find(systemAbilityId);
+    if (pos != onDemandSystemAbilityIdsSet_.end()) {
+        return true;
+    }
+
+    return false;
+}
+
+sptr<IRemoteObject> SystemAbilityManagerProxy::Recompute(int32_t systemAbilityId, int32_t code)
+{
+    ClearCache();
+    if (code == GET_SYSTEM_ABILITY_CODE) {
+        return GetSystemAbilityWrapper(systemAbilityId);
+    }
+    return CheckSystemAbilityTransaction(systemAbilityId);
 }
 
 sptr<IRemoteObject> SystemAbilityManagerProxy::GetSystemAbility(int32_t systemAbilityId,
@@ -136,11 +174,19 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t system
         return nullptr;
     }
 
-    auto proxy = LocalAbilitys::GetInstance().GetAbility(systemAbilityId);
-    if (proxy != nullptr) {
-        return proxy;
+    if (IsOnDemandSystemAbility(systemAbilityId)) {
+        return CheckSystemAbilityTransaction(systemAbilityId);
     }
 
+    bool ret = SetKey(PARAM_KEY);
+    if (!ret) {
+        return CheckSystemAbilityTransaction(systemAbilityId);
+    }
+    return QueryResult(systemAbilityId, CHECK_SYSTEM_ABILITY_CODE);
+}
+
+sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbilityTransaction(int32_t systemAbilityId)
+{
     MessageParcel data;
     if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
         return nullptr;
@@ -1098,6 +1144,47 @@ int32_t SystemAbilityManagerProxy::GetOnDemandPolicy(int32_t systemAbilityId, On
     }
     if (!OnDemandEventToParcel::ReadOnDemandEventsFromParcel(abilityOnDemandEvents, reply)) {
         HILOGE("GetOnDemandPolicy Read on demand events failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ERR_OK;
+}
+
+int32_t SystemAbilityManagerProxy::GetOnDemandSystemAbilityIds(std::vector<int32_t>& systemAbilityIds)
+{
+    HILOGD("GetOnDemandSystemAbilityIds called");
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGI("GetOnDemandSystemAbilityIds remote is nullptr");
+        return ERR_INVALID_OPERATION;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        HILOGE("GetOnDemandPolicy write interface token failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::GET_ONDEMAND_SYSTEM_ABILITY_IDS_TRANSACTION), data, reply, option);
+    if (err != ERR_NONE) {
+        HILOGE("GetOnDemandSystemAbilityIds SendRequest error: %{public}d!", err);
+        return err;
+    }
+    HILOGI("GetOnDemandSystemAbilityIds SendRequest succeed!");
+    int32_t result = 0;
+    if (!reply.ReadInt32(result)) {
+        HILOGE("GetOnDemandSystemAbilityIds Read result failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (result != ERR_OK) {
+        HILOGE("GetOnDemandSystemAbilityIds failed: %{public}d!", result);
+        return result;
+    }
+    if (!reply.ReadInt32Vector(&systemAbilityIds)) {
+        HILOGW("GetOnDemandSystemAbilityIds systemAbilityIds read reply failed");
+        systemAbilityIds.clear();
         return ERR_FLATTEN_OBJECT;
     }
     return ERR_OK;
