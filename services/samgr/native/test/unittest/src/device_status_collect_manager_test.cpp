@@ -372,9 +372,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, CheckExtraMessages004, TestSize.Level3)
     DTEST_LOG << " CheckExtraMessages004 BEGIN" << std::endl;
     sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
-    auto runner = AppExecFwk::EventRunner::Create("collect_test1");
-    commonEventCollect->workHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
-
+    std::shared_ptr<CommonHandler> commonHandler = std::make_shared<CommonHandler>(commonEventCollect);
     std::map<std::string, std::string> want;
     want["1"] = "1";
     OnDemandReasonExtraData extraData = OnDemandReasonExtraData(1, "", want);
@@ -401,8 +399,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, CheckExtraMessages005, TestSize.Level3)
 {
     DTEST_LOG << " CheckExtraMessages005 BEGIN" << std::endl;
     sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
-    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
-    auto runner = AppExecFwk::EventRunner::Create("collect_test1");
+    std::shared_ptr<CommonHandler> commonHandler = std::make_shared<CommonHandler>(commonEventCollect);
     commonEventCollect->workHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
 
     std::map<std::string, std::string> want;
