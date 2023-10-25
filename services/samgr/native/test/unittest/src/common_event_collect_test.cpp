@@ -327,7 +327,7 @@ HWTEST_F(CommonEventCollectTest, SaveOnDemandReasonExtraData002, TestSize.Level3
     DTEST_LOG << "SaveOnDemandReasonExtraData002 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
-    commonEventCollect->workHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
+    commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
     SaProfile saProfile;
     std::map<std::string, std::string> extraMessages;
     extraMessages["12"] = "56";
@@ -392,7 +392,8 @@ HWTEST_F(CommonEventCollectTest, GetOnDemandReasonExtraData001, TestSize.Level3)
 {
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
-    std::shared_ptr<CommonHandler> commonHandler = std::make_shared<CommonHandler>(commonEventCollect);
+    auto runner = AppExecFwk::EventRunner::Create("collect_test1");
+    commonEventCollect->workHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     commonEventCollect->extraDatas_.clear();
     OnDemandReasonExtraData onDemandReasonExtraData;
     bool ret = commonEventCollect->GetOnDemandReasonExtraData(1, onDemandReasonExtraData);
