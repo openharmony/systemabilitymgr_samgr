@@ -728,6 +728,72 @@ HWTEST_F(ParseUtilTest, GetOnDemandConditionsFromJson004, TestSize.Level3)
     DTEST_LOG << " GetOnDemandConditionsFromJson004 END" << std::endl;
 }
 
+
+/**
+ * @tc.name: GetOnDemandExtraMessagesFromJson001
+ * @tc.desc: parse OnDemandExtraMessages, ExtraMessages is empty.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseUtilTest, GetOnDemandExtraMessagesFromJson001, TestSize.Level3)
+{
+    DTEST_LOG << " GetOnDemandExtraMessagesFromJson001 BEGIN" << std::endl;
+    nlohmann::json obj;
+    std::string key;
+    std::map<std::string, std::string> out;
+    //SaProfile saProfile;
+    parser_->GetOnDemandExtraMessagesFromJson(obj, key, out);
+    EXPECT_TRUE(out.empty());
+    DTEST_LOG << " GetOnDemandExtraMessagesFromJson001 END" << std::endl;
+}
+
+/**
+ * @tc.name: GetOnDemandExtraMessagesFromJson002
+ * @tc.desc: parse OnDemandExtraMessages, five ExtraMessages.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseUtilTest, GetOnDemandExtraMessagesFromJson002, TestSize.Level3)
+{
+    DTEST_LOG << " GetOnDemandExtraMessagesFromJson002 BEGIN" << std::endl;
+    nlohmann::json obj;
+    nlohmann::json extraMessages;
+    extraMessages["eventId"] = SA_TAG_DEVICE_ON_LINE;
+    extraMessages["name"] = "mockName";
+    extraMessages["value"] = "mockValue";
+    extraMessages["123"] = "123";
+    extraMessages["abc"] = "";
+    obj["extra-messages"] = extraMessages;
+
+    std::string key = "extra-messages";
+    std::map<std::string, std::string> out;
+    //SaProfile saProfile;
+    parser_->GetOnDemandExtraMessagesFromJson(obj, key, out);
+    EXPECT_EQ(out.size(), 5);
+    DTEST_LOG << " GetOnDemandExtraMessagesFromJson002 END" << std::endl;
+}
+
+/**
+ * @tc.name: GetOnDemandExtraMessagesFromJson003
+ * @tc.desc: parse OnDemandExtraMessages, invalid ExtraMessage.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseUtilTest, GetOnDemandExtraMessagesFromJson003, TestSize.Level3)
+{
+    DTEST_LOG << " GetOnDemandExtraMessagesFromJson003 BEGIN" << std::endl;
+    nlohmann::json obj;
+    nlohmann::json extraMessages;
+    extraMessages["123"] = 123;
+    extraMessages["abc"] = 456.7;
+    obj["extra-messages"] = extraMessages;
+
+    std::string key = "extra-messages";
+    std::map<std::string, std::string> out;
+    //SaProfile saProfile;
+    parser_->GetOnDemandExtraMessagesFromJson(obj, key, out);
+    EXPECT_EQ(out.size(), 0);
+    DTEST_LOG << " GetOnDemandExtraMessagesFromJson003 END" << std::endl;
+}
+
+
 /**
  * @tc.name: ParseJsonFile001
  * @tc.desc: parse json file using big json file

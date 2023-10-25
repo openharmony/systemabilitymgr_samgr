@@ -115,7 +115,8 @@ void DeviceStatusCollectManager::GetSaControlListByEvent(const OnDemandEvent& ev
         // start on demand
         for (auto iterStart = profile.startOnDemand.onDemandEvents.begin();
             iterStart != profile.startOnDemand.onDemandEvents.end(); iterStart++) {
-            if (IsSameEvent(event, *iterStart) && CheckConditions(*iterStart)) {
+            if (IsSameEvent(event, *iterStart) && CheckConditions(*iterStart) &&
+                CheckExtraMessages(event, *iterStart)) {
                 // maybe the process is being killed, let samgr make decisions.
                 SaControlInfo control = { START_ON_DEMAND, profile.saId, iterStart->enableOnce,
                     iterStart->loadPriority };
@@ -126,7 +127,8 @@ void DeviceStatusCollectManager::GetSaControlListByEvent(const OnDemandEvent& ev
         // stop on demand
         for (auto iterStop = profile.stopOnDemand.onDemandEvents.begin();
             iterStop != profile.stopOnDemand.onDemandEvents.end(); iterStop++) {
-            if (IsSameEvent(event, *iterStop) && CheckConditions(*iterStop)) {
+            if (IsSameEvent(event, *iterStop) && CheckConditions(*iterStop) &&
+                CheckExtraMessages(event, *iterStop)) {
                 // maybe the process is starting, let samgr make decisions.
                 SaControlInfo control = { STOP_ON_DEMAND, profile.saId, iterStop->enableOnce,
                     iterStop->loadPriority };
@@ -188,6 +190,23 @@ bool DeviceStatusCollectManager::CheckConditions(const OnDemandEvent& onDemandEv
         }
     }
     return true;
+}
+
+bool DeviceStatusCollectManager::CheckExtraMessages(const OnDemandEvent& ev1, const OnDemandEvent& ev2)
+{
+    HILOGI("DeviceStatusCollectManager CheckExtraMessages begin");
+    if (collectPluginMap_.count(ev1.eventId) == 0) {
+        HILOGE("not support CheckExtraMessages");
+        return false;
+    }
+    if (collectPluginMap_[ev1.eventId] == nullptr) {
+        HILOGE("CommonEventCollect is nullptr");
+        return false;
+    }
+    if (collectPluginMap_[ev1.eventId]->CheckExtraMessage(ev1.extraDataId, ev2)) {
+        return true;
+    }
+    return false;
 }
 
 void DeviceStatusCollectManager::UnInit()

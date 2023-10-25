@@ -19,6 +19,7 @@
 #include "common_event_manager.h"
 #include "common_event_support.h"
 #include "matching_skills.h"
+#include "parse_util.h"
 #include "want.h"
 #include "sam_log.h"
 #include "sa_profiles.h"
@@ -63,33 +64,58 @@ int32_t CommonEventCollect::OnStop()
     return ERR_OK;
 }
 
+void CommonEventCollect::InitCommonEventState(const OnDemandEvent& event)
+{
+    if (event.eventId == COMMON_EVENT) {
+        std::lock_guard<std::mutex> autoLock(commomEventLock_);
+        commonEventNames_.insert(event.name);
+        for (auto [key, value] : event.extraMessages) {
+            extraDataKey_[event.name].insert(key);
+        }
+    }
+    for (auto& condition : event.conditions) {
+        if (condition.eventId != COMMON_EVENT) {
+            continue;
+        }
+        {
+            std::lock_guard<std::mutex> autoLock(commomEventLock_);
+            commonEventNames_.insert(condition.name);
+        }
+        if (condition.extraMessages.size() > 0) {
+            std::lock_guard<std::mutex> autoLock(commonEventStateLock_);
+            for (auto [key, value] : condition.extraMessages) {
+                commonEventConditionExtraData_[condition.name][key] = "";
+            }
+        }
+    }
+}
+
 void CommonEventCollect::Init(const std::list<SaProfile>& onDemandSaProfiles)
 {
     {
         std::lock_guard<std::mutex> autoLock(commonEventStateLock_);
-        commonEventState_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON);
-        commonEventState_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_DISCHARGING);
-        commonEventState_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_POWER_DISCONNECTED);
+        commonEventWhitelist.insert(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON);
+        commonEventWhitelist.insert(EventFwk::CommonEventSupport::COMMON_EVENT_DISCHARGING);
+        commonEventWhitelist.insert(EventFwk::CommonEventSupport::COMMON_EVENT_POWER_DISCONNECTED);
     }
-    std::lock_guard<std::mutex> autoLock(commomEventLock_);
-    commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON);
-    commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
-    commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_CHARGING);
-    commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_DISCHARGING);
-    commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_POWER_CONNECTED);
-    commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_POWER_DISCONNECTED);
+    {
+        std::lock_guard<std::mutex> autoLock(commomEventLock_);
+        commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON);
+        commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
+        commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_CHARGING);
+        commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_DISCHARGING);
+        commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_POWER_CONNECTED);
+        commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_POWER_DISCONNECTED);
+    }
+    
     for (auto& profile : onDemandSaProfiles) {
         for (auto iterStart = profile.startOnDemand.onDemandEvents.begin();
             iterStart != profile.startOnDemand.onDemandEvents.end(); iterStart++) {
-            if (iterStart->eventId == COMMON_EVENT) {
-                commonEventNames_.insert(iterStart->name);
-            }
+            InitCommonEventState(*iterStart);
         }
         for (auto iterStop = profile.stopOnDemand.onDemandEvents.begin();
             iterStop != profile.stopOnDemand.onDemandEvents.end(); iterStop++) {
-            if (iterStop->eventId == COMMON_EVENT) {
-                commonEventNames_.insert(iterStop->name);
-            }
+            InitCommonEventState(*iterStop);
         }
     }
 }
@@ -160,34 +186,67 @@ void CommonEventListener::OnRemoveSystemAbility(int32_t systemAblityId, const st
 {
     HILOGI("CommonEventListener OnRemoveSystemAblity systemAblityId:%{public}d", systemAblityId);
 }
+
 void CommonEventCollect::SaveAction(const std::string& action)
 {
     std::lock_guard<std::mutex> autoLock(commonEventStateLock_);
     if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON) {
-        commonEventState_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON);
-        commonEventState_.erase(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
+        commonEventWhitelist.insert(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON);
+        commonEventWhitelist.erase(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF) {
-        commonEventState_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
-        commonEventState_.erase(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON);
+        commonEventWhitelist.insert(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
+        commonEventWhitelist.erase(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON);
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_CHARGING) {
-        commonEventState_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_CHARGING);
-        commonEventState_.erase(EventFwk::CommonEventSupport::COMMON_EVENT_DISCHARGING);
+        commonEventWhitelist.insert(EventFwk::CommonEventSupport::COMMON_EVENT_CHARGING);
+        commonEventWhitelist.erase(EventFwk::CommonEventSupport::COMMON_EVENT_DISCHARGING);
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_DISCHARGING) {
-        commonEventState_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_DISCHARGING);
-        commonEventState_.erase(EventFwk::CommonEventSupport::COMMON_EVENT_CHARGING);
+        commonEventWhitelist.insert(EventFwk::CommonEventSupport::COMMON_EVENT_DISCHARGING);
+        commonEventWhitelist.erase(EventFwk::CommonEventSupport::COMMON_EVENT_CHARGING);
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_POWER_CONNECTED) {
-        commonEventState_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_POWER_CONNECTED);
-        commonEventState_.erase(EventFwk::CommonEventSupport::COMMON_EVENT_POWER_DISCONNECTED);
+        commonEventWhitelist.insert(EventFwk::CommonEventSupport::COMMON_EVENT_POWER_CONNECTED);
+        commonEventWhitelist.erase(EventFwk::CommonEventSupport::COMMON_EVENT_POWER_DISCONNECTED);
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_POWER_DISCONNECTED) {
-        commonEventState_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_POWER_DISCONNECTED);
-        commonEventState_.erase(EventFwk::CommonEventSupport::COMMON_EVENT_POWER_CONNECTED);
+        commonEventWhitelist.insert(EventFwk::CommonEventSupport::COMMON_EVENT_POWER_DISCONNECTED);
+        commonEventWhitelist.erase(EventFwk::CommonEventSupport::COMMON_EVENT_POWER_CONNECTED);
     }
 }
 
 bool CommonEventCollect::CheckCondition(const OnDemandCondition& condition)
 {
     std::lock_guard<std::mutex> autoLock(commonEventStateLock_);
-    return commonEventState_.count(condition.name) > 0;
+    std::map<std::string, std::string> stateMap = commonEventConditionExtraData_[condition.name];
+    for (auto [key, profileValue] : condition.extraMessages) {
+        if (!ParseUtil::CheckLogicRelationship(stateMap[key], profileValue)) {
+            return false;
+        }
+    }
+    if (commonEventConditionValue_[condition.name] != condition.value && condition.value != "") {
+        return false;
+    }
+    if (condition.name == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON ||
+        condition.name == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF ||
+        condition.name == EventFwk::CommonEventSupport::COMMON_EVENT_CHARGING ||
+        condition.name == EventFwk::CommonEventSupport::COMMON_EVENT_DISCHARGING ||
+        condition.name == EventFwk::CommonEventSupport::COMMON_EVENT_POWER_CONNECTED ||
+        condition.name == EventFwk::CommonEventSupport::COMMON_EVENT_POWER_DISCONNECTED) {
+        return commonEventWhitelist.count(condition.name) > 0;
+    }
+    return true;
+}
+
+bool CommonEventCollect::CheckExtraMessage(int64_t extraDataId, const OnDemandEvent& profileEvent)
+{
+    OnDemandReasonExtraData extraData;
+    if (!GetOnDemandReasonExtraData(extraDataId, extraData)) {
+        return false;
+    }
+    std::map<std::string, std::string> eventExtraMessages = extraData.GetWant();
+    for (auto [key, profileValue] : profileEvent.extraMessages) {
+        if (!ParseUtil::CheckLogicRelationship(eventExtraMessages[key], profileValue)) {
+            return false;
+        }
+    }
+    return true;
 }
 
 int64_t CommonEventCollect::GenerateExtraDataIdLocked()
@@ -199,22 +258,54 @@ int64_t CommonEventCollect::GenerateExtraDataIdLocked()
     return extraDataId_;
 }
 
+std::string CommonEventCollect::GetParamFromWant(const std::string& key, const AAFwk::Want& want)
+{
+    std::string valueString;
+    int32_t valueInt = want.GetIntParam(key, -1);
+    if (valueInt == -1) {
+        valueString = want.GetStringParam(key);
+    } else {
+        valueString = std::to_string(valueInt);
+    }
+    if (want.GetBoolParam(key, false)) {
+        valueString = "true";
+    } else if (!want.GetBoolParam(key, true)) {
+        valueString = "false";
+    }
+    HILOGD("key:%{public}s || value:%{public}s", key.c_str(), valueString.c_str());
+    return valueString;
+}
+
 int64_t CommonEventCollect::SaveOnDemandReasonExtraData(const EventFwk::CommonEventData& data)
 {
     std::lock_guard<std::mutex> autoLock(extraDataLock_);
     HILOGD("CommonEventCollect extraData code: %{public}d, data: %{public}s", data.GetCode(),
         data.GetData().c_str());
-    int32_t uid = data.GetWant().GetIntParam(UID, -1);
-    int32_t netType = data.GetWant().GetIntParam(NET_TYPE, -1);
-    std::map<std::string, std::string> want;
-    want[UID] = std::to_string(uid);
-    want[NET_TYPE] = std::to_string(netType);
-    OnDemandReasonExtraData extraData(data.GetCode(), data.GetData(), want);
+    AAFwk::Want want = data.GetWant();
+    int32_t uid = want.GetIntParam(UID, -1);
+    int32_t netType = want.GetIntParam(NET_TYPE, -1);
+    std::map<std::string, std::string> wantMap;
+    wantMap[UID] = std::to_string(uid);
+    wantMap[NET_TYPE] = std::to_string(netType);
+    for (auto key : extraDataKey_[want.GetAction()]) {
+        wantMap[key] = GetParamFromWant(key, want);
+    }
+    OnDemandReasonExtraData extraData(data.GetCode(), data.GetData(), wantMap);
     int64_t extraDataId = GenerateExtraDataIdLocked();
     extraDatas_[extraDataId] = extraData;
     HILOGD("CommonEventCollect save extraData %{public}d", static_cast<int32_t>(extraDataId));
     workHandler_->SendEvent(REMOVE_EXTRA_DATA_EVENT, extraDataId, REMOVE_EXTRA_DATA_DELAY_TIME);
     return extraDataId;
+}
+
+void CommonEventCollect::SaveOnDemandConditionExtraData(const EventFwk::CommonEventData& data)
+{
+    std::lock_guard<std::mutex> autoLock(commonEventStateLock_);
+    AAFwk::Want want = data.GetWant();
+    commonEventConditionValue_[want.GetAction()] = std::to_string(data.GetCode());
+    for (auto& [key, value] : commonEventConditionExtraData_[want.GetAction()]) {
+        value = GetParamFromWant(key, want);
+    }
 }
 
 void CommonEventCollect::RemoveOnDemandReasonExtraData(int64_t extraDataId)
@@ -338,6 +429,7 @@ void CommonEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData& data
     }
     collect->SaveAction(action);
     int64_t extraDataId = collect->SaveOnDemandReasonExtraData(data);
+    collect->SaveOnDemandConditionExtraData(data);
     OnDemandEvent event = {COMMON_EVENT, action, std::to_string(code), extraDataId};
     collect->ReportEvent(event);
 }

@@ -44,6 +44,10 @@ public:
     bool CreateCommonEventSubscriber();
     bool CreateCommonEventSubscriberLocked();
     bool SendEvent(uint32_t eventId);
+    std::string GetParamFromWant(const std::string& key, const AAFwk::Want& data);
+    void InitCommonEventState(const OnDemandEvent& evnet);
+    bool CheckExtraMessage(int64_t extraDataId, const OnDemandEvent& profileEvent) override;
+    void SaveOnDemandConditionExtraData(const EventFwk::CommonEventData& data);
 private:
     int64_t GenerateExtraDataIdLocked();
     bool AddCommonEventName(const std::string& eventName);
@@ -52,14 +56,23 @@ private:
     std::mutex commomEventLock_;
     std::mutex commonEventSubscriberLock_;
     sptr<IRemoteObject::DeathRecipient> commonEventDeath_;
+    //common event collection that require plugins to subscribe to
     std::set<std::string> commonEventNames_;
     std::shared_ptr<CommonHandler> workHandler_;
     std::shared_ptr<EventFwk::CommonEventSubscriber> commonEventSubscriber_ = nullptr;
     std::mutex commonEventStateLock_;
-    std::set<std::string> commonEventState_;
+    //Save device screen and charging status
+    std::set<std::string> commonEventWhitelist;
+    //Save the extra data carried by the common event as ondemand condition
+    std::map<std::string, std::map<std::string, std::string>> commonEventConditionExtraData_;
+    //Save the value carried by the common event as ondemand condition
+    std::map<std::string, std::string> commonEventConditionValue_;
     std::mutex extraDataLock_;
     int64_t extraDataId_ = 0;
+    //Save the extra data carried by the common event as ondemand event
     std::map<int64_t, OnDemandReasonExtraData> extraDatas_;
+    //Save the key of extra data that SA care about in the common event as ondemand event
+    std::map<std::string, std::set<std::string>> extraDataKey_;
 };
 
 class CommonEventListener : public SystemAbilityStatusChangeStub {
