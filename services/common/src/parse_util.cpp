@@ -668,7 +668,7 @@ bool ParseUtil::CheckLogicRelationship(const std::string& state, const std::stri
             logicRelationship = LESS;
         }
     }
-    int32_t profileInt, stateInt;
+    int32_t stateInt, profileInt;
     if (!StrToInt(profile.substr(valueStartPosition, profile.length() - 1), profileInt)) {
         return false;
     }
@@ -676,15 +676,15 @@ bool ParseUtil::CheckLogicRelationship(const std::string& state, const std::stri
         return false;
     }
     if (logicRelationship == EQ) {
-        return profileInt == stateInt;
+        return stateInt == profileInt;
     } else if (logicRelationship == GREATER_EQ) {
-        return profileInt >= stateInt;
+        return stateInt >= profileInt;
     } else if (logicRelationship == GREATER) {
-        return profileInt > stateInt;
+        return stateInt > profileInt;
     } else if (logicRelationship == LESS_EQ) {
-        return profileInt <= stateInt;
+        return stateInt <= profileInt;
     } else if (logicRelationship == LESS) {
-        return profileInt < stateInt;
+        return stateInt < profileInt;
     }
     return false;
 }

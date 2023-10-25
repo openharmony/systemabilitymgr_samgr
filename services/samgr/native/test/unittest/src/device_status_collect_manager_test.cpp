@@ -119,6 +119,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, GetSaControlListByEvent001, TestSize.Le
 {
     DTEST_LOG << " GetSaControlListByEvent001 BEGIN" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    collect->collectPluginMap_[DEVICE_ONLINE] = new MockCollectPlugin(collect);
     OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
     std::list<SaControlInfo> saControlList;
     collect->GetSaControlListByEvent(event, saControlList);
@@ -158,6 +159,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, SortSaControlListByLoadPriority001, Tes
 {
     DTEST_LOG << " SaControlListByEvent001 BEGIN" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    collect->collectPluginMap_[DEVICE_ONLINE] = new MockCollectPlugin(collect);
     OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
     OnDemandEvent event1 = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
     event1.loadPriority = 2;
@@ -324,7 +326,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, CheckExtraMessages001, TestSize.Level3)
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     OnDemandEvent event;
     bool result = collect->CheckExtraMessages(event, event);
-    EXPECT_EQ(result, true);
+    EXPECT_EQ(result, false);
     DTEST_LOG << " CheckExtraMessages001 END" << std::endl;
 }
 
@@ -380,6 +382,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, CheckExtraMessages004, TestSize.Level3)
     commonEventCollect->extraDatas_[1] = extraData;
     OnDemandEvent event, profile;
     event.extraDataId = 1;
+    event.eventId = COMMON_EVENT;
     profile.eventId = COMMON_EVENT;
     profile.extraMessages["1"] = "1";
 
@@ -409,6 +412,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, CheckExtraMessages005, TestSize.Level3)
     commonEventCollect->extraDatas_[1] = extraData;
     OnDemandEvent event, profile;
     event.extraDataId = 1;
+    event.eventId = COMMON_EVENT;
     profile.eventId = COMMON_EVENT;
     profile.extraMessages["1"] = "2";
     

@@ -740,7 +740,6 @@ HWTEST_F(ParseUtilTest, GetOnDemandExtraMessagesFromJson001, TestSize.Level3)
     nlohmann::json obj;
     std::string key;
     std::map<std::string, std::string> out;
-    //SaProfile saProfile;
     parser_->GetOnDemandExtraMessagesFromJson(obj, key, out);
     EXPECT_TRUE(out.empty());
     DTEST_LOG << " GetOnDemandExtraMessagesFromJson001 END" << std::endl;
@@ -762,10 +761,8 @@ HWTEST_F(ParseUtilTest, GetOnDemandExtraMessagesFromJson002, TestSize.Level3)
     extraMessages["123"] = "123";
     extraMessages["abc"] = "";
     obj["extra-messages"] = extraMessages;
-
     std::string key = "extra-messages";
     std::map<std::string, std::string> out;
-    //SaProfile saProfile;
     parser_->GetOnDemandExtraMessagesFromJson(obj, key, out);
     EXPECT_EQ(out.size(), 5);
     DTEST_LOG << " GetOnDemandExtraMessagesFromJson002 END" << std::endl;
@@ -784,10 +781,8 @@ HWTEST_F(ParseUtilTest, GetOnDemandExtraMessagesFromJson003, TestSize.Level3)
     extraMessages["123"] = 123;
     extraMessages["abc"] = 456.7;
     obj["extra-messages"] = extraMessages;
-
     std::string key = "extra-messages";
     std::map<std::string, std::string> out;
-    //SaProfile saProfile;
     parser_->GetOnDemandExtraMessagesFromJson(obj, key, out);
     EXPECT_EQ(out.size(), 0);
     DTEST_LOG << " GetOnDemandExtraMessagesFromJson003 END" << std::endl;
@@ -1190,6 +1185,38 @@ HWTEST_F(ParseUtilTest, SetUpdateList001, TestSize.Level3)
     updateVec.emplace_back(test);
     parser_->SetUpdateList(updateVec);
     EXPECT_FALSE(parser_->updateVec_.empty());
+}
+
+/**
+ * @tc.name: CheckLogicRelationship001
+ * @tc.desc: test CheckLogicRelationship
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseUtilTest, CheckLogicRelationship001, TestSize.Level3)
+{
+    bool ret;
+    ret = parser_->CheckLogicRelationship("1", "");
+    EXPECT_EQ(ret, true);
+    ret = parser_->CheckLogicRelationship("1", "1");
+    EXPECT_EQ(ret, true);
+    ret = parser_->CheckLogicRelationship("", "1");
+    EXPECT_EQ(ret, false);
+    ret = parser_->CheckLogicRelationship("1", ">1");
+    EXPECT_EQ(ret, false);
+    ret = parser_->CheckLogicRelationship("2", ">1");
+    EXPECT_EQ(ret, true);
+    ret = parser_->CheckLogicRelationship("1", ">=1");
+    EXPECT_EQ(ret, true);
+    ret = parser_->CheckLogicRelationship("1", "<1");
+    EXPECT_EQ(ret, false);
+    ret = parser_->CheckLogicRelationship("0", "<1");
+    EXPECT_EQ(ret, true);
+    ret = parser_->CheckLogicRelationship("1", "<=1");
+    EXPECT_EQ(ret, true);
+    ret = parser_->CheckLogicRelationship("1", ">=abc");
+    EXPECT_EQ(ret, false);
+    ret = parser_->CheckLogicRelationship("abc", ">=1");
+    EXPECT_EQ(ret, false);
 }
 } // namespace SAMGR
 } // namespace OHOS
