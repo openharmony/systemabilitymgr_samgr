@@ -236,6 +236,7 @@ private:
 private:
     static inline BrokerDelegator<SystemAbilityManagerProxy> delegator_;
     std::set<int32_t> onDemandSystemAbilityIdsSet_;
+    std::mutex onDemandSaLock_;
 };
 } // namespace OHOS
 
