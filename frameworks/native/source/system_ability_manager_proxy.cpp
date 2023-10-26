@@ -87,20 +87,30 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::GetSystemAbility(int32_t systemAb
 
 bool SystemAbilityManagerProxy::IsOnDemandSystemAbility(int32_t systemAbilityId)
 {
-    if (onDemandSystemAbilityIdsSet_.empty()) {
-        std::vector<int32_t> onDemandSystemAbilityIds;
-        GetOnDemandSystemAbilityIds(onDemandSystemAbilityIds);
+    {
+        std::lock_guard<std::mutex> autoLock(onDemandSaLock_);
+        if (!onDemandSystemAbilityIdsSet_.empty()) {
+            auto pos = onDemandSystemAbilityIdsSet_.find(systemAbilityId);
+            if (pos != onDemandSystemAbilityIdsSet_.end()) {
+                return true;
+            }
+            return false;
+        }
+    }
+    std::vector<int32_t> onDemandSystemAbilityIds;
+    GetOnDemandSystemAbilityIds(onDemandSystemAbilityIds);
+    {
+        std::lock_guard<std::mutex> autoLock(onDemandSaLock_);
         for (auto onDemandSystemAbilityId : onDemandSystemAbilityIds) {
             onDemandSystemAbilityIdsSet_.insert(onDemandSystemAbilityId);
         }
-    }
 
-    auto pos = onDemandSystemAbilityIdsSet_.find(systemAbilityId);
-    if (pos != onDemandSystemAbilityIdsSet_.end()) {
-        return true;
+        auto pos = onDemandSystemAbilityIdsSet_.find(systemAbilityId);
+        if (pos != onDemandSystemAbilityIdsSet_.end()) {
+            return true;
+        }
+        return false;
     }
-
-    return false;
 }
 
 sptr<IRemoteObject> SystemAbilityManagerProxy::Recompute(int32_t systemAbilityId, int32_t code)
