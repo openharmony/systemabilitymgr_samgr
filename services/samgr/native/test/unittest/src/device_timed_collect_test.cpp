@@ -221,6 +221,8 @@ HWTEST_F(DeviceTimedCollectTest, PostDelayTask001, TestSize.Level3)
 HWTEST_F(DeviceTimedCollectTest, PostDelayTask002, TestSize.Level3)
 {
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    std::list<SaProfile> saProfiles;
+    collect->Init(saProfiles);
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(collect);
     deviceTimedCollect->PostDelayTask(deviceTimedCollect->nonPersitenceLoopTasks_[0], 0);

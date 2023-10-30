@@ -56,22 +56,16 @@ private:
     std::mutex commomEventLock_;
     std::mutex commonEventSubscriberLock_;
     sptr<IRemoteObject::DeathRecipient> commonEventDeath_;
-    //common event collection that require plugins to subscribe to
     std::set<std::string> commonEventNames_;
     std::shared_ptr<CommonHandler> workHandler_;
     std::shared_ptr<EventFwk::CommonEventSubscriber> commonEventSubscriber_ = nullptr;
     std::mutex commonEventStateLock_;
-    //Save device screen and charging status
     std::set<std::string> commonEventWhitelist;
-    //Save the extra data carried by the common event as ondemand condition
     std::map<std::string, std::map<std::string, std::string>> commonEventConditionExtraData_;
-    //Save the value carried by the common event as ondemand condition
     std::map<std::string, std::string> commonEventConditionValue_;
     std::mutex extraDataLock_;
     int64_t extraDataId_ = 0;
-    //Save the extra data carried by the common event as ondemand event
     std::map<int64_t, OnDemandReasonExtraData> extraDatas_;
-    //Save the key of extra data that SA care about in the common event as ondemand event
     std::map<std::string, std::set<std::string>> extraDataKey_;
 };
 
