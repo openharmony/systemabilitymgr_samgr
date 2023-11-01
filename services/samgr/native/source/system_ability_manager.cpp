@@ -1045,11 +1045,13 @@ int32_t SystemAbilityManager::AddSystemAbility(int32_t systemAbilityId, const sp
 void SystemAbilityManager::SystemAbilityInvalidateCache(int32_t systemAbilityId)
 {
     auto pos = onDemandSaIdsSet_.find(systemAbilityId);
-    if (pos == onDemandSaIdsSet_.end()) {
-        if (!InvalidateCache()) {
-            HILOGE("InvalidateCache error!");
-        }
+    if (pos != onDemandSaIdsSet_.end()) {
+        return;
     }
+    auto invalidateCacheTask = [this] () {
+        InvalidateCache();
+    };
+    ffrt::submit(invalidateCacheTask);
 }
 
 int32_t SystemAbilityManager::AddSystemProcess(const u16string& procName,
