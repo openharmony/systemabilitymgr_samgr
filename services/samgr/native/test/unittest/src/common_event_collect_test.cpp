@@ -117,7 +117,7 @@ HWTEST_F(CommonEventCollectTest, OnStop002, TestSize.Level3)
  */
 HWTEST_F(CommonEventCollectTest, init001, TestSize.Level3)
 {
-    DTEST_LOG << " init002 BEGIN" << std::endl;
+    DTEST_LOG << " init001 BEGIN" << std::endl;
     shared_ptr<CommonEventCollect> commonEventCollect = make_shared<CommonEventCollect>(nullptr);
     SaProfile saProfile;
     saProfile.startOnDemand.onDemandEvents.push_back({COMMON_EVENT, "", ""});
@@ -329,8 +329,8 @@ HWTEST_F(CommonEventCollectTest, SaveOnDemandReasonExtraData002, TestSize.Level3
     extraMessages["abc"] = "abc";
     extraMessages["xxx"] = "true";
     extraMessages["yyy"] = "false";
-    std::vector<OnDemandCondition> condition;
-    OnDemandEvent event = {COMMON_EVENT, "", "", -1, false, condition, false, 3, extraMessages};
+    std::vector<OnDemandCondition> conditions;
+    OnDemandEvent event = {COMMON_EVENT, "", "", -1, false, conditions, false, 3, extraMessages};
     saProfile.startOnDemand.onDemandEvents.push_back(event);
     std::list<SaProfile> onDemandSaProfiles;
     onDemandSaProfiles.push_back(saProfile);
@@ -410,4 +410,261 @@ HWTEST_F(CommonEventCollectTest, GetOnDemandReasonExtraData002, TestSize.Level3)
     bool ret = commonEventCollect->GetOnDemandReasonExtraData(1, onDemandReasonExtraData);
     EXPECT_TRUE(ret);
 }
+
+/**
+ * @tc.name: InitCommonEventState001
+ * @tc.desc: test InitCommonEventState with COMMON_EVENT
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonEventCollectTest, InitCommonEventState001, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
+    commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
+    
+    std::map<std::string, std::string> extraMessages;
+    extraMessages["12"] = "56";
+    extraMessages["abc"] = "abc";
+    std::vector<OnDemandCondition> conditions;
+    OnDemandEvent event = {COMMON_EVENT, "1", "", -1, false, conditions, false, 3, extraMessages};
+    commonEventCollect->InitCommonEventState(event);
+    EXPECT_EQ(commonEventCollect->commonEventNames_.size(), 1);
+    EXPECT_EQ(commonEventCollect->extraDataKey_["1"].size(), 2);
+}
+
+/**
+ * @tc.name: InitCommonEventState002
+ * @tc.desc: test InitCommonEventState with conditions
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonEventCollectTest, InitCommonEventState002, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
+    commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
+    
+    std::vector<OnDemandCondition> conditions;
+    std::map<std::string, std::string> extraMessages;
+    extraMessages["12"] = "56";
+    OnDemandCondition condition = {COMMON_EVENT, "1", "", extraMessages};
+    conditions.push_back(condition);
+    condition = {COMMON_EVENT, "2", ""};
+    conditions.push_back(condition);
+    condition = {PARAM, "3", ""};
+    conditions.push_back(condition);
+    OnDemandEvent event = {PARAM, "1", "", -1, false, conditions, false, 3, extraMessages};
+
+    commonEventCollect->InitCommonEventState(event);
+    EXPECT_EQ(commonEventCollect->commonEventNames_.size(), 2);
+    EXPECT_EQ(commonEventCollect->commonEventConditionExtraData_["1"].size(), 1);
+}
+
+/**
+ * @tc.name: GetParamFromWant001
+ * @tc.desc: test GetParamFromWant
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonEventCollectTest, GetParamFromWant001, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
+    commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
+    AAFwk::Want want;
+    want.SetParam("0", false);
+    want.SetParam("1", true);
+    want.SetParam("2", 2);
+    std::string stringValue = "3";
+    want.SetParam("3", stringValue);
+    EXPECT_EQ(commonEventCollect->GetParamFromWant("0", want), "false");
+    EXPECT_EQ(commonEventCollect->GetParamFromWant("1", want), "true");
+    EXPECT_EQ(commonEventCollect->GetParamFromWant("2", want), "2");
+    EXPECT_EQ(commonEventCollect->GetParamFromWant("3", want), "3");
+    EXPECT_EQ(commonEventCollect->GetParamFromWant("4", want), "");
+}
+
+/**
+ * @tc.name: CheckCondition001
+ * @tc.desc: test CheckCondition while check ConditionExtraData_ failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonEventCollectTest, CheckCondition001, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
+    commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
+
+    std::map<std::string, std::string> extraMessages;
+    extraMessages["12"] = "56";
+    OnDemandCondition condition = {COMMON_EVENT, "1", "", extraMessages};
+    commonEventCollect->commonEventConditionExtraData_[condition.name]["12"] = "";
+
+    bool ret = commonEventCollect->CheckCondition(condition);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << " CheckCondition001 END" << std::endl;
+}
+
+/**
+ * @tc.name: CheckCondition002
+ * @tc.desc: test CheckCondition while check commonEventConditionValue_ failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonEventCollectTest, CheckCondition002, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
+    commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
+
+    std::map<std::string, std::string> extraMessages;
+    extraMessages["12"] = "56";
+    OnDemandCondition condition = {COMMON_EVENT, "1", "17", extraMessages};
+    commonEventCollect->commonEventConditionExtraData_[condition.name] = extraMessages;
+    commonEventCollect->commonEventConditionValue_[condition.name] = "14";
+
+    bool ret = commonEventCollect->CheckCondition(condition);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << " CheckCondition002 END" << std::endl;
+}
+
+/**
+ * @tc.name: CheckCondition003
+ * @tc.desc: test CheckCondition while check commonEventWhitelist failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonEventCollectTest, CheckCondition003, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
+    commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
+
+    std::map<std::string, std::string> extraMessages;
+    extraMessages["12"] = "56";
+    OnDemandCondition condition = {COMMON_EVENT,
+        EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON, "", extraMessages};
+    commonEventCollect->commonEventConditionExtraData_[condition.name] = extraMessages;
+
+    bool ret = commonEventCollect->CheckCondition(condition);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << " CheckCondition003 END" << std::endl;
+}
+
+/**
+ * @tc.name: CheckCondition004
+ * @tc.desc: test CheckCondition passed
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonEventCollectTest, CheckCondition004, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
+    commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
+
+    std::map<std::string, std::string> extraMessages;
+    extraMessages["12"] = "56";
+    OnDemandCondition condition = {COMMON_EVENT, "1", "", extraMessages};
+    commonEventCollect->commonEventConditionExtraData_[condition.name] = extraMessages;
+
+    bool ret = commonEventCollect->CheckCondition(condition);
+    EXPECT_EQ(ret, true);
+    DTEST_LOG << " CheckCondition004 END" << std::endl;
+}
+
+/**
+ * @tc.name: CheckExtraMessage001
+ * @tc.desc: test CheckExtraMessage, not get extraData
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonEventCollectTest, CheckExtraMessage001, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
+    commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
+
+    std::map<std::string, std::string> want;
+    want["1"] = "1";
+    OnDemandReasonExtraData extraData = OnDemandReasonExtraData(1, "", want);
+    int64_t extraDataId = 1;
+    commonEventCollect->extraDatas_[extraDataId] = extraData;
+    OnDemandEvent profile;
+    profile.eventId = COMMON_EVENT;
+    profile.extraMessages["1"] = "1";
+
+    bool ret = commonEventCollect->CheckExtraMessage(2, profile);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << " CheckExtraMessages001 END" << std::endl;
+}
+
+/**
+ * @tc.name: CheckExtraMessage002
+ * @tc.desc: test CheckExtraMessage passed
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonEventCollectTest, CheckExtraMessage002, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
+    commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
+
+    std::map<std::string, std::string> want;
+    want["1"] = "1";
+    OnDemandReasonExtraData extraData = OnDemandReasonExtraData(1, "", want);
+    int64_t extraDataId = 1;
+    commonEventCollect->extraDatas_[extraDataId] = extraData;
+    OnDemandEvent profile;
+    profile.eventId = COMMON_EVENT;
+    profile.extraMessages["1"] = "1";
+
+    bool ret = commonEventCollect->CheckExtraMessage(extraDataId, profile);
+    EXPECT_EQ(ret, true);
+    DTEST_LOG << " CheckExtraMessages002 END" << std::endl;
+}
+
+/**
+ * @tc.name: CheckExtraMessage003
+ * @tc.desc: test CheckExtraMessage failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonEventCollectTest, CheckExtraMessage003, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
+    commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
+
+    std::map<std::string, std::string> want;
+    want["1"] = "2";
+    OnDemandReasonExtraData extraData = OnDemandReasonExtraData(1, "", want);
+    int64_t extraDataId = 1;
+    commonEventCollect->extraDatas_[extraDataId] = extraData;
+    OnDemandEvent profile;
+    profile.eventId = COMMON_EVENT;
+    profile.extraMessages["1"] = "1";
+
+    bool ret = commonEventCollect->CheckExtraMessage(extraDataId, profile);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << " CheckExtraMessages003 END" << std::endl;
+}
+
+/**
+ * @tc.name: SaveOnDemandConditionExtraData001
+ * @tc.desc: test SaveOnDemandConditionExtraData
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonEventCollectTest, SaveOnDemandConditionExtraData001, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
+    commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
+
+    AAFwk::Want want;
+    std::string action = "abc";
+    want.SetParam("1", 1);
+    want.SetAction(action);
+    EventFwk::CommonEventData eventData = {want, 2, action};
+
+    commonEventCollect->commonEventConditionExtraData_[action]["1"] = "";
+    commonEventCollect->SaveOnDemandConditionExtraData(eventData);
+    EXPECT_EQ(commonEventCollect->commonEventConditionValue_[action], "2");
+    EXPECT_EQ(commonEventCollect->commonEventConditionExtraData_[action]["1"], "1");
+    DTEST_LOG << " SaveOnDemandConditionExtraData001 END" << std::endl;
+}
+
 } // namespace OHOS
