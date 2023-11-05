@@ -991,6 +991,15 @@ int32_t SystemAbilityStateScheduler::UnSubscribeSystemProcess(const sptr<ISystem
     return ERR_OK;
 }
 
+bool SystemAbilityStateScheduler::IsSystemProcessNeverStartedLocked(const std::u16string& processName)
+{
+    std::shared_ptr<SystemProcessContext> processContext;
+    if (!GetSystemProcessContext(processName, processContext)) {
+        return true;
+    }
+    return processContext->pid < 0;
+}
+
 int32_t SystemAbilityStateScheduler::ProcessDelayUnloadEvent(int32_t systemAbilityId)
 {
     std::shared_ptr<SystemAbilityContext> abilityContext;
