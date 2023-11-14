@@ -842,6 +842,26 @@ int32_t SystemAbilityManager::RemoveSystemAbility(const sptr<IRemoteObject>& abi
     return ERR_OK;
 }
 
+int32_t SystemAbilityManager::RemoveDiedSystemAbility(int32_t systemAbilityId)
+{
+    {
+        unique_lock<shared_mutex> writeLock(abilityMapLock_);
+        auto itSystemAbility = abilityMap_.find(systemAbilityId);
+        if (itSystemAbility == abilityMap_.end()) {
+            return ERR_OK;
+        }
+        sptr<IRemoteObject> ability = itSystemAbility->second.remoteObj;
+        if (ability != nullptr && abilityDeath_ != nullptr) {
+            ability->RemoveDeathRecipient(abilityDeath_);
+        }
+        (void)abilityMap_.erase(itSystemAbility);
+        HILOGI("%s called, systemAbilityId:%{public}d removed, size : %{public}zu", __func__, systemAbilityId,
+            abilityMap_.size());
+    }
+    SendSystemAbilityRemovedMsg(systemAbilityId);
+    return ERR_OK;
+}
+
 vector<u16string> SystemAbilityManager::ListSystemAbilities(uint32_t dumpFlags)
 {
     vector<u16string> list;
