@@ -36,6 +36,7 @@ public:
         const nlohmann::json& activeReason);
     bool IdleAbility(int32_t systemAbilityId,
         const nlohmann::json& idleReason, int32_t& delayTime);
+    bool SendStrategyToSA(int32_t type, int32_t systemAbilityId, int32_t level, std::string& action);
 private:
     static inline BrokerDelegator<LocalAbilityManagerProxy> delegator_;
     OHOS::HiviewDFX::HiLogLabel label_ = { LOG_CORE, 0xD001800, "SA" };

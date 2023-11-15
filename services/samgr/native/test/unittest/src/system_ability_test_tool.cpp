@@ -43,6 +43,8 @@ namespace {
     constexpr int32_t ARGC_EXTEND_LENTH = 3;
     constexpr int32_t ARV_SAID_INDEX = 2;
     constexpr int32_t ARV_DEVICEID_INDEX = 3;
+    constexpr const char* RESOURCESCHEDULE_PROCESS_NAME = "resource_schedule_service";
+    constexpr const char* INVALID_PROCESS_NAME = "invalid_process";
 
     const string HELP_CONTENT = "usage: samgr test tool <command> <options>\n"
                             "These are common samgr test tool commands list:\n"
@@ -272,6 +274,49 @@ namespace {
         int32_t res = sm->UnSubscribeSystemAbility(said, listen);
         cout << "unsubscribe system ability result : " << ((res == 0) ? "succeed" : "failed") << endl;
     }
+
+    static void MockProcess(const char* processName)
+    {
+        uint64_t tokenId;
+        NativeTokenInfoParams infoInstance = {
+            .dcapsNum = 0,
+            .permsNum = 0,
+            .aclsNum = 0,
+            .dcaps = nullptr,
+            .perms = nullptr,
+            .acls = nullptr,
+            .processName = processName,
+            .aplStr = "system_core",
+        };
+        tokenId = GetAccessTokenId(&infoInstance);
+        SetSelfTokenID(tokenId);
+    }
+
+    static void DoSend(int32_t said, int32_t rssProcess)
+    {
+        if (rssProcess) {
+            MockProcess(RESOURCESCHEDULE_PROCESS_NAME);
+        } else {
+            MockProcess(INVALID_PROCESS_NAME);
+        }
+        cout << "send strategy to " << said <<endl;
+        sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+        if (sm == nullptr)  {
+            cout << "------------------samgr is unavailable-----------------------------------------" << endl;
+            return;
+        }
+        if (!rssProcess) {
+            rssProcess = 1;
+        }
+        std::vector<int32_t> saIds;
+        while (rssProcess--) {
+            saIds.push_back(said);
+        }
+        std::string action = "{\"send\":true,\"check\":1}";
+        int32_t ret = sm->SendStrategy(1, saIds, 1, action);
+        cout << "send strategy result: " << ret << endl;
+        return ;
+    }
 }
 
 static void DoDefault(char* argv[])
@@ -350,6 +395,15 @@ static void DoRemote(char* argv[])
         DoLoadRemote(said, deviceid);
         return;
     }
+    if (strcmp(argv[1], "send") == 0) {
+        int32_t said = DEFAULT_SA_ID;
+        StrToInt(argv[ARV_SAID_INDEX], said);
+        int32_t rssProcess = 0;
+        StrToInt(argv[ARV_DEVICEID_INDEX], rssProcess);
+        DoSend(said, rssProcess);
+        return;
+    }
+
     cout << "DoRemote failed, get help with arg 'h'"<< endl;
 }
 

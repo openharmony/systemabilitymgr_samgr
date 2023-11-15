@@ -149,6 +149,8 @@ SystemAbilityManagerStub::SystemAbilityManagerStub()
         &SystemAbilityManagerStub::UpdateOnDemandPolicyInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_ONDEMAND_SYSTEM_ABILITY_IDS_TRANSACTION)] =
         &SystemAbilityManagerStub::GetOnDemandSystemAbilityIdsInner;
+    memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::SEND_STRATEGY_TRANASACTION)] =
+        &SystemAbilityManagerStub::SendStrategyInner;
 }
 
 int32_t SystemAbilityManagerStub::OnRemoteRequest(uint32_t code,
@@ -915,6 +917,40 @@ int32_t SystemAbilityManagerStub::UpdateOnDemandPolicyInner(MessageParcel& data,
     int32_t result = UpdateOnDemandPolicy(systemAbilityId, typeEnum, abilityOnDemandEvents);
     if (!reply.WriteInt32(result)) {
         HILOGW("UpdateOnDemandPolicyInner write result failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ERR_OK;
+}
+
+int32_t SystemAbilityManagerStub::SendStrategyInner(MessageParcel& data, MessageParcel& reply)
+{
+    if (!CanRequest()) {
+        HILOGE("SendStrategy PERMISSION DENIED!");
+        return ERR_PERMISSION_DENIED;
+    }
+    int32_t type = 0;
+    if (!data.ReadInt32(type)) {
+        HILOGW("SendStrategy read type failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    std::vector<int32_t> systemAbilityIds;
+    if (!data.ReadInt32Vector(&systemAbilityIds)) {
+        HILOGW("SendStrategy read saId failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t level = -1;
+    if (!data.ReadInt32(level)) {
+        HILOGW("SendStrategy read level failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    std::string action;
+    if (!data.ReadString(action)) {
+        HILOGW("SendStrategy read action failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t result = SendStrategy(type, systemAbilityIds, level, action);
+    if (!reply.WriteInt32(result)) {
+        HILOGW("SendStrategy write result failed.");
         return ERR_FLATTEN_OBJECT;
     }
     return ERR_OK;

@@ -59,6 +59,7 @@ const string PREFIX = "/system/profile/";
 const string LOCAL_DEVICE = "local";
 const string ONDEMAND_PARAM = "persist.samgr.perf.ondemand";
 const string DYNAMIC_CACHE_PARAM = "persist.samgr.cache.sa";
+const string RESOURCE_SCHEDULE_PROCESS_NAME = "resource_schedule_service";
 constexpr const char* ONDEMAND_PERF_PARAM = "persist.samgr.perf.ondemand";
 constexpr const char* ONDEMAND_WORKER = "OndemandLoader";
 
@@ -1928,6 +1929,37 @@ int32_t SystemAbilityManager::GetOnDemandSystemAbilityIds(std::vector<int32_t>& 
     }
     for (int32_t onDemandSaId : onDemandSaIdsSet_) {
         systemAbilityIds.emplace_back(onDemandSaId);
+    }
+    return ERR_OK;
+}
+
+int32_t SystemAbilityManager::SendStrategy(int32_t type, std::vector<int32_t>& systemAbilityIds,
+    int32_t level, std::string& action)
+{
+    HILOGD("SendStrategy begin");
+    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    Security::AccessToken::NativeTokenInfo nativeTokenInfo;
+    int32_t result = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
+    if (result != ERR_OK || nativeTokenInfo.processName != RESOURCE_SCHEDULE_PROCESS_NAME) {
+        HILOGW("SendStrategy reject used by %{public}s", nativeTokenInfo.processName.c_str());
+        return ERR_PERMISSION_DENIED;
+    }
+
+    for (auto saId : systemAbilityIds) {
+        SaProfile saProfile;
+        if (!GetSaProfile(saId, saProfile)) {
+            HILOGW("not found SA: %{public}d.", saId);
+            return ERR_INVALID_VALUE;
+        }
+        auto procName = saProfile.process;
+        sptr<ILocalAbilityManager> procObject =
+            iface_cast<ILocalAbilityManager>(GetSystemProcess(procName));
+        if (procObject == nullptr) {
+            HILOGW("get process:%{public}s fail", Str16ToStr8(procName).c_str());
+            return ERR_INVALID_VALUE;
+        }
+        bool ret = procObject->SendStrategyToSA(type, saId, level, action);
+        HILOGI("SendStrategy %{public}d %{public}s", saId, ret ? "success" : "failed");
     }
     return ERR_OK;
 }

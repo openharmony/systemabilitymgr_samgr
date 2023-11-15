@@ -243,7 +243,19 @@ public:
      * @return ERR_OK indicates that the Subscribe successfully.
      */
     virtual int32_t SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener) = 0;
-    
+
+    /**
+     * SendStrategy, Send strategy to SA.
+     *
+     * @param type, type is a certain device status type.
+     * @param systemAbilityIds, Need the vector of said which wants to send strategy.
+     * @param level, level is level of a certain device status type.
+     * @param action, action is scheduling strategy.
+     * @return ERR_OK indicates that the Subscribe successfully.
+     */
+    virtual int32_t SendStrategy(int32_t type, std::vector<int32_t>& systemAbilityIds,
+        int32_t level, std::string& action) = 0;
+
     /**
      * UnSubscribeSystemProcess, UnSubscribe the status of process.
      *
