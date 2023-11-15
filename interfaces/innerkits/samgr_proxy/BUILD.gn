@@ -29,6 +29,7 @@ config("samgr_proxy_private_config") {
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/lsamgr",
     "//foundation/systemabilitymgr/samgr/services/lsamgr/include",
     "//foundation/systemabilitymgr/samgr/services/samgr/native/include",
+    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/dynamic_cache/include",
     "//foundation/systemabilitymgr/samgr/utils/native/include",
     "//third_party/json/include",
     "//third_party/json/single_include",
@@ -53,6 +54,8 @@ ohos_shared_library("samgr_proxy") {
     "//foundation/systemabilitymgr/samgr/test/resource:coverage_flags",
   ]
 
+  deps = [ "//foundation/systemabilitymgr/samgr/interfaces/innerkits/dynamic_cache:dynamic_cache" ]
+
   public_configs = [ ":lsamgr_proxy_config" ]
   all_dependent_configs = [ ":samgr_proxy_config" ]
 
@@ -62,7 +65,6 @@ ohos_shared_library("samgr_proxy") {
       "hilog:libhilog",
       "init:libbegetutil",
       "ipc:ipc_single",
-      "safwk:dynamic_cache",
     ]
 
     part_name = "samgr"
