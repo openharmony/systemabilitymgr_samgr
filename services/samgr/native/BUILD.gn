@@ -63,6 +63,7 @@ ohos_executable("samgr") {
 
   deps = [
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/common:samgr_common",
+    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/dynamic_cache:dynamic_cache",
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/rust:rust_samgr",
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
   ]
@@ -91,7 +92,6 @@ ohos_executable("samgr") {
       "init:libbegetutil",
       "ipc:ipc_core",
       "ipc:libdbinder",
-      "safwk:dynamic_cache",
       "safwk:system_ability_fwk",
     ]
 

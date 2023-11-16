@@ -49,7 +49,8 @@
                 "base_group": [],
                 "fwk_group": [
                     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/common:samgr_common",
-                    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy"
+                    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
+                    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/dynamic_cache:dynamic_cache"
                 ],
                 "service_group": [
                     "//foundation/systemabilitymgr/samgr/etc:samgr_etc",
@@ -92,6 +93,15 @@
                         "header_files": []
                     },
                     "name": "//foundation/systemabilitymgr/samgr/interfaces/innerkits/rust:rust_samgr"
+                },
+                {
+                    "header": {
+                        "header_base": "//foundation/systemabilitymgr/samgr/interfaces/innerkits/dynamic_cache/include",
+                        "header_files": [
+                            "dynamic_cache.h"
+                        ]
+                    },
+                    "name": "//foundation/systemabilitymgr/samgr/interfaces/innerkits/dynamic_cache:dynamic_cache"
                 }
             ],
             "test": [
