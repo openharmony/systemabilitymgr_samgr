@@ -205,4 +205,60 @@ bool LocalAbilityManagerProxy::IdleAbility(int32_t systemAbilityId,
     }
     return result;
 }
+
+bool LocalAbilityManagerProxy::SendStrategyToSA(int32_t type, int32_t systemAbilityId,
+    int32_t level, std::string& action)
+{
+    if (systemAbilityId <= 0) {
+        HiLog::Warn(label_, "SendStrategy systemAbilityId invalid.");
+        return false;
+    }
+
+    sptr<IRemoteObject> iro = Remote();
+    if (iro == nullptr) {
+        HiLog::Error(label_, "SendStrategy Remote return null");
+        return false;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(LOCAL_ABILITY_MANAGER_INTERFACE_TOKEN)) {
+        HiLog::Warn(label_, "SendStrategy interface token check failed");
+        return false;
+    }
+    bool ret = data.WriteInt32(type);
+    if (!ret) {
+        HiLog::Warn(label_, "SendStrategy write type failed!");
+        return false;
+    }
+    ret = data.WriteInt32(systemAbilityId);
+    if (!ret) {
+        HiLog::Warn(label_, "SendStrategy write systemAbilityId failed!");
+        return false;
+    }
+    ret = data.WriteInt32(level);
+    if (!ret) {
+        HiLog::Warn(label_, "SendStrategy write level failed!");
+        return false;
+    }
+    ret = data.WriteString(action);
+    if (!ret) {
+        HiLog::Warn(label_, "SendStrategy write action failed!");
+        return false;
+    }
+    
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    int32_t status = iro->SendRequest(
+        static_cast<uint32_t>(SafwkInterfaceCode::SEND_STRATEGY_TO_SA_TRANSACTION), data, reply, option);
+    if (status != NO_ERROR) {
+        HiLog::Error(label_, "SendStrategy SendRequest failed, return value : %{public}d", status);
+        return false;
+    }
+    bool result = false;
+    if (!reply.ReadBool(result)) {
+        HiLog::Warn(label_, "SendStrategy read result failed!");
+        return false;
+    }
+    return result;
+}
 }

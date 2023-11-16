@@ -1247,4 +1247,57 @@ int32_t SystemAbilityManagerProxy::UpdateOnDemandPolicy(int32_t systemAbilityId,
     }
     return result;
 }
+
+int32_t SystemAbilityManagerProxy::SendStrategy(int32_t type, std::vector<int32_t>& systemAbilityIds,
+    int32_t level, std::string& action)
+{
+    HILOGI("SendStrategy called");
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGI("SendStrategy remote is nullptr");
+        return ERR_INVALID_OPERATION;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        HILOGE("SendStrategy write interface token failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(type)) {
+        HILOGE("SendStrategy write type failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32Vector(systemAbilityIds)) {
+        HILOGE("SendStrategy write said failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(level)) {
+        HILOGE("SendStrategy write level failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(action)) {
+        HILOGW("SendStrategy write action failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::SEND_STRATEGY_TRANASACTION), data, reply, option);
+    if (err != ERR_NONE) {
+        HILOGE("SendStrategy SendRequest error: %{public}d!", err);
+        return err;
+    }
+    HILOGI("SendStrategy SendRequest succeed!");
+    int32_t result = 0;
+    if (!reply.ReadInt32(result)) {
+        HILOGE("SendStrategy Read result failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (result != ERR_OK) {
+        HILOGE("SendStrategy failed: %{public}d!", result);
+    }
+    return result;
+}
+
 } // namespace OHOS
