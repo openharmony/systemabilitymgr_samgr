@@ -983,4 +983,21 @@ HWTEST_F(SystemAbilityMgrProxyTest, SubscribeSystemProcess002, TestSize.Level3)
     int32_t ret = samgrProxy->SubscribeSystemProcess(nullptr);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
+
+/**
+ * @tc.name: SendStrategy001
+ * @tc.desc: check SendStrategy
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, SendStrategy001, TestSize.Level1)
+{
+    sptr<ISystemAbilityManager> samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    std::vector<int32_t> saIds;
+    saIds.push_back(-1);
+    int32_t type = 1;
+    int32_t level = 1;
+    std::string action = "";
+    int32_t res = samgrProxy->SendStrategy(type, saIds, level, action);
+    EXPECT_EQ(res, ERR_PERMISSION_DENIED);
+}
 }
