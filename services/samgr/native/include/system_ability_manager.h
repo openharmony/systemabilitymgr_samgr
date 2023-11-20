@@ -83,6 +83,8 @@ public:
     sptr<IRemoteObject> CheckSystemAbility(int32_t systemAbilityId, bool& isExist) override;
     bool DoLoadOnDemandAbility(int32_t systemAbilityId, bool& isExist);
 
+    int32_t RemoveDiedSystemAbility(int32_t systemAbilityId);
+    
     void NotifyRemoteSaDied(const std::u16string& name);
     void NotifyRemoteDeviceOffline(const std::string& deviceId);
     int32_t AddSystemAbility(int32_t systemAbilityId, const sptr<IRemoteObject>& ability,

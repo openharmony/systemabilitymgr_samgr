@@ -708,6 +708,8 @@ int32_t SystemAbilityStateScheduler::HandleAbnormallyDiedAbilityLocked(
     OnDemandEvent onDemandEvent = {INTERFACE_CALL, "restart"};
     sptr<ISystemAbilityLoadCallback> callback(new SystemAbilityLoadCallbackStub());
     for (auto& abilityContext : abnormallyDiedAbilityList) {
+        // Actively remove SA to prevent restart failure if the death recipient of SA is not processed in time.
+        SystemAbilityManager::GetInstance()->RemoveDiedSystemAbility(abilityContext->systemAbilityId);
         LoadRequestInfo loadRequestInfo = {abilityContext->systemAbilityId,
             LOCAL_DEVICE, callback, -1, onDemandEvent};
         HandleLoadAbilityEventLocked(abilityContext, loadRequestInfo);
