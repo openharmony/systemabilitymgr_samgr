@@ -192,6 +192,7 @@ enum {
     AUDIO_POLICY_SERVICE_ID                          = 3009,
     AVSESSION_SERVICE_ID                             = 3010,
     AV_CODEC_SERVICE_ID                              = 3011,
+    MEDIA_KEY_SYSTEM_SERVICE_ID                      = 3012,
     SUBSYS_MULTIMODAINPUT_SYS_ABILITY_ID_BEGIN       = 3100,
     MULTIMODAL_INPUT_SERVICE_ID                      = 3101,
     MULTIMODAL_CHANNEL_SERVICE_ID                    = 3102,
