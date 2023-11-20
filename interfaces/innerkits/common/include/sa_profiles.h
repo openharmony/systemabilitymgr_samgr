@@ -49,6 +49,11 @@ enum {
     LOW_PRIORITY = 3,
 };
 
+enum {
+    IMMEDIATELY = 0,
+    LOW_MEMORY,
+};
+
 struct OnDemandCondition {
     int32_t eventId;
     std::string name;
@@ -113,6 +118,7 @@ struct SaProfile {
     StartOnDemand startOnDemand;
     StopOnDemand stopOnDemand;
     DlHandle handle = nullptr;
+    int32_t recycleStrategy = IMMEDIATELY;
 };
 }
 #endif // SAMGR_INTERFACE_INNERKITS_COMMOM_INCLUDE_SAPROFILE_H

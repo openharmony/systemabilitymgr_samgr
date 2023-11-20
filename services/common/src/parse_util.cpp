@@ -59,6 +59,7 @@ constexpr const char* SA_TAG_SETTING_SWITCH = "settingswitch";
 constexpr const char* SA_TAG_COMMON_EVENT = "commonevent";
 constexpr const char* SA_TAG_PARAM = "param";
 constexpr const char* SA_TAG_TIEMD_EVENT = "timedevent";
+constexpr const char* SA_TAG_RECYCLE_STRATEGY = "recycle-strategy";
 constexpr int32_t MAX_JSON_OBJECT_SIZE = 50 * 1024;
 constexpr int32_t MAX_JSON_STRING_LENGTH = 128;
 constexpr int32_t FIRST_SYS_ABILITY_ID = 0x00000000;
@@ -422,8 +423,27 @@ bool ParseUtil::ParseSystemAbility(SaProfile& saProfile, nlohmann::json& systemA
     ParseStartOndemandTag(systemAbilityJson, SA_TAG_START_ON_DEMAND, saProfile.startOnDemand);
     // parse stop-on-demand tag
     ParseStopOndemandTag(systemAbilityJson, SA_TAG_STOP_ON_DEMAND, saProfile.stopOnDemand);
+    string recycleStrategy;
+    GetStringFromJson(systemAbilityJson, SA_TAG_RECYCLE_STRATEGY, recycleStrategy);
+    if (!CheckRecycleStrategy(recycleStrategy, saProfile.recycleStrategy)) {
+        HILOGE("profile format error: recycleStrategy: %{public}s is not immediately or low-memory",
+            recycleStrategy.c_str());
+        return false;
+    }
     HILOGD("ParseSystemAbility end");
     return true;
+}
+
+bool ParseUtil::CheckRecycleStrategy(const std::string& recycleStrategyStr, int32_t& recycleStrategy)
+{
+    if (recycleStrategyStr == "" || recycleStrategyStr == "immediately") {
+        recycleStrategy = IMMEDIATELY;
+        return true;
+    } else if (recycleStrategyStr == "low-memory") {
+        recycleStrategy = LOW_MEMORY;
+        return true;
+    }
+    return false;
 }
 
 bool ParseUtil::ParseJsonTag(const nlohmann::json& systemAbilityJson, const std::string& jsonTag,
