@@ -183,7 +183,15 @@ public:
      * @return ERR_OK indicates that the uninstall was canceled successfully.
      */
     int32_t CancelUnloadSystemAbility(int32_t systemAbilityId) override;
-    
+
+    /**
+     * UnloadAllIdleSystemAbility, unload all idle sa.
+     * only support for memmgrservice
+     *
+     * @return ERR_OK It means unload all idle sa success.
+     */
+    int32_t UnloadAllIdleSystemAbility() override;
+
     /**
      * GetSystemProcessInfo, Get process info by said.
      *

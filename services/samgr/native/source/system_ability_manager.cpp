@@ -263,6 +263,16 @@ bool SystemAbilityManager::GetSaProfile(int32_t saId, SaProfile& saProfile)
 
 bool SystemAbilityManager::CheckCallerProcess(SaProfile& saProfile)
 {
+    if (!CheckCallerProcess(Str16ToStr8(saProfile.process))) {
+        HILOGE("cannot operate SA: %{public}d by process: %{public}s",
+            saProfile.saId, Str16ToStr8(saProfile.process).c_str());
+        return false;
+    }
+    return true;
+}
+
+bool SystemAbilityManager::CheckCallerProcess(const std::string& callProcess)
+{
     uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
     Security::AccessToken::NativeTokenInfo nativeTokenInfo;
     int32_t tokenInfoResult = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
@@ -270,10 +280,9 @@ bool SystemAbilityManager::CheckCallerProcess(SaProfile& saProfile)
         HILOGE("get token info failed");
         return false;
     }
-    std::string callProcess = Str16ToStr8(saProfile.process);
-    if (nativeTokenInfo.processName!= callProcess) {
-        HILOGE("cannot operate SA: %{public}d by process: %{public}s",
-            saProfile.saId, nativeTokenInfo.processName.c_str());
+
+    if (nativeTokenInfo.processName != callProcess) {
+        HILOGE("cannot operate by process: %{public}s", nativeTokenInfo.processName.c_str());
         return false;
     }
     return true;
@@ -1639,6 +1648,19 @@ int32_t SystemAbilityManager::DoUnloadSystemAbility(int32_t systemAbilityId,
     }
     ReportSamgrSaUnload(systemAbilityId, event.eventId);
     return ERR_OK;
+}
+
+int32_t SystemAbilityManager::UnloadAllIdleSystemAbility()
+{
+    if (!CheckCallerProcess("memmgrservice")) {
+        HILOGE("UnloadAllIdleSystemAbility invalid caller process, only support for memmgrservice");
+        return ERR_PERMISSION_DENIED;
+    }
+    if (abilityStateScheduler_ == nullptr) {
+        HILOGE("abilityStateScheduler is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    return abilityStateScheduler_->UnloadAllIdleSystemAbility();
 }
 
 bool SystemAbilityManager::IdleSystemAbility(int32_t systemAbilityId, const std::u16string& procName,

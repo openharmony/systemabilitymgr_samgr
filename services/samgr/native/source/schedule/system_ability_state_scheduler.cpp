@@ -598,6 +598,31 @@ int32_t SystemAbilityStateScheduler::DoUnloadSystemAbilityLocked(
     return result;
 }
 
+int32_t SystemAbilityStateScheduler::UnloadAllIdleSystemAbility()
+{
+    HILOGI("[SA Scheduler] UnloadAllIdleSystemAbility");
+    int32_t result = ERR_OK;
+    std::shared_lock<std::shared_mutex> readLock(processMapLock_);
+    for (auto it : processContextMap_) {
+        auto& processContext = it.second;
+        if (processContext == nullptr) {
+            continue;
+        }
+
+        int32_t ret = ERR_OK;
+        std::lock_guard<std::mutex> autoLock(processContext->processLock);
+        if (CanUnloadAllSystemAbilityLocked(processContext)) {
+            ret = UnloadAllSystemAbilityLocked(processContext);
+        }
+        if (ret != ERR_OK) {
+            result = ret;
+            HILOGI("[SA Scheduler][process: %{public}s] unload all SA fail",
+                Str16ToStr8(processContext->processName).c_str());
+        }
+    }
+    return result;
+}
+
 int32_t SystemAbilityStateScheduler::TryKillSystemProcess(
     const std::shared_ptr<SystemProcessContext>& processContext)
 {

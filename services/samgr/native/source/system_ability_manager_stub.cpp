@@ -151,6 +151,8 @@ SystemAbilityManagerStub::SystemAbilityManagerStub()
         &SystemAbilityManagerStub::GetOnDemandSystemAbilityIdsInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::SEND_STRATEGY_TRANASACTION)] =
         &SystemAbilityManagerStub::SendStrategyInner;
+    memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::UNLOAD_ALL_IDLE_SYSTEM_ABILITY_TRANSACTION)] =
+        &SystemAbilityManagerStub::UnloadAllIdleSystemAbilityInner;
 }
 
 int32_t SystemAbilityManagerStub::OnRemoteRequest(uint32_t code,
@@ -664,6 +666,18 @@ int32_t SystemAbilityManagerStub::UnloadSystemAbilityInner(MessageParcel& data, 
     ret = reply.WriteInt32(result);
     if (!ret) {
         HILOGW("SystemAbilityManagerStub::UnloadSystemAbilityInner write reply failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
+int32_t SystemAbilityManagerStub::UnloadAllIdleSystemAbilityInner(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t result = UnloadAllIdleSystemAbility();
+    HILOGI("SystemAbilityManagerStub::UnloadAllIdleSystemAbilityInner result is %{public}d", result);
+    bool ret = reply.WriteInt32(result);
+    if (!ret) {
+        HILOGW("SystemAbilityManagerStub::UnloadAllIdleSystemAbilityInner write reply failed.");
         return ERR_FLATTEN_OBJECT;
     }
     return result;
