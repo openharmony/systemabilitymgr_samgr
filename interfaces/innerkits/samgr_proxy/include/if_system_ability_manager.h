@@ -220,6 +220,14 @@ public:
     virtual int32_t CancelUnloadSystemAbility(int32_t systemAbilityId) = 0;
 
     /**
+     * UnloadAllIdleSystemAbility, unload all idle sa.
+     * only support for memmgrservice
+     *
+     * @return ERR_OK It means unload all idle sa success.
+     */
+    virtual int32_t UnloadAllIdleSystemAbility() = 0;
+
+    /**
      * GetSystemProcessInfo, Get process info by said.
      *
      * @param systemAbilityId, Need the said of sa which wants to get process info.

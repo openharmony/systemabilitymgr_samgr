@@ -43,6 +43,7 @@ public:
     int32_t HandleLoadAbilityEvent(int32_t systemAbilityId, bool& isExist);
     int32_t HandleUnloadAbilityEvent(const UnloadRequestInfo& unloadRequestInfo);
     int32_t HandleCancelUnloadAbilityEvent(int32_t systemAbilityId);
+    int32_t UnloadAllIdleSystemAbility();
     int32_t SendAbilityStateEvent(int32_t systemAbilityId, AbilityStateEvent event);
     int32_t SendProcessStateEvent(const ProcessInfo& processInfo, ProcessStateEvent event);
     bool IsSystemAbilityUnloading(int32_t systemAbilityId);

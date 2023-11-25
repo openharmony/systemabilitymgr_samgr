@@ -749,6 +749,33 @@ int32_t SystemAbilityManagerProxy::CancelUnloadSystemAbility(int32_t systemAbili
     return result;
 }
 
+int32_t SystemAbilityManagerProxy::UnloadAllIdleSystemAbility()
+{
+    HILOGI("UnloadAllIdleSystemAbility called");
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("UnloadAllIdleSystemAbility remote is nullptr");
+        return ERR_INVALID_OPERATION;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        HILOGE("UnloadAllIdleSystemAbility write interface token failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::UNLOAD_ALL_IDLE_SYSTEM_ABILITY_TRANSACTION), data, reply, option);
+    if (err != ERR_NONE) {
+        HILOGE("UnloadAllIdleSystemAbility SendRequest error:%{public}d", err);
+        return err;
+    }
+    HILOGI("UnloadAllIdleSystemAbility SendRequest succeed");
+    return ERR_OK;
+}
+
 int32_t SystemAbilityManagerProxy::MarshalSAExtraProp(const SAExtraProp& extraProp, MessageParcel& data) const
 {
     if (!data.WriteBool(extraProp.isDistributed)) {

@@ -117,6 +117,7 @@ public:
     int32_t DoUnloadSystemAbility(int32_t systemAbilityId, const std::u16string& procName, const OnDemandEvent& event);
     int32_t CancelUnloadSystemAbility(int32_t systemAbilityId) override;
     int32_t DoUnloadSystemAbility(int32_t systemAbilityId, const std::u16string& procName);
+    int32_t UnloadAllIdleSystemAbility() override;
     bool IdleSystemAbility(int32_t systemAbilityId, const std::u16string& procName,
         const nlohmann::json& idleReason, int32_t& delayTime);
     bool ActiveSystemAbility(int32_t systemAbilityId, const std::u16string& procName,
@@ -223,6 +224,7 @@ private:
     std::list<int32_t> GetAllOndemandSa();
     std::string EventToStr(const OnDemandEvent& event);
     bool CheckCallerProcess(SaProfile& saProfile);
+    bool CheckCallerProcess(const std::string& callProcess);
     bool CheckAllowUpdate(OnDemandPolicyType type, SaProfile& saProfile);
     void ConvertToOnDemandEvent(const SystemAbilityOnDemandEvent& from, OnDemandEvent& to);
     void ConvertToSystemAbilityOnDemandEvent(const OnDemandEvent& from, SystemAbilityOnDemandEvent& to);

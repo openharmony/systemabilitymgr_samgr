@@ -52,6 +52,7 @@ private:
     int32_t LoadRemoteSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t UnloadSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t CancelUnloadSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
+    int32_t UnloadAllIdleSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t GetOnDemandReasonExtraDataInner(MessageParcel& data, MessageParcel& reply);
     int32_t GetOnDemandPolicyInner(MessageParcel& data, MessageParcel& reply);
     int32_t UpdateOnDemandPolicyInner(MessageParcel& data, MessageParcel& reply);
