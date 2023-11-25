@@ -1600,6 +1600,17 @@ int32_t SystemAbilityManager::UnloadSystemAbility(int32_t systemAbilityId)
     return abilityStateScheduler_->HandleUnloadAbilityEvent(unloadRequestInfo);
 }
 
+bool SystemAbilityManager::CheckSaIsImmediatelyRecycle(int32_t systemAbilityId)
+{
+    SaProfile saProfile;
+    bool ret = GetSaProfile(systemAbilityId, saProfile);
+    if (!ret) {
+        HILOGE("UnloadSystemAbility systemAbilityId:%{public}d not supported!", systemAbilityId);
+        return ERR_INVALID_VALUE;
+    }
+    return saProfile.recycleStrategy == IMMEDIATELY;
+}
+
 int32_t SystemAbilityManager::CancelUnloadSystemAbility(int32_t systemAbilityId)
 {
     if (!CheckInputSysAbilityId(systemAbilityId)) {

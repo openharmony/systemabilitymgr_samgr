@@ -471,7 +471,7 @@ int32_t SystemAbilityStateScheduler::TryUnloadAllSystemAbility(
         return ERR_INVALID_VALUE;
     }
     std::lock_guard<std::mutex> autoLock(processContext->processLock);
-    if (CanUnloadAllSystemAbilityLocked(processContext)) {
+    if (CanUnloadAllSystemAbilityLocked(processContext, true)) {
         return UnloadAllSystemAbilityLocked(processContext);
     }
     return ERR_OK;
@@ -481,11 +481,11 @@ bool SystemAbilityStateScheduler::CanUnloadAllSystemAbility(
     const std::shared_ptr<SystemProcessContext>& processContext)
 {
     std::shared_lock<std::shared_mutex> sharedLock(processContext->stateCountLock);
-	return CanUnloadAllSystemAbilityLocked(processContext);
+	return CanUnloadAllSystemAbilityLocked(processContext, true);
 }
 
 bool SystemAbilityStateScheduler::CanUnloadAllSystemAbilityLocked(
-    const std::shared_ptr<SystemProcessContext>& processContext)
+    const std::shared_ptr<SystemProcessContext>& processContext, bool isNeedCheckRecycleStrategy)
 {
     uint32_t notLoadAbilityCount = processContext->abilityStateCountMap[SystemAbilityState::NOT_LOADED];
     uint32_t unloadableAbilityCount = processContext->abilityStateCountMap[SystemAbilityState::UNLOADABLE];
@@ -496,8 +496,24 @@ bool SystemAbilityStateScheduler::CanUnloadAllSystemAbilityLocked(
         return false;
     }
     if (notLoadAbilityCount + unloadableAbilityCount == processContext->saList.size()) {
-        return true;
+        if (isNeedCheckRecycleStrategy) {
+            return CheckSaIsImmediatelyRecycle(processContext);
+        } else {
+            return true;
+        }
     }
+    return false;
+}
+
+bool SystemAbilityStateScheduler::CheckSaIsImmediatelyRecycle(
+    const std::shared_ptr<SystemProcessContext>& processContext)
+{
+    for (auto& saId: processContext->saList) {
+        if (SystemAbilityManager::GetInstance()->CheckSaIsImmediatelyRecycle(saId)) {
+            return true;
+        }
+    }
+    HILOGI("CheckSaIsImmediatelyRecycle is false");
     return false;
 }
 

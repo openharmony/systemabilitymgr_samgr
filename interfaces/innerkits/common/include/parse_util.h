@@ -66,6 +66,7 @@ private:
         const std::string& key, std::vector<OnDemandCondition>& out);
     void GetOnDemandExtraMessagesFromJson(const nlohmann::json& obj,
         const std::string& key, std::map<std::string, std::string>& out);
+    bool CheckRecycleStrategy(const std::string& recycleStrategyStr, int32_t& recycleStrategy);
 
     static inline void GetBoolFromJson(const nlohmann::json& obj, const std::string& key, bool& out)
     {

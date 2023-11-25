@@ -94,7 +94,9 @@ private:
 
     int32_t TryUnloadAllSystemAbility(const std::shared_ptr<SystemProcessContext>& processContext);
     bool CanUnloadAllSystemAbility(const std::shared_ptr<SystemProcessContext>& processContext);
-	bool CanUnloadAllSystemAbilityLocked(const std::shared_ptr<SystemProcessContext>& processContext);
+    bool CanUnloadAllSystemAbilityLocked(const std::shared_ptr<SystemProcessContext>& processContext,
+        bool isNeedCheckRecycleStrategy = false);
+    bool CheckSaIsImmediatelyRecycle(const std::shared_ptr<SystemProcessContext>& processContext);
     int32_t UnloadAllSystemAbilityLocked(const std::shared_ptr<SystemProcessContext>& processContext);
 
     int32_t TryKillSystemProcess(const std::shared_ptr<SystemProcessContext>& processContext);
