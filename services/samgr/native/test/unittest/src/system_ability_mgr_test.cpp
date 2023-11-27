@@ -224,6 +224,19 @@ HWTEST_F(SystemAbilityMgrTest, RemoveSystemAbility003, TestSize.Level1)
 }
 
 /**
+ * @tc.name: RemoveSystemAbility004
+ * @tc.desc: remove not exist system ability.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, RemoveSystemAbility004, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    int32_t result = saMgr->RemoveSystemAbility(-1);
+    EXPECT_TRUE(result != ERR_OK);
+}
+
+/**
  * @tc.name: GetSystemAbility001
  * @tc.desc: get not exist system ability.
  * @tc.type: FUNC
@@ -614,6 +627,20 @@ HWTEST_F(SystemAbilityMgrTest, LoadSystemAbility010, TestSize.Level3)
     saMgr->saProfileMap_.clear();
     sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
     int32_t ret = saMgr->LoadSystemAbility(SAID, callback);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: LoadSystemAbility011
+ * @tc.desc: test LoadSystemAbility with invalid said
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, LoadSystemAbility011, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
+    int32_t ret = saMgr->LoadSystemAbility(-1, callback);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
 
@@ -1053,6 +1080,93 @@ HWTEST_F(SystemAbilityMgrTest, LoadSystemAbilityFromRpc005, TestSize.Level2)
     int32_t systemAbilityId = 1;
     bool ret = saMgr->LoadSystemAbilityFromRpc(deviceId, systemAbilityId, nullptr);
     EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: LoadSystemAbilityFromRpc006
+ * @tc.desc: load system ability with sa profile distributed false.
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrTest, LoadSystemAbilityFromRpc006, TestSize.Level2)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::string deviceId = "2222222";
+    int32_t systemAbilityId = 1;
+    SaProfile saProfile;
+    saMgr->saProfileMap_[1] = saProfile;
+    bool ret = saMgr->LoadSystemAbilityFromRpc(deviceId, systemAbilityId, nullptr);
+    EXPECT_FALSE(ret);
+    saMgr->saProfileMap_.clear();
+}
+
+/**
+ * @tc.name: LoadSystemAbilityFromRpc007
+ * @tc.desc: load system ability with abilityStateScheduler_ nullptr
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrTest, LoadSystemAbilityFromRpc007, TestSize.Level2)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::string deviceId = "2222222";
+    int32_t systemAbilityId = 1;
+    SaProfile saProfile;
+    saProfile.distributed = true;
+    saMgr->saProfileMap_[1] = saProfile;
+    saMgr->abilityStateScheduler_ = nullptr;
+    bool ret = saMgr->LoadSystemAbilityFromRpc(deviceId, systemAbilityId, nullptr);
+    EXPECT_FALSE(ret);
+    saMgr->saProfileMap_.clear();
+}
+
+/**
+ * @tc.name: LoadSystemAbilityFromRpc008
+ * @tc.desc: load system ability with distributed true
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrTest, LoadSystemAbilityFromRpc008, TestSize.Level2)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::string deviceId = "2222222";
+    int32_t systemAbilityId = 1;
+    SaProfile saProfile;
+    saProfile.distributed = true;
+    saMgr->saProfileMap_[1] = saProfile;
+    bool ret = saMgr->LoadSystemAbilityFromRpc(deviceId, systemAbilityId, nullptr);
+    EXPECT_FALSE(ret);
+    saMgr->saProfileMap_.clear();
+}
+
+/**
+ * @tc.name: UnloadSystemAbility001
+ * @tc.desc: UnloadSystemAbility sa not exist
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrTest, UnloadSystemAbility001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t result = saMgr->UnloadSystemAbility(1);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: UnloadSystemAbility002
+ * @tc.desc: UnloadSystemAbility, abilityStateScheduler_ is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrTest, UnloadSystemAbility002, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    SaProfile saProfile;
+    saMgr->saProfileMap_[1] = saProfile;
+    saMgr->abilityStateScheduler_ = nullptr;
+    int32_t result = saMgr->UnloadSystemAbility(1);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    saMgr->saProfileMap_.clear();
 }
 
 /**
@@ -1847,6 +1961,21 @@ HWTEST_F(SystemAbilityMgrTest, DoLoadRemoteSystemAbility003, TestSize.Level1)
      */
     saMgr->DoLoadRemoteSystemAbility(11111, 0, 0, "222", mockLoadCallback2);
     ASSERT_EQ(saMgr->remoteCallbacks_.size(), 1);
+}
+
+/**
+ * @tc.name: DoLoadRemoteSystemAbility004 test
+ * @tc.desc: test for load complete, callback is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrTest, DoLoadRemoteSystemAbility004, TestSize.Level1)
+{
+    DTEST_LOG << " DoLoadRemoteSystemAbility004 start " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->remoteCallbacks_.clear();
+    saMgr->DoLoadRemoteSystemAbility(11111, 0, 0, "222", nullptr);
+    ASSERT_EQ(saMgr->remoteCallbacks_.size(), 0);
 }
 
 /**
@@ -2945,6 +3074,23 @@ HWTEST_F(SystemAbilityMgrTest, StopOnDemandAbilityInner002, TestSize.Level3)
 }
 
 /**
+ * @tc.name: StopOnDemandAbility001
+ * @tc.desc: test StopOnDemandAbility001
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+HWTEST_F(SystemAbilityMgrTest, StopOnDemandAbility001, TestSize.Level3)
+{
+    DTEST_LOG << " StopOnDemandAbility001 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::u16string procName = u"";
+    int32_t systemAbilityId = 1;
+    OnDemandEvent event;
+    bool ret = saMgr->StopOnDemandAbility(procName, systemAbilityId, event);
+    EXPECT_EQ(ret, false);
+}
+
+/**
  * @tc.name: DoLoadOnDemandAbility001
  * @tc.desc: test DoLoadOnDemandAbility, abilityProxy is no nullptr
  * @tc.type: FUNC
@@ -3155,7 +3301,11 @@ HWTEST_F(SystemAbilityMgrTest, CheckCallerProcess001, TestSize.Level3)
     /**
      * @tc.steps: step1. test ConvertToOnDemandEvent
      */
+    SystemAbilityOnDemandCondition condition;
+    condition.eventId = OnDemandEventId::DEVICE_ONLINE;
     SystemAbilityOnDemandEvent from;
+    from.conditions.push_back(condition);
+
     OnDemandEvent to;
     saMgr->ConvertToOnDemandEvent(from, to);
 
@@ -3177,7 +3327,11 @@ HWTEST_F(SystemAbilityMgrTest, CheckCallerProcess002, TestSize.Level3)
     /**
      * @tc.steps: step1. test ConvertToSystemAbilityOnDemandEvent
      */
+    OnDemandCondition condition;
+    condition.eventId = -1;
     OnDemandEvent from;
+    from.conditions.push_back(condition);
+
     SystemAbilityOnDemandEvent to;
     saMgr->ConvertToSystemAbilityOnDemandEvent(from, to);
 
@@ -3338,6 +3492,171 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandReasonExtraData003, TestSize.Level3)
 }
 
 /**
+ * @tc.name: GetSystemAbilityWithDevice001
+ * @tc.desc: get invalid system ability.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, GetSystemAbilityWithDevice001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    std::string deviceId = "";
+    auto ability = saMgr->GetSystemAbility(TEST_EXCEPTION_LOW_SA_ID, deviceId);
+    EXPECT_EQ(ability, nullptr);
+}
+
+/**
+ * @tc.name: GetSystemAbilityFromRemote001
+ * @tc.desc: get invalid system ability.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, GetSystemAbilityFromRemote001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    auto ability = saMgr->GetSystemAbilityFromRemote(TEST_EXCEPTION_LOW_SA_ID);
+    EXPECT_EQ(ability, nullptr);
+}
+
+/**
+ * @tc.name: GetSystemAbilityFromRemote002
+ * @tc.desc: get not exist system ability.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, GetSystemAbilityFromRemote002, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    auto ability = saMgr->GetSystemAbilityFromRemote(TEST_SYSTEM_ABILITY1);
+    EXPECT_EQ(ability, nullptr);
+}
+
+/**
+ * @tc.name: GetSystemAbilityFromRemote003
+ * @tc.desc: get exist system ability.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, GetSystemAbilityFromRemote003, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    SAInfo saInfo;
+    saMgr->abilityMap_[1] = saInfo;
+    auto ability = saMgr->GetSystemAbilityFromRemote(1);
+    EXPECT_EQ(ability, nullptr);
+}
+
+/**
+ * @tc.name: GetSystemAbilityFromRemote004
+ * @tc.desc: get exist system ability, isDistributed is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, GetSystemAbilityFromRemote004, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    SAInfo saInfo;
+    saInfo.isDistributed = true;
+    saMgr->abilityMap_[1] = saInfo;
+    auto ability = saMgr->GetSystemAbilityFromRemote(1);
+    EXPECT_EQ(ability, nullptr);
+}
+
+/**
+ * @tc.name: GetDBinder001
+ * @tc.desc: GetDBinder, return null
+ * @tc.type: FUNC
+ * @tc.require: I7VEPG
+ */
+
+HWTEST_F(SystemAbilityMgrTest, GetDBinder001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    sptr<DBinderService> result = saMgr->GetDBinder();
+    EXPECT_TRUE(saMgr != nullptr);
+}
+
+/**
+ * @tc.name: TransformDeviceId001
+ * @tc.desc: TransformDeviceId, isPrivate false
+ * @tc.type: FUNC
+ * @tc.require: I7VEPG
+ */
+
+HWTEST_F(SystemAbilityMgrTest, TransformDeviceId001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    string result = saMgr->TransformDeviceId("123", 1, false);
+    EXPECT_EQ(result, "123");
+}
+
+/**
+ * @tc.name: TransformDeviceId002
+ * @tc.desc: TransformDeviceId, isPrivate true
+ * @tc.type: FUNC
+ * @tc.require: I7VEPG
+ */
+
+HWTEST_F(SystemAbilityMgrTest, TransformDeviceId002, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    string result = saMgr->TransformDeviceId("123", 1, true);
+    EXPECT_EQ(result, "");
+}
+
+/**
+ * @tc.name: NotifyRpcLoadCompleted001
+ * @tc.desc: test NotifyRpcLoadCompleted, workHandler_ is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+
+HWTEST_F(SystemAbilityMgrTest, NotifyRpcLoadCompleted001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    sptr<IRemoteObject> testAbility = new TestTransactionService();
+    saMgr->workHandler_ = nullptr;
+    saMgr->NotifyRpcLoadCompleted("", 1, testAbility);
+    EXPECT_TRUE(saMgr != nullptr);
+}
+
+/**
+ * @tc.name: NotifyRpcLoadCompleted003
+ * @tc.desc: test NotifyRpcLoadCompleted, dBinderService_ is null
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+
+HWTEST_F(SystemAbilityMgrTest, NotifyRpcLoadCompleted003, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    sptr<IRemoteObject> testAbility = new TestTransactionService();
+    saMgr->dBinderService_ = nullptr;
+    saMgr->NotifyRpcLoadCompleted("", 1, testAbility);
+    EXPECT_TRUE(saMgr != nullptr);
+}
+
+/**
+ * @tc.name: NotifyRpcLoadCompleted004
+ * @tc.desc: test NotifyRpcLoadCompleted
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+HWTEST_F(SystemAbilityMgrTest, NotifyRpcLoadCompleted004, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    sptr<IRemoteObject> testAbility = new TestTransactionService();
+    saMgr->NotifyRpcLoadCompleted("", 1, testAbility);
+    EXPECT_TRUE(saMgr != nullptr);
+}
+
+/**
  * @tc.name: Dump001
  * @tc.desc: call Dump, return ERR_OK
  * @tc.type: FUNC
@@ -3348,6 +3667,7 @@ HWTEST_F(SystemAbilityMgrTest, Dump001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     vector<std::u16string> args;
+    args.push_back(u"test_name");
     int32_t result = saMgr->Dump(1, args);
     EXPECT_EQ(result, ERR_OK);
 }
@@ -3364,6 +3684,7 @@ HWTEST_F(SystemAbilityMgrTest, AddSamgrToAbilityMap001, TestSize.Level3)
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     saMgr->AddSamgrToAbilityMap();
     vector<std::u16string> args;
+    args.push_back(u"test_name");
     int32_t result = saMgr->Dump(1, args);
     EXPECT_EQ(result, ERR_OK);
 }
