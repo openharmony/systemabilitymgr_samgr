@@ -209,7 +209,7 @@ HWTEST_F(CommonEventCollectTest, ProcessEvent004, TestSize.Level3)
     sptr<CommonEventCollect> commonEventCollect = nullptr;
     std::shared_ptr<CommonHandler> commonHandler = std::make_shared<CommonHandler>(commonEventCollect);
     AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
-    event->innerEventId_ = -1;
+    event->innerEventId_ = static_cast<uint32_t>(-1);
     auto destructor = [](AppExecFwk::InnerEvent *event) {
         if (event != nullptr) {
             delete event;
