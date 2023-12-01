@@ -628,7 +628,7 @@ bool SystemAbilityManager::IsNameInValid(const std::u16string& name)
 void SystemAbilityManager::StartOnDemandAbility(const std::u16string& procName, int32_t systemAbilityId)
 {
     lock_guard<mutex> autoLock(onDemandLock_);
-	StartOnDemandAbilityLocked(procName, systemAbilityId);
+    StartOnDemandAbilityLocked(procName, systemAbilityId);
 }
 
 void SystemAbilityManager::StartOnDemandAbilityLocked(const std::u16string& procName, int32_t systemAbilityId)
@@ -723,7 +723,7 @@ int32_t SystemAbilityManager::AddOnDemandSystemAbilityInfo(int32_t systemAbility
 int32_t SystemAbilityManager::StartOnDemandAbility(int32_t systemAbilityId, bool& isExist)
 {
     lock_guard<mutex> onDemandAbilityLock(onDemandLock_);
-	return StartOnDemandAbilityLocked(systemAbilityId, isExist);
+    return StartOnDemandAbilityLocked(systemAbilityId, isExist);
 }
 
 int32_t SystemAbilityManager::StartOnDemandAbilityLocked(int32_t systemAbilityId, bool& isExist)
@@ -1431,19 +1431,23 @@ int32_t SystemAbilityManager::StartingSystemProcessLocked(const std::u16string& 
         return ERR_OK;
     }
     // call init start process
+    int64_t begin = 0;
     {
         lock_guard<mutex> autoLock(startingProcessMapLock_);
         if (startingProcessMap_.count(procName) != 0) {
             HILOGI("StartingSystemProcess process:%{public}s already starting!", Str16ToStr8(procName).c_str());
             return ERR_OK;
+        } else {
+            begin = GetTickCount();
+            startingProcessMap_.emplace(procName, begin);
         }
     }
-    int64_t begin = GetTickCount();
     int32_t result = StartDynamicSystemProcess(procName, systemAbilityId, event);
-    if (result == ERR_OK) {
+    if (result != ERR_OK) {
         lock_guard<mutex> autoLock(startingProcessMapLock_);
-        if (startingProcessMap_.count(procName) == 0) {
-            startingProcessMap_.emplace(procName, begin);
+        auto iterStarting = startingProcessMap_.find(procName);
+        if (iterStarting != startingProcessMap_.end()) {
+            startingProcessMap_.erase(iterStarting);
         }
     }
     return result;
@@ -1466,19 +1470,23 @@ int32_t SystemAbilityManager::StartingSystemProcess(const std::u16string& procNa
         return ERR_OK;
     }
     // call init start process
+    int64_t begin = 0;
     {
         lock_guard<mutex> autoLock(startingProcessMapLock_);
         if (startingProcessMap_.count(procName) != 0) {
             HILOGI("StartingSystemProcess process:%{public}s already starting!", Str16ToStr8(procName).c_str());
             return ERR_OK;
+        } else {
+            begin = GetTickCount();
+            startingProcessMap_.emplace(procName, begin);
         }
     }
-    int64_t begin = GetTickCount();
     int32_t result = StartDynamicSystemProcess(procName, systemAbilityId, event);
-    if (result == ERR_OK) {
+    if (result != ERR_OK) {
         lock_guard<mutex> autoLock(startingProcessMapLock_);
-        if (startingProcessMap_.count(procName) == 0) {
-            startingProcessMap_.emplace(procName, begin);
+        auto iterStarting = startingProcessMap_.find(procName);
+        if (iterStarting != startingProcessMap_.end()) {
+            startingProcessMap_.erase(iterStarting);
         }
     }
     return result;
@@ -1515,11 +1523,11 @@ int32_t SystemAbilityManager::DoLoadSystemAbility(int32_t systemAbilityId, const
             HILOGI("LoadSystemAbility systemAbilityId:%{public}d AddDeathRecipient %{public}s",
                 systemAbilityId, ret ? "succeed" : "failed");
         }
-        result = StartingSystemProcessLocked(procName, systemAbilityId, event);
         ReportSamgrSaLoad(systemAbilityId, event.eventId);
         HILOGI("LoadSystemAbility systemAbilityId:%{public}d size : %{public}zu",
             systemAbilityId, abilityItem.callbackMap[LOCAL_DEVICE].size());
     }
+    result = StartingSystemProcess(procName, systemAbilityId, event);
     SendCheckLoadedMsg(systemAbilityId, procName, LOCAL_DEVICE, callback);
     return result;
 }
