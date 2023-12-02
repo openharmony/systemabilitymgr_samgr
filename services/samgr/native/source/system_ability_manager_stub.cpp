@@ -675,11 +675,6 @@ int32_t SystemAbilityManagerStub::UnloadAllIdleSystemAbilityInner(MessageParcel&
 {
     int32_t result = UnloadAllIdleSystemAbility();
     HILOGI("SystemAbilityManagerStub::UnloadAllIdleSystemAbilityInner result is %{public}d", result);
-    bool ret = reply.WriteInt32(result);
-    if (!ret) {
-        HILOGW("SystemAbilityManagerStub::UnloadAllIdleSystemAbilityInner write reply failed.");
-        return ERR_FLATTEN_OBJECT;
-    }
     return result;
 }
 
