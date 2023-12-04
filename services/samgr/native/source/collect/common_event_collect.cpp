@@ -180,8 +180,8 @@ CommonEventListener::CommonEventListener(const sptr<CommonEventCollect>& commonE
 
 void CommonEventListener::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
 {
-    if (commonEventSubscriber_ == nullptr) {
-        HILOGE("commonEventSubscriber_ is nullptr!");
+    if (commonEventCollect_ == nullptr) {
+        HILOGE("commonEventCollect_ is nullptr!");
         return;
     }
     if (systemAbilityId == COMMON_EVENT_SERVICE_ID) {
