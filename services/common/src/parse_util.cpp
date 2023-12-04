@@ -175,22 +175,11 @@ void ParseUtil::OpenSo(SaProfile& saProfile)
             return;
         }
         bool loadFromModuleUpdate = false;
-        Dl_namespace dlNs;
         string updateLibPath = GetRealPath("/module_update/" + ToString(saProfile.saId) + "/" + libDir + "/"
             + fileName);
         if (IsUpdateSA(ToString(saProfile.saId)) && CheckPathExist(updateLibPath)) {
-            HILOGI("create namespace to load so");
-            Dl_namespace currentNs;
-            string nsName = "module_update_" + ToString(saProfile.saId);
-            dlns_init(&dlNs, nsName.c_str());
-            dlns_get(nullptr, &currentNs);
-
-            string libLdPath = GetRealPath("/module_update/" + ToString(saProfile.saId) + "/" + libDir);
-            if (!libLdPath.empty()) {
-                dlns_create(&dlNs, libLdPath.c_str());
-                dlns_inherit(&dlNs, &currentNs, nullptr);
-                loadFromModuleUpdate = true;
-            }
+            HILOGI("load module_update so");
+            loadFromModuleUpdate = true;
         }
 
         string dlopenTag = ToString(saProfile.saId) + "_DLOPEN";
@@ -198,7 +187,7 @@ void ParseUtil::OpenSo(SaProfile& saProfile)
         int64_t begin = GetTickCount();
         DlHandle handle = nullptr;
         if (loadFromModuleUpdate) {
-            handle = dlopen_ns(&dlNs, updateLibPath.c_str(), RTLD_NOW);
+            handle = dlopen(updateLibPath.c_str(), RTLD_NOW);
         }
         if (handle == nullptr) {
             handle = dlopen(saProfile.libPath.c_str(), RTLD_NOW);
