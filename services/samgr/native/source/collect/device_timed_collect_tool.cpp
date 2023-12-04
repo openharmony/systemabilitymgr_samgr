@@ -95,8 +95,8 @@ std::map<std::string, NativePreferences::PreferencesValue> PreferencesUtil::Obta
     if (!GetPreference()) {
         return {};
     }
-    if (ptr == nullptr) {
-        HILOGE("ptr is nullptr");
+    if (ptr_ == nullptr) {
+        HILOGE("ptr_ is nullptr");
         return {};
     }
     return ptr_->GetAll();
@@ -140,8 +140,8 @@ bool PreferencesUtil::RefreshSync()
         HILOGI("RefreshSync GetPreference failed");
         return false;
     }
-    if (ptr == nullptr) {
-        HILOGE("ptr is nullptr");
+    if (ptr_ == nullptr) {
+        HILOGE("ptr_ is nullptr");
         return false;
     }
     if (ptr_->FlushSync() != NativePreferences::E_OK) {
@@ -157,8 +157,8 @@ bool PreferencesUtil::IsExist(const std::string& key)
         HILOGI("IsExist GetPreference failed");
         return false;
     }
-    if (ptr == nullptr) {
-        HILOGE("ptr is nullptr");
+    if (ptr_ == nullptr) {
+        HILOGE("ptr_ is nullptr");
         return false;
     }
     return ptr_->HasKey(key);
@@ -170,8 +170,8 @@ bool PreferencesUtil::Remove(const std::string &key)
         HILOGI("Remove GetPreference failed");
         return false;
     }
-    if (ptr == nullptr) {
-        HILOGE("ptr is nullptr");
+    if (ptr_ == nullptr) {
+        HILOGE("ptr_ is nullptr");
         return false;
     }
     if (ptr_->Delete(key) != NativePreferences::E_OK) {
