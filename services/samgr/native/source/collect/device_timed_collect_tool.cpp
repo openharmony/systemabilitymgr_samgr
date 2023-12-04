@@ -97,7 +97,7 @@ std::map<std::string, NativePreferences::PreferencesValue> PreferencesUtil::Obta
     }
     if (ptr == nullptr) {
         HILOGE("ptr is nullptr");
-        return false;
+        return {};
     }
     return ptr_->GetAll();
 }
