@@ -107,7 +107,7 @@ void CommonEventCollect::Init(const std::list<SaProfile>& onDemandSaProfiles)
         commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_POWER_CONNECTED);
         commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_POWER_DISCONNECTED);
     }
-    
+
     for (auto& profile : onDemandSaProfiles) {
         for (auto iterStart = profile.startOnDemand.onDemandEvents.begin();
             iterStart != profile.startOnDemand.onDemandEvents.end(); iterStart++) {
@@ -131,6 +131,10 @@ void CommonEventCollect::AddSkillsEvent(EventFwk::MatchingSkills& skill)
 
 void CommonEventCollect::CleanFailedEventLocked(const std::string& eventName)
 {
+    if (commonEventSubscriber_ == nullptr) {
+        HILOGE("commonEventSubscriber_ is nullptr!");
+        return;
+    }
     EventFwk::MatchingSkills skill = commonEventSubscriber_->GetSubscribeInfo().GetMatchingSkills();
     skill.RemoveEvent(eventName);
     std::lock_guard<std::mutex> autoLock(commomEventLock_);
@@ -144,7 +148,7 @@ bool CommonEventCollect::CreateCommonEventSubscriber()
 }
 
 bool CommonEventCollect::CreateCommonEventSubscriberLocked()
-{ 
+{
     EventFwk::MatchingSkills skill;
     if (commonEventSubscriber_ != nullptr) {
         skill = commonEventSubscriber_->GetSubscribeInfo().GetMatchingSkills();
@@ -176,6 +180,10 @@ CommonEventListener::CommonEventListener(const sptr<CommonEventCollect>& commonE
 
 void CommonEventListener::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
 {
+    if (commonEventCollect_ == nullptr) {
+        HILOGE("commonEventCollect_ is nullptr!");
+        return;
+    }
     if (systemAbilityId == COMMON_EVENT_SERVICE_ID) {
         HILOGI("CommonEventCollect ces is ready");
         commonEventCollect_->SendEvent(SUB_COMMON_EVENT);
@@ -294,6 +302,10 @@ int64_t CommonEventCollect::SaveOnDemandReasonExtraData(const EventFwk::CommonEv
     int64_t extraDataId = GenerateExtraDataIdLocked();
     extraDatas_[extraDataId] = extraData;
     HILOGD("CommonEventCollect save extraData %{public}d", static_cast<int32_t>(extraDataId));
+    if (workHandler_ == nullptr) {
+        HILOGI("CommonEventCollect workHandler is nullptr");
+        return -1;
+    }
     workHandler_->SendEvent(REMOVE_EXTRA_DATA_EVENT, extraDataId, REMOVE_EXTRA_DATA_DELAY_TIME);
     return extraDataId;
 }

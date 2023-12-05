@@ -212,7 +212,9 @@ bool DeviceStatusCollectManager::CheckExtraMessages(const OnDemandEvent& ev1, co
 void DeviceStatusCollectManager::UnInit()
 {
     for (auto& iter : collectPluginMap_) {
-        iter.second->OnStop();
+        if (iter.second != nullptr) {
+            iter.second->OnStop();
+        }
     }
     collectPluginMap_.clear();
 

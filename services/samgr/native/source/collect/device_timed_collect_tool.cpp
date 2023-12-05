@@ -73,18 +73,30 @@ bool PreferencesUtil::Save(const std::string& key, const T& value)
 bool PreferencesUtil::SaveInner(
     std::shared_ptr<NativePreferences::Preferences> ptr, const std::string& key, const int64_t& value)
 {
+    if (ptr == nullptr) {
+        HILOGE("ptr is nullptr");
+        return false;
+    }
     return ptr->PutLong(key, value) == NativePreferences::E_OK;
 }
 
 bool PreferencesUtil::SaveInner(
     std::shared_ptr<NativePreferences::Preferences> ptr, const std::string& key, const string& value)
 {
+    if (ptr == nullptr) {
+        HILOGE("ptr is nullptr");
+        return false;
+    }
     return ptr->PutString(key, value) == NativePreferences::E_OK;
 }
 
 std::map<std::string, NativePreferences::PreferencesValue> PreferencesUtil::ObtainAll()
 {
     if (!GetPreference()) {
+        return {};
+    }
+    if (ptr_ == nullptr) {
+        HILOGE("ptr_ is nullptr");
         return {};
     }
     return ptr_->GetAll();
@@ -128,6 +140,10 @@ bool PreferencesUtil::RefreshSync()
         HILOGI("RefreshSync GetPreference failed");
         return false;
     }
+    if (ptr_ == nullptr) {
+        HILOGE("ptr_ is nullptr");
+        return false;
+    }
     if (ptr_->FlushSync() != NativePreferences::E_OK) {
         HILOGE("RefreshSync error");
         return false;
@@ -141,6 +157,10 @@ bool PreferencesUtil::IsExist(const std::string& key)
         HILOGI("IsExist GetPreference failed");
         return false;
     }
+    if (ptr_ == nullptr) {
+        HILOGE("ptr_ is nullptr");
+        return false;
+    }
     return ptr_->HasKey(key);
 }
 
@@ -148,6 +168,10 @@ bool PreferencesUtil::Remove(const std::string &key)
 {
     if (!GetPreference()) {
         HILOGI("Remove GetPreference failed");
+        return false;
+    }
+    if (ptr_ == nullptr) {
+        HILOGE("ptr_ is nullptr");
         return false;
     }
     if (ptr_->Delete(key) != NativePreferences::E_OK) {
