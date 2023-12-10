@@ -136,6 +136,7 @@ enum {
     SUBSYS_DRIVERS_SYS_ABILITY_ID_BEGIN              = 1500,
     SUBSYS_GLOBAL_SYS_ABILITY_ID_BEGIN               = 1600,
     ENTERPRISE_DEVICE_MANAGER_SA_ID                  = 1601,
+    I18N_SA_ID                                       = 1602,
     SUBSYS_GRAPHIC_SYS_ABILITY_ID_BEGIN              = 1700,
     SUBSYS_HBS_SYS_ABILITY_ID_BEGIN                  = 1800,
     SUBSYS_IAWARE_SYS_ABILITY_ID_BEGIN               = 1900,
