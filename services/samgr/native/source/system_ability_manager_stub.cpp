@@ -101,7 +101,7 @@ namespace {
 
 using namespace OHOS::Security;
 namespace OHOS {
-SystemAbilityManagerStub::SystemAbilityManagerStub()
+void SystemAbilityManagerStub::SetAbilityFuncMap()
 {
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_SYSTEM_ABILITY_TRANSACTION)] =
         &SystemAbilityManagerStub::GetSystemAbilityInner;
@@ -123,8 +123,6 @@ SystemAbilityManagerStub::SystemAbilityManagerStub()
         &SystemAbilityManagerStub::CheckSystemAbilityImmeInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::UNSUBSCRIBE_SYSTEM_ABILITY_TRANSACTION)] =
         &SystemAbilityManagerStub::UnSubsSystemAbilityInner;
-    memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::ADD_SYSTEM_PROCESS_TRANSACTION)] =
-        &SystemAbilityManagerStub::AddSystemProcessInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::LOAD_SYSTEM_ABILITY_TRANSACTION)] =
         &SystemAbilityManagerStub::LoadSystemAbilityInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::LOAD_REMOTE_SYSTEM_ABILITY_TRANSACTION)] =
@@ -133,6 +131,12 @@ SystemAbilityManagerStub::SystemAbilityManagerStub()
         &SystemAbilityManagerStub::UnloadSystemAbilityInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::CANCEL_UNLOAD_SYSTEM_ABILITY_TRANSACTION)] =
         &SystemAbilityManagerStub::CancelUnloadSystemAbilityInner;
+}
+
+void SystemAbilityManagerStub::SetProcessFuncMap()
+{
+    memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::ADD_SYSTEM_PROCESS_TRANSACTION)] =
+        &SystemAbilityManagerStub::AddSystemProcessInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_SYSTEM_PROCESS_INFO_TRANSACTION)] =
         &SystemAbilityManagerStub::GetSystemProcessInfoInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_RUNNING_SYSTEM_PROCESS_TRANSACTION)] =
@@ -141,6 +145,12 @@ SystemAbilityManagerStub::SystemAbilityManagerStub()
         &SystemAbilityManagerStub::SubscribeSystemProcessInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::UNSUBSCRIBE_SYSTEM_PROCESS_TRANSACTION)] =
         &SystemAbilityManagerStub::UnSubscribeSystemProcessInner;
+}
+
+SystemAbilityManagerStub::SystemAbilityManagerStub()
+{
+    SetAbilityFuncMap();
+    SetProcessFuncMap();
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_ONDEMAND_REASON_EXTRA_DATA_TRANSACTION)] =
         &SystemAbilityManagerStub::GetOnDemandReasonExtraDataInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_ONDEAMND_POLICY_TRANSACTION)] =
