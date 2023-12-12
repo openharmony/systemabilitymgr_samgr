@@ -60,6 +60,8 @@ private:
     int32_t GetOnDemandSystemAbilityIdsInner(MessageParcel& data, MessageParcel& reply);
     int32_t SendStrategyInner(MessageParcel& data, MessageParcel& reply);
     static int32_t GetHapIdMultiuser(int32_t uid);
+    void SetAbilityFuncMap();
+    void SetProcessFuncMap();
 
     using SystemAbilityManagerStubFunc =
         int32_t (SystemAbilityManagerStub::*)(MessageParcel& data, MessageParcel& reply);
