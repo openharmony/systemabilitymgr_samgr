@@ -1431,14 +1431,13 @@ int32_t SystemAbilityManager::StartingSystemProcessLocked(const std::u16string& 
         return ERR_OK;
     }
     // call init start process
-    int64_t begin = 0;
     {
         lock_guard<mutex> autoLock(startingProcessMapLock_);
         if (startingProcessMap_.count(procName) != 0) {
             HILOGI("StartingSystemProcess process:%{public}s already starting!", Str16ToStr8(procName).c_str());
             return ERR_OK;
         } else {
-            begin = GetTickCount();
+            int64_t begin = GetTickCount();
             startingProcessMap_.emplace(procName, begin);
         }
     }
@@ -1470,14 +1469,13 @@ int32_t SystemAbilityManager::StartingSystemProcess(const std::u16string& procNa
         return ERR_OK;
     }
     // call init start process
-    int64_t begin = 0;
     {
         lock_guard<mutex> autoLock(startingProcessMapLock_);
         if (startingProcessMap_.count(procName) != 0) {
             HILOGI("StartingSystemProcess process:%{public}s already starting!", Str16ToStr8(procName).c_str());
             return ERR_OK;
         } else {
-            begin = GetTickCount();
+            int64_t begin = GetTickCount();
             startingProcessMap_.emplace(procName, begin);
         }
     }
