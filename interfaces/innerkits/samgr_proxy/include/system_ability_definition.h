@@ -237,6 +237,7 @@ enum {
     WALLPAPER_MANAGER_SERVICE_ID                     = 3705,
     DOWNLOAD_SERVICE_ID                              = 3706,
     PRINT_SERVICE_ID                                 = 3707,
+    SCAN_SERVICE_ID                                  = 3708,
     SUBSYS_SOURCECODETRANSFORMER_SYS_ABILITY_ID_BEGIN = 3800,
     SUBSYS_STARTUP_SYS_ABILITY_ID_BEGIN              = 3900,
     PARAM_WATCHER_DISTRIBUTED_SERVICE_ID             = 3901,
