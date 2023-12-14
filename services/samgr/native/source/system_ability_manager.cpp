@@ -73,6 +73,7 @@ constexpr int32_t MAX_SA_FREQUENCY_COUNT = INT32_MAX - 1000000;
 constexpr int32_t SHFIT_BIT = 32;
 constexpr int32_t DEVICE_INFO_SERVICE_SA = 3902;
 constexpr int32_t HIDUMPER_SERVICE_SA = 1212;
+constexpr int32_t MEDIA_ANALYSIS_SERVICE_SA = 10120;
 constexpr int64_t ONDEMAND_PERF_DELAY_TIME = 60 * 1000; // ms
 constexpr int64_t CHECK_LOADED_DELAY_TIME = 4 * 1000; // ms
 constexpr int32_t SOFTBUS_SERVER_SA_ID = 4700;
@@ -185,6 +186,7 @@ void SystemAbilityManager::InitSaProfile()
     lock_guard<mutex> autoLock(saProfileMapLock_);
     onDemandSaIdsSet_.insert(DEVICE_INFO_SERVICE_SA);
     onDemandSaIdsSet_.insert(HIDUMPER_SERVICE_SA);
+    onDemandSaIdsSet_.insert(MEDIA_ANALYSIS_SERVICE_SA);
     for (const auto& saInfo : saInfos) {
         saProfileMap_[saInfo.saId] = saInfo;
         if (!saInfo.runOnCreate) {
@@ -1075,6 +1077,7 @@ void SystemAbilityManager::SystemAbilityInvalidateCache(int32_t systemAbilityId)
 {
     auto pos = onDemandSaIdsSet_.find(systemAbilityId);
     if (pos != onDemandSaIdsSet_.end()) {
+        HILOGI("SystemAbilityInvalidateCache:systemAbilityId is %{public}d.", systemAbilityId);
         return;
     }
     auto invalidateCacheTask = [this] () {
