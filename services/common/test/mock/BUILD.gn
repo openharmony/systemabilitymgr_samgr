@@ -22,8 +22,6 @@ ohos_shared_library("mock_sa") {
   sources = [ "src/mock_sa.cpp" ]
   configs = [ ":mock_sa_config" ]
 
-  external_deps = [ "safwk:system_ability_fwk" ]
-
   part_name = "samgr"
   subsystem_name = "systemabilitymgr"
 }
