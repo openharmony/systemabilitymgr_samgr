@@ -265,6 +265,10 @@ void WorkHandler::ProcessEvent(uint32_t eventId)
     if (!collect_->AddDeviceChangeListener()) {
         HILOGW("DeviceNetworkingCollect AddDeviceChangeListener retry");
         auto task = std::bind(&WorkHandler::ProcessEvent, this, INIT_EVENT);
+        if (handler_ == nullptr) {
+            HILOGE("DeviceNetworkingCollect ProcessEvent handler is null!");
+            return;
+        }
         handler_->PostTask(task, DELAY_TIME);
     }
     HILOGI("DeviceNetworkingCollect AddDeviceChangeListener success");
