@@ -829,6 +829,19 @@ HWTEST_F(SystemAbilityMgrProxyTest, UnSubscribeSystemProcess002, TestSize.Level3
 }
 
 /**
+ * @tc.name: UnloadAllIdleSa001
+ * @tc.desc: UnloadAllIdleSystemAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, UnloadAllIdleSa001, TestSize.Level1)
+{
+    SamMockPermission::MockProcess("memmgrservice");
+    sptr<ISystemAbilityManager> samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    int32_t res = samgrProxy->UnloadAllIdleSystemAbility();
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
  * @tc.name: OnRemoteRequest001
  * @tc.desc: OnRemoteRequest001
  * @tc.type: FUNC
