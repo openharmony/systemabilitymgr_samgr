@@ -142,6 +142,7 @@ ohos_unittest("SystemAbilityMgrTest") {
       "${samgr_services_dir}/source/collect/common_event_collect.cpp",
       "${samgr_services_dir}/test/unittest/src/common_event_collect_test.cpp",
       "${samgr_services_dir}/test/unittest/src/device_status_collect_manager_test.cpp",
+      "${samgr_services_dir}/test/unittest/src/system_ability_mgr_new_test.cpp",
       "${samgr_services_dir}/test/unittest/src/system_ability_mgr_test.cpp",
     ]
     external_deps += [
