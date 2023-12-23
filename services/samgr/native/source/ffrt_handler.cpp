@@ -44,7 +44,7 @@ bool FFRTHandler::PostTask(std::function<void()> func)
 
 bool FFRTHandler::PostTask(std::function<void()> func, uint32_t delayTime)
 {
-    if (delayTime > std::numeric_limits<uint32_t>::max() / CONVERSION_FACTOR) {
+    if (delayTime > std::numeric_limits<uint32_t>::max()) {
         HILOGE("invalid delay time");
         return false;
     }
