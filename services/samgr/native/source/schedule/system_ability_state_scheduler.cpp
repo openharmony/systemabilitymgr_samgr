@@ -676,15 +676,9 @@ int32_t SystemAbilityStateScheduler::KillSystemProcessLocked(
     const std::shared_ptr<SystemProcessContext>& processContext)
 {
     int32_t result = ERR_OK;
-    #ifdef RESSCHED_ENABLE
-    std::unordered_map<std::string, std::string> payload;
-    payload["pid"] = std::to_string(processContext->pid);
-    payload["uid"] = std::to_string(processContext->uid);
-    payload["processName"] = Str16ToStr8(processContext->processName);
-    result = ResourceSchedule::ResSchedClient::GetInstance().KillProcess(payload);
+    result = ServiceControlWithExtra(Str16ToStr8(processContext->processName).c_str(), ServiceAction::STOP, nullptr, 0);
     HILOGI("[SA Scheduler][process: %{public}s] kill process, pid: %{public}d, uid: %{public}d, result: %{public}d",
         Str16ToStr8(processContext->processName).c_str(), processContext->pid, processContext->uid, result);
-    #endif
     return result;
 }
 
