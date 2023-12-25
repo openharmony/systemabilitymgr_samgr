@@ -365,4 +365,42 @@ HWTEST_F(SystemAbilityManagerDumperTest, Dump006, TestSize.Level3)
     bool ret = SystemAbilityManagerDumper::Dump(abilityStateScheduler, args, result);
     EXPECT_FALSE(ret);
 }
+
+/**
+ * @tc.name: Dump007
+ * @tc.desc: call Dump, ShowAllSystemAbilityInfo
+ * @tc.type: FUNC
+ * @tc.require: I7VEPG
+ */
+
+HWTEST_F(SystemAbilityManagerDumperTest, Dump007, TestSize.Level3)
+{
+    SamMockPermission::MockProcess("hidumper_service");
+    std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler = nullptr;
+    std::vector<std::string> args;
+    args.push_back("-sm");
+    std::string result;
+    bool ret = SystemAbilityManagerDumper::Dump(abilityStateScheduler, args, result);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: Dump008
+ * @tc.desc: call Dump, ShowAllSystemAbilityInfoInState
+ * @tc.type: FUNC
+ * @tc.require: I7VEPG
+ */
+
+HWTEST_F(SystemAbilityManagerDumperTest, Dump008, TestSize.Level3)
+{
+    SamMockPermission::MockProcess("hidumper_service");
+    std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler = nullptr;
+    std::vector<std::string> args;
+    std::string state;
+    args.push_back("-h");
+    args.push_back(state);
+    std::string result;
+    bool ret = SystemAbilityManagerDumper::Dump(abilityStateScheduler, args, result);
+    EXPECT_FALSE(ret);
+}
 }
