@@ -2741,4 +2741,105 @@ HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemProcessInner003, TestSize.Le
     int32_t ret = saMgr->UnSubscribeSystemProcessInner(data, reply);
     EXPECT_EQ(ret, ERR_OK);
 }
+
+/**
+ * @tc.name: UnloadSystemAbilityInner003
+ * @tc.desc: call UnloadSystemAbility
+ * @tc.type: FUNC
+ * @tc.require: I6AJ3S
+ */
+HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbilityInner003, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInt32(SAID);
+    int32_t result = saMgr->UnloadSystemAbilityInner(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: Test GetSystemProcessInfoInner002
+ * @tc.desc: GetSystemProcessInfoInner002, permission denied!
+ * @tc.type: FUNC
+ * @tc.require: I7VQQG
+ */
+HWTEST_F(SystemAbilityMgrStubTest, GetSystemProcessInfoInner002, TestSize.Level3)
+{
+    DTEST_LOG << "GetSystemProcessInfoInner002" << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInt32(INVALID_SAID);
+    int32_t ret = saMgr->GetSystemProcessInfoInner(data, reply);
+    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+}
+
+/**
+ * @tc.name: Test GetSystemProcessInfoInner003
+ * @tc.desc: GetSystemProcessInfoInner003, permission denied!
+ * @tc.type: FUNC
+ * @tc.require: I7VQQG
+ */
+HWTEST_F(SystemAbilityMgrStubTest, GetSystemProcessInfoInner003, TestSize.Level3)
+{
+    DTEST_LOG << "GetSystemProcessInfoInner003" << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t systemAbilityId = -1;
+    int32_t ret = saMgr->GetSystemProcessInfoInner(data, reply);
+    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+}
+
+/**
+ * @tc.name: Test CancelUnloadSystemAbilityInner001
+ * @tc.desc: CancelUnloadSystemAbilityInner001, permission denied!
+ * @tc.type: FUNC
+ * @tc.require: I7VQQG
+ */
+HWTEST_F(SystemAbilityMgrStubTest, CancelUnloadSystemAbilityInner001, TestSize.Level3)
+{
+    DTEST_LOG << "CancelUnloadSystemAbilityInner001" << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInt32(INVALID_SAID);
+    int32_t ret = saMgr->CancelUnloadSystemAbilityInner(data, reply);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: Test CancelUnloadSystemAbilityInner002
+ * @tc.desc: CancelUnloadSystemAbilityInner002, permission denied!
+ * @tc.type: FUNC
+ * @tc.require: I7VQQG
+ */
+HWTEST_F(SystemAbilityMgrStubTest, CancelUnloadSystemAbilityInner002, TestSize.Level3)
+{
+    DTEST_LOG << "CancelUnloadSystemAbilityInner002" << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInt32(SAID);
+    int32_t ret = saMgr->CancelUnloadSystemAbilityInner(data, reply);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: GetSystemAbilityInner004
+ * @tc.desc: test GetSystemAbilityInner, read systemAbilityId failed!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, GetSystemAbilityInner004, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInt32(INVALID_SAID);
+    int32_t result = saMgr->GetSystemAbilityInner(data, reply);
+    EXPECT_EQ(result, ERR_NULL_OBJECT);
+}
 }
