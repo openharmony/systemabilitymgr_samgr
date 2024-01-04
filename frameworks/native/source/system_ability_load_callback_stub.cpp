@@ -56,7 +56,7 @@ int32_t SystemAbilityLoadCallbackStub::OnLoadSystemAbilitySuccessInner(MessagePa
         HILOGW("OnLoadSystemAbilitySuccessInner read systemAbilityId:%{public}d fail!", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
-    HILOGI("SystemAbilityLoadCallbackStub::OnLoadSystemAbilitySuccessInner, systemAbilityId = %{public}d", systemAbilityId);
+    HILOGI("OnLoadSystemAbilitySuccessInner, systemAbilityId = %{public}d", systemAbilityId);
     if (!CheckInputSystemAbilityId(systemAbilityId)) {
         HILOGW("OnLoadSystemAbilitySuccessInner invalid systemAbilityId:%{public}d !", systemAbilityId);
         return ERR_INVALID_VALUE;
@@ -74,7 +74,7 @@ int32_t SystemAbilityLoadCallbackStub::OnLoadSystemAbilityFailInner(MessageParce
         HILOGW("OnLoadSystemAbilityFailInner read systemAbilityId:%{public}d fail!", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
-    HILOGI("SystemAbilityLoadCallbackStub::OnLoadSystemAbilityFailInner, systemAbilityId = %{public}d", systemAbilityId);
+    HILOGI("OnLoadSystemAbilityFailInner, systemAbilityId = %{public}d", systemAbilityId);
     if (!CheckInputSystemAbilityId(systemAbilityId)) {
         HILOGW("OnLoadSystemAbilityFailInner invalid systemAbilityId:%{public}d !", systemAbilityId);
         return ERR_INVALID_VALUE;
@@ -97,7 +97,8 @@ int32_t SystemAbilityLoadCallbackStub::OnLoadSACompleteForRemoteInner(MessagePar
         return ERR_INVALID_VALUE;
     }
     ret = data.ReadBool();
-    HILOGI("OnLoadSACompleteForRemoteInner load systemAbilityId:%{public}d %{public}s", systemAbilityId, ret ? "succeed" : "failed");
+    HILOGI("OnLoadSACompleteForRemoteInner load systemAbilityId:%{public}d %{public}s",
+        systemAbilityId, ret ? "succeed" : "failed");
     sptr<IRemoteObject> remoteObject = ret ? data.ReadRemoteObject() : nullptr;
     OnLoadSACompleteForRemote(deviceId, systemAbilityId, remoteObject);
     return ERR_NONE;
