@@ -28,8 +28,8 @@ public:
     explicit FFRTHandler(const std::string& name);
     ~FFRTHandler() = default;
     bool PostTask(std::function<void()> func);
-    bool PostTask(std::function<void()> func, uint32_t delayTime);
-    bool PostTask(std::function<void()> func, const std::string& name, uint32_t delayTime);
+    bool PostTask(std::function<void()> func, uint64_t delayTime);
+    bool PostTask(std::function<void()> func, const std::string& name, uint64_t delayTime);
     void RemoveTask(const std::string& name);
     bool HasInnerEvent(const std::string name);
 

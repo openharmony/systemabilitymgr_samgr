@@ -33,7 +33,7 @@
 
 namespace OHOS {
 namespace {
-constexpr int32_t SECOND = 1000;
+constexpr int32_t TO_MILLISECOND = 1000;
 }
 void DeviceStatusCollectManager::Init(const std::list<SaProfile>& saProfiles)
 {
@@ -260,7 +260,11 @@ void DeviceStatusCollectManager::ReportEvent(const OnDemandEvent& event)
 void DeviceStatusCollectManager::PostDelayTask(std::function<void()> callback, int32_t delayTime)
 {
     HILOGI("DeviceStatusCollectManager PostDelayTask begin");
-    collectHandler_->PostTask(callback, delayTime * SECOND);
+    if (delayTime < 0 || delayTime > std::numeric_limits<int32_t>::max() / TO_MILLISECOND) {
+        HILOGE("DeviceStatusCollectManager PostDelayTask Failed : delayTime out of range %{public}d", delayTime);
+        return;
+    }
+    collectHandler_->PostTask(callback, delayTime * TO_MILLISECOND);
 }
 
 int32_t DeviceStatusCollectManager::GetOnDemandReasonExtraData(int64_t extraDataId, OnDemandReasonExtraData& extraData)

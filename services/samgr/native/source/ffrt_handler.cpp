@@ -23,7 +23,7 @@
 namespace OHOS {
 using namespace ffrt;
 namespace {
-    constexpr uint32_t CONVERSION_FACTOR = 1000; // ms to us
+    constexpr uint64_t CONVERSION_FACTOR = 1000; // ms to us
 }
 
 FFRTHandler::FFRTHandler(const std::string& name)
@@ -42,9 +42,9 @@ bool FFRTHandler::PostTask(std::function<void()> func)
     return true;
 }
 
-bool FFRTHandler::PostTask(std::function<void()> func, uint32_t delayTime)
+bool FFRTHandler::PostTask(std::function<void()> func, uint64_t delayTime)
 {
-    if (delayTime > std::numeric_limits<uint32_t>::max()) {
+    if (delayTime > std::numeric_limits<uint64_t>::max() / CONVERSION_FACTOR) {
         HILOGE("invalid delay time");
         return false;
     }
@@ -57,9 +57,9 @@ bool FFRTHandler::PostTask(std::function<void()> func, uint32_t delayTime)
     return true;
 }
 
-bool FFRTHandler::PostTask(std::function<void()> func, const std::string& name, uint32_t delayTime)
+bool FFRTHandler::PostTask(std::function<void()> func, const std::string& name, uint64_t delayTime)
 {
-    if (delayTime > std::numeric_limits<uint32_t>::max() / CONVERSION_FACTOR) {
+    if (delayTime > std::numeric_limits<uint64_t>::max() / CONVERSION_FACTOR) {
         HILOGE("invalid delay time");
         return false;
     }
