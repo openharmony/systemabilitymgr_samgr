@@ -31,6 +31,22 @@ FFRTHandler::FFRTHandler(const std::string& name)
     queue_ = std::make_shared<queue>(name.c_str());
 }
 
+void FFRTHandler::CleanFfrt()
+{
+    if (queue_ != nullptr) {
+        queue_.reset();
+    }
+    for (auto iter = taskMap_.begin(); iter != taskMap_.end(); ++iter) {
+        iter->second = nullptr;
+        (void)taskMap_.erase(iter);
+    }
+}
+
+void FFRTHandler::SetFfrt(const std::string& name)
+{
+    queue_ = std::make_shared<queue>(name.c_str());
+}
+
 bool FFRTHandler::PostTask(std::function<void()> func)
 {
     std::unique_lock<std::shared_mutex> lock(mutex_);

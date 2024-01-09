@@ -37,7 +37,9 @@ public:
     SystemAbilityStateScheduler() = default;
     virtual ~SystemAbilityStateScheduler() = default;
     void Init(const std::list<SaProfile>& saProfiles);
-    
+    void CleanFfrt();
+    void SetFfrt();
+
     int32_t HandleAbilityDiedEvent(int32_t systemAbilityId);
     int32_t HandleLoadAbilityEvent(const LoadRequestInfo& loadRequestInfo);
     int32_t HandleLoadAbilityEvent(int32_t systemAbilityId, bool& isExist);
@@ -134,6 +136,9 @@ private:
         bool SendEvent(uint32_t eventId, int64_t extraDataId, uint64_t delayTime);
         void RemoveEvent(uint32_t eventId);
         bool HasInnerEvent(uint32_t eventId);
+        void CleanFfrt();
+        void SetFfrt();
+
     private:
         std::weak_ptr<SystemAbilityStateScheduler> stateScheduler_;
         std::shared_ptr<FFRTHandler> handler_;

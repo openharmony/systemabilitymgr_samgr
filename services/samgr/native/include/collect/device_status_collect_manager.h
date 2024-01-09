@@ -32,6 +32,8 @@ public:
     ~DeviceStatusCollectManager() = default;
     void Init(const std::list<SaProfile>& saProfiles);
     void UnInit();
+    void CleanFfrt();
+    void SetFfrt();
     void ReportEvent(const OnDemandEvent& event) override;
     void StartCollect();
     void PostDelayTask(std::function<void()> callback, int32_t delayTime) override;

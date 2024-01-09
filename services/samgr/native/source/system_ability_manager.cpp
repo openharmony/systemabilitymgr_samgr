@@ -114,6 +114,32 @@ void SystemAbilityManager::Init()
     SetKey(DYNAMIC_CACHE_PARAM);
 }
 
+void SystemAbilityManager::CleanFfrt()
+{
+    if (workHandler_ != nullptr) {
+        workHandler_->CleanFfrt();
+    }
+    if (collectManager_ != nullptr) {
+        collectManager_->CleanFfrt();
+    }
+    if (abilityStateScheduler_ != nullptr) {
+        abilityStateScheduler_->CleanFfrt();
+    }
+}
+
+void SystemAbilityManager::SetFfrt()
+{
+    if (workHandler_ != nullptr) {
+        workHandler_->SetFfrt("workHandler");
+    }
+    if (collectManager_ != nullptr) {
+        collectManager_->SetFfrt();
+    }
+    if (abilityStateScheduler_ != nullptr) {
+        abilityStateScheduler_->SetFfrt();
+    }
+}
+
 int32_t SystemAbilityManager::Dump(int32_t fd, const std::vector<std::u16string>& args)
 {
     std::vector<std::string> argsWithStr8;

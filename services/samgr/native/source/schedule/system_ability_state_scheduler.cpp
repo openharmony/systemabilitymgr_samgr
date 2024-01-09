@@ -64,6 +64,26 @@ void SystemAbilityStateScheduler::Init(const std::list<SaProfile>& saProfiles)
     HILOGI("[SA Scheduler] init end");
 }
 
+void SystemAbilityStateScheduler::CleanFfrt()
+{
+    if (processHandler_ != nullptr) {
+        processHandler_->CleanFfrt();
+    }
+    if (unloadEventHandler_ != nullptr) {
+        unloadEventHandler_->CleanFfrt();
+    }
+}
+
+void SystemAbilityStateScheduler::SetFfrt()
+{
+    if (processHandler_ != nullptr) {
+        processHandler_->SetFfrt("ProcessHandler");
+    }
+    if (unloadEventHandler_ != nullptr) {
+        unloadEventHandler_->SetFfrt();
+    }
+}
+
 void SystemAbilityStateScheduler::InitStateContext(const std::list<SaProfile>& saProfiles)
 {
     for (auto& saProfile : saProfiles) {
@@ -1122,4 +1142,19 @@ bool SystemAbilityStateScheduler::UnloadEventHandler::HasInnerEvent(uint32_t eve
     }
     return handler_->HasInnerEvent(std::to_string(eventId));
 }
+
+void SystemAbilityStateScheduler::UnloadEventHandler::CleanFfrt()
+{
+    if (handler_ != nullptr) {
+        handler_->CleanFfrt();
+    }
+}
+
+void SystemAbilityStateScheduler::UnloadEventHandler::SetFfrt()
+{
+    if (handler_ != nullptr) {
+        handler_->SetFfrt("UnloadEventHandler");
+    }
+}
+
 }  // namespace OHOS

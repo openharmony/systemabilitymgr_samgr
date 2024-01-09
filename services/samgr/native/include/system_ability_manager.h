@@ -92,6 +92,8 @@ public:
     std::string TransformDeviceId(const std::string& deviceId, int32_t type, bool isPrivate);
     std::string GetLocalNodeId();
     void Init();
+    void CleanFfrt();
+    void SetFfrt();
     int32_t Dump(int32_t fd, const std::vector<std::u16string>& args) override;
     void AddSamgrToAbilityMap();
 
