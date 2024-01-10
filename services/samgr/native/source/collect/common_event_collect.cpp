@@ -106,6 +106,7 @@ void CommonEventCollect::Init(const std::list<SaProfile>& onDemandSaProfiles)
         commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_DISCHARGING);
         commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_POWER_CONNECTED);
         commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_POWER_DISCONNECTED);
+        commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED);
     }
 
     for (auto& profile : onDemandSaProfiles) {
@@ -216,6 +217,8 @@ void CommonEventCollect::SaveAction(const std::string& action)
     } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_POWER_DISCONNECTED) {
         commonEventWhitelist.insert(EventFwk::CommonEventSupport::COMMON_EVENT_POWER_DISCONNECTED);
         commonEventWhitelist.erase(EventFwk::CommonEventSupport::COMMON_EVENT_POWER_CONNECTED);
+    } else if (action == EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED) {
+        commonEventWhitelist.insert(EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED);
     }
 }
 
@@ -236,7 +239,8 @@ bool CommonEventCollect::CheckCondition(const OnDemandCondition& condition)
         condition.name == EventFwk::CommonEventSupport::COMMON_EVENT_CHARGING ||
         condition.name == EventFwk::CommonEventSupport::COMMON_EVENT_DISCHARGING ||
         condition.name == EventFwk::CommonEventSupport::COMMON_EVENT_POWER_CONNECTED ||
-        condition.name == EventFwk::CommonEventSupport::COMMON_EVENT_POWER_DISCONNECTED) {
+        condition.name == EventFwk::CommonEventSupport::COMMON_EVENT_POWER_DISCONNECTED ||
+        condition.name == EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED) {
         return commonEventWhitelist.count(condition.name) > 0;
     }
     return true;
