@@ -19,18 +19,14 @@
 #include "hilog/log.h"
 
 namespace OHOS {
+#undef LOG_DOMAIN
+#define LOG_DOMAIN 0xD001800
+
+#undef LOG_TAG
 #ifdef SAMGR_PROXY
-static constexpr OHOS::HiviewDFX::HiLogLabel SYSTEM_ABLILITY_LABEL = {
-    LOG_CORE,
-    0xD001800,
-    "SA_CLIENT"
-};
+#define LOG_TAG "SA_CLIENT"
 #else
-static constexpr OHOS::HiviewDFX::HiLogLabel SYSTEM_ABLILITY_LABEL = {
-    LOG_CORE,
-    0xD001800,
-    "SAMGR"
-};
+#define LOG_TAG "SAMGR"
 #endif
 
 #ifdef HILOGF
@@ -53,11 +49,11 @@ static constexpr OHOS::HiviewDFX::HiLogLabel SYSTEM_ABLILITY_LABEL = {
 #undef HILOGD
 #endif
 
-#define HILOGF(...) (void)OHOS::HiviewDFX::HiLog::Fatal(SYSTEM_ABLILITY_LABEL, __VA_ARGS__)
-#define HILOGE(...) (void)OHOS::HiviewDFX::HiLog::Error(SYSTEM_ABLILITY_LABEL, __VA_ARGS__)
-#define HILOGW(...) (void)OHOS::HiviewDFX::HiLog::Warn(SYSTEM_ABLILITY_LABEL, __VA_ARGS__)
-#define HILOGI(...) (void)OHOS::HiviewDFX::HiLog::Info(SYSTEM_ABLILITY_LABEL, __VA_ARGS__)
-#define HILOGD(...) (void)OHOS::HiviewDFX::HiLog::Debug(SYSTEM_ABLILITY_LABEL, __VA_ARGS__)
+#define HILOGF(...) HILOG_FATAL(LOG_CORE, __VA_ARGS__)
+#define HILOGE(...) HILOG_ERROR(LOG_CORE, __VA_ARGS__)
+#define HILOGW(...) HILOG_WARN(LOG_CORE, __VA_ARGS__)
+#define HILOGI(...) HILOG_INFO(LOG_CORE, __VA_ARGS__)
+#define HILOGD(...) HILOG_DEBUG(LOG_CORE, __VA_ARGS__)
 } // namespace OHOS
 
 #endif // #ifndef SAMGR_PROXY_INCLUDE_SAM_LOG_H
