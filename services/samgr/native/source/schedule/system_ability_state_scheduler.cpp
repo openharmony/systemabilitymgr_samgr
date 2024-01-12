@@ -233,7 +233,8 @@ int32_t SystemAbilityStateScheduler::HandleLoadAbilityEventLocked(
 
 int32_t SystemAbilityStateScheduler::HandleUnloadAbilityEvent(const UnloadRequestInfo& unloadRequestInfo)
 {
-    HILOGI("[SA Scheduler][SA: %{public}d] handle unload event start", unloadRequestInfo.systemAbilityId);
+    HILOGI("[SA Scheduler][SA: %{public}d] handle unload event start callingPid : %{public}d",
+        unloadRequestInfo.systemAbilityId, unloadRequestInfo.callingPid);
     std::shared_ptr<SystemAbilityContext> abilityContext;
     if (!GetSystemAbilityContext(unloadRequestInfo.systemAbilityId, abilityContext)) {
         return ERR_INVALID_VALUE;

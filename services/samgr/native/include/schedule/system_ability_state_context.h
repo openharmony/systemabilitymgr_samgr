@@ -60,6 +60,7 @@ struct LoadRequestInfo {
 struct UnloadRequestInfo {
     int32_t systemAbilityId = -1;
     OnDemandEvent unloadEvent;
+    int32_t callingPid = -1;
 };
 
 struct SystemProcessContext {
