@@ -480,7 +480,8 @@ int32_t SystemAbilityManager::CheckStopEnableOnce(const OnDemandEvent& event,
         HILOGI("stopEnableOnceMap_ add saId:%{public}d, eventId:%{public}d",
             saControl.saId, event.eventId);
     }
-    UnloadRequestInfo unloadRequestInfo = {saControl.saId, event};
+    auto callingPid = IPCSkeleton::GetCallingPid();
+    UnloadRequestInfo unloadRequestInfo = {saControl.saId, event, callingPid};
     result = abilityStateScheduler_->HandleUnloadAbilityEvent(unloadRequestInfo);
     if (saControl.enableOnce && result != ERR_OK) {
         lock_guard<mutex> autoLock(stopEnableOnceLock_);
@@ -1614,7 +1615,8 @@ int32_t SystemAbilityManager::UnloadSystemAbility(int32_t systemAbilityId)
         return ERR_INVALID_VALUE;
     }
     OnDemandEvent onDemandEvent = {INTERFACE_CALL, "unload"};
-    UnloadRequestInfo unloadRequestInfo = {systemAbilityId, onDemandEvent};
+    auto callingPid = IPCSkeleton::GetCallingPid();
+    UnloadRequestInfo unloadRequestInfo = {systemAbilityId, onDemandEvent, callingPid};
     return abilityStateScheduler_->HandleUnloadAbilityEvent(unloadRequestInfo);
 }
 
