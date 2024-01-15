@@ -577,10 +577,10 @@ sptr<IRemoteObject> SystemAbilityManager::CheckSystemAbility(int32_t systemAbili
     shared_lock<shared_mutex> readLock(abilityMapLock_);
     auto iter = abilityMap_.find(systemAbilityId);
     if (iter != abilityMap_.end()) {
-        HILOGD("found service : %{public}d.", systemAbilityId);
+        HILOGD("NOT found service : %{public}d, callingpid: %{public}d", systemAbilityId, IPCSkeleton::GetCallingPid());
         return iter->second.remoteObj;
     }
-    HILOGW("NOT found service : %{public}d", systemAbilityId);
+    HILOGW("NOT found service : %{public}d, callingpid: %{public}d", systemAbilityId, IPCSkeleton::GetCallingPid());
     return nullptr;
 }
 
