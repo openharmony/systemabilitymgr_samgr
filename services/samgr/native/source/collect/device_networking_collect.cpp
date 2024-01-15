@@ -37,6 +37,20 @@ DeviceNetworkingCollect::DeviceNetworkingCollect(const sptr<IReport>& report)
 {
 }
 
+void DeviceNetworkingCollect::CleanFfrt()
+{
+    if (workHandler_ != nullptr) {
+        workHandler_->CleanFfrt();
+    }
+}
+
+void DeviceNetworkingCollect::SetFfrt()
+{
+    if (workHandler_ != nullptr) {
+        workHandler_->SetFfrt();
+    }
+}
+
 int32_t DeviceNetworkingCollect::OnStart()
 {
     HILOGI("DeviceNetworkingCollect OnStart called");
@@ -245,6 +259,20 @@ void DeviceStateCallback::OnDeviceReady(const DmDeviceInfo& deviceInfo)
             collect_->ReportEvent(event);
         }
         isExistDeviceReady_ = true;
+    }
+}
+
+void WorkHandler::CleanFfrt()
+{
+    if (handler_ != nullptr) {
+        handler_->CleanFfrt();
+    }
+}
+
+void WorkHandler::SetFfrt()
+{
+    if (handler_ != nullptr) {
+        handler_->SetFfrt("WorkHandler");
     }
 }
 

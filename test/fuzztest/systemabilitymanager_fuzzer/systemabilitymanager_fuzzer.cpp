@@ -31,6 +31,7 @@ namespace {
     constexpr size_t THRESHOLD = 10;
     constexpr uint8_t MAX_CALL_TRANSACTION = 64;
     constexpr int32_t OFFSET = 4;
+    constexpr int32_t INIT_TIME = 3;
     const std::u16string SAMGR_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
     bool flag_ = false;
 }
@@ -58,9 +59,13 @@ void FuzzSystemAbilityManager(const uint8_t* rawData, size_t size)
     sptr<SystemAbilityManager> manager = SystemAbilityManager::GetInstance();
     if (!flag_) {
         manager->Init();
+        sleep(INIT_TIME);
         flag_ = true;
+    } else {
+        manager->SetFfrt();
     }
     manager->OnRemoteRequest(code % MAX_CALL_TRANSACTION, data, reply, option);
+    manager->CleanFfrt();
 }
 }
 }

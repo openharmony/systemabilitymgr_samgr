@@ -57,6 +57,8 @@ public:
     explicit DeviceNetworkingCollect(const sptr<IReport>& report);
     ~DeviceNetworkingCollect() = default;
 
+    void CleanFfrt() override;
+    void SetFfrt() override;
     int32_t OnStart() override;
     int32_t OnStop() override;
     bool CheckCondition(const OnDemandCondition& condition) override;
@@ -83,7 +85,9 @@ class WorkHandler {
         void ProcessEvent(uint32_t eventId);
         bool SendEvent(uint32_t eventId);
         bool SendEvent(uint32_t eventId, uint64_t delayTime);
-
+        void CleanFfrt();
+        void SetFfrt();
+        
     private:
         sptr<DeviceNetworkingCollect> collect_;
         std::shared_ptr<FFRTHandler> handler_;

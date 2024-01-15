@@ -223,6 +223,30 @@ void DeviceStatusCollectManager::UnInit()
     }
 }
 
+void DeviceStatusCollectManager::CleanFfrt()
+{
+    for (auto& iter : collectPluginMap_) {
+        if (iter.first == DEVICE_ONLINE || iter.first == COMMON_EVENT) {
+            iter.second->CleanFfrt();
+        }
+    }
+    if (collectHandler_ != nullptr) {
+        collectHandler_->CleanFfrt();
+    }
+}
+
+void DeviceStatusCollectManager::SetFfrt()
+{
+    for (auto& iter : collectPluginMap_) {
+        if (iter.first == DEVICE_ONLINE || iter.first == COMMON_EVENT) {
+            iter.second->SetFfrt();
+        }
+    }
+    if (collectHandler_ != nullptr) {
+        collectHandler_->SetFfrt("collect");
+    }
+}
+
 void DeviceStatusCollectManager::StartCollect()
 {
     HILOGI("DeviceStatusCollectManager OnStart begin");

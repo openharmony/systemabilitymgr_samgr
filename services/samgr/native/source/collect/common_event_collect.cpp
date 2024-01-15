@@ -43,6 +43,20 @@ CommonEventCollect::CommonEventCollect(const sptr<IReport>& report)
 {
 }
 
+void CommonEventCollect::CleanFfrt()
+{
+    if (workHandler_ != nullptr) {
+        workHandler_->CleanFfrt();
+    }
+}
+
+void CommonEventCollect::SetFfrt()
+{
+    if (workHandler_ != nullptr) {
+        workHandler_->SetFfrt();
+    }
+}
+
 int32_t CommonEventCollect::OnStart()
 {
     HILOGI("CommonEventCollect OnStart called");
@@ -378,6 +392,20 @@ int32_t CommonEventCollect::RemoveUnusedEvent(const OnDemandEvent& event)
         commonEventNames_.erase(iter);
     }
     return ERR_OK;
+}
+
+void CommonHandler::CleanFfrt()
+{
+    if (handler_ != nullptr) {
+        handler_->CleanFfrt();
+    }
+}
+
+void CommonHandler::SetFfrt()
+{
+    if (handler_ != nullptr) {
+        handler_->SetFfrt("CommonHandler");
+    }
 }
 
 void CommonHandler::ProcessEvent(uint32_t eventId, int64_t extraDataId)

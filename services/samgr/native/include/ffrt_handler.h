@@ -32,6 +32,8 @@ public:
     bool PostTask(std::function<void()> func, const std::string& name, uint64_t delayTime);
     void RemoveTask(const std::string& name);
     bool HasInnerEvent(const std::string name);
+    void CleanFfrt();
+    void SetFfrt(const std::string& name);
 
 private:
     std::shared_mutex mutex_;

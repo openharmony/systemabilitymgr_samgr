@@ -31,6 +31,8 @@ public:
     explicit CommonEventCollect(const sptr<IReport>& report);
     ~CommonEventCollect() = default;
 
+    void CleanFfrt() override;
+    void SetFfrt() override;
     int32_t OnStart() override;
     int32_t OnStop() override;
     void SaveAction(const std::string& action);
@@ -86,7 +88,9 @@ class CommonHandler {
         void ProcessEvent(uint32_t eventId, int64_t extraDataId);
         bool SendEvent(uint32_t eventId);
         bool SendEvent(uint32_t eventId, int64_t extraDataId, uint64_t delayTime);
-
+        void CleanFfrt();
+        void SetFfrt();
+        
     private:
         wptr<CommonEventCollect> commonCollect_;
         std::shared_ptr<FFRTHandler> handler_;

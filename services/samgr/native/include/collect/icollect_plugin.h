@@ -30,6 +30,13 @@ public:
     explicit ICollectPlugin(const sptr<IReport>& report);
     virtual ~ICollectPlugin() = default;
 
+    virtual void CleanFfrt()
+    {
+    }
+    virtual void SetFfrt()
+    {
+    }
+
     virtual int32_t OnStart() = 0;
     virtual int32_t OnStop() = 0;
     virtual void Init(const std::list<SaProfile>& saProfiles) {};
