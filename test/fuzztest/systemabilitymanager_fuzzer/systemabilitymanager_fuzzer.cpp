@@ -58,7 +58,6 @@ void FuzzSystemAbilityManager(const uint8_t* rawData, size_t size)
     MessageOption option;
     sptr<SystemAbilityManager> manager = SystemAbilityManager::GetInstance();
     if (!flag_) {
-        manager->Init();
         sleep(INIT_TIME);
         flag_ = true;
     } else {
