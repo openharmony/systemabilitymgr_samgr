@@ -458,21 +458,17 @@ ohos_executable("ondemand") {
     "//foundation/systemabilitymgr/samgr/test/resource:coverage_flags",
   ]
   deps = [ ":samgr_proxy_tdd" ]
-  if (is_standard_system) {
-    external_deps = [ "hilog:libhilog_base" ]
-  } else {
-    external_deps = [ "hilog:libhilog" ]
-  }
 
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
-  external_deps += [
+  external_deps = [
     "access_token:libnativetoken",
     "access_token:libtoken_setproc",
     "c_utils:utils",
     "dsoftbus:softbus_client",
+    "hilog:libhilog",
     "init:libbeget_proxy",
     "init:libbegetutil",
     "ipc:ipc_core",
@@ -519,12 +515,7 @@ ohos_executable("TestTool") {
     ":samgr_proxy_tdd",
     "${samgr_dir}/interfaces/innerkits/common:samgr_common",
   ]
-
-  if (is_standard_system) {
-    external_deps = [ "hilog:libhilog_base" ]
-  } else {
-    external_deps = [ "hilog:libhilog" ]
-  }
+  external_deps = [ "hilog:libhilog" ]
 
   cflags = []
   if (target_cpu == "arm") {
@@ -561,8 +552,6 @@ ohos_executable("TestTool") {
     "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
-    "hilog:libhilog",
-    "hilog:libhilog_base",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
     "init:libbeget_proxy",
