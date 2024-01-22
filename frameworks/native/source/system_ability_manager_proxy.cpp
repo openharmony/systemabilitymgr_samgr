@@ -61,7 +61,7 @@ void SystemAbilityProxyCallback::OnLoadSystemAbilitySuccess(
     std::lock_guard<std::mutex> lock(callbackLock_);
     loadproxy_ = remoteObject;
     cv_.notify_one();
-    HILOGI("LoadSystemAbility on load system ability %{public}d success!", systemAbilityId);
+    HILOGI("LoadSystemAbility on load SA:%{public}d success!", systemAbilityId);
 }
 
 void SystemAbilityProxyCallback::OnLoadSystemAbilityFail(int32_t systemAbilityId)
@@ -69,7 +69,7 @@ void SystemAbilityProxyCallback::OnLoadSystemAbilityFail(int32_t systemAbilityId
     std::lock_guard<std::mutex> lock(callbackLock_);
     loadproxy_ = nullptr;
     cv_.notify_one();
-    HILOGI("LoadSystemAbility on load system ability %{public}d failed!", systemAbilityId);
+    HILOGI("LoadSystemAbility on load SA:%{public}d failed!", systemAbilityId);
 }
 
 sptr<IRemoteObject> SystemAbilityManagerProxy::GetSystemAbility(int32_t systemAbilityId)
@@ -131,19 +131,19 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::GetSystemAbility(int32_t systemAb
 sptr<IRemoteObject> SystemAbilityManagerProxy::GetSystemAbilityWrapper(int32_t systemAbilityId, const string& deviceId)
 {
     if (!CheckInputSysAbilityId(systemAbilityId)) {
-        HILOGW("GetSystemAbilityWrapper systemAbilityId invalid:%{public}d!", systemAbilityId);
+        HILOGW("GetSystemAbilityWrapper SA invalid:%{public}d!", systemAbilityId);
         return nullptr;
     }
 
     bool isExist = false;
     int32_t timeout = RETRY_TIME_OUT_NUMBER;
-    HILOGD("GetSystemAbilityWrapper:Waiting for sa %{public}d, ", systemAbilityId);
+    HILOGD("GetSystemAbilityWrapper:Waiting for SA:%{public}d, ", systemAbilityId);
     do {
         sptr<IRemoteObject> svc;
         if (deviceId.empty()) {
             svc = CheckSystemAbility(systemAbilityId, isExist);
             if (!isExist) {
-                HILOGW("%{public}s:sa %{public}d is not exist", __func__, systemAbilityId);
+                HILOGD("%{public}s:SA:%{public}d is not exist", __func__, systemAbilityId);
                 usleep(SLEEP_ONE_MILLI_SECOND_TIME * SLEEP_INTERVAL_TIME);
                 continue;
             }
@@ -156,7 +156,7 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::GetSystemAbilityWrapper(int32_t s
         }
         usleep(SLEEP_ONE_MILLI_SECOND_TIME * SLEEP_INTERVAL_TIME);
     } while (timeout--);
-    HILOGE("GetSystemAbilityWrapper sa %{public}d didn't start. Returning nullptr", systemAbilityId);
+    HILOGE("GetSystemAbilityWrapper SA:%{public}d didn't start. Returning nullptr", systemAbilityId);
     return nullptr;
 }
 
@@ -180,7 +180,7 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t system
 {
     HILOGD("%{public}s called", __func__);
     if (!CheckInputSysAbilityId(systemAbilityId)) {
-        HILOGW("systemAbilityId:%{public}d invalid!", systemAbilityId);
+        HILOGW("SA:%{public}d invalid!", systemAbilityId);
         return nullptr;
     }
 
@@ -213,11 +213,11 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbilityTransaction(int
 sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
 {
     if (!CheckInputSysAbilityId(systemAbilityId) || deviceId.empty()) {
-        HILOGW("CheckSystemAbility:systemAbilityId:%{public}d or deviceId is nullptr.", systemAbilityId);
+        HILOGW("CheckSystemAbility:SA:%{public}d or deviceId is nullptr.", systemAbilityId);
         return nullptr;
     }
 
-    HILOGD("CheckSystemAbility: ability id is : %{public}d, deviceId is %{private}s", systemAbilityId,
+    HILOGD("CheckSystemAbility: SA:%{public}d, deviceId is %{private}s", systemAbilityId,
         deviceId.c_str());
 
     auto remote = Remote();
@@ -247,7 +247,7 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t system
 
 sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t systemAbilityId, bool& isExist)
 {
-    HILOGD("%{public}s called, ability id is %{public}d, isExist is %{public}d", __func__, systemAbilityId, isExist);
+    HILOGD("%{public}s called, SA:%{public}d, isExist is %{public}d", __func__, systemAbilityId, isExist);
     if (!CheckInputSysAbilityId(systemAbilityId)) {
         HILOGW("CheckSystemAbility:systemAbilityId:%{public}d invalid!", systemAbilityId);
         return nullptr;
@@ -302,7 +302,7 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t system
 int32_t SystemAbilityManagerProxy::AddOnDemandSystemAbilityInfo(int32_t systemAbilityId,
     const std::u16string& localAbilityManagerName)
 {
-    HILOGD("%{public}s called, system ability name is : %{public}d ", __func__, systemAbilityId);
+    HILOGD("%{public}s called, SA:%{public}d ", __func__, systemAbilityId);
     if (!CheckInputSysAbilityId(systemAbilityId) || localAbilityManagerName.empty()) {
         HILOGI("AddOnDemandSystemAbilityInfo invalid params!");
         return ERR_INVALID_VALUE;
@@ -335,7 +335,7 @@ int32_t SystemAbilityManagerProxy::AddOnDemandSystemAbilityInfo(int32_t systemAb
     int32_t err = remote->SendRequest(
         static_cast<uint32_t>(SamgrInterfaceCode::ADD_ONDEMAND_SYSTEM_ABILITY_TRANSACTION), data, reply, option);
 
-    HILOGI("%{public}s:add ondemand system ability %{public}d %{public}s, return %{public}d",
+    HILOGI("%{public}s:add ondemand SA:%{public}d %{public}s, return %{public}d",
         __func__, systemAbilityId, err ? "fail" : "succ", err);
     if (err != ERR_NONE) {
         return err;
@@ -377,9 +377,9 @@ int32_t SystemAbilityManagerProxy::RemoveSystemAbilityWrapper(int32_t code, Mess
 
 int32_t SystemAbilityManagerProxy::RemoveSystemAbility(int32_t systemAbilityId)
 {
-    HILOGD("%{public}s called, systemabilityId : %{public}d", __func__, systemAbilityId);
+    HILOGD("%{public}s called, SA:%{public}d", __func__, systemAbilityId);
     if (!CheckInputSysAbilityId(systemAbilityId)) {
-        HILOGW("systemAbilityId:%{public}d is invalid!", systemAbilityId);
+        HILOGW("SA:%{public}d is invalid!", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
 
@@ -444,9 +444,9 @@ std::vector<u16string> SystemAbilityManagerProxy::ListSystemAbilities(unsigned i
 int32_t SystemAbilityManagerProxy::SubscribeSystemAbility(int32_t systemAbilityId,
     const sptr<ISystemAbilityStatusChange>& listener)
 {
-    HILOGI("%{public}s called, SubscribeSystemAbility systemAbilityId:%{public}d", __func__, systemAbilityId);
+    HILOGD("%{public}s called, SA:%{public}d", __func__, systemAbilityId);
     if (!CheckInputSysAbilityId(systemAbilityId) || listener == nullptr) {
-        HILOGE("SubscribeSystemAbility systemAbilityId:%{public}d or listener invalid!", systemAbilityId);
+        HILOGE("SubscribeSystemAbility SA:%{public}d or listener invalid!", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
 
@@ -462,7 +462,7 @@ int32_t SystemAbilityManagerProxy::SubscribeSystemAbility(int32_t systemAbilityI
     }
     bool ret = data.WriteInt32(systemAbilityId);
     if (!ret) {
-        HILOGW("SubscribeSystemAbility Write systemAbilityId failed!");
+        HILOGW("SubscribeSystemAbility Write saId failed!");
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -480,7 +480,7 @@ int32_t SystemAbilityManagerProxy::SubscribeSystemAbility(int32_t systemAbilityI
         HILOGE("SubscribeSystemAbility SendRequest error:%{public}d!", err);
         return err;
     }
-    HILOGI("SubscribeSystemAbility SendRequest succeed!");
+    HILOGD("SubscribeSystemAbility SendRequest succeed!");
     int32_t result = 0;
     ret = reply.ReadInt32(result);
     if (!ret) {
@@ -494,9 +494,9 @@ int32_t SystemAbilityManagerProxy::SubscribeSystemAbility(int32_t systemAbilityI
 int32_t SystemAbilityManagerProxy::UnSubscribeSystemAbility(int32_t systemAbilityId,
     const sptr<ISystemAbilityStatusChange>& listener)
 {
-    HILOGI("%{public}s called, UnSubscribeSystemAbility systemAbilityId:%{public}d", __func__, systemAbilityId);
+    HILOGD("%{public}s called, SA:%{public}d", __func__, systemAbilityId);
     if (!CheckInputSysAbilityId(systemAbilityId) || listener == nullptr) {
-        HILOGE("UnSubscribeSystemAbility systemAbilityId:%{public}d or listener invalid!", systemAbilityId);
+        HILOGE("UnSubscribeSystemAbility SA:%{public}d or listener invalid!", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
 
@@ -530,7 +530,7 @@ int32_t SystemAbilityManagerProxy::UnSubscribeSystemAbility(int32_t systemAbilit
         HILOGE("UnSubscribeSystemAbility SendRequest error:%{public}d!", err);
         return err;
     }
-    HILOGI("UnSubscribeSystemAbility SendRequest succeed!");
+    HILOGD("UnSubscribeSystemAbility SendRequest succeed!");
     int32_t result = 0;
     ret = reply.ReadInt32(result);
     if (!ret) {
@@ -568,7 +568,7 @@ int32_t SystemAbilityManagerProxy::LoadSystemAbility(int32_t systemAbilityId,
     const sptr<ISystemAbilityLoadCallback>& callback)
 {
     if (!CheckInputSysAbilityId(systemAbilityId) || callback == nullptr) {
-        HILOGE("LoadSystemAbility systemAbilityId:%{public}d or callback invalid!", systemAbilityId);
+        HILOGE("LoadSystemAbility SA:%{public}d or callback invalid!", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
 
@@ -599,10 +599,10 @@ int32_t SystemAbilityManagerProxy::LoadSystemAbility(int32_t systemAbilityId,
     int32_t err = remote->SendRequest(
         static_cast<uint32_t>(SamgrInterfaceCode::LOAD_SYSTEM_ABILITY_TRANSACTION), data, reply, option);
     if (err != ERR_NONE) {
-        HILOGE("LoadSystemAbility systemAbilityId : %{public}d invalid error:%{public}d!", systemAbilityId, err);
+        HILOGE("LoadSystemAbility SA:%{public}d invalid error:%{public}d!", systemAbilityId, err);
         return err;
     }
-    HILOGI("LoadSystemAbility systemAbilityId : %{public}d, SendRequest succeed!", systemAbilityId);
+    HILOGD("LoadSystemAbility SA:%{public}d, SendRequest succeed!", systemAbilityId);
     int32_t result = 0;
     ret = reply.ReadInt32(result);
     if (!ret) {
@@ -616,7 +616,7 @@ int32_t SystemAbilityManagerProxy::LoadSystemAbility(int32_t systemAbilityId, co
     const sptr<ISystemAbilityLoadCallback>& callback)
 {
     if (!CheckInputSysAbilityId(systemAbilityId) || deviceId.empty() || callback == nullptr) {
-        HILOGE("LoadSystemAbility systemAbilityId:%{public}d ,deviceId or callback invalid!", systemAbilityId);
+        HILOGE("LoadSystemAbility SA:%{public}d ,deviceId or callback invalid!", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
     sptr<IRemoteObject> remote = Remote();
@@ -651,10 +651,10 @@ int32_t SystemAbilityManagerProxy::LoadSystemAbility(int32_t systemAbilityId, co
     int32_t err = remote->SendRequest(
         static_cast<uint32_t>(SamgrInterfaceCode::LOAD_REMOTE_SYSTEM_ABILITY_TRANSACTION), data, reply, option);
     if (err != ERR_NONE) {
-        HILOGE("LoadSystemAbility systemAbilityId : %{public}d invalid error:%{public}d!", systemAbilityId, err);
+        HILOGE("LoadSystemAbility SA:%{public}d invalid error:%{public}d!", systemAbilityId, err);
         return err;
     }
-    HILOGD("LoadSystemAbility systemAbilityId : %{public}d for remote, SendRequest succeed!", systemAbilityId);
+    HILOGD("LoadSystemAbility SA:%{public}d for remote, SendRequest succeed!", systemAbilityId);
     int32_t result = 0;
     ret = reply.ReadInt32(result);
     if (!ret) {
@@ -667,7 +667,7 @@ int32_t SystemAbilityManagerProxy::LoadSystemAbility(int32_t systemAbilityId, co
 int32_t SystemAbilityManagerProxy::UnloadSystemAbility(int32_t systemAbilityId)
 {
     if (!CheckInputSysAbilityId(systemAbilityId)) {
-        HILOGE("UnloadSystemAbility systemAbilityId:%{public}d invalid!", systemAbilityId);
+        HILOGE("UnloadSystemAbility SA:%{public}d invalid!", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
 
@@ -693,10 +693,10 @@ int32_t SystemAbilityManagerProxy::UnloadSystemAbility(int32_t systemAbilityId)
     int32_t err = remote->SendRequest(
         static_cast<uint32_t>(SamgrInterfaceCode::UNLOAD_SYSTEM_ABILITY_TRANSACTION), data, reply, option);
     if (err != ERR_NONE) {
-        HILOGE("UnloadSystemAbility systemAbilityId : %{public}d invalid error:%{public}d!", systemAbilityId, err);
+        HILOGE("UnloadSystemAbility SA:%{public}d invalid error:%{public}d!", systemAbilityId, err);
         return err;
     }
-    HILOGI("UnloadSystemAbility systemAbilityId : %{public}d, SendRequest succeed!", systemAbilityId);
+    HILOGD("UnloadSystemAbility SA:%{public}d, SendRequest succeed!", systemAbilityId);
     int32_t result = 0;
     ret = reply.ReadInt32(result);
     if (!ret) {
@@ -709,7 +709,7 @@ int32_t SystemAbilityManagerProxy::UnloadSystemAbility(int32_t systemAbilityId)
 int32_t SystemAbilityManagerProxy::CancelUnloadSystemAbility(int32_t systemAbilityId)
 {
     if (!CheckInputSysAbilityId(systemAbilityId)) {
-        HILOGE("CancelUnloadSystemAbility systemAbilityId:%{public}d invalid!", systemAbilityId);
+        HILOGE("CancelUnloadSystemAbility SA:%{public}d invalid!", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
 
@@ -735,11 +735,11 @@ int32_t SystemAbilityManagerProxy::CancelUnloadSystemAbility(int32_t systemAbili
     int32_t err = remote->SendRequest(
         static_cast<uint32_t>(SamgrInterfaceCode::CANCEL_UNLOAD_SYSTEM_ABILITY_TRANSACTION), data, reply, option);
     if (err != ERR_NONE) {
-        HILOGE("CancelUnloadSystemAbility systemAbilityId : %{public}d SendRequest failed, error:%{public}d!",
+        HILOGE("CancelUnloadSystemAbility SA:%{public}d SendRequest failed, error:%{public}d!",
             systemAbilityId, err);
         return err;
     }
-    HILOGI("CancelUnloadSystemAbility systemAbilityId : %{public}d, SendRequest succeed!", systemAbilityId);
+    HILOGD("CancelUnloadSystemAbility SA:%{public}d, SendRequest succeed!", systemAbilityId);
     int32_t result = 0;
     ret = reply.ReadInt32(result);
     if (!ret) {
@@ -772,7 +772,7 @@ int32_t SystemAbilityManagerProxy::UnloadAllIdleSystemAbility()
         HILOGE("UnloadAllIdleSystemAbility SendRequest error:%{public}d", err);
         return err;
     }
-    HILOGI("UnloadAllIdleSystemAbility SendRequest succeed");
+    HILOGD("UnloadAllIdleSystemAbility SendRequest succeed");
     return ERR_OK;
 }
 
@@ -800,7 +800,7 @@ int32_t SystemAbilityManagerProxy::MarshalSAExtraProp(const SAExtraProp& extraPr
 int32_t SystemAbilityManagerProxy::AddSystemAbility(int32_t systemAbilityId, const sptr<IRemoteObject>& ability,
     const SAExtraProp& extraProp)
 {
-    HILOGD("%{public}s called, systemAbilityId is %{public}d", __func__, systemAbilityId);
+    HILOGD("%{public}s called, SA:%{public}d", __func__, systemAbilityId);
     if (!CheckInputSysAbilityId(systemAbilityId)) {
         HILOGW("systemAbilityId:%{public}d invalid.", systemAbilityId);
         return ERR_INVALID_VALUE;
@@ -884,7 +884,7 @@ int32_t SystemAbilityManagerProxy::AddSystemProcess(const u16string& procName, c
 
 int32_t SystemAbilityManagerProxy::GetSystemProcessInfo(int32_t systemAbilityId, SystemProcessInfo& systemProcessInfo)
 {
-    HILOGI("GetSystemProcessInfo called");
+    HILOGD("GetSystemProcessInfo called");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         HILOGI("GetSystemProcessInfo remote is nullptr");
@@ -907,7 +907,7 @@ int32_t SystemAbilityManagerProxy::GetSystemProcessInfo(int32_t systemAbilityId,
         HILOGE("GetSystemProcessInfo SendRequest error: %{public}d!", err);
         return err;
     }
-    HILOGI("GetSystemProcessInfo SendRequest succeed!");
+    HILOGD("GetSystemProcessInfo SendRequest succeed!");
     int32_t result = 0;
     bool ret = reply.ReadInt32(result);
     if (!ret) {
@@ -944,7 +944,7 @@ int32_t SystemAbilityManagerProxy::ReadProcessInfoFromParcel(MessageParcel& repl
 
 int32_t SystemAbilityManagerProxy::GetRunningSystemProcess(std::list<SystemProcessInfo>& systemProcessInfos)
 {
-    HILOGI("GetRunningSystemProcess called");
+    HILOGD("GetRunningSystemProcess called");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         HILOGI("GetRunningSystemProcess remote is nullptr");
@@ -964,7 +964,7 @@ int32_t SystemAbilityManagerProxy::GetRunningSystemProcess(std::list<SystemProce
         HILOGE("GetRunningSystemProcess SendRequest error: %{public}d!", err);
         return err;
     }
-    HILOGI("GetRunningSystemProcess SendRequest succeed!");
+    HILOGD("GetRunningSystemProcess SendRequest succeed!");
     int32_t result = 0;
     bool ret = reply.ReadInt32(result);
     if (!ret) {
@@ -1019,7 +1019,7 @@ int32_t SystemAbilityManagerProxy::ReadSystemProcessFromParcel(MessageParcel& re
 
 int32_t SystemAbilityManagerProxy::SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener)
 {
-    HILOGI("SubscribeSystemProcess called");
+    HILOGD("SubscribeSystemProcess called");
     if (listener == nullptr) {
         HILOGE("SubscribeSystemProcess listener is nullptr");
         return ERR_INVALID_VALUE;
@@ -1049,7 +1049,7 @@ int32_t SystemAbilityManagerProxy::SubscribeSystemProcess(const sptr<ISystemProc
         HILOGE("SubscribeSystemProcess SendRequest error:%{public}d!", err);
         return err;
     }
-    HILOGI("SubscribeSystemProcesss SendRequest succeed!");
+    HILOGD("SubscribeSystemProcesss SendRequest succeed!");
     int32_t result = 0;
     ret = reply.ReadInt32(result);
     if (!ret) {
@@ -1061,7 +1061,7 @@ int32_t SystemAbilityManagerProxy::SubscribeSystemProcess(const sptr<ISystemProc
 
 int32_t SystemAbilityManagerProxy::UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener)
 {
-    HILOGI("UnSubscribeSystemProcess called");
+    HILOGD("UnSubscribeSystemProcess called");
     if (listener == nullptr) {
         HILOGE("UnSubscribeSystemProcess listener is nullptr");
         return ERR_INVALID_VALUE;
@@ -1091,7 +1091,7 @@ int32_t SystemAbilityManagerProxy::UnSubscribeSystemProcess(const sptr<ISystemPr
         HILOGE("UnSubscribeSystemProcess SendRequest error:%{public}d!", err);
         return err;
     }
-    HILOGI("UnSubscribeSystemProcess SendRequest succeed!");
+    HILOGD("UnSubscribeSystemProcess SendRequest succeed!");
     int32_t result = 0;
     ret = reply.ReadInt32(result);
     if (!ret) {
@@ -1103,7 +1103,7 @@ int32_t SystemAbilityManagerProxy::UnSubscribeSystemProcess(const sptr<ISystemPr
 
 int32_t SystemAbilityManagerProxy::GetOnDemandReasonExtraData(int64_t extraDataId, MessageParcel& extraDataParcel)
 {
-    HILOGI("GetOnDemandReasonExtraData called");
+    HILOGD("GetOnDemandReasonExtraData called");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         HILOGE("GetOnDemandReasonExtraData remote is nullptr");
@@ -1128,7 +1128,7 @@ int32_t SystemAbilityManagerProxy::GetOnDemandReasonExtraData(int64_t extraDataI
         HILOGE("GetOnDemandReasonExtraData SendRequest error:%{public}d", err);
         return err;
     }
-    HILOGI("GetOnDemandReasonExtraData SendRequest succeed");
+    HILOGD("GetOnDemandReasonExtraData SendRequest succeed");
     int32_t result = 0;
     if (!extraDataParcel.ReadInt32(result)) {
         HILOGE("GetOnDemandReasonExtraData read result failed");
@@ -1140,7 +1140,7 @@ int32_t SystemAbilityManagerProxy::GetOnDemandReasonExtraData(int64_t extraDataI
 int32_t SystemAbilityManagerProxy::GetOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
     std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents)
 {
-    HILOGI("GetOnDemandPolicy called");
+    HILOGD("GetOnDemandPolicy called");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         HILOGI("GetOnDemandPolicy remote is nullptr");
@@ -1169,7 +1169,7 @@ int32_t SystemAbilityManagerProxy::GetOnDemandPolicy(int32_t systemAbilityId, On
         HILOGE("GetOnDemandPolicy SendRequest error: %{public}d!", err);
         return err;
     }
-    HILOGI("GetOnDemandPolicy SendRequest succeed!");
+    HILOGD("GetOnDemandPolicy SendRequest succeed!");
     int32_t result = 0;
     if (!reply.ReadInt32(result)) {
         HILOGE("GetOnDemandPolicy Read result failed!");
@@ -1209,7 +1209,7 @@ int32_t SystemAbilityManagerProxy::GetOnDemandSystemAbilityIds(std::vector<int32
         HILOGE("GetOnDemandSystemAbilityIds SendRequest error: %{public}d!", err);
         return err;
     }
-    HILOGI("GetOnDemandSystemAbilityIds SendRequest succeed!");
+    HILOGD("GetOnDemandSystemAbilityIds SendRequest succeed!");
     int32_t result = 0;
     if (!reply.ReadInt32(result)) {
         HILOGE("GetOnDemandSystemAbilityIds Read result failed!");
@@ -1230,7 +1230,7 @@ int32_t SystemAbilityManagerProxy::GetOnDemandSystemAbilityIds(std::vector<int32
 int32_t SystemAbilityManagerProxy::UpdateOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
     const std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents)
 {
-    HILOGI("UpdateOnDemandPolicy called");
+    HILOGD("UpdateOnDemandPolicy called");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         HILOGI("UpdateOnDemandPolicy remote is nullptr");
@@ -1263,7 +1263,7 @@ int32_t SystemAbilityManagerProxy::UpdateOnDemandPolicy(int32_t systemAbilityId,
         HILOGE("UpdateOnDemandPolicy SendRequest error: %{public}d!", err);
         return err;
     }
-    HILOGI("UpdateOnDemandPolicy SendRequest succeed!");
+    HILOGD("UpdateOnDemandPolicy SendRequest succeed!");
     int32_t result = 0;
     if (!reply.ReadInt32(result)) {
         HILOGE("UpdateOnDemandPolicy Read result failed!");
@@ -1278,7 +1278,7 @@ int32_t SystemAbilityManagerProxy::UpdateOnDemandPolicy(int32_t systemAbilityId,
 int32_t SystemAbilityManagerProxy::SendStrategy(int32_t type, std::vector<int32_t>& systemAbilityIds,
     int32_t level, std::string& action)
 {
-    HILOGI("SendStrategy called");
+    HILOGD("SendStrategy called");
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         HILOGI("SendStrategy remote is nullptr");
@@ -1315,7 +1315,7 @@ int32_t SystemAbilityManagerProxy::SendStrategy(int32_t type, std::vector<int32_
         HILOGE("SendStrategy SendRequest error: %{public}d!", err);
         return err;
     }
-    HILOGI("SendStrategy SendRequest succeed!");
+    HILOGD("SendStrategy SendRequest succeed!");
     int32_t result = 0;
     if (!reply.ReadInt32(result)) {
         HILOGE("SendStrategy Read result failed!");

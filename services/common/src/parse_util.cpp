@@ -336,7 +336,7 @@ bool ParseUtil::ParseJsonFile(const string& realPath)
         HILOGE("json file parse error!");
         return false;
     }
-    HILOGI("profileJson:%{private}s", profileJson.dump().c_str());
+    HILOGD("profileJson:%{private}s", profileJson.dump().c_str());
     string process;
     GetStringFromJson(profileJson, SA_TAG_PROCESS, process);
     if (process.empty()) {
@@ -353,7 +353,7 @@ bool ParseUtil::ParseJsonFile(const string& realPath)
         return false;
     }
     nlohmann::json& systemAbilityJson = profileJson.at(SA_TAG_SYSTEM_ABILITY);
-    HILOGI("systemAbilityJson:%{private}s", systemAbilityJson.dump().c_str());
+    HILOGD("systemAbilityJson:%{private}s", systemAbilityJson.dump().c_str());
     if (!systemAbilityJson.is_array()) {
         HILOGE("system ability is not array!");
         return false;

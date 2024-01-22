@@ -567,7 +567,7 @@ sptr<IRemoteObject> SystemAbilityManager::GetSystemAbilityFromRemote(int32_t sys
 
 sptr<IRemoteObject> SystemAbilityManager::CheckSystemAbility(int32_t systemAbilityId)
 {
-    HILOGD("%{public}s called, systemAbilityId = %{public}d", __func__, systemAbilityId);
+    HILOGD("%{public}s called, SA:%{public}d", __func__, systemAbilityId);
 
     if (!CheckInputSysAbilityId(systemAbilityId)) {
         HILOGW("CheckSystemAbility CheckSystemAbility invalid!");
@@ -577,10 +577,10 @@ sptr<IRemoteObject> SystemAbilityManager::CheckSystemAbility(int32_t systemAbili
     shared_lock<shared_mutex> readLock(abilityMapLock_);
     auto iter = abilityMap_.find(systemAbilityId);
     if (iter != abilityMap_.end()) {
-        HILOGD("NOT found service : %{public}d, callingpid: %{public}d", systemAbilityId, IPCSkeleton::GetCallingPid());
+        HILOGD("found SA:%{public}d,callpid:%{public}d", systemAbilityId, IPCSkeleton::GetCallingPid());
         return iter->second.remoteObj;
     }
-    HILOGW("NOT found service : %{public}d, callingpid: %{public}d", systemAbilityId, IPCSkeleton::GetCallingPid());
+    HILOGW("NOT found SA:%{public}d,callpid:%{public}d", systemAbilityId, IPCSkeleton::GetCallingPid());
     return nullptr;
 }
 
@@ -607,7 +607,7 @@ int32_t SystemAbilityManager::FindSystemAbilityNotify(int32_t systemAbilityId, i
 void SystemAbilityManager::NotifySystemAbilityChanged(int32_t systemAbilityId, const std::string& deviceId,
     int32_t code, const sptr<ISystemAbilityStatusChange>& listener)
 {
-    HILOGD("NotifySystemAbilityChanged, systemAbilityId = %{public}d", systemAbilityId);
+    HILOGD("NotifySystemAbilityChanged, SA:%{public}d", systemAbilityId);
     if (listener == nullptr) {
         HILOGE("%s listener null pointer!", __func__);
         return;
@@ -630,7 +630,7 @@ void SystemAbilityManager::NotifySystemAbilityChanged(int32_t systemAbilityId, c
 int32_t SystemAbilityManager::FindSystemAbilityNotify(int32_t systemAbilityId, const std::string& deviceId,
     int32_t code)
 {
-    HILOGI("%{public}s called:systemAbilityId = %{public}d, code = %{public}d", __func__, systemAbilityId, code);
+    HILOGI("%{public}s called:SA:%{public}d, code=%{public}d", __func__, systemAbilityId, code);
     lock_guard<mutex> autoLock(listenerMapLock_);
     auto iter = listenerMap_.find(systemAbilityId);
     if (iter != listenerMap_.end()) {
@@ -937,10 +937,10 @@ int32_t SystemAbilityManager::SubscribeSystemAbility(int32_t systemAbilityId,
         if (abilityStatusDeath_ != nullptr) {
             bool ret = listener->AsObject()->AddDeathRecipient(abilityStatusDeath_);
             listeners.emplace_back(listener, callingPid);
-            HILOGI("SubscribeSystemAbility systemAbilityId = %{public}d AddDeathRecipient %{public}s",
+            HILOGI("SubscribeSystemAbility saId = %{public}d AddDeathRecipient %{public}s",
                 systemAbilityId, ret ? "succeed" : "failed");
         }
-        HILOGI("SubscribeSystemAbility systemAbilityId = %{public}d, size = %{public}zu", systemAbilityId,
+        HILOGI("SubscribeSystemAbility SA:%{public}d, size=%{public}zu", systemAbilityId,
             listeners.size());
     }
     sptr<IRemoteObject> targetObject = CheckSystemAbility(systemAbilityId);
