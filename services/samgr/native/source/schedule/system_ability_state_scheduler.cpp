@@ -19,9 +19,6 @@
 #include "datetime_ex.h"
 #include "ipc_skeleton.h"
 #include "memory_guard.h"
-#ifdef RESSCHED_ENABLE
-#include "res_sched_client.h"
-#endif
 #include "sam_log.h"
 #include "schedule/system_ability_state_scheduler.h"
 #include "service_control.h"
@@ -696,10 +693,12 @@ bool SystemAbilityStateScheduler::CanKillSystemProcessLocked(
 int32_t SystemAbilityStateScheduler::KillSystemProcessLocked(
     const std::shared_ptr<SystemProcessContext>& processContext)
 {
+    int64_t begin = GetTickCount();
     int32_t result = ERR_OK;
     result = ServiceControlWithExtra(Str16ToStr8(processContext->processName).c_str(), ServiceAction::STOP, nullptr, 0);
-    HILOGI("[SA Scheduler][process:%{public}s] kill process, pid: %{public}d, uid: %{public}d, result: %{public}d",
-        Str16ToStr8(processContext->processName).c_str(), processContext->pid, processContext->uid, result);
+    HILOGI("[SA Scheduler][process:%{public}s] kill process, pid: %{public}d, uid: %{public}d, result: %{public}d "
+        "spend %{public}" PRId64 " ms", Str16ToStr8(processContext->processName).c_str(), processContext->pid,
+        processContext->uid, result, GetTickCount() - begin);
     return result;
 }
 
