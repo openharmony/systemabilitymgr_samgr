@@ -20,7 +20,11 @@
 
 namespace OHOS {
 #undef LOG_DOMAIN
+#ifdef SAMGR_PROXY
+#define LOG_DOMAIN 0xD001810
+#else
 #define LOG_DOMAIN 0xD001800
+#endif
 
 #undef LOG_TAG
 #ifdef SAMGR_PROXY
