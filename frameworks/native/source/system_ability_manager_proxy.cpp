@@ -38,8 +38,8 @@ namespace OHOS {
 namespace {
 const int32_t MAX_TIMEOUT = 4;
 const int32_t MIN_TIMEOUT = 0;
-const int32_t RETRY_TIME_OUT_NUMBER = 10;
-const int32_t SLEEP_INTERVAL_TIME = 100;
+const int32_t RETRY_TIME_OUT_NUMBER = 5;
+const int32_t SLEEP_INTERVAL_TIME = 200;
 const int32_t GET_SYSTEM_ABILITY_CODE = 1;
 const int32_t CHECK_SYSTEM_ABILITY_CODE = 2;
 const int32_t SLEEP_ONE_MILLI_SECOND_TIME = 1000;

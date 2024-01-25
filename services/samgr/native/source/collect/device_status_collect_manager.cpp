@@ -183,9 +183,9 @@ bool DeviceStatusCollectManager::CheckConditions(const OnDemandEvent& onDemandEv
             return false;
         }
         bool ret = collectPluginMap_[condition.eventId]->CheckCondition(condition);
-        HILOGI("CheckCondition condition: %{public}s, value: %{public}s, ret: %{public}s",
-            condition.name.c_str(), condition.value.c_str(), ret ? "pass" : "not pass");
         if (!ret) {
+            HILOGW("CheckCondition condition: %{public}s, value: %{public}s not pass",
+                condition.name.c_str(), condition.value.c_str());
             return false;
         }
     }
@@ -194,7 +194,7 @@ bool DeviceStatusCollectManager::CheckConditions(const OnDemandEvent& onDemandEv
 
 bool DeviceStatusCollectManager::CheckExtraMessages(const OnDemandEvent& ev1, const OnDemandEvent& ev2)
 {
-    HILOGI("DeviceStatusCollectManager CheckExtraMessages begin");
+    HILOGD("CheckExtraMessages begin evt1:%{public}d, evt2:%{public}d", ev1.eventId, ev2.eventId);
     if (collectPluginMap_.count(ev1.eventId) == 0) {
         HILOGE("not support CheckExtraMessages");
         return false;
@@ -272,7 +272,7 @@ void DeviceStatusCollectManager::ReportEvent(const OnDemandEvent& event)
     GetSaControlListByPersistEvent(event, saControlList);
     SortSaControlListByLoadPriority(saControlList);
     if (saControlList.empty()) {
-        HILOGW("DeviceStatusCollectManager no matched event");
+        HILOGD("DeviceStatusCollectManager no matched event");
         return;
     }
     auto callback = [event, saControlList = std::move(saControlList)] () {
@@ -293,7 +293,8 @@ void DeviceStatusCollectManager::PostDelayTask(std::function<void()> callback, i
 
 int32_t DeviceStatusCollectManager::GetOnDemandReasonExtraData(int64_t extraDataId, OnDemandReasonExtraData& extraData)
 {
-    HILOGI("DeviceStatusCollectManager GetOnDemandReasonExtraData begin");
+    HILOGD("DeviceStatusCollectManager GetOnDemandReasonExtraData begin, extraDataId:%{public}d",
+        static_cast<int32_t>(extraDataId));
     if (collectPluginMap_.count(COMMON_EVENT) == 0) {
         HILOGE("not support get extra data");
         return ERR_INVALID_VALUE;

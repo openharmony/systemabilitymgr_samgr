@@ -15,6 +15,8 @@
 
 #include "system_ability_status_change_stub.h"
 
+#include <cinttypes>
+
 #include "errors.h"
 #include "ipc_object_stub.h"
 #include "ipc_types.h"
@@ -22,6 +24,7 @@
 #include "message_parcel.h"
 #include "refbase.h"
 #include "sam_log.h"
+#include "datetime_ex.h"
 
 namespace OHOS {
 namespace {
@@ -39,7 +42,7 @@ SystemAbilityStatusChangeStub::SystemAbilityStatusChangeStub()
 int32_t SystemAbilityStatusChangeStub::OnRemoteRequest(uint32_t code,
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
-    HILOGI("SystemAbilityStatusChangeStub::code:%{public}u, flags:%{public}d", code, option.GetFlags());
+    HILOGD("SystemAbilityStatusChangeStub::code:%{public}u, flags:%{public}d", code, option.GetFlags());
     if (!EnforceInterceToken(data)) {
         HILOGW("check interface token failed!");
         return ERR_PERMISSION_DENIED;
@@ -67,7 +70,9 @@ int32_t SystemAbilityStatusChangeStub::OnAddSystemAbilityInner(MessageParcel& da
         return ERR_NULL_OBJECT;
     }
     std::string deviceId = data.ReadString();
+    int64_t begin = GetTickCount();
     OnAddSystemAbility(systemAbilityId, deviceId);
+    HILOGD("OnAddSA:%{public}d, spend:%{public}" PRId64 " ms", systemAbilityId, GetTickCount() - begin);
     return ERR_NONE;
 }
 
@@ -83,7 +88,9 @@ int32_t SystemAbilityStatusChangeStub::OnRemoveSystemAbilityInner(MessageParcel&
         return ERR_NULL_OBJECT;
     }
     std::string deviceId = data.ReadString();
+    int64_t begin = GetTickCount();
     OnRemoveSystemAbility(systemAbilityId, deviceId);
+    HILOGD("OnRemoveSA:%{public}d, spend:%{public}" PRId64 " ms", systemAbilityId, GetTickCount() - begin);
     return ERR_NONE;
 }
 

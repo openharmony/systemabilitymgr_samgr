@@ -22,42 +22,42 @@
 namespace OHOS {
 void AbilityDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
-    HILOGI("AbilityDeathRecipient OnRemoteDied called");
+    HILOGD("AbilityDeathRecipient OnRemoteDied called");
     SystemAbilityManager::GetInstance()->RemoveSystemAbility(remote.promote());
     HILOGD("AbilityDeathRecipients death notice success");
 }
 
 void SystemProcessDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
-    HILOGI("SystemProcessDeathRecipient called!");
+    HILOGD("SystemProcessDeathRecipient called!");
     SystemAbilityManager::GetInstance()->RemoveSystemProcess(remote.promote());
     HILOGD("SystemProcessDeathRecipient death notice success");
 }
 
 void AbilityStatusDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
-    HILOGI("AbilityStatusDeathRecipient called!");
+    HILOGD("AbilityStatusDeathRecipient called!");
     SystemAbilityManager::GetInstance()->UnSubscribeSystemAbility(remote.promote());
     HILOGD("AbilityStatusDeathRecipient death notice success");
 }
 
 void AbilityCallbackDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
-    HILOGI("AbilityCallbackDeathRecipient called!");
+    HILOGD("AbilityCallbackDeathRecipient called!");
     SystemAbilityManager::GetInstance()->OnAbilityCallbackDied(remote.promote());
     HILOGD("AbilityCallbackDeathRecipient death notice success");
 }
 
 void RemoteCallbackDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
-    HILOGI("RemoteCallbackDeathRecipient called!");
+    HILOGD("RemoteCallbackDeathRecipient called!");
     SystemAbilityManager::GetInstance()->OnRemoteCallbackDied(remote.promote());
     HILOGD("RemoteCallbackDeathRecipient death notice success");
 }
 
 void SystemProcessListenerDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
-    HILOGI("SystemProcessListenerDeathRecipient called!");
+    HILOGD("SystemProcessListenerDeathRecipient called!");
     sptr<ISystemProcessStatusChange> listener = iface_cast<ISystemProcessStatusChange>(remote.promote());
     SystemAbilityManager::GetInstance()->UnSubscribeSystemProcess(listener);
     HILOGD("SystemProcessListenerDeathRecipient death notice success");
