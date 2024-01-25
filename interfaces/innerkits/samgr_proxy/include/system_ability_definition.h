@@ -101,6 +101,7 @@ enum {
     COMM_NETSYS_EXT_SYS_ABILITY_ID                   = 1162,
     COMM_DISTRIBUTED_NET_ABILITY_ID                  = 1163,
     SMART_COMM_SYS_ABILITY_ID                        = 1180,
+    NEARLINK_HOST_SYS_ABILITY_ID                     = 1190,
     SUBSYS_DFX_SYS_ABILITY_ID_BEGIN                  = 1200,
     DFX_SYS_HIVIEW_ABILITY_ID                        = 1201,
     DFX_FAULT_LOGGER_ABILITY_ID                      = 1202,
