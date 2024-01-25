@@ -574,7 +574,7 @@ string ParseUtil::GetRealPath(const string& profilePath) const
 {
     char path[PATH_MAX] = {'\0'};
     if (realpath(profilePath.c_str(), path) == nullptr) {
-        HILOGE("get real path fail");
+        HILOGD("get real path fail");
         return "";
     }
     string realPath(path);
@@ -614,7 +614,7 @@ bool ParseUtil::ParseTrustConfig(const string& profilePath,
     }
     auto& saIds = values[Str8ToStr16(process)];
     GetIntArrayFromJson(trustSaIdJson, SA_TAG_SAID, saIds);
-    HILOGI("ParseTrustConfig realPath:%s, saIds size = %{public}zu", realPath.c_str(), saIds.size());
+    HILOGI("ParseTrustConfig realPath:%{public}s, saIds size = %{public}zu", realPath.c_str(), saIds.size());
     return true;
 }
 

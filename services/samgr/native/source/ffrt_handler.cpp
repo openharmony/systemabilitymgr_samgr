@@ -92,7 +92,7 @@ bool FFRTHandler::PostTask(std::function<void()> func, const std::string& name, 
         std::unique_lock<std::shared_mutex> lock(mutex_);
         auto item = taskMap_.find(name);
         if (item == taskMap_.end()) {
-            HILOGW("task not find");
+            HILOGW("clear task %{public}s not find", name.c_str());
             return;
         }
         taskMap_.erase(name);
@@ -106,7 +106,7 @@ void FFRTHandler::RemoveTask(const std::string& name)
     std::unique_lock<std::shared_mutex> lock(mutex_);
     auto item = taskMap_.find(name);
     if (item == taskMap_.end()) {
-        HILOGW("task not find");
+        HILOGW("remove task %{public}s not find", name.c_str());
         return;
     }
     if (item->second != nullptr) {

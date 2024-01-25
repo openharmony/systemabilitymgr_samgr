@@ -312,20 +312,20 @@ int32_t SystemAbilityManagerStub::CheckRemtSystemAbilityInner(MessageParcel& dat
     }
 
     if (!CheckGetRemoteSAPermission(systemAbilityId)) {
-        HILOGE("CheckRemtSystemAbilityInner selinux permission denied!, SA : %{public}d", systemAbilityId);
+        HILOGE("CheckRemtSystemAbilityInner selinux permission denied!, SA:%{public}d", systemAbilityId);
         return ERR_PERMISSION_DENIED;
     }
 
     std::string deviceId;
     ret = data.ReadString(deviceId);
     if (!ret) {
-        HILOGW("SystemAbilityManagerStub::CheckRemtSystemAbilityInner read deviceId failed!");
+        HILOGW("CheckRemtSystemAbilityInner read deviceId failed!");
         return ERR_FLATTEN_OBJECT;
     }
     std::string uuid = SystemAbilityManager::GetInstance()->TransformDeviceId(deviceId, UUID, false);
     ret = reply.WriteRemoteObject(GetSystemAbility(systemAbilityId, uuid));
     if (!ret) {
-        HILOGW("SystemAbilityManagerStub::CheckRemtSystemAbilityInner write reply failed.");
+        HILOGW("CheckRemtSystemAbilityInner SA:%{public}d write reply failed.", systemAbilityId);
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -372,29 +372,32 @@ int32_t SystemAbilityManagerStub::AddOndemandSystemAbilityInner(MessageParcel& d
 
 int32_t SystemAbilityManagerStub::CheckSystemAbilityImmeInner(MessageParcel& data, MessageParcel& reply)
 {
+    int64_t begin = OHOS::GetTickCount();
     int32_t systemAbilityId = -1;
     bool ret = data.ReadInt32(systemAbilityId);
     if (!ret) {
         return ERR_NULL_OBJECT;
     }
     if (!CheckInputSysAbilityId(systemAbilityId)) {
-        HILOGW("SystemAbilityManagerStub::CheckSystemAbilityImmeInner read systemAbilityId failed!");
+        HILOGW("CheckSystemAbilityImmeInner read systemAbilityId failed!");
         return ERR_NULL_OBJECT;
     }
 
     if (!CheckGetSAPermission(systemAbilityId)) {
-        HILOGE("CheckSystemAbilityImmeInner selinux permission denied! SA : %{public}d", systemAbilityId);
+        HILOGD("CheckSystemAbilityImmeInner selinux permission denied! SA : %{public}d", systemAbilityId);
         return ERR_PERMISSION_DENIED;
     }
 
     bool isExist = false;
     ret = data.ReadBool(isExist);
     if (!ret) {
-        HILOGW("SystemAbilityManagerStub::CheckSystemAbilityImmeInner read isExist failed!");
+        HILOGW("CheckSystemAbilityImmeInner read isExist failed!");
         return ERR_FLATTEN_OBJECT;
     }
     ret = reply.WriteRemoteObject(CheckSystemAbility(systemAbilityId, isExist));
     if (!ret) {
+        HILOGE("CheckSystemAbilityImmeInner SA:%{public}d, callpid:%{public}d, write obj fail, spend %{public}"
+            PRId64 " ms", systemAbilityId, OHOS::IPCSkeleton::GetCallingPid(), OHOS::GetTickCount() - begin);
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -491,7 +494,7 @@ int32_t SystemAbilityManagerStub::GetSystemAbilityInner(MessageParcel& data, Mes
 
     ret = reply.WriteRemoteObject(GetSystemAbility(systemAbilityId));
     if (!ret) {
-        HILOGW("SystemAbilityManagerStub:GetSystemAbilityInner write reply failed.");
+        HILOGW("GetSystemAbilityInner SA:%{public}d write reply failed.", systemAbilityId);
         return ERR_FLATTEN_OBJECT;
     }
     return ERR_NONE;
@@ -510,7 +513,7 @@ int32_t SystemAbilityManagerStub::CheckSystemAbilityInner(MessageParcel& data, M
     }
 
     if (!CheckGetSAPermission(systemAbilityId)) {
-        HILOGE("CheckSystemAbilityInner selinux permission denied! SA : %{public}d", systemAbilityId);
+        HILOGD("CheckSystemAbilityInner selinux permission denied! SA : %{public}d", systemAbilityId);
         return ERR_PERMISSION_DENIED;
     }
 

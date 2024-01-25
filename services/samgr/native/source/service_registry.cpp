@@ -94,7 +94,7 @@ public:
     virtual int32_t AddService(const std::u16string& name,
         const sptr<IRemoteObject>& service, bool allowIsolated, int32_t dumpsysPriority)
     {
-        HILOGI("%s called", __func__);
+        HILOGD("%{public}s called", __func__);
         MessageParcel data;
         PARCEL_WRITE_HELPER_RET(data, Int32, MASK, ERR_FLATTEN_OBJECT);
         PARCEL_WRITE_HELPER_RET(data, Int32, INTERFACE_TOKEN, ERR_FLATTEN_OBJECT);
@@ -157,7 +157,7 @@ sptr<ISystemAbilityManager> SystemAbilityManagerClient::GetSystemAbilityManager(
 
 void SystemAbilityManagerClient::DestroySystemAbilityManagerObject()
 {
-    HILOGI("%s called", __func__);
+    HILOGD("%{public}s called", __func__);
     std::lock_guard<std::mutex> lock(systemAbilityManagerLock_);
     systemAbilityManager_.clear();
 }

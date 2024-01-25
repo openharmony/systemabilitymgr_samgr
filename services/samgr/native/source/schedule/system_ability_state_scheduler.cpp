@@ -127,7 +127,7 @@ bool SystemAbilityStateScheduler::GetSystemAbilityContext(int32_t systemAbilityI
 {
     std::shared_lock<std::shared_mutex> readLock(abiltyMapLock_);
     if (abilityContextMap_.count(systemAbilityId) == 0) {
-        HILOGE("[SA Scheduler][SA:%{public}d] not in SA profiles", systemAbilityId);
+        HILOGD("[SA Scheduler][SA:%{public}d] not in SA profiles", systemAbilityId);
         return false;
     }
     abilityContext = abilityContextMap_[systemAbilityId];
@@ -174,8 +174,6 @@ bool SystemAbilityStateScheduler::IsSystemAbilityUnloading(int32_t systemAbility
 
 int32_t SystemAbilityStateScheduler::HandleLoadAbilityEvent(int32_t systemAbilityId, bool& isExist)
 {
-    HILOGI("[SA Scheduler][SA:%{public}d] handle load event by check start",
-        systemAbilityId);
     std::shared_ptr<SystemAbilityContext> abilityContext;
     if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
         isExist = false;
@@ -188,6 +186,7 @@ int32_t SystemAbilityStateScheduler::HandleLoadAbilityEvent(int32_t systemAbilit
     }
     if (abilityContext->ownProcessContext->state == SystemProcessState::STARTED
         && abilityContext->state ==SystemAbilityState::NOT_LOADED) {
+        HILOGD("[SA Scheduler][SA:%{public}d] handle load event by check start", systemAbilityId);
         bool result = SystemAbilityManager::GetInstance()->DoLoadOnDemandAbility(systemAbilityId, isExist);
         if (result) {
             return stateMachine_->AbilityStateTransitionLocked(abilityContext, SystemAbilityState::LOADING);
@@ -200,12 +199,13 @@ int32_t SystemAbilityStateScheduler::HandleLoadAbilityEvent(int32_t systemAbilit
 
 int32_t SystemAbilityStateScheduler::HandleLoadAbilityEvent(const LoadRequestInfo& loadRequestInfo)
 {
-    HILOGI("[SA Scheduler][SA:%{public}d] handle load event start, callingpid: %{public}d",
-        loadRequestInfo.systemAbilityId, loadRequestInfo.callingPid);
     std::shared_ptr<SystemAbilityContext> abilityContext;
     if (!GetSystemAbilityContext(loadRequestInfo.systemAbilityId, abilityContext)) {
         return ERR_INVALID_VALUE;
     }
+    HILOGI("[SA Scheduler][SA:%{public}d]load event start, callpid: %{public}d, evtid:%{public}d, "
+        "ProcessState:%{public}d, SAState:%{public}d", loadRequestInfo.systemAbilityId, loadRequestInfo.callingPid,
+        loadRequestInfo.loadEvent.eventId, abilityContext->ownProcessContext->state, abilityContext->state);
     std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
     return HandleLoadAbilityEventLocked(abilityContext, loadRequestInfo);
 }
@@ -250,12 +250,13 @@ int32_t SystemAbilityStateScheduler::HandleLoadAbilityEventLocked(
 
 int32_t SystemAbilityStateScheduler::HandleUnloadAbilityEvent(const UnloadRequestInfo& unloadRequestInfo)
 {
-    HILOGI("[SA Scheduler][SA:%{public}d] handle unload event start callingPid : %{public}d",
-        unloadRequestInfo.systemAbilityId, unloadRequestInfo.callingPid);
     std::shared_ptr<SystemAbilityContext> abilityContext;
     if (!GetSystemAbilityContext(unloadRequestInfo.systemAbilityId, abilityContext)) {
         return ERR_INVALID_VALUE;
     }
+    HILOGI("[SA Scheduler][SA:%{public}d] handle unload event start callingPid:%{public}d, evtid:%{public}d,"
+        "ProcessState:%{public}d, SAState:%{public}d", unloadRequestInfo.systemAbilityId, unloadRequestInfo.callingPid,
+        unloadRequestInfo.unloadEvent.eventId, abilityContext->ownProcessContext->state, abilityContext->state);
     std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
     return HandleUnloadAbilityEventLocked(abilityContext, unloadRequestInfo);
 }
@@ -278,8 +279,8 @@ int32_t SystemAbilityStateScheduler::HandleUnloadAbilityEventLocked(
             break;
         default:
             result = ERR_OK;
-            HILOGI("[SA Scheduler][SA:%{public}d] in state %{public}d, not need unload ability",
-                abilityContext->systemAbilityId, abilityContext->state);
+            HILOGI("[SA Scheduler][SA:%{public}d] in state %{public}d, not need unload ability, callingPid:%{public}d",
+                abilityContext->systemAbilityId, abilityContext->state, unloadRequestInfo.callingPid);
             break;
     }
     return result;
@@ -507,9 +508,6 @@ bool SystemAbilityStateScheduler::CanUnloadAllSystemAbilityLocked(
 {
     uint32_t notLoadAbilityCount = processContext->abilityStateCountMap[SystemAbilityState::NOT_LOADED];
     uint32_t unloadableAbilityCount = processContext->abilityStateCountMap[SystemAbilityState::UNLOADABLE];
-    HILOGI("[SA Scheduler][process:%{public}s] SA num: %{public}zu, notloaded: %{public}d, unloadable: %{public}d",
-        Str16ToStr8(processContext->processName).c_str(), processContext->saList.size(), notLoadAbilityCount,
-        unloadableAbilityCount);
     if (unloadableAbilityCount == 0) {
         return false;
     }
@@ -520,6 +518,9 @@ bool SystemAbilityStateScheduler::CanUnloadAllSystemAbilityLocked(
             return true;
         }
     }
+    HILOGI("[SA Scheduler][process:%{public}s] SA num: %{public}zu, notloaded: %{public}d, unloadable: %{public}d",
+        Str16ToStr8(processContext->processName).c_str(), processContext->saList.size(), notLoadAbilityCount,
+        unloadableAbilityCount);
     return false;
 }
 
