@@ -41,7 +41,7 @@ const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 const string DEFAULT_LOAD_NAME = "loadevent";
 constexpr uint32_t SAID = 1499;
 constexpr int64_t DEFAULT_EVENTID = 0;
-constexpr uint32_t INVALID_SAID = -1;
+constexpr int32_t INVALID_SAID = -1;
 constexpr uint32_t INVALID_CODE = 50;
 }
 
@@ -336,7 +336,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UpdateOnDemandPolicyInner001, TestSize.Level3
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     MessageParcel data;
     MessageParcel reply;
-    int32_t ret = saMgr->GetOnDemandPolicyInner(data, reply);
+    int32_t ret = saMgr->UpdateOnDemandPolicyInner(data, reply);
     EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
 }
 
@@ -1073,6 +1073,22 @@ HWTEST_F(SystemAbilityMgrStubTest, LoadRemoteSystemAbilityInner004, TestSize.Lev
 }
 
 /**
+ * @tc.name: LoadRemoteSystemAbilityInner005
+ * @tc.desc: test LoadRemoteSystemAbilityInner, systemAbilityId invalid!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, LoadRemoteSystemAbilityInner005, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInt32(INVALID_SAID);    
+    int32_t result = saMgr->LoadRemoteSystemAbilityInner(data, reply);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
  * @tc.name: InitSaProfile001
  * @tc.desc: test InitSaProfile! InitSaProfile.
  * @tc.type: FUNC
@@ -1356,6 +1372,36 @@ HWTEST_F(SystemAbilityMgrStubTest, StartOnDemandAbilityInner002, TestSize.Level3
     abilityItem.state = SystemAbilityManager::AbilityState::INIT;
     saMgr->StartOnDemandAbilityInner(procName, SAID, abilityItem);
     EXPECT_EQ(abilityItem.state, SystemAbilityManager::AbilityState::INIT);
+}
+
+/**
+ * @tc.name: StartOnDemandAbilityInner003
+ * @tc.desc: test StartOnDemandAbilityInner, get process fail!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, StartOnDemandAbilityInner003, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    u16string procName = u"";
+    SystemAbilityManager::AbilityItem abilityItem;
+    abilityItem.state = SystemAbilityManager::AbilityState::STARTING;
+    int32_t ret = saMgr->StartOnDemandAbilityInner(procName, SAID, abilityItem);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: StartOnDemandAbilityInner004
+ * @tc.desc: test StartOnDemandAbilityInner, get process fail!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, StartOnDemandAbilityInner004, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    u16string procName = u"";
+    SystemAbilityManager::AbilityItem abilityItem;
+    abilityItem.state = SystemAbilityManager::AbilityState::STARTED;
+    int32_t ret = saMgr->StartOnDemandAbilityInner(procName, SAID, abilityItem);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
 
 /**
@@ -2841,5 +2887,20 @@ HWTEST_F(SystemAbilityMgrStubTest, GetSystemAbilityInner004, TestSize.Level3)
     data.WriteInt32(INVALID_SAID);
     int32_t result = saMgr->GetSystemAbilityInner(data, reply);
     EXPECT_EQ(result, ERR_NULL_OBJECT);
+}
+
+/**
+ * @tc.name: SendStrategyInner001
+ * @tc.desc: test SendStrategyInner, read systemAbilityId failed!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, SendStrategyInner001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t result = saMgr->SendStrategyInner(data, reply);
+    EXPECT_EQ(result, ERR_FLATTEN_OBJECT);
 }
 }

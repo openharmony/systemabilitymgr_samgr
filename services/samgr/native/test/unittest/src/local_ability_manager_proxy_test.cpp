@@ -274,4 +274,21 @@ HWTEST_F(LocalAbilityManagerProxyTest, IdleAbility002, TestSize.Level3)
     bool ret = localAbility->IdleAbility(TEST_SAID_VAILD, idleReason, delayTime);
     EXPECT_FALSE(ret);
 }
+
+/**
+ * @tc.name: SendStrategyToSA001
+ * @tc.desc: test SendStrategyToSA001 with idleReason is not empty
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(LocalAbilityManagerProxyTest, SendStrategyToSA001, TestSize.Level3)
+{
+    sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
+    sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
+    int32_t type = 0;
+    int32_t level = 0;
+    std::string action;
+    bool ret = localAbility->SendStrategyToSA(type, TEST_SAID_INVAILD, level, action);
+    EXPECT_FALSE(ret);
+}
 }

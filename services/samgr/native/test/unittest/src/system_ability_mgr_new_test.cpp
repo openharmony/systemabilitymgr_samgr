@@ -551,4 +551,94 @@ HWTEST_F(SystemAbilityMgrTest, AddSamgrToAbilityMap001, TestSize.Level3)
     int32_t result = saMgr->Dump(1, args);
     EXPECT_EQ(result, ERR_OK);
 }
+
+/**
+ * @tc.name: CleanFfrt001
+ * @tc.desc: test CleanFfrt with remoteObject is not nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, CleanFfrt001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::shared_ptr<FFRTHandler> workHandler_ = make_shared<FFRTHandler>("workHandler");
+    int ret = true;
+    saMgr->CleanFfrt();
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: CleanFfrt002
+ * @tc.desc: test CleanFfrt with remoteObject is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, CleanFfrt002, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<DeviceStatusCollectManager> collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
+    int ret = true;
+    saMgr->CleanFfrt();
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: CleanFfrt003
+ * @tc.desc: test CleanFfrt with remoteObject is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, CleanFfrt003, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+    int ret = true;
+    saMgr->CleanFfrt();
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: SetFfrt001
+ * @tc.desc: test CleanFfrt with remoteObject is not nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, SetFfrt001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::shared_ptr<FFRTHandler> workHandler_ = make_shared<FFRTHandler>("workHandler");
+    int ret = true;
+    saMgr->SetFfrt();
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: SetFfrt002
+ * @tc.desc: test CleanFfrt with remoteObject is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, SetFfrt002, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<DeviceStatusCollectManager> collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
+    int ret = true;
+    saMgr->SetFfrt();
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: SetFfrt003
+ * @tc.desc: test CleanFfrt with remoteObject is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, SetFfrt003, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+    int ret = true;
+    saMgr->SetFfrt();
+    EXPECT_EQ(ret, true);
+}
 } // namespace OHOS
