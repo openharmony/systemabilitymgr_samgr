@@ -279,6 +279,54 @@ HWTEST_F(DeviceTimedCollectTest, AddCollectEvent003, TestSize.Level3)
 }
 
 /**
+ * @tc.name: AddCollectEvent004
+ * @tc.desc: test AddCollectEvent with the interval is less than MIN_INTERVAL
+ * @tc.type: FUNC
+ * @tc.require: I7G775
+ */
+HWTEST_F(DeviceTimedCollectTest, AddCollectEvent004, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
+        std::make_shared<DeviceTimedCollect>(collect);
+    OnDemandEvent event = {TIMED_EVENT, "order_timed_event", "10", -1, true};
+    int32_t ret = deviceTimedCollect->AddCollectEvent(event);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: AddCollectEvent005
+ * @tc.desc: test AddCollectEvent with the interval is less than MIN_INTERVAL
+ * @tc.type: FUNC
+ * @tc.require: I7G775
+ */
+HWTEST_F(DeviceTimedCollectTest, AddCollectEvent005, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
+        std::make_shared<DeviceTimedCollect>(collect);
+    OnDemandEvent event = {TIMED_EVENT, "order_timed_event", "10"};
+    int32_t ret = deviceTimedCollect->AddCollectEvent(event);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: AddCollectEvent006
+ * @tc.desc: test AddCollectEvent with the interval is less than MIN_INTERVAL
+ * @tc.type: FUNC
+ * @tc.require: I7G775
+ */
+HWTEST_F(DeviceTimedCollectTest, AddCollectEvent006, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
+        std::make_shared<DeviceTimedCollect>(collect);
+    OnDemandEvent event = {TIMED_EVENT, "mockevent", "10", -1, true};
+    int32_t ret = deviceTimedCollect->AddCollectEvent(event);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
  * @tc.name: OnStop001
  * @tc.desc: cover OnStop
  * @tc.type: FUNC
@@ -338,6 +386,23 @@ HWTEST_F(DeviceTimedCollectTest, RemoveUnusedEvent003, TestSize.Level3)
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(report);
     OnDemandEvent event = {TIMED_EVENT, "loopevent", "10"};
+    deviceTimedCollect->nonPersitenceLoopEventSet_.insert(10);
+    int32_t ret = deviceTimedCollect->RemoveUnusedEvent(event);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: RemoveUnusedEvent004
+ * @tc.desc: test RemoveUnusedEvent, with event.name in nonPersitenceLoopEventSet_
+ * @tc.type: FUNC
+ * @tc.require: I7VZ98
+ */
+HWTEST_F(DeviceTimedCollectTest, RemoveUnusedEvent004, TestSize.Level3)
+{
+    sptr<IReport> report;
+    std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
+        std::make_shared<DeviceTimedCollect>(report);
+    OnDemandEvent event = {TIMED_EVENT, "loopevent", "10", -1, true};
     deviceTimedCollect->nonPersitenceLoopEventSet_.insert(10);
     int32_t ret = deviceTimedCollect->RemoveUnusedEvent(event);
     EXPECT_EQ(ret, ERR_OK);
