@@ -15,11 +15,13 @@
 
 #include "system_ability_load_callback_stub.h"
 
+#include <cinttypes>
 #include "errors.h"
 #include "ipc_object_stub.h"
 #include "ipc_types.h"
 #include "message_parcel.h"
 #include "refbase.h"
+#include "datetime_ex.h"
 #include "sam_log.h"
 
 namespace OHOS {
@@ -53,16 +55,21 @@ int32_t SystemAbilityLoadCallbackStub::OnLoadSystemAbilitySuccessInner(MessagePa
     int32_t systemAbilityId = -1;
     bool ret = data.ReadInt32(systemAbilityId);
     if (!ret) {
-        HILOGW("OnLoadSystemAbilitySuccessInner read systemAbilityId:%{public}d fail!", systemAbilityId);
+        HILOGW("OnLoadSystemAbilitySuccessInner read SA:%{public}d fail!", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
-    HILOGI("OnLoadSystemAbilitySuccessInner, systemAbilityId = %{public}d", systemAbilityId);
+    HILOGD("OnLoadSystemAbilitySuccessInner, SA:%{public}d", systemAbilityId);
     if (!CheckInputSystemAbilityId(systemAbilityId)) {
-        HILOGW("OnLoadSystemAbilitySuccessInner invalid systemAbilityId:%{public}d !", systemAbilityId);
+        HILOGW("OnLoadSystemAbilitySuccessInner invalid SA:%{public}d !", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
     sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
+    if (remoteObject == nullptr) {
+        HILOGW("OnLoadSystemAbilitySuccessInner read remoteObject fail, SA:%{public}d!", systemAbilityId);
+    }
+    int64_t begin = OHOS::GetTickCount();
     OnLoadSystemAbilitySuccess(systemAbilityId, remoteObject);
+    HILOGW("onloadsasuc SA:%{public}d spend %{public}" PRId64 " ms", systemAbilityId, GetTickCount() - begin);
     return ERR_NONE;
 }
 
@@ -71,15 +78,17 @@ int32_t SystemAbilityLoadCallbackStub::OnLoadSystemAbilityFailInner(MessageParce
     int32_t systemAbilityId = -1;
     bool ret = data.ReadInt32(systemAbilityId);
     if (!ret) {
-        HILOGW("OnLoadSystemAbilityFailInner read systemAbilityId:%{public}d fail!", systemAbilityId);
+        HILOGW("OnLoadSystemAbilityFailInner read SA:%{public}d fail!", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
-    HILOGI("OnLoadSystemAbilityFailInner, systemAbilityId = %{public}d", systemAbilityId);
+    HILOGI("OnLoadSystemAbilityFailInner, SA:%{public}d", systemAbilityId);
     if (!CheckInputSystemAbilityId(systemAbilityId)) {
-        HILOGW("OnLoadSystemAbilityFailInner invalid systemAbilityId:%{public}d !", systemAbilityId);
+        HILOGW("OnLoadSystemAbilityFailInner invalid SA:%{public}d !", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
+    int64_t begin = OHOS::GetTickCount();
     OnLoadSystemAbilityFail(systemAbilityId);
+    HILOGW("onloadsafail SA:%{public}d spend %{public}" PRId64 " ms", systemAbilityId, GetTickCount() - begin);
     return ERR_NONE;
 }
 
@@ -89,18 +98,20 @@ int32_t SystemAbilityLoadCallbackStub::OnLoadSACompleteForRemoteInner(MessagePar
     int32_t systemAbilityId = -1;
     bool ret = data.ReadInt32(systemAbilityId);
     if (!ret) {
-        HILOGW("OnLoadSACompleteForRemoteInner read systemAbilityId:%{public}d fail!", systemAbilityId);
+        HILOGW("OnLoadSACompleteForRemoteInner read SA:%{public}d fail!", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
     if (!CheckInputSystemAbilityId(systemAbilityId)) {
-        HILOGW("OnLoadSACompleteForRemoteInner invalid systemAbilityId:%{public}d !", systemAbilityId);
+        HILOGW("OnLoadSACompleteForRemoteInner invalid SA:%{public}d !", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
     ret = data.ReadBool();
-    HILOGI("OnLoadSACompleteForRemoteInner load systemAbilityId:%{public}d %{public}s",
+    HILOGI("OnLoadSACompleteForRemoteInner load SA:%{public}d %{public}s",
         systemAbilityId, ret ? "succeed" : "failed");
     sptr<IRemoteObject> remoteObject = ret ? data.ReadRemoteObject() : nullptr;
+    int64_t begin = OHOS::GetTickCount();
     OnLoadSACompleteForRemote(deviceId, systemAbilityId, remoteObject);
+    HILOGW("onloadRemoteSa SA:%{public}d spend %{public}" PRId64 " ms", systemAbilityId, GetTickCount() - begin);
     return ERR_NONE;
 }
 
