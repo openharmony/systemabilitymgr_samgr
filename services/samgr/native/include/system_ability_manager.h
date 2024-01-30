@@ -218,7 +218,7 @@ private:
         sptr<ISystemAbilityLoadCallback> callback);
     int32_t CheckStopEnableOnce(const OnDemandEvent& event, const SaControlInfo& saControl);
     bool IsSameEvent(const OnDemandEvent& event, std::list<OnDemandEvent>& enableOnceList);
-    void UpdateSaFreMap(int32_t uid, int32_t saId);
+    int32_t UpdateSaFreMap(int32_t uid, int32_t saId);
     uint64_t GenerateFreKey(int32_t uid, int32_t saId) const;
     void ReportGetSAPeriodically();
     void OndemandLoad();
