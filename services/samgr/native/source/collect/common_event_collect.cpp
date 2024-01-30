@@ -319,7 +319,7 @@ int64_t CommonEventCollect::SaveOnDemandReasonExtraData(const EventFwk::CommonEv
     OnDemandReasonExtraData extraData(data.GetCode(), data.GetData(), wantMap);
     int64_t extraDataId = GenerateExtraDataIdLocked();
     extraDatas_[extraDataId] = extraData;
-    HILOGD("CommonEventCollect save extraData %{public}d", static_cast<int32_t>(extraDataId));
+    HILOGI("CommonEventCollect save extraData %{public}d", static_cast<int32_t>(extraDataId));
     if (workHandler_ == nullptr) {
         HILOGI("CommonEventCollect workHandler is nullptr");
         return -1;
@@ -348,7 +348,7 @@ void CommonEventCollect::RemoveOnDemandReasonExtraData(int64_t extraDataId)
 bool CommonEventCollect::GetOnDemandReasonExtraData(int64_t extraDataId, OnDemandReasonExtraData& extraData)
 {
     std::lock_guard<std::mutex> autoLock(extraDataLock_);
-    HILOGI("CommonEventCollect get extraData %{public}d", static_cast<int32_t>(extraDataId));
+    HILOGD("CommonEventCollect get extraData %{public}d", static_cast<int32_t>(extraDataId));
     if (extraDatas_.count(extraDataId) == 0) {
         return false;
     }
@@ -465,7 +465,6 @@ void CommonEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData& data
 {
     std::string action = data.GetWant().GetAction();
     int32_t code = data.GetCode();
-    HILOGI("OnReceiveEvent get action: %{public}s code: %{public}d", action.c_str(), code);
     auto collect = collect_.promote();
     if (collect == nullptr) {
         HILOGE("CommonEventCollect collect is nullptr");
@@ -473,6 +472,8 @@ void CommonEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData& data
     }
     collect->SaveAction(action);
     int64_t extraDataId = collect->SaveOnDemandReasonExtraData(data);
+    HILOGI("OnReceiveEvent get action: %{public}s code: %{public}d, extraDataId %{public}d",
+        action.c_str(), code, static_cast<int32_t>(extraDataId));
     collect->SaveOnDemandConditionExtraData(data);
     OnDemandEvent event = {COMMON_EVENT, action, std::to_string(code), extraDataId};
     collect->ReportEvent(event);
