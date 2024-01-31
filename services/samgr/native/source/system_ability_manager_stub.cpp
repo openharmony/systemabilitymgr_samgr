@@ -396,7 +396,7 @@ int32_t SystemAbilityManagerStub::CheckSystemAbilityImmeInner(MessageParcel& dat
     }
     ret = reply.WriteRemoteObject(CheckSystemAbility(systemAbilityId, isExist));
     if (!ret) {
-        HILOGE("CheckSystemAbilityImmeInner SA:%{public}d, callpid:%{public}d, write obj fail, spend %{public}"
+        HILOGD("CheckSystemAbilityImmeInner SA:%{public}d, callpid:%{public}d, write obj fail, spend %{public}"
             PRId64 " ms", systemAbilityId, OHOS::IPCSkeleton::GetCallingPid(), OHOS::GetTickCount() - begin);
         return ERR_FLATTEN_OBJECT;
     }

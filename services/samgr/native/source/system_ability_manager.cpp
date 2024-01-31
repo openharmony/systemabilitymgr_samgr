@@ -573,16 +573,15 @@ sptr<IRemoteObject> SystemAbilityManager::CheckSystemAbility(int32_t systemAbili
         HILOGW("CheckSystemAbility CheckSystemAbility invalid!");
         return nullptr;
     }
-    UpdateSaFreMap(IPCSkeleton::GetCallingUid(), systemAbilityId);
+    int32_t count = UpdateSaFreMap(IPCSkeleton::GetCallingUid(), systemAbilityId);
     shared_lock<shared_mutex> readLock(abilityMapLock_);
     auto iter = abilityMap_.find(systemAbilityId);
     if (iter != abilityMap_.end()) {
         HILOGD("found SA:%{public}d,callpid:%{public}d", systemAbilityId, IPCSkeleton::GetCallingPid());
         return iter->second.remoteObj;
     }
-    HILOGD("NOT found SA:%{public}d,callpid:%{public}d,size:%{public}zu, processSize:%{public}zu, "
-        "startingSASize:%{public}zu", systemAbilityId, IPCSkeleton::GetCallingPid(), abilityMap_.size(),
-        systemProcessMap_.size(), startingAbilityMap_.size());
+    HILOGI("NOT found SA:%{public}d,callpid:%{public}d,count:%{public}d",
+        systemAbilityId, IPCSkeleton::GetCallingPid(), count);
     return nullptr;
 }
 
@@ -1992,11 +1991,11 @@ std::string SystemAbilityManager::EventToStr(const OnDemandEvent& event)
     return eventStr;
 }
 
-void SystemAbilityManager::UpdateSaFreMap(int32_t uid, int32_t saId)
+int32_t SystemAbilityManager::UpdateSaFreMap(int32_t uid, int32_t saId)
 {
     if (uid < 0) {
         HILOGW("UpdateSaFreMap return, uid not valid!");
-        return;
+        return -1;
     }
 
     uint64_t key = GenerateFreKey(uid, saId);
@@ -2005,6 +2004,7 @@ void SystemAbilityManager::UpdateSaFreMap(int32_t uid, int32_t saId)
     if (count < MAX_SA_FREQUENCY_COUNT) {
         count++;
     }
+    return count;
 }
 
 uint64_t SystemAbilityManager::GenerateFreKey(int32_t uid, int32_t saId) const
