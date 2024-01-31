@@ -2029,7 +2029,7 @@ HWTEST_F(SystemAbilityMgrTest, ReportGetSAFre002, TestSize.Level3)
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     int32_t uid = 1;
     saMgr->saFrequencyMap_.clear();
-    saMgr->UpdateSaFreMap(uid, TEST_SYSTEM_ABILITY1);
+    int32_t count = saMgr->UpdateSaFreMap(uid, TEST_SYSTEM_ABILITY1);
     ASSERT_EQ(saMgr->saFrequencyMap_.size(), 1);
     saMgr->ReportGetSAPeriodically();
     ASSERT_EQ(saMgr->saFrequencyMap_.size(), 0);
@@ -2047,7 +2047,7 @@ HWTEST_F(SystemAbilityMgrTest, ReportGetSAFre003, TestSize.Level3)
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     int32_t uid = -1;
     saMgr->saFrequencyMap_.clear();
-    saMgr->UpdateSaFreMap(uid, TEST_SYSTEM_ABILITY1);
+    int32_t count = saMgr->UpdateSaFreMap(uid, TEST_SYSTEM_ABILITY1);
     saMgr->ReportGetSAPeriodically();
     ASSERT_EQ(saMgr->saFrequencyMap_.size(), 0);
 }
@@ -2065,7 +2065,7 @@ HWTEST_F(SystemAbilityMgrTest, ReportGetSAFre004, TestSize.Level3)
     int32_t uid = 1;
     uint64_t key = saMgr->GenerateFreKey(uid, TEST_SYSTEM_ABILITY1);
     saMgr->saFrequencyMap_[key] = MAX_COUNT;
-    saMgr->UpdateSaFreMap(uid, TEST_SYSTEM_ABILITY1);
+    int32_t count = saMgr->UpdateSaFreMap(uid, TEST_SYSTEM_ABILITY1);
     EXPECT_EQ(saMgr->saFrequencyMap_[key], MAX_COUNT);
     saMgr->saFrequencyMap_.clear();
 }
