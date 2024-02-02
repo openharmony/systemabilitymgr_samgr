@@ -860,6 +860,7 @@ int32_t SystemAbilityManager::RemoveSystemAbility(const sptr<IRemoteObject>& abi
         for (auto iter = abilityMap_.begin(); iter != abilityMap_.end(); ++iter) {
             if (iter->second.remoteObj == ability) {
                 saId = iter->first;
+                SystemAbilityInvalidateCache(saId);
                 (void)abilityMap_.erase(iter);
                 if (abilityDeath_ != nullptr) {
                     ability->RemoveDeathRecipient(abilityDeath_);
