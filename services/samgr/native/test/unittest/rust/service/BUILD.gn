@@ -20,8 +20,12 @@ ohos_rust_shared_library("test_access_token") {
   ]
 
   deps = [
-    "../../../../../../../../../../base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",
-    "../../../../../../../../../../base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
+    # "../../../../../../../../../../base/security/access_token/interfaces/innerkits/nativetoken:libnativetoken",
+    # "../../../../../../../../../../base/security/access_token/interfaces/innerkits/token_setproc:libtoken_setproc",
+  ]
+  external_deps = [
+    "access_token:libnativetoken",
+    "access_token:libtoken_setproc",
   ]
 
   crate_name = "test_access_token"
