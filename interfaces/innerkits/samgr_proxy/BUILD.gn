@@ -31,8 +31,6 @@ config("samgr_proxy_private_config") {
     "//foundation/systemabilitymgr/samgr/services/samgr/native/include",
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/dynamic_cache/include",
     "//foundation/systemabilitymgr/samgr/utils/native/include",
-    "//third_party/json/include",
-    "//third_party/json/single_include",
   ]
 }
 
@@ -56,7 +54,10 @@ ohos_shared_library("samgr_proxy") {
 
   deps = [ "//foundation/systemabilitymgr/samgr/interfaces/innerkits/dynamic_cache:dynamic_cache" ]
 
-  public_configs = [ ":lsamgr_proxy_config" ]
+  public_configs = [
+    ":lsamgr_proxy_config",
+    ":samgr_proxy_config",
+  ]
   all_dependent_configs = [ ":samgr_proxy_config" ]
 
   if (is_standard_system) {
@@ -65,6 +66,7 @@ ohos_shared_library("samgr_proxy") {
       "hilog:libhilog",
       "init:libbegetutil",
       "ipc:ipc_single",
+      "json:nlohmann_json_static",
     ]
 
     part_name = "samgr"

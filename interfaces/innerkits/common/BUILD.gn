@@ -14,11 +14,7 @@
 import("//build/ohos.gni")
 
 config("all_config_samgr_common") {
-  include_dirs = [
-    "include",
-    "//third_party/json/include",
-    "//third_party/json/single_include",
-  ]
+  include_dirs = [ "include" ]
 }
 
 config("config_samgr_common") {
@@ -48,7 +44,11 @@ ohos_shared_library("samgr_common") {
     "//foundation/systemabilitymgr/samgr/test/resource:coverage_flags",
   ]
 
-  public_configs = [ ":config_samgr_common" ]
+  public_configs = [
+    ":config_samgr_common",
+    ":all_config_samgr_common",
+    "//third_party/libxml2:libxml2_config",
+  ]
 
   all_dependent_configs = [
     ":all_config_samgr_common",
@@ -62,6 +62,7 @@ ohos_shared_library("samgr_common") {
       "hisysevent:libhisysevent",
       "hitrace:hitrace_meter",
     ]
+    public_external_deps = [ "json:nlohmann_json_static" ]
     part_name = "samgr"
   }
 

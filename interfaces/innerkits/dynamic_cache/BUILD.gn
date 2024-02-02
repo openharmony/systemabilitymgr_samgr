@@ -22,6 +22,7 @@ config("dynamic_cache_config") {
 
 ohos_shared_library("dynamic_cache") {
   all_dependent_configs = [ ":dynamic_cache_config" ]
+  public_configs = [ ":dynamic_cache_config" ]
   if (is_standard_system) {
     external_deps = [
       "c_utils:utils",
