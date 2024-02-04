@@ -1317,6 +1317,12 @@ void SystemAbilityManager::SendCheckLoadedMsg(int32_t systemAbilityId, const std
     }
 
     auto delayTask = [systemAbilityId, name, srcDeviceId, callback, this]() {
+        if (workHandler_ != nullptr) {
+            HILOGD("SendCheckLoadedMsg deltask SA:%{public}d", systemAbilityId);
+            workHandler_->DelTask(ToString(systemAbilityId));
+        } else {
+            HILOGE("SendCheckLoadedMsg workHandler_ is null");
+        }
         if (CheckSystemAbility(systemAbilityId) != nullptr) {
             HILOGI("SendCheckLoadedMsg SA:%{public}d loaded.", systemAbilityId);
             return;

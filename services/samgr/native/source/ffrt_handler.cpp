@@ -86,18 +86,6 @@ bool FFRTHandler::PostTask(std::function<void()> func, const std::string& name, 
         return false;
     }
     taskMap_[name] = std::move(handler);
-
-    // submit clear task to clear map record
-    auto clearTask = [this, name]() {
-        std::unique_lock<std::shared_mutex> lock(mutex_);
-        auto item = taskMap_.find(name);
-        if (item == taskMap_.end()) {
-            HILOGW("clear task %{public}s not find", name.c_str());
-            return;
-        }
-        taskMap_.erase(name);
-    };
-    queue_->submit_h(clearTask, task_attr().delay(delayTime * CONVERSION_FACTOR));
     return true;
 }
 
@@ -115,6 +103,18 @@ void FFRTHandler::RemoveTask(const std::string& name)
             HILOGE("cancel task failed, error code %{public}d", ret);
         }
     }
+    taskMap_.erase(name);
+}
+
+void FFRTHandler::DelTask(const std::string& name)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    auto item = taskMap_.find(name);
+    if (item == taskMap_.end()) {
+        HILOGW("del task %{public}s not find", name.c_str());
+        return;
+    }
+    HILOGD("erase task %{public}s ", name.c_str());
     taskMap_.erase(name);
 }
 
