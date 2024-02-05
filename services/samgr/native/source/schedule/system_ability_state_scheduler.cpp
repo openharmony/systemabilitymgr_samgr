@@ -557,6 +557,13 @@ int32_t SystemAbilityStateScheduler::PostTryUnloadAllAbilityTask(
 int32_t SystemAbilityStateScheduler::PostUnloadTimeoutTask(const std::shared_ptr<SystemProcessContext>& processContext)
 {
     auto timeoutTask = [this, processContext] () {
+        std::string name = KEY_UNLOAD_TIMEOUT + Str16ToStr8(processContext->processName);
+        if (processHandler_ != nullptr) {
+            HILOGD("TimeoutTask deltask proc:%{public}s", name.c_str());
+            processHandler_->DelTask(name);
+        } else {
+            HILOGE("TimeoutTask processHandler_ is null");
+        }
         std::lock_guard<std::mutex> autoLock(processContext->processLock);
         if (processContext->state == SystemProcessState::STOPPING) {
             HILOGW("[SA Scheduler][process:%{public}s] unload SA timeout",
@@ -1106,6 +1113,12 @@ int32_t SystemAbilityStateScheduler::ProcessDelayUnloadEventLocked(int32_t syste
 void SystemAbilityStateScheduler::UnloadEventHandler::ProcessEvent(uint32_t eventId)
 {
     int32_t systemAbilityId = static_cast<int32_t>(eventId);
+    if (handler_ != nullptr) {
+        HILOGD("ProcessEvent deltask SA:%{public}d", systemAbilityId);
+        handler_->DelTask(std::to_string(eventId));
+    } else {
+        HILOGE("ProcessEvent handler_ is null");
+    }
     auto stateScheduler = stateScheduler_.lock();
     int32_t result = ERR_OK;
     if (stateScheduler != nullptr) {
