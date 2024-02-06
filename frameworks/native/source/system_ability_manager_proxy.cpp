@@ -203,7 +203,7 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbilityTransaction(int
     }
     bool ret = data.WriteInt32(systemAbilityId);
     if (!ret) {
-        HILOGW("CheckSystemAbility Write systemAbilityId failed!");
+        HILOGW("CheckSystemAbility Write SAId failed!");
         return nullptr;
     }
     return CheckSystemAbilityWrapper(
@@ -249,7 +249,7 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t system
 {
     HILOGD("%{public}s called, SA:%{public}d, isExist is %{public}d", __func__, systemAbilityId, isExist);
     if (!CheckInputSysAbilityId(systemAbilityId)) {
-        HILOGW("CheckSystemAbility:systemAbilityId:%{public}d invalid!", systemAbilityId);
+        HILOGW("CheckSystemAbility:SA:%{public}d invalid!", systemAbilityId);
         return nullptr;
     }
 
@@ -271,7 +271,7 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t system
     }
     bool ret = data.WriteInt32(systemAbilityId);
     if (!ret) {
-        HILOGW("CheckSystemAbility Write systemAbilityId failed!");
+        HILOGW("CheckSystemAbility Write SAId failed!");
         return nullptr;
     }
 
@@ -320,7 +320,7 @@ int32_t SystemAbilityManagerProxy::AddOnDemandSystemAbilityInfo(int32_t systemAb
     }
     bool ret = data.WriteInt32(systemAbilityId);
     if (!ret) {
-        HILOGW("AddOnDemandSystemAbilityInfo Write systemAbilityId failed!");
+        HILOGW("AddOnDemandSystemAbilityInfo Write SAId failed!");
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -389,7 +389,7 @@ int32_t SystemAbilityManagerProxy::RemoveSystemAbility(int32_t systemAbilityId)
     }
     bool ret = data.WriteInt32(systemAbilityId);
     if (!ret) {
-        HILOGW("RemoveSystemAbility Write systemAbilityId failed!");
+        HILOGW("RemoveSystemAbility Write SAId failed!");
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -512,7 +512,7 @@ int32_t SystemAbilityManagerProxy::UnSubscribeSystemAbility(int32_t systemAbilit
     }
     bool ret = data.WriteInt32(systemAbilityId);
     if (!ret) {
-        HILOGW("UnSubscribeSystemAbility Write systemAbilityId failed!");
+        HILOGW("UnSubscribeSystemAbility Write SAId failed!");
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -558,7 +558,7 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::LoadSystemAbility(int32_t systemA
     auto waitStatus = callback->cv_.wait_for(lock, std::chrono::seconds(timeout),
         [&callback]() { return callback->loadproxy_ != nullptr; });
     if (!waitStatus) {
-        HILOGE("LoadSystemAbility systemAbilityId timeout");
+        HILOGE("LoadSystemAbility SA:%{public}d timeout", systemAbilityId);
         return nullptr;
     }
     return callback->loadproxy_;
@@ -585,7 +585,7 @@ int32_t SystemAbilityManagerProxy::LoadSystemAbility(int32_t systemAbilityId,
     }
     bool ret = data.WriteInt32(systemAbilityId);
     if (!ret) {
-        HILOGW("LoadSystemAbility Write systemAbilityId failed!");
+        HILOGW("LoadSystemAbility Write SAId failed!");
         return ERR_FLATTEN_OBJECT;
     }
     ret = data.WriteRemoteObject(callback->AsObject());
@@ -632,7 +632,7 @@ int32_t SystemAbilityManagerProxy::LoadSystemAbility(int32_t systemAbilityId, co
     }
     bool ret = data.WriteInt32(systemAbilityId);
     if (!ret) {
-        HILOGW("LoadSystemAbility write systemAbilityId failed!");
+        HILOGW("LoadSystemAbility write SAId failed!");
         return ERR_FLATTEN_OBJECT;
     }
     ret = data.WriteString(deviceId);
@@ -726,7 +726,7 @@ int32_t SystemAbilityManagerProxy::CancelUnloadSystemAbility(int32_t systemAbili
     }
     bool ret = data.WriteInt32(systemAbilityId);
     if (!ret) {
-        HILOGW("CancelUnloadSystemAbility Write systemAbilityId failed!");
+        HILOGW("CancelUnloadSystemAbility Write SAId failed!");
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -802,7 +802,7 @@ int32_t SystemAbilityManagerProxy::AddSystemAbility(int32_t systemAbilityId, con
 {
     HILOGD("%{public}s called, SA:%{public}d", __func__, systemAbilityId);
     if (!CheckInputSysAbilityId(systemAbilityId)) {
-        HILOGW("systemAbilityId:%{public}d invalid.", systemAbilityId);
+        HILOGW("SA:%{public}d invalid.", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
 
@@ -992,7 +992,7 @@ int32_t SystemAbilityManagerProxy::ReadSystemProcessFromParcel(MessageParcel& re
         return ERR_OK;
     }
     if (static_cast<size_t>(size) > reply.GetReadableBytes() || size < 0) {
-        HILOGE("Failed to read system process list, size = %{public}d", size);
+        HILOGE("Failed to read proc list, size=%{public}d", size);
         return ERR_FLATTEN_OBJECT;
     }
     for (int32_t i = 0; i < size; i++) {
@@ -1220,7 +1220,7 @@ int32_t SystemAbilityManagerProxy::GetOnDemandSystemAbilityIds(std::vector<int32
         return result;
     }
     if (!reply.ReadInt32Vector(&systemAbilityIds)) {
-        HILOGW("GetOnDemandSystemAbilityIds systemAbilityIds read reply failed");
+        HILOGW("GetOnDemandSystemAbilityIds SAIds read reply failed");
         systemAbilityIds.clear();
         return ERR_FLATTEN_OBJECT;
     }

@@ -29,7 +29,7 @@ constexpr int32_t PARAM_WATCHER_DISTRIBUTED_SERVICE_ID = 3901;
 }
 static void DeviceParamCallback(const char* key, const char* value, void* context)
 {
-    HILOGI("key : %{public}s, value : %{public}s", key, value);
+    HILOGI("key:%{public}s, value:%{public}s", key, value);
     OnDemandEvent event = {PARAM, key, value};
     DeviceParamCollect* deviceParamCollect = static_cast<DeviceParamCollect*>(context);
     if (deviceParamCollect == nullptr) {
@@ -131,7 +131,7 @@ int32_t DeviceParamCollect::RemoveUnusedEvent(const OnDemandEvent& event)
 
 void SystemAbilityStatusChange::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
 {
-    HILOGI("OnAddSystemAbility systemAbilityId:%{public}d", systemAbilityId);
+    HILOGI("OnAddSystemAbility SA:%{public}d", systemAbilityId);
     switch (systemAbilityId) {
         case PARAM_WATCHER_DISTRIBUTED_SERVICE_ID: {
             if (deviceParamCollect_ == nullptr) {
@@ -145,7 +145,7 @@ void SystemAbilityStatusChange::OnAddSystemAbility(int32_t systemAbilityId, cons
             break;
         }
         default:
-            HILOGE("OnAddSystemAbility unhandled sysabilityId:%{public}d", systemAbilityId);
+            HILOGE("OnAddSystemAbility unhandled SA:%{public}d", systemAbilityId);
     }
 }
 

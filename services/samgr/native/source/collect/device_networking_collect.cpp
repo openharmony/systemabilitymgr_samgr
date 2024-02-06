@@ -125,21 +125,21 @@ bool DeviceNetworkingCollect::ReportMissedEvents()
 
 bool DeviceNetworkingCollect::AddDeviceChangeListener()
 {
-    HILOGI("DeviceNetworkingCollect AddDeviceChangeListener called");
+    HILOGI("AddDeviceChangeListener called");
     if (IsDmReady()) {
         int32_t ret = DeviceManager::GetInstance().InitDeviceManager(PKG_NAME, initCallback_);
         if (ret != ERR_OK) {
-            HILOGE("DeviceNetworkingCollect InitDeviceManager error");
+            HILOGE("InitDeviceManager error");
             return false;
         }
         if (!ReportMissedEvents()) {
-            HILOGE("DeviceNetworkingCollect ReportMissedEvents error");
+            HILOGE("ReportMissedEvents error");
             return false;
         }
         ret = DeviceManager::GetInstance().RegisterDevStateCallback(PKG_NAME, "", stateCallback_);
         if (ret != ERR_OK) {
             DeviceManager::GetInstance().UnRegisterDevStateCallback(PKG_NAME);
-            HILOGE("DeviceNetworkingCollect RegisterDevStateCallback error");
+            HILOGE("RegisterDevStateCallback error");
             return false;
         }
         return true;
@@ -279,33 +279,33 @@ void WorkHandler::SetFfrt()
 void WorkHandler::ProcessEvent(uint32_t eventId)
 {
     if (collect_ == nullptr) {
-        HILOGE("DeviceNetworkingCollect ProcessEvent collect or event is null!");
+        HILOGE("NetworkingCollect ProcessEvent collect or event is null!");
         return;
     }
     if (eventId != INIT_EVENT && eventId != DM_DIED_EVENT) {
-        HILOGE("DeviceNetworkingCollect ProcessEvent error event code!");
+        HILOGE("NetworkingCollect ProcessEvent error event code!");
         return;
     }
     if (handler_ == nullptr) {
-        HILOGE("DeviceNetworkingCollect SendEvent handler is null!");
+        HILOGE("NetworkingCollect SendEvent handler is null!");
         return;
     }
     if (!collect_->AddDeviceChangeListener()) {
-        HILOGW("DeviceNetworkingCollect AddDeviceChangeListener retry");
+        HILOGW("AddDeviceChangeListener retry");
         auto task = std::bind(&WorkHandler::ProcessEvent, this, INIT_EVENT);
         if (handler_ == nullptr) {
-            HILOGE("DeviceNetworkingCollect ProcessEvent handler is null!");
+            HILOGE("NetworkingCollect ProcessEvent handler is null!");
             return;
         }
         handler_->PostTask(task, DELAY_TIME);
     }
-    HILOGI("DeviceNetworkingCollect AddDeviceChangeListener success");
+    HILOGI("AddDeviceChangeListener success");
 }
 
 bool WorkHandler::SendEvent(uint32_t eventId)
 {
     if (handler_ == nullptr) {
-        HILOGE("DeviceNetworkingCollect SendEvent handler is null!");
+        HILOGE("NetworkingCollect SendEvent handler is null!");
         return false;
     }
     auto task = std::bind(&WorkHandler::ProcessEvent, this, eventId);
@@ -315,7 +315,7 @@ bool WorkHandler::SendEvent(uint32_t eventId)
 bool WorkHandler::SendEvent(uint32_t eventId, uint64_t delayTime)
 {
     if (handler_ == nullptr) {
-        HILOGE("DeviceNetworkingCollect SendEvent handler is null!");
+        HILOGE("NetworkingCollect SendEvent handler is null!");
         return false;
     }
     auto task = std::bind(&WorkHandler::ProcessEvent, this, eventId);

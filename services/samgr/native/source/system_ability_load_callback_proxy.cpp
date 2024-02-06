@@ -28,7 +28,7 @@ void SystemAbilityLoadCallbackProxy::OnLoadSystemAbilitySuccess(int32_t systemAb
     const sptr<IRemoteObject>& remoteObject)
 {
     if (systemAbilityId <= 0) {
-        HILOGE("OnLoadSystemAbilitySuccess systemAbilityId:%{public}d invalid!", systemAbilityId);
+        HILOGE("OnLoadSystemAbilitySuccess SA:%{public}d invalid!", systemAbilityId);
         return;
     }
 
@@ -44,7 +44,7 @@ void SystemAbilityLoadCallbackProxy::OnLoadSystemAbilitySuccess(int32_t systemAb
     }
     bool ret = data.WriteInt32(systemAbilityId);
     if (!ret) {
-        HILOGE("OnLoadSystemAbilitySuccess write systemAbilityId failed!");
+        HILOGE("OnLoadSystemAbilitySuccess write SAId failed!");
         return;
     }
     if (remoteObject == nullptr) {
@@ -69,7 +69,7 @@ void SystemAbilityLoadCallbackProxy::OnLoadSystemAbilitySuccess(int32_t systemAb
 void SystemAbilityLoadCallbackProxy::OnLoadSystemAbilityFail(int32_t systemAbilityId)
 {
     if (systemAbilityId <= 0) {
-        HILOGE("OnLoadSystemAbilityFail systemAbilityId:%{public}d invalid!", systemAbilityId);
+        HILOGE("OnLoadSystemAbilityFail SAId:%{public}d invalid!", systemAbilityId);
         return;
     }
 
@@ -85,7 +85,7 @@ void SystemAbilityLoadCallbackProxy::OnLoadSystemAbilityFail(int32_t systemAbili
     }
     bool ret = data.WriteInt32(systemAbilityId);
     if (!ret) {
-        HILOGE("OnLoadSystemAbilityFail write systemAbilityId failed!");
+        HILOGE("OnLoadSystemAbilityFail write SAId failed!");
         return;
     }
     MessageParcel reply;
@@ -101,7 +101,7 @@ void SystemAbilityLoadCallbackProxy::OnLoadSACompleteForRemote(const std::string
     const sptr<IRemoteObject>& remoteObject)
 {
     if (systemAbilityId <= 0) {
-        HILOGE("OnLoadSACompleteForRemote systemAbilityId:%{public}d invalid!", systemAbilityId);
+        HILOGE("OnLoadSACompleteForRemote SA:%{public}d invalid!", systemAbilityId);
         return;
     }
 
@@ -122,7 +122,7 @@ void SystemAbilityLoadCallbackProxy::OnLoadSACompleteForRemote(const std::string
     }
     ret = data.WriteInt32(systemAbilityId);
     if (!ret) {
-        HILOGE("OnLoadSACompleteForRemote write systemAbilityId failed!");
+        HILOGE("OnLoadSACompleteForRemote write SAId failed!");
         return;
     }
     if (remoteObject == nullptr) {
