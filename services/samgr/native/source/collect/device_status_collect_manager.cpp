@@ -184,7 +184,7 @@ bool DeviceStatusCollectManager::CheckConditions(const OnDemandEvent& onDemandEv
         }
         bool ret = collectPluginMap_[condition.eventId]->CheckCondition(condition);
         if (!ret) {
-            HILOGW("CheckCondition condition: %{public}s, value: %{public}s not pass",
+            HILOGW("CheckCondition:%{public}s, value:%{public}s not pass",
                 condition.name.c_str(), condition.value.c_str());
             return false;
         }

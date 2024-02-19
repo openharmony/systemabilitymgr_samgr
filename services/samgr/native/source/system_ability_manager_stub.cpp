@@ -207,7 +207,7 @@ int32_t SystemAbilityManagerStub::ListSystemAbilityInner(MessageParcel& data, Me
     int32_t dumpFlag = 0;
     bool ret = data.ReadInt32(dumpFlag);
     if (!ret) {
-        HILOGW("SystemAbilityManagerStub::ListSystemAbilityInner read dumpflag failed!");
+        HILOGW("ListSystemAbilityInner read dumpflag failed!");
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -216,7 +216,7 @@ int32_t SystemAbilityManagerStub::ListSystemAbilityInner(MessageParcel& data, Me
         HILOGI("List System Abilities list errors");
         ret = reply.WriteInt32(ERR_INVALID_VALUE);
     } else {
-        HILOGI("SystemAbilityManagerStub::ListSystemAbilityInner list success");
+        HILOGI("ListSystemAbilityInner list success");
         ret = reply.WriteInt32(ERR_NONE);
         if (ret) {
             ret = reply.WriteString16Vector(saNameVector);
@@ -224,7 +224,7 @@ int32_t SystemAbilityManagerStub::ListSystemAbilityInner(MessageParcel& data, Me
     }
 
     if (!ret) {
-        HILOGW("SystemAbilityManagerStub::ListSystemAbilityInner write reply failed.");
+        HILOGW("ListSystemAbilityInner write reply failed.");
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -239,24 +239,24 @@ int32_t SystemAbilityManagerStub::SubsSystemAbilityInner(MessageParcel& data, Me
         return ERR_NULL_OBJECT;
     }
     if (!CheckInputSysAbilityId(systemAbilityId)) {
-        HILOGW("SystemAbilityManagerStub::SubsSystemAbilityInner read systemAbilityId failed!");
+        HILOGW("SubsSystemAbilityInner read SAId failed!");
         return ERR_NULL_OBJECT;
     }
     sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
     if (remoteObject == nullptr) {
-        HILOGW("SystemAbilityManagerStub::SubsSystemAbilityInner read listener failed!");
+        HILOGW("SubsSystemAbilityInner read listener failed!");
         return ERR_NULL_OBJECT;
     }
     sptr<ISystemAbilityStatusChange> listener = iface_cast<ISystemAbilityStatusChange>(remoteObject);
     if (listener == nullptr) {
-        HILOGW("SystemAbilityManagerStub::SubsSystemAbilityInner iface_cast failed!");
+        HILOGW("SubsSystemAbilityInner iface_cast failed!");
         return ERR_NULL_OBJECT;
     }
     int32_t result = SubscribeSystemAbility(systemAbilityId, listener);
-    HILOGD("SystemAbilityManagerStub::SubsSystemAbilityInner result is %d", result);
+    HILOGD("SubsSystemAbilityInner result is %{public}d", result);
     ret = reply.WriteInt32(result);
     if (!ret) {
-        HILOGW("SystemAbilityManagerStub::SubsSystemAbilityInner write reply failed.");
+        HILOGW("SubsSystemAbilityInner write reply failed.");
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -271,24 +271,24 @@ int32_t SystemAbilityManagerStub::UnSubsSystemAbilityInner(MessageParcel& data, 
         return ERR_NULL_OBJECT;
     }
     if (!CheckInputSysAbilityId(systemAbilityId)) {
-        HILOGW("SystemAbilityManagerStub::UnSubsSystemAbilityInner read systemAbilityId failed!");
+        HILOGW("UnSubsSystemAbilityInner read SAId failed!");
         return ERR_NULL_OBJECT;
     }
     sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
     if (remoteObject == nullptr) {
-        HILOGW("SystemAbilityManagerStub::UnSubscribeSystemAbility read listener failed!");
+        HILOGW("UnSubscribeSystemAbility read listener failed!");
         return ERR_NULL_OBJECT;
     }
     sptr<ISystemAbilityStatusChange> listener = iface_cast<ISystemAbilityStatusChange>(remoteObject);
     if (listener == nullptr) {
-        HILOGW("SystemAbilityManagerStub::UnSubscribeSystemAbility iface_cast failed!");
+        HILOGW("UnSubscribeSystemAbility iface_cast failed!");
         return ERR_NULL_OBJECT;
     }
     int32_t result = UnSubscribeSystemAbility(systemAbilityId, listener);
-    HILOGD("SystemAbilityManagerStub::UnSubscribeSystemAbility result is %d", result);
+    HILOGD("UnSubscribeSystemAbility result is %{public}d", result);
     ret = reply.WriteInt32(result);
     if (!ret) {
-        HILOGW("SystemAbilityManagerStub::UnSubscribeSystemAbility write reply failed.");
+        HILOGW("UnSubscribeSystemAbility write reply failed.");
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -307,7 +307,7 @@ int32_t SystemAbilityManagerStub::CheckRemtSystemAbilityInner(MessageParcel& dat
         return ERR_NULL_OBJECT;
     }
     if (!CheckInputSysAbilityId(systemAbilityId)) {
-        HILOGW("SystemAbilityManagerStub::CheckRemtSystemAbilityInner read systemAbilityId failed!");
+        HILOGW("CheckRemtSystemAbilityInner read SAId failed!");
         return ERR_NULL_OBJECT;
     }
 
@@ -344,7 +344,7 @@ int32_t SystemAbilityManagerStub::AddOndemandSystemAbilityInner(MessageParcel& d
         return ERR_NULL_OBJECT;
     }
     if (!CheckInputSysAbilityId(systemAbilityId)) {
-        HILOGW("SystemAbilityManagerStub::AddOndemandSystemAbilityInner read systemAbilityId failed!");
+        HILOGW("AddOndemandSystemAbilityInner read SAId failed!");
         return ERR_NULL_OBJECT;
     }
 
@@ -355,15 +355,15 @@ int32_t SystemAbilityManagerStub::AddOndemandSystemAbilityInner(MessageParcel& d
 
     std::u16string localManagerName = data.ReadString16();
     if (localManagerName.empty()) {
-        HILOGW("SystemAbilityManagerStub::AddOndemandSystemAbilityInner read localName failed!");
+        HILOGW("AddOndemandSystemAbilityInner read localName failed!");
         return ERR_NULL_OBJECT;
     }
 
     int32_t result = AddOnDemandSystemAbilityInfo(systemAbilityId, localManagerName);
-    HILOGD("SystemAbilityManagerStub::AddOndemandSystemAbilityInner result is %d", result);
+    HILOGD("AddOndemandSystemAbilityInner result is %{public}d", result);
     ret = reply.WriteInt32(result);
     if (!ret) {
-        HILOGW("SystemAbilityManagerStub::AddOndemandSystemAbilityInner write reply failed.");
+        HILOGW("AddOndemandSystemAbilityInner write reply failed.");
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -379,7 +379,7 @@ int32_t SystemAbilityManagerStub::CheckSystemAbilityImmeInner(MessageParcel& dat
         return ERR_NULL_OBJECT;
     }
     if (!CheckInputSysAbilityId(systemAbilityId)) {
-        HILOGW("CheckSystemAbilityImmeInner read systemAbilityId failed!");
+        HILOGW("CheckSystemAbilityImmeInner read SAId failed!");
         return ERR_NULL_OBJECT;
     }
 
@@ -403,7 +403,7 @@ int32_t SystemAbilityManagerStub::CheckSystemAbilityImmeInner(MessageParcel& dat
 
     ret = reply.WriteBool(isExist);
     if (!ret) {
-        HILOGW("SystemAbilityManagerStub::CheckSystemAbilityImmeInner write reply failed.");
+        HILOGW("CheckSystemAbilityImmeInner write reply failed.");
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -415,14 +415,14 @@ int32_t SystemAbilityManagerStub::UnmarshalingSaExtraProp(MessageParcel& data, S
     bool isDistributed = false;
     bool ret = data.ReadBool(isDistributed);
     if (!ret) {
-        HILOGW("SystemAbilityManagerStub::UnmarshalingSaExtraProp read isDistributed failed!");
+        HILOGW("UnmarshalingSaExtraProp read isDistributed failed!");
         return ERR_FLATTEN_OBJECT;
     }
 
     int32_t dumpFlags = 0;
     ret = data.ReadInt32(dumpFlags);
     if (!ret || dumpFlags < 0) {
-        HILOGW("SystemAbilityManagerStub::UnmarshalingSaExtraProp dumpFlags failed!");
+        HILOGW("UnmarshalingSaExtraProp dumpFlags failed!");
         return ERR_FLATTEN_OBJECT;
     }
     std::u16string capability = data.ReadString16();
@@ -446,7 +446,7 @@ int32_t SystemAbilityManagerStub::AddSystemAbilityInner(MessageParcel& data, Mes
         return ERR_NULL_OBJECT;
     }
     if (!CheckInputSysAbilityId(systemAbilityId)) {
-        HILOGW("SystemAbilityManagerStub::AddSystemAbilityExtraInner read systemAbilityId failed!");
+        HILOGW("AddSystemAbilityExtraInner read SAId failed!");
         return ERR_NULL_OBJECT;
     }
 
@@ -457,19 +457,19 @@ int32_t SystemAbilityManagerStub::AddSystemAbilityInner(MessageParcel& data, Mes
 
     auto object = data.ReadRemoteObject();
     if (object == nullptr) {
-        HILOGW("SystemAbilityManagerStub::AddSystemAbilityExtraInner readParcelable failed!");
+        HILOGW("AddSystemAbilityExtraInner readParcelable failed!");
         return ERR_NULL_OBJECT;
     }
     SAExtraProp extraProp;
     int32_t result = UnmarshalingSaExtraProp(data, extraProp);
     if (result != ERR_OK) {
-        HILOGW("SystemAbilityManagerStub::AddSystemAbilityExtraInner UnmarshalingSaExtraProp failed!");
+        HILOGW("AddSystemAbilityExtraInner UnmarshalingSaExtraProp failed!");
         return result;
     }
     result = AddSystemAbility(systemAbilityId, object, extraProp);
     ret = reply.WriteInt32(result);
     if (!ret) {
-        HILOGW("SystemAbilityManagerStub::AddSystemAbilityExtraInner write reply failed.");
+        HILOGW("AddSystemAbilityExtraInner write reply failed.");
         return ERR_FLATTEN_OBJECT;
     }
     return result;
@@ -483,7 +483,7 @@ int32_t SystemAbilityManagerStub::GetSystemAbilityInner(MessageParcel& data, Mes
         return ERR_NULL_OBJECT;
     }
     if (!CheckInputSysAbilityId(systemAbilityId)) {
-        HILOGW("SystemAbilityManagerStub::GetSystemAbilityInner read systemAbilityId failed!");
+        HILOGW("GetSystemAbilityInner read SAId failed!");
         return ERR_NULL_OBJECT;
     }
 
@@ -508,7 +508,7 @@ int32_t SystemAbilityManagerStub::CheckSystemAbilityInner(MessageParcel& data, M
         return ERR_NULL_OBJECT;
     }
     if (!CheckInputSysAbilityId(systemAbilityId)) {
-        HILOGW("SystemAbilityManagerStub::CheckSystemAbilityInner read systemAbilityId failed!");
+        HILOGW("CheckSystemAbilityInner read SAId failed!");
         return ERR_NULL_OBJECT;
     }
 
@@ -536,7 +536,7 @@ int32_t SystemAbilityManagerStub::RemoveSystemAbilityInner(MessageParcel& data, 
         return ERR_NULL_OBJECT;
     }
     if (!CheckInputSysAbilityId(systemAbilityId)) {
-        HILOGW("SystemAbilityManagerStub::RemoveSystemAbilityInner read systemAbilityId failed!");
+        HILOGW("RemoveSystemAbilityInner read SAId failed!");
         return ERR_NULL_OBJECT;
     }
 
@@ -548,7 +548,7 @@ int32_t SystemAbilityManagerStub::RemoveSystemAbilityInner(MessageParcel& data, 
     int32_t result = RemoveSystemAbility(systemAbilityId);
     ret = reply.WriteInt32(result);
     if (!ret) {
-        HILOGW("SystemAbilityManagerStub::RemoveSystemAbilityInner write reply failed.");
+        HILOGW("RemoveSystemAbilityInner write reply failed.");
         return ERR_FLATTEN_OBJECT;
     }
     return result;
@@ -563,20 +563,20 @@ int32_t SystemAbilityManagerStub::AddSystemProcessInner(MessageParcel& data, Mes
     }
     std::u16string procName = data.ReadString16();
     if (procName.empty()) {
-        HILOGW("SystemAbilityManagerStub::AddSystemProcessInner read process name failed!");
+        HILOGW("AddSystemProcessInner read procName failed!");
         return ERR_NULL_OBJECT;
     }
 
     sptr<IRemoteObject> procObject = data.ReadRemoteObject();
     if (procObject == nullptr) {
-        HILOGW("SystemAbilityManagerStub::AddSystemProcessInner readParcelable failed!");
+        HILOGW("AddSystemProcessInner readParcelable failed!");
         return ERR_NULL_OBJECT;
     }
 
     int32_t result = AddSystemProcess(procName, procObject);
     bool ret = reply.WriteInt32(result);
     if (!ret) {
-        HILOGW("SystemAbilityManagerStub::AddSystemProcessInner write reply failed.");
+        HILOGW("AddSystemProcessInner write reply failed.");
         return ERR_FLATTEN_OBJECT;
     }
     return result;
@@ -592,7 +592,7 @@ int32_t SystemAbilityManagerStub::LoadSystemAbilityInner(MessageParcel& data, Me
     std::string loadSystemAbilityTag = ToString(systemAbilityId) + "_LoadSystemAbility";
     HITRACE_METER_NAME(HITRACE_TAG_SAMGR, loadSystemAbilityTag);
     if (!CheckInputSysAbilityId(systemAbilityId)) {
-        HILOGW("SystemAbilityManagerStub::LoadSystemAbilityInner read systemAbilityId failed!");
+        HILOGW("LoadSystemAbilityInner read SAId failed!");
         return ERR_INVALID_VALUE;
     }
 
@@ -603,19 +603,19 @@ int32_t SystemAbilityManagerStub::LoadSystemAbilityInner(MessageParcel& data, Me
 
     sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
     if (remoteObject == nullptr) {
-        HILOGW("SystemAbilityManagerStub::LoadSystemAbilityInner read callback failed!");
+        HILOGW("LoadSystemAbilityInner read callback failed!");
         return ERR_INVALID_VALUE;
     }
     sptr<ISystemAbilityLoadCallback> callback = iface_cast<ISystemAbilityLoadCallback>(remoteObject);
     if (callback == nullptr) {
-        HILOGW("SystemAbilityManagerStub::LoadSystemAbilityInner iface_cast failed!");
+        HILOGW("LoadSystemAbilityInner iface_cast failed!");
         return ERR_INVALID_VALUE;
     }
     int32_t result = LoadSystemAbility(systemAbilityId, callback);
-    HILOGD("SystemAbilityManagerStub::LoadSystemAbilityInner result is %{public}d", result);
+    HILOGD("LoadSystemAbilityInner result is %{public}d", result);
     ret = reply.WriteInt32(result);
     if (!ret) {
-        HILOGW("SystemAbilityManagerStub::LoadSystemAbilityInner write reply failed.");
+        HILOGW("LoadSystemAbilityInner write reply failed.");
         return ERR_FLATTEN_OBJECT;
     }
     return result;
@@ -629,7 +629,7 @@ int32_t SystemAbilityManagerStub::LoadRemoteSystemAbilityInner(MessageParcel& da
         return ERR_INVALID_VALUE;
     }
     if (!CheckInputSysAbilityId(systemAbilityId)) {
-        HILOGW("SystemAbilityManagerStub::LoadRemoteSystemAbilityInner systemAbilityId invalid");
+        HILOGW("LoadRemoteSystemAbilityInner SAId invalid");
         return ERR_INVALID_VALUE;
     }
 
@@ -640,24 +640,24 @@ int32_t SystemAbilityManagerStub::LoadRemoteSystemAbilityInner(MessageParcel& da
 
     std::string deviceId = data.ReadString();
     if (deviceId.empty()) {
-        HILOGW("SystemAbilityManagerStub::LoadRemoteSystemAbilityInner read deviceId failed");
+        HILOGW("LoadRemoteSystemAbilityInner read deviceId failed");
         return ERR_INVALID_VALUE;
     }
     sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
     if (remoteObject == nullptr) {
-        HILOGW("SystemAbilityManagerStub::LoadRemoteSystemAbilityInner read callback failed!");
+        HILOGW("LoadRemoteSystemAbilityInner read callback failed!");
         return ERR_INVALID_VALUE;
     }
     sptr<ISystemAbilityLoadCallback> callback = iface_cast<ISystemAbilityLoadCallback>(remoteObject);
     if (callback == nullptr) {
-        HILOGW("SystemAbilityManagerStub::LoadRemoteSystemAbilityInner iface_cast failed!");
+        HILOGW("LoadRemoteSystemAbilityInner iface_cast failed!");
         return ERR_INVALID_VALUE;
     }
     int32_t result = LoadSystemAbility(systemAbilityId, deviceId, callback);
-    HILOGD("SystemAbilityManagerStub::LoadRemoteSystemAbilityInner result is %{public}d", result);
+    HILOGD("LoadRemoteSystemAbilityInner result is %{public}d", result);
     ret = reply.WriteInt32(result);
     if (!ret) {
-        HILOGW("SystemAbilityManagerStub::LoadRemoteSystemAbilityInner write reply failed.");
+        HILOGW("LoadRemoteSystemAbilityInner write reply failed.");
         return ERR_FLATTEN_OBJECT;
     }
     return result;
@@ -671,14 +671,14 @@ int32_t SystemAbilityManagerStub::UnloadSystemAbilityInner(MessageParcel& data, 
         return ERR_INVALID_VALUE;
     }
     if (!CheckInputSysAbilityId(systemAbilityId)) {
-        HILOGW("SystemAbilityManagerStub::UnloadSystemAbilityInner systemAbilityId invalid");
+        HILOGW("UnloadSystemAbilityInner SAId invalid");
         return ERR_INVALID_VALUE;
     }
     int32_t result = UnloadSystemAbility(systemAbilityId);
-    HILOGD("SystemAbilityManagerStub::UnloadSystemAbilityInner result is %{public}d", result);
+    HILOGD("UnloadSystemAbilityInner result is %{public}d", result);
     ret = reply.WriteInt32(result);
     if (!ret) {
-        HILOGW("SystemAbilityManagerStub::UnloadSystemAbilityInner write reply failed.");
+        HILOGW("UnloadSystemAbilityInner write reply failed.");
         return ERR_FLATTEN_OBJECT;
     }
     return result;
@@ -687,7 +687,7 @@ int32_t SystemAbilityManagerStub::UnloadSystemAbilityInner(MessageParcel& data, 
 int32_t SystemAbilityManagerStub::UnloadAllIdleSystemAbilityInner(MessageParcel& data, MessageParcel& reply)
 {
     int32_t result = UnloadAllIdleSystemAbility();
-    HILOGI("SystemAbilityManagerStub::UnloadAllIdleSystemAbilityInner result is %{public}d", result);
+    HILOGI("UnloadAllIdleSystemAbilityInner result is %{public}d", result);
     return result;
 }
 
@@ -704,7 +704,7 @@ int32_t SystemAbilityManagerStub::GetSystemProcessInfoInner(MessageParcel& data,
         return ERR_NULL_OBJECT;
     }
     if (!CheckInputSysAbilityId(systemAbilityId)) {
-        HILOGW("SystemAbilityManagerStub::GetSystemProcessInfoInner read systemAbilityId failed!");
+        HILOGW("GetSystemProcessInfoInner read SAId failed!");
         return ERR_NULL_OBJECT;
     }
     SystemProcessInfo processInfo;
@@ -720,7 +720,7 @@ int32_t SystemAbilityManagerStub::GetSystemProcessInfoInner(MessageParcel& data,
 
     ret = reply.WriteString(processInfo.processName);
     if (!ret) {
-        HILOGW("GetSystemProcessInfoInner write processName failed.");
+        HILOGW("GetSystemProcessInfoInner write procName failed.");
         return ERR_FLATTEN_OBJECT;
     }
     ret = reply.WriteInt32(processInfo.pid);
@@ -757,13 +757,13 @@ int32_t SystemAbilityManagerStub::GetRunningSystemProcessInner(MessageParcel& da
     size_t size = systemProcessInfos.size();
     ret = reply.WriteInt32(size);
     if (!ret) {
-        HILOGW("GetRunningSystemProcessInner write systemProcessInfos size failed.");
+        HILOGW("GetRunningSystemProcessInner write ProcInfos size failed.");
         return ERR_FLATTEN_OBJECT;
     }
     for (auto& systemProcessInfo : systemProcessInfos) {
         ret = reply.WriteString(systemProcessInfo.processName);
         if (!ret) {
-            HILOGW("GetRunningSystemProcessInner write processName failed.");
+            HILOGW("GetRunningSystemProcessInner write procName failed.");
             return ERR_FLATTEN_OBJECT;
         }
         ret = reply.WriteInt32(systemProcessInfo.pid);
@@ -840,14 +840,14 @@ int32_t SystemAbilityManagerStub::CancelUnloadSystemAbilityInner(MessageParcel& 
         return ERR_INVALID_VALUE;
     }
     if (!CheckInputSysAbilityId(systemAbilityId)) {
-        HILOGW("SystemAbilityManagerStub::CancelUnloadSystemAbilityInner systemAbilityId invalid");
+        HILOGW("CancelUnloadSystemAbilityInner SAId invalid");
         return ERR_INVALID_VALUE;
     }
     int32_t result = CancelUnloadSystemAbility(systemAbilityId);
-    HILOGD("SystemAbilityManagerStub::CancelUnloadSystemAbilityInner result is %{public}d", result);
+    HILOGD("CancelUnloadSystemAbilityInner result is %{public}d", result);
     ret = reply.WriteInt32(result);
     if (!ret) {
-        HILOGW("SystemAbilityManagerStub::CancelUnloadSystemAbilityInner write reply failed.");
+        HILOGW("CancelUnloadSystemAbilityInner write reply failed.");
         return ERR_FLATTEN_OBJECT;
     }
     return result;
@@ -861,24 +861,24 @@ int32_t SystemAbilityManagerStub::GetOnDemandReasonExtraDataInner(MessageParcel&
     }
     int64_t extraDataId = -1;
     if (!data.ReadInt64(extraDataId)) {
-        HILOGW("SystemAbilityManagerStub::GetOnDemandReasonExtraData read extraDataId failed.");
+        HILOGW("GetOnDemandReasonExtraData read extraDataId failed.");
         return ERR_FLATTEN_OBJECT;
     }
     MessageParcel extraDataParcel;
     int32_t result = GetOnDemandReasonExtraData(extraDataId, extraDataParcel);
-    HILOGD("SystemAbilityManagerStub::GetOnDemandReasonExtraData result is %{public}d", result);
+    HILOGD("GetOnDemandReasonExtraData result is %{public}d", result);
     if (!reply.WriteInt32(result)) {
-        HILOGW("SystemAbilityManagerStub::GetOnDemandReasonExtraData write reply failed.");
+        HILOGW("GetOnDemandReasonExtraData write reply failed.");
         return ERR_FLATTEN_OBJECT;
     }
     sptr<OnDemandReasonExtraData> extraData;
     extraData = extraDataParcel.ReadParcelable<OnDemandReasonExtraData>();
     if (extraData == nullptr) {
-        HILOGW("SystemAbilityManagerStub::GetOnDemandReasonExtraData read extraData failed.");
+        HILOGW("GetOnDemandReasonExtraData read extraData failed.");
         return ERR_FLATTEN_OBJECT;
     }
     if (!reply.WriteParcelable(extraData)) {
-        HILOGW("SystemAbilityManagerStub::GetOnDemandReasonExtraData write extraData failed.");
+        HILOGW("GetOnDemandReasonExtraData write extraData failed.");
         return ERR_FLATTEN_OBJECT;
     }
     return ERR_OK;
@@ -997,7 +997,7 @@ bool SystemAbilityManagerStub::CanRequest()
 {
     auto accessTokenId = IPCSkeleton::GetCallingTokenID();
     AccessToken::ATokenTypeEnum tokenType = AccessToken::AccessTokenKit::GetTokenTypeFlag(accessTokenId);
-    HILOGD("SystemAbilityManagerStub::CanRequest tokenId:%{private}u, tokenType:%{public}d",
+    HILOGD("CanRequest tokenId:%{private}u, tokenType:%{public}d",
         accessTokenId, tokenType);
     return (tokenType == AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
 }

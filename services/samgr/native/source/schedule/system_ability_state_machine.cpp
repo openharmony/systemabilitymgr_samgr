@@ -56,12 +56,12 @@ int32_t SystemAbilityStateMachine::AbilityStateTransitionLocked(const std::share
     }
     SystemAbilityState currentState = context->state;
     if (currentState == nextState) {
-        HILOGI("[SA Scheduler][SA: %{public}d] current state %{public}d is same as next state %{public}d",
+        HILOGI("[SA Scheduler][SA:%{public}d] state current %{public}d is same as next %{public}d",
             context->systemAbilityId, currentState, nextState);
         return ERR_OK;
     }
     if (!handler->CanEnter(currentState)) {
-        HILOGE("[SA Scheduler][SA: %{public}d] cannot transiton from state %{public}d to state %{public}d",
+        HILOGE("[SA Scheduler][SA:%{public}d] can't transiton from state %{public}d to %{public}d",
             context->systemAbilityId, currentState, nextState);
         return ERR_INVALID_VALUE;
     }
@@ -70,7 +70,7 @@ int32_t SystemAbilityStateMachine::AbilityStateTransitionLocked(const std::share
         return ERR_INVALID_VALUE;
     }
     context->state = nextState;
-    HILOGD("[SA Scheduler][SA: %{public}d] transiton from state %{public}d to state %{public}d",
+    HILOGD("[SA Scheduler][SA:%{public}d] transiton from state %{public}d to %{public}d",
         context->systemAbilityId, currentState, nextState);
     handler->OnEnter(context);
     return ERR_OK;
@@ -85,12 +85,12 @@ bool SystemAbilityStateMachine::UpdateStateCount(const std::shared_ptr<SystemPro
     }
     std::unique_lock<std::shared_mutex> uniqueLock(context->stateCountLock);
     if (!context->abilityStateCountMap.count(fromState) || !context->abilityStateCountMap.count(toState)) {
-        HILOGE("[SA Scheduler][process: %{public}s] invalid state",
+        HILOGE("[SA Scheduler][proc:%{public}s] invalid state",
             Str16ToStr8(context->processName).c_str());
         return false;
     }
     if (context->abilityStateCountMap[fromState] <= 0) {
-        HILOGE("[SA Scheduler][process: %{public}s] invalid current state count",
+        HILOGE("[SA Scheduler][proc:%{public}s] invalid current state count",
             Str16ToStr8(context->processName).c_str());
         return false;
     }
@@ -117,17 +117,17 @@ int32_t SystemAbilityStateMachine::ProcessStateTransitionLocked(const std::share
     }
     SystemProcessState currentState = context->state;
     if (currentState == nextState) {
-        HILOGI("[SA Scheduler][process: %{public}s] current state %{public}d is same as next state %{public}d",
+        HILOGI("[SA Scheduler][proc:%{public}s] state current %{public}d is same as next %{public}d",
             Str16ToStr8(context->processName).c_str(), currentState, nextState);
         return ERR_OK;
     }
     if (!handler->CanEnter(currentState)) {
-        HILOGI("[SA Scheduler][process: %{public}s] cannot transiton from state %{public}d to state %{public}d",
+        HILOGI("[SA Scheduler][proc:%{public}s] can't transiton from state %{public}d to %{public}d",
             Str16ToStr8(context->processName).c_str(), currentState, nextState);
         return ERR_INVALID_VALUE;
     }
     context->state = nextState;
-    HILOGI("[SA Scheduler][process: %{public}s] transiton from state %{public}d to state %{public}d",
+    HILOGI("[SA Scheduler][proc:%{public}s] transiton from state %{public}d to %{public}d",
         Str16ToStr8(context->processName).c_str(), currentState, nextState);
     handler->OnEnter(context);
     return ERR_OK;

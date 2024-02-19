@@ -291,7 +291,7 @@ bool SystemAbilityManager::GetSaProfile(int32_t saId, SaProfile& saProfile)
 bool SystemAbilityManager::CheckCallerProcess(SaProfile& saProfile)
 {
     if (!CheckCallerProcess(Str16ToStr8(saProfile.process))) {
-        HILOGE("cannot operate SA: %{public}d by process: %{public}s",
+        HILOGE("can't operate SA: %{public}d by proc:%{public}s",
             saProfile.saId, Str16ToStr8(saProfile.process).c_str());
         return false;
     }
@@ -309,7 +309,7 @@ bool SystemAbilityManager::CheckCallerProcess(const std::string& callProcess)
     }
 
     if (nativeTokenInfo.processName != callProcess) {
-        HILOGE("cannot operate by process: %{public}s", nativeTokenInfo.processName.c_str());
+        HILOGE("can't operate by proc:%{public}s", nativeTokenInfo.processName.c_str());
         return false;
     }
     return true;
@@ -435,7 +435,7 @@ int32_t SystemAbilityManager::UpdateOnDemandPolicy(int32_t systemAbilityId, OnDe
 void SystemAbilityManager::ProcessOnDemandEvent(const OnDemandEvent& event,
     const std::list<SaControlInfo>& saControlList)
 {
-    HILOGI("SystemAbilityManager::ProcessEvent eventId:%{public}d name:%{public}s value:%{public}s",
+    HILOGI("ProcessOnDemandEvent:%{public}d name:%{public}s value:%{public}s",
         event.eventId, event.name.c_str(), event.value.c_str());
     sptr<ISystemAbilityLoadCallback> callback(new SystemAbilityLoadCallbackStub());
     if (abilityStateScheduler_ == nullptr) {
@@ -545,7 +545,7 @@ sptr<IRemoteObject> SystemAbilityManager::GetSystemAbility(int32_t systemAbility
 
 sptr<IRemoteObject> SystemAbilityManager::GetSystemAbilityFromRemote(int32_t systemAbilityId)
 {
-    HILOGD("%{public}s called, systemAbilityId = %{public}d", __func__, systemAbilityId);
+    HILOGD("%{public}s called, SA:%{public}d", __func__, systemAbilityId);
     if (!CheckInputSysAbilityId(systemAbilityId)) {
         HILOGW("GetSystemAbilityFromRemote invalid!");
         return nullptr;
@@ -716,7 +716,7 @@ int32_t SystemAbilityManager::AddOnDemandSystemAbilityInfo(int32_t systemAbility
 {
     HILOGD("%{public}s called", __func__);
     if (!CheckInputSysAbilityId(systemAbilityId) || IsNameInValid(procName)) {
-        HILOGW("AddOnDemandSystemAbilityInfo systemAbilityId or procName invalid.");
+        HILOGW("AddOnDemandSystemAbilityInfo SAId or procName invalid.");
         return ERR_INVALID_VALUE;
     }
 
@@ -825,7 +825,7 @@ int32_t SystemAbilityManager::RemoveSystemAbility(int32_t systemAbilityId)
         unique_lock<shared_mutex> writeLock(abilityMapLock_);
         auto itSystemAbility = abilityMap_.find(systemAbilityId);
         if (itSystemAbility == abilityMap_.end()) {
-            HILOGI("SystemAbilityManager::RemoveSystemAbility not found!");
+            HILOGI("RemoveSystemAbility not found!");
             return ERR_INVALID_VALUE;
         }
         sptr<IRemoteObject> ability = itSystemAbility->second.remoteObj;
@@ -917,7 +917,7 @@ int32_t SystemAbilityManager::SubscribeSystemAbility(int32_t systemAbilityId,
     const sptr<ISystemAbilityStatusChange>& listener)
 {
     if (!CheckInputSysAbilityId(systemAbilityId) || listener == nullptr) {
-        HILOGW("SubscribeSystemAbility systemAbilityId or listener invalid!");
+        HILOGW("SubscribeSystemAbility SAId or listener invalid!");
         return ERR_INVALID_VALUE;
     }
 
@@ -979,7 +979,7 @@ void SystemAbilityManager::UnSubscribeSystemAbilityLocked(
             }
         }
         iter = listenerList.erase(iter);
-        HILOGI("Remove SA Status listener added by callingPid:%{public}d, szie:%{public}zu",
+        HILOGI("Remove SA Status listener added by callPid:%{public}d, szie:%{public}zu",
             item.second, listenerList.size());
         break;
     }
@@ -1029,7 +1029,7 @@ void SystemAbilityManager::NotifyRemoteSaDied(const std::u16string& name)
     if (dBinderService_ != nullptr) {
         std::string nodeId = TransformDeviceId(deviceId, NODE_ID, false);
         dBinderService_->NoticeServiceDie(saName, nodeId);
-        HILOGI("NotifyRemoteSaDied, serviceName is %{public}s, deviceId is %{public}s",
+        HILOGI("NotifyRemoteSaDied, serviceName:%{public}s, deviceId:%{public}s",
             Str16ToStr8(saName).c_str(), AnonymizeDeviceId(nodeId).c_str());
     }
 }
@@ -1038,7 +1038,7 @@ void SystemAbilityManager::NotifyRemoteDeviceOffline(const std::string& deviceId
 {
     if (dBinderService_ != nullptr) {
         dBinderService_->NoticeDeviceDie(deviceId);
-        HILOGI("NotifyRemoteDeviceOffline, deviceId is %{public}s", AnonymizeDeviceId(deviceId).c_str());
+        HILOGI("NotifyRemoteDeviceOffline, deviceId:%{public}s", AnonymizeDeviceId(deviceId).c_str());
     }
 }
 
@@ -1074,11 +1074,11 @@ int32_t SystemAbilityManager::AddSystemAbility(int32_t systemAbilityId, const sp
         if (abilityMap_.count(systemAbilityId) > 0) {
             auto callingPid = IPCSkeleton::GetCallingPid();
             auto callingUid = IPCSkeleton::GetCallingUid();
-            HILOGW("systemAbility: %{public}d is being covered, callingPid is %{public}d, callingUid is %{public}d",
+            HILOGW("SA:%{public}d is being covered, callPid:%{public}d, callUid:%{public}d",
                 systemAbilityId, callingPid, callingUid);
         }
         abilityMap_[systemAbilityId] = std::move(saInfo);
-        HILOGI("insert %{public}d. size : %{public}zu", systemAbilityId, abilityMap_.size());
+        HILOGI("insert %{public}d. size:%{public}zu", systemAbilityId, abilityMap_.size());
     }
     RemoveCheckLoadedMsg(systemAbilityId);
     if (abilityDeath_ != nullptr) {
@@ -1134,7 +1134,7 @@ int32_t SystemAbilityManager::AddSystemProcess(const u16string& procName,
             return ERR_INVALID_VALUE;
         }
         systemProcessMap_[procName] = procObject;
-        HILOGI("AddSystemProcess insert %{public}s. size : %{public}zu", Str16ToStr8(procName).c_str(),
+        HILOGI("AddSystemProcess:%{public}s. size:%{public}zu", Str16ToStr8(procName).c_str(),
             systemProcessMap_.size());
     }
     if (systemProcessDeath_ != nullptr) {
@@ -1147,7 +1147,7 @@ int32_t SystemAbilityManager::AddSystemProcess(const u16string& procName,
         auto iterStarting = startingProcessMap_.find(procName);
         if (iterStarting != startingProcessMap_.end()) {
             int64_t end = GetTickCount();
-            HILOGI("[PerformanceTest] AddSystemProcess start process:%{public}s spend %{public}" PRId64 " ms",
+            HILOGI("[PerformanceTest] AddSystemProcess start proc:%{public}s spend %{public}" PRId64 " ms",
                 Str16ToStr8(procName).c_str(), (end - iterStarting->second));
             startingProcessMap_.erase(iterStarting);
         }
@@ -1184,7 +1184,7 @@ int32_t SystemAbilityManager::RemoveSystemProcess(const sptr<IRemoteObject>& pro
             std::string name = Str16ToStr8(procName);
             processName = procName;
             (void)systemProcessMap_.erase(procName);
-            HILOGI("RemoveSystemProcess process:%{public}s dead, size : %{public}zu", name.c_str(),
+            HILOGI("RemoveSystemProcess proc:%{public}s dead, size:%{public}zu", name.c_str(),
                 systemProcessMap_.size());
             result = ERR_OK;
             break;
@@ -1414,7 +1414,7 @@ void SystemAbilityManager::NotifySystemAbilityLoaded(int32_t systemAbilityId, co
         HILOGE("NotifySystemAbilityLoaded callback null!");
         return;
     }
-    HILOGD("NotifySystemAbilityLoaded SA:%{public}d, saSize:%{public}zu, processSize:%{public}zu, "
+    HILOGD("NotifySystemAbilityLoaded SA:%{public}d, saSize:%{public}zu, procSize:%{public}zu, "
         "startingSASize:%{public}zu", systemAbilityId, abilityMap_.size(), systemProcessMap_.size(),
         startingAbilityMap_.size());
     callback->OnLoadSystemAbilitySuccess(systemAbilityId, remoteObject);
@@ -1430,7 +1430,7 @@ void SystemAbilityManager::NotifySystemAbilityLoaded(int32_t systemAbilityId, co
     auto& abilityItem = iter->second;
     for (auto& [deviceId, callbackList] : abilityItem.callbackMap) {
         for (auto& callbackItem : callbackList) {
-            HILOGI("notify SA:%{public}d, saSize:%{public}zu, processSize:%{public}zu, callbacksize:%{public}d",
+            HILOGI("notify SA:%{public}d, saSize:%{public}zu, procSize:%{public}zu, callbacksize:%{public}d",
                 systemAbilityId, abilityMap_.size(), systemProcessMap_.size(), callbackItem.second);
             NotifySystemAbilityLoaded(systemAbilityId, remoteObject, callbackItem.first);
             RemoveStartingAbilityCallbackLocked(callbackItem);
@@ -1461,8 +1461,8 @@ int32_t SystemAbilityManager::StartDynamicSystemProcess(const std::u16string& na
         ServiceWaitForStatus(Str16ToStr8(name).c_str(), ServiceStatus::SERVICE_STOPPED, 1);
     }
     auto result = ServiceControlWithExtra(Str16ToStr8(name).c_str(), ServiceAction::START, &extraArgv, 1);
-    HILOGI("StartDynamicSystemProcess call ServiceControlWithExtra process:%{public}s, SA:%{public}d, "
-        "result:%{public}d!", Str16ToStr8(name).c_str(), systemAbilityId, result);
+    HILOGI("Start dynamic proc:%{public}s, SA:%{public}d, ret:%{public}d!",
+        Str16ToStr8(name).c_str(), systemAbilityId, result);
     return (result == 0) ? ERR_OK : ERR_INVALID_VALUE;
 }
 
@@ -1557,7 +1557,7 @@ int32_t SystemAbilityManager::DoLoadSystemAbility(int32_t systemAbilityId, const
         auto& abilityItem = startingAbilityMap_[systemAbilityId];
         for (const auto& itemCallback : abilityItem.callbackMap[LOCAL_DEVICE]) {
             if (callback->AsObject() == itemCallback.first->AsObject()) {
-                HILOGI("LoadSystemAbility already existed callback object systemAbilityId:%{public}d", systemAbilityId);
+                HILOGI("LoadSystemAbility already existed callback object SA:%{public}d", systemAbilityId);
                 return ERR_OK;
             }
         }
@@ -1575,7 +1575,7 @@ int32_t SystemAbilityManager::DoLoadSystemAbility(int32_t systemAbilityId, const
                 systemAbilityId, ret ? "succeed" : "failed", count, callingPid);
         }
         ReportSamgrSaLoad(systemAbilityId, event.eventId);
-        HILOGI("LoadSystemAbility systemAbilityId:%{public}d size : %{public}zu, count:%{public}d",
+        HILOGI("LoadSystemAbility SA:%{public}d size:%{public}zu, count:%{public}d",
             systemAbilityId, abilityItem.callbackMap[LOCAL_DEVICE].size(), count);
     }
     result = StartingSystemProcess(procName, systemAbilityId, event);
@@ -1605,7 +1605,7 @@ int32_t SystemAbilityManager::LoadSystemAbility(int32_t systemAbilityId,
     const sptr<ISystemAbilityLoadCallback>& callback)
 {
     if (!CheckInputSysAbilityId(systemAbilityId) || callback == nullptr) {
-        HILOGW("LoadSystemAbility systemAbilityId or callback invalid!");
+        HILOGW("LoadSystemAbility SAId or callback invalid!");
         return ERR_INVALID_VALUE;
     }
     SaProfile saProfile;
@@ -1683,7 +1683,7 @@ bool SystemAbilityManager::CheckSaIsImmediatelyRecycle(int32_t systemAbilityId)
 int32_t SystemAbilityManager::CancelUnloadSystemAbility(int32_t systemAbilityId)
 {
     if (!CheckInputSysAbilityId(systemAbilityId)) {
-        HILOGW("CancelUnloadSystemAbility systemAbilityId or callback invalid!");
+        HILOGW("CancelUnloadSystemAbility SAId or callback invalid!");
         return ERR_INVALID_VALUE;
     }
     SaProfile saProfile;
