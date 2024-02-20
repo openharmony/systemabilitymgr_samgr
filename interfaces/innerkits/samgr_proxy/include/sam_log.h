@@ -19,6 +19,13 @@
 #include "hilog/log.h"
 
 namespace OHOS {
+
+constexpr OHOS::HiviewDFX::HiLogLabel SYSTEM_ABLILITY_LABEL = {
+    LOG_KMSG,
+    0xD001800,
+    "SAMGR"
+};
+
 #undef LOG_DOMAIN
 #ifdef SAMGR_PROXY
 #define LOG_DOMAIN 0xD001810
@@ -52,6 +59,16 @@ namespace OHOS {
 #ifdef HILOGD
 #undef HILOGD
 #endif
+
+#ifdef KHILOGI
+#undef KHILOGI
+#endif
+
+#define KHILOGI(...) \
+    do { \
+        (void)OHOS::HiviewDFX::HiLog::Info(SYSTEM_ABLILITY_LABEL, __VA_ARGS__); \
+        HILOG_INFO(LOG_CORE, __VA_ARGS__); \
+    } while (0)
 
 #define HILOGF(...) HILOG_FATAL(LOG_CORE, __VA_ARGS__)
 #define HILOGE(...) HILOG_ERROR(LOG_CORE, __VA_ARGS__)

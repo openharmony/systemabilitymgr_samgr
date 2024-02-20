@@ -833,8 +833,7 @@ int32_t SystemAbilityManager::RemoveSystemAbility(int32_t systemAbilityId)
             ability->RemoveDeathRecipient(abilityDeath_);
         }
         (void)abilityMap_.erase(itSystemAbility);
-        HILOGI("%{public}s called, SA:%{public}d, size:%{public}zu", __func__, systemAbilityId,
-            abilityMap_.size());
+        KHILOGI("%{public}s called, SA:%{public}d, size:%{public}zu", __func__, systemAbilityId, abilityMap_.size());
     }
     if (abilityStateScheduler_ == nullptr) {
         HILOGE("abilityStateScheduler is nullptr");
@@ -865,7 +864,7 @@ int32_t SystemAbilityManager::RemoveSystemAbility(const sptr<IRemoteObject>& abi
                 if (abilityDeath_ != nullptr) {
                     ability->RemoveDeathRecipient(abilityDeath_);
                 }
-                HILOGI("%{public}s called, SA:%{public}d removed, size:%{public}zu", __func__, saId,
+                KHILOGI("%{public}s called, SA:%{public}d removed, size:%{public}zu", __func__, saId,
                     abilityMap_.size());
                 break;
             }
@@ -896,7 +895,7 @@ int32_t SystemAbilityManager::RemoveDiedSystemAbility(int32_t systemAbilityId)
             ability->RemoveDeathRecipient(abilityDeath_);
         }
         (void)abilityMap_.erase(itSystemAbility);
-        HILOGI("%{public}s called, SA:%{public}d removed, size:%{public}zu", __func__, systemAbilityId,
+        KHILOGI("%{public}s called, SA:%{public}d removed, size:%{public}zu", __func__, systemAbilityId,
             abilityMap_.size());
     }
     SendSystemAbilityRemovedMsg(systemAbilityId);
@@ -1078,7 +1077,7 @@ int32_t SystemAbilityManager::AddSystemAbility(int32_t systemAbilityId, const sp
                 systemAbilityId, callingPid, callingUid);
         }
         abilityMap_[systemAbilityId] = std::move(saInfo);
-        HILOGI("insert %{public}d. size:%{public}zu", systemAbilityId, abilityMap_.size());
+        KHILOGI("insert %{public}d. size:%{public}zu", systemAbilityId, abilityMap_.size());
     }
     RemoveCheckLoadedMsg(systemAbilityId);
     if (abilityDeath_ != nullptr) {
@@ -1461,7 +1460,7 @@ int32_t SystemAbilityManager::StartDynamicSystemProcess(const std::u16string& na
         ServiceWaitForStatus(Str16ToStr8(name).c_str(), ServiceStatus::SERVICE_STOPPED, 1);
     }
     auto result = ServiceControlWithExtra(Str16ToStr8(name).c_str(), ServiceAction::START, &extraArgv, 1);
-    HILOGI("Start dynamic proc:%{public}s, SA:%{public}d, ret:%{public}d!",
+    KHILOGI("Start dynamic proc:%{public}s, SA:%{public}d, ret:%{public}d!",
         Str16ToStr8(name).c_str(), systemAbilityId, result);
     return (result == 0) ? ERR_OK : ERR_INVALID_VALUE;
 }
