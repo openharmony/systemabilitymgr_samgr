@@ -30,8 +30,19 @@
 namespace OHOS {
 using namespace std;
 template <class Query, class Result>
-class DynamicCache {
+class DynamicCache : public IRemoteObject::DeathRecipient {
 public:
+    void OnRemoteDied(const wptr<IRemoteObject>& remote) override
+    {
+        HILOGD("DynamicCache OnRemoteDied called");
+        sptr<IRemoteObject> ability = remote.promote();
+        if (ability == NULL) {
+            HILOGW("DynamicCache OnRemoteDied:ability is null");
+            return;
+        }
+        ability->RemoveDeathRecipient(this);
+        ClearCache();
+    }
     Result QueryResult(Query query, int32_t code)
     {
         int32_t waterLineLength = 128;
@@ -41,7 +52,8 @@ public:
         {
             std::lock_guard<std::mutex> autoLock(queryCacheLock_);
             if (localPara_.count(key_) != 0 && cacheMap_.count(query) != 0 &&
-                defaultValue != string(waterLine) && string(waterLine) == localPara_[key_]) {
+                defaultValue != string(waterLine) && string(waterLine) == localPara_[key_] &&
+                !cacheMap_[query]->IsObjectDead()) {
                 HILOGD("DynamicCache QueryResult Return Cache");
                 return cacheMap_[query];
             }
@@ -51,6 +63,7 @@ public:
         if (res == nullptr) {
             return nullptr;
         }
+        res->AddDeathRecipient(this);
         {
             std::lock_guard<std::mutex> autoLock(queryCacheLock_);
             localPara_[key_] = waterLine;
