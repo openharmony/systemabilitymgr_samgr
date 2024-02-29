@@ -979,7 +979,7 @@ void SystemAbilityManager::UnSubscribeSystemAbilityLocked(
             }
         }
         iter = listenerList.erase(iter);
-        HILOGI("Remove SA Status listener added by callPid:%{public}d, szie:%{public}zu",
+        HILOGI("Remove SA Status listener added by callPid:%{public}d, size:%{public}zu",
             item.second, listenerList.size());
         break;
     }
