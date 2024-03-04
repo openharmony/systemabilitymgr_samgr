@@ -38,6 +38,7 @@
                 "hitrace",
                 "init",
                 "ipc",
+                "json",
                 "preferences",
                 "resource_schedule_service",
                 "safwk",
