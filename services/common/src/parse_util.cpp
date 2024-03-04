@@ -192,7 +192,7 @@ void ParseUtil::OpenSo(SaProfile& saProfile)
         if (handle == nullptr) {
             handle = dlopen(saProfile.libPath.c_str(), RTLD_NOW);
         }
-        HILOGI("[PerformanceTest] SA:%{public}d OpenSo spend %{public}" PRId64 " ms",
+        KHILOGI("[PerformanceTest] SA:%{public}d OpenSo spend %{public}" PRId64 " ms",
             saProfile.saId, GetTickCount() - begin);
         if (handle == nullptr) {
             ReportAddSystemAbilityFailed(saProfile.saId, fileName);
@@ -201,7 +201,7 @@ void ParseUtil::OpenSo(SaProfile& saProfile)
         }
         saProfile.handle = handle;
     } else {
-        HILOGI("SA:%{public}d handle is not null", saProfile.saId);
+        KHILOGI("SA:%{public}d handle is not null", saProfile.saId);
     }
 }
 

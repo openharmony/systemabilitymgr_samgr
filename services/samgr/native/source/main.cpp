@@ -25,19 +25,21 @@ using namespace OHOS;
 
 int main(int argc, char *argv[])
 {
-    HILOGI("%{public}s called, enter System Ability Manager ", __func__);
+    KHILOGI("%{public}s called, enter System Ability Manager ", __func__);
     Samgr::MemoryGuard cacheGuard;
     OHOS::sptr<OHOS::SystemAbilityManager> manager = OHOS::SystemAbilityManager::GetInstance();
     manager->Init();
+    KHILOGI("System Ability Manager enter init");
     OHOS::sptr<OHOS::IRemoteObject> serv = manager->AsObject();
 
     if (!IPCSkeleton::SetContextObject(serv)) {
-        HILOGE("set context fail!"); // add log for dfx
+        KHILOGI("set context fail!"); // add log for dfx
     }
     manager->AddSamgrToAbilityMap();
     int result = SetParameter("bootevent.samgr.ready", "true");
-    HILOGI("set samgr ready ret : %{public}s", result == 0 ? "succeed" : "failed");
+    KHILOGI("set samgr ready ret : %{public}s", result == 0 ? "succeed" : "failed");
     manager->StartDfxTimer();
     OHOS::IPCSkeleton::JoinWorkThread();
+    KHILOGI("JoinWorkThread error, samgr main exit!");
     return -1;
 }

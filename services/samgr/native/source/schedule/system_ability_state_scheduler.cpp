@@ -704,7 +704,7 @@ int32_t SystemAbilityStateScheduler::KillSystemProcessLocked(
     int64_t begin = GetTickCount();
     int32_t result = ERR_OK;
     result = ServiceControlWithExtra(Str16ToStr8(processContext->processName).c_str(), ServiceAction::STOP, nullptr, 0);
-    HILOGI("[SA Scheduler][proc:%{public}s] kill proc, pid:%{public}d, uid:%{public}d, ret:%{public}d "
+    KHILOGI("[SA Scheduler][proc:%{public}s] kill proc, pid:%{public}d, uid:%{public}d, ret:%{public}d "
         "spend %{public}" PRId64 " ms", Str16ToStr8(processContext->processName).c_str(), processContext->pid,
         processContext->uid, result, GetTickCount() - begin);
     return result;
