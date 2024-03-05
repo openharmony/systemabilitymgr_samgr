@@ -33,12 +33,11 @@
 
 #ifdef WITH_SELINUX
 #include "service_checker.h"
+#define HILOG_SE_DEBUG(type, fmt, ...) HILOG_IMPL((type), LOG_DEBUG, LOG_DOMAIN, "SA_SELINUX", fmt, __VA_ARGS__)
 #endif
 
 namespace {
 #ifdef WITH_SELINUX
-    using namespace OHOS::HiviewDFX;
-    OHOS::HiviewDFX::HiLogLabel label_ = { LOG_CORE, 0xD001800, "SA_SELINUX" };
     std::unique_ptr<ServiceChecker> selinuxChecker_ = std::make_unique<ServiceChecker>(false);
 #endif
 
@@ -48,7 +47,7 @@ namespace {
         int64_t begin = OHOS::GetTickCount();
         auto callingPid = OHOS::IPCSkeleton::GetCallingPid();
         auto ret = selinuxChecker_->GetServiceCheck(callingPid, std::to_string(said)) == 0;
-        HiLog::Debug(label_, "[Performance] GetServiceCheck SA : %{public}d spend %{public}" PRId64 " ms",
+        HILOG_SE_DEBUG(LOG_CORE, "[Performance] GetServiceCheck SA : %{public}d spend %{public}" PRId64 " ms",
             said, OHOS::GetTickCount() - begin);
         return  ret;
 #else
@@ -62,7 +61,7 @@ namespace {
         int64_t begin = OHOS::GetTickCount();
         auto callingPid = OHOS::IPCSkeleton::GetCallingPid();
         auto ret = selinuxChecker_->AddServiceCheck(callingPid, std::to_string(said)) == 0;
-        HiLog::Debug(label_, "[Performance] AddServiceCheck SA : %{public}d spend %{public}" PRId64 " ms",
+        HILOG_SE_DEBUG(LOG_CORE, "[Performance] AddServiceCheck SA : %{public}d spend %{public}" PRId64 " ms",
             said, OHOS::GetTickCount() - begin);
         return ret;
 #else
@@ -76,7 +75,7 @@ namespace {
         int64_t begin = OHOS::GetTickCount();
         auto callingPid = OHOS::IPCSkeleton::GetCallingPid();
         auto ret = selinuxChecker_->GetRemoteServiceCheck(callingPid, std::to_string(said)) == 0;
-        HiLog::Debug(label_, "[Performance] GetRemoteServiceCheck SA : %{public}d spend %{public}" PRId64 " ms",
+        HILOG_SE_DEBUG(LOG_CORE, "[Performance] GetRemoteServiceCheck SA : %{public}d spend %{public}" PRId64 " ms",
             said, OHOS::GetTickCount() - begin);
         return ret;
 #else
@@ -90,7 +89,7 @@ namespace {
         int64_t begin = OHOS::GetTickCount();
         auto callingPid = OHOS::IPCSkeleton::GetCallingPid();
         auto ret = selinuxChecker_->ListServiceCheck(callingPid) == 0;
-        HiLog::Debug(label_, "[Performance] ListServiceCheck spend %{public}" PRId64 " ms",
+        HILOG_SE_DEBUG(LOG_CORE, "[Performance] ListServiceCheck spend %{public}" PRId64 " ms",
             OHOS::GetTickCount() - begin);
         return ret;
 #else
