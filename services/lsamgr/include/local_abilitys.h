@@ -34,7 +34,6 @@ private:
     LocalAbilitys() = default;
     ~LocalAbilitys() = default;
 
-    OHOS::HiviewDFX::HiLogLabel label_ = { LOG_CORE, 0xD001800, "SA" };
     std::mutex localSALock_;
     std::map<int32_t, sptr<IRemoteObject>> localSAMap_;
 };

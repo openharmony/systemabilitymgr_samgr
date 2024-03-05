@@ -26,37 +26,41 @@ using namespace std;
 using namespace OHOS::HiviewDFX;
 
 namespace OHOS {
+#undef LOG_DOMAIN
+#define LOG_DOMAIN 0xD001800
+#undef LOG_TAG
+#define LOG_TAG "SA"
 bool LocalAbilityManagerProxy::StartAbility(int32_t systemAbilityId, const std::string& eventStr)
 {
     if (systemAbilityId <= 0) {
-        HiLog::Warn(label_, "StartAbility systemAbilityId invalid.");
+        HILOG_WARN(LOG_CORE, "StartAbility systemAbilityId invalid.");
         return false;
     }
 
     if (eventStr.empty()) {
-        HiLog::Warn(label_, "StartAbility eventStr invalid.");
+        HILOG_WARN(LOG_CORE, "StartAbility eventStr invalid.");
         return false;
     }
 
     sptr<IRemoteObject> iro = Remote();
     if (iro == nullptr) {
-        HiLog::Error(label_, "StartAbility Remote return null");
+        HILOG_ERROR(LOG_CORE, "StartAbility Remote return null");
         return false;
     }
 
     MessageParcel data;
     if (!data.WriteInterfaceToken(LOCAL_ABILITY_MANAGER_INTERFACE_TOKEN)) {
-        HiLog::Warn(label_, "StartAbility interface token check failed");
+        HILOG_WARN(LOG_CORE, "StartAbility interface token check failed");
         return false;
     }
     bool ret = data.WriteInt32(systemAbilityId);
     if (!ret) {
-        HiLog::Warn(label_, "StartAbility write systemAbilityId failed!");
+        HILOG_WARN(LOG_CORE, "StartAbility write systemAbilityId failed!");
         return false;
     }
     ret = data.WriteString(eventStr);
     if (!ret) {
-        HiLog::Warn(label_, "StartAbility write eventStr failed!");
+        HILOG_WARN(LOG_CORE, "StartAbility write eventStr failed!");
         return false;
     }
     MessageParcel reply;
@@ -64,7 +68,7 @@ bool LocalAbilityManagerProxy::StartAbility(int32_t systemAbilityId, const std::
     int32_t status = iro->SendRequest(
         static_cast<uint32_t>(SafwkInterfaceCode::START_ABILITY_TRANSACTION), data, reply, option);
     if (status != NO_ERROR) {
-        HiLog::Error(label_, "StartAbility SendRequest failed, return value : %{public}d", status);
+        HILOG_ERROR(LOG_CORE, "StartAbility SendRequest failed, return value : %{public}d", status);
         return false;
     }
     return true;
@@ -73,34 +77,34 @@ bool LocalAbilityManagerProxy::StartAbility(int32_t systemAbilityId, const std::
 bool LocalAbilityManagerProxy::StopAbility(int32_t systemAbilityId, const std::string& eventStr)
 {
     if (systemAbilityId <= 0) {
-        HiLog::Warn(label_, "StopAbility systemAbilityId invalid.");
+        HILOG_WARN(LOG_CORE, "StopAbility systemAbilityId invalid.");
         return false;
     }
 
     if (eventStr.empty()) {
-        HiLog::Warn(label_, "StartAbility eventStr invalid.");
+        HILOG_WARN(LOG_CORE, "StartAbility eventStr invalid.");
         return false;
     }
     
     sptr<IRemoteObject> iro = Remote();
     if (iro == nullptr) {
-        HiLog::Error(label_, "StopAbility Remote return null");
+        HILOG_ERROR(LOG_CORE, "StopAbility Remote return null");
         return false;
     }
 
     MessageParcel data;
     if (!data.WriteInterfaceToken(LOCAL_ABILITY_MANAGER_INTERFACE_TOKEN)) {
-        HiLog::Warn(label_, "StopAbility interface token check failed");
+        HILOG_WARN(LOG_CORE, "StopAbility interface token check failed");
         return false;
     }
     bool ret = data.WriteInt32(systemAbilityId);
     if (!ret) {
-        HiLog::Warn(label_, "StopAbility write systemAbilityId failed!");
+        HILOG_WARN(LOG_CORE, "StopAbility write systemAbilityId failed!");
         return false;
     }
     ret = data.WriteString(eventStr);
     if (!ret) {
-        HiLog::Warn(label_, "StopAbility write eventStr failed!");
+        HILOG_WARN(LOG_CORE, "StopAbility write eventStr failed!");
         return false;
     }
     MessageParcel reply;
@@ -108,7 +112,7 @@ bool LocalAbilityManagerProxy::StopAbility(int32_t systemAbilityId, const std::s
     int32_t status = iro->SendRequest(
         static_cast<uint32_t>(SafwkInterfaceCode::STOP_ABILITY_TRANSACTION), data, reply, option);
     if (status != NO_ERROR) {
-        HiLog::Error(label_, "StopAbility SendRequest failed, return value : %{public}d", status);
+        HILOG_ERROR(LOG_CORE, "StopAbility SendRequest failed, return value : %{public}d", status);
         return false;
     }
     return true;
@@ -118,27 +122,27 @@ bool LocalAbilityManagerProxy::ActiveAbility(int32_t systemAbilityId,
     const nlohmann::json& activeReason)
 {
     if (systemAbilityId <= 0) {
-        HiLog::Warn(label_, "ActiveAbility systemAbilityId invalid.");
+        HILOG_WARN(LOG_CORE, "ActiveAbility systemAbilityId invalid.");
         return false;
     }
 
     sptr<IRemoteObject> iro = Remote();
     if (iro == nullptr) {
-        HiLog::Error(label_, "ActiveAbility Remote return null");
+        HILOG_ERROR(LOG_CORE, "ActiveAbility Remote return null");
         return false;
     }
 
     MessageParcel data;
     if (!data.WriteInterfaceToken(LOCAL_ABILITY_MANAGER_INTERFACE_TOKEN)) {
-        HiLog::Warn(label_, "ActiveAbility interface token check failed");
+        HILOG_WARN(LOG_CORE, "ActiveAbility interface token check failed");
         return false;
     }
     if (!data.WriteInt32(systemAbilityId)) {
-        HiLog::Warn(label_, "ActiveAbility write systemAbilityId failed!");
+        HILOG_WARN(LOG_CORE, "ActiveAbility write systemAbilityId failed!");
         return false;
     }
     if (!data.WriteString(activeReason.dump())) {
-        HiLog::Warn(label_, "ActiveAbility write activeReason failed!");
+        HILOG_WARN(LOG_CORE, "ActiveAbility write activeReason failed!");
         return false;
     }
 
@@ -147,12 +151,12 @@ bool LocalAbilityManagerProxy::ActiveAbility(int32_t systemAbilityId,
     int32_t status = iro->SendRequest(
         static_cast<uint32_t>(SafwkInterfaceCode::ACTIVE_ABILITY_TRANSACTION), data, reply, option);
     if (status != NO_ERROR) {
-        HiLog::Error(label_, "ActiveAbility SendRequest failed, return value : %{public}d", status);
+        HILOG_ERROR(LOG_CORE, "ActiveAbility SendRequest failed, return value : %{public}d", status);
         return false;
     }
     bool result = false;
     if (!reply.ReadBool(result)) {
-        HiLog::Warn(label_, "ActiveAbility read result failed!");
+        HILOG_WARN(LOG_CORE, "ActiveAbility read result failed!");
         return false;
     }
     return result;
@@ -162,27 +166,27 @@ bool LocalAbilityManagerProxy::IdleAbility(int32_t systemAbilityId,
     const nlohmann::json& idleReason, int32_t& delayTime)
 {
     if (systemAbilityId <= 0) {
-        HiLog::Warn(label_, "IdleAbility systemAbilityId invalid.");
+        HILOG_WARN(LOG_CORE, "IdleAbility systemAbilityId invalid.");
         return false;
     }
 
     sptr<IRemoteObject> iro = Remote();
     if (iro == nullptr) {
-        HiLog::Error(label_, "IdleAbility Remote return null");
+        HILOG_ERROR(LOG_CORE, "IdleAbility Remote return null");
         return false;
     }
 
     MessageParcel data;
     if (!data.WriteInterfaceToken(LOCAL_ABILITY_MANAGER_INTERFACE_TOKEN)) {
-        HiLog::Warn(label_, "IdleAbility interface token check failed");
+        HILOG_WARN(LOG_CORE, "IdleAbility interface token check failed");
         return false;
     }
     if (!data.WriteInt32(systemAbilityId)) {
-        HiLog::Warn(label_, "IdleAbility write systemAbilityId failed!");
+        HILOG_WARN(LOG_CORE, "IdleAbility write systemAbilityId failed!");
         return false;
     }
     if (!data.WriteString(idleReason.dump())) {
-        HiLog::Warn(label_, "IdleAbility write ildeReason failed!");
+        HILOG_WARN(LOG_CORE, "IdleAbility write ildeReason failed!");
         return false;
     }
 
@@ -191,16 +195,16 @@ bool LocalAbilityManagerProxy::IdleAbility(int32_t systemAbilityId,
     int32_t status = iro->SendRequest(
         static_cast<uint32_t>(SafwkInterfaceCode::IDLE_ABILITY_TRANSACTION), data, reply, option);
     if (status != NO_ERROR) {
-        HiLog::Error(label_, "IdleAbility SendRequest failed, return value : %{public}d", status);
+        HILOG_ERROR(LOG_CORE, "IdleAbility SendRequest failed, return value : %{public}d", status);
         return false;
     }
     bool result = false;
     if (!reply.ReadBool(result)) {
-        HiLog::Warn(label_, "IdleAbility read result failed!");
+        HILOG_WARN(LOG_CORE, "IdleAbility read result failed!");
         return false;
     }
     if (!reply.ReadInt32(delayTime)) {
-        HiLog::Warn(label_, "IdleAbility read delayTime failed!");
+        HILOG_WARN(LOG_CORE, "IdleAbility read delayTime failed!");
         return false;
     }
     return result;
@@ -210,39 +214,39 @@ bool LocalAbilityManagerProxy::SendStrategyToSA(int32_t type, int32_t systemAbil
     int32_t level, std::string& action)
 {
     if (systemAbilityId <= 0) {
-        HiLog::Warn(label_, "SendStrategy systemAbilityId invalid.");
+        HILOG_WARN(LOG_CORE, "SendStrategy systemAbilityId invalid.");
         return false;
     }
 
     sptr<IRemoteObject> iro = Remote();
     if (iro == nullptr) {
-        HiLog::Error(label_, "SendStrategy Remote return null");
+        HILOG_ERROR(LOG_CORE, "SendStrategy Remote return null");
         return false;
     }
 
     MessageParcel data;
     if (!data.WriteInterfaceToken(LOCAL_ABILITY_MANAGER_INTERFACE_TOKEN)) {
-        HiLog::Warn(label_, "SendStrategy interface token check failed");
+        HILOG_WARN(LOG_CORE, "SendStrategy interface token check failed");
         return false;
     }
     bool ret = data.WriteInt32(type);
     if (!ret) {
-        HiLog::Warn(label_, "SendStrategy write type failed!");
+        HILOG_WARN(LOG_CORE, "SendStrategy write type failed!");
         return false;
     }
     ret = data.WriteInt32(systemAbilityId);
     if (!ret) {
-        HiLog::Warn(label_, "SendStrategy write systemAbilityId failed!");
+        HILOG_WARN(LOG_CORE, "SendStrategy write systemAbilityId failed!");
         return false;
     }
     ret = data.WriteInt32(level);
     if (!ret) {
-        HiLog::Warn(label_, "SendStrategy write level failed!");
+        HILOG_WARN(LOG_CORE, "SendStrategy write level failed!");
         return false;
     }
     ret = data.WriteString(action);
     if (!ret) {
-        HiLog::Warn(label_, "SendStrategy write action failed!");
+        HILOG_WARN(LOG_CORE, "SendStrategy write action failed!");
         return false;
     }
     
@@ -251,12 +255,12 @@ bool LocalAbilityManagerProxy::SendStrategyToSA(int32_t type, int32_t systemAbil
     int32_t status = iro->SendRequest(
         static_cast<uint32_t>(SafwkInterfaceCode::SEND_STRATEGY_TO_SA_TRANSACTION), data, reply, option);
     if (status != NO_ERROR) {
-        HiLog::Error(label_, "SendStrategy SendRequest failed, return value : %{public}d", status);
+        HILOG_ERROR(LOG_CORE, "SendStrategy SendRequest failed, return value : %{public}d", status);
         return false;
     }
     bool result = false;
     if (!reply.ReadBool(result)) {
-        HiLog::Warn(label_, "SendStrategy read result failed!");
+        HILOG_WARN(LOG_CORE, "SendStrategy read result failed!");
         return false;
     }
     return result;

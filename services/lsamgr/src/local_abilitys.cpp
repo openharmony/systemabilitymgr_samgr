@@ -19,6 +19,10 @@ using namespace std;
 using namespace OHOS::HiviewDFX;
 
 namespace OHOS {
+#undef LOG_DOMAIN
+#define LOG_DOMAIN 0xD001800
+#undef LOG_TAG
+#define LOG_TAG "SA"
 LocalAbilitys& LocalAbilitys::GetInstance()
 {
     static auto instance = new LocalAbilitys();
@@ -27,7 +31,7 @@ LocalAbilitys& LocalAbilitys::GetInstance()
 
 void LocalAbilitys::AddAbility(int32_t systemAbilityId, const sptr<IRemoteObject>& ability)
 {
-    HiLog::Debug(label_, "AddAbility to cache %{public}d", systemAbilityId);
+    HILOG_DEBUG(LOG_CORE, "AddAbility to cache %{public}d", systemAbilityId);
     std::lock_guard<std::mutex> autoLock(localSALock_);
     localSAMap_[systemAbilityId] = ability;
 }
@@ -44,7 +48,7 @@ sptr<IRemoteObject> LocalAbilitys::GetAbility(int32_t systemAbilityId)
 
 void LocalAbilitys::RemoveAbility(int32_t systemAbilityId)
 {
-    HiLog::Debug(label_, "RemoveAbility from cache %{public}d", systemAbilityId);
+    HILOG_DEBUG(LOG_CORE, "RemoveAbility from cache %{public}d", systemAbilityId);
     std::lock_guard<std::mutex> autoLock(localSALock_);
     auto it = localSAMap_.find(systemAbilityId);
     if (it != localSAMap_.end()) {
