@@ -303,6 +303,7 @@ enum {
     FILEMANAGEMENT_CLOUD_BACKUP_SERVICE_SA_ID        = 5206,
     SUBSYS_TESTPLATFORM_SYS_ABILITY_ID_BEGIN         = 5500,
     DEVICE_ATTEST_PROFILE_SA_ID                      = 5501,
+    TEST_SERVER_SA_ID                                = 5502,
     DISTRIBUTED_DEVICE_PROFILE_SA_ID                 = 6001,
     ADVERTISING_SA_ID                                = 6104,
     ECOLOGICAL_RULE_MANAGER_SA_ID                    = 6105,
