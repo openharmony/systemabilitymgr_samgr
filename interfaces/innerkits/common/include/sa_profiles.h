@@ -19,6 +19,7 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <list>
 
 namespace OHOS {
 using DlHandle = void*;
@@ -119,6 +120,7 @@ struct SaProfile {
     StopOnDemand stopOnDemand;
     DlHandle handle = nullptr;
     int32_t recycleStrategy = IMMEDIATELY;
+    std::list<std::string> extension;
 };
 }
 #endif // SAMGR_INTERFACE_INNERKITS_COMMOM_INCLUDE_SAPROFILE_H

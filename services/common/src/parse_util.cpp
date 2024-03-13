@@ -21,6 +21,7 @@
 #include <memory>
 #include <sstream>
 #include <vector>
+#include <algorithm>
 
 #include "datetime_ex.h"
 #include "hisysevent_adapter.h"
@@ -60,10 +61,12 @@ constexpr const char* SA_TAG_COMMON_EVENT = "commonevent";
 constexpr const char* SA_TAG_PARAM = "param";
 constexpr const char* SA_TAG_TIEMD_EVENT = "timedevent";
 constexpr const char* SA_TAG_RECYCLE_STRATEGY = "recycle-strategy";
+constexpr const char* SA_TAG_EXTENSION = "extension";
 constexpr int32_t MAX_JSON_OBJECT_SIZE = 50 * 1024;
 constexpr int32_t MAX_JSON_STRING_LENGTH = 128;
 constexpr int32_t FIRST_SYS_ABILITY_ID = 0x00000000;
 constexpr int32_t LAST_SYS_ABILITY_ID = 0x00ffffff;
+constexpr int32_t MAX_EXTENSIONO_NUM = 100;
 const string BOOT_START_PHASE = "BootStartPhase";
 const string CORE_START_PHASE = "CoreStartPhase";
 const string HIGH_LOAD_PRIORITY = "HighPriority";
@@ -369,6 +372,30 @@ bool ParseUtil::ParseJsonFile(const string& realPath)
     return !saProfiles_.empty();
 }
 
+bool ParseUtil::ParseSystemAbilityGetExtension(SaProfile& saProfile, nlohmann::json& systemAbilityJson)
+{
+    if ((systemAbilityJson.find(SA_TAG_EXTENSION) != systemAbilityJson.end()) &&
+        (systemAbilityJson[SA_TAG_EXTENSION].is_array())) {
+        for (auto& item : systemAbilityJson[SA_TAG_EXTENSION]) {
+            std::string extension = item.get<std::string>();
+            if (extension.length() > MAX_JSON_STRING_LENGTH) {
+                HILOGE("profile format error: extension() len exceed limit");
+                return false;
+            }
+            if (saProfile.extension.size() >= MAX_EXTENSIONO_NUM) {
+                HILOGE("profile format error: extension num exceed limit");
+                return false;
+            }
+
+            if (std::find(saProfile.extension.begin(), saProfile.extension.end(), extension) ==
+                saProfile.extension.end()) {
+                saProfile.extension.push_back(extension);
+            }
+        }
+    }
+    return true;
+}
+
 bool ParseUtil::ParseSystemAbility(SaProfile& saProfile, nlohmann::json& systemAbilityJson)
 {
     HILOGD("ParseSystemAbility begin");
@@ -417,6 +444,9 @@ bool ParseUtil::ParseSystemAbility(SaProfile& saProfile, nlohmann::json& systemA
     if (!CheckRecycleStrategy(recycleStrategy, saProfile.recycleStrategy)) {
         HILOGE("profile format error: recycleStrategy: %{public}s is not immediately or low-memory",
             recycleStrategy.c_str());
+        return false;
+    }
+    if (!ParseSystemAbilityGetExtension(saProfile, systemAbilityJson)) {
         return false;
     }
     HILOGD("ParseSystemAbility end");

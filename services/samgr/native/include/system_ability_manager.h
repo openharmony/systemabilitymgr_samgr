@@ -84,7 +84,7 @@ public:
     bool DoLoadOnDemandAbility(int32_t systemAbilityId, bool& isExist);
 
     int32_t RemoveDiedSystemAbility(int32_t systemAbilityId);
-    
+
     void NotifyRemoteSaDied(const std::u16string& name);
     void NotifyRemoteDeviceOffline(const std::string& deviceId);
     int32_t AddSystemAbility(int32_t systemAbilityId, const sptr<IRemoteObject>& ability,
@@ -109,7 +109,7 @@ public:
     {
         return nullptr;
     }
-    
+
     int32_t LoadSystemAbility(int32_t systemAbilityId, const sptr<ISystemAbilityLoadCallback>& callback) override;
     int32_t DoLoadSystemAbility(int32_t systemAbilityId, const std::u16string& procName,
         const sptr<ISystemAbilityLoadCallback>& callback, int32_t callingPid, const OnDemandEvent& event);
@@ -144,6 +144,8 @@ public:
     int32_t SendStrategy(int32_t type, std::vector<int32_t>& systemAbilityIds,
         int32_t level, std::string& action) override;
     bool CheckSaIsImmediatelyRecycle(int32_t systemAbilityId);
+    int32_t GetExtensionSaIds(const std::string& extension, std::vector<int32_t>& saIds) override;
+    int32_t GetExtensionRunningSaList(const std::string& extension, std::vector<sptr<IRemoteObject>>& saList) override;
 private:
     enum class AbilityState {
         INIT,

@@ -34,6 +34,7 @@
             <option name="push" value="profile/sa_profile_large.json -> /data/test/resource/samgr/profile/" src="res"/>
             <option name="push" value="profile/sa_profile_long_libpath.json -> /data/test/resource/samgr/profile/" src="res"/>
             <option name="push" value="profile/sa_profile_long_process.json -> /data/test/resource/samgr/profile/" src="res"/>
+            <option name="push" value="profile/sa_profile_extension.json -> /data/test/resource/samgr/profile/" src="res"/>
             <option name="push" value="systemabilitymgr/samgr/libmock_sa.z.so -> /data/test/" src="out"/>
         </preparer>
     </target>

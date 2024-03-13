@@ -60,6 +60,7 @@ private:
         const std::string& jsonTag, StartOnDemand& startOnDemand);
     void ParseStopOndemandTag(const nlohmann::json& systemAbilityJson,
         const std::string& jsonTag, StopOnDemand& stopOnDemand);
+    bool ParseSystemAbilityGetExtension(SaProfile& saProfile, nlohmann::json& systemAbilityJson);
     void GetOnDemandArrayFromJson(int32_t eventId, const nlohmann::json& obj,
         const std::string& key, std::vector<OnDemandEvent>& out);
     void GetOnDemandConditionsFromJson(const nlohmann::json& obj,
@@ -81,7 +82,7 @@ private:
             obj[key.c_str()].get_to(out);
         }
     }
-    
+
     static inline void GetInt32FromJson(const nlohmann::json& obj, const std::string& key, int32_t& out)
     {
         if (obj.find(key.c_str()) != obj.end() && obj[key.c_str()].is_number_integer()) {

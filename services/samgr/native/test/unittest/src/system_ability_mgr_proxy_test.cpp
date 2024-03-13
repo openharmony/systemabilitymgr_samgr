@@ -1013,4 +1013,35 @@ HWTEST_F(SystemAbilityMgrProxyTest, SendStrategy001, TestSize.Level1)
     int32_t res = samgrProxy->SendStrategy(type, saIds, level, action);
     EXPECT_EQ(res, ERR_PERMISSION_DENIED);
 }
+
+/**
+ * @tc.name: GetExtensionSaIds001
+ * @tc.desc: test GetExtensionSaIds, GetExtensionSaIds
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, GetExtensionSaIds002, TestSize.Level3)
+{
+    sptr<ISystemAbilityManager> samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    std::vector<int32_t> saIds;
+
+    int32_t ret = samgrProxy->GetExtensionSaIds("backup", saIds);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(saIds.size(), 0);
+}
+
+/**
+ * @tc.name: GetExtensionRunningSaList001
+ * @tc.desc: test GetExtensionRunningSaList, GetExtensionRunningSaList
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, GetExtensionRunningSaList002, TestSize.Level3)
+{
+    sptr<ISystemAbilityManager> samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    std::vector<sptr<IRemoteObject>> saList;
+
+    int32_t ret = samgrProxy->GetExtensionRunningSaList("restore", saList);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(saList.size(), 0);
+}
+
 }

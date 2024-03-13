@@ -173,7 +173,7 @@ public:
      * @return ERR_OK indicates successful add.
      */
     virtual int32_t AddSystemProcess(const std::u16string& procName, const sptr<IRemoteObject>& procObject) = 0;
-    
+
     /**
      * LoadSystemAbility, Load sa.
      *
@@ -182,7 +182,7 @@ public:
      * @return remote object means that the load was successful.
      */
     virtual sptr<IRemoteObject> LoadSystemAbility(int32_t systemAbilityId, int32_t timeout) = 0;
-    
+
     /**
      * LoadSystemAbility, Load sa.
      *
@@ -191,7 +191,7 @@ public:
      * @return ERR_OK It does not mean that the load was successful.
      */
     virtual int32_t LoadSystemAbility(int32_t systemAbilityId, const sptr<ISystemAbilityLoadCallback>& callback) = 0;
-    
+
     /**
      * LoadSystemAbility, Load sa.
      *
@@ -271,6 +271,25 @@ public:
      * @return ERR_OK indicates that the UnSubscribe successfully.
      */
     virtual int32_t UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener) = 0;
+
+    /**
+     * GetExtensionSaIds, Return list of saId that match extension.
+     *
+     * @param extension, extension, match with profile extension.
+     * @param saIds, list of saId that match extension
+     * @return ERR_OK indicates that the list of saId that match extension success.
+     */
+    virtual int32_t GetExtensionSaIds(const std::string& extension, std::vector<int32_t> &saIds) = 0;
+
+    /**
+     * GetExtensionRunningSaList, Return started list of hanlde that match extension.
+     *
+     * @param extension, extension, match with profile extension.
+     * @param saList, started list of remote obj that match extension
+     * @return ERR_OK indicates that the list of hanlde that match extension success.
+     */
+    virtual int32_t GetExtensionRunningSaList(const std::string& extension,
+        std::vector<sptr<IRemoteObject>>& saList) = 0;
     virtual int32_t GetOnDemandReasonExtraData(int64_t extraDataId, MessageParcel& extraDataParcel) = 0;
     virtual int32_t GetOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
         std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents) = 0;
