@@ -183,6 +183,7 @@ enum {
     MSDP_GEOFENCE_SERVICE_ID                         = 2905,
     MSDP_TIMELINE_SERVICE_ID                         = 2906,
     MSDP_USER_STATUS_SERVICE_ID                      = 2907,
+    MSDP_MULTIMODAL_AWARENESS_SERVICE_ID             = 2908,
     SUBSYS_MULTIMEDIA_SYS_ABILITY_ID_BEGIN           = 3000,
     AUDIO_DISTRIBUTED_SERVICE_ID                     = 3001,
     PLAYER_DISTRIBUTED_SERVICE_ID                    = 3002,
