@@ -20,6 +20,7 @@
 #include "refbase.h"
 #include "sam_log.h"
 #include "system_ability_manager.h"
+#include "samgr_xcollie.h"
 
 using namespace OHOS;
 
@@ -32,11 +33,19 @@ int main(int argc, char *argv[])
     KHILOGI("System Ability Manager enter init");
     OHOS::sptr<OHOS::IRemoteObject> serv = manager->AsObject();
 
-    if (!IPCSkeleton::SetContextObject(serv)) {
-        KHILOGI("set context fail!"); // add log for dfx
+    {
+        SamgrXCollie samgrXCollie("samgr::main_setContextObject");
+        if (!IPCSkeleton::SetContextObject(serv)) {
+            KHILOGI("set context fail!");
+        }
     }
+
     manager->AddSamgrToAbilityMap();
-    int result = SetParameter("bootevent.samgr.ready", "true");
+    int result = 0;
+    {
+        SamgrXCollie samgrXCollie("samgr::main_setParameter");
+        result = SetParameter("bootevent.samgr.ready", "true");
+    }
     KHILOGI("set samgr ready ret : %{public}s", result == 0 ? "succeed" : "failed");
     manager->StartDfxTimer();
     OHOS::IPCSkeleton::JoinWorkThread();
