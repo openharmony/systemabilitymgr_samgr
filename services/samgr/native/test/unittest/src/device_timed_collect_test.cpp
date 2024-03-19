@@ -224,6 +224,7 @@ HWTEST_F(DeviceTimedCollectTest, PostDelayTask002, TestSize.Level3)
     collect->collectHandler_ = std::make_shared<FFRTHandler>("collect");
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(collect);
+    deviceTimedCollect->nonPersitenceLoopTasks_[0] = [] () {};
     deviceTimedCollect->PostDelayTask(deviceTimedCollect->nonPersitenceLoopTasks_[0], 0);
     EXPECT_NE(collect, nullptr);
 }
