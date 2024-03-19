@@ -576,7 +576,8 @@ HWTEST_F(SystemAbilityMgrTest, CleanFfrt001, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, CleanFfrt002, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    sptr<DeviceStatusCollectManager> collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
+    sptr<DeviceStatusCollectManager> collectManager_ =
+        sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
     int ret = true;
     saMgr->CleanFfrt();
     EXPECT_EQ(ret, true);
@@ -591,7 +592,8 @@ HWTEST_F(SystemAbilityMgrTest, CleanFfrt002, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, CleanFfrt003, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+    std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler_ =
+        std::make_shared<SystemAbilityStateScheduler>();
     int ret = true;
     saMgr->CleanFfrt();
     EXPECT_EQ(ret, true);
@@ -621,7 +623,8 @@ HWTEST_F(SystemAbilityMgrTest, SetFfrt001, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, SetFfrt002, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    sptr<DeviceStatusCollectManager> collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
+    sptr<DeviceStatusCollectManager> collectManager_ =
+        sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
     int ret = true;
     saMgr->SetFfrt();
     EXPECT_EQ(ret, true);
@@ -636,7 +639,8 @@ HWTEST_F(SystemAbilityMgrTest, SetFfrt002, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, SetFfrt003, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+    std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler_ =
+        std::make_shared<SystemAbilityStateScheduler>();
     int ret = true;
     saMgr->SetFfrt();
     EXPECT_EQ(ret, true);
