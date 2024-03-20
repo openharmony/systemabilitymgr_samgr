@@ -580,7 +580,7 @@ ohos_static_library("samgr_proxy_tdd") {
     "//foundation/systemabilitymgr/samgr/test/resource:coverage_flags",
   ]
 
-  all_dependent_configs = [ ":samgr_proxy_config" ]
+  public_configs = [ ":samgr_proxy_config" ]
 
   deps = [ "//foundation/systemabilitymgr/samgr/interfaces/innerkits/dynamic_cache:dynamic_cache" ]
   external_deps = [ "json:nlohmann_json_static" ]
