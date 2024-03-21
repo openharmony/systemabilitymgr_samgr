@@ -1327,4 +1327,82 @@ int32_t SystemAbilityManagerProxy::SendStrategy(int32_t type, std::vector<int32_
     return result;
 }
 
+int32_t SystemAbilityManagerProxy::ListExtensionSendReq(const std::string& extension,
+    SamgrInterfaceCode cmd, MessageParcel& reply, MessageOption& option)
+{
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("remote is nullptr !");
+        return ERR_INVALID_OPERATION;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        HILOGW("%{public}s write token failed!", __func__);
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(extension)) {
+        HILOGW("%{public}s write extension failed!", __func__);
+        return ERR_FLATTEN_OBJECT;
+    }
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(cmd), data, reply, option);
+    if (err != ERR_NONE) {
+        HILOGW("%{public}s transact failed!", __func__);
+        return err;
+    }
+    int32_t result;
+    if (!reply.ReadInt32(result)) {
+        HILOGW("%{public}s Read result failed!", __func__);
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
+int32_t SystemAbilityManagerProxy::GetExtensionSaIds(const std::string& extension, std::vector<int32_t>& saIds)
+{
+    HILOGD("%{public}s called", __func__);
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = ListExtensionSendReq(extension,
+        SamgrInterfaceCode::GET_EXTENSION_SA_IDS_TRANSCATION, reply, option);
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    if (!reply.ReadInt32Vector(&saIds)) {
+        HILOGW("%{public}s read reply failed", __func__);
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ERR_OK;
+}
+
+int32_t SystemAbilityManagerProxy::GetExtensionRunningSaList(const std::string& extension,
+    std::vector<sptr<IRemoteObject>>& saList)
+{
+    HILOGD("%{public}s called", __func__);
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = ListExtensionSendReq(extension,
+        SamgrInterfaceCode::GET_EXTERNSION_SA_LIST_TRANSCATION, reply, option);
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    int32_t size;
+    if (!reply.ReadInt32(size)) {
+        HILOGW("%{public}s read reply failed", __func__);
+        return ERR_FLATTEN_OBJECT;
+    }
+    for (int32_t i = 0; i < size; ++i) {
+        sptr<IRemoteObject> obj = reply.ReadRemoteObject();
+        if (obj == nullptr) {
+            HILOGW("%{public}s read reply loop(%{public}d) size(%{public}d) failed", __func__, i, size);
+            saList.clear();
+            return ERR_FLATTEN_OBJECT;
+        }
+        saList.emplace_back(obj);
+    }
+    return ERR_OK;
+}
+
 } // namespace OHOS

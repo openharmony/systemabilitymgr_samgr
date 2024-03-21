@@ -162,6 +162,10 @@ SystemAbilityManagerStub::SystemAbilityManagerStub()
         &SystemAbilityManagerStub::SendStrategyInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::UNLOAD_ALL_IDLE_SYSTEM_ABILITY_TRANSACTION)] =
         &SystemAbilityManagerStub::UnloadAllIdleSystemAbilityInner;
+    memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_EXTENSION_SA_IDS_TRANSCATION)] =
+        &SystemAbilityManagerStub::GetExtensionSaIdsInner;
+    memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_EXTERNSION_SA_LIST_TRANSCATION)] =
+        &SystemAbilityManagerStub::GetExtensionRunningSaListInner;
 }
 
 int32_t SystemAbilityManagerStub::OnRemoteRequest(uint32_t code,
@@ -1000,4 +1004,63 @@ bool SystemAbilityManagerStub::CanRequest()
         accessTokenId, tokenType);
     return (tokenType == AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
 }
+
+int32_t SystemAbilityManagerStub::GetExtensionSaIdsInner(MessageParcel& data, MessageParcel& reply)
+{
+    if (!CanRequest()) {
+        HILOGE("%{public}s  PERMISSION DENIED!", __func__);
+        return ERR_PERMISSION_DENIED;
+    }
+    std::string extension;
+    if (!data.ReadString(extension)) {
+        HILOGW("%{public}s read extension failed!", __func__);
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    std::vector<int32_t> saIds;
+    int32_t result = GetExtensionSaIds(extension, saIds);
+    if (!reply.WriteInt32(result)) {
+        HILOGW("%{public}s write reply failed.", __func__);
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.WriteInt32Vector(saIds)) {
+        HILOGW("%{public}s write saids reply failed.", __func__);
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    return ERR_NONE;
+}
+
+int32_t SystemAbilityManagerStub::GetExtensionRunningSaListInner(MessageParcel& data, MessageParcel& reply)
+{
+    if (!CanRequest()) {
+        HILOGE("%{public}s PERMISSION DENIED!", __func__);
+        return ERR_PERMISSION_DENIED;
+    }
+    std::string extension;
+    if (!data.ReadString(extension)) {
+        HILOGW("%{public}s read extension failed!", __func__);
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    std::vector<sptr<IRemoteObject>> saList;
+    int32_t result = GetExtensionRunningSaList(extension, saList);
+    if (!reply.WriteInt32(result)) {
+        HILOGW("%{public}s write reply failed.", __func__);
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!reply.WriteInt32(saList.size())) {
+        HILOGW("%{public}s write saHandle size failed.", __func__);
+        return ERR_FLATTEN_OBJECT;
+    }
+    for (auto& remoteObject : saList) {
+        if (!reply.WriteRemoteObject(remoteObject)) {
+            HILOGW("%{public}s write remote obj failed.", __func__);
+            return ERR_FLATTEN_OBJECT;
+        }
+    }
+
+    return ERR_NONE;
+}
+
 } // namespace OHOS

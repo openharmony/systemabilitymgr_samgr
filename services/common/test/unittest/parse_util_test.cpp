@@ -42,6 +42,10 @@ namespace {
     constexpr const char* SA_TAG_COMMON_EVENT = "commonevent";
     constexpr const char* SA_TAG_PARAM = "param";
     constexpr const char* SA_TAG_TIEMD_EVENT = "timedevent";
+    const string EXTENSIOON_BACKUP = "backup";
+    const string EXTENSIOON_RESTORE = "restore";
+    constexpr int32_t MAX_JSON_STRING_LENGTH = 128;
+    constexpr int32_t MAX_EXTENSIONO_NUM = 100;
 }
 
 class ParseUtilTest : public testing::Test {
@@ -908,6 +912,30 @@ HWTEST_F(ParseUtilTest, ParseJsonFile007, TestSize.Level3)
 }
 
 /**
+ * @tc.name: ParseJsonFile008
+ * @tc.desc: parse json file using extension profile
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseUtilTest, ParseJsonFile008, TestSize.Level3)
+{
+    DTEST_LOG << " ParseJsonFile008 BEGIN" << std::endl;
+    parser_->saProfiles_.clear();
+    bool ret = parser_->ParseSaProfiles(TEST_RESOURCE_PATH + "sa_profile_extension.json");
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(parser_->saProfiles_.empty(), false);
+    SaProfile saProfile;
+    parser_->GetProfile(9999, saProfile);
+    EXPECT_EQ(9999, saProfile.saId);
+    EXPECT_EQ(saProfile.extension.size(), 2);
+    auto iter = std::find(saProfile.extension.begin(), saProfile.extension.end(), EXTENSIOON_BACKUP);
+    EXPECT_NE(iter, saProfile.extension.end());
+    iter = std::find(saProfile.extension.begin(), saProfile.extension.end(), EXTENSIOON_RESTORE);
+    EXPECT_NE(iter, saProfile.extension.end());
+
+    DTEST_LOG << " ParseJsonFile008 END" << std::endl;
+}
+
+/**
  * @tc.name: ParseSystemAbility001
  * @tc.desc: parse sytemability tag with error param.
  * @tc.type: FUNC
@@ -1218,5 +1246,118 @@ HWTEST_F(ParseUtilTest, CheckLogicRelationship001, TestSize.Level3)
     ret = parser_->CheckLogicRelationship("abc", ">=1");
     EXPECT_EQ(ret, false);
 }
+
+/**
+ * @tc.name: ParseSystemAbilityGetExtension001
+ * @tc.desc: parse sytemability extension tag
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseUtilTest, ParseSystemAbilityGetExtension001, TestSize.Level3)
+{
+    DTEST_LOG << " ParseSystemAbilityGetExtension001 BEGIN" << std::endl;
+    nlohmann::json systemAbilityJson;
+    SaProfile saProfile;
+    bool ret = parser_->ParseSystemAbilityGetExtension(saProfile, systemAbilityJson);
+    EXPECT_EQ(ret, true);
+    systemAbilityJson["extension"] = nlohmann::json::array();
+    systemAbilityJson["extension"].push_back(EXTENSIOON_BACKUP);
+    ret = parser_->ParseSystemAbilityGetExtension(saProfile, systemAbilityJson);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(saProfile.extension.size(), 1);
+    auto iter = std::find(saProfile.extension.begin(), saProfile.extension.end(), EXTENSIOON_BACKUP);
+    EXPECT_NE(iter, saProfile.extension.end());
+
+    systemAbilityJson["extension"].push_back(EXTENSIOON_RESTORE);
+    ret = parser_->ParseSystemAbilityGetExtension(saProfile, systemAbilityJson);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(saProfile.extension.size(), 2);
+    iter = std::find(saProfile.extension.begin(), saProfile.extension.end(), EXTENSIOON_RESTORE);
+    EXPECT_NE(iter, saProfile.extension.end());
+
+    systemAbilityJson["extension"].push_back(EXTENSIOON_BACKUP);
+    systemAbilityJson["extension"].push_back(EXTENSIOON_RESTORE);
+
+    ret = parser_->ParseSystemAbilityGetExtension(saProfile, systemAbilityJson);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(saProfile.extension.size(), 2);
+
+    DTEST_LOG << " ParseSystemAbilityGetExtension001 END" << std::endl;
+}
+
+/**
+ * @tc.name: ParseSystemAbilityGetExtension002
+ * @tc.desc: parse sytemability extension string length test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseUtilTest, ParseSystemAbilityGetExtension002, TestSize.Level3)
+{
+    DTEST_LOG << " ParseSystemAbilityGetExtension002 BEGIN" << std::endl;
+    nlohmann::json systemAbilityJson;
+    SaProfile saProfile;
+    systemAbilityJson["extension"] = nlohmann::json::array();
+
+    char ch = 'a';
+    std::string aExceedstr(MAX_JSON_STRING_LENGTH + 1, ch);
+    systemAbilityJson["extension"].push_back(aExceedstr);
+    bool ret = parser_->ParseSystemAbilityGetExtension(saProfile, systemAbilityJson);
+    EXPECT_EQ(ret, false);
+    EXPECT_EQ(saProfile.extension.size(), 0);
+
+    systemAbilityJson["extension"].clear();
+
+    ch = 'a';
+    std::string astr(MAX_JSON_STRING_LENGTH, ch);
+    systemAbilityJson["extension"].push_back(astr);
+    ret = parser_->ParseSystemAbilityGetExtension(saProfile, systemAbilityJson);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(saProfile.extension.size(), 1);
+    auto iter = std::find(saProfile.extension.begin(), saProfile.extension.end(), astr);
+    EXPECT_NE(iter, saProfile.extension.end());
+
+    ch = 'b';
+    std::string bstr(MAX_JSON_STRING_LENGTH - 1, ch);
+    systemAbilityJson["extension"].push_back(bstr);
+    ret = parser_->ParseSystemAbilityGetExtension(saProfile, systemAbilityJson);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(saProfile.extension.size(), 2);
+    iter = std::find(saProfile.extension.begin(), saProfile.extension.end(), bstr);
+    EXPECT_NE(iter, saProfile.extension.end());
+
+    DTEST_LOG << " ParseSystemAbilityGetExtension002 END" << std::endl;
+}
+
+/**
+ * @tc.name: ParseSystemAbilityGetExtension002
+ * @tc.desc: parse sytemability extension string num test
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseUtilTest, ParseSystemAbilityGetExtension003, TestSize.Level3)
+{
+    DTEST_LOG << " ParseSystemAbilityGetExtension003 BEGIN" << std::endl;
+    nlohmann::json systemAbilityJson;
+    SaProfile saProfile;
+    systemAbilityJson["extension"] = nlohmann::json::array();
+
+    bool ret;
+    char ch = 0;
+    for (int32_t loop = 0; loop < MAX_EXTENSIONO_NUM; ++loop) {
+        std::string str(MAX_JSON_STRING_LENGTH, ch + loop);
+        systemAbilityJson["extension"].push_back(str);
+        ret = parser_->ParseSystemAbilityGetExtension(saProfile, systemAbilityJson);
+        EXPECT_EQ(ret, true);
+        EXPECT_EQ(saProfile.extension.size(), loop + 1);
+        auto iter = std::find(saProfile.extension.begin(), saProfile.extension.end(), str);
+        EXPECT_NE(iter, saProfile.extension.end());
+    }
+
+    std::string str(MAX_JSON_STRING_LENGTH, ch + MAX_EXTENSIONO_NUM);
+    systemAbilityJson["extension"].push_back(str);
+    ret = parser_->ParseSystemAbilityGetExtension(saProfile, systemAbilityJson);
+    EXPECT_EQ(ret, false);
+    EXPECT_EQ(saProfile.extension.size(), MAX_EXTENSIONO_NUM);
+
+    DTEST_LOG << " ParseSystemAbilityGetExtension003 END" << std::endl;
+}
+
 } // namespace SAMGR
 } // namespace OHOS

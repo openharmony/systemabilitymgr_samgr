@@ -400,6 +400,44 @@ void OnDemandHelper::OnDemandLoadCallback::OnLoadSACompleteForRemote(const std::
     cout << "OnLoadSACompleteForRemote systemAbilityId:" << systemAbilityId << " IRemoteObject result:" <<
         ((remoteObject != nullptr) ? "succeed" : "failed") << endl;
 }
+
+int32_t OnDemandHelper::GetExtensionSaIds(const std::string& extension, std::vector<int32_t> &saIds)
+{
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    int32_t ret;
+    if ((ret = sm->GetExtensionSaIds(extension, saIds)) != ERR_OK) {
+        return ret;
+    }
+    cout << __func__ << "saIds size: " << saIds.size() << endl;
+    if (saIds.size() != 0) {
+        cout << __func__ << "saIds: ";
+        for (uint32_t loop = 0; loop < saIds.size(); ++loop) {
+            cout << saIds[loop] << ", ";
+        }
+        cout << endl;
+    }
+    return ERR_OK;
+}
+
+int32_t OnDemandHelper::GetExtensionRunningSaList(const std::string& extension,
+    std::vector<sptr<IRemoteObject>>& saList)
+{
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    int32_t ret;
+    if ((ret = sm->GetExtensionRunningSaList(extension, saList)) != ERR_OK) {
+        return ret;
+    }
+    cout << __func__ << "saList size: " << saList.size() << endl;
+    if (saList.size() != 0) {
+        cout << __func__ << "saIds: ";
+        for (uint32_t loop = 0; loop < saList.size(); ++loop) {
+            cout << (saList[loop] != nullptr) << ", ";
+        }
+        cout << endl;
+    }
+    return ERR_OK;
+}
+
 }
 
 static void TestProcess(OHOS::OnDemandHelper& ondemandHelper)
@@ -588,13 +626,33 @@ static void TestOnDemandPolicy(OHOS::OnDemandHelper& ondemandHelper)
     }
 }
 
+static void TestGetExtension(OHOS::OnDemandHelper& ondemandHelper)
+{
+    std::string extension;
+    cin >> extension;
+
+    std::vector<int32_t> saIds;
+    if (ondemandHelper.GetExtensionSaIds(extension, saIds) != ERR_OK) {
+        cout << "get extension: " << extension << " failed" << endl;
+        return;
+    }
+    std::vector<sptr<IRemoteObject>> saList;
+    if (ondemandHelper.GetExtensionRunningSaList(extension, saList) != ERR_OK) {
+        cout << "get handle extension: " << extension << " failed" << endl;
+        return;
+    }
+    return;
+}
+
 int main(int argc, char* argv[])
 {
     SamMockPermission::MockPermission();
     OHOS::OnDemandHelper& ondemandHelper = OnDemandHelper::GetInstance();
     string cmd = "load";
     do {
-        cout << "please input operation(sa/proc/param/policy)" << endl;
+        cout << "please input operation(sa/proc/param/policy/getExtension)" << endl;
+        cmd.clear();
+        cin.clear();
         cin >> cmd;
         if (cmd == "param") {
             TestParamPlugin(ondemandHelper);
@@ -604,12 +662,13 @@ int main(int argc, char* argv[])
             TestProcess(ondemandHelper);
         } else if (cmd == "policy") {
             TestOnDemandPolicy(ondemandHelper);
-        } else {
+        } else if (cmd == "getExtension") {
+            TestGetExtension(ondemandHelper);
+        }
+        else {
             cout << "invalid input" << endl;
         }
         cout << "-----Input q or Q to quit" << endl;
-        cmd.clear();
-        cin.clear();
         cin.ignore(numeric_limits<std::streamsize>::max(), '\n');
     } while (cmd[0] != 'q' && cmd[0] != 'Q');
     return 0;

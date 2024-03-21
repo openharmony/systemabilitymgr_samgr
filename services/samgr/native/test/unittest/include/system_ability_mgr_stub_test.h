@@ -20,6 +20,7 @@
 #define private public
 #define protected public
 #include "system_process_status_change_stub.h"
+#include "system_ability_manager.h"
 namespace OHOS {
 class SystemAbilityMgrStubTest : public testing::Test {
 public:
@@ -28,6 +29,12 @@ public:
     void SetUp();
     void TearDown();
     void AddSystemAbilityContext(int32_t systemAbilityId, const std::u16string& processName);
+    void SaProfileStore(sptr<SystemAbilityManager>& saMgr, map<int32_t, SaProfile>& saProfileMapTmp,
+        int32_t maxLoop);
+    void SaProfileRecover(sptr<SystemAbilityManager>& saMgr, map<int32_t, SaProfile> saProfileMapTmp,
+        int32_t maxLoop);
+    void SaProfileExtensionTestPrevSet(sptr<SystemAbilityManager>& saMgr, int32_t maxLoop);
+    void SaAbilityMapObjTestPrevSet(sptr<SystemAbilityManager>& saMgr, int32_t maxLoop);
 };
 
 class SystemProcessStatusChange : public SystemProcessStatusChangeStub {

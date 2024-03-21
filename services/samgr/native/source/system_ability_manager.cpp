@@ -101,7 +101,7 @@ void SystemAbilityManager::Init()
     abilityStatusDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityStatusDeathRecipient());
     abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityCallbackDeathRecipient());
     remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
-    
+
     rpcCallbackImp_ = make_shared<RpcCallbackImp>();
     if (workHandler_ == nullptr) {
         workHandler_ = make_shared<FFRTHandler>("workHandler");
@@ -2075,4 +2075,35 @@ int32_t SystemAbilityManager::SendStrategy(int32_t type, std::vector<int32_t>& s
     }
     return ERR_OK;
 }
+
+int32_t SystemAbilityManager::GetExtensionSaIds(const std::string& extension, std::vector<int32_t>& saIds)
+{
+    lock_guard<mutex> autoLock(saProfileMapLock_);
+    for (const auto& [saId, value] : saProfileMap_) {
+        if (std::find(value.extension.begin(), value.extension.end(), extension) !=
+            value.extension.end()) {
+            saIds.push_back(saId);
+        }
+    }
+    return ERR_OK;
+}
+
+int32_t SystemAbilityManager::GetExtensionRunningSaList(const std::string& extension,
+    std::vector<sptr<IRemoteObject>>& saList)
+{
+    lock_guard<mutex> autoLock(saProfileMapLock_);
+    for (const auto& [saId, value] : saProfileMap_) {
+        if (std::find(value.extension.begin(), value.extension.end(), extension)
+            != value.extension.end()) {
+            shared_lock<shared_mutex> readLock(abilityMapLock_);
+            auto iter = abilityMap_.find(saId);
+            if (iter != abilityMap_.end() && iter->second.remoteObj != nullptr) {
+                saList.push_back(iter->second.remoteObj);
+                HILOGD("%{public}s get extension(%{public}s) saId(%{public}d)", __func__, extension.c_str(), saId);
+            }
+        }
+    }
+    return ERR_OK;
+}
+
 } // namespace OHOS

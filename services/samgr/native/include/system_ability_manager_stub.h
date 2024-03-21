@@ -59,6 +59,8 @@ private:
     int32_t UnmarshalingSaExtraProp(MessageParcel& data, SAExtraProp& extraProp);
     int32_t GetOnDemandSystemAbilityIdsInner(MessageParcel& data, MessageParcel& reply);
     int32_t SendStrategyInner(MessageParcel& data, MessageParcel& reply);
+    int32_t GetExtensionSaIdsInner(MessageParcel& data, MessageParcel& reply);
+    int32_t GetExtensionRunningSaListInner(MessageParcel& data, MessageParcel& reply);
     static int32_t GetHapIdMultiuser(int32_t uid);
     void SetAbilityFuncMap();
     void SetProcessFuncMap();

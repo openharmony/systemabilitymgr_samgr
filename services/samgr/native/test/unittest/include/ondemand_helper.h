@@ -19,6 +19,7 @@
 #include "system_ability_load_callback_stub.h"
 #include "system_ability_on_demand_event.h"
 #include "system_process_status_change_stub.h"
+
 namespace OHOS {
 class OnDemandHelper {
 public:
@@ -46,6 +47,8 @@ public:
     void GetOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type);
     void UpdateOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
         std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents);
+    int32_t GetExtensionSaIds(const std::string& extension, std::vector<int32_t> &saIds);
+    int32_t GetExtensionRunningSaList(const std::string& extension, std::vector<sptr<IRemoteObject>>& saList);
 protected:
     class OnDemandLoadCallback : public SystemAbilityLoadCallbackStub {
     public:
