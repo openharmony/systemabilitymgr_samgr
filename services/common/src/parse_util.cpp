@@ -28,6 +28,7 @@
 #include "hitrace_meter.h"
 #include "sam_log.h"
 #include "string_ex.h"
+#include "samgr_xcollie.h"
 
 namespace OHOS {
 using std::string;
@@ -189,12 +190,16 @@ void ParseUtil::OpenSo(SaProfile& saProfile)
         HITRACE_METER_NAME(HITRACE_TAG_SAMGR, dlopenTag);
         int64_t begin = GetTickCount();
         DlHandle handle = nullptr;
-        if (loadFromModuleUpdate) {
-            handle = dlopen(updateLibPath.c_str(), RTLD_NOW);
+        {
+            SamgrXCollie samgrXCollie("safwk::openso_" + ToString(saProfile.saId));
+            if (loadFromModuleUpdate) {
+                handle = dlopen(updateLibPath.c_str(), RTLD_NOW);
+            }
+            if (handle == nullptr) {
+                handle = dlopen(saProfile.libPath.c_str(), RTLD_NOW);
+            }
         }
-        if (handle == nullptr) {
-            handle = dlopen(saProfile.libPath.c_str(), RTLD_NOW);
-        }
+
         KHILOGI("[PerformanceTest] SA:%{public}d OpenSo spend %{public}" PRId64 " ms",
             saProfile.saId, GetTickCount() - begin);
         if (handle == nullptr) {

@@ -17,6 +17,7 @@
     *ReportAddSystemAbilityFailed*;
     *ReportGetSAFrequency*;
     *WatchDogSendEvent*;
+    *SamgrXCollie*;
   local:
     *;
 };

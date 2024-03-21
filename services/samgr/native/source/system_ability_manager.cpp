@@ -39,6 +39,7 @@
 #include "string_ex.h"
 #include "system_ability_manager_dumper.h"
 #include "tools.h"
+#include "samgr_xcollie.h"
 
 #ifdef SUPPORT_DEVICE_MANAGER
 #include "device_manager.h"
@@ -1459,7 +1460,13 @@ int32_t SystemAbilityManager::StartDynamicSystemProcess(const std::u16string& na
         // Waiting for the init subsystem to perceive process death
         ServiceWaitForStatus(Str16ToStr8(name).c_str(), ServiceStatus::SERVICE_STOPPED, 1);
     }
-    auto result = ServiceControlWithExtra(Str16ToStr8(name).c_str(), ServiceAction::START, &extraArgv, 1);
+
+    int result = ERR_INVALID_VALUE;
+    {
+        SamgrXCollie samgrXCollie("samgr::startProccess_" + ToString(systemAbilityId));
+        result = ServiceControlWithExtra(Str16ToStr8(name).c_str(), ServiceAction::START, &extraArgv, 1);
+    }
+
     KHILOGI("Start dynamic proc:%{public}s, SA:%{public}d, ret:%{public}d!",
         Str16ToStr8(name).c_str(), systemAbilityId, result);
     return (result == 0) ? ERR_OK : ERR_INVALID_VALUE;
@@ -1746,6 +1753,7 @@ bool SystemAbilityManager::IdleSystemAbility(int32_t systemAbilityId, const std:
         HILOGE("get process:%{public}s fail", Str16ToStr8(procName).c_str());
         return false;
     }
+    SamgrXCollie samgrXCollie("samgr::IdleSa_" + ToString(systemAbilityId));
     return procObject->IdleAbility(systemAbilityId, idleReason, delayTime);
 }
 
@@ -1763,6 +1771,7 @@ bool SystemAbilityManager::ActiveSystemAbility(int32_t systemAbilityId, const st
         HILOGE("get process:%{public}s fail", Str16ToStr8(procName).c_str());
         return false;
     }
+    SamgrXCollie samgrXCollie("samgr::ActiveSa_" + ToString(systemAbilityId));
     return procObject->ActiveAbility(systemAbilityId, activeReason);
 }
 
@@ -1848,8 +1857,11 @@ sptr<DBinderServiceStub> SystemAbilityManager::DoMakeRemoteBinder(int32_t system
     sptr<DBinderServiceStub> remoteBinder = nullptr;
     if (dBinderService_ != nullptr) {
         string strName = to_string(systemAbilityId);
-        remoteBinder = dBinderService_->MakeRemoteBinder(Str8ToStr16(strName),
-            networkId, systemAbilityId, callingPid, callingUid);
+        {
+            SamgrXCollie samgrXCollie("samgr::MakeRemoteBinder_" + strName);
+            remoteBinder = dBinderService_->MakeRemoteBinder(Str8ToStr16(strName),
+                networkId, systemAbilityId, callingPid, callingUid);
+        }
     }
     HILOGI("MakeRemoteBinder end, result %{public}s, SA:%{public}d, networkId : %{public}s",
         remoteBinder == nullptr ? " failed" : "succeed", systemAbilityId, AnonymizeDeviceId(networkId).c_str());

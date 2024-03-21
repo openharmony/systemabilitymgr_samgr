@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("//foundation/systemabilitymgr/samgr/services/samgr/var.gni")
 
 config("all_config_samgr_common") {
   include_dirs = [ "include" ]
@@ -37,7 +38,10 @@ ohos_shared_library("samgr_common") {
   sources = [
     "//foundation/systemabilitymgr/samgr/services/common/src/parse_util.cpp",
     "//foundation/systemabilitymgr/samgr/services/dfx/source/hisysevent_adapter.cpp",
+    "//foundation/systemabilitymgr/samgr/services/dfx/source/samgr_xcollie.cpp",
   ]
+
+  defines = []
 
   configs = [
     ":config_samgr_common",
@@ -63,6 +67,11 @@ ohos_shared_library("samgr_common") {
       "hisysevent:libhisysevent",
       "hitrace:hitrace_meter",
     ]
+
+    if (hicollie_able) {
+      external_deps += [ "hicollie:libhicollie" ]
+      defines += [ "HICOLLIE_ENABLE" ]
+    }
     public_external_deps = [ "json:nlohmann_json_static" ]
     part_name = "samgr"
   }

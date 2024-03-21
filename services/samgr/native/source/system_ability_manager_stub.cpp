@@ -30,6 +30,7 @@
 #include "system_ability_manager.h"
 #include "system_ability_on_demand_event.h"
 #include "tools.h"
+#include "samgr_xcollie.h"
 
 #ifdef WITH_SELINUX
 #include "service_checker.h"
@@ -588,35 +589,46 @@ int32_t SystemAbilityManagerStub::AddSystemProcessInner(MessageParcel& data, Mes
 int32_t SystemAbilityManagerStub::LoadSystemAbilityInner(MessageParcel& data, MessageParcel& reply)
 {
     int32_t systemAbilityId = -1;
-    bool ret = data.ReadInt32(systemAbilityId);
-    if (!ret) {
-        return ERR_INVALID_VALUE;
-    }
-    std::string loadSystemAbilityTag = ToString(systemAbilityId) + "_LoadSystemAbility";
-    HITRACE_METER_NAME(HITRACE_TAG_SAMGR, loadSystemAbilityTag);
-    if (!CheckInputSysAbilityId(systemAbilityId)) {
-        HILOGW("LoadSystemAbilityInner read SAId failed!");
-        return ERR_INVALID_VALUE;
+    bool ret = false;
+    sptr<IRemoteObject> remoteObject = nullptr;
+    sptr<ISystemAbilityLoadCallback> callback = nullptr;
+    {
+        SamgrXCollie samgrXCollie("samgrStub::loadSa_readData");
+        ret = data.ReadInt32(systemAbilityId);
+        if (!ret) {
+            HILOGW("LoadSystemAbilityInner read SAId failed!");
+            return ERR_INVALID_VALUE;
+        }
+        std::string loadSystemAbilityTag = ToString(systemAbilityId) + "_LoadSystemAbility";
+        HITRACE_METER_NAME(HITRACE_TAG_SAMGR, loadSystemAbilityTag);
+        if (!CheckInputSysAbilityId(systemAbilityId)) {
+            HILOGW("LoadSystemAbilityInner check SAId failed!");
+            return ERR_INVALID_VALUE;
+        }
+
+        if (!CheckGetSAPermission(systemAbilityId)) {
+            HILOGE("LoadSystemAbilityInner selinux permission denied!SA : %{public}d", systemAbilityId);
+            return ERR_PERMISSION_DENIED;
+        }
+
+        remoteObject = data.ReadRemoteObject();
+        if (remoteObject == nullptr) {
+            HILOGW("LoadSystemAbilityInner read callback failed!");
+            return ERR_INVALID_VALUE;
+        }
+        callback = iface_cast<ISystemAbilityLoadCallback>(remoteObject);
+        if (callback == nullptr) {
+            HILOGW("LoadSystemAbilityInner iface_cast failed!");
+            return ERR_INVALID_VALUE;
+        }
     }
 
-    if (!CheckGetSAPermission(systemAbilityId)) {
-        HILOGE("LoadSystemAbilityInner selinux permission denied!SA : %{public}d", systemAbilityId);
-        return ERR_PERMISSION_DENIED;
-    }
-
-    sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
-    if (remoteObject == nullptr) {
-        HILOGW("LoadSystemAbilityInner read callback failed!");
-        return ERR_INVALID_VALUE;
-    }
-    sptr<ISystemAbilityLoadCallback> callback = iface_cast<ISystemAbilityLoadCallback>(remoteObject);
-    if (callback == nullptr) {
-        HILOGW("LoadSystemAbilityInner iface_cast failed!");
-        return ERR_INVALID_VALUE;
-    }
     int32_t result = LoadSystemAbility(systemAbilityId, callback);
     HILOGD("LoadSystemAbilityInner result is %{public}d", result);
-    ret = reply.WriteInt32(result);
+    {
+        SamgrXCollie samgrXCollie("samgrStub::loadSa_writeResult_" + ToString(systemAbilityId));
+        ret = reply.WriteInt32(result);
+    }
     if (!ret) {
         HILOGW("LoadSystemAbilityInner write reply failed.");
         return ERR_FLATTEN_OBJECT;
@@ -627,38 +639,50 @@ int32_t SystemAbilityManagerStub::LoadSystemAbilityInner(MessageParcel& data, Me
 int32_t SystemAbilityManagerStub::LoadRemoteSystemAbilityInner(MessageParcel& data, MessageParcel& reply)
 {
     int32_t systemAbilityId = -1;
-    bool ret = data.ReadInt32(systemAbilityId);
-    if (!ret) {
-        return ERR_INVALID_VALUE;
-    }
-    if (!CheckInputSysAbilityId(systemAbilityId)) {
-        HILOGW("LoadRemoteSystemAbilityInner SAId invalid");
-        return ERR_INVALID_VALUE;
+    bool ret = false;
+    std::string deviceId = "";
+    sptr<IRemoteObject> remoteObject = nullptr;
+    sptr<ISystemAbilityLoadCallback> callback = nullptr;
+    {
+        SamgrXCollie samgrXCollie("samgrStub::loadRmtSa_readData");
+        ret = data.ReadInt32(systemAbilityId);
+        if (!ret) {
+            HILOGW("LoadRemoteSystemAbilityInner read SAId invalid");
+            return ERR_INVALID_VALUE;
+        }
+        if (!CheckInputSysAbilityId(systemAbilityId)) {
+            HILOGW("LoadRemoteSystemAbilityInner check SAId invalid");
+            return ERR_INVALID_VALUE;
+        }
+
+        if (!CheckGetRemoteSAPermission(systemAbilityId)) {
+            HILOGE("LoadRemoteSystemAbilityInner selinux permission denied!SA : %{public}d", systemAbilityId);
+            return ERR_PERMISSION_DENIED;
+        }
+
+        deviceId = data.ReadString();
+        if (deviceId.empty()) {
+            HILOGW("LoadRemoteSystemAbilityInner read deviceId failed");
+            return ERR_INVALID_VALUE;
+        }
+        remoteObject = data.ReadRemoteObject();
+        if (remoteObject == nullptr) {
+            HILOGW("LoadRemoteSystemAbilityInner read callback failed!");
+            return ERR_INVALID_VALUE;
+        }
+        callback = iface_cast<ISystemAbilityLoadCallback>(remoteObject);
+        if (callback == nullptr) {
+            HILOGW("LoadRemoteSystemAbilityInner iface_cast failed!");
+            return ERR_INVALID_VALUE;
+        }
     }
 
-    if (!CheckGetRemoteSAPermission(systemAbilityId)) {
-        HILOGE("LoadRemoteSystemAbilityInner selinux permission denied!SA : %{public}d", systemAbilityId);
-        return ERR_PERMISSION_DENIED;
-    }
-
-    std::string deviceId = data.ReadString();
-    if (deviceId.empty()) {
-        HILOGW("LoadRemoteSystemAbilityInner read deviceId failed");
-        return ERR_INVALID_VALUE;
-    }
-    sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
-    if (remoteObject == nullptr) {
-        HILOGW("LoadRemoteSystemAbilityInner read callback failed!");
-        return ERR_INVALID_VALUE;
-    }
-    sptr<ISystemAbilityLoadCallback> callback = iface_cast<ISystemAbilityLoadCallback>(remoteObject);
-    if (callback == nullptr) {
-        HILOGW("LoadRemoteSystemAbilityInner iface_cast failed!");
-        return ERR_INVALID_VALUE;
-    }
     int32_t result = LoadSystemAbility(systemAbilityId, deviceId, callback);
     HILOGD("LoadRemoteSystemAbilityInner result is %{public}d", result);
-    ret = reply.WriteInt32(result);
+    {
+        SamgrXCollie samgrXCollie("samgrStub::loadRmtSa_writeResult_" + ToString(systemAbilityId));
+        ret = reply.WriteInt32(result);
+    }
     if (!ret) {
         HILOGW("LoadRemoteSystemAbilityInner write reply failed.");
         return ERR_FLATTEN_OBJECT;
@@ -669,17 +693,26 @@ int32_t SystemAbilityManagerStub::LoadRemoteSystemAbilityInner(MessageParcel& da
 int32_t SystemAbilityManagerStub::UnloadSystemAbilityInner(MessageParcel& data, MessageParcel& reply)
 {
     int32_t systemAbilityId = -1;
-    bool ret = data.ReadInt32(systemAbilityId);
-    if (!ret) {
-        return ERR_INVALID_VALUE;
+    bool ret = false;
+    {
+        SamgrXCollie samgrXCollie("samgrStub::unloadSa_readData");
+        ret = data.ReadInt32(systemAbilityId);
+        if (!ret) {
+            HILOGW("UnloadSystemAbilityInner read SAId invalid");
+            return ERR_INVALID_VALUE;
+        }
+        if (!CheckInputSysAbilityId(systemAbilityId)) {
+            HILOGW("UnloadSystemAbilityInner check SAId invalid");
+            return ERR_INVALID_VALUE;
+        }
     }
-    if (!CheckInputSysAbilityId(systemAbilityId)) {
-        HILOGW("UnloadSystemAbilityInner SAId invalid");
-        return ERR_INVALID_VALUE;
-    }
+
     int32_t result = UnloadSystemAbility(systemAbilityId);
     HILOGD("UnloadSystemAbilityInner result is %{public}d", result);
-    ret = reply.WriteInt32(result);
+    {
+        SamgrXCollie samgrXCollie("samgrStub::unloadSa_writeResult_" + ToString(systemAbilityId));
+        ret = reply.WriteInt32(result);
+    }
     if (!ret) {
         HILOGW("UnloadSystemAbilityInner write reply failed.");
         return ERR_FLATTEN_OBJECT;
