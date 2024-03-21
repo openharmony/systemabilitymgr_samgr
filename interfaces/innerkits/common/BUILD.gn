@@ -47,8 +47,9 @@ ohos_shared_library("samgr_common") {
   public_configs = [
     ":config_samgr_common",
     ":all_config_samgr_common",
-    "//third_party/libxml2:libxml2_config",
   ]
+
+  external_deps = [ "libxml2:libxml2" ]
 
   all_dependent_configs = [
     ":all_config_samgr_common",
@@ -56,7 +57,7 @@ ohos_shared_library("samgr_common") {
   ]
 
   if (is_standard_system) {
-    external_deps = [
+    external_deps += [
       "c_utils:utils",
       "hilog:libhilog",
       "hisysevent:libhisysevent",
