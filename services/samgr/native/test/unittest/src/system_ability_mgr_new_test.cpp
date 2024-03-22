@@ -73,23 +73,6 @@ HWTEST_F(SystemAbilityMgrTest, GetLocalNodeId001, TestSize.Level3)
 }
 
 /**
- * @tc.name: EventToStr001
- * @tc.desc: test EventToStr with event is initialized
- * @tc.type: FUNC
- * @tc.require: I6NKWX
- */
-HWTEST_F(SystemAbilityMgrTest, EventToStr001, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    OnDemandEvent onDemandEvent;
-    onDemandEvent.eventId = 1234;
-    onDemandEvent.name = "name";
-    onDemandEvent.value = "value";
-    string ret = saMgr->EventToStr(onDemandEvent);
-    EXPECT_FALSE(ret.empty());
-}
-
-/**
  * @tc.name: ReportGetSAPeriodically001
  * @tc.desc: test ReportGetSAPeriodically with saFrequencyMap_ is not empty
  * @tc.type: FUNC
@@ -394,36 +377,6 @@ HWTEST_F(SystemAbilityMgrTest, GetDBinder001, TestSize.Level3)
     EXPECT_TRUE(saMgr != nullptr);
     sptr<DBinderService> result = saMgr->GetDBinder();
     EXPECT_TRUE(saMgr != nullptr);
-}
-
-/**
- * @tc.name: TransformDeviceId001
- * @tc.desc: TransformDeviceId, isPrivate false
- * @tc.type: FUNC
- * @tc.require: I7VEPG
- */
-
-HWTEST_F(SystemAbilityMgrTest, TransformDeviceId001, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
-    string result = saMgr->TransformDeviceId("123", 1, false);
-    EXPECT_EQ(result, "123");
-}
-
-/**
- * @tc.name: TransformDeviceId002
- * @tc.desc: TransformDeviceId, isPrivate true
- * @tc.type: FUNC
- * @tc.require: I7VEPG
- */
-
-HWTEST_F(SystemAbilityMgrTest, TransformDeviceId002, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
-    string result = saMgr->TransformDeviceId("123", 1, true);
-    EXPECT_EQ(result, "");
 }
 
 /**

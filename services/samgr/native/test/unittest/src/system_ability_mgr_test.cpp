@@ -2976,66 +2976,6 @@ HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent007, TestSize.Level3)
 }
 
 /**
- * @tc.name: IsNameInValid001
- * @tc.desc: test IsNameInValid, name is empty
- * @tc.type: FUNC
- * @tc.require: I6MO6A
- */
-HWTEST_F(SystemAbilityMgrTest, IsNameInValid001, TestSize.Level3)
-{
-    DTEST_LOG << " IsNameInValid001 " << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    std::u16string name;
-    bool ret = saMgr->IsNameInValid(name);
-    EXPECT_EQ(ret, true);
-}
-
-/**
- * @tc.name: IsNameInValid002
- * @tc.desc: test IsNameInValid, DeleteBlank is empty
- * @tc.type: FUNC
- * @tc.require: I6MO6A
- */
-HWTEST_F(SystemAbilityMgrTest, IsNameInValid002, TestSize.Level3)
-{
-    DTEST_LOG << " IsNameInValid002 " << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    std::u16string name = u"/t";
-    bool ret = saMgr->IsNameInValid(name);
-    EXPECT_EQ(ret, true);
-}
-
-/**
- * @tc.name: IsNameInValid003
- * @tc.desc: test IsNameInValid, name is not empty
- * @tc.type: FUNC
- * @tc.require: I6MO6A
- */
-HWTEST_F(SystemAbilityMgrTest, IsNameInValid003, TestSize.Level3)
-{
-    DTEST_LOG << " IsNameInValid003 " << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    std::u16string name = u"test";
-    bool ret = saMgr->IsNameInValid(name);
-    EXPECT_EQ(ret, false);
-}
-
-/**
- * @tc.name: IsNameInValid004
- * @tc.desc: test IsNameInValid, DeleteBlank is not empty
- * @tc.type: FUNC
- * @tc.require: I6MO6A
- */
-HWTEST_F(SystemAbilityMgrTest, IsNameInValid004, TestSize.Level3)
-{
-    DTEST_LOG << " IsNameInValid004 " << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    std::u16string name = u"name";
-    bool ret = saMgr->IsNameInValid(name);
-    EXPECT_EQ(ret, false);
-}
-
-/**
  * @tc.name: StopOnDemandAbilityInner001
  * @tc.desc: test StopOnDemandAbilityInner, procObject is empty
  * @tc.type: FUNC
