@@ -57,11 +57,20 @@ public:
     int32_t RemoveSystemAbility(const sptr<IRemoteObject>& ability);
     std::vector<std::u16string> ListSystemAbilities(uint32_t dumpFlags) override;
 
-    void SetDeviceName(const std::u16string &name);
+    void SetDeviceName(const std::u16string &name)
+    {
+        deviceName_ = name;
+    }
 
-    const std::u16string& GetDeviceName() const;
+    const std::u16string& GetDeviceName() const
+    {
+        return deviceName_;
+    }
 
-    const sptr<DBinderService> GetDBinder() const;
+    const sptr<DBinderService> GetDBinder() const
+    {
+        return dBinderService_;
+    }
 
     sptr<IRemoteObject> GetSystemAbility(int32_t systemAbilityId) override;
 
@@ -89,7 +98,6 @@ public:
     void NotifyRemoteDeviceOffline(const std::string& deviceId);
     int32_t AddSystemAbility(int32_t systemAbilityId, const sptr<IRemoteObject>& ability,
         const SAExtraProp& extraProp) override;
-    std::string TransformDeviceId(const std::string& deviceId, int32_t type, bool isPrivate);
     std::string GetLocalNodeId();
     void Init();
     void CleanFfrt();
@@ -164,12 +172,8 @@ private:
     SystemAbilityManager();
     std::string EventToJson(const OnDemandEvent& event);
     void DoInsertSaData(const std::u16string& name, const sptr<IRemoteObject>& ability, const SAExtraProp& extraProp);
-    bool IsNameInValid(const std::u16string& name);
     int32_t StartOnDemandAbility(int32_t systemAbilityId, bool& isExist);
-	int32_t StartOnDemandAbilityLocked(int32_t systemAbilityId, bool& isExist);
-    void ParseRemoteSaName(const std::u16string& name, std::string& deviceId, std::u16string& saName);
-    bool IsLocalDeviceId(const std::string& deviceId);
-    bool CheckDistributedPermission();
+    int32_t StartOnDemandAbilityLocked(int32_t systemAbilityId, bool& isExist);
     int32_t AddSystemAbility(const std::u16string& name, const sptr<IRemoteObject>& ability,
         const SAExtraProp& extraProp);
     int32_t FindSystemAbilityNotify(int32_t systemAbilityId, int32_t code);
@@ -192,10 +196,10 @@ private:
         const sptr<ISystemAbilityLoadCallback>& callback);
     void NotifySystemAbilityLoadFail(int32_t systemAbilityId, const sptr<ISystemAbilityLoadCallback>& callback);
     int32_t StartingSystemProcess(const std::u16string& name, int32_t systemAbilityId, const OnDemandEvent& event);
-	int32_t StartingSystemProcessLocked(const std::u16string& name, int32_t systemAbilityId,
-	    const OnDemandEvent& event);
+    int32_t StartingSystemProcessLocked(const std::u16string& name, int32_t systemAbilityId,
+        const OnDemandEvent& event);
     void StartOnDemandAbility(const std::u16string& name, int32_t systemAbilityId);
-	void StartOnDemandAbilityLocked(const std::u16string& name, int32_t systemAbilityId);
+    void StartOnDemandAbilityLocked(const std::u16string& name, int32_t systemAbilityId);
     int32_t StartOnDemandAbilityInner(const std::u16string& name, int32_t systemAbilityId, AbilityItem& abilityItem);
     int32_t StartDynamicSystemProcess(const std::u16string& name, int32_t systemAbilityId, const OnDemandEvent& event);
     bool StopOnDemandAbility(const std::u16string& name, int32_t systemAbilityId, const OnDemandEvent& event);
@@ -219,14 +223,12 @@ private:
     int32_t CheckStartEnableOnce(const OnDemandEvent& event, const SaControlInfo& saControl,
         sptr<ISystemAbilityLoadCallback> callback);
     int32_t CheckStopEnableOnce(const OnDemandEvent& event, const SaControlInfo& saControl);
-    bool IsSameEvent(const OnDemandEvent& event, std::list<OnDemandEvent>& enableOnceList);
     int32_t UpdateSaFreMap(int32_t uid, int32_t saId);
     uint64_t GenerateFreKey(int32_t uid, int32_t saId) const;
     void ReportGetSAPeriodically();
     void OndemandLoad();
     void OndemandLoadForPerf();
     std::list<int32_t> GetAllOndemandSa();
-    std::string EventToStr(const OnDemandEvent& event);
     bool CheckCallerProcess(SaProfile& saProfile);
     bool CheckCallerProcess(const std::string& callProcess);
     bool CheckAllowUpdate(OnDemandPolicyType type, SaProfile& saProfile);

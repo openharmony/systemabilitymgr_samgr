@@ -28,6 +28,7 @@
 #include "sam_log.h"
 #include "string_ex.h"
 #include "system_ability_manager.h"
+#include "system_ability_manager_util.h"
 #include "system_ability_on_demand_event.h"
 #include "tools.h"
 #include "samgr_xcollie.h"
@@ -326,7 +327,7 @@ int32_t SystemAbilityManagerStub::CheckRemtSystemAbilityInner(MessageParcel& dat
         HILOGW("CheckRemtSystemAbilityInner read deviceId failed!");
         return ERR_FLATTEN_OBJECT;
     }
-    std::string uuid = SystemAbilityManager::GetInstance()->TransformDeviceId(deviceId, UUID, false);
+    std::string uuid = SamgrUtil::TransformDeviceId(deviceId, UUID, false);
     ret = reply.WriteRemoteObject(GetSystemAbility(systemAbilityId, uuid));
     if (!ret) {
         HILOGW("CheckRemtSystemAbilityInner SA:%{public}d write reply failed.", systemAbilityId);

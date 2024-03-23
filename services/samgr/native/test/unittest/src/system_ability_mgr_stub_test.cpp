@@ -1294,18 +1294,6 @@ HWTEST_F(SystemAbilityMgrStubTest, CheckSystemAbility002, TestSize.Level3)
 }
 
 /**
- * @tc.name: CheckDistributedPermission001
- * @tc.desc: test CheckDistributedPermission! return true!
- * @tc.type: FUNC
- */
-HWTEST_F(SystemAbilityMgrStubTest, CheckDistributedPermission001, TestSize.Level1)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    bool res = saMgr->CheckDistributedPermission();
-    EXPECT_EQ(res, true);
-}
-
-/**
  * @tc.name: NotifySystemAbilityChanged001
  * @tc.desc: test NotifySystemAbilityChanged! listener null pointer!!
  * @tc.type: FUNC
@@ -2448,25 +2436,6 @@ HWTEST_F(SystemAbilityMgrStubTest, DoMakeRemoteBinder002, TestSize.Level3)
     saMgr->DoLoadRemoteSystemAbility(SAID, callingPid, callingUid, deviceId, callback);
     sptr<DBinderServiceStub> res = saMgr->DoMakeRemoteBinder(SAID, callingPid, callingUid, deviceId);
     EXPECT_EQ(res, nullptr);
-}
-
-/**
- * @tc.name: TransformDeviceId001
- * @tc.desc: test TransformDeviceId, return string
- * @tc.type: FUNC
- */
-HWTEST_F(SystemAbilityMgrStubTest, TransformDeviceId001, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    string deviceId = "deviceId";
-    int32_t type = NODE_ID;
-    sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
-    saMgr->dBinderService_ = nullptr;
-    saMgr->NotifyRpcLoadCompleted(deviceId, SAID, testAbility);
-    saMgr->dBinderService_ = DBinderService::GetInstance();
-    saMgr->NotifyRpcLoadCompleted(deviceId, SAID, testAbility);
-    string res = saMgr->TransformDeviceId(deviceId, type, true);
-    EXPECT_EQ(res, "");
 }
 
 /**

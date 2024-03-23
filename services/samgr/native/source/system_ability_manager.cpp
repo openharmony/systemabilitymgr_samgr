@@ -37,6 +37,7 @@
 #include "sam_log.h"
 #include "service_control.h"
 #include "string_ex.h"
+#include "system_ability_manager_util.h"
 #include "system_ability_manager_dumper.h"
 #include "tools.h"
 #include "samgr_xcollie.h"
@@ -51,10 +52,6 @@ using namespace std;
 namespace OHOS {
 namespace {
 const string START_SAID = "said";
-const string EVENT_TYPE = "eventId";
-const string EVENT_NAME = "name";
-const string EVENT_VALUE = "value";
-const string EVENT_EXTRA_DATA_ID = "extraDataId";
 const string PKG_NAME = "Samgr_Networking";
 const string PREFIX = "/system/profile/";
 const string LOCAL_DEVICE = "local";
@@ -65,10 +62,6 @@ constexpr const char* ONDEMAND_PERF_PARAM = "persist.samgr.perf.ondemand";
 constexpr const char* ONDEMAND_WORKER = "OndemandLoader";
 
 constexpr uint32_t REPORT_GET_SA_INTERVAL = 24 * 60 * 60 * 1000; // ms and is one day
-constexpr int32_t MAX_NAME_SIZE = 200;
-constexpr int32_t SPLIT_NAME_VECTOR_SIZE = 2;
-constexpr int32_t UID_ROOT = 0;
-constexpr int32_t UID_SYSTEM = 1000;
 constexpr int32_t MAX_SUBSCRIBE_COUNT = 256;
 constexpr int32_t MAX_SA_FREQUENCY_COUNT = INT32_MAX - 1000000;
 constexpr int32_t SHFIT_BIT = 32;
@@ -166,11 +159,6 @@ void SystemAbilityManager::AddSamgrToAbilityMap()
     saInfo.capability = u"";
     abilityMap_[systemAbilityId] = std::move(saInfo);
     HILOGD("samgr inserted");
-}
-
-const sptr<DBinderService> SystemAbilityManager::GetDBinder() const
-{
-    return dBinderService_;
 }
 
 void SystemAbilityManager::StartDfxTimer()
@@ -466,7 +454,7 @@ int32_t SystemAbilityManager::CheckStartEnableOnce(const OnDemandEvent& event,
     if (saControl.enableOnce) {
         lock_guard<mutex> autoLock(startEnableOnceLock_);
         auto iter = startEnableOnceMap_.find(saControl.saId);
-        if (iter != startEnableOnceMap_.end() && IsSameEvent(event, startEnableOnceMap_[saControl.saId])) {
+        if (iter != startEnableOnceMap_.end() && SamgrUtil::IsSameEvent(event, startEnableOnceMap_[saControl.saId])) {
             HILOGI("ondemand canceled for enable-once, ondemandId:%{public}d, SA:%{public}d",
                 saControl.ondemandId, saControl.saId);
             return result;
@@ -498,7 +486,7 @@ int32_t SystemAbilityManager::CheckStopEnableOnce(const OnDemandEvent& event,
     if (saControl.enableOnce) {
         lock_guard<mutex> autoLock(stopEnableOnceLock_);
         auto iter = stopEnableOnceMap_.find(saControl.saId);
-        if (iter != stopEnableOnceMap_.end() && IsSameEvent(event, stopEnableOnceMap_[saControl.saId])) {
+        if (iter != stopEnableOnceMap_.end() && SamgrUtil::IsSameEvent(event, stopEnableOnceMap_[saControl.saId])) {
             HILOGI("ondemand canceled for enable-once, ondemandId:%{public}d, SA:%{public}d",
                 saControl.ondemandId, saControl.saId);
             return result;
@@ -521,17 +509,6 @@ int32_t SystemAbilityManager::CheckStopEnableOnce(const OnDemandEvent& event,
             saControl.saId, event.eventId);
     }
     return result;
-}
-
-bool SystemAbilityManager::IsSameEvent(const OnDemandEvent& event, std::list<OnDemandEvent>& enableOnceList)
-{
-    for (auto iter = enableOnceList.begin(); iter != enableOnceList.end(); iter++) {
-        if (event.eventId == iter->eventId && event.name == iter->name && event.value == iter->value) {
-            HILOGI("event already exits in enable-once list");
-            return true;
-        }
-    }
-    return false;
 }
 
 sptr<IRemoteObject> SystemAbilityManager::GetSystemAbility(int32_t systemAbilityId)
@@ -586,15 +563,6 @@ sptr<IRemoteObject> SystemAbilityManager::CheckSystemAbility(int32_t systemAbili
     return nullptr;
 }
 
-bool SystemAbilityManager::CheckDistributedPermission()
-{
-    auto callingUid = IPCSkeleton::GetCallingUid();
-    if (callingUid != UID_ROOT && callingUid != UID_SYSTEM) {
-        return false;
-    }
-    return true;
-}
-
 sptr<IRemoteObject> SystemAbilityManager::CheckSystemAbility(int32_t systemAbilityId,
     const std::string& deviceId)
 {
@@ -646,17 +614,6 @@ int32_t SystemAbilityManager::FindSystemAbilityNotify(int32_t systemAbilityId, c
     return ERR_OK;
 }
 
-bool SystemAbilityManager::IsNameInValid(const std::u16string& name)
-{
-    HILOGD("%{public}s called:name = %{public}s", __func__, Str16ToStr8(name).c_str());
-    bool ret = false;
-    if (name.empty() || name.size() > MAX_NAME_SIZE || DeleteBlank(name).empty()) {
-        ret = true;
-    }
-
-    return ret;
-}
-
 void SystemAbilityManager::StartOnDemandAbility(const std::u16string& procName, int32_t systemAbilityId)
 {
     lock_guard<mutex> autoLock(onDemandLock_);
@@ -686,7 +643,7 @@ int32_t SystemAbilityManager::StartOnDemandAbilityInner(const std::u16string& pr
         return ERR_INVALID_VALUE;
     }
     auto event = abilityItem.event;
-    auto eventStr = EventToStr(event);
+    auto eventStr = SamgrUtil::EventToStr(event);
     procObject->StartAbility(systemAbilityId, eventStr);
     abilityItem.state = AbilityState::STARTING;
     return ERR_OK;
@@ -708,7 +665,7 @@ bool SystemAbilityManager::StopOnDemandAbilityInner(const std::u16string& procNa
         HILOGI("get process:%{public}s fail", Str16ToStr8(procName).c_str());
         return false;
     }
-    auto eventStr = EventToStr(event);
+    auto eventStr = SamgrUtil::EventToStr(event);
     return procObject->StopAbility(systemAbilityId, eventStr);
 }
 
@@ -716,7 +673,7 @@ int32_t SystemAbilityManager::AddOnDemandSystemAbilityInfo(int32_t systemAbility
     const std::u16string& procName)
 {
     HILOGD("%{public}s called", __func__);
-    if (!CheckInputSysAbilityId(systemAbilityId) || IsNameInValid(procName)) {
+    if (!CheckInputSysAbilityId(systemAbilityId) || SamgrUtil::IsNameInValid(procName)) {
         HILOGW("AddOnDemandSystemAbilityInfo SAId or procName invalid.");
         return ERR_INVALID_VALUE;
     }
@@ -1011,23 +968,13 @@ void SystemAbilityManager::UnSubscribeSystemAbility(const sptr<IRemoteObject>& r
     }
 }
 
-void SystemAbilityManager::SetDeviceName(const u16string &name)
-{
-    deviceName_ = name;
-}
-
-const u16string& SystemAbilityManager::GetDeviceName() const
-{
-    return deviceName_;
-}
-
 void SystemAbilityManager::NotifyRemoteSaDied(const std::u16string& name)
 {
     std::u16string saName;
     std::string deviceId;
-    ParseRemoteSaName(name, deviceId, saName);
+    SamgrUtil::ParseRemoteSaName(name, deviceId, saName);
     if (dBinderService_ != nullptr) {
-        std::string nodeId = TransformDeviceId(deviceId, NODE_ID, false);
+        std::string nodeId = SamgrUtil::TransformDeviceId(deviceId, NODE_ID, false);
         dBinderService_->NoticeServiceDie(saName, nodeId);
         HILOGI("NotifyRemoteSaDied, serviceName:%{public}s, deviceId:%{public}s",
             Str16ToStr8(saName).c_str(), AnonymizeDeviceId(nodeId).c_str());
@@ -1039,16 +986,6 @@ void SystemAbilityManager::NotifyRemoteDeviceOffline(const std::string& deviceId
     if (dBinderService_ != nullptr) {
         dBinderService_->NoticeDeviceDie(deviceId);
         HILOGI("NotifyRemoteDeviceOffline, deviceId:%{public}s", AnonymizeDeviceId(deviceId).c_str());
-    }
-}
-
-void SystemAbilityManager::ParseRemoteSaName(const std::u16string& name, std::string& deviceId, std::u16string& saName)
-{
-    vector<string> strVector;
-    SplitStr(Str16ToStr8(name), "_", strVector);
-    if (strVector.size() == SPLIT_NAME_VECTOR_SIZE) {
-        deviceId = strVector[0];
-        saName = Str8ToStr16(strVector[1]);
     }
 }
 
@@ -1988,25 +1925,9 @@ void SystemAbilityManager::RemoveRemoteCallbackLocked(std::list<sptr<ISystemAbil
     }
 }
 
-std::string SystemAbilityManager::TransformDeviceId(const std::string& deviceId, int32_t type, bool isPrivate)
-{
-    return isPrivate ? std::string() : deviceId;
-}
-
 std::string SystemAbilityManager::GetLocalNodeId()
 {
     return std::string();
-}
-
-std::string SystemAbilityManager::EventToStr(const OnDemandEvent& event)
-{
-    nlohmann::json eventJson;
-    eventJson[EVENT_TYPE] = event.eventId;
-    eventJson[EVENT_NAME] = event.name;
-    eventJson[EVENT_VALUE] = event.value;
-    eventJson[EVENT_EXTRA_DATA_ID] = event.extraDataId;
-    std::string eventStr = eventJson.dump();
-    return eventStr;
 }
 
 int32_t SystemAbilityManager::UpdateSaFreMap(int32_t uid, int32_t saId)
