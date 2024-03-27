@@ -23,7 +23,7 @@ MemoryGuard::MemoryGuard()
 #ifdef CONFIG_USE_JEMALLOC_DFX_INTF
     int setCache = mallopt(M_SET_THREAD_CACHE, M_THREAD_CACHE_DISABLE);
     int setFree = mallopt(M_DELAYED_FREE, M_DELAYED_FREE_DISABLE);
-    if (setCache != 0 || setFree != 0) {
+    if (setCache != 1 || setFree != 1) {
         HILOGE("samgr disable tcache and delay free, result[%{public}d, %{public}d]", setCache, setFree);
     }
 #endif
@@ -33,7 +33,7 @@ MemoryGuard::~MemoryGuard()
 {
 #ifdef CONFIG_USE_JEMALLOC_DFX_INTF
     int err = mallopt(M_FLUSH_THREAD_CACHE, 0);
-    if (err != 0) {
+    if (err != 1) {
         HILOGE("samgr flush cache, result: %{public}d", err);
     }
 #endif

@@ -151,7 +151,14 @@ sptr<ISystemAbilityManager> SystemAbilityManagerClient::GetSystemAbilityManager(
         return systemAbilityManager_;
     }
     sptr<IRemoteObject> registryObject = IPCSkeleton::GetContextObject();
+    if (registryObject == nullptr) {
+        HILOGD("samgrClient registryObject is null, callPid:%{public}d", IPCSkeleton::GetCallingPid());
+        return nullptr;
+    }
     systemAbilityManager_ = iface_cast<ISystemAbilityManager>(registryObject);
+    if (systemAbilityManager_ == nullptr) {
+        HILOGD("samgrClient systemAbilityManager_ is null, callPid:%{public}d", IPCSkeleton::GetCallingPid());
+    }
     return systemAbilityManager_;
 }
 

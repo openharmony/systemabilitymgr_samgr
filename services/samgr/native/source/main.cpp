@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
     {
         SamgrXCollie samgrXCollie("samgr::main_setContextObject");
         if (!IPCSkeleton::SetContextObject(serv)) {
-            KHILOGI("set context fail!");
+            KHILOGE("set context fail!");
         }
     }
 
