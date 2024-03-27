@@ -51,6 +51,7 @@ ohos_shared_library("samgr_common") {
   public_configs = [
     ":config_samgr_common",
     ":all_config_samgr_common",
+    "//third_party/libxml2:libxml2_config",
   ]
 
   external_deps = [ "libxml2:libxml2" ]
