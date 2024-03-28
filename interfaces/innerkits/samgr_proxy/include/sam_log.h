@@ -64,10 +64,50 @@ constexpr OHOS::HiviewDFX::HiLogLabel SYSTEM_ABLILITY_LABEL = {
 #undef KHILOGI
 #endif
 
+#ifdef KHILOGE
+#undef KHILOGE
+#endif
+
+#ifdef KHILOGW
+#undef KHILOGW
+#endif
+
+#ifdef KHILOGD
+#undef KHILOGD
+#endif
+
+#ifdef KHILOGF
+#undef KHILOGF
+#endif
+
 #define KHILOGI(...) \
     do { \
         (void)OHOS::HiviewDFX::HiLog::Info(SYSTEM_ABLILITY_LABEL, __VA_ARGS__); \
         HILOG_INFO(LOG_CORE, __VA_ARGS__); \
+    } while (0)
+
+#define KHILOGE(...) \
+    do { \
+        (void)OHOS::HiviewDFX::HiLog::Error(SYSTEM_ABLILITY_LABEL, __VA_ARGS__); \
+        HILOG_ERROR(LOG_CORE, __VA_ARGS__); \
+    } while (0)
+
+#define KHILOGW(...) \
+    do { \
+        (void)OHOS::HiviewDFX::HiLog::Warn(SYSTEM_ABLILITY_LABEL, __VA_ARGS__); \
+        HILOG_WARN(LOG_CORE, __VA_ARGS__); \
+    } while (0)
+
+#define KHILOGD(...) \
+    do { \
+        (void)OHOS::HiviewDFX::HiLog::Debug(SYSTEM_ABLILITY_LABEL, __VA_ARGS__); \
+        HILOG_DEBUG(LOG_CORE, __VA_ARGS__); \
+    } while (0)
+
+#define KHILOGF(...) \
+    do { \
+        (void)OHOS::HiviewDFX::HiLog::Fatal(SYSTEM_ABLILITY_LABEL, __VA_ARGS__); \
+        HILOG_FATAL(LOG_CORE, __VA_ARGS__); \
     } while (0)
 
 #define HILOGF(...) HILOG_FATAL(LOG_CORE, __VA_ARGS__)

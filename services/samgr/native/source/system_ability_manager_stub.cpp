@@ -442,7 +442,7 @@ int32_t SystemAbilityManagerStub::UnmarshalingSaExtraProp(MessageParcel& data, S
 int32_t SystemAbilityManagerStub::AddSystemAbilityInner(MessageParcel& data, MessageParcel& reply)
 {
     if (!CanRequest()) {
-        HILOGE("AddSystemAbilityInner PERMISSION DENIED!");
+        KHILOGE("AddSystemAbilityInner PERMISSION DENIED!");
         return ERR_PERMISSION_DENIED;
     }
     int32_t systemAbilityId = -1;
@@ -451,30 +451,30 @@ int32_t SystemAbilityManagerStub::AddSystemAbilityInner(MessageParcel& data, Mes
         return ERR_NULL_OBJECT;
     }
     if (!CheckInputSysAbilityId(systemAbilityId)) {
-        HILOGW("AddSystemAbilityExtraInner read SAId failed!");
+        KHILOGW("AddSystemAbilityExtraInner read SAId failed!");
         return ERR_NULL_OBJECT;
     }
 
     if (!CheckAddOrRemovePermission(systemAbilityId)) {
-        HILOGE("AddSystemAbilityInner selinux permission denied! SA : %{public}d", systemAbilityId);
+        KHILOGE("AddSystemAbilityInner selinux permission denied! SA : %{public}d", systemAbilityId);
         return ERR_PERMISSION_DENIED;
     }
 
     auto object = data.ReadRemoteObject();
     if (object == nullptr) {
-        HILOGW("AddSystemAbilityExtraInner readParcelable failed!");
+        KHILOGW("AddSystemAbilityExtraInner readParcelable failed!");
         return ERR_NULL_OBJECT;
     }
     SAExtraProp extraProp;
     int32_t result = UnmarshalingSaExtraProp(data, extraProp);
     if (result != ERR_OK) {
-        HILOGW("AddSystemAbilityExtraInner UnmarshalingSaExtraProp failed!");
+        KHILOGW("AddSystemAbilityExtraInner UnmarshalingSaExtraProp failed!");
         return result;
     }
     result = AddSystemAbility(systemAbilityId, object, extraProp);
     ret = reply.WriteInt32(result);
     if (!ret) {
-        HILOGW("AddSystemAbilityExtraInner write reply failed.");
+        KHILOGW("AddSystemAbilityExtraInner write reply failed.");
         return ERR_FLATTEN_OBJECT;
     }
     return result;
