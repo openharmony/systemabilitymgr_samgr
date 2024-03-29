@@ -396,9 +396,8 @@ bool ParseUtil::ParseSystemAbilityGetExtension(SaProfile& saProfile, nlohmann::j
     return true;
 }
 
-bool ParseUtil::ParseSystemAbility(SaProfile& saProfile, nlohmann::json& systemAbilityJson)
+bool ParseUtil::ParseSystemAbilityGetSaBaseInfo(SaProfile& saProfile, nlohmann::json& systemAbilityJson)
 {
-    HILOGD("ParseSystemAbility begin");
     GetInt32FromJson(systemAbilityJson, SA_TAG_NAME, saProfile.saId);
     if (saProfile.saId == 0) {
         HILOGE("profile format error: no name tag");
@@ -417,6 +416,11 @@ bool ParseUtil::ParseSystemAbility(SaProfile& saProfile, nlohmann::json& systemA
         HILOGE("profile format error: libPath is too long");
         return false;
     }
+    return true;
+}
+
+bool ParseUtil::ParseSystemAbilityGetSaExtInfo(SaProfile& saProfile, nlohmann::json& systemAbilityJson)
+{
     GetBoolFromJson(systemAbilityJson, SA_TAG_RUN_ON_CREATE, saProfile.runOnCreate);
     GetBoolFromJson(systemAbilityJson, SA_TAG_AUTO_RESTART, saProfile.autoRestart);
     GetBoolFromJson(systemAbilityJson, SA_TAG_DISTRIBUTED, saProfile.distributed);
@@ -447,6 +451,18 @@ bool ParseUtil::ParseSystemAbility(SaProfile& saProfile, nlohmann::json& systemA
         return false;
     }
     if (!ParseSystemAbilityGetExtension(saProfile, systemAbilityJson)) {
+        return false;
+    }
+    return true;
+}
+
+bool ParseUtil::ParseSystemAbility(SaProfile& saProfile, nlohmann::json& systemAbilityJson)
+{
+    HILOGD("ParseSystemAbility begin");
+    if (!ParseSystemAbilityGetSaBaseInfo(saProfile, systemAbilityJson)) {
+        return false;
+    }
+    if (!ParseSystemAbilityGetSaExtInfo(saProfile, systemAbilityJson)) {
         return false;
     }
     HILOGD("ParseSystemAbility end");
