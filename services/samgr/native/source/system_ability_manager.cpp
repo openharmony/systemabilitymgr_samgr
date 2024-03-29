@@ -464,7 +464,7 @@ int32_t SystemAbilityManager::CheckStartEnableOnce(const OnDemandEvent& event,
             saControl.saId, event.eventId);
     }
     auto callingPid = IPCSkeleton::GetCallingPid();
-    LoadRequestInfo loadRequestInfo = {saControl.saId, LOCAL_DEVICE, callback, callingPid, event};
+    LoadRequestInfo loadRequestInfo = {LOCAL_DEVICE, callback, saControl.saId, callingPid, event};
     result = abilityStateScheduler_->HandleLoadAbilityEvent(loadRequestInfo);
     if (saControl.enableOnce && result != ERR_OK) {
         lock_guard<mutex> autoLock(startEnableOnceLock_);
@@ -496,7 +496,8 @@ int32_t SystemAbilityManager::CheckStopEnableOnce(const OnDemandEvent& event,
             saControl.saId, event.eventId);
     }
     auto callingPid = IPCSkeleton::GetCallingPid();
-    UnloadRequestInfo unloadRequestInfo = {saControl.saId, event, callingPid};
+    std::shared_ptr<UnloadRequestInfo> unloadRequestInfo =
+        std::make_shared<UnloadRequestInfo>(event, saControl.saId, callingPid);
     result = abilityStateScheduler_->HandleUnloadAbilityEvent(unloadRequestInfo);
     if (saControl.enableOnce && result != ERR_OK) {
         lock_guard<mutex> autoLock(stopEnableOnceLock_);
@@ -1559,7 +1560,7 @@ int32_t SystemAbilityManager::LoadSystemAbility(int32_t systemAbilityId,
     }
     auto callingPid = IPCSkeleton::GetCallingPid();
     OnDemandEvent onDemandEvent = {INTERFACE_CALL, "load"};
-    LoadRequestInfo loadRequestInfo = {systemAbilityId, LOCAL_DEVICE, callback, callingPid, onDemandEvent};
+    LoadRequestInfo loadRequestInfo = {LOCAL_DEVICE, callback, systemAbilityId, callingPid, onDemandEvent};
     return abilityStateScheduler_->HandleLoadAbilityEvent(loadRequestInfo);
 }
 
@@ -1582,7 +1583,7 @@ bool SystemAbilityManager::LoadSystemAbilityFromRpc(const std::string& srcDevice
         return false;
     }
     OnDemandEvent onDemandEvent = {INTERFACE_CALL, "loadFromRpc"};
-    LoadRequestInfo loadRequestInfo = {systemAbilityId, srcDeviceId, callback, -1, onDemandEvent};
+    LoadRequestInfo loadRequestInfo = {srcDeviceId, callback, systemAbilityId, -1, onDemandEvent};
     if (abilityStateScheduler_ == nullptr) {
         HILOGE("abilityStateScheduler is nullptr");
         return false;
@@ -1608,7 +1609,8 @@ int32_t SystemAbilityManager::UnloadSystemAbility(int32_t systemAbilityId)
     }
     OnDemandEvent onDemandEvent = {INTERFACE_CALL, "unload"};
     auto callingPid = IPCSkeleton::GetCallingPid();
-    UnloadRequestInfo unloadRequestInfo = {systemAbilityId, onDemandEvent, callingPid};
+    std::shared_ptr<UnloadRequestInfo> unloadRequestInfo =
+        std::make_shared<UnloadRequestInfo>(onDemandEvent, systemAbilityId, callingPid);
     return abilityStateScheduler_->HandleUnloadAbilityEvent(unloadRequestInfo);
 }
 

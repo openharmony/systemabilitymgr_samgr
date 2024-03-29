@@ -50,42 +50,44 @@ enum class PendingEvent {
 };
 
 struct LoadRequestInfo {
-    int32_t systemAbilityId = -1;
     std::string deviceId;
     sptr<ISystemAbilityLoadCallback> callback;
+    int32_t systemAbilityId = -1;
     int32_t callingPid = -1;
     OnDemandEvent loadEvent;
 };
 
 struct UnloadRequestInfo {
-    int32_t systemAbilityId = -1;
     OnDemandEvent unloadEvent;
-    int32_t callingPid = -1;
+    int32_t systemAbilityId;
+    int32_t callingPid;
+    UnloadRequestInfo(OnDemandEvent ue, int32_t said = -1, int32_t cpid = -1)
+        :unloadEvent(ue), systemAbilityId(said), callingPid(cpid) {}
 };
 
 struct SystemProcessContext {
-    std::u16string processName;
-    int32_t pid = -1;
-    int32_t uid = -1;
-    std::list<int32_t> saList;
+    std::mutex stateCountLock;
     std::mutex processLock;
-    SystemProcessState state = SystemProcessState::NOT_STARTED;
-    std::shared_mutex stateCountLock;
+    std::u16string processName;
+    std::list<int32_t> saList;
     std::map<SystemAbilityState, uint32_t> abilityStateCountMap;
     std::list<int64_t> restartCountsCtrl;
+    int32_t pid = -1;
+    int32_t uid = -1;
+    SystemProcessState state = SystemProcessState::NOT_STARTED;
     bool enableRestart = true;
 };
 
 struct SystemAbilityContext {
-    int32_t systemAbilityId = -1;
-    std::shared_ptr<SystemProcessContext> ownProcessContext;
-    SystemAbilityState state = SystemAbilityState::NOT_LOADED;
-    PendingEvent pendingEvent = PendingEvent::NO_EVENT;
     std::map<int32_t, int32_t> pendingLoadEventCountMap;
     std::list<LoadRequestInfo> pendingLoadEventList;
-    UnloadRequestInfo pendingUnloadEvent;
+    std::shared_ptr<SystemProcessContext> ownProcessContext;
+    std::shared_ptr<UnloadRequestInfo> pendingUnloadEvent;
+    std::shared_ptr<UnloadRequestInfo> unloadRequest;
+    int32_t systemAbilityId = -1;
     int32_t delayUnloadTime = 0;
-    UnloadRequestInfo unloadRequest;
+    SystemAbilityState state = SystemAbilityState::NOT_LOADED;
+    PendingEvent pendingEvent = PendingEvent::NO_EVENT;
     bool isAutoRestart = false;
 };
 } // namespace OHOS

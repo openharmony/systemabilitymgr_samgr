@@ -83,7 +83,7 @@ bool SystemAbilityStateMachine::UpdateStateCount(const std::shared_ptr<SystemPro
         HILOGE("[SA Scheduler] process context is nullptr");
         return false;
     }
-    std::unique_lock<std::shared_mutex> uniqueLock(context->stateCountLock);
+    std::lock_guard<std::mutex> autoLock(context->stateCountLock);
     if (!context->abilityStateCountMap.count(fromState) || !context->abilityStateCountMap.count(toState)) {
         HILOGE("[SA Scheduler][proc:%{public}s] invalid state",
             Str16ToStr8(context->processName).c_str());

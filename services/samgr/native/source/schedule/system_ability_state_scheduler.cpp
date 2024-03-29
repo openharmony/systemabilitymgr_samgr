@@ -249,22 +249,32 @@ int32_t SystemAbilityStateScheduler::HandleLoadAbilityEventLocked(
     return result;
 }
 
-int32_t SystemAbilityStateScheduler::HandleUnloadAbilityEvent(const UnloadRequestInfo& unloadRequestInfo)
+int32_t SystemAbilityStateScheduler::HandleUnloadAbilityEvent(
+    const std::shared_ptr<UnloadRequestInfo> unloadRequestInfo)
 {
+    if (unloadRequestInfo == nullptr) {
+        HILOGE("[SA Scheduler]HandleUnloadAbilityEvent unloadRequestInfo is nullptr");
+        return ERR_INVALID_VALUE;
+    }
     std::shared_ptr<SystemAbilityContext> abilityContext;
-    if (!GetSystemAbilityContext(unloadRequestInfo.systemAbilityId, abilityContext)) {
+    if (!GetSystemAbilityContext(unloadRequestInfo->systemAbilityId, abilityContext)) {
         return ERR_INVALID_VALUE;
     }
     HILOGI("[SA Scheduler][SA:%{public}d] handle unload event start callPid:%{public}d, evtid:%{public}d,"
-        "ProcState:%{public}d, SAState:%{public}d", unloadRequestInfo.systemAbilityId, unloadRequestInfo.callingPid,
-        unloadRequestInfo.unloadEvent.eventId, abilityContext->ownProcessContext->state, abilityContext->state);
+        "ProcState:%{public}d, SAState:%{public}d", unloadRequestInfo->systemAbilityId, unloadRequestInfo->callingPid,
+        unloadRequestInfo->unloadEvent.eventId, abilityContext->ownProcessContext->state, abilityContext->state);
     std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
     return HandleUnloadAbilityEventLocked(abilityContext, unloadRequestInfo);
 }
 
 int32_t SystemAbilityStateScheduler::HandleUnloadAbilityEventLocked(
-    const std::shared_ptr<SystemAbilityContext>& abilityContext, const UnloadRequestInfo& unloadRequestInfo)
+    const std::shared_ptr<SystemAbilityContext>& abilityContext,
+    const std::shared_ptr<UnloadRequestInfo> unloadRequestInfo)
 {
+    if (unloadRequestInfo == nullptr) {
+        HILOGE("[SA Scheduler][SA:%{public}d] unloadRequestInfo is nullptr", abilityContext->systemAbilityId);
+        return ERR_INVALID_VALUE;
+    }
     abilityContext->unloadRequest = unloadRequestInfo;
     int32_t result = ERR_INVALID_VALUE;
     switch (abilityContext->state) {
@@ -272,7 +282,7 @@ int32_t SystemAbilityStateScheduler::HandleUnloadAbilityEventLocked(
             result = PendUnloadEventLocked(abilityContext, unloadRequestInfo);
             break;
         case SystemAbilityState::LOADED:
-            if (unloadRequestInfo.unloadEvent.eventId == INTERFACE_CALL) {
+            if (unloadRequestInfo->unloadEvent.eventId == INTERFACE_CALL) {
                 result = ProcessDelayUnloadEventLocked(abilityContext->systemAbilityId);
             } else {
                 result = SendDelayUnloadEventLocked(abilityContext->systemAbilityId, abilityContext->delayUnloadTime);
@@ -281,7 +291,7 @@ int32_t SystemAbilityStateScheduler::HandleUnloadAbilityEventLocked(
         default:
             result = ERR_OK;
             HILOGI("[SA Scheduler][SA:%{public}d] in state %{public}d, not need unload ability, callPid:%{public}d",
-                abilityContext->systemAbilityId, abilityContext->state, unloadRequestInfo.callingPid);
+                abilityContext->systemAbilityId, abilityContext->state, unloadRequestInfo->callingPid);
             break;
     }
     return result;
@@ -411,7 +421,8 @@ int32_t SystemAbilityStateScheduler::PendLoadEventLocked(const std::shared_ptr<S
 }
 
 int32_t SystemAbilityStateScheduler::PendUnloadEventLocked(
-    const std::shared_ptr<SystemAbilityContext>& abilityContext, const UnloadRequestInfo& unloadRequestInfo)
+    const std::shared_ptr<SystemAbilityContext>& abilityContext,
+    const std::shared_ptr<UnloadRequestInfo> unloadRequestInfo)
 {
     HILOGI("[SA Scheduler][SA:%{public}d] save unload event", abilityContext->systemAbilityId);
     abilityContext->pendingEvent = PendingEvent::UNLOAD_ABILITY_EVENT;
@@ -500,7 +511,7 @@ int32_t SystemAbilityStateScheduler::TryUnloadAllSystemAbility(
 bool SystemAbilityStateScheduler::CanUnloadAllSystemAbility(
     const std::shared_ptr<SystemProcessContext>& processContext)
 {
-    std::shared_lock<std::shared_mutex> sharedLock(processContext->stateCountLock);
+    std::lock_guard<std::mutex> autoLock(processContext->stateCountLock);
 	return CanUnloadAllSystemAbilityLocked(processContext, true);
 }
 
@@ -631,10 +642,15 @@ int32_t SystemAbilityStateScheduler::UnloadAllSystemAbilityLocked(
 int32_t SystemAbilityStateScheduler::DoUnloadSystemAbilityLocked(
     const std::shared_ptr<SystemAbilityContext>& abilityContext)
 {
+    if (abilityContext->unloadRequest == nullptr) {
+        HILOGE("[SA Scheduler][SA:%{public}d] DoUnloadSystemAbilityLocked unloadRequest is nullptr",
+            abilityContext->systemAbilityId);
+        return ERR_INVALID_VALUE;
+    }
     int32_t result = ERR_OK;
     HILOGI("[SA Scheduler][SA:%{public}d] unload ability start", abilityContext->systemAbilityId);
     result = SystemAbilityManager::GetInstance()->DoUnloadSystemAbility(abilityContext->systemAbilityId,
-        abilityContext->ownProcessContext->processName, abilityContext->unloadRequest.unloadEvent);
+        abilityContext->ownProcessContext->processName, abilityContext->unloadRequest->unloadEvent);
     if (result == ERR_OK) {
         return stateMachine_->AbilityStateTransitionLocked(abilityContext, SystemAbilityState::UNLOADING);
     }
@@ -683,7 +699,7 @@ int32_t SystemAbilityStateScheduler::TryKillSystemProcess(
 bool SystemAbilityStateScheduler::CanKillSystemProcess(
     const std::shared_ptr<SystemProcessContext>& processContext)
 {
-    std::shared_lock<std::shared_mutex> sharedLock(processContext->stateCountLock);
+    std::lock_guard<std::mutex> autoLock(processContext->stateCountLock);
 	return CanKillSystemProcessLocked(processContext);
 }
 
@@ -777,8 +793,8 @@ int32_t SystemAbilityStateScheduler::HandleAbnormallyDiedAbilityLocked(
     for (auto& abilityContext : abnormallyDiedAbilityList) {
         // Actively remove SA to prevent restart failure if the death recipient of SA is not processed in time.
         SystemAbilityManager::GetInstance()->RemoveDiedSystemAbility(abilityContext->systemAbilityId);
-        LoadRequestInfo loadRequestInfo = {abilityContext->systemAbilityId,
-            LOCAL_DEVICE, callback, -1, onDemandEvent};
+        LoadRequestInfo loadRequestInfo = {LOCAL_DEVICE, callback,
+            abilityContext->systemAbilityId, -1, onDemandEvent};
         HandleLoadAbilityEventLocked(abilityContext, loadRequestInfo);
     }
     return ERR_OK;
@@ -1085,6 +1101,10 @@ int32_t SystemAbilityStateScheduler::ProcessDelayUnloadEventLocked(int32_t syste
     if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
         return ERR_INVALID_VALUE;
     }
+    if (abilityContext->unloadRequest == nullptr) {
+        HILOGE("[SA Scheduler][SA:%{public}d] unloadRequest is nullptr", abilityContext->systemAbilityId);
+        return ERR_INVALID_VALUE;
+    }
     if (abilityContext->state != SystemAbilityState::LOADED) {
         HILOGW("[SA Scheduler][SA:%{public}d] can't proc delay unload event", systemAbilityId);
         return ERR_OK;
@@ -1092,10 +1112,10 @@ int32_t SystemAbilityStateScheduler::ProcessDelayUnloadEventLocked(int32_t syste
     HILOGI("[SA Scheduler][SA:%{public}d] proc delay unload event", systemAbilityId);
     int32_t delayTime = 0;
     nlohmann::json idleReason;
-    idleReason[KEY_EVENT_ID] = abilityContext->unloadRequest.unloadEvent.eventId;
-    idleReason[KEY_NAME] = abilityContext->unloadRequest.unloadEvent.name;
-    idleReason[KEY_VALUE] = abilityContext->unloadRequest.unloadEvent.value;
-    idleReason[KEY_EXTRA_DATA_ID] = abilityContext->unloadRequest.unloadEvent.extraDataId;
+    idleReason[KEY_EVENT_ID] = abilityContext->unloadRequest->unloadEvent.eventId;
+    idleReason[KEY_NAME] = abilityContext->unloadRequest->unloadEvent.name;
+    idleReason[KEY_VALUE] = abilityContext->unloadRequest->unloadEvent.value;
+    idleReason[KEY_EXTRA_DATA_ID] = abilityContext->unloadRequest->unloadEvent.extraDataId;
     bool result = SystemAbilityManager::GetInstance()->IdleSystemAbility(abilityContext->systemAbilityId,
         abilityContext->ownProcessContext->processName, idleReason, delayTime);
     if (!result) {

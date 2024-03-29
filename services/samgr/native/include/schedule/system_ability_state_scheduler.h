@@ -43,7 +43,7 @@ public:
     int32_t HandleAbilityDiedEvent(int32_t systemAbilityId);
     int32_t HandleLoadAbilityEvent(const LoadRequestInfo& loadRequestInfo);
     int32_t HandleLoadAbilityEvent(int32_t systemAbilityId, bool& isExist);
-    int32_t HandleUnloadAbilityEvent(const UnloadRequestInfo& unloadRequestInfo);
+    int32_t HandleUnloadAbilityEvent(const std::shared_ptr<UnloadRequestInfo> unloadRequestInfo);
     int32_t HandleCancelUnloadAbilityEvent(int32_t systemAbilityId);
     int32_t UnloadAllIdleSystemAbility();
     int32_t SendAbilityStateEvent(int32_t systemAbilityId, AbilityStateEvent event);
@@ -71,7 +71,7 @@ private:
     int32_t HandleLoadAbilityEventLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext,
         const LoadRequestInfo& loadRequestInfo);
     int32_t HandleUnloadAbilityEventLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext,
-        const UnloadRequestInfo& unloadRequestInfo);
+        const std::shared_ptr<UnloadRequestInfo> unloadRequestInfo);
 
     int32_t SendDelayUnloadEventLocked(uint32_t systemAbilityId, int32_t delayTime = UNLOAD_DELAY_TIME);
     int32_t RemoveDelayUnloadEventLocked(uint32_t systemAbilityId);
@@ -81,7 +81,7 @@ private:
     int32_t PendLoadEventLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext,
         const LoadRequestInfo& loadRequestInfo);
     int32_t PendUnloadEventLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext,
-        const UnloadRequestInfo& unloadRequestInfo);
+        const std::shared_ptr<UnloadRequestInfo> unloadRequestInfo);
     int32_t RemovePendingUnloadEventLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext);
     int32_t HandlePendingLoadEventLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext);
     int32_t HandlePendingUnloadEventLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext);
