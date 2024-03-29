@@ -41,11 +41,7 @@ int main(int argc, char *argv[])
     }
 
     manager->AddSamgrToAbilityMap();
-    int result = 0;
-    {
-        SamgrXCollie samgrXCollie("samgr::main_setParameter");
-        result = SetParameter("bootevent.samgr.ready", "true");
-    }
+    int result = SetParameter("bootevent.samgr.ready", "true");
     KHILOGI("set samgr ready ret : %{public}s", result == 0 ? "succeed" : "failed");
     manager->StartDfxTimer();
     OHOS::IPCSkeleton::JoinWorkThread();
