@@ -57,6 +57,60 @@ constexpr int32_t MAX_COUNT = INT32_MAX - 1000000;
 constexpr int64_t ONDEMAND_EXTRA_DATA_ID = 1;
 
 const std::u16string PROCESS_NAME = u"test_process_name";
+
+void SaProfileStore(sptr<SystemAbilityManager>& saMgr,
+    map<int32_t, SaProfile>& saProfileMapTmp, int32_t maxLoop)
+{
+    for (int32_t loop = 0; loop < maxLoop; ++loop) {
+        if (saMgr->saProfileMap_.count(SAID + loop) > 0) {
+            saProfileMapTmp[SAID + loop] = saMgr->saProfileMap_[SAID + loop];
+        }
+    }
+    return;
+}
+
+void SaProfileRecover(sptr<SystemAbilityManager>& saMgr,
+    map<int32_t, SaProfile> saProfileMapTmp, int32_t maxLoop)
+{
+    for (int32_t loop = 0; loop < maxLoop; ++loop) {
+        if (saProfileMapTmp.count(SAID + loop) > 0) {
+            saMgr->saProfileMap_[SAID + loop] = saProfileMapTmp[SAID + loop];
+        } else {
+            saMgr->saProfileMap_.erase(SAID + loop);
+        }
+    }
+    return;
+}
+
+void SaProfileExtensionTestPrevSet(sptr<SystemAbilityManager>& saMgr, int32_t maxLoop)
+{
+    const int32_t mod_num = 2;
+    std::vector<std::string> extensionVec = { "backup", "restore", "alpha", "beta" };
+    for (int32_t loop = 0; loop < maxLoop; ++loop) {
+        SaProfile saProfile;
+        saProfile.extension.push_back(extensionVec[loop % mod_num]);
+        if (loop >= (maxLoop - mod_num)) {
+            saProfile.extension.push_back(extensionVec[(loop + 1) % mod_num]);
+        }
+        saMgr->saProfileMap_[SAID + loop] = saProfile;
+    }
+    return;
+}
+
+void SaAbilityMapObjTestPrevSet(sptr<SystemAbilityManager>& saMgr, int32_t maxLoop)
+{
+    for (int32_t loop = 0; loop < maxLoop; ++loop) {
+        if (loop == 0) {
+            continue;
+        }
+        sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
+        SAInfo saInfo;
+        saInfo.remoteObj = testAbility;
+        saMgr->abilityMap_[SAID + loop] = saInfo;
+    }
+
+    return;
+}
 }
 
 /**
@@ -507,7 +561,7 @@ HWTEST_F(SystemAbilityMgrTest, AddSamgrToAbilityMap001, TestSize.Level3)
 
 /**
  * @tc.name: CleanFfrt001
- * @tc.desc: test CleanFfrt with remoteObject is not nullptr
+ * @tc.desc: test CleanFfrt, workHandler_ true.
  * @tc.type: FUNC
  * @tc.require: I6NKWX
  */
@@ -522,7 +576,7 @@ HWTEST_F(SystemAbilityMgrTest, CleanFfrt001, TestSize.Level3)
 
 /**
  * @tc.name: CleanFfrt002
- * @tc.desc: test CleanFfrt with remoteObject is nullptr
+ * @tc.desc: test CleanFfrt, collectManager_ true.
  * @tc.type: FUNC
  * @tc.require: I6NKWX
  */
@@ -538,7 +592,7 @@ HWTEST_F(SystemAbilityMgrTest, CleanFfrt002, TestSize.Level3)
 
 /**
  * @tc.name: CleanFfrt003
- * @tc.desc: test CleanFfrt with remoteObject is nullptr
+ * @tc.desc: test CleanFfrt, abilityStateScheduler_ true.
  * @tc.type: FUNC
  * @tc.require: I6NKWX
  */
@@ -554,7 +608,7 @@ HWTEST_F(SystemAbilityMgrTest, CleanFfrt003, TestSize.Level3)
 
 /**
  * @tc.name: SetFfrt001
- * @tc.desc: test CleanFfrt with remoteObject is not nullptr
+ * @tc.desc: test SetFfrt, workHandler_  true.
  * @tc.type: FUNC
  * @tc.require: I6NKWX
  */
@@ -569,7 +623,7 @@ HWTEST_F(SystemAbilityMgrTest, SetFfrt001, TestSize.Level3)
 
 /**
  * @tc.name: SetFfrt002
- * @tc.desc: test CleanFfrt with remoteObject is nullptr
+ * @tc.desc: test SetFfrt, collectManager_  true.
  * @tc.type: FUNC
  * @tc.require: I6NKWX
  */
@@ -585,7 +639,7 @@ HWTEST_F(SystemAbilityMgrTest, SetFfrt002, TestSize.Level3)
 
 /**
  * @tc.name: SetFfrt003
- * @tc.desc: test CleanFfrt with remoteObject is nullptr
+ * @tc.desc: test SetFfrt, abilityStateScheduler_  true.
  * @tc.type: FUNC
  * @tc.require: I6NKWX
  */
@@ -597,5 +651,323 @@ HWTEST_F(SystemAbilityMgrTest, SetFfrt003, TestSize.Level3)
     int ret = true;
     saMgr->SetFfrt();
     EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: GetExtensionSaIdsInner001
+ * @tc.desc: test GetExtensionSaIdsInner, read extension failed!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, GetExtensionSaIdsInner001, TestSize.Level3)
+{
+    DTEST_LOG << __func__ << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t result = saMgr->GetExtensionSaIdsInner(data, reply);
+    EXPECT_EQ(result, ERR_FLATTEN_OBJECT);
+}
+
+/**
+ * @tc.name: GetExtensionSaIdsInner002
+ * @tc.desc: test GetExtensionSaIdsInner, read null extension!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, GetExtensionSaIdsInner002, TestSize.Level3)
+{
+    DTEST_LOG << __func__ << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteString("backup");
+    int32_t result = saMgr->GetExtensionSaIdsInner(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+    int32_t ret = reply.ReadInt32(result);
+    EXPECT_EQ(ret, true);
+
+    vector<int32_t> saIds;
+    ret = reply.ReadInt32Vector(&saIds);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(saIds.size(), 0);
+}
+
+/**
+ * @tc.name: GetExtensionSaIdsInner003
+ * @tc.desc: test GetExtensionSaIdsInner, get extension success with backup!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, GetExtensionSaIdsInner003, TestSize.Level3)
+{
+    DTEST_LOG << __func__ << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    const int32_t maxLoop = 4;
+    map<int32_t, SaProfile> saProfileMapTmp;
+    SaProfileStore(saMgr, saProfileMapTmp, maxLoop);
+    SaProfileExtensionTestPrevSet(saMgr, maxLoop);
+
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteString("backup");
+    int32_t result = saMgr->GetExtensionSaIdsInner(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+    int32_t ret = reply.ReadInt32(result);
+    EXPECT_EQ(ret, true);
+
+    vector<int32_t> saIds;
+    ret = reply.ReadInt32Vector(&saIds);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(saIds.size(), 3);
+    EXPECT_EQ(saIds[0], SAID);
+    EXPECT_EQ(saIds[1], SAID + 2);
+    EXPECT_EQ(saIds[2], SAID + 3);
+
+    SaProfileRecover(saMgr, saProfileMapTmp, maxLoop);
+}
+
+/**
+ * @tc.name: GetExtensionRunningSaListInner001
+ * @tc.desc: test GetExtensionRunningSaListInner, read extension failed!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, GetExtensionRunningSaListInner001, TestSize.Level3)
+{
+    DTEST_LOG << __func__ << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t result = saMgr->GetExtensionRunningSaListInner(data, reply);
+    EXPECT_EQ(result, ERR_FLATTEN_OBJECT);
+}
+
+/**
+ * @tc.name: GetExtensionRunningSaListInner002
+ * @tc.desc: test GetExtensionRunningSaListInner, read null extension!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, GetExtensionRunningSaListInner002, TestSize.Level3)
+{
+    DTEST_LOG << __func__ << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteString("backup");
+    int32_t result = saMgr->GetExtensionRunningSaListInner(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+    int32_t ret = reply.ReadInt32(result);
+    EXPECT_EQ(ret, true);
+
+    int32_t size;
+    ret = reply.ReadInt32(size);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(size, 0);
+}
+
+/**
+ * @tc.name: GetExtensionRunningSaListInner003
+ * @tc.desc: test GetExtensionRunningSaListInner, get extension success with restore!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, GetExtensionRunningSaListInner003, TestSize.Level3)
+{
+    DTEST_LOG << __func__ << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    const int32_t maxLoop = 4;
+    map<int32_t, SaProfile> saProfileMapTmp;
+
+    SaProfileStore(saMgr, saProfileMapTmp, maxLoop);
+    SaProfileExtensionTestPrevSet(saMgr, maxLoop);
+    SaAbilityMapObjTestPrevSet(saMgr, maxLoop);
+
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteString("restore");
+    int32_t result = saMgr->GetExtensionRunningSaListInner(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+    int32_t ret = reply.ReadInt32(result);
+    EXPECT_EQ(ret, true);
+
+    int32_t size;
+    ret = reply.ReadInt32(size);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(size, 3);
+    for (int32_t i = 0; i < size; ++i) {
+        sptr<IRemoteObject> obj = reply.ReadRemoteObject();
+        EXPECT_NE(obj, nullptr);
+    }
+
+    saMgr->abilityMap_.clear();
+    SaProfileRecover(saMgr, saProfileMapTmp, maxLoop);
+}
+
+/**
+ * @tc.name: StartOnDemandAbilityInner001
+ * @tc.desc: test StartOnDemandAbilityInner, ERR_INVALID_VALUE.
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, StartOnDemandAbilityInner001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    const std::u16string procName;
+    int32_t systemAbilityId = 0;
+    SystemAbilityManager::AbilityItem abilityItem;
+    abilityItem.state = SystemAbilityManager::AbilityState::STARTING;
+    int32_t ret = saMgr->StartOnDemandAbilityInner(procName, systemAbilityId, abilityItem);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: CheckSystemAbility006
+ * @tc.desc: test CheckSystemAbility, nullptr.
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, CheckSystemAbility006, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t systemAbilityId = -1;
+    bool isExist;
+    sptr<IRemoteObject> ret = saMgr->CheckSystemAbility(systemAbilityId, isExist);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: RemoveSystemAbility005
+ * @tc.desc: test RemoveSystemAbility, ERR_INVALID_VALUE.
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, RemoveSystemAbility005, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    const sptr<IRemoteObject> ability = nullptr;
+    int32_t ret = saMgr->RemoveSystemAbility(ability);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: SubscribeSystemAbility001
+ * @tc.desc: test SubscribeSystemAbility, ERR_INVALID_VALUE.
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, SubscribeSystemAbility001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t systemAbilityId = -1;
+    const sptr<ISystemAbilityStatusChange> listener;
+    int32_t ret = saMgr->SubscribeSystemAbility(systemAbilityId, listener);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: UnSubscribeSystemAbility001
+ * @tc.desc: test UnSubscribeSystemAbility, ERR_INVALID_VALUE.
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, UnSubscribeSystemAbility001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t systemAbilityId = -1;
+    const sptr<ISystemAbilityStatusChange> listener;
+    int32_t ret = saMgr->UnSubscribeSystemAbility(systemAbilityId, listener);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: NotifyRemoteSaDied002
+ * @tc.desc: test NotifyRemoteSaDied, true.
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, NotifyRemoteSaDied002, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    const std::u16string name;
+    sptr<DBinderService> dBinderService_;
+    int ret = true;
+    saMgr->NotifyRemoteSaDied(name);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: AddSystemAbility006
+ * @tc.desc: add system ability with empty capability.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, AddSystemAbility006, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t systemAbilityId = -1;
+    const sptr<IRemoteObject> ability;
+    const ISystemAbilityManager::SAExtraProp extraProp;
+    int32_t ret = saMgr->AddSystemAbility(systemAbilityId, ability, extraProp);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: AddSystemAbility007
+ * @tc.desc: test AddSystemAbility.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, AddSystemAbility007, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t systemAbilityId = -1;
+    const sptr<IRemoteObject> ability;
+    const ISystemAbilityManager::SAExtraProp extraProp;
+    std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler_ = nullptr;
+    int32_t ret = saMgr->AddSystemAbility(systemAbilityId, ability, extraProp);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: GetSystemProcess001
+ * @tc.desc: test GetSystemProcess.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, GetSystemProcess001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::u16string procName;
+    sptr<IRemoteObject> ret = saMgr->GetSystemProcess(procName);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: GetSystemProcessInfo003
+ * @tc.desc: test GetSystemProcessInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, GetSystemProcessInfo003, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->abilityStateScheduler_ = nullptr;
+    int32_t systemAbilityId = 0;
+    SystemProcessInfo systemProcessInfo;
+    int32_t ret = saMgr->GetSystemProcessInfo(systemAbilityId, systemProcessInfo);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: LoadSystemAbilityFromRpc009
+ * @tc.desc: test LoadSystemAbilityFromRpc.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, LoadSystemAbilityFromRpc009, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t systemAbilityId = 0;
+    const std::string srcDeviceId;
+    const sptr<ISystemAbilityLoadCallback> callback;
+    int32_t ret = saMgr->LoadSystemAbilityFromRpc(srcDeviceId, systemAbilityId, callback);
+    EXPECT_FALSE(ret);
 }
 } // namespace OHOS
