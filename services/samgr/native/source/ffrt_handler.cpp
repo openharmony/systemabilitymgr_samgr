@@ -33,12 +33,19 @@ FFRTHandler::FFRTHandler(const std::string& name)
 
 void FFRTHandler::CleanFfrt()
 {
+    for (auto iter = taskMap_.begin(); iter != taskMap_.end(); ++iter) {
+        HILOGI("CleanFfrt taskMap_ %{public}s", iter->first.c_str());
+        if (queue_ != nullptr && iter->second != nullptr) {
+            auto ret = queue_->cancel(iter->second);
+            if (ret != 0) {
+                HILOGE("cancel task failed, error code %{public}d", ret);
+            }
+        }
+        iter->second = nullptr;
+    }
+    taskMap_.clear();
     if (queue_ != nullptr) {
         queue_.reset();
-    }
-    for (auto iter = taskMap_.begin(); iter != taskMap_.end(); ++iter) {
-        iter->second = nullptr;
-        (void)taskMap_.erase(iter);
     }
 }
 
