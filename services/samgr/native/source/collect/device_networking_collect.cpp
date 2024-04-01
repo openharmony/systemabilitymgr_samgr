@@ -191,7 +191,7 @@ void DeviceInitCallBack::OnRemoteDied()
 
 void DeviceStateCallback::OnDeviceOnline(const DmDeviceInfo& deviceInfo)
 {
-    HILOGI("DeviceNetworkingCollect DeviceStateCallback OnDeviceOnline");
+    HILOGI("DeviceNetworkingCollect OnDeviceOnline size %{public}zu", deviceOnlineSet_.size());
     bool isOnline = false;
     {
         lock_guard<mutex> autoLock(deviceOnlineLock_);
@@ -202,13 +202,17 @@ void DeviceStateCallback::OnDeviceOnline(const DmDeviceInfo& deviceInfo)
         OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
         if (collect_ != nullptr) {
             collect_->ReportEvent(event);
+        } else {
+            HILOGE("OnDeviceOnline collect_ isnull");
         }
+    } else {
+        HILOGI("OnDeviceOnline not report size %{public}zu", deviceOnlineSet_.size());
     }
 }
 
 void DeviceStateCallback::OnDeviceOffline(const DmDeviceInfo& deviceInfo)
 {
-    HILOGI("DeviceNetworkingCollect DeviceStateCallback OnDeviceOffline");
+    HILOGI("DeviceNetworkingCollect OnDeviceOffline size %{public}zu", deviceOnlineSet_.size());
     bool isOffline = false;
     {
         lock_guard<mutex> autoLock(deviceOnlineLock_);
@@ -222,7 +226,11 @@ void DeviceStateCallback::OnDeviceOffline(const DmDeviceInfo& deviceInfo)
         OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "off" };
         if (collect_ != nullptr) {
             collect_->ReportEvent(event);
+        } else {
+            HILOGE("OnDeviceOffline collect_ isnull");
         }
+    } else {
+        HILOGI("OnDeviceOffline not report size %{public}zu", deviceOnlineSet_.size());
     }
 }
 

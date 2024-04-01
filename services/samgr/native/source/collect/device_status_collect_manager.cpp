@@ -273,6 +273,9 @@ void DeviceStatusCollectManager::ReportEvent(const OnDemandEvent& event)
     SortSaControlListByLoadPriority(saControlList);
     if (saControlList.empty()) {
         HILOGD("DeviceStatusCollectManager no matched event");
+        if (event.eventId == DEVICE_ONLINE) {
+            HILOGI("deviceOnline is empty");
+        }
         return;
     }
     auto callback = [event, saControlList = std::move(saControlList)] () {
