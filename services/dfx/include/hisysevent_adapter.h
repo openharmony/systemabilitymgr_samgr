@@ -30,5 +30,19 @@ void ReportSamgrSaLoadFail(int32_t said, const std::string& reason);
 void ReportSamgrSaLoad(int32_t said, int32_t eventId);
 
 void ReportSamgrSaUnload(int32_t said, int32_t eventId);
+
+void ReportSaUnLoadFail(int32_t saId, const std::string& reason);
+
+void ReportSaLoadDuration(int32_t saId, int32_t keyStage, int64_t duration);
+
+void ReportSaUnLoadDuration(int32_t saId, int32_t keyStage, int64_t duration);
+
+void ReportProcessStartFail(const std::string& processName, int32_t pid, int32_t uid, const std::string& reason);
+
+void ReportProcessStopFail(const std::string& processName, int32_t pid, int32_t uid, const std::string& reason);
+
+void ReportProcessStartDuration(const std::string& processName, int32_t pid, int32_t uid, int64_t duration);
+
+void ReportProcessStopDuration(const std::string& processName, int32_t pid, int32_t uid, int64_t duration);
 } // OHOS
 #endif // SAMGR_SERVICES_DFX_INCLUDE__HISYSEVENT_ADAPTER_H

@@ -20,6 +20,7 @@
 #include "ipc_skeleton.h"
 #include "memory_guard.h"
 #include "sam_log.h"
+#include "hisysevent_adapter.h"
 #include "schedule/system_ability_state_scheduler.h"
 #include "service_control.h"
 #include "string_ex.h"
@@ -264,7 +265,13 @@ int32_t SystemAbilityStateScheduler::HandleUnloadAbilityEvent(
         "ProcState:%{public}d, SAState:%{public}d", unloadRequestInfo->systemAbilityId, unloadRequestInfo->callingPid,
         unloadRequestInfo->unloadEvent.eventId, abilityContext->ownProcessContext->state, abilityContext->state);
     std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
-    return HandleUnloadAbilityEventLocked(abilityContext, unloadRequestInfo);
+    int32_t result = HandleUnloadAbilityEventLocked(abilityContext, unloadRequestInfo);
+    if (result != ERR_OK) {
+        ReportSaUnLoadFail(unloadRequestInfo->systemAbilityId, "err:" + ToString(result));
+        HILOGE("[SA Scheduler][SA:%{public}d] handle unload fail,ret:%{public}d",
+            unloadRequestInfo->systemAbilityId, result);
+    }
+    return result;
 }
 
 int32_t SystemAbilityStateScheduler::HandleUnloadAbilityEventLocked(
@@ -724,9 +731,17 @@ int32_t SystemAbilityStateScheduler::KillSystemProcessLocked(
         SamgrXCollie samgrXCollie("samgr::killProccess_" + Str16ToStr8(processContext->processName));
         result = ServiceControlWithExtra(Str16ToStr8(processContext->processName).c_str(), ServiceAction::STOP, nullptr, 0);
     }
+
+    int64_t duration = GetTickCount() - begin;
+    if (result != 0) {
+        ReportProcessStopFail(Str16ToStr8(processContext->processName), processContext->pid, processContext->uid,
+            "err:" + ToString(result));
+    }
+    ReportProcessStopDuration(Str16ToStr8(processContext->processName), processContext->pid,
+        processContext->uid, duration);
     KHILOGI("[SA Scheduler][proc:%{public}s] kill proc, pid:%{public}d, uid:%{public}d, ret:%{public}d "
         "spend %{public}" PRId64 " ms", Str16ToStr8(processContext->processName).c_str(), processContext->pid,
-        processContext->uid, result, GetTickCount() - begin);
+        processContext->uid, result, duration);
     return result;
 }
 
