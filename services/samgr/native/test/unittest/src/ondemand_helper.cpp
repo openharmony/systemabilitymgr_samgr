@@ -664,8 +664,7 @@ int main(int argc, char* argv[])
             TestOnDemandPolicy(ondemandHelper);
         } else if (cmd == "getExtension") {
             TestGetExtension(ondemandHelper);
-        }
-        else {
+        } else {
             cout << "invalid input" << endl;
         }
         cout << "-----Input q or Q to quit" << endl;

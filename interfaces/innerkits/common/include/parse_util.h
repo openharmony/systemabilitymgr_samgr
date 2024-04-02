@@ -52,6 +52,8 @@ private:
     void CloseHandle(SaProfile& saProfile);
     bool ParseJsonFile(const std::string& realPath);
     bool ParseJsonObj(nlohmann::json& jsonObj, const std::string& jsonPath);
+    bool ParseSystemAbilityGetSaBaseInfo(SaProfile& saProfile, nlohmann::json& systemAbilityJson);
+    bool ParseSystemAbilityGetSaExtInfo(SaProfile& saProfile, nlohmann::json& systemAbilityJson);
     bool ParseSystemAbility(SaProfile& saProfile, nlohmann::json& systemAbilityJson);
     bool ParseJsonTag(const nlohmann::json& systemAbilityJson, const std::string& jsonTag,
         nlohmann::json& onDemandJson);
