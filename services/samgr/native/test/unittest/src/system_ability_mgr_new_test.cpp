@@ -561,7 +561,7 @@ HWTEST_F(SystemAbilityMgrTest, AddSamgrToAbilityMap001, TestSize.Level3)
 
 /**
  * @tc.name: CleanFfrt001
- * @tc.desc: test CleanFfrt with remoteObject is not nullptr
+ * @tc.desc: test CleanFfrt, workHandler_ true.
  * @tc.type: FUNC
  * @tc.require: I6NKWX
  */
@@ -576,7 +576,7 @@ HWTEST_F(SystemAbilityMgrTest, CleanFfrt001, TestSize.Level3)
 
 /**
  * @tc.name: CleanFfrt002
- * @tc.desc: test CleanFfrt with remoteObject is nullptr
+ * @tc.desc: test CleanFfrt, collectManager_ true.
  * @tc.type: FUNC
  * @tc.require: I6NKWX
  */
@@ -592,7 +592,7 @@ HWTEST_F(SystemAbilityMgrTest, CleanFfrt002, TestSize.Level3)
 
 /**
  * @tc.name: CleanFfrt003
- * @tc.desc: test CleanFfrt with remoteObject is nullptr
+ * @tc.desc: test CleanFfrt, abilityStateScheduler_ true.
  * @tc.type: FUNC
  * @tc.require: I6NKWX
  */
@@ -608,7 +608,7 @@ HWTEST_F(SystemAbilityMgrTest, CleanFfrt003, TestSize.Level3)
 
 /**
  * @tc.name: SetFfrt001
- * @tc.desc: test CleanFfrt with remoteObject is not nullptr
+ * @tc.desc: test SetFfrt, workHandler_  true.
  * @tc.type: FUNC
  * @tc.require: I6NKWX
  */
@@ -623,7 +623,7 @@ HWTEST_F(SystemAbilityMgrTest, SetFfrt001, TestSize.Level3)
 
 /**
  * @tc.name: SetFfrt002
- * @tc.desc: test CleanFfrt with remoteObject is nullptr
+ * @tc.desc: test SetFfrt, collectManager_  true.
  * @tc.type: FUNC
  * @tc.require: I6NKWX
  */
@@ -639,7 +639,7 @@ HWTEST_F(SystemAbilityMgrTest, SetFfrt002, TestSize.Level3)
 
 /**
  * @tc.name: SetFfrt003
- * @tc.desc: test CleanFfrt with remoteObject is nullptr
+ * @tc.desc: test SetFfrt, abilityStateScheduler_  true.
  * @tc.type: FUNC
  * @tc.require: I6NKWX
  */
@@ -803,5 +803,171 @@ HWTEST_F(SystemAbilityMgrTest, GetExtensionRunningSaListInner003, TestSize.Level
 
     saMgr->abilityMap_.clear();
     SaProfileRecover(saMgr, saProfileMapTmp, maxLoop);
+}
+
+/**
+ * @tc.name: StartOnDemandAbilityInner001
+ * @tc.desc: test StartOnDemandAbilityInner, ERR_INVALID_VALUE.
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, StartOnDemandAbilityInner001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    const std::u16string procName;
+    int32_t systemAbilityId = 0;
+    SystemAbilityManager::AbilityItem abilityItem;
+    abilityItem.state = SystemAbilityManager::AbilityState::STARTING;
+    int32_t ret = saMgr->StartOnDemandAbilityInner(procName, systemAbilityId, abilityItem);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: CheckSystemAbility006
+ * @tc.desc: test CheckSystemAbility, nullptr.
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, CheckSystemAbility006, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t systemAbilityId = -1;
+    bool isExist;
+    sptr<IRemoteObject> ret = saMgr->CheckSystemAbility(systemAbilityId, isExist);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: RemoveSystemAbility005
+ * @tc.desc: test RemoveSystemAbility, ERR_INVALID_VALUE.
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, RemoveSystemAbility005, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    const sptr<IRemoteObject> ability = nullptr;
+    int32_t ret = saMgr->RemoveSystemAbility(ability);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: SubscribeSystemAbility001
+ * @tc.desc: test SubscribeSystemAbility, ERR_INVALID_VALUE.
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, SubscribeSystemAbility001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t systemAbilityId = -1;
+    const sptr<ISystemAbilityStatusChange> listener;
+    int32_t ret = saMgr->SubscribeSystemAbility(systemAbilityId, listener);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: UnSubscribeSystemAbility001
+ * @tc.desc: test UnSubscribeSystemAbility, ERR_INVALID_VALUE.
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, UnSubscribeSystemAbility001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t systemAbilityId = -1;
+    const sptr<ISystemAbilityStatusChange> listener;
+    int32_t ret = saMgr->UnSubscribeSystemAbility(systemAbilityId, listener);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: NotifyRemoteSaDied002
+ * @tc.desc: test NotifyRemoteSaDied, true.
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, NotifyRemoteSaDied002, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    const std::u16string name;
+    sptr<DBinderService> dBinderService_;
+    int ret = true;
+    saMgr->NotifyRemoteSaDied(name);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: AddSystemAbility006
+ * @tc.desc: add system ability with empty capability.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, AddSystemAbility006, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t systemAbilityId = -1;
+    const sptr<IRemoteObject> ability;
+    const ISystemAbilityManager::SAExtraProp extraProp;
+    int32_t ret = saMgr->AddSystemAbility(systemAbilityId, ability, extraProp);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: AddSystemAbility007
+ * @tc.desc: test AddSystemAbility.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, AddSystemAbility007, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t systemAbilityId = -1;
+    const sptr<IRemoteObject> ability;
+    const ISystemAbilityManager::SAExtraProp extraProp;
+    std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler_ = nullptr;
+    int32_t ret = saMgr->AddSystemAbility(systemAbilityId, ability, extraProp);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: GetSystemProcess001
+ * @tc.desc: test GetSystemProcess.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, GetSystemProcess001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::u16string procName;
+    sptr<IRemoteObject> ret = saMgr->GetSystemProcess(procName);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: GetSystemProcessInfo003
+ * @tc.desc: test GetSystemProcessInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, GetSystemProcessInfo003, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->abilityStateScheduler_ = nullptr;
+    int32_t systemAbilityId = 0;
+    SystemProcessInfo systemProcessInfo;
+    int32_t ret = saMgr->GetSystemProcessInfo(systemAbilityId, systemProcessInfo);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: LoadSystemAbilityFromRpc009
+ * @tc.desc: test LoadSystemAbilityFromRpc.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, LoadSystemAbilityFromRpc009, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t systemAbilityId = 0;
+    const std::string srcDeviceId;
+    const sptr<ISystemAbilityLoadCallback> callback;
+    int32_t ret = saMgr->LoadSystemAbilityFromRpc(srcDeviceId, systemAbilityId, callback);
+    EXPECT_FALSE(ret);
 }
 } // namespace OHOS
