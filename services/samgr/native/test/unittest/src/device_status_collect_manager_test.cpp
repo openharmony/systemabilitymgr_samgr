@@ -454,6 +454,8 @@ HWTEST_F(DeviceStatusCollectManagerTest, ReportEvent002, TestSize.Level3)
     collect->ReportEvent(event);
     EXPECT_EQ(true, collect->collectHandler_ != nullptr);
     PostTask(collect->collectHandler_);
+    event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
+    collect->ReportEvent(event);
     DTEST_LOG << " ReportEvent002 END" << std::endl;
 }
 
