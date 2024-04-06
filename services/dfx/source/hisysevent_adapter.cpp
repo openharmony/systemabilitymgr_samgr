@@ -17,6 +17,10 @@
 #include <string>
 
 #include "def.h"
+
+// hisysevent report 500 times per 5s
+#define HISYSEVENT_PERIOD 5
+#define HISYSEVENT_THRESHOLD 500
 #include "hisysevent.h"
 #include "sam_log.h"
 
@@ -35,6 +39,106 @@ const std::string ONDEMAND_SA_LOAD_FAIL = "ONDEMAND_SA_LOAD_FAIL";
 const std::string ONDEMAND_SA_LOAD = "ONDEMAND_SA_LOAD";
 const std::string EVENT = "EVENT";
 const std::string ONDEMAND_SA_UNLOAD = "ONDEMAND_SA_UNLOAD";
+const std::string SA_UNLOAD_FAIL = "SA_UNLOAD_FAIL";
+const std::string SA_LOAD_DURATION = "SA_LOAD_DURATION";
+const std::string SA_UNLOAD_DURATION = "SA_UNLOAD_DURATION";
+const std::string PROCESS_START_FAIL = "PROCESS_START_FAIL";
+const std::string PROCESS_STOP_FAIL = "PROCESS_STOP_FAIL";
+const std::string PROCESS_START_DURATION = "PROCESS_START_DURATION";
+const std::string PROCESS_STOP_DURATION = "PROCESS_STOP_DURATION";
+const std::string PROCESS_NAME = "PROCESS_NAME";
+const std::string PID = "PID";
+const std::string UID = "UID";
+const std::string DURATION = "DURATION";
+const std::string KEY_STAGE = "KEY_STAGE";
+}
+
+void ReportSaUnLoadFail(int32_t saId, const std::string& reason)
+{
+    int ret = HiSysEventWrite(HiSysEvent::Domain::SAMGR,
+        SA_UNLOAD_FAIL,
+        HiSysEvent::EventType::FAULT,
+        SAID, saId,
+        REASON, reason);
+    if (ret != 0) {
+        HILOGE("report sa unload fail event failed! SA:%{public}d, ret %{public}d.", saId, ret);
+    }
+}
+
+static void ReportSaDuration(const std::string& eventName, int32_t saId, int32_t keyStage, int64_t duration)
+{
+    int ret = HiSysEventWrite(HiSysEvent::Domain::SAMGR,
+        eventName,
+        HiSysEvent::EventType::BEHAVIOR,
+        SAID, saId,
+        KEY_STAGE, keyStage,
+        DURATION, duration);
+    if (ret != 0) {
+        HILOGE("report event:%{public}s failed! SA:%{public}d, ret:%{public}d.",
+            eventName.c_str(), saId, ret);
+    }
+}
+
+void ReportSaLoadDuration(int32_t saId, int32_t keyStage, int64_t duration)
+{
+    ReportSaDuration(SA_LOAD_DURATION, saId, keyStage, duration);
+}
+
+void ReportSaUnLoadDuration(int32_t saId, int32_t keyStage, int64_t duration)
+{
+    ReportSaDuration(SA_UNLOAD_DURATION, saId, keyStage, duration);
+}
+
+static void ReportProcessDuration(const std::string& eventName, const std::string& processName,
+    int32_t pid, int32_t uid, int64_t duration)
+{
+    int ret = HiSysEventWrite(HiSysEvent::Domain::SAMGR,
+        eventName,
+        HiSysEvent::EventType::BEHAVIOR,
+        PROCESS_NAME, processName,
+        PID, pid,
+        UID, uid,
+        DURATION, duration);
+    if (ret != 0) {
+        HILOGE("report event:%{public}s failed! process:%{public}s, ret:%{public}d.",
+            eventName.c_str(), processName.c_str(), ret);
+    }
+}
+
+void ReportProcessStartDuration(const std::string& processName, int32_t pid, int32_t uid, int64_t duration)
+{
+    ReportProcessDuration(PROCESS_START_DURATION, processName, pid, uid, duration);
+}
+
+void ReportProcessStopDuration(const std::string& processName, int32_t pid, int32_t uid, int64_t duration)
+{
+    ReportProcessDuration(PROCESS_STOP_DURATION, processName, pid, uid, duration);
+}
+
+static void ReportProcessFail(const std::string& eventName, const std::string& processName,
+    int32_t pid, int32_t uid, const std::string& reason)
+{
+    int ret = HiSysEventWrite(HiSysEvent::Domain::SAMGR,
+        eventName,
+        HiSysEvent::EventType::FAULT,
+        PROCESS_NAME, processName,
+        PID, pid,
+        UID, uid,
+        REASON, reason);
+    if (ret != 0) {
+        HILOGE("report event:%{public}s failed! process:%{public}s, ret:%{public}d.",
+            eventName.c_str(), processName.c_str(), ret);
+    }
+}
+
+void ReportProcessStartFail(const std::string& processName, int32_t pid, int32_t uid, const std::string& reason)
+{
+    ReportProcessFail(PROCESS_START_FAIL, processName, pid, uid, reason);
+}
+
+void ReportProcessStopFail(const std::string& processName, int32_t pid, int32_t uid, const std::string& reason)
+{
+    ReportProcessFail(PROCESS_STOP_FAIL, processName, pid, uid, reason);
 }
 
 void ReportSamgrSaLoadFail(int32_t said, const std::string& reason)

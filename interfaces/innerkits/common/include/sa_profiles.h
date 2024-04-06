@@ -34,6 +34,15 @@ enum {
 };
 
 enum {
+    // sa load key stage
+    SA_LOAD_OPENSO = 1,
+    SA_LOAD_ON_START,
+
+    // sa unload key stage
+    SA_UNLOAD_ON_STOP = 10,
+};
+
+enum {
     START_ON_DEMAND = 1,
     STOP_ON_DEMAND,
 };

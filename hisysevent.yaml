@@ -13,6 +13,51 @@
 
 domain: SAMGR
 
+PROCESS_STOP_DURATION:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: ondemand process stop time cost}
+  PROCESS_NAME: {type: STRING, desc: process name}
+  PID: {type: INT32, desc: caller pid}
+  UID: {type: INT32, desc: caller uid}
+  DURATION: {type: INT64, desc: process stop time cost}
+
+PROCESS_START_DURATION:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: ondemand process start time cost}
+  PROCESS_NAME: {type: STRING, desc: process name}
+  PID: {type: INT32, desc: caller pid}
+  UID: {type: INT32, desc: caller uid}
+  DURATION: {type: INT64, desc: process start time cost}
+
+PROCESS_STOP_FAIL:
+  __BASE: {type: FAULT, level: CRITICAL, desc: ondemand process stop failed event}
+  PROCESS_NAME: {type: STRING, desc: process name}
+  PID: {type: INT32, desc: caller pid}
+  UID: {type: INT32, desc: caller uid}
+  REASON: {type: STRING, desc: process stop fail reason}
+
+PROCESS_START_FAIL:
+  __BASE: {type: FAULT, level: CRITICAL, desc: ondemand process start failed event}
+  PROCESS_NAME: {type: STRING, desc: process name}
+  PID: {type: INT32, desc: caller pid}
+  UID: {type: INT32, desc: caller uid}
+  REASON: {type: STRING, desc: process start fail reason}
+
+SA_LOAD_DURATION:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: samgr sa load time cost}
+  SAID: {type: INT32, desc: system ability id}
+  KEY_STAGE: {type: INT32, desc: load sa key stage}
+  DURATION: {type: INT64, desc: time cost}
+
+SA_UNLOAD_DURATION:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: samgr sa unload time cost}
+  SAID: {type: INT32, desc: system ability id}
+  KEY_STAGE: {type: INT32, desc: unload sa key stage}
+  DURATION: {type: INT64, desc: time cost}
+
+SA_UNLOAD_FAIL:
+  __BASE: {type: FAULT, level: CRITICAL, desc: samgr sa unload failed event}
+  SAID: {type: INT32, desc: system ability id}
+  REASON: {type: STRING, desc: fail reason}
+
 ONDEMAND_SA_LOAD_FAIL:
   __BASE: {type: FAULT, level: CRITICAL, desc: samgr sa load failed event}
   SAID: {type: INT32, desc: system ability id}

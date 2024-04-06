@@ -18,6 +18,13 @@
     *ReportGetSAFrequency*;
     *WatchDogSendEvent*;
     *SamgrXCollie*;
+    *ReportSaUnLoadFail*;
+    *ReportSaLoadDuration*;
+    *ReportSaUnLoadDuration*;
+    *ReportProcessStartFail*;
+    *ReportProcessStopFail*;
+    *ReportProcessStartDuration*;
+    *ReportProcessStopDuration*;
   local:
     *;
 };

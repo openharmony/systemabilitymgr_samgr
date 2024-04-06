@@ -1398,15 +1398,22 @@ int32_t SystemAbilityManager::StartDynamicSystemProcess(const std::u16string& na
         // Waiting for the init subsystem to perceive process death
         ServiceWaitForStatus(Str16ToStr8(name).c_str(), ServiceStatus::SERVICE_STOPPED, 1);
     }
-
+    int64_t begin = GetTickCount();
     int result = ERR_INVALID_VALUE;
     {
         SamgrXCollie samgrXCollie("samgr::startProccess_" + ToString(systemAbilityId));
         result = ServiceControlWithExtra(Str16ToStr8(name).c_str(), ServiceAction::START, &extraArgv, 1);
     }
 
-    KHILOGI("Start dynamic proc:%{public}s, SA:%{public}d, ret:%{public}d!",
-        Str16ToStr8(name).c_str(), systemAbilityId, result);
+    int64_t duration = GetTickCount() - begin;
+    auto callingPid = IPCSkeleton::GetCallingPid();
+    auto callingUid = IPCSkeleton::GetCallingUid();
+    if (result != 0) {
+        ReportProcessStartFail(Str16ToStr8(name), callingPid, callingUid, "err:" + ToString(result));
+    }
+    ReportProcessStartDuration(Str16ToStr8(name), callingPid, callingUid, duration);
+    KHILOGI("Start dynamic proc:%{public}s, SA:%{public}d, ret:%{public}d, spend %{public}" PRId64 " ms",
+        Str16ToStr8(name).c_str(), systemAbilityId, result, duration);
     return (result == 0) ? ERR_OK : ERR_INVALID_VALUE;
 }
 

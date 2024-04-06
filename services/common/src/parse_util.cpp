@@ -199,9 +199,10 @@ void ParseUtil::OpenSo(SaProfile& saProfile)
                 handle = dlopen(saProfile.libPath.c_str(), RTLD_NOW);
             }
         }
-
+        int64_t duration = GetTickCount() - begin;
+        ReportSaLoadDuration(saProfile.saId, SA_LOAD_OPENSO, duration);
         KHILOGI("[PerformanceTest] SA:%{public}d OpenSo spend %{public}" PRId64 " ms",
-            saProfile.saId, GetTickCount() - begin);
+            saProfile.saId, duration);
         if (handle == nullptr) {
             ReportAddSystemAbilityFailed(saProfile.saId, fileName);
             HILOGE("dlopen %{public}s failed with errno:%{public}s!", fileName.c_str(), dlerror());
