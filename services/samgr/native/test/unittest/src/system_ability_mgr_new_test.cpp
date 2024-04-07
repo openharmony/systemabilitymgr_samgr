@@ -14,6 +14,7 @@
  */
 
 #include "system_ability_mgr_test.h"
+#include "samgr_err_code.h"
 #include "hisysevent_adapter.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
@@ -141,6 +142,27 @@ HWTEST_F(SystemAbilityMgrTest, ReportGetSAPeriodically001, TestSize.Level3)
     saMgr->saFrequencyMap_[pid_said] = count;
     saMgr->ReportGetSAPeriodically();
     EXPECT_TRUE(saMgr->saFrequencyMap_.empty());
+}
+
+/**
+ * @tc.name: UnloadSystemAbility004
+ * @tc.desc: test UnloadSystemAbility004, abilityStateScheduler_ is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6J4T7
+ */
+HWTEST_F(SystemAbilityMgrTest, UnloadSystemAbility004, TestSize.Level3)
+{
+    DTEST_LOG << " UnloadSystemAbility004 " << std::endl;
+    SamMockPermission::MockProcess("memmgrservice");
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    SaProfile saProfile;
+    saProfile.process = u"memmgrservice";
+    saMgr->saProfileMap_[1] = saProfile;
+    saMgr->abilityStateScheduler_ = nullptr;
+    int32_t systemAbilityId = 1;
+    int32_t ret = saMgr->UnloadSystemAbility(systemAbilityId);
+    saMgr->abilityStateScheduler_ = make_shared<SystemAbilityStateScheduler>();
+    EXPECT_EQ(ret, STATE_SCHEDULER_NULL);
 }
 
 /**

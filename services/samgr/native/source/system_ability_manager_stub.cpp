@@ -625,6 +625,9 @@ int32_t SystemAbilityManagerStub::LoadSystemAbilityInner(MessageParcel& data, Me
     }
 
     int32_t result = LoadSystemAbility(systemAbilityId, callback);
+    if (result != ERR_OK) {
+        HILOGE("loadSaInner fail ret:%{public}d", result);
+    }
     HILOGD("LoadSystemAbilityInner result is %{public}d", result);
     {
         SamgrXCollie samgrXCollie("samgrStub::loadSa_writeResult_" + ToString(systemAbilityId));
@@ -709,6 +712,9 @@ int32_t SystemAbilityManagerStub::UnloadSystemAbilityInner(MessageParcel& data, 
     }
 
     int32_t result = UnloadSystemAbility(systemAbilityId);
+    if (result != ERR_OK) {
+        HILOGE("unloadSa fail ret:%{public}d", result);
+    }
     HILOGD("UnloadSystemAbilityInner result is %{public}d", result);
     {
         SamgrXCollie samgrXCollie("samgrStub::unloadSa_writeResult_" + ToString(systemAbilityId));

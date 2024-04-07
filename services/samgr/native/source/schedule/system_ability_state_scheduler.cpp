@@ -23,6 +23,7 @@
 #include "hisysevent_adapter.h"
 #include "schedule/system_ability_state_scheduler.h"
 #include "service_control.h"
+#include "samgr_err_code.h"
 #include "string_ex.h"
 #include "system_ability_manager.h"
 #include "samgr_xcollie.h"
@@ -203,7 +204,7 @@ int32_t SystemAbilityStateScheduler::HandleLoadAbilityEvent(const LoadRequestInf
 {
     std::shared_ptr<SystemAbilityContext> abilityContext;
     if (!GetSystemAbilityContext(loadRequestInfo.systemAbilityId, abilityContext)) {
-        return ERR_INVALID_VALUE;
+        return GET_SA_CONTEXT_FAIL;
     }
     HILOGI("[SA Scheduler][SA:%{public}d]load event start, callpid:%{public}d, evtid:%{public}d, "
         "ProcState:%{public}d, SAState:%{public}d", loadRequestInfo.systemAbilityId, loadRequestInfo.callingPid,
@@ -224,7 +225,7 @@ int32_t SystemAbilityStateScheduler::HandleLoadAbilityEventLocked(
     activeReason[KEY_NAME] = loadRequestInfo.loadEvent.name;
     activeReason[KEY_VALUE] = loadRequestInfo.loadEvent.value;
     activeReason[KEY_EXTRA_DATA_ID] = loadRequestInfo.loadEvent.extraDataId;
-    int32_t result = ERR_INVALID_VALUE;
+    int32_t result = INVALID_SA_STATE;
     switch (abilityContext->state) {
         case SystemAbilityState::LOADING:
             result = RemovePendingUnloadEventLocked(abilityContext);
@@ -239,7 +240,7 @@ int32_t SystemAbilityStateScheduler::HandleLoadAbilityEventLocked(
             result = ERR_OK;
             break;
         default:
-            result = ERR_INVALID_VALUE;
+            result = INVALID_SA_STATE;
             HILOGI("[SA Scheduler][SA:%{public}d] in state %{public}d, cannot load ability",
                 loadRequestInfo.systemAbilityId, abilityContext->state);
             break;
@@ -255,11 +256,11 @@ int32_t SystemAbilityStateScheduler::HandleUnloadAbilityEvent(
 {
     if (unloadRequestInfo == nullptr) {
         HILOGE("[SA Scheduler]HandleUnloadAbilityEvent unloadRequestInfo is nullptr");
-        return ERR_INVALID_VALUE;
+        return UNLOAD_REQUEST_NULL;
     }
     std::shared_ptr<SystemAbilityContext> abilityContext;
     if (!GetSystemAbilityContext(unloadRequestInfo->systemAbilityId, abilityContext)) {
-        return ERR_INVALID_VALUE;
+        return GET_SA_CONTEXT_FAIL;
     }
     HILOGI("[SA Scheduler][SA:%{public}d] handle unload event start callPid:%{public}d, evtid:%{public}d,"
         "ProcState:%{public}d, SAState:%{public}d", unloadRequestInfo->systemAbilityId, unloadRequestInfo->callingPid,
@@ -280,10 +281,10 @@ int32_t SystemAbilityStateScheduler::HandleUnloadAbilityEventLocked(
 {
     if (unloadRequestInfo == nullptr) {
         HILOGE("[SA Scheduler][SA:%{public}d] unloadRequestInfo is nullptr", abilityContext->systemAbilityId);
-        return ERR_INVALID_VALUE;
+        return UNLOAD_REQUEST_NULL;
     }
     abilityContext->unloadRequest = unloadRequestInfo;
-    int32_t result = ERR_INVALID_VALUE;
+    int32_t result = INVALID_SA_STATE;
     switch (abilityContext->state) {
         case SystemAbilityState::LOADING:
             result = PendUnloadEventLocked(abilityContext, unloadRequestInfo);
@@ -339,7 +340,7 @@ int32_t SystemAbilityStateScheduler::ActiveSystemAbilityLocked(
         abilityContext->ownProcessContext->processName, activeReason);
     if (!result) {
         HILOGE("[SA Scheduler][SA:%{public}d] active ability failed", abilityContext->systemAbilityId);
-        return ERR_INVALID_VALUE;
+        return ACTIVE_SA_FAIL;
     }
     return stateMachine_->AbilityStateTransitionLocked(abilityContext, SystemAbilityState::LOADED);
 }
@@ -371,7 +372,7 @@ int32_t SystemAbilityStateScheduler::SendDelayUnloadEventLocked(uint32_t systemA
 {
     if (unloadEventHandler_ == nullptr) {
         HILOGE("[SA Scheduler] unload handler not initialized!");
-        return ERR_INVALID_VALUE;
+        return UNLOAD_EVENT_HANDLER_NULL;
     }
     if (unloadEventHandler_->HasInnerEvent(systemAbilityId)) {
         return ERR_OK;
@@ -380,7 +381,7 @@ int32_t SystemAbilityStateScheduler::SendDelayUnloadEventLocked(uint32_t systemA
     bool ret = unloadEventHandler_->SendEvent(systemAbilityId, 0, delayTime);
     if (!ret) {
         HILOGE("[SA Scheduler] send event failed!");
-        return ERR_INVALID_VALUE;
+        return SEND_EVENT_FAIL;
     }
     return ERR_OK;
 }
@@ -389,7 +390,7 @@ int32_t SystemAbilityStateScheduler::RemoveDelayUnloadEventLocked(uint32_t syste
 {
     if (unloadEventHandler_ == nullptr) {
         HILOGE("[SA Scheduler] unload handler not initialized!");
-        return ERR_INVALID_VALUE;
+        return UNLOAD_EVENT_HANDLER_NULL;
     }
     if (!unloadEventHandler_->HasInnerEvent(systemAbilityId)) {
         return ERR_OK;
@@ -405,7 +406,7 @@ int32_t SystemAbilityStateScheduler::PendLoadEventLocked(const std::shared_ptr<S
     HILOGI("[SA Scheduler][SA:%{public}d] save load event", abilityContext->systemAbilityId);
     if (loadRequestInfo.callback == nullptr) {
         HILOGW("[SA Scheduler] callback invalid!");
-        return ERR_INVALID_VALUE;
+        return CALLBACK_NULL;
     }
     bool isExist = std::any_of(abilityContext->pendingLoadEventList.begin(),
         abilityContext->pendingLoadEventList.end(), [&loadRequestInfo](const auto& loadEventItem) {
@@ -419,7 +420,7 @@ int32_t SystemAbilityStateScheduler::PendLoadEventLocked(const std::shared_ptr<S
     if (count >= MAX_SUBSCRIBE_COUNT) {
         HILOGE("[SA Scheduler][SA:%{public}d] pid:%{public}d overflow max callback count!",
             abilityContext->systemAbilityId, loadRequestInfo.callingPid);
-        return ERR_PERMISSION_DENIED;
+        return PEND_LOAD_EVENT_SIZE_LIMIT;
     }
     ++count;
     abilityContext->pendingLoadEventList.emplace_back(loadRequestInfo);
@@ -1104,7 +1105,7 @@ int32_t SystemAbilityStateScheduler::ProcessDelayUnloadEvent(int32_t systemAbili
 {
     std::shared_ptr<SystemAbilityContext> abilityContext;
     if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
-        return ERR_INVALID_VALUE;
+        return GET_SA_CONTEXT_FAIL;
     }
     std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
 	return ProcessDelayUnloadEventLocked(systemAbilityId);
@@ -1114,11 +1115,11 @@ int32_t SystemAbilityStateScheduler::ProcessDelayUnloadEventLocked(int32_t syste
 {
     std::shared_ptr<SystemAbilityContext> abilityContext;
     if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
-        return ERR_INVALID_VALUE;
+        return GET_SA_CONTEXT_FAIL;
     }
     if (abilityContext->unloadRequest == nullptr) {
         HILOGE("[SA Scheduler][SA:%{public}d] unloadRequest is nullptr", abilityContext->systemAbilityId);
-        return ERR_INVALID_VALUE;
+        return UNLOAD_REQUEST_NULL;
     }
     if (abilityContext->state != SystemAbilityState::LOADED) {
         HILOGW("[SA Scheduler][SA:%{public}d] can't proc delay unload event", systemAbilityId);
@@ -1135,7 +1136,7 @@ int32_t SystemAbilityStateScheduler::ProcessDelayUnloadEventLocked(int32_t syste
         abilityContext->ownProcessContext->processName, idleReason, delayTime);
     if (!result) {
         HILOGE("[SA Scheduler][SA:%{public}d] idle SA failed", systemAbilityId);
-        return ERR_INVALID_VALUE;
+        return IDLE_SA_FAIL;
     }
     if (delayTime < 0) {
         HILOGI("[SA Scheduler][SA:%{public}d] reject unload", systemAbilityId);

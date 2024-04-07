@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "system_ability_mgr_proxy_test.h"
+#include "samgr_err_code.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "itest_transaction_service.h"
@@ -421,7 +422,7 @@ HWTEST_F(SystemAbilityMgrProxyTest, UnloadSystemAbility002, TestSize.Level1)
     sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     EXPECT_NE(sm, nullptr);
     int32_t res = sm->UnloadSystemAbility(TEST_ID_VAILD);
-    EXPECT_EQ(res, ERR_INVALID_VALUE);
+    EXPECT_EQ(res, PROFILE_NOT_EXIST);
 }
 
 /**

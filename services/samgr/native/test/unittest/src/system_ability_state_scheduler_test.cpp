@@ -14,7 +14,7 @@
  */
 
 #include "system_ability_state_scheduler_test.h"
-
+#include "samgr_err_code.h"
 #include "ability_death_recipient.h"
 #include "datetime_ex.h"
 #include "sa_status_change_mock.h"
@@ -444,7 +444,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleLoadAbilityEvent005, TestSize.Le
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
     systemAbilityStateScheduler->abilityContextMap_.clear();
     int32_t ret = systemAbilityStateScheduler->HandleLoadAbilityEvent(loadRequestInfo);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, GET_SA_CONTEXT_FAIL);
 }
 
 /**
@@ -470,7 +470,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleLoadAbilityEvent006, TestSize.Le
     loadRequestInfo.callback = new SystemAbilityLoadCallbackMock();
     systemAbilityContext->state = SystemAbilityState::UNLOADABLE;
     int32_t ret = systemAbilityStateScheduler->HandleLoadAbilityEvent(loadRequestInfo);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, ACTIVE_SA_FAIL);
 }
 
 /**
@@ -624,7 +624,9 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleUnloadAbilityEvent001, TestSize.
     std::shared_ptr<UnloadRequestInfo> unloadRequestInfo =
         std::make_shared<UnloadRequestInfo>(onDemandEvent, SAID, -1);
     int32_t ret = systemAbilityStateScheduler->HandleUnloadAbilityEvent(unloadRequestInfo);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, GET_SA_CONTEXT_FAIL);
+    ret = systemAbilityStateScheduler->HandleUnloadAbilityEvent(nullptr);
+    EXPECT_EQ(ret, UNLOAD_REQUEST_NULL);
 }
 
 /**
@@ -676,7 +678,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleUnloadAbilityEvent003, TestSize.
     std::shared_ptr<UnloadRequestInfo> unloadRequestInfo =
         std::make_shared<UnloadRequestInfo>(onDemandEvent, SAID, -1);
     int32_t ret = systemAbilityStateScheduler->HandleUnloadAbilityEvent(unloadRequestInfo);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, GET_SA_CONTEXT_FAIL);
 }
 
 /**
@@ -729,7 +731,22 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleUnloadAbilityEvent005, TestSize.
     std::shared_ptr<UnloadRequestInfo> unloadRequestInfo =
         std::make_shared<UnloadRequestInfo>(onDemandEvent, SAID, -1);
     int32_t ret = systemAbilityStateScheduler->HandleUnloadAbilityEvent(unloadRequestInfo);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, UNLOAD_EVENT_HANDLER_NULL);
+}
+
+/**
+ * @tc.name: HandleUnloadAbilityEventLock001
+ * @tc.desc: test HandleUnloadAbilityEventLock, unloadRequestInfo is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6LQ18
+ */
+HWTEST_F(SystemAbilityStateSchedulerTest, HandleUnloadAbilityEventLock001, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
+    int32_t ret = systemAbilityStateScheduler->HandleUnloadAbilityEventLocked(systemAbilityContext, nullptr);
+    EXPECT_EQ(ret, UNLOAD_REQUEST_NULL);
 }
 
 /**
@@ -794,7 +811,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleCancelUnloadAbilityEvent003, Tes
     systemAbilityStateScheduler->abilityContextMap_[SAID] = systemAbilityContext;
     systemAbilityContext->state = SystemAbilityState::UNLOADABLE;
     int32_t ret = systemAbilityStateScheduler->HandleCancelUnloadAbilityEvent(SAID);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, ACTIVE_SA_FAIL);
 }
 
 /**
@@ -812,7 +829,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, SendDelayUnloadEventLocked001, TestSiz
     systemAbilityStateScheduler->Init(saProfiles);
     systemAbilityStateScheduler->unloadEventHandler_ = nullptr;
     int32_t ret = systemAbilityStateScheduler->SendDelayUnloadEventLocked(SAID, DELAY_TIME);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, UNLOAD_EVENT_HANDLER_NULL);
 }
 
 /**
@@ -867,7 +884,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, RemoveDelayUnloadEventLocked001, TestS
     systemAbilityStateScheduler->Init(saProfiles);
     systemAbilityStateScheduler->unloadEventHandler_ = nullptr;
     int32_t ret = systemAbilityStateScheduler->RemoveDelayUnloadEventLocked(SAID);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, UNLOAD_EVENT_HANDLER_NULL);
 }
 
 /**
@@ -924,7 +941,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, PendLoadEventLocked001, TestSize.Level
     loadRequestInfo.systemAbilityId = SAID;
     loadRequestInfo.callback = nullptr;
     int32_t ret = systemAbilityStateScheduler->PendLoadEventLocked(systemAbilityContext, loadRequestInfo);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, CALLBACK_NULL);
 }
 
 /**
@@ -986,7 +1003,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, PendLoadEventLocked004, TestSize.Level
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
     LoadRequestInfo loadRequestInfo;
     int32_t ret = systemAbilityStateScheduler->PendLoadEventLocked(systemAbilityContext, loadRequestInfo);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, CALLBACK_NULL);
 }
 
 /**
@@ -1150,7 +1167,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandlePendingUnloadEventLocked003, Tes
     systemAbilityContext->state = SystemAbilityState::NOT_LOADED;
     systemAbilityContext->pendingUnloadEvent = nullptr;
     int32_t ret = systemAbilityStateScheduler->HandlePendingUnloadEventLocked(systemAbilityContext);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, UNLOAD_REQUEST_NULL);
 }
 
 /**
@@ -1188,7 +1205,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, TryUnloadAllSystemAbility002, TestSize
     systemProcessContext->abilityStateCountMap.clear();
     systemProcessContext->abilityStateCountMap[SystemAbilityState::UNLOADABLE] = 1;
     int32_t ret = systemAbilityStateScheduler->TryUnloadAllSystemAbility(systemProcessContext);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, TRANSIT_PROC_STATE_FAIL);
 }
 
 /**
@@ -1268,7 +1285,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, UnloadAllSystemAbilityLocked001, TestS
     systemAbilityStateScheduler->processContextMap_.clear();
     systemProcessContext->saList.push_back(SAID);
     int32_t ret = systemAbilityStateScheduler->UnloadAllSystemAbilityLocked(systemProcessContext);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, TRANSIT_PROC_STATE_FAIL);
 }
 
 /**
@@ -1292,7 +1309,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, UnloadAllSystemAbilityLocked002, TestS
     systemProcessContext->saList.push_back(SAID);
     systemAbilityContext->state = SystemAbilityState::UNLOADABLE;
     int32_t ret = systemAbilityStateScheduler->UnloadAllSystemAbilityLocked(systemProcessContext);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, TRANSIT_PROC_STATE_FAIL);
 }
 
 /**
@@ -1316,7 +1333,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, UnloadAllSystemAbilityLocked003, TestS
     systemProcessContext->saList.push_back(SAID);
     systemAbilityContext->state = SystemAbilityState::LOADED;
     int32_t ret = systemAbilityStateScheduler->UnloadAllSystemAbilityLocked(systemProcessContext);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, TRANSIT_PROC_STATE_FAIL);
 }
 
 /**
@@ -1870,7 +1887,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, ProcessDelayUnloadEvent001, TestSize.L
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
     systemAbilityStateScheduler->abilityContextMap_.clear();
     int32_t ret = systemAbilityStateScheduler->ProcessDelayUnloadEvent(SAID);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, GET_SA_CONTEXT_FAIL);
 }
 
 /**
@@ -1920,7 +1937,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, ProcessDelayUnloadEvent003, TestSize.L
     OnDemandEvent onDemandEvent = {INTERFACE_CALL};
     systemAbilityContext->unloadRequest = std::make_shared<UnloadRequestInfo>(onDemandEvent, SAID);
     int32_t ret = systemAbilityStateScheduler->ProcessDelayUnloadEvent(SAID);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, IDLE_SA_FAIL);
 }
 
 /**

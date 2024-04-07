@@ -27,6 +27,7 @@
 #include "file_ex.h"
 #include "hisysevent_adapter.h"
 #include "hitrace_meter.h"
+#include "samgr_err_code.h"
 #include "if_local_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "local_ability_manager_proxy.h"
@@ -1414,7 +1415,7 @@ int32_t SystemAbilityManager::StartDynamicSystemProcess(const std::u16string& na
     ReportProcessStartDuration(Str16ToStr8(name), callingPid, callingUid, duration);
     KHILOGI("Start dynamic proc:%{public}s, SA:%{public}d, ret:%{public}d, spend %{public}" PRId64 " ms",
         Str16ToStr8(name).c_str(), systemAbilityId, result, duration);
-    return (result == 0) ? ERR_OK : ERR_INVALID_VALUE;
+    return result;
 }
 
 int32_t SystemAbilityManager::StartingSystemProcessLocked(const std::u16string& procName,
@@ -1515,7 +1516,7 @@ int32_t SystemAbilityManager::DoLoadSystemAbility(int32_t systemAbilityId, const
         auto& count = callbackCountMap_[callingPid];
         if (count >= MAX_SUBSCRIBE_COUNT) {
             HILOGE("LoadSystemAbility pid:%{public}d overflow max callback count!", callingPid);
-            return ERR_PERMISSION_DENIED;
+            return CALLBACK_MAP_SIZE_LIMIT;
         }
         ++count;
         abilityItem.callbackMap[LOCAL_DEVICE].emplace_back(callback, callingPid);
@@ -1557,13 +1558,13 @@ int32_t SystemAbilityManager::LoadSystemAbility(int32_t systemAbilityId,
 {
     if (!CheckInputSysAbilityId(systemAbilityId) || callback == nullptr) {
         HILOGW("LoadSystemAbility SAId or callback invalid!");
-        return ERR_INVALID_VALUE;
+        return INVALID_INPUT_PARA;
     }
     SaProfile saProfile;
     bool ret = GetSaProfile(systemAbilityId, saProfile);
     if (!ret) {
         HILOGE("LoadSystemAbility SA:%{public}d not supported!", systemAbilityId);
-        return ERR_INVALID_VALUE;
+        return PROFILE_NOT_EXIST;
     }
     auto callingPid = IPCSkeleton::GetCallingPid();
     OnDemandEvent onDemandEvent = {INTERFACE_CALL, "load"};
@@ -1604,15 +1605,15 @@ int32_t SystemAbilityManager::UnloadSystemAbility(int32_t systemAbilityId)
     bool ret = GetSaProfile(systemAbilityId, saProfile);
     if (!ret) {
         HILOGE("UnloadSystemAbility SA:%{public}d not supported!", systemAbilityId);
-        return ERR_INVALID_VALUE;
+        return PROFILE_NOT_EXIST;
     }
     if (!CheckCallerProcess(saProfile)) {
         HILOGE("UnloadSystemAbility invalid caller process, SA:%{public}d", systemAbilityId);
-        return ERR_INVALID_VALUE;
+        return INVALID_CALL_PROC;
     }
     if (abilityStateScheduler_ == nullptr) {
         HILOGE("abilityStateScheduler is nullptr");
-        return ERR_INVALID_VALUE;
+        return STATE_SCHEDULER_NULL;
     }
     OnDemandEvent onDemandEvent = {INTERFACE_CALL, "unload"};
     auto callingPid = IPCSkeleton::GetCallingPid();

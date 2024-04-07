@@ -25,6 +25,7 @@
 #include "sa_status_change_mock.h"
 #include "string_ex.h"
 #include "system_ability_definition.h"
+#include "samgr_err_code.h"
 #include "system_process_status_change_proxy.h"
 #include "test_log.h"
 #define private public
@@ -627,7 +628,7 @@ HWTEST_F(SystemAbilityMgrTest, LoadSystemAbility010, TestSize.Level3)
     saMgr->saProfileMap_.clear();
     sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
     int32_t ret = saMgr->LoadSystemAbility(SAID, callback);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, PROFILE_NOT_EXIST);
 }
 
 /**
@@ -641,7 +642,7 @@ HWTEST_F(SystemAbilityMgrTest, LoadSystemAbility011, TestSize.Level3)
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
     int32_t ret = saMgr->LoadSystemAbility(-1, callback);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, INVALID_INPUT_PARA);
 }
 
 /**
@@ -1149,12 +1150,12 @@ HWTEST_F(SystemAbilityMgrTest, UnloadSystemAbility001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     int32_t result = saMgr->UnloadSystemAbility(1);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(result, PROFILE_NOT_EXIST);
 }
 
 /**
  * @tc.name: UnloadSystemAbility002
- * @tc.desc: UnloadSystemAbility, abilityStateScheduler_ is nullptr
+ * @tc.desc: UnloadSystemAbility, caller invalid
  * @tc.type: FUNC
  * @tc.require: I5KMF7
  */
@@ -1165,7 +1166,7 @@ HWTEST_F(SystemAbilityMgrTest, UnloadSystemAbility002, TestSize.Level3)
     saMgr->saProfileMap_[1] = saProfile;
     saMgr->abilityStateScheduler_ = nullptr;
     int32_t result = saMgr->UnloadSystemAbility(1);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(result, INVALID_CALL_PROC);
     saMgr->saProfileMap_.clear();
 }
 
@@ -2217,7 +2218,7 @@ HWTEST_F(SystemAbilityMgrTest, CheckStartEnableOnce001, TestSize.Level3)
     SaControlInfo saControl = { START_ON_DEMAND, TEST_SYSTEM_ABILITY1};
     sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
     int32_t result = saMgr->CheckStartEnableOnce(event1, saControl, callback);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(result, GET_SA_CONTEXT_FAIL);
     saMgr->RemoveSystemAbility(TEST_SYSTEM_ABILITY1);
 }
 
@@ -2235,7 +2236,7 @@ HWTEST_F(SystemAbilityMgrTest, CheckStartEnableOnce002, TestSize.Level3)
     SaControlInfo saControl = { START_ON_DEMAND, TEST_SYSTEM_ABILITY1, true};
     sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
     int32_t result = saMgr->CheckStartEnableOnce(event, saControl, callback);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(result, GET_SA_CONTEXT_FAIL);
     saMgr->RemoveSystemAbility(TEST_SYSTEM_ABILITY1);
 }
 
@@ -2318,7 +2319,7 @@ HWTEST_F(SystemAbilityMgrTest, CheckStartEnableOnce006, TestSize.Level3)
     saMgr->startEnableOnceMap_.clear();
     sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
     int32_t ret = saMgr->CheckStartEnableOnce(onDemandEvent, saControlInfo, callback);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, GET_SA_CONTEXT_FAIL);
 }
 
 /**
@@ -2364,7 +2365,7 @@ HWTEST_F(SystemAbilityMgrTest, CheckStartEnableOnce008, TestSize.Level3)
     SaControlInfo saControlInfo;
     sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
     int32_t ret = saMgr->CheckStartEnableOnce(onDemandEvent, saControlInfo, callback);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, GET_SA_CONTEXT_FAIL);
 }
 
 /**
@@ -2380,7 +2381,7 @@ HWTEST_F(SystemAbilityMgrTest, CheckStopEnableOnce001, TestSize.Level3)
     OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "off" };
     SaControlInfo saControl = { STOP_ON_DEMAND, TEST_SYSTEM_ABILITY1};
     int32_t result = saMgr->CheckStopEnableOnce(event, saControl);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(result, GET_SA_CONTEXT_FAIL);
     saMgr->RemoveSystemAbility(TEST_SYSTEM_ABILITY1);
 }
 
@@ -2397,7 +2398,7 @@ HWTEST_F(SystemAbilityMgrTest, CheckStopEnableOnce002, TestSize.Level3)
     OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "off" };
     SaControlInfo saControl = { STOP_ON_DEMAND, TEST_SYSTEM_ABILITY1, true};
     int32_t result = saMgr->CheckStopEnableOnce(event, saControl);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(result, GET_SA_CONTEXT_FAIL);
     saMgr->RemoveSystemAbility(TEST_SYSTEM_ABILITY1);
 }
 

@@ -14,6 +14,7 @@
  */
 
 #include "system_ability_event_handler_test.h"
+#include "samgr_err_code.h"
 #include "test_log.h"
 #include <memory>
 #define private public
@@ -233,7 +234,7 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityLoadFailedEventLocked001, T
     systemAbilityContext->state = SystemAbilityState::LOADING;
     systemAbilityStateMachine->abilityStateHandlerMap_.clear();
     int32_t ret = systemAbilityEventHandler->HandleAbilityLoadFailedEventLocked(systemAbilityContext);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, INVALID_SA_NEXT_STATE);
 }
 
 /**
@@ -321,7 +322,7 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityUnLoadSuccessEventLocked001
     systemAbilityContext->state = SystemAbilityState::LOADING;
     systemAbilityStateMachine->abilityStateHandlerMap_.clear();
     int32_t ret = systemAbilityEventHandler->HandleAbilityUnLoadSuccessEventLocked(systemAbilityContext);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, INVALID_SA_NEXT_STATE);
 }
 
 /**
@@ -345,7 +346,7 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityUnLoadSuccessEventLocked002
     systemAbilityContext->pendingEvent = PendingEvent::UNLOAD_ABILITY_EVENT;
     systemAbilityStateMachine->abilityStateHandlerMap_.clear();
     int32_t ret = systemAbilityEventHandler->HandleAbilityUnLoadSuccessEventLocked(systemAbilityContext);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, INVALID_SA_NEXT_STATE);
 }
 
 /**
