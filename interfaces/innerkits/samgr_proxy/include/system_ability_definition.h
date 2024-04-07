@@ -24,8 +24,10 @@ namespace OHOS {
 System ability definition should be a number between FIRST_SYS_ABILITY_ID and LAST_SYS_ABILITY_ID.
 And for vendor, should be a number between VENDOR_SYS_ABILITY_ID_BEGIN and VENDOR_SYS_ABILITY_ID_END.
 
-If a new SA definition is added, it is necessary to synchronously add a mapping in the hidumper
-The path is "\base\hiviewdfx\hidumper\frameworks\native\dump_utils.cpp", and map name is "saNameMap_"
+If a new SA definition is added, it is necessary to synchronously add a mapping in the hidumper and 
+synchronously add a mapping in the rust definition.rs 
+The path of hidumper is "\base\hiviewdfx\hidumper\frameworks\native\dump_utils.cpp", and map name is "saNameMap_"
+The path of definition.rs is "\foundation\systemabilitymgr\samgr\interfaces\innerkits\rust\src\cxx\definition.rs"
 */
 enum {
     SAMGR_DUMP_SAID                                  = 0,
