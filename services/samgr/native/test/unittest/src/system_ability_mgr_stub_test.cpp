@@ -1858,6 +1858,8 @@ HWTEST_F(SystemAbilityMgrStubTest, AddSystemAbility003, TestSize.Level1)
     sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
     saMgr->SendCheckLoadedMsg(SAID, name, srcDeviceId, callback);
     EXPECT_EQ(res, ERR_INVALID_VALUE);
+    saMgr->workHandler_->CleanFfrt();
+    saMgr->workHandler_ = nullptr;
 }
 
 /**
