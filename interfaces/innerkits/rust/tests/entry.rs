@@ -1,4 +1,4 @@
-// Copyright (C) 2023 Huawei Device Co., Ltd.
+// Copyright (C) 2024 Huawei Device Co., Ltd.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -11,11 +11,13 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-//! This crate implements the accesstoken init function FFI binding.
+#![allow(unused)]
 
+mod basic;
+mod mem;
+mod remote;
 use std::ffi::{c_char, CString};
 use std::ptr;
-
 #[repr(C)]
 struct TokenInfoParams {
     dcaps_num: i32,
@@ -33,7 +35,6 @@ extern "C" {
     fn SetSelfTokenID(token_id: u64) -> i32;
 }
 
-/// Init access token ID for current process
 pub fn init_access_token() {
     let perms_str =
         CString::new("ohos.permission.DISTRIBUTED_DATASYNC").expect("permission is invalid");

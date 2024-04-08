@@ -13,22 +13,54 @@
 
 import("//build/ohos.gni")
 
-ohos_rust_shared_library("rust_samgr") {
+rust_cxx("samgr_cxx_gen") {
+  sources = [ "src/wrapper.rs" ]
+}
+
+ohos_static_library("samgr_rust_cpp") {
   sources = [
-    "src/lib.rs",
-    "src/rust_samgr.rs",
+    "src/cxx/status_change_wrapper.cpp",
+    "src/cxx/system_ability_manager_wrapper.cpp",
   ]
+
+  sources += get_target_outputs(":samgr_cxx_gen")
+  include_dirs = [
+    "${target_gen_dir}/src",
+    "include",
+  ]
+  deps = [
+    ":samgr_cxx_gen",
+    "../samgr_proxy:samgr_proxy",
+    "//third_party/rust/crates/cxx:cxx_cppdeps",
+  ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "ipc:ipc_single",
+  ]
+
+  subsystem_name = "systemabilitymgr"
+  part_name = "samgr"
+}
+
+ohos_rust_shared_library("samgr_rust") {
+  sources = [ "src/lib.rs" ]
 
   external_deps = [
     "hilog:hilog_rust",
     "ipc:ipc_rust",
   ]
 
-  crate_name = "rust_samgr"
-  crate_type = "dylib"
+  deps = [
+    ":samgr_rust_cpp",
+    "//third_party/rust/crates/cxx:lib",
+  ]
+  crate_name = "samgr"
 
   install_images = [ system_base_dir ]
   relative_install_dir = "chipset-pub-sdk"
+
   subsystem_name = "systemabilitymgr"
   part_name = "samgr"
 }
