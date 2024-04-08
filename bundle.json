@@ -41,7 +41,6 @@
                 "json",
                 "libxml2",
                 "preferences",
-                "resource_schedule_service",
                 "safwk",
                 "selinux_adapter"
             ]

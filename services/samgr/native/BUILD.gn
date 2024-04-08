@@ -106,11 +106,6 @@ ohos_executable("samgr") {
       defines += [ "HICOLLIE_ENABLE" ]
     }
 
-    if (ressched_able) {
-      external_deps += [ "resource_schedule_service:ressched_client" ]
-      defines += [ "RESSCHED_ENABLE" ]
-    }
-
     if (support_device_manager) {
       sources += [ "//foundation/systemabilitymgr/samgr/services/samgr/native/source/collect/device_networking_collect.cpp" ]
       external_deps += [ "device_manager:devicemanagersdk" ]
