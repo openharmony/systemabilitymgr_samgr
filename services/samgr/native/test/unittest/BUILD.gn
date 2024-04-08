@@ -201,11 +201,6 @@ ohos_unittest("SystemAbilityMgrCollectTest") {
     defines += [ "HICOLLIE_ENABLE" ]
   }
 
-  if (ressched_able) {
-    external_deps += [ "resource_schedule_service:ressched_client" ]
-    defines += [ "RESSCHED_ENABLE" ]
-  }
-
   if (support_common_event) {
     sources += [
       "${samgr_services_dir}/source/collect/common_event_collect.cpp",
@@ -383,11 +378,6 @@ ohos_unittest("SystemAbilityMgrStubTest") {
   if (hicollie_able) {
     external_deps += [ "hicollie:libhicollie" ]
     defines += [ "HICOLLIE_ENABLE" ]
-  }
-
-  if (ressched_able) {
-    external_deps += [ "resource_schedule_service:ressched_client" ]
-    defines += [ "RESSCHED_ENABLE" ]
   }
 
   if (support_device_manager) {
@@ -688,11 +678,6 @@ ohos_executable("TestTool") {
   if (hicollie_able) {
     external_deps += [ "hicollie:libhicollie" ]
     defines += [ "HICOLLIE_ENABLE" ]
-  }
-
-  if (ressched_able) {
-    external_deps += [ "resource_schedule_service:ressched_client" ]
-    defines += [ "RESSCHED_ENABLE" ]
   }
 
   if (support_device_manager) {
