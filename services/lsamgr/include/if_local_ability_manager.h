@@ -26,6 +26,12 @@
 #include "safwk_ipc_interface_code.h"
 
 namespace OHOS {
+enum {
+    IPC_STAT_CMD_START = 0,
+    IPC_STAT_CMD_STOP = 1,
+    IPC_STAT_CMD_GET = 2,
+    IPC_STAT_CMD_MAX = 3
+};
 class ILocalAbilityManager : public IRemoteBroker {
 public:
     virtual bool StartAbility(int32_t systemAbilityId, const std::string& eventStr) = 0;
@@ -35,6 +41,7 @@ public:
     virtual bool IdleAbility(int32_t systemAbilityId,
         const nlohmann::json& idleReason, int32_t& delayTime) = 0;
     virtual bool SendStrategyToSA(int32_t type, int32_t systemAbilityId, int32_t level, std::string& action) = 0;
+    virtual bool IpcStatCmdProc(int32_t fd, int32_t cmd) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ILocalAbilityManager");
 protected:
     static inline const std::u16string LOCAL_ABILITY_MANAGER_INTERFACE_TOKEN = u"ohos.localabilitymanager.accessToken";

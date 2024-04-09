@@ -22,10 +22,18 @@
 #include "schedule/system_ability_state_scheduler.h"
 
 namespace OHOS {
+enum {
+    IPC_STAT_PREFIX_INDEX = 0,
+    IPC_STAT_PROCESS_INDEX = 1,
+    IPC_STAT_CMD_INDEX = 2,
+    IPC_STAT_MAX_INDEX = 3
+};
 class SystemAbilityManagerDumper {
 public:
     static bool Dump(std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler,
         const std::vector<std::string>& args, std::string& result);
+    static bool IpcDumpCmdParser(int32_t& cmd, const std::vector<std::string>& args);
+    static bool IpcDumpIsAllProcess(const std::string& processName);
 private:
     SystemAbilityManagerDumper() = default;
     ~SystemAbilityManagerDumper() = default;

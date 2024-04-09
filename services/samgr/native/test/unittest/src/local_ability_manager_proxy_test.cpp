@@ -291,4 +291,56 @@ HWTEST_F(LocalAbilityManagerProxyTest, SendStrategyToSA001, TestSize.Level3)
     bool ret = localAbility->SendStrategyToSA(type, TEST_SAID_INVAILD, level, action);
     EXPECT_FALSE(ret);
 }
+
+/**
+ * @tc.name: IpcStatCmdProc001
+ * @tc.desc: test IpcStatCmdProc001 with fd valid and cmd valid
+ * @tc.type: FUNC
+ * @tc.require: I9DR69
+ */
+HWTEST_F(LocalAbilityManagerProxyTest, IpcStatCmdProc001, TestSize.Level3)
+{
+    sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
+    sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
+    int32_t fd = 1;
+    int32_t cmd = 0;
+    std::string action;
+    bool ret = localAbility->IpcStatCmdProc(fd, cmd);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: IpcStatCmdProc002
+ * @tc.desc: test IpcStatCmdProc002 with fd invalid and cmd valid
+ * @tc.type: FUNC
+ * @tc.require: I9DR69
+ */
+HWTEST_F(LocalAbilityManagerProxyTest, IpcStatCmdProc002, TestSize.Level3)
+{
+    sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
+    sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
+    int32_t fd = -1;
+    int32_t cmd = 0;
+    std::string action;
+    bool ret = localAbility->IpcStatCmdProc(fd, cmd);
+    EXPECT_FALSE(ret);
+}
+
+
+/**
+ * @tc.name: IpcStatCmdProc003
+ * @tc.desc: test IpcStatCmdProc003 with fd invalid and cmd valid
+ * @tc.type: FUNC
+ * @tc.require: I9DR69
+ */
+HWTEST_F(LocalAbilityManagerProxyTest, IpcStatCmdProc003, TestSize.Level3)
+{
+    sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
+    sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
+    int32_t fd = -1;
+    int32_t cmd = -1;
+    std::string action;
+    bool ret = localAbility->IpcStatCmdProc(fd, cmd);
+    EXPECT_FALSE(ret);
+}
 }

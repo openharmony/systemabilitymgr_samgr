@@ -238,6 +238,7 @@ private:
 #ifdef SUPPORT_DEVICE_MANAGER
     void DeviceIdToNetworkId(std::string& networkId);
 #endif
+    int32_t IpcDumpProc(int32_t fd, const std::vector<std::string>& args);
 
     std::u16string deviceName_;
     static sptr<SystemAbilityManager> instance;

@@ -18,6 +18,7 @@
 #include "accesstoken_kit.h"
 #include "ipc_skeleton.h"
 #include "system_ability_manager.h"
+#include "if_local_ability_manager.h"
 
 namespace OHOS {
 namespace {
@@ -29,6 +30,40 @@ const std::string ARGS_HELP = "-h";
 const std::string ARGS_QUERY_ALL_SA_STATE = "-l";
 constexpr size_t MIN_ARGS_SIZE = 1;
 constexpr size_t MAX_ARGS_SIZE = 2;
+
+const std::string IPC_STAT_STR_START = "--start-stat";
+const std::string IPC_STAT_STR_STOP = "--stop-stat";
+const std::string IPC_STAT_STR_GET = "--stat";
+const std::string IPC_STAT_STR_ALL = "all";
+}
+
+bool SystemAbilityManagerDumper::IpcDumpIsAllProcess(const std::string& processName)
+{
+    return processName == IPC_STAT_STR_ALL;
+}
+
+bool SystemAbilityManagerDumper::IpcDumpCmdParser(int32_t& cmd, const std::vector<std::string>& args)
+{
+    if (!CanDump()) {
+        HILOGE("IPC Dump failed, not allowed");
+        return false;
+    }
+
+    if (args.size() < IPC_STAT_MAX_INDEX) {
+        HILOGE("IPC Dump failed, length error");
+        return false;
+    }
+
+    if (args[IPC_STAT_CMD_INDEX] == IPC_STAT_STR_START) {
+        cmd = IPC_STAT_CMD_START;
+    } else if (args[IPC_STAT_CMD_INDEX] == IPC_STAT_STR_STOP) {
+        cmd = IPC_STAT_CMD_STOP;
+    } else if (args[IPC_STAT_CMD_INDEX] == IPC_STAT_STR_GET){
+        cmd = IPC_STAT_CMD_GET;
+    } else {
+        return false;
+    }
+    return true;
 }
 
 bool SystemAbilityManagerDumper::Dump(std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler,
