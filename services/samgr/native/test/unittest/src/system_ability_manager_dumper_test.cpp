@@ -763,10 +763,10 @@ HWTEST_F(SystemAbilityManagerDumperTest, IpcDumpIsSamgr002, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6W28
  */
-HWTEST_F(LocalAbilityManagerDumperTest, StartSamgrIpcStatistics001, TestSize.Level2)
+HWTEST_F(SystemAbilityManagerDumperTest, StartSamgrIpcStatistics001, TestSize.Level2)
 {
     std::string result;
-    bool ret = LocalAbilityManagerDumper::StartSamgrIpcStatistics(result);
+    bool ret = SystemAbilityManagerDumper::StartSamgrIpcStatistics(result);
     EXPECT_EQ(ret, true);
 }
 
@@ -776,10 +776,10 @@ HWTEST_F(LocalAbilityManagerDumperTest, StartSamgrIpcStatistics001, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require: I6W28
  */
-HWTEST_F(LocalAbilityManagerDumperTest, StopSamgrIpcStatistics001, TestSize.Level2)
+HWTEST_F(SystemAbilityManagerDumperTest, StopSamgrIpcStatistics001, TestSize.Level2)
 {
     std::string result;
-    bool ret = LocalAbilityManagerDumper::StopSamgrIpcStatistics(result);
+    bool ret = SystemAbilityManagerDumper::StopSamgrIpcStatistics(result);
     EXPECT_EQ(ret, true);
 }
 
@@ -789,10 +789,10 @@ HWTEST_F(LocalAbilityManagerDumperTest, StopSamgrIpcStatistics001, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require: I6W28
  */
-HWTEST_F(LocalAbilityManagerDumperTest, GetSamgrIpcStatistics001, TestSize.Level2)
+HWTEST_F(SystemAbilityManagerDumperTest, GetSamgrIpcStatistics001, TestSize.Level2)
 {
     std::string result;
-    bool ret = LocalAbilityManagerDumper::GetSamgrIpcStatistics(result);
+    bool ret = SystemAbilityManagerDumper::GetSamgrIpcStatistics(result);
     EXPECT_EQ(ret, true);
 }
 }
