@@ -28,7 +28,7 @@ enum {
     IPC_STAT_CMD_INDEX = 2
 };
 
-constexpr int32_t IPC_STAT_CMD_LEN 3
+constexpr int32_t IPC_STAT_CMD_LEN 3;
 
 class SystemAbilityManagerDumper {
 public:
