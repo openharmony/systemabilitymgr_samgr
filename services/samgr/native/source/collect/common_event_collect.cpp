@@ -320,8 +320,6 @@ int64_t CommonEventCollect::SaveOnDemandReasonExtraData(const EventFwk::CommonEv
     wantMap[UID] = std::to_string(uid);
     wantMap[NET_TYPE] = std::to_string(netType);
     wantMap[BUNDLE_NAME] = want.GetBundle();
-    HILOGD("CommonEventCollect want bundle:%{public}s, val:%{public}s",
-        BUNDLE_NAME.c_str(), wantMap[BUNDLE_NAME].c_str());
     for (auto key : extraDataKey_[want.GetAction()]) {
         wantMap[key] = GetParamFromWant(key, want);
     }
