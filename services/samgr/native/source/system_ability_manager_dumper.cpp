@@ -49,7 +49,7 @@ bool SystemAbilityManagerDumper::IpcDumpCmdParser(int32_t& cmd, const std::vecto
         return false;
     }
 
-    if (args.size() < IPC_STAT_MAX_INDEX) {
+    if (args.size() < IPC_STAT_CMD_LEN) {
         HILOGE("IPC Dump failed, length error");
         return false;
     }
