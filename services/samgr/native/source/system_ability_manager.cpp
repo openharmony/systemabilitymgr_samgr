@@ -135,9 +135,70 @@ void SystemAbilityManager::SetFfrt()
     }
 }
 
+bool SystemAbilityManager::IpcStatSamgrProc(int32_t fd, int32_t cmd)
+{
+    bool ret = false;
+    std::string result;
+
+    HILOGI("IpcStatSamgrProc:fd=%{public}d cmd=%{public}d", fd, cmd);
+    if (cmd < IPC_STAT_CMD_START || cmd >= IPC_STAT_CMD_MAX) {
+        HILOGW("para invalid, fd=%{public}d cmd=%{public}d", fd, cmd);
+        return false;
+    }
+
+    switch (cmd) {
+        case IPC_STAT_CMD_START: {
+            ret = SystemAbilityManagerDumper::StartSamgrIpcStatistics(result);
+            break;
+        }
+        case IPC_STAT_CMD_STOP: {
+            ret = SystemAbilityManagerDumper::StopSamgrIpcStatistics(result);
+            break;
+        }
+        case IPC_STAT_CMD_GET: {
+            ret = SystemAbilityManagerDumper::GetSamgrIpcStatistics(result);
+            break;
+        }
+        default:
+            return false;
+    }
+
+    if (!SaveStringToFd(fd, result)) {
+        HILOGW("save to fd failed");
+        return false;
+    }
+    return ret;
+}
+
+void SystemAbilityManager::IpcDumpAllProcess(int32_t fd, int32_t cmd)
+{
+    lock_guard<mutex> autoLock(systemProcessMapLock_);
+    for (auto iter = systemProcessMap_.begin(); iter != systemProcessMap_.end(); iter++) {
+        sptr<ILocalAbilityManager> obj = iface_cast<ILocalAbilityManager>(iter->second);
+        if (obj != nullptr) {
+            obj->IpcStatCmdProc(fd, cmd);
+        }
+    }
+}
+
+void SystemAbilityManager::IpcDumpSamgrProcess(int32_t fd, int32_t cmd)
+{
+    if (!IpcStatSamgrProc(fd, cmd)) {
+        HILOGE("IpcStatSamgrProc failed");
+    }
+}
+
+void SystemAbilityManager::IpcDumpSingleProcess(int32_t fd, int32_t cmd, const std::string processName)
+{
+    sptr<ILocalAbilityManager> obj = iface_cast<ILocalAbilityManager>(GetSystemProcess(Str8ToStr16(processName)));
+    if (obj != nullptr) {
+        obj->IpcStatCmdProc(fd, cmd);
+    }
+}
+
 int32_t SystemAbilityManager::IpcDumpProc(int32_t fd, const std::vector<std::string>& args)
 {
-    int32_t cmd = -1;
+    int32_t cmd;
     if (!SystemAbilityManagerDumper::IpcDumpCmdParser(cmd, args)) {
         HILOGE("IpcDumpCmdParser failed");
         return ERR_INVALID_VALUE;
@@ -147,18 +208,12 @@ int32_t SystemAbilityManager::IpcDumpProc(int32_t fd, const std::vector<std::str
 
     const std::string processName = args[IPC_STAT_PROCESS_INDEX];
     if (SystemAbilityManagerDumper::IpcDumpIsAllProcess(processName)) {
-        lock_guard<mutex> autoLock(systemProcessMapLock_);
-        for (auto iter = systemProcessMap_.begin(); iter != systemProcessMap_.end(); iter++) {
-            sptr<ILocalAbilityManager> obj = iface_cast<ILocalAbilityManager>(iter->second);
-            if (obj != nullptr) {
-                obj->IpcStatCmdProc(fd, cmd);
-            }
-        }
+        IpcDumpAllProcess(fd, cmd);
+        IpcDumpSamgrProcess(fd, cmd);
+    } else if (SystemAbilityManagerDumper::IpcDumpIsSamgr(processName)) {
+        IpcDumpSamgrProcess(fd, cmd);
     } else {
-        sptr<ILocalAbilityManager> obj = iface_cast<ILocalAbilityManager>(GetSystemProcess(Str8ToStr16(processName)));
-        if (obj != nullptr) {
-            obj->IpcStatCmdProc(fd, cmd);
-        }
+        IpcDumpSingleProcess(fd, cmd, processName);
     }
     return ERR_OK;
 }
@@ -192,6 +247,9 @@ void SystemAbilityManager::AddSamgrToAbilityMap()
     saInfo.isDistributed = false;
     saInfo.capability = u"";
     abilityMap_[systemAbilityId] = std::move(saInfo);
+    if (abilityStateScheduler_ != nullptr) {
+        abilityStateScheduler_->InitSamgrProcessContext();
+    }
     HILOGD("samgr inserted");
 }
 

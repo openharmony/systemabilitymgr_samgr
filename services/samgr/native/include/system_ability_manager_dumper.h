@@ -36,6 +36,10 @@ public:
         const std::vector<std::string>& args, std::string& result);
     static bool IpcDumpCmdParser(int32_t& cmd, const std::vector<std::string>& args);
     static bool IpcDumpIsAllProcess(const std::string& processName);
+    static bool IpcDumpIsSamgr(const std::string& processName);
+    static bool StartSamgrIpcStatistics(std::string& result);
+    static bool StopSamgrIpcStatistics(std::string& result);
+    static bool GetSamgrIpcStatistics(std::string& result);
 private:
     SystemAbilityManagerDumper() = default;
     ~SystemAbilityManagerDumper() = default;

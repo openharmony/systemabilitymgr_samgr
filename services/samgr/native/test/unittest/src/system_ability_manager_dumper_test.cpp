@@ -728,4 +728,71 @@ HWTEST_F(SystemAbilityManagerDumperTest, IpcDumpIsAllProcess003, TestSize.Level3
     bool ret = SystemAbilityManagerDumper::IpcDumpIsAllProcess(processName);
     EXPECT_FALSE(ret);
 }
+
+/**
+ * @tc.name: IpcDumpIsSamgr001
+ * @tc.desc: is ipc dump samgr process cmd, IpcDumpIsSamgr001
+ * @tc.type: FUNC
+ * @tc.require: I9DR69
+ */
+
+HWTEST_F(SystemAbilityManagerDumperTest, IpcDumpIsSamgr001, TestSize.Level3)
+{
+    std::string processName = "samgr";
+    bool ret = SystemAbilityManagerDumper::IpcDumpIsSamgr(processName);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: IpcDumpIsSamgr002
+ * @tc.desc: is ipc dump samgr process cmd, IpcDumpIsSamgr002
+ * @tc.type: FUNC
+ * @tc.require: I9DR69
+ */
+
+HWTEST_F(SystemAbilityManagerDumperTest, IpcDumpIsSamgr002, TestSize.Level3)
+{
+    std::string processName = "test001";
+    bool ret = SystemAbilityManagerDumper::IpcDumpIsSamgr(processName);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: StartSamgrIpcStatistics001
+ * @tc.desc: test StartSamgrIpcStatistics
+ * @tc.type: FUNC
+ * @tc.require: I6W28
+ */
+HWTEST_F(LocalAbilityManagerDumperTest, StartSamgrIpcStatistics001, TestSize.Level2)
+{
+    std::string result;
+    bool ret = LocalAbilityManagerDumper::StartSamgrIpcStatistics(result);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: StopSamgrIpcStatistics001
+ * @tc.desc: test StopSamgrIpcStatistics
+ * @tc.type: FUNC
+ * @tc.require: I6W28
+ */
+HWTEST_F(LocalAbilityManagerDumperTest, StopSamgrIpcStatistics001, TestSize.Level2)
+{
+    std::string result;
+    bool ret = LocalAbilityManagerDumper::StopSamgrIpcStatistics(result);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: GetSamgrIpcStatistics001
+ * @tc.desc: test GetSamgrIpcStatistics
+ * @tc.type: FUNC
+ * @tc.require: I6W28
+ */
+HWTEST_F(LocalAbilityManagerDumperTest, GetSamgrIpcStatistics001, TestSize.Level2)
+{
+    std::string result;
+    bool ret = LocalAbilityManagerDumper::GetSamgrIpcStatistics(result);
+    EXPECT_EQ(ret, true);
+}
 }

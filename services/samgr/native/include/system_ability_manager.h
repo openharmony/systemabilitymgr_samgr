@@ -238,6 +238,10 @@ private:
 #ifdef SUPPORT_DEVICE_MANAGER
     void DeviceIdToNetworkId(std::string& networkId);
 #endif
+    bool IpcStatSamgrProc(int32_t fd, int32_t cmd);
+    void IpcDumpAllProcess(int32_t fd, int32_t cmd);
+    void IpcDumpSamgrProcess(int32_t fd, int32_t cmd);
+    void IpcDumpSingleProcess(int32_t fd, int32_t cmd, const std::string processName);
     int32_t IpcDumpProc(int32_t fd, const std::vector<std::string>& args);
 
     std::u16string deviceName_;
