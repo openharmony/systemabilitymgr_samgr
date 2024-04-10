@@ -36,6 +36,7 @@ constexpr int64_t MAX_EXTRA_DATA_ID = 1000000000;
 constexpr int32_t COMMON_EVENT_SERVICE_ID = 3299;
 const std::string UID = "uid";
 const std::string NET_TYPE = "NetType";
+const std::string BUNDLE_NAME = "bundleName";
 }
 
 CommonEventCollect::CommonEventCollect(const sptr<IReport>& report)
@@ -308,11 +309,19 @@ int64_t CommonEventCollect::SaveOnDemandReasonExtraData(const EventFwk::CommonEv
     HILOGD("CommonEventCollect extraData code: %{public}d, data: %{public}s", data.GetCode(),
         data.GetData().c_str());
     AAFwk::Want want = data.GetWant();
+    auto keySet = want.GetParams().KeySet();
+    std::map<std::string, std::string> wantMap;
+    for (const auto& key : keySet) {
+        wantMap[key] = GetParamFromWant(key, want);
+        HILOGD("CommonEventCollect want key:%{public}s, val:%{public}s", key.c_str(), wantMap[key].c_str());
+    }
     int32_t uid = want.GetIntParam(UID, -1);
     int32_t netType = want.GetIntParam(NET_TYPE, -1);
-    std::map<std::string, std::string> wantMap;
     wantMap[UID] = std::to_string(uid);
     wantMap[NET_TYPE] = std::to_string(netType);
+    wantMap[BUNDLE_NAME] = want.GetBundle();
+    HILOGD("CommonEventCollect want bundle:%{public}s, val:%{public}s",
+        BUNDLE_NAME.c_str(), wantMap[BUNDLE_NAME].c_str());
     for (auto key : extraDataKey_[want.GetAction()]) {
         wantMap[key] = GetParamFromWant(key, want);
     }
