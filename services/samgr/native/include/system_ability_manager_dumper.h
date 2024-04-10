@@ -25,9 +25,11 @@ namespace OHOS {
 enum {
     IPC_STAT_PREFIX_INDEX = 0,
     IPC_STAT_PROCESS_INDEX = 1,
-    IPC_STAT_CMD_INDEX = 2,
-    IPC_STAT_MAX_INDEX = 3
+    IPC_STAT_CMD_INDEX = 2
 };
+
+constexpr int32_t IPC_STAT_CMD_LEN 4
+
 class SystemAbilityManagerDumper {
 public:
     static bool Dump(std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler,
