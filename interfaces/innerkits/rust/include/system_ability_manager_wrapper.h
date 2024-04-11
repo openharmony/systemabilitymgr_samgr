@@ -30,6 +30,7 @@ namespace SamgrRust {
 struct SAExtraPropWrapper;
 struct AbilityStub;
 struct SystemProcessInfo;
+struct AddSystemAbilityConfig;
 
 std::unique_ptr<SptrIRemoteObject> GetSystemAbility(int32_t systemAbilityId);
 std::unique_ptr<SptrIRemoteObject> CheckSystemAbility(int32_t systemAbilityId);
@@ -56,8 +57,7 @@ int32_t UnloadAllIdleSystemAbility();
 SystemProcessInfo GetSystemProcessInfo(int32_t systemAbilityId);
 rust::Vec<SystemProcessInfo> GetRunningSystemProcess();
 int32_t SendStrategy(int32_t type, rust::Vec<int32_t> systemAbilityIds, int32_t level, std::string &action);
-int32_t AddSystemAbility(int32_t systemAbilityId, rust::Box<AbilityStub> ability, bool isDistributed,
-    unsigned int dumpFlags, rust::str capability, rust::str permission);
+int32_t AddSystemAbility(int32_t systemAbilityId, rust::Box<AbilityStub> ability, AddSystemAbilityConfig config);
 std::unique_ptr<UnSubscribeSystemProcessHandler> SubscribeSystemProcess(
     rust::Fn<void(const OHOS::SamgrRust::SystemProcessInfo &systemProcessInfo)> onStart_,
     rust::Fn<void(const OHOS::SamgrRust::SystemProcessInfo &systemProcessInfo)> onStop_);

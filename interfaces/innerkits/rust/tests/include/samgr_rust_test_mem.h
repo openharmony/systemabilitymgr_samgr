@@ -12,6 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
+#ifndef SAMGR_RUST_TEST_MEM_H
+#define SAMGR_RUST_TEST_MEM_H
+
 #include <cstdint>
 #include <memory>
 
@@ -37,3 +41,4 @@ std::unique_ptr<sptr<Foo>> GetUniqueSptr();
 std::unique_ptr<Keeper> KeepUniqueSptr(std::unique_ptr<SptrFoo> foo);
 
 } // namespace OHOS
+#endif

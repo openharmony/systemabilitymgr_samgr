@@ -18,10 +18,7 @@ rust_cxx("samgr_rust_test_gen") {
 }
 
 ohos_static_library("samgr_rust_test_c") {
-  sources = [
-    "cxx/samgr_rust_test_basic.cpp",
-    "cxx/samgr_rust_test_mem.cpp",
-  ]
+  sources = [ "cxx/samgr_rust_test_mem.cpp" ]
 
   sources += get_target_outputs(":samgr_rust_test_gen")
 

@@ -27,6 +27,13 @@ mod ffi {
         uid: i32,
     }
 
+    struct AddSystemAbilityConfig {
+        is_distributed: bool,
+        dump_flags: u32,
+        capability: String,
+        permission: String,
+    }
+
     extern "Rust" {
         type AbilityStub;
 
@@ -103,10 +110,7 @@ mod ffi {
         fn AddSystemAbility(
             said: i32,
             ability: Box<AbilityStub>,
-            is_distributed: bool,
-            dump_flags: u32,
-            capability: &str,
-            permission: &str,
+            config: AddSystemAbilityConfig,
         ) -> i32;
 
         fn SubscribeSystemProcess(

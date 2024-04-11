@@ -15,13 +15,13 @@ use cxx::{let_cxx_string, UniquePtr};
 use ipc::remote::{RemoteObj, RemoteStub};
 
 use crate::wrapper::{
-    AbilityStub, AddOnDemandSystemAbilityInfo, AddSystemAbility, CancelUnloadSystemAbility,
-    CheckSystemAbility, CheckSystemAbilityWithDeviceId, GetContextManager, GetRunningSystemProcess,
-    GetSystemAbility, GetSystemAbilityWithDeviceId, GetSystemProcessInfo, ListSystemAbilities,
-    ListSystemAbilitiesWithDumpFlag, LoadSystemAbility, LoadSystemAbilityWithCallback,
-    RemoveSystemAbility, SendStrategy, SubscribeSystemAbility, SubscribeSystemProcess,
-    SystemProcessInfo, UnSubscribeSystemAbilityHandler, UnSubscribeSystemProcessHandler,
-    UnloadAllIdleSystemAbility, UnloadSystemAbility,
+    AbilityStub, AddOnDemandSystemAbilityInfo, AddSystemAbility, AddSystemAbilityConfig,
+    CancelUnloadSystemAbility, CheckSystemAbility, CheckSystemAbilityWithDeviceId,
+    GetContextManager, GetRunningSystemProcess, GetSystemAbility, GetSystemAbilityWithDeviceId,
+    GetSystemProcessInfo, ListSystemAbilities, ListSystemAbilitiesWithDumpFlag, LoadSystemAbility,
+    LoadSystemAbilityWithCallback, RemoveSystemAbility, SendStrategy, SubscribeSystemAbility,
+    SubscribeSystemProcess, SystemProcessInfo, UnSubscribeSystemAbilityHandler,
+    UnSubscribeSystemProcessHandler, UnloadAllIdleSystemAbility, UnloadSystemAbility,
 };
 use crate::DumpFlagPriority;
 
@@ -126,10 +126,12 @@ impl SystemAbilityManager {
         AddSystemAbility(
             said,
             Box::new(stub),
-            is_distributed,
-            dump_flags as u32,
-            capability,
-            permission,
+            AddSystemAbilityConfig {
+                is_distributed,
+                dump_flags: dump_flags as u32,
+                capability: capability.to_string(),
+                permission: permission.to_string(),
+            },
         )
     }
 
@@ -146,10 +148,12 @@ impl SystemAbilityManager {
         AddSystemAbility(
             said,
             Box::new(stub),
-            is_distributed,
-            dump_flags as u32,
-            capability,
-            permission,
+            AddSystemAbilityConfig {
+                is_distributed,
+                dump_flags: dump_flags as u32,
+                capability: capability.to_string(),
+                permission: permission.to_string(),
+            },
         )
     }
 
