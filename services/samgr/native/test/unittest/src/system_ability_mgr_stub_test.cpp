@@ -14,7 +14,7 @@
  */
 
 #include "system_ability_mgr_stub_test.h"
-
+#include "samgr_err_code.h"
 #include "ability_death_recipient.h"
 #include "itest_transaction_service.h"
 #include "if_system_ability_manager.h"
@@ -2216,7 +2216,7 @@ HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbility001, TestSize.Level1)
     saMgr->callbackCountMap_[itemPair.second] = countNum;
     saMgr->RemoveStartingAbilityCallbackLocked(itemPair);
     int32_t res = saMgr->LoadSystemAbility(INVALID_SAID, callback);
-    EXPECT_EQ(res, ERR_INVALID_VALUE);
+    EXPECT_EQ(res, INVALID_INPUT_PARA);
 }
 
 /**
@@ -2229,7 +2229,7 @@ HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbility002, TestSize.Level1)
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     saMgr->OnRemoteCallbackDied(nullptr);
     int32_t res = saMgr->LoadSystemAbility(SAID, nullptr);
-    EXPECT_EQ(res, ERR_INVALID_VALUE);
+    EXPECT_EQ(res, INVALID_INPUT_PARA);
 }
 
 /**
@@ -2246,7 +2246,7 @@ HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbility003, TestSize.Level1)
     saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
     saMgr->RemoveRemoteCallbackLocked(callbacks, callback);
     int32_t res = saMgr->LoadSystemAbility(INVALID_SAID, nullptr);
-    EXPECT_EQ(res, ERR_INVALID_VALUE);
+    EXPECT_EQ(res, INVALID_INPUT_PARA);
 }
 
 /**
@@ -2588,7 +2588,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbilityInner002, TestSize.Level3)
     MessageParcel reply;
     data.WriteInt32(SAID);
     int32_t result = saMgr->UnloadSystemAbilityInner(data, reply);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(result, INVALID_CALL_PROC);
 }
 
 /**
@@ -2602,7 +2602,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility001, TestSize.Level3)
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
     int32_t result = saMgr->UnloadSystemAbility(INVALID_SAID);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(result, PROFILE_NOT_EXIST);
 }
 
 /**
@@ -2616,7 +2616,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility002, TestSize.Level3)
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
     int32_t result = saMgr->UnloadSystemAbility(SAID);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(result, INVALID_CALL_PROC);
 }
 
 /**
@@ -2632,7 +2632,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility003, TestSize.Level3)
     SaProfile saProfile;
     saMgr->saProfileMap_[SAID] = saProfile;
     int32_t result = saMgr->UnloadSystemAbility(SAID);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(result, INVALID_CALL_PROC);
 }
 
 /**
@@ -2650,7 +2650,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility004, TestSize.Level3)
     saProfile.process = u"testProcess";
     saMgr->saProfileMap_[SAID] = saProfile;
     int32_t result = saMgr->UnloadSystemAbility(SAID);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(result, INVALID_CALL_PROC);
 }
 
 /**
@@ -2661,16 +2661,16 @@ HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility004, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility005, TestSize.Level3)
 {
-    SamMockPermission::MockProcess("testProcess");
+    SamMockPermission::MockProcess("memmgrservice");
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     saMgr->abilityStateScheduler_->processContextMap_.clear();
     saMgr->abilityStateScheduler_->abilityContextMap_.clear();
     EXPECT_TRUE(saMgr != nullptr);
     SaProfile saProfile;
-    saProfile.process = u"testProcess";
+    saProfile.process = u"memmgrservice";
     saMgr->saProfileMap_[SAID] = saProfile;
     int32_t result = saMgr->UnloadSystemAbility(SAID);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(result, GET_SA_CONTEXT_FAIL);
 }
 
 /**
@@ -2773,7 +2773,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbilityInner003, TestSize.Level3)
     MessageParcel reply;
     data.WriteInt32(SAID);
     int32_t result = saMgr->UnloadSystemAbilityInner(data, reply);
-    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_EQ(result, GET_SA_CONTEXT_FAIL);
 }
 
 /**

@@ -14,6 +14,7 @@
  */
 
 #include "system_ability_state_machine_test.h"
+#include "samgr_err_code.h"
 #include "sa_status_change_mock.h"
 #include "test_log.h"
 #define private public
@@ -99,7 +100,7 @@ HWTEST_F(SystemAbilityStateMachineTest, AbilityStateTransitionLocked001, TestSiz
         std::make_shared<SystemAbilityStateMachine>(stateListener);
     int32_t ret = systemAbilityStateMachine->AbilityStateTransitionLocked(nullptr,
         SystemAbilityState::NOT_LOADED);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, SA_CONTEXT_NULL);
 }
 
 /**
@@ -120,7 +121,7 @@ HWTEST_F(SystemAbilityStateMachineTest, AbilityStateTransitionLocked002, TestSiz
     systemAbilityStateMachine->abilityStateHandlerMap_.clear();
     int32_t ret = systemAbilityStateMachine->AbilityStateTransitionLocked(systemAbilityContext,
         SystemAbilityState::NOT_LOADED);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, INVALID_SA_NEXT_STATE);
 }
 
 /**
@@ -142,7 +143,7 @@ HWTEST_F(SystemAbilityStateMachineTest, AbilityStateTransitionLocked003, TestSiz
     systemAbilityStateMachine->abilityStateHandlerMap_[SystemAbilityState::NOT_LOADED] = nullptr;
     int32_t ret = systemAbilityStateMachine->AbilityStateTransitionLocked(systemAbilityContext,
         SystemAbilityState::NOT_LOADED);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, SA_STATE_HANDLER_NULL);
 }
 
 /**
@@ -196,7 +197,7 @@ HWTEST_F(SystemAbilityStateMachineTest, AbilityStateTransitionLocked005, TestSiz
     systemAbilityStateMachine->abilityStateHandlerMap_[SystemAbilityState::NOT_LOADED] = notLoadedStateHandler;
     int32_t ret = systemAbilityStateMachine->AbilityStateTransitionLocked(systemAbilityContext,
         SystemAbilityState::LOADING);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, INVALID_SA_NEXT_STATE);
 }
 
 /**
@@ -319,7 +320,7 @@ HWTEST_F(SystemAbilityStateMachineTest, ProcessStateTransitionLocked001, TestSiz
     std::shared_ptr<SystemAbilityStateMachine> systemAbilityStateMachine =
         std::make_shared<SystemAbilityStateMachine>(stateListener);
     int32_t ret = systemAbilityStateMachine->ProcessStateTransitionLocked(nullptr, SystemProcessState::NOT_STARTED);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, PROC_CONTEXT_NULL);
 }
 
 /**
@@ -340,7 +341,7 @@ HWTEST_F(SystemAbilityStateMachineTest, ProcessStateTransitionLocked002, TestSiz
     systemAbilityStateMachine->processStateHandlerMap_.clear();
     int32_t ret = systemAbilityStateMachine->ProcessStateTransitionLocked(systemProcessContext,
         SystemProcessState::NOT_STARTED);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, INVALID_PROC_NEXT_STATE);
 }
 
 /**
@@ -362,7 +363,7 @@ HWTEST_F(SystemAbilityStateMachineTest, ProcessStateTransitionLocked003, TestSiz
     systemAbilityStateMachine->processStateHandlerMap_[SystemProcessState::NOT_STARTED] = nullptr;
     int32_t ret = systemAbilityStateMachine->ProcessStateTransitionLocked(systemProcessContext,
         SystemProcessState::NOT_STARTED);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, PROC_STATE_HANDLER_NULL);
 }
 
 /**
@@ -416,7 +417,7 @@ HWTEST_F(SystemAbilityStateMachineTest, ProcessStateTransitionLocked005, TestSiz
     systemAbilityStateMachine->processStateHandlerMap_[SystemProcessState::NOT_STARTED] = startedStateHandler;
     int32_t ret = systemAbilityStateMachine->ProcessStateTransitionLocked(systemProcessContext,
         SystemProcessState::STARTED);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, INVALID_PROC_NEXT_STATE);
 }
 
 /**

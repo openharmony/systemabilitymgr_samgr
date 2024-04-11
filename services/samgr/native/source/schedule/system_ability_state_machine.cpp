@@ -17,6 +17,7 @@
 
 #include "sam_log.h"
 #include "string_ex.h"
+#include "samgr_err_code.h"
 #include "schedule/system_ability_state_machine.h"
 
 namespace OHOS {
@@ -43,16 +44,16 @@ int32_t SystemAbilityStateMachine::AbilityStateTransitionLocked(const std::share
 {
     if (context == nullptr) {
         HILOGE("[SA Scheduler] context is nullptr");
-        return ERR_INVALID_VALUE;
+        return SA_CONTEXT_NULL;
     }
     if (abilityStateHandlerMap_.count(nextState) == 0) {
         HILOGE("[SA Scheduler] invalid next state: %{public}d", nextState);
-        return ERR_INVALID_VALUE;
+        return INVALID_SA_NEXT_STATE;
     }
     std::shared_ptr<SystemAbilityStateHandler> handler = abilityStateHandlerMap_[nextState];
     if (handler == nullptr) {
         HILOGE("[SA Scheduler] next state: %{public}d handler is nullptr", nextState);
-        return ERR_INVALID_VALUE;
+        return SA_STATE_HANDLER_NULL;
     }
     SystemAbilityState currentState = context->state;
     if (currentState == nextState) {
@@ -63,11 +64,11 @@ int32_t SystemAbilityStateMachine::AbilityStateTransitionLocked(const std::share
     if (!handler->CanEnter(currentState)) {
         HILOGE("[SA Scheduler][SA:%{public}d] can't transiton from state %{public}d to %{public}d",
             context->systemAbilityId, currentState, nextState);
-        return ERR_INVALID_VALUE;
+        return TRANSIT_SA_STATE_FAIL;
     }
     if (!UpdateStateCount(context->ownProcessContext, currentState, nextState)) {
         HILOGE("[SA Scheduler][SA: %{public}d] update state count failed", context->systemAbilityId);
-        return ERR_INVALID_VALUE;
+        return UPDATE_STATE_COUNT_FAIL;
     }
     context->state = nextState;
     HILOGD("[SA Scheduler][SA:%{public}d] transiton from state %{public}d to %{public}d",
@@ -104,16 +105,16 @@ int32_t SystemAbilityStateMachine::ProcessStateTransitionLocked(const std::share
 {
     if (context == nullptr) {
         HILOGE("[SA Scheduler] process context is nullptr");
-        return ERR_INVALID_VALUE;
+        return PROC_CONTEXT_NULL;
     }
     if (processStateHandlerMap_.count(nextState) == 0) {
         HILOGE("[SA Scheduler] invalid next state: %{public}d", nextState);
-        return ERR_INVALID_VALUE;
+        return INVALID_PROC_NEXT_STATE;
     }
     std::shared_ptr<SystemProcessStateHandler> handler = processStateHandlerMap_[nextState];
     if (handler == nullptr) {
         HILOGE("[SA Scheduler] next state: %{public}d handler is nullptr", nextState);
-        return ERR_INVALID_VALUE;
+        return PROC_STATE_HANDLER_NULL;
     }
     SystemProcessState currentState = context->state;
     if (currentState == nextState) {
@@ -124,7 +125,7 @@ int32_t SystemAbilityStateMachine::ProcessStateTransitionLocked(const std::share
     if (!handler->CanEnter(currentState)) {
         HILOGI("[SA Scheduler][proc:%{public}s] can't transiton from state %{public}d to %{public}d",
             Str16ToStr8(context->processName).c_str(), currentState, nextState);
-        return ERR_INVALID_VALUE;
+        return TRANSIT_PROC_STATE_FAIL;
     }
     context->state = nextState;
     HILOGI("[SA Scheduler][proc:%{public}s] transiton from state %{public}d to %{public}d",
