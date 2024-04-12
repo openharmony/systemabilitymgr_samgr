@@ -22,12 +22,12 @@
 #include "refbase.h"
 namespace OHOS {
 extern "C" {
-int32_t TEST_DROP = 0;
+int32_t g_testDrop = 0;
 }
 
 Foo::~Foo()
 {
-    TEST_DROP += 1;
+    g_testDrop += 1;
 }
 
 Keeper::Keeper(sptr<Foo> inner) : inner_(inner)

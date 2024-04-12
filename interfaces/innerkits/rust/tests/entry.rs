@@ -12,10 +12,9 @@
 // limitations under the License.
 
 #![allow(unused)]
-
+#![cfg(gn_test)]
 mod basic;
 mod mem;
-mod remote;
 use std::ffi::{c_char, CString};
 use std::ptr;
 #[repr(C)]

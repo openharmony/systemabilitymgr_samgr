@@ -28,24 +28,24 @@ mod ffi {
 fn test() {
     let w = GetUniqueSptr();
     unsafe {
-        assert_eq!(TEST_DROP, 0);
+        assert_eq!(g_testDrop, 0);
     }
     drop(w);
     unsafe {
-        assert_eq!(TEST_DROP, 1);
+        assert_eq!(g_testDrop, 1);
     }
     let w = GetUniqueSptr();
     let keeper = KeepUniqueSptr(w);
     unsafe {
-        assert_eq!(TEST_DROP, 1);
+        assert_eq!(g_testDrop, 1);
     }
     drop(keeper);
     unsafe {
-        assert_eq!(TEST_DROP, 2);
+        assert_eq!(g_testDrop, 2);
     }
 }
 
 #[link(name = "samgr_rust_test_c")]
 extern "C" {
-    static TEST_DROP: i32;
+    static g_testDrop: i32;
 }
