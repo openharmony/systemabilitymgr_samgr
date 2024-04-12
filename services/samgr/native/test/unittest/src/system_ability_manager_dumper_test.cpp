@@ -403,4 +403,396 @@ HWTEST_F(SystemAbilityManagerDumperTest, Dump008, TestSize.Level3)
     bool ret = SystemAbilityManagerDumper::Dump(abilityStateScheduler, args, result);
     EXPECT_FALSE(ret);
 }
+
+/**
+ * @tc.name: IpcDumpCmdParser001
+ * @tc.desc: ipc dump cmd parser, IpcDumpCmdParser
+ * @tc.type: FUNC
+ * @tc.require: I9DR69
+ */
+
+HWTEST_F(SystemAbilityManagerDumperTest, IpcDumpCmdParser001, TestSize.Level3)
+{
+    SamMockPermission::MockProcess("hidumper_service");
+    int32_t cmd = -1;
+    std::vector<std::string> args;
+    args.push_back("--ipc");
+    args.push_back("all");
+    args.push_back("--start-stat");
+    std::string result;
+    bool ret = SystemAbilityManagerDumper::IpcDumpCmdParser(cmd, args);
+    EXPECT_TRUE(ret);
+    EXPECT_TRUE(cmd == 0);
+}
+
+/**
+ * @tc.name: IpcDumpCmdParser002
+ * @tc.desc: ipc dump cmd parser, IpcDumpCmdParser
+ * @tc.type: FUNC
+ * @tc.require: I9DR69
+ */
+
+HWTEST_F(SystemAbilityManagerDumperTest, IpcDumpCmdParser002, TestSize.Level3)
+{
+    SamMockPermission::MockProcess("hidumper_service");
+    int32_t cmd = 0;
+    std::vector<std::string> args;
+    args.push_back("--ipc");
+    args.push_back("all");
+    args.push_back("--stop-stat");
+    std::string result;
+    bool ret = SystemAbilityManagerDumper::IpcDumpCmdParser(cmd, args);
+    EXPECT_TRUE(ret);
+    EXPECT_TRUE(cmd == 1);
+}
+
+/**
+ * @tc.name: IpcDumpCmdParser003
+ * @tc.desc: ipc dump cmd parser, IpcDumpCmdParser
+ * @tc.type: FUNC
+ * @tc.require: I9DR69
+ */
+
+HWTEST_F(SystemAbilityManagerDumperTest, IpcDumpCmdParser003, TestSize.Level3)
+{
+    SamMockPermission::MockProcess("hidumper_service");
+    int32_t cmd = 0;
+    std::vector<std::string> args;
+    args.push_back("--ipc");
+    args.push_back("all");
+    args.push_back("--stat");
+    std::string result;
+    bool ret = SystemAbilityManagerDumper::IpcDumpCmdParser(cmd, args);
+    EXPECT_TRUE(ret);
+    EXPECT_TRUE(cmd == 2);
+}
+
+/**
+ * @tc.name: IpcDumpCmdParser004
+ * @tc.desc: ipc dump cmd parser, IpcDumpCmdParser
+ * @tc.type: FUNC
+ * @tc.require: I9DR69
+ */
+
+HWTEST_F(SystemAbilityManagerDumperTest, IpcDumpCmdParser004, TestSize.Level3)
+{
+    SamMockPermission::MockProcess("hidumper_service");
+    int32_t cmd = 0;
+    std::vector<std::string> args;
+    args.push_back("--ipc");
+    args.push_back("wifi_manager_service");
+    args.push_back("--start-stat");
+    std::string result;
+    bool ret = SystemAbilityManagerDumper::IpcDumpCmdParser(cmd, args);
+    EXPECT_TRUE(ret);
+    EXPECT_TRUE(cmd == 0);
+}
+
+/**
+ * @tc.name: IpcDumpCmdParser005
+ * @tc.desc: ipc dump cmd parser, IpcDumpCmdParser
+ * @tc.type: FUNC
+ * @tc.require: I9DR69
+ */
+
+HWTEST_F(SystemAbilityManagerDumperTest, IpcDumpCmdParser005, TestSize.Level3)
+{
+    SamMockPermission::MockProcess("hidumper_service");
+    int32_t cmd = 0;
+    std::vector<std::string> args;
+    args.push_back("--ipc");
+    args.push_back("wifi_manager_service");
+    args.push_back("--stop-stat");
+    std::string result;
+    bool ret = SystemAbilityManagerDumper::IpcDumpCmdParser(cmd, args);
+    EXPECT_TRUE(ret);
+    EXPECT_TRUE(cmd == 1);
+}
+
+/**
+ * @tc.name: IpcDumpCmdParser006
+ * @tc.desc: ipc dump cmd parser, IpcDumpCmdParser
+ * @tc.type: FUNC
+ * @tc.require: I9DR69
+ */
+
+HWTEST_F(SystemAbilityManagerDumperTest, IpcDumpCmdParser006, TestSize.Level3)
+{
+    SamMockPermission::MockProcess("hidumper_service");
+    int32_t cmd = 0;
+    std::vector<std::string> args;
+    args.push_back("--ipc");
+    args.push_back("wifi_manager_service");
+    args.push_back("--stat");
+    std::string result;
+    bool ret = SystemAbilityManagerDumper::IpcDumpCmdParser(cmd, args);
+    EXPECT_TRUE(ret);
+    EXPECT_TRUE(cmd == 2);
+}
+
+/**
+ * @tc.name: IpcDumpCmdParser007
+ * @tc.desc: ipc dump cmd parser, IpcDumpCmdParser
+ * @tc.type: FUNC
+ * @tc.require: I9DR69
+ */
+
+HWTEST_F(SystemAbilityManagerDumperTest, IpcDumpCmdParser007, TestSize.Level3)
+{
+    SamMockPermission::MockProcess("demo_service");
+    int32_t cmd = 0;
+    std::vector<std::string> args;
+    args.push_back("--ipc");
+    args.push_back("wifi_manager_service");
+    args.push_back("--start-stat");
+    std::string result;
+    bool ret = SystemAbilityManagerDumper::IpcDumpCmdParser(cmd, args);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: IpcDumpCmdParser008
+ * @tc.desc: ipc dump cmd parser, IpcDumpCmdParser
+ * @tc.type: FUNC
+ * @tc.require: I9DR69
+ */
+
+HWTEST_F(SystemAbilityManagerDumperTest, IpcDumpCmdParser008, TestSize.Level3)
+{
+    SamMockPermission::MockProcess("demo_service");
+    int32_t cmd = 0;
+    std::vector<std::string> args;
+    args.push_back("--ipc");
+    args.push_back("wifi_manager_service");
+    args.push_back("--stop-stat");
+    std::string result;
+    bool ret = SystemAbilityManagerDumper::IpcDumpCmdParser(cmd, args);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: IpcDumpCmdParser009
+ * @tc.desc: ipc dump cmd parser, IpcDumpCmdParser
+ * @tc.type: FUNC
+ * @tc.require: I9DR69
+ */
+
+HWTEST_F(SystemAbilityManagerDumperTest, IpcDumpCmdParser009, TestSize.Level3)
+{
+    SamMockPermission::MockProcess("demo_service");
+    int32_t cmd = 0;
+    std::vector<std::string> args;
+    args.push_back("--ipc");
+    args.push_back("wifi_manager_service");
+    args.push_back("--stat");
+    std::string result;
+    bool ret = SystemAbilityManagerDumper::IpcDumpCmdParser(cmd, args);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: IpcDumpCmdParser010
+ * @tc.desc: ipc dump cmd parser, IpcDumpCmdParser
+ * @tc.type: FUNC
+ * @tc.require: I9DR69
+ */
+
+HWTEST_F(SystemAbilityManagerDumperTest, IpcDumpCmdParser010, TestSize.Level3)
+{
+    SamMockPermission::MockProcess("demo_service");
+    int32_t cmd = 0;
+    std::vector<std::string> args;
+    args.push_back("--ipc");
+    std::string result;
+    bool ret = SystemAbilityManagerDumper::IpcDumpCmdParser(cmd, args);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: IpcDumpCmdParser011
+ * @tc.desc: ipc dump cmd parser, IpcDumpCmdParser
+ * @tc.type: FUNC
+ * @tc.require: I9DR69
+ */
+
+HWTEST_F(SystemAbilityManagerDumperTest, IpcDumpCmdParser011, TestSize.Level3)
+{
+    SamMockPermission::MockProcess("demo_service");
+    int32_t cmd = 0;
+    std::vector<std::string> args;
+    args.push_back("--ipc");
+    args.push_back("wifi_manager_service");
+    std::string result;
+    bool ret = SystemAbilityManagerDumper::IpcDumpCmdParser(cmd, args);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: IpcDumpCmdParser012
+ * @tc.desc: ipc dump cmd parser, IpcDumpCmdParser
+ * @tc.type: FUNC
+ * @tc.require: I9DR69
+ */
+
+HWTEST_F(SystemAbilityManagerDumperTest, IpcDumpCmdParser012, TestSize.Level3)
+{
+    SamMockPermission::MockProcess("demo_service");
+    int32_t cmd = 0;
+    std::vector<std::string> args;
+    args.push_back("--ipc");
+    args.push_back("wifi_manager_service");
+    args.push_back("test001");
+    std::string result;
+    bool ret = SystemAbilityManagerDumper::IpcDumpCmdParser(cmd, args);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: IpcDumpCmdParser013
+ * @tc.desc: ipc dump cmd parser, IpcDumpCmdParser
+ * @tc.type: FUNC
+ * @tc.require: I9DR69
+ */
+
+HWTEST_F(SystemAbilityManagerDumperTest, IpcDumpCmdParser013, TestSize.Level3)
+{
+    SamMockPermission::MockProcess("demo_service");
+    int32_t cmd = 0;
+    std::vector<std::string> args;
+    args.push_back("--ipc");
+    args.push_back("testProcess");
+    args.push_back("test001");
+    std::string result;
+    bool ret = SystemAbilityManagerDumper::IpcDumpCmdParser(cmd, args);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: IpcDumpCmdParser014
+ * @tc.desc: ipc dump cmd parser, IpcDumpCmdParser
+ * @tc.type: FUNC
+ * @tc.require: I9DR69
+ */
+
+HWTEST_F(SystemAbilityManagerDumperTest, IpcDumpCmdParser014, TestSize.Level3)
+{
+    SamMockPermission::MockProcess("hidumper_service");
+    int32_t cmd = 0;
+    std::vector<std::string> args;
+    args.push_back("--ipc");
+    args.push_back("testProcess");
+    args.push_back("test001");
+    std::string result;
+    bool ret = SystemAbilityManagerDumper::IpcDumpCmdParser(cmd, args);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: IpcDumpIsAllProcess001
+ * @tc.desc: is ipc dump all process cmd, IpcDumpIsAllProcess
+ * @tc.type: FUNC
+ * @tc.require: I9DR69
+ */
+
+HWTEST_F(SystemAbilityManagerDumperTest, IpcDumpIsAllProcess001, TestSize.Level3)
+{
+    std::string processName = "all";
+    bool ret = SystemAbilityManagerDumper::IpcDumpIsAllProcess(processName);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: IpcDumpIsAllProcess002
+ * @tc.desc: is ipc dump all process cmd, IpcDumpIsAllProcess
+ * @tc.type: FUNC
+ * @tc.require: I9DR69
+ */
+
+HWTEST_F(SystemAbilityManagerDumperTest, IpcDumpIsAllProcess002, TestSize.Level3)
+{
+    std::string processName = "test001";
+    bool ret = SystemAbilityManagerDumper::IpcDumpIsAllProcess(processName);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: IpcDumpIsAllProcess003
+ * @tc.desc: is ipc dump all process cmd, IpcDumpIsAllProcess
+ * @tc.type: FUNC
+ * @tc.require: I9DR69
+ */
+
+HWTEST_F(SystemAbilityManagerDumperTest, IpcDumpIsAllProcess003, TestSize.Level3)
+{
+    std::string processName = "";
+    bool ret = SystemAbilityManagerDumper::IpcDumpIsAllProcess(processName);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: IpcDumpIsSamgr001
+ * @tc.desc: is ipc dump samgr process cmd, IpcDumpIsSamgr001
+ * @tc.type: FUNC
+ * @tc.require: I9DR69
+ */
+
+HWTEST_F(SystemAbilityManagerDumperTest, IpcDumpIsSamgr001, TestSize.Level3)
+{
+    std::string processName = "samgr";
+    bool ret = SystemAbilityManagerDumper::IpcDumpIsSamgr(processName);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: IpcDumpIsSamgr002
+ * @tc.desc: is ipc dump samgr process cmd, IpcDumpIsSamgr002
+ * @tc.type: FUNC
+ * @tc.require: I9DR69
+ */
+
+HWTEST_F(SystemAbilityManagerDumperTest, IpcDumpIsSamgr002, TestSize.Level3)
+{
+    std::string processName = "test001";
+    bool ret = SystemAbilityManagerDumper::IpcDumpIsSamgr(processName);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: StartSamgrIpcStatistics001
+ * @tc.desc: test StartSamgrIpcStatistics
+ * @tc.type: FUNC
+ * @tc.require: I6W28
+ */
+HWTEST_F(SystemAbilityManagerDumperTest, StartSamgrIpcStatistics001, TestSize.Level2)
+{
+    std::string result;
+    bool ret = SystemAbilityManagerDumper::StartSamgrIpcStatistics(result);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: StopSamgrIpcStatistics001
+ * @tc.desc: test StopSamgrIpcStatistics
+ * @tc.type: FUNC
+ * @tc.require: I6W28
+ */
+HWTEST_F(SystemAbilityManagerDumperTest, StopSamgrIpcStatistics001, TestSize.Level2)
+{
+    std::string result;
+    bool ret = SystemAbilityManagerDumper::StopSamgrIpcStatistics(result);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: GetSamgrIpcStatistics001
+ * @tc.desc: test GetSamgrIpcStatistics
+ * @tc.type: FUNC
+ * @tc.require: I6W28
+ */
+HWTEST_F(SystemAbilityManagerDumperTest, GetSamgrIpcStatistics001, TestSize.Level2)
+{
+    std::string result;
+    bool ret = SystemAbilityManagerDumper::GetSamgrIpcStatistics(result);
+    EXPECT_EQ(ret, true);
+}
 }

@@ -42,6 +42,7 @@ const std::string KEY_NAME = "name";
 const std::string KEY_VALUE = "value";
 const std::string KEY_EXTRA_DATA_ID = "extraDataId";
 const std::string KEY_UNLOAD_TIMEOUT = "unloadTimeout";
+const std::u16string SAMGR_PROCESS_NAME = u"samgr";
 constexpr const char *SA_STATE_ENUM_STR[] = {
     "NOT_LOADED", "LOADING", "LOADED", "UNLOADABLE", "UNLOADING" };
 constexpr const char *PROCESS_STATE_ENUM_STR[] = {
@@ -112,6 +113,30 @@ void SystemAbilityStateScheduler::InitStateContext(const std::list<SaProfile>& s
         std::unique_lock<std::shared_mutex> abiltyWriteLock(abiltyMapLock_);
         abilityContextMap_[saProfile.saId] = abilityContext;
     }
+}
+
+void SystemAbilityStateScheduler::InitSamgrProcessContext()
+{
+    auto processContext = std::make_shared<SystemProcessContext>();
+    processContext->processName = SAMGR_PROCESS_NAME;
+    processContext->abilityStateCountMap[SystemAbilityState::NOT_LOADED] = 0;
+    processContext->abilityStateCountMap[SystemAbilityState::LOADING] = 0;
+    processContext->abilityStateCountMap[SystemAbilityState::LOADED] = 1;
+    processContext->abilityStateCountMap[SystemAbilityState::UNLOADABLE] = 0;
+    processContext->abilityStateCountMap[SystemAbilityState::UNLOADING] = 0;
+    processContext->pid = getpid();
+    processContext->uid = getuid();
+    processContextMap_[SAMGR_PROCESS_NAME] = processContext;
+    processContextMap_[SAMGR_PROCESS_NAME]->saList.push_back(0);
+    processContext->state = SystemProcessState::STARTED;
+
+    auto abilityContext = std::make_shared<SystemAbilityContext>();
+    abilityContext->systemAbilityId = 0;
+    abilityContext->isAutoRestart = false;
+    abilityContext->delayUnloadTime = MAX_DELAY_TIME;
+    abilityContext->ownProcessContext = processContextMap_[SAMGR_PROCESS_NAME];
+    std::unique_lock<std::shared_mutex> abiltyWriteLock(abiltyMapLock_);
+    abilityContextMap_[0] = abilityContext;
 }
 
 int32_t SystemAbilityStateScheduler::LimitDelayUnloadTime(int32_t delayUnloadTime)

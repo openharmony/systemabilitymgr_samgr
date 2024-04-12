@@ -59,6 +59,7 @@ const string LOCAL_DEVICE = "local";
 const string ONDEMAND_PARAM = "persist.samgr.perf.ondemand";
 const string DYNAMIC_CACHE_PARAM = "persist.samgr.cache.sa";
 const string RESOURCE_SCHEDULE_PROCESS_NAME = "resource_schedule_service";
+const string IPC_STAT_DUMP_PREFIX = "--ipc";
 constexpr const char* ONDEMAND_PERF_PARAM = "persist.samgr.perf.ondemand";
 constexpr const char* ONDEMAND_WORKER = "OndemandLoader";
 
@@ -135,17 +136,105 @@ void SystemAbilityManager::SetFfrt()
     }
 }
 
+bool SystemAbilityManager::IpcStatSamgrProc(int32_t fd, int32_t cmd)
+{
+    bool ret = false;
+    std::string result;
+
+    HILOGI("IpcStatSamgrProc:fd=%{public}d cmd=%{public}d", fd, cmd);
+    if (cmd < IPC_STAT_CMD_START || cmd >= IPC_STAT_CMD_MAX) {
+        HILOGW("para invalid, fd=%{public}d cmd=%{public}d", fd, cmd);
+        return false;
+    }
+
+    switch (cmd) {
+        case IPC_STAT_CMD_START: {
+            ret = SystemAbilityManagerDumper::StartSamgrIpcStatistics(result);
+            break;
+        }
+        case IPC_STAT_CMD_STOP: {
+            ret = SystemAbilityManagerDumper::StopSamgrIpcStatistics(result);
+            break;
+        }
+        case IPC_STAT_CMD_GET: {
+            ret = SystemAbilityManagerDumper::GetSamgrIpcStatistics(result);
+            break;
+        }
+        default:
+            return false;
+    }
+
+    if (!SaveStringToFd(fd, result)) {
+        HILOGW("save to fd failed");
+        return false;
+    }
+    return ret;
+}
+
+void SystemAbilityManager::IpcDumpAllProcess(int32_t fd, int32_t cmd)
+{
+    lock_guard<mutex> autoLock(systemProcessMapLock_);
+    for (auto iter = systemProcessMap_.begin(); iter != systemProcessMap_.end(); iter++) {
+        sptr<ILocalAbilityManager> obj = iface_cast<ILocalAbilityManager>(iter->second);
+        if (obj != nullptr) {
+            obj->IpcStatCmdProc(fd, cmd);
+        }
+    }
+}
+
+void SystemAbilityManager::IpcDumpSamgrProcess(int32_t fd, int32_t cmd)
+{
+    if (!IpcStatSamgrProc(fd, cmd)) {
+        HILOGE("IpcStatSamgrProc failed");
+    }
+}
+
+void SystemAbilityManager::IpcDumpSingleProcess(int32_t fd, int32_t cmd, const std::string processName)
+{
+    sptr<ILocalAbilityManager> obj = iface_cast<ILocalAbilityManager>(GetSystemProcess(Str8ToStr16(processName)));
+    if (obj != nullptr) {
+        obj->IpcStatCmdProc(fd, cmd);
+    }
+}
+
+int32_t SystemAbilityManager::IpcDumpProc(int32_t fd, const std::vector<std::string>& args)
+{
+    int32_t cmd;
+    if (!SystemAbilityManagerDumper::IpcDumpCmdParser(cmd, args)) {
+        HILOGE("IpcDumpCmdParser failed");
+        return ERR_INVALID_VALUE;
+    }
+
+    HILOGI("IpcDumpProc:fd=%{public}d cmd=%{public}d request", fd, cmd);
+
+    const std::string processName = args[IPC_STAT_PROCESS_INDEX];
+    if (SystemAbilityManagerDumper::IpcDumpIsAllProcess(processName)) {
+        IpcDumpAllProcess(fd, cmd);
+        IpcDumpSamgrProcess(fd, cmd);
+    } else if (SystemAbilityManagerDumper::IpcDumpIsSamgr(processName)) {
+        IpcDumpSamgrProcess(fd, cmd);
+    } else {
+        IpcDumpSingleProcess(fd, cmd, processName);
+    }
+    return ERR_OK;
+}
+
 int32_t SystemAbilityManager::Dump(int32_t fd, const std::vector<std::u16string>& args)
 {
     std::vector<std::string> argsWithStr8;
     for (const auto& arg : args) {
         argsWithStr8.emplace_back(Str16ToStr8(arg));
     }
-    std::string result;
-    SystemAbilityManagerDumper::Dump(abilityStateScheduler_, argsWithStr8, result);
-    if (!SaveStringToFd(fd, result)) {
-        HILOGE("save to fd failed");
-        return ERR_INVALID_VALUE;
+
+    if ((argsWithStr8.size() > 0) && (argsWithStr8[IPC_STAT_PREFIX_INDEX] == IPC_STAT_DUMP_PREFIX)) {
+        return IpcDumpProc(fd, argsWithStr8);
+    } else {
+        std::string result;
+        SystemAbilityManagerDumper::Dump(abilityStateScheduler_, argsWithStr8, result);
+        if (!SaveStringToFd(fd, result)) {
+            HILOGE("save to fd failed");
+            return ERR_INVALID_VALUE;
+        }
     }
     return ERR_OK;
 }
@@ -159,6 +248,9 @@ void SystemAbilityManager::AddSamgrToAbilityMap()
     saInfo.isDistributed = false;
     saInfo.capability = u"";
     abilityMap_[systemAbilityId] = std::move(saInfo);
+    if (abilityStateScheduler_ != nullptr) {
+        abilityStateScheduler_->InitSamgrProcessContext();
+    }
     HILOGD("samgr inserted");
 }
 

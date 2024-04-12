@@ -59,6 +59,7 @@ public:
     int32_t SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener);
     int32_t UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener);
     bool IsSystemProcessNeverStartedLocked(const std::u16string& processName);
+    void InitSamgrProcessContext();
 private:
     void InitStateContext(const std::list<SaProfile>& saProfiles);
 

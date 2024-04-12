@@ -265,4 +265,39 @@ bool LocalAbilityManagerProxy::SendStrategyToSA(int32_t type, int32_t systemAbil
     }
     return result;
 }
+
+bool LocalAbilityManagerProxy::IpcStatCmdProc(int32_t fd, int32_t cmd)
+{
+    sptr<IRemoteObject> iro = Remote();
+    if (iro == nullptr) {
+        HILOG_ERROR(LOG_CORE, "IpcStatCmdProc Remote null");
+        return false;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(LOCAL_ABILITY_MANAGER_INTERFACE_TOKEN)) {
+        HILOG_WARN(LOG_CORE, "IpcStatCmdProc interface token check failed");
+        return false;
+    }
+
+    if (!data.WriteFileDescriptor(fd)) {
+        HILOG_WARN(LOG_CORE, "IpcStatCmdProc write fd failed");
+        return false;
+    }
+
+    if (!data.WriteInt32(cmd)) {
+        HILOG_WARN(LOG_CORE, "IpcStatCmdProc write cmd faild");
+        return false;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t status = iro->SendRequest(
+        static_cast<uint32_t>(SafwkInterfaceCode::IPC_STAT_CMD_TRANSACTION), data, reply, option);
+    if (status != NO_ERROR) {
+        HILOG_ERROR(LOG_CORE, "IpcStatCmdProc SendRequest failed, return value : %{public}d", status);
+        return false;
+    }
+    return true;
+}
 }
