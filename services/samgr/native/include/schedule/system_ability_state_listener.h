@@ -27,35 +27,35 @@ public:
     virtual ~SystemAbilityStateListener() = default;
     virtual void OnAbilityNotLoadedLocked(int32_t systemAbilityId)
     {
-        HILOGI("[SA Scheduler][SA:%{public}d] not loaded", systemAbilityId);
+        HILOGI("Scheduler SA:%{public}d not loaded", systemAbilityId);
     };
     virtual void OnAbilityLoadingLocked(int32_t systemAbilityId)
     {
-        HILOGI("[SA Scheduler][SA:%{public}d] loading", systemAbilityId);
+        HILOGI("Scheduler SA:%{public}d loading", systemAbilityId);
     };
     virtual void OnAbilityLoadedLocked(int32_t systemAbilityId)
     {
-        HILOGI("[SA Scheduler][SA:%{public}d] loaded", systemAbilityId);
+        HILOGI("Scheduler SA:%{public}d loaded", systemAbilityId);
     };
     virtual void OnAbilityUnloadableLocked(int32_t systemAbilityId)
     {
-        HILOGI("[SA Scheduler][SA:%{public}d] unloadable", systemAbilityId);
+        HILOGI("Scheduler SA:%{public}d unloadable", systemAbilityId);
     };
     virtual void OnAbilityUnloadingLocked(int32_t systemAbilityId)
     {
-        HILOGI("[SA Scheduler][SA:%{public}d] unloading", systemAbilityId);
+        HILOGI("Scheduler SA:%{public}d unloading", systemAbilityId);
     };
     virtual void OnProcessNotStartedLocked(const std::u16string& processName)
     {
-        HILOGI("[SA Scheduler][proc:%{public}s] stopped", Str16ToStr8(processName).c_str());
+        HILOGI("Scheduler proc:%{public}s stopped", Str16ToStr8(processName).c_str());
     };
     virtual void OnProcessStartedLocked(const std::u16string& processName)
     {
-        HILOGI("[SA Scheduler][proc:%{public}s] started", Str16ToStr8(processName).c_str());
+        HILOGI("Scheduler proc:%{public}s started", Str16ToStr8(processName).c_str());
     };
     virtual void OnProcessStoppingLocked(const std::u16string& processName)
     {
-        HILOGI("[SA Scheduler][proc:%{public}s] stopping", Str16ToStr8(processName).c_str());
+        HILOGI("Scheduler proc:%{public}s stopping", Str16ToStr8(processName).c_str());
     };
 };
 } // namespace OHOS

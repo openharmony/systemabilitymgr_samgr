@@ -43,35 +43,35 @@ int32_t SystemAbilityStateMachine::AbilityStateTransitionLocked(const std::share
     const SystemAbilityState nextState)
 {
     if (context == nullptr) {
-        HILOGE("[SA Scheduler] context is nullptr");
+        HILOGE("Scheduler:context is null");
         return SA_CONTEXT_NULL;
     }
     if (abilityStateHandlerMap_.count(nextState) == 0) {
-        HILOGE("[SA Scheduler] invalid next state: %{public}d", nextState);
+        HILOGE("Scheduler:invalid next state:%{public}d", nextState);
         return INVALID_SA_NEXT_STATE;
     }
     std::shared_ptr<SystemAbilityStateHandler> handler = abilityStateHandlerMap_[nextState];
     if (handler == nullptr) {
-        HILOGE("[SA Scheduler] next state: %{public}d handler is nullptr", nextState);
+        HILOGE("Scheduler:next state:%{public}d handler is null", nextState);
         return SA_STATE_HANDLER_NULL;
     }
     SystemAbilityState currentState = context->state;
     if (currentState == nextState) {
-        HILOGI("[SA Scheduler][SA:%{public}d] state current %{public}d is same as next %{public}d",
+        HILOGI("Scheduler SA:%{public}d state current %{public}d is same as next %{public}d",
             context->systemAbilityId, currentState, nextState);
         return ERR_OK;
     }
     if (!handler->CanEnter(currentState)) {
-        HILOGE("[SA Scheduler][SA:%{public}d] can't transiton from state %{public}d to %{public}d",
+        HILOGE("Scheduler SA:%{public}d can't transiton from state %{public}d to %{public}d",
             context->systemAbilityId, currentState, nextState);
         return TRANSIT_SA_STATE_FAIL;
     }
     if (!UpdateStateCount(context->ownProcessContext, currentState, nextState)) {
-        HILOGE("[SA Scheduler][SA: %{public}d] update state count failed", context->systemAbilityId);
+        HILOGE("Scheduler SA:%{public}d update state count fail", context->systemAbilityId);
         return UPDATE_STATE_COUNT_FAIL;
     }
     context->state = nextState;
-    HILOGD("[SA Scheduler][SA:%{public}d] transiton from state %{public}d to %{public}d",
+    HILOGD("Scheduler SA:%{public}d transiton from state %{public}d to %{public}d",
         context->systemAbilityId, currentState, nextState);
     handler->OnEnter(context);
     return ERR_OK;
@@ -81,17 +81,17 @@ bool SystemAbilityStateMachine::UpdateStateCount(const std::shared_ptr<SystemPro
     SystemAbilityState fromState, SystemAbilityState toState)
 {
     if (context == nullptr) {
-        HILOGE("[SA Scheduler] process context is nullptr");
+        HILOGE("Scheduler:proc context is null");
         return false;
     }
     std::lock_guard<std::mutex> autoLock(context->stateCountLock);
     if (!context->abilityStateCountMap.count(fromState) || !context->abilityStateCountMap.count(toState)) {
-        HILOGE("[SA Scheduler][proc:%{public}s] invalid state",
+        HILOGE("Scheduler proc:%{public}s invalid state",
             Str16ToStr8(context->processName).c_str());
         return false;
     }
     if (context->abilityStateCountMap[fromState] <= 0) {
-        HILOGE("[SA Scheduler][proc:%{public}s] invalid current state count",
+        HILOGE("Scheduler proc:%{public}s invalid current state count",
             Str16ToStr8(context->processName).c_str());
         return false;
     }
@@ -104,31 +104,31 @@ int32_t SystemAbilityStateMachine::ProcessStateTransitionLocked(const std::share
     SystemProcessState nextState)
 {
     if (context == nullptr) {
-        HILOGE("[SA Scheduler] process context is nullptr");
+        HILOGE("Scheduler:proc context is null");
         return PROC_CONTEXT_NULL;
     }
     if (processStateHandlerMap_.count(nextState) == 0) {
-        HILOGE("[SA Scheduler] invalid next state: %{public}d", nextState);
+        HILOGE("Scheduler:invalid next state:%{public}d", nextState);
         return INVALID_PROC_NEXT_STATE;
     }
     std::shared_ptr<SystemProcessStateHandler> handler = processStateHandlerMap_[nextState];
     if (handler == nullptr) {
-        HILOGE("[SA Scheduler] next state: %{public}d handler is nullptr", nextState);
+        HILOGE("Scheduler:next state:%{public}d handler is null", nextState);
         return PROC_STATE_HANDLER_NULL;
     }
     SystemProcessState currentState = context->state;
     if (currentState == nextState) {
-        HILOGI("[SA Scheduler][proc:%{public}s] state current %{public}d is same as next %{public}d",
+        HILOGI("Scheduler proc:%{public}s state current %{public}d is same as next %{public}d",
             Str16ToStr8(context->processName).c_str(), currentState, nextState);
         return ERR_OK;
     }
     if (!handler->CanEnter(currentState)) {
-        HILOGI("[SA Scheduler][proc:%{public}s] can't transiton from state %{public}d to %{public}d",
+        HILOGI("Scheduler proc:%{public}s can't transiton from state %{public}d to %{public}d",
             Str16ToStr8(context->processName).c_str(), currentState, nextState);
         return TRANSIT_PROC_STATE_FAIL;
     }
     context->state = nextState;
-    HILOGI("[SA Scheduler][proc:%{public}s] transiton from state %{public}d to %{public}d",
+    HILOGI("Scheduler proc:%{public}s transiton from state %{public}d to %{public}d",
         Str16ToStr8(context->processName).c_str(), currentState, nextState);
     handler->OnEnter(context);
     return ERR_OK;
@@ -143,7 +143,7 @@ void NotLoadedStateHandler::OnEnter(const std::shared_ptr<SystemAbilityContext>&
 {
     auto listener = listener_.lock();
     if (listener == nullptr) {
-        HILOGE("[SA Scheduler] listener is nullptr");
+        HILOGE("Scheduler:listener is null");
         return;
     }
     listener->OnAbilityNotLoadedLocked(context->systemAbilityId);
@@ -158,7 +158,7 @@ void LoadingStateHandler::OnEnter(const std::shared_ptr<SystemAbilityContext>& c
 {
     auto listener = listener_.lock();
     if (listener == nullptr) {
-        HILOGE("[SA Scheduler] listener is nullptr");
+        HILOGE("Scheduler:listener is null");
         return;
     }
     listener->OnAbilityLoadingLocked(context->systemAbilityId);
@@ -178,7 +178,7 @@ void LoadedStateHandler::OnEnter(const std::shared_ptr<SystemAbilityContext>& co
 {
     auto listener = listener_.lock();
     if (listener == nullptr) {
-        HILOGE("[SA Scheduler] listener is nullptr");
+        HILOGE("Scheduler:listener is null");
         return;
     }
     listener->OnAbilityLoadedLocked(context->systemAbilityId);
@@ -193,7 +193,7 @@ void UnloadableStateHandler::OnEnter(const std::shared_ptr<SystemAbilityContext>
 {
     auto listener = listener_.lock();
     if (listener == nullptr) {
-        HILOGE("[SA Scheduler] listener is nullptr");
+        HILOGE("Scheduler:listener is null");
         return;
     }
     listener->OnAbilityUnloadableLocked(context->systemAbilityId);
@@ -208,7 +208,7 @@ void UnloadingStateHandler::OnEnter(const std::shared_ptr<SystemAbilityContext>&
 {
     auto listener = listener_.lock();
     if (listener == nullptr) {
-        HILOGE("[SA Scheduler] listener is nullptr");
+        HILOGE("Scheduler:listener is null");
         return;
     }
     listener->OnAbilityUnloadingLocked(context->systemAbilityId);
@@ -223,7 +223,7 @@ void NotStartedStateHandler::OnEnter(const std::shared_ptr<SystemProcessContext>
 {
     auto listener = listener_.lock();
     if (listener == nullptr) {
-        HILOGE("[SA Scheduler] listener is nullptr");
+        HILOGE("Scheduler:listener is null");
         return;
     }
     listener->OnProcessNotStartedLocked(context->processName);
@@ -238,7 +238,7 @@ void StartedStateHandler::OnEnter(const std::shared_ptr<SystemProcessContext>& c
 {
     auto listener = listener_.lock();
     if (listener == nullptr) {
-        HILOGE("[SA Scheduler] listener is nullptr");
+        HILOGE("Scheduler:listener is null");
         return;
     }
     listener->OnProcessStartedLocked(context->processName);
@@ -253,7 +253,7 @@ void StoppingStateHandler::OnEnter(const std::shared_ptr<SystemProcessContext>& 
 {
     auto listener = listener_.lock();
     if (listener == nullptr) {
-        HILOGE("[SA Scheduler] listener is nullptr");
+        HILOGE("Scheduler:listener is null");
         return;
     }
     listener->OnProcessStoppingLocked(context->processName);

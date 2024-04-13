@@ -42,10 +42,10 @@ int32_t SystemAbilityEventHandler::HandleAbilityEventLocked(const std::shared_pt
     AbilityStateEvent event)
 {
     if (context == nullptr) {
-        HILOGE("[SA Scheduler] context is nullptr");
+        HILOGE("Scheduler:context is null");
         return ERR_INVALID_VALUE;
     }
-    HILOGD("[SA Scheduler][SA: %{public}d] handle ability event %{public}d start",
+    HILOGD("Scheduler SA:%{public}d handle SA event %{public}d start",
         context->systemAbilityId, event);
     auto iter = abilityEventHandlerMap_.find(event);
     if (iter != abilityEventHandlerMap_.end()) {
@@ -54,7 +54,7 @@ int32_t SystemAbilityEventHandler::HandleAbilityEventLocked(const std::shared_pt
             return (this->*func)(context);
         }
     }
-    HILOGE("[SA Scheduler][SA: %{public}d] invalid ability event %{public}d", context->systemAbilityId, event);
+    HILOGE("Scheduler SA:%{public}d invalid SA event %{public}d", context->systemAbilityId, event);
     return ERR_INVALID_VALUE;
 }
 
@@ -62,10 +62,10 @@ int32_t SystemAbilityEventHandler::HandleProcessEventLocked(const std::shared_pt
     const ProcessInfo& processInfo, ProcessStateEvent event)
 {
     if (context == nullptr) {
-        HILOGE("[SA Scheduler] context is nullptr");
+        HILOGE("Scheduler:context is null");
         return ERR_INVALID_VALUE;
     }
-    HILOGD("[SA Scheduler][process: %{public}s] handle process event %{public}d start",
+    HILOGD("Scheduler proc:%{public}s handle proc event %{public}d start",
         Str16ToStr8(context->processName).c_str(), event);
     auto iter = processEventHandlerMap_.find(event);
     if (iter != processEventHandlerMap_.end()) {
@@ -74,7 +74,7 @@ int32_t SystemAbilityEventHandler::HandleProcessEventLocked(const std::shared_pt
             return (this->*func)(context, processInfo);
         }
     }
-    HILOGE("[SA Scheduler][proc:%{public}s] invalid proc event %{public}d",
+    HILOGE("Scheduler proc:%{public}s invalid proc event %{public}d",
         Str16ToStr8(context->processName).c_str(), event);
     return ERR_INVALID_VALUE;
 }
@@ -82,19 +82,19 @@ int32_t SystemAbilityEventHandler::HandleProcessEventLocked(const std::shared_pt
 int32_t SystemAbilityEventHandler::HandleAbilityLoadFailedEventLocked(
     const std::shared_ptr<SystemAbilityContext>& context)
 {
-    HILOGI("[SA Scheduler][SA: %{public}d] handle load failed event", context->systemAbilityId);
+    HILOGI("Scheduler SA:%{public}d handle load fail event", context->systemAbilityId);
     int32_t result = ERR_OK;
     switch (context->state) {
         case SystemAbilityState::LOADING:
             if (context->pendingEvent == PendingEvent::UNLOAD_ABILITY_EVENT) {
-                HILOGI("[SA Scheduler][SA: %{public}d] remove pending unload event", context->systemAbilityId);
+                HILOGI("Scheduler SA:%{public}d rm pending unload event", context->systemAbilityId);
                 context->pendingEvent = PendingEvent::NO_EVENT;
             }
             result = stateMachine_->AbilityStateTransitionLocked(context, SystemAbilityState::NOT_LOADED);
             break;
         default:
             result = ERR_INVALID_VALUE;
-            HILOGE("[SA Scheduler][SA:%{public}d] in state %{public}d, can't handle load failed event",
+            HILOGE("Scheduler SA:%{public}d in state %{public}d,can't handle load fail event",
                 context->systemAbilityId, context->state);
             break;
     }
@@ -104,7 +104,7 @@ int32_t SystemAbilityEventHandler::HandleAbilityLoadFailedEventLocked(
 int32_t SystemAbilityEventHandler::HandleAbilityLoadSuccessEventLocked(
     const std::shared_ptr<SystemAbilityContext>& context)
 {
-    HILOGI("[SA Scheduler][SA: %{public}d] handle load success event", context->systemAbilityId);
+    HILOGI("Scheduler SA:%{public}d handle load suc event", context->systemAbilityId);
     int32_t result = ERR_OK;
     switch (context->state) {
         case SystemAbilityState::NOT_LOADED:
@@ -113,7 +113,7 @@ int32_t SystemAbilityEventHandler::HandleAbilityLoadSuccessEventLocked(
             break;
         default:
             result = ERR_INVALID_VALUE;
-            HILOGE("[SA Scheduler][SA:%{public}d] in state %{public}d, can't handle load success event",
+            HILOGE("Scheduler SA:%{public}d in state %{public}d,can't handle load suc event",
                 context->systemAbilityId, context->state);
             break;
     }
@@ -123,12 +123,12 @@ int32_t SystemAbilityEventHandler::HandleAbilityLoadSuccessEventLocked(
 int32_t SystemAbilityEventHandler::HandleAbilityUnLoadSuccessEventLocked(
     const std::shared_ptr<SystemAbilityContext>& context)
 {
-    HILOGI("[SA Scheduler][SA: %{public}d] handle unload success event", context->systemAbilityId);
+    HILOGI("Scheduler SA:%{public}d handle unload suc event", context->systemAbilityId);
     int32_t result = ERR_OK;
     switch (context->state) {
         case SystemAbilityState::LOADING:
             if (context->pendingEvent == PendingEvent::UNLOAD_ABILITY_EVENT) {
-                HILOGI("[SA Scheduler][SA: %{public}d] remove pending unload event", context->systemAbilityId);
+                HILOGI("Scheduler SA:%{public}d rm pending unload event", context->systemAbilityId);
                 context->pendingEvent = PendingEvent::NO_EVENT;
             }
             result = stateMachine_->AbilityStateTransitionLocked(context, SystemAbilityState::NOT_LOADED);
@@ -140,7 +140,7 @@ int32_t SystemAbilityEventHandler::HandleAbilityUnLoadSuccessEventLocked(
             break;
         default:
             result = ERR_INVALID_VALUE;
-            HILOGE("[SA Scheduler][SA: %{public}d] in state %{public}d, not need handle unload success event",
+            HILOGE("Scheduler SA:%{public}d in state %{public}d,not need handle unload suc event",
                 context->systemAbilityId, context->state);
             break;
     }
@@ -150,7 +150,7 @@ int32_t SystemAbilityEventHandler::HandleAbilityUnLoadSuccessEventLocked(
 int32_t SystemAbilityEventHandler::HandleProcessStartedEventLocked(
     const std::shared_ptr<SystemProcessContext>& context, const ProcessInfo& processInfo)
 {
-    HILOGI("[SA Scheduler][proc:%{public}s] handle started event", Str16ToStr8(context->processName).c_str());
+    HILOGI("Scheduler proc:%{public}s handle started event", Str16ToStr8(context->processName).c_str());
     context->pid = processInfo.pid;
     context->uid = processInfo.uid;
     int32_t result = ERR_OK;
@@ -160,7 +160,7 @@ int32_t SystemAbilityEventHandler::HandleProcessStartedEventLocked(
             break;
         default:
             result = ERR_INVALID_VALUE;
-            HILOGE("[SA Scheduler][proc:%{public}s] in state %{public}d, not need handle started event",
+            HILOGE("Scheduler proc:%{public}s in state %{public}d,not need handle started event",
                 Str16ToStr8(context->processName).c_str(), context->state);
             break;
     }
@@ -170,7 +170,7 @@ int32_t SystemAbilityEventHandler::HandleProcessStartedEventLocked(
 int32_t SystemAbilityEventHandler::HandleProcessStoppedEventLocked(
     const std::shared_ptr<SystemProcessContext>& context, const ProcessInfo& processInfo)
 {
-    HILOGI("[SA Scheduler][proc:%{public}s] handle stopped event", Str16ToStr8(context->processName).c_str());
+    HILOGI("Scheduler proc:%{public}s handle stopped event", Str16ToStr8(context->processName).c_str());
     int32_t result = ERR_OK;
     switch (context->state) {
         case SystemProcessState::STARTED:
@@ -179,7 +179,7 @@ int32_t SystemAbilityEventHandler::HandleProcessStoppedEventLocked(
             break;
         default:
             result = ERR_INVALID_VALUE;
-            HILOGE("[SA Scheduler][proc:%{public}s] in state %{public}d, not need handle stopped event",
+            HILOGE("Scheduler proc:%{public}s in state %{public}d,not need handle stopped event",
                 Str16ToStr8(context->processName).c_str(), context->state);
             break;
     }
