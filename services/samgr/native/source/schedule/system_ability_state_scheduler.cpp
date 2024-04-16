@@ -27,6 +27,7 @@
 #include "string_ex.h"
 #include "system_ability_manager.h"
 #include "samgr_xcollie.h"
+#include "parameters.h"
 
 namespace OHOS {
 namespace {
@@ -807,10 +808,15 @@ int32_t SystemAbilityStateScheduler::GetAbnormallyDiedAbilityLocked(
         if (abilityContext->state == SystemAbilityState::LOADED
             || abilityContext->state == SystemAbilityState::LOADING) {
             HILOGI("[SA Scheduler][SA:%{public}d] abnormally died", abilityContext->systemAbilityId);
-            if (abilityContext->isAutoRestart) {
-                HILOGI("[SA Scheduler][SA:%{public}d] is auto restart", abilityContext->systemAbilityId);
-                abnormallyDiedAbilityList.emplace_back(abilityContext);
+            if (!abilityContext->isAutoRestart) {
+                continue;
             }
+            if (system::GetBoolParameter("min.memmory.watermark", false)) {
+                HILOGW("restart fail,watermark=true");
+                continue;
+            }
+            HILOGI("[SA Scheduler][SA:%{public}d] is auto restart", abilityContext->systemAbilityId);
+            abnormallyDiedAbilityList.emplace_back(abilityContext);
         }
     }
     return ERR_OK;
