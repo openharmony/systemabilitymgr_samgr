@@ -35,12 +35,6 @@ public:
     void OnRemoteDied(const wptr<IRemoteObject>& remote) override
     {
         HILOGD("DynamicCache OnRemoteDied called");
-        sptr<IRemoteObject> ability = remote.promote();
-        if (ability == NULL) {
-            HILOGW("DynamicCache OnRemoteDied:ability is null");
-            return;
-        }
-        ability->RemoveDeathRecipient(this);
         ClearCache();
     }
     Result QueryResult(Query query, int32_t code)
@@ -75,6 +69,12 @@ public:
     void ClearCache()
     {
         std::lock_guard<std::mutex> autoLock(queryCacheLock_);
+        for (auto &it : cacheMap_) {
+            if (it.second != nullptr) {
+                HILOGD("DynamicCache RemoveDeathRecipient");
+                it.second->RemoveDeathRecipient(this);
+            }
+        }
         cacheMap_.clear();
     }
 
