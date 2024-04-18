@@ -1219,7 +1219,7 @@ int32_t SystemAbilityManager::RemoveSystemProcess(const sptr<IRemoteObject>& pro
             std::string name = Str16ToStr8(procName);
             processName = procName;
             (void)systemProcessMap_.erase(procName);
-            HILOGI("RemoveSystemProcess proc:%{public}s dead, size:%{public}zu", name.c_str(),
+            HILOGI("RemoveProc:%{public}s dead, size:%{public}zu", name.c_str(),
                 systemProcessMap_.size());
             result = ERR_OK;
             break;

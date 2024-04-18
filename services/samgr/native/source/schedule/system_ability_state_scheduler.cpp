@@ -765,7 +765,7 @@ int32_t SystemAbilityStateScheduler::KillSystemProcessLocked(
     }
     ReportProcessStopDuration(Str16ToStr8(processContext->processName), processContext->pid,
         processContext->uid, duration);
-    KHILOGI("Scheduler proc:%{public}s kill proc,pid:%{public}d,uid:%{public}d,ret:%{public}d"
+    KHILOGI("Scheduler proc:%{public}s kill proc,pid:%{public}d,uid:%{public}d,ret:%{public}d,"
         "spend %{public}" PRId64 "ms", Str16ToStr8(processContext->processName).c_str(), processContext->pid,
         processContext->uid, result, duration);
     return result;
