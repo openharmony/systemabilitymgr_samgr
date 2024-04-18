@@ -27,6 +27,7 @@
 #include "string_ex.h"
 #include "system_ability_manager.h"
 #include "samgr_xcollie.h"
+#include "parameters.h"
 
 namespace OHOS {
 namespace {

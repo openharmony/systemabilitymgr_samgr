@@ -37,6 +37,13 @@ namespace {
     constexpr int32_t RETRY_TIME_OUT_NUMBER = 10;
     constexpr int32_t SLEEP_INTERVAL_TIME = 200000;
     constexpr int32_t DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID = 4802;
+    constexpr uint8_t SEAT_ZERO = 0;
+    constexpr uint8_t LIFT_OFFSET_ZERO = 24;
+    constexpr uint8_t SEAT_ONE = 1;
+    constexpr uint8_t LIFT_OFFSET_ONE = 16;
+    constexpr uint8_t SEAT_TWO = 2;
+    constexpr uint8_t LIFT_OFFSET_TWO = 8;
+    constexpr uint8_t SEAT_THREE = 3;
     unsigned int g_dumpLevel = 0;
     const std::u16string SAMGR_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
     bool g_flag = false;
@@ -47,7 +54,8 @@ uint32_t Convert2Uint32(const uint8_t* ptr)
     if (ptr == nullptr) {
         return 0;
     }
-    return (ptr[0] << 24) | (ptr[1] << 16) | (ptr[2] << 8) | (ptr[3]); // this is a general method of converting in fuzz
+    return (ptr[SEAT_ZERO] << LIFT_OFFSET_ZERO) | (ptr[SEAT_ONE] << LIFT_OFFSET_ONE) |
+        (ptr[SEAT_TWO] << LIFT_OFFSET_TWO) | (ptr[SEAT_THREE]); // this is a general method of converting in fuzz
 }
 
 bool IsDmReady()

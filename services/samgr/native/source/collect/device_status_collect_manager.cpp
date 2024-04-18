@@ -467,6 +467,10 @@ void DeviceStatusCollectManager::StringToTypeAndSaid(const std::string& eventStr
         HILOGW("DeviceStatusCollectManager StringToTypeAndSaid failed");
         return;
     }
+    if (pos == string::npos) {
+        HILOGW("DeviceStatusCollectManager StringToSaid failed");
+        return;
+    }
     systemAbilityId = atoi((eventStr.substr(pos + 1, eventStr.size() - pos - 1)).c_str());
     HILOGD("systemAbilityId is : %{public}d", systemAbilityId);
 }
