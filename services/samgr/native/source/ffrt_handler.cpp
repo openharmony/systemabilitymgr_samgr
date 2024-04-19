@@ -101,7 +101,7 @@ void FFRTHandler::RemoveTask(const std::string& name)
     std::unique_lock<std::shared_mutex> lock(mutex_);
     auto item = taskMap_.find(name);
     if (item == taskMap_.end()) {
-        HILOGW("remove task %{public}s not find", name.c_str());
+        HILOGW("rm task %{public}s no find", name.c_str());
         return;
     }
     if (item->second != nullptr) {

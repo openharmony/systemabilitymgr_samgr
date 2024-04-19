@@ -335,8 +335,7 @@ int32_t SystemAbilityManagerProxy::AddOnDemandSystemAbilityInfo(int32_t systemAb
     int32_t err = remote->SendRequest(
         static_cast<uint32_t>(SamgrInterfaceCode::ADD_ONDEMAND_SYSTEM_ABILITY_TRANSACTION), data, reply, option);
 
-    HILOGI("%{public}s:add ondemand SA:%{public}d %{public}s, return %{public}d",
-        __func__, systemAbilityId, err ? "fail" : "succ", err);
+    HILOGI("AddOnDemandSaInfo SA:%{public}d %{public}s,rtn:%{public}d", systemAbilityId, err ? "fail" : "suc", err);
     if (err != ERR_NONE) {
         return err;
     }

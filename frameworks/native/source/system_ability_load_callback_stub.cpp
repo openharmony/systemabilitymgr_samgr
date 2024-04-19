@@ -69,7 +69,7 @@ int32_t SystemAbilityLoadCallbackStub::OnLoadSystemAbilitySuccessInner(MessagePa
     }
     int64_t begin = OHOS::GetTickCount();
     OnLoadSystemAbilitySuccess(systemAbilityId, remoteObject);
-    HILOGW("onloadsasuc SA:%{public}d spend %{public}" PRId64 " ms", systemAbilityId, GetTickCount() - begin);
+    HILOGW("OnLoadSaSucInner SA:%{public}d spend %{public}" PRId64 "ms", systemAbilityId, GetTickCount() - begin);
     return ERR_NONE;
 }
 
@@ -88,7 +88,7 @@ int32_t SystemAbilityLoadCallbackStub::OnLoadSystemAbilityFailInner(MessageParce
     }
     int64_t begin = OHOS::GetTickCount();
     OnLoadSystemAbilityFail(systemAbilityId);
-    HILOGW("onloadsafail SA:%{public}d spend %{public}" PRId64 " ms", systemAbilityId, GetTickCount() - begin);
+    HILOGW("OnLoadSaFailInner SA:%{public}d spend %{public}" PRId64 "ms", systemAbilityId, GetTickCount() - begin);
     return ERR_NONE;
 }
 
@@ -111,7 +111,7 @@ int32_t SystemAbilityLoadCallbackStub::OnLoadSACompleteForRemoteInner(MessagePar
     sptr<IRemoteObject> remoteObject = ret ? data.ReadRemoteObject() : nullptr;
     int64_t begin = OHOS::GetTickCount();
     OnLoadSACompleteForRemote(deviceId, systemAbilityId, remoteObject);
-    HILOGW("onloadRemoteSa SA:%{public}d spend %{public}" PRId64 " ms", systemAbilityId, GetTickCount() - begin);
+    HILOGW("OnLoadRemoteSaInner SA:%{public}d spend %{public}" PRId64 "ms", systemAbilityId, GetTickCount() - begin);
     return ERR_NONE;
 }
 
