@@ -42,6 +42,7 @@ public:
         const nlohmann::json& idleReason, int32_t& delayTime) = 0;
     virtual bool SendStrategyToSA(int32_t type, int32_t systemAbilityId, int32_t level, std::string& action) = 0;
     virtual bool IpcStatCmdProc(int32_t fd, int32_t cmd) = 0;
+    virtual bool FfrtDumperProc(std::string& result) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ILocalAbilityManager");
 protected:
     static inline const std::u16string LOCAL_ABILITY_MANAGER_INTERFACE_TOKEN = u"ohos.localabilitymanager.accessToken";

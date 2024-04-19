@@ -20,6 +20,8 @@
 #include <vector>
 #define private public
 #include "system_ability_manager_dumper.h"
+#include "system_ability_manager.h"
+#include "samgr_err_code.h"
 using namespace std;
 using namespace testing;
 using namespace testing::ext;
@@ -794,5 +796,192 @@ HWTEST_F(SystemAbilityManagerDumperTest, GetSamgrIpcStatistics001, TestSize.Leve
     std::string result;
     bool ret = SystemAbilityManagerDumper::GetSamgrIpcStatistics(result);
     EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: FfrtDumpParser001
+ * @tc.desc: test FfrtDumpParser
+ * @tc.type: FUNC
+ * @tc.require: I6W28
+ */
+HWTEST_F(SystemAbilityManagerDumperTest, FfrtDumpParser001, TestSize.Level2)
+{
+    SamMockPermission::MockProcess("hidumper_service");
+    std::vector<int32_t> processIds;
+    std::string pidStr = "123";
+    bool ret = SystemAbilityManagerDumper::FfrtDumpParser(processIds, pidStr);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: FfrtDumpParser002
+ * @tc.desc: test FfrtDumpParser
+ * @tc.type: FUNC
+ * @tc.require: I6W28
+ */
+HWTEST_F(SystemAbilityManagerDumperTest, FfrtDumpParser002, TestSize.Level2)
+{
+    SamMockPermission::MockProcess("hidumper_service");
+    std::vector<int32_t> processIds;
+    std::string pidStr = "123|234";
+    bool ret = SystemAbilityManagerDumper::FfrtDumpParser(processIds, pidStr);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(processIds.size(), 2);
+}
+
+/**
+ * @tc.name: FfrtDumpParser003
+ * @tc.desc: test FfrtDumpParser
+ * @tc.type: FUNC
+ * @tc.require: I6W28
+ */
+HWTEST_F(SystemAbilityManagerDumperTest, FfrtDumpParser003, TestSize.Level2)
+{
+    SamMockPermission::MockProcess("hidumper_service");
+    std::vector<int32_t> processIds;
+    std::string pidStr = "12k|234";
+    bool ret = SystemAbilityManagerDumper::FfrtDumpParser(processIds, pidStr);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(processIds.size(), 1);
+}
+
+/**
+ * @tc.name: FfrtDumpParser004
+ * @tc.desc: test FfrtDumpParser
+ * @tc.type: FUNC
+ * @tc.require: I6W28
+ */
+HWTEST_F(SystemAbilityManagerDumperTest, FfrtDumpParser004, TestSize.Level2)
+{
+    SamMockPermission::MockProcess("hidumper_service");
+    std::vector<int32_t> processIds;
+    std::string pidStr = "12k";
+    bool ret = SystemAbilityManagerDumper::FfrtDumpParser(processIds, pidStr);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(processIds.size(), 0);
+}
+
+/**
+ * @tc.name: GetFfrtDumpInfoProc001
+ * @tc.desc: test GetFfrtDumpInfoProc
+ * @tc.type: FUNC
+ * @tc.require: I6W28
+ */
+HWTEST_F(SystemAbilityManagerDumperTest, GetFfrtDumpInfoProc001, TestSize.Level2)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::vector<std::string> args;
+    args.emplace_back("--ffrt");
+    std::string result;
+    bool ret = SystemAbilityManagerDumper::GetFfrtDumpInfoProc(systemAbilityStateScheduler, args, result);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: GetFfrtDumpInfoProc002
+ * @tc.desc: test GetFfrtDumpInfoProc
+ * @tc.type: FUNC
+ * @tc.require: I6W28
+ */
+HWTEST_F(SystemAbilityManagerDumperTest, GetFfrtDumpInfoProc002, TestSize.Level2)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::vector<std::string> args;
+    args.emplace_back("--ffrt");
+    args.emplace_back("");
+    std::string result;
+    bool ret = SystemAbilityManagerDumper::GetFfrtDumpInfoProc(systemAbilityStateScheduler, args, result);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: GetFfrtDumpInfoProc003
+ * @tc.desc: test GetFfrtDumpInfoProc
+ * @tc.type: FUNC
+ * @tc.require: I6W28
+ */
+HWTEST_F(SystemAbilityManagerDumperTest, GetFfrtDumpInfoProc003, TestSize.Level2)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::vector<std::string> args;
+    args.emplace_back("--ffrt");
+    args.emplace_back("12k");
+    std::string result;
+    bool ret = SystemAbilityManagerDumper::GetFfrtDumpInfoProc(systemAbilityStateScheduler, args, result);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: GetFfrtDumpInfoProc004
+ * @tc.desc: test GetFfrtDumpInfoProc
+ * @tc.type: FUNC
+ * @tc.require: I6W28
+ */
+HWTEST_F(SystemAbilityManagerDumperTest, GetFfrtDumpInfoProc004, TestSize.Level2)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->abilityStateScheduler_ = systemAbilityStateScheduler;
+    std::vector<std::string> args;
+    args.emplace_back("--ffrt");
+    args.emplace_back("1234|12345");
+    std::string result;
+    bool ret = SystemAbilityManagerDumper::GetFfrtDumpInfoProc(systemAbilityStateScheduler, args, result);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: GetFfrtDumpInfoProc005
+ * @tc.desc: test GetFfrtDumpInfoProc
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityManagerDumperTest, GetFfrtDumpInfoProc005, TestSize.Level1)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->abilityStateScheduler_ = systemAbilityStateScheduler;
+
+    u16string procName = u"proTest";
+    auto processContext = std::make_shared<SystemProcessContext>();
+    processContext->pid = 123;
+    processContext->processName = u"proTest";
+    saMgr->abilityStateScheduler_->processContextMap_[procName] = processContext;
+    std::vector<std::string> args;
+    args.emplace_back("--ffrt");
+    args.emplace_back("123");
+    std::string result;
+    bool ret = SystemAbilityManagerDumper::GetFfrtDumpInfoProc(systemAbilityStateScheduler, args, result);
+    EXPECT_EQ(ret, true);
+}
+
+/**
+ * @tc.name: SaveDumpResultToFd001
+ * @tc.desc: test SaveDumpResultToFd
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityManagerDumperTest, SaveDumpResultToFd001, TestSize.Level1)
+{
+    int32_t fd = -1;
+    std::string result = "";
+    int32_t ret = SystemAbilityManagerDumper::SaveDumpResultToFd(fd, result);
+    EXPECT_EQ(ret, SAVE_FD_FAIL);
+}
+
+/**
+ * @tc.name: SaveDumpResultToFd002
+ * @tc.desc: test SaveDumpResultToFd
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityManagerDumperTest, SaveDumpResultToFd002, TestSize.Level1)
+{
+    int32_t fd = 1;
+    std::string result = "";
+    int32_t ret = SystemAbilityManagerDumper::SaveDumpResultToFd(fd, result);
+    EXPECT_EQ(ret, ERR_OK);
 }
 }

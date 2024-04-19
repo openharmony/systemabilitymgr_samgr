@@ -154,6 +154,7 @@ public:
     bool CheckSaIsImmediatelyRecycle(int32_t systemAbilityId);
     int32_t GetExtensionSaIds(const std::string& extension, std::vector<int32_t>& saIds) override;
     int32_t GetExtensionRunningSaList(const std::string& extension, std::vector<sptr<IRemoteObject>>& saList) override;
+    sptr<IRemoteObject> GetSystemProcess(const std::u16string& procName);
 private:
     enum class AbilityState {
         INIT,
@@ -178,8 +179,6 @@ private:
         const SAExtraProp& extraProp);
     int32_t FindSystemAbilityNotify(int32_t systemAbilityId, int32_t code);
     int32_t FindSystemAbilityNotify(int32_t systemAbilityId, const std::string& deviceId, int32_t code);
-
-    sptr<IRemoteObject> GetSystemProcess(const std::u16string& procName);
 
     void InitSaProfile();
     bool GetSaProfile(int32_t saId, SaProfile& saProfile);
