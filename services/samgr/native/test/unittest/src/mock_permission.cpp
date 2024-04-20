@@ -22,7 +22,8 @@ namespace OHOS {
 void SamMockPermission::MockPermission()
 {
     static const char *PERMS[] = {
-        "ohos.permission.DISTRIBUTED_DATASYNC"
+        "ohos.permission.DISTRIBUTED_DATASYNC",
+        "ohos.permission.ACCESS_EXT_SYSTEM_ABILITY"
     };
     uint64_t tokenId;
     NativeTokenInfoParams infoInstance = {

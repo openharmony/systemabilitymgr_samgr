@@ -1404,4 +1404,37 @@ int32_t SystemAbilityManagerProxy::GetExtensionRunningSaList(const std::string& 
     return ERR_OK;
 }
 
+int32_t SystemAbilityManagerProxy::GetRunningSaExtensionInfoList(const std::string& extension,
+    std::vector<SaExtensionInfo>& infoList)
+{
+    HILOGD("%{public}s called", __func__);
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = ListExtensionSendReq(extension,
+        SamgrInterfaceCode::GET_SA_EXTENSION_INFO_TRANSCATION, reply, option);
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    int32_t size = 0;
+    if (!reply.ReadInt32(size)) {
+        HILOGW("get SaExtInfoList read reply size failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    for (int32_t i = 0; i < size; ++i) {
+        SaExtensionInfo tmp;
+        if (!reply.ReadInt32(tmp.saId)) {
+            HILOGW("get SaExtInfoList read reply id failed");
+            infoList.clear();
+            return ERR_FLATTEN_OBJECT;
+        }
+        tmp.processObj = reply.ReadRemoteObject();
+        if (tmp.processObj == nullptr) {
+            HILOGW("get SaExtInfoList read reply loop:%{public}d size:%{public}d failed", i, size);
+            infoList.clear();
+            return ERR_FLATTEN_OBJECT;
+        }
+        infoList.emplace_back(tmp);
+    }
+    return ERR_OK;
+}
 } // namespace OHOS

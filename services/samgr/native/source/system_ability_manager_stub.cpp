@@ -102,6 +102,10 @@ namespace {
 
 using namespace OHOS::Security;
 namespace OHOS {
+namespace {
+constexpr const char *EXT_TRANSACTION_PERMISSION = "ohos.permission.ACCESS_EXT_SYSTEM_ABILITY";
+}
+
 void SystemAbilityManagerStub::SetAbilityFuncMap()
 {
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_SYSTEM_ABILITY_TRANSACTION)] =
@@ -168,6 +172,8 @@ SystemAbilityManagerStub::SystemAbilityManagerStub()
         &SystemAbilityManagerStub::GetExtensionSaIdsInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_EXTERNSION_SA_LIST_TRANSCATION)] =
         &SystemAbilityManagerStub::GetExtensionRunningSaListInner;
+    memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_SA_EXTENSION_INFO_TRANSCATION)] =
+        &SystemAbilityManagerStub::GetRunningSaExtensionInfoListInner;
 }
 
 int32_t SystemAbilityManagerStub::OnRemoteRequest(uint32_t code,
@@ -1045,6 +1051,13 @@ bool SystemAbilityManagerStub::CanRequest()
     return (tokenType == AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
 }
 
+bool SystemAbilityManagerStub::CheckPermission(const std::string& permission)
+{
+    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    int32_t ret = Security::AccessToken::AccessTokenKit::VerifyAccessToken(accessToken, permission);
+    return (ret == Security::AccessToken::PermissionState::PERMISSION_GRANTED);
+}
+
 int32_t SystemAbilityManagerStub::GetExtensionSaIdsInner(MessageParcel& data, MessageParcel& reply)
 {
     if (!CanRequest()) {
@@ -1103,4 +1116,42 @@ int32_t SystemAbilityManagerStub::GetExtensionRunningSaListInner(MessageParcel& 
     return ERR_NONE;
 }
 
+int32_t SystemAbilityManagerStub::GetRunningSaExtensionInfoListInner(MessageParcel& data, MessageParcel& reply)
+{
+    if (!CheckPermission(EXT_TRANSACTION_PERMISSION)) {
+        HILOGE("get SaExtInfoList CheckPermission fail!");
+        //return ERR_PERMISSION_DENIED;
+    }
+    std::string extension;
+    if (!data.ReadString(extension)) {
+        HILOGE("get SaExtInfoList read extension failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    std::vector<SaExtensionInfo> infoList;
+    int32_t result = GetRunningSaExtensionInfoList(extension, infoList);
+    if (!reply.WriteInt32(result)) {
+        HILOGE("get SaExtInfoList write ret failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (result != ERR_OK) {
+        HILOGE("get SaExtInfoList failed,ret:%{public}d", result);
+        return result;
+    }
+    if (!reply.WriteInt32(infoList.size())) {
+        HILOGE("get SaExtInfoList write size failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    for (auto& tmp : infoList) {
+        if (!reply.WriteInt32(tmp.saId)) {
+            HILOGE("get SaExtInfoList write said failed.");
+            return ERR_FLATTEN_OBJECT;
+        }
+        if (!reply.WriteRemoteObject(tmp.processObj)) {
+            HILOGE("get SaExtInfoList write obj failed.");
+            return ERR_FLATTEN_OBJECT;
+        }
+    }
+    return ERR_NONE;
+}
 } // namespace OHOS

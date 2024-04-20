@@ -1045,4 +1045,13 @@ HWTEST_F(SystemAbilityMgrProxyTest, GetExtensionRunningSaList002, TestSize.Level
     EXPECT_EQ(saList.size(), 0);
 }
 
+HWTEST_F(SystemAbilityMgrProxyTest, GetRunningSaExtensionInfoList001, TestSize.Level3)
+{
+    sptr<ISystemAbilityManager> samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+
+    std::vector<ISystemAbilityManager::SaExtensionInfo> infoList;
+    int32_t ret = samgrProxy->GetRunningSaExtensionInfoList("backup", infoList);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(infoList.size(), 0);
+}
 }

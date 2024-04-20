@@ -31,6 +31,7 @@ public:
 protected:
     static bool CanRequest();
     static bool EnforceInterceToken(MessageParcel& data);
+    static bool CheckPermission(const std::string& permission);
 
 private:
     int32_t ListSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
@@ -61,6 +62,7 @@ private:
     int32_t SendStrategyInner(MessageParcel& data, MessageParcel& reply);
     int32_t GetExtensionSaIdsInner(MessageParcel& data, MessageParcel& reply);
     int32_t GetExtensionRunningSaListInner(MessageParcel& data, MessageParcel& reply);
+    int32_t GetRunningSaExtensionInfoListInner(MessageParcel& data, MessageParcel& reply);
     static int32_t GetHapIdMultiuser(int32_t uid);
     void SetAbilityFuncMap();
     void SetProcessFuncMap();
