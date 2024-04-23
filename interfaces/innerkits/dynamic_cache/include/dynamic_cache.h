@@ -104,7 +104,7 @@ public:
 
     virtual Result Recompute(Query query, int32_t code)
     {
-        if (cacheMap_.count(query) == 0){
+        if (cacheMap_.count(query) == 0) {
             return nullptr;
         }
         return cacheMap_[query];
