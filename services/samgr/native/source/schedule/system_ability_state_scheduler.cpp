@@ -126,7 +126,7 @@ void SystemAbilityStateScheduler::InitSamgrProcessContext()
     processContext->abilityStateCountMap[SystemAbilityState::UNLOADABLE] = 0;
     processContext->abilityStateCountMap[SystemAbilityState::UNLOADING] = 0;
     processContext->pid = getpid();
-    processContext->uid = getuid();
+    processContext->uid = static_cast<int32_t>(getuid());
     processContextMap_[SAMGR_PROCESS_NAME] = processContext;
     processContextMap_[SAMGR_PROCESS_NAME]->saList.push_back(0);
     processContext->state = SystemProcessState::STARTED;

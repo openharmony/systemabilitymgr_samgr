@@ -49,7 +49,10 @@ public:
                 defaultValue != string(waterLine) && string(waterLine) == localPara_[key_] &&
                 !cacheMap_[query]->IsObjectDead()) {
                 HILOGD("DynamicCache QueryResult Return Cache");
-                return cacheMap_[query];
+            if (cacheMap_.count(query) == 0){
+                return nullptr;
+            }
+            return cacheMap_[query];
             }
         }
         HILOGD("DynamicCache QueryResult Recompute");
@@ -104,6 +107,9 @@ public:
 
     virtual Result Recompute(Query query, int32_t code)
     {
+        if (cacheMap_.count(query) == 0){
+            return nullptr;
+        }
         return cacheMap_[query];
     }
 private:
