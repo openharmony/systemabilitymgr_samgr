@@ -763,10 +763,7 @@ ohos_rust_unittest("rust_samgr_test_client") {
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/rust:samgr_rust",
     "//foundation/systemabilitymgr/samgr/services/samgr/native/test/unittest/rust/service:test_access_token",
   ]
-  external_deps = [
-    "hilog:hilog_rust",
-    "safwk:audio_rust_sa",
-  ]
+  external_deps = [ "hilog:hilog_rust" ]
 
   subsystem_name = "systemabilitymgr"
   part_name = "samgr"
