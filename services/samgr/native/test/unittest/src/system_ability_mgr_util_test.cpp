@@ -25,6 +25,8 @@ using namespace OHOS;
 
 namespace OHOS {
 
+const std::u16string PROCESS_NAME = u"test_process_name";
+
 void SamgrUtilTest::SetUpTestCase()
 {
     DTEST_LOG << "SetUpTestCase" << std::endl;
@@ -155,4 +157,115 @@ HWTEST_F(SamgrUtilTest, TransformDeviceId002, TestSize.Level3)
     string result = SamgrUtil::TransformDeviceId("123", 1, true);
     EXPECT_EQ(result, "");
 }
+
+/**
+ * @tc.name: CheckCallerProcess001
+ * @tc.desc: test CheckCallerProcess with process is null
+ * @tc.type: FUNC
+ * @tc.require: I6V4AX
+ */
+HWTEST_F(SamgrUtilTest, CheckCallerProcess001, TestSize.Level3)
+{
+    SaProfile saProfile;
+    saProfile.process = u"";
+    /**
+     * @tc.steps: step1. test ConvertToOnDemandEvent
+     */
+    SystemAbilityOnDemandCondition condition;
+    condition.eventId = OnDemandEventId::DEVICE_ONLINE;
+    SystemAbilityOnDemandEvent from;
+    from.conditions.push_back(condition);
+
+    OnDemandEvent to;
+    SamgrUtil::ConvertToOnDemandEvent(from, to);
+
+    bool ret = SamgrUtil::CheckCallerProcess(saProfile);
+    EXPECT_EQ(false, ret);
+}
+
+/**
+ * @tc.name: CheckCallerProcess002
+ * @tc.desc: test CheckCallerProcess with process is PROCESS_NAME
+ * @tc.type: FUNC
+ * @tc.require: I6V4AX
+ */
+HWTEST_F(SamgrUtilTest, CheckCallerProcess002, TestSize.Level3)
+{
+    SaProfile saProfile;
+    saProfile.process = PROCESS_NAME;
+    /**
+     * @tc.steps: step1. test ConvertToSystemAbilityOnDemandEvent
+     */
+    OnDemandCondition condition;
+    condition.eventId = -1;
+    OnDemandEvent from;
+    from.conditions.push_back(condition);
+
+    SystemAbilityOnDemandEvent to;
+    SamgrUtil::ConvertToSystemAbilityOnDemandEvent(from, to);
+
+    bool ret = SamgrUtil::CheckCallerProcess(saProfile);
+    EXPECT_EQ(false, ret);
+}
+
+/**
+ * @tc.name: CheckAllowUpdate001
+ * @tc.desc: test CheckAllowUpdate with OnDemandPolicyType is START_POLICY, allowUpdate is true
+ * @tc.type: FUNC
+ * @tc.require: I6V4AX
+ */
+HWTEST_F(SamgrUtilTest, CheckAllowUpdate001, TestSize.Level3)
+{
+    OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
+    SaProfile saProfile;
+    saProfile.startOnDemand.allowUpdate = true;
+    bool ret = SamgrUtil::CheckAllowUpdate(type, saProfile);
+    EXPECT_EQ(true, ret);
+}
+
+/**
+ * @tc.name: CheckAllowUpdate002
+ * @tc.desc: test CheckAllowUpdate with OnDemandPolicyType is STOP_POLICY, allowUpdate is true
+ * @tc.type: FUNC
+ * @tc.require: I6V4AX
+ */
+HWTEST_F(SamgrUtilTest, CheckAllowUpdate002, TestSize.Level3)
+{
+    OnDemandPolicyType type = OnDemandPolicyType::STOP_POLICY;
+    SaProfile saProfile;
+    saProfile.stopOnDemand.allowUpdate = true;
+    bool ret = SamgrUtil::CheckAllowUpdate(type, saProfile);
+    EXPECT_EQ(true, ret);
+}
+
+/**
+ * @tc.name: CheckAllowUpdate003
+ * @tc.desc: test CheckAllowUpdate with OnDemandPolicyType is START_POLICY, allowUpdate is false
+ * @tc.type: FUNC
+ * @tc.require: I6V4AX
+ */
+HWTEST_F(SamgrUtilTest, CheckAllowUpdate003, TestSize.Level3)
+{
+    OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
+    SaProfile saProfile;
+    saProfile.startOnDemand.allowUpdate = false;
+    bool ret = SamgrUtil::CheckAllowUpdate(type, saProfile);
+    EXPECT_EQ(false, ret);
+}
+
+/**
+ * @tc.name: CheckAllowUpdate004
+ * @tc.desc: test CheckAllowUpdate with OnDemandPolicyType is STOP_POLICY, allowUpdate is false
+ * @tc.type: FUNC
+ * @tc.require: I6V4AX
+ */
+HWTEST_F(SamgrUtilTest, CheckAllowUpdate004, TestSize.Level3)
+{
+    OnDemandPolicyType type = OnDemandPolicyType::STOP_POLICY;
+    SaProfile saProfile;
+    saProfile.startOnDemand.allowUpdate = false;
+    bool ret = SamgrUtil::CheckAllowUpdate(type, saProfile);
+    EXPECT_EQ(false, ret);
+}
+
 }
