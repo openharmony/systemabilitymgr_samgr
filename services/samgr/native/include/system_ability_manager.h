@@ -98,7 +98,10 @@ public:
     void NotifyRemoteDeviceOffline(const std::string& deviceId);
     int32_t AddSystemAbility(int32_t systemAbilityId, const sptr<IRemoteObject>& ability,
         const SAExtraProp& extraProp) override;
-    std::string GetLocalNodeId();
+    std::string GetLocalNodeId()
+    {
+        return std::string();
+    }
     void Init();
     void CleanFfrt();
     void SetFfrt();
@@ -224,16 +227,10 @@ private:
         sptr<ISystemAbilityLoadCallback> callback);
     int32_t CheckStopEnableOnce(const OnDemandEvent& event, const SaControlInfo& saControl);
     int32_t UpdateSaFreMap(int32_t uid, int32_t saId);
-    uint64_t GenerateFreKey(int32_t uid, int32_t saId) const;
     void ReportGetSAPeriodically();
     void OndemandLoad();
     void OndemandLoadForPerf();
     std::list<int32_t> GetAllOndemandSa();
-    bool CheckCallerProcess(SaProfile& saProfile);
-    bool CheckCallerProcess(const std::string& callProcess);
-    bool CheckAllowUpdate(OnDemandPolicyType type, SaProfile& saProfile);
-    void ConvertToOnDemandEvent(const SystemAbilityOnDemandEvent& from, OnDemandEvent& to);
-    void ConvertToSystemAbilityOnDemandEvent(const OnDemandEvent& from, SystemAbilityOnDemandEvent& to);
     void SystemAbilityInvalidateCache(int32_t systemAbilityId);
 #ifdef SUPPORT_DEVICE_MANAGER
     void DeviceIdToNetworkId(std::string& networkId);
