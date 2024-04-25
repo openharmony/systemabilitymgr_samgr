@@ -47,6 +47,8 @@ ohos_static_library("samgr_rust_cpp") {
 ohos_rust_shared_library("samgr_rust") {
   sources = [ "src/lib.rs" ]
 
+  rustflags = [ "-Zstack-protector=all" ]
+
   external_deps = [
     "hilog:hilog_rust",
     "ipc:ipc_rust",
