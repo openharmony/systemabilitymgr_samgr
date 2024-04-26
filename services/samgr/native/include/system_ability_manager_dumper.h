@@ -40,6 +40,12 @@ public:
     static bool StartSamgrIpcStatistics(std::string& result);
     static bool StopSamgrIpcStatistics(std::string& result);
     static bool GetSamgrIpcStatistics(std::string& result);
+    static bool FfrtDumpParser(std::vector<int32_t>& processIds, const std::string& processIdsStr);
+    static int32_t FfrtDumpProc(std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler,
+        int32_t fd, const std::vector<std::string>& args);
+    static bool GetFfrtDumpInfoProc(std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler,
+        const std::vector<std::string>& args, std::string& result);
+
 private:
     SystemAbilityManagerDumper() = default;
     ~SystemAbilityManagerDumper() = default;
@@ -54,6 +60,9 @@ private:
     static void ShowAllSystemAbilityInfoInState(const std::string& state,
         std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler, std::string& result);
     static void IllegalInput(std::string& result);
+    static void DumpFfrtInfoByProcName(int32_t processId, const std::u16string processName, std::string& result);
+    static int32_t SaveDumpResultToFd(int32_t fd, const std::string& result);
+    static void GetSAMgrFfrtInfo(std::string& result);
 };
 } // namespace OHOS
 #endif // SERVICES_SAMGR_NATIVE_INCLUDE_SYSTEM_ABILITY_MANAGER_DUMPER_H

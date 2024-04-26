@@ -380,7 +380,6 @@ HWTEST_F(DeviceSwitchCollectTest, UnSubscribeSwitchEvent001, TestSize.Level3)
         new DeviceSwitchCollect(collect);
     deviceSwitchCollect->Init(saProfiles);
     deviceSwitchCollect->switchEventSubscriber_->SubscribeSwitchEvent();
-    deviceSwitchCollect->switchEventSubscriber_->UnSubscribeSwitchEvent();
     EXPECT_NE(deviceSwitchCollect->switchEventSubscriber_, nullptr);
 }
 

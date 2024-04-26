@@ -27,6 +27,7 @@
 #include "system_ability_definition.h"
 #include "samgr_err_code.h"
 #include "system_process_status_change_proxy.h"
+#include "system_ability_manager_util.h"
 #include "test_log.h"
 #define private public
 #include "system_ability_manager.h"
@@ -2009,7 +2010,7 @@ HWTEST_F(SystemAbilityMgrTest, ReportGetSAFre001, TestSize.Level3)
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     uint32_t realUid = 1;
     uint32_t readSaid = 1;
-    uint64_t key = saMgr->GenerateFreKey(realUid, readSaid);
+    uint64_t key = SamgrUtil::GenerateFreKey(realUid, readSaid);
     DTEST_LOG << " key 001 :  " << key << std::endl;
     uint32_t expectSid = static_cast<uint32_t>(key);
     uint32_t expectUid = key >> SHFIT_BIT;
@@ -2064,7 +2065,7 @@ HWTEST_F(SystemAbilityMgrTest, ReportGetSAFre004, TestSize.Level3)
     DTEST_LOG << " ReportGetSAFre004 start " << std::endl;
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     int32_t uid = 1;
-    uint64_t key = saMgr->GenerateFreKey(uid, TEST_SYSTEM_ABILITY1);
+    uint64_t key = SamgrUtil::GenerateFreKey(uid, TEST_SYSTEM_ABILITY1);
     saMgr->saFrequencyMap_[key] = MAX_COUNT;
     int32_t count = saMgr->UpdateSaFreMap(uid, TEST_SYSTEM_ABILITY1);
     EXPECT_EQ(saMgr->saFrequencyMap_[key], MAX_COUNT);

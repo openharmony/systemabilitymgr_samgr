@@ -343,4 +343,19 @@ HWTEST_F(LocalAbilityManagerProxyTest, IpcStatCmdProc003, TestSize.Level3)
     bool ret = localAbility->IpcStatCmdProc(fd, cmd);
     EXPECT_FALSE(ret);
 }
+
+/**
+ * @tc.name: FfrtDumperProc001
+ * @tc.desc: test FfrtDumperProc
+ * @tc.type: FUNC
+ * @tc.require: I9DR69
+ */
+HWTEST_F(LocalAbilityManagerProxyTest, FfrtDumperProc001, TestSize.Level3)
+{
+    sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
+    sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
+    std::string ffrtDumperInfo;
+    bool ret = localAbility->FfrtDumperProc(ffrtDumperInfo);
+    EXPECT_FALSE(ret);
+}
 }

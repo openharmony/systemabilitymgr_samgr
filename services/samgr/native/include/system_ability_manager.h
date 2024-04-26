@@ -98,7 +98,10 @@ public:
     void NotifyRemoteDeviceOffline(const std::string& deviceId);
     int32_t AddSystemAbility(int32_t systemAbilityId, const sptr<IRemoteObject>& ability,
         const SAExtraProp& extraProp) override;
-    std::string GetLocalNodeId();
+    std::string GetLocalNodeId()
+    {
+        return std::string();
+    }
     void Init();
     void CleanFfrt();
     void SetFfrt();
@@ -152,10 +155,11 @@ public:
     int32_t SendStrategy(int32_t type, std::vector<int32_t>& systemAbilityIds,
         int32_t level, std::string& action) override;
     bool CheckSaIsImmediatelyRecycle(int32_t systemAbilityId);
+    int32_t GetRunningSaExtensionInfoList(const std::string& extension,
+        std::vector<SaExtensionInfo>& infoList) override;    
     int32_t GetExtensionSaIds(const std::string& extension, std::vector<int32_t>& saIds) override;
     int32_t GetExtensionRunningSaList(const std::string& extension, std::vector<sptr<IRemoteObject>>& saList) override;
-    int32_t GetRunningSaExtensionInfoList(const std::string& extension,
-        std::vector<SaExtensionInfo>& infoList) override;
+    sptr<IRemoteObject> GetSystemProcess(const std::u16string& procName);
 private:
     enum class AbilityState {
         INIT,
@@ -180,8 +184,6 @@ private:
         const SAExtraProp& extraProp);
     int32_t FindSystemAbilityNotify(int32_t systemAbilityId, int32_t code);
     int32_t FindSystemAbilityNotify(int32_t systemAbilityId, const std::string& deviceId, int32_t code);
-
-    sptr<IRemoteObject> GetSystemProcess(const std::u16string& procName);
 
     void InitSaProfile();
     bool GetSaProfile(int32_t saId, SaProfile& saProfile);
@@ -226,16 +228,10 @@ private:
         sptr<ISystemAbilityLoadCallback> callback);
     int32_t CheckStopEnableOnce(const OnDemandEvent& event, const SaControlInfo& saControl);
     int32_t UpdateSaFreMap(int32_t uid, int32_t saId);
-    uint64_t GenerateFreKey(int32_t uid, int32_t saId) const;
     void ReportGetSAPeriodically();
     void OndemandLoad();
     void OndemandLoadForPerf();
     std::list<int32_t> GetAllOndemandSa();
-    bool CheckCallerProcess(SaProfile& saProfile);
-    bool CheckCallerProcess(const std::string& callProcess);
-    bool CheckAllowUpdate(OnDemandPolicyType type, SaProfile& saProfile);
-    void ConvertToOnDemandEvent(const SystemAbilityOnDemandEvent& from, OnDemandEvent& to);
-    void ConvertToSystemAbilityOnDemandEvent(const OnDemandEvent& from, SystemAbilityOnDemandEvent& to);
     void SystemAbilityInvalidateCache(int32_t systemAbilityId);
 #ifdef SUPPORT_DEVICE_MANAGER
     void DeviceIdToNetworkId(std::string& networkId);

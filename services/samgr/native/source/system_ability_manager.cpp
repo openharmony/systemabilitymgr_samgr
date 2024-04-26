@@ -62,6 +62,7 @@ const string RESOURCE_SCHEDULE_PROCESS_NAME = "resource_schedule_service";
 const string IPC_STAT_DUMP_PREFIX = "--ipc";
 constexpr const char* ONDEMAND_PERF_PARAM = "persist.samgr.perf.ondemand";
 constexpr const char* ONDEMAND_WORKER = "OndemandLoader";
+constexpr const char* ARGS_FFRT_PARAM = "--ffrt";
 
 constexpr uint32_t REPORT_GET_SA_INTERVAL = 24 * 60 * 60 * 1000; // ms and is one day
 constexpr int32_t MAX_SUBSCRIBE_COUNT = 256;
@@ -73,6 +74,7 @@ constexpr int32_t MEDIA_ANALYSIS_SERVICE_SA = 10120;
 constexpr int64_t ONDEMAND_PERF_DELAY_TIME = 60 * 1000; // ms
 constexpr int64_t CHECK_LOADED_DELAY_TIME = 4 * 1000; // ms
 constexpr int32_t SOFTBUS_SERVER_SA_ID = 4700;
+constexpr int32_t FFRT_DUMP_INDEX = 0;
 }
 
 std::mutex SystemAbilityManager::instanceLock;
@@ -225,7 +227,9 @@ int32_t SystemAbilityManager::Dump(int32_t fd, const std::vector<std::u16string>
     for (const auto& arg : args) {
         argsWithStr8.emplace_back(Str16ToStr8(arg));
     }
-
+    if ((argsWithStr8.size() > 0) && (argsWithStr8[FFRT_DUMP_INDEX] == ARGS_FFRT_PARAM)) {
+        return SystemAbilityManagerDumper::FfrtDumpProc(abilityStateScheduler_, fd, argsWithStr8);
+    }
     if ((argsWithStr8.size() > 0) && (argsWithStr8[IPC_STAT_PREFIX_INDEX] == IPC_STAT_DUMP_PREFIX)) {
         return IpcDumpProc(fd, argsWithStr8);
     } else {
@@ -370,76 +374,6 @@ bool SystemAbilityManager::GetSaProfile(int32_t saId, SaProfile& saProfile)
     return true;
 }
 
-bool SystemAbilityManager::CheckCallerProcess(SaProfile& saProfile)
-{
-    if (!CheckCallerProcess(Str16ToStr8(saProfile.process))) {
-        HILOGE("can't operate SA: %{public}d by proc:%{public}s",
-            saProfile.saId, Str16ToStr8(saProfile.process).c_str());
-        return false;
-    }
-    return true;
-}
-
-bool SystemAbilityManager::CheckCallerProcess(const std::string& callProcess)
-{
-    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
-    Security::AccessToken::NativeTokenInfo nativeTokenInfo;
-    int32_t tokenInfoResult = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
-    if (tokenInfoResult != ERR_OK) {
-        HILOGE("get token info failed");
-        return false;
-    }
-
-    if (nativeTokenInfo.processName != callProcess) {
-        HILOGE("can't operate by proc:%{public}s", nativeTokenInfo.processName.c_str());
-        return false;
-    }
-    return true;
-}
-
-bool SystemAbilityManager::CheckAllowUpdate(OnDemandPolicyType type, SaProfile& saProfile)
-{
-    if (type == OnDemandPolicyType::START_POLICY && saProfile.startOnDemand.allowUpdate) {
-        return true;
-    } else if (type == OnDemandPolicyType::STOP_POLICY && saProfile.stopOnDemand.allowUpdate) {
-        return true;
-    }
-    return false;
-}
-
-void SystemAbilityManager::ConvertToOnDemandEvent(const SystemAbilityOnDemandEvent& from, OnDemandEvent& to)
-{
-    to.eventId = static_cast<int32_t>(from.eventId);
-    to.name = from.name;
-    to.value = from.value;
-    to.persistence = from.persistence;
-    for (auto& item : from.conditions) {
-        OnDemandCondition condition;
-        condition.eventId = static_cast<int32_t>(item.eventId);
-        condition.name = item.name;
-        condition.value = item.value;
-        to.conditions.push_back(condition);
-    }
-    to.enableOnce = from.enableOnce;
-}
-
-void SystemAbilityManager::ConvertToSystemAbilityOnDemandEvent(const OnDemandEvent& from,
-    SystemAbilityOnDemandEvent& to)
-{
-    to.eventId = static_cast<OnDemandEventId>(from.eventId);
-    to.name = from.name;
-    to.value = from.value;
-    to.persistence = from.persistence;
-    for (auto& item : from.conditions) {
-        SystemAbilityOnDemandCondition condition;
-        condition.eventId = static_cast<OnDemandEventId>(item.eventId);
-        condition.name = item.name;
-        condition.value = item.value;
-        to.conditions.push_back(condition);
-    }
-    to.enableOnce = from.enableOnce;
-}
-
 int32_t SystemAbilityManager::GetOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
     std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents)
 {
@@ -448,11 +382,11 @@ int32_t SystemAbilityManager::GetOnDemandPolicy(int32_t systemAbilityId, OnDeman
         HILOGE("GetOnDemandPolicy invalid SA:%{public}d", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
-    if (!CheckCallerProcess(saProfile)) {
+    if (!SamgrUtil::CheckCallerProcess(saProfile)) {
         HILOGE("GetOnDemandPolicy invalid caller SA:%{public}d", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
-    if (!CheckAllowUpdate(type, saProfile)) {
+    if (!SamgrUtil::CheckAllowUpdate(type, saProfile)) {
         HILOGE("GetOnDemandPolicy not allow get SA:%{public}d", systemAbilityId);
         return ERR_PERMISSION_DENIED;
     }
@@ -470,7 +404,7 @@ int32_t SystemAbilityManager::GetOnDemandPolicy(int32_t systemAbilityId, OnDeman
     }
     for (auto& item : onDemandEvents) {
         SystemAbilityOnDemandEvent eventOuter;
-        ConvertToSystemAbilityOnDemandEvent(item, eventOuter);
+        SamgrUtil::ConvertToSystemAbilityOnDemandEvent(item, eventOuter);
         abilityOnDemandEvents.push_back(eventOuter);
     }
     HILOGI("GetOnDemandPolicy policy size : %{public}zu.", abilityOnDemandEvents.size());
@@ -485,11 +419,11 @@ int32_t SystemAbilityManager::UpdateOnDemandPolicy(int32_t systemAbilityId, OnDe
         HILOGE("UpdateOnDemandPolicy invalid SA:%{public}d", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
-    if (!CheckCallerProcess(saProfile)) {
+    if (!SamgrUtil::CheckCallerProcess(saProfile)) {
         HILOGE("UpdateOnDemandPolicy invalid caller SA:%{public}d", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
-    if (!CheckAllowUpdate(type, saProfile)) {
+    if (!SamgrUtil::CheckAllowUpdate(type, saProfile)) {
         HILOGE("UpdateOnDemandPolicy not allow get SA:%{public}d", systemAbilityId);
         return ERR_PERMISSION_DENIED;
     }
@@ -501,7 +435,7 @@ int32_t SystemAbilityManager::UpdateOnDemandPolicy(int32_t systemAbilityId, OnDe
     std::vector<OnDemandEvent> onDemandEvents;
     for (auto& item : abilityOnDemandEvents) {
         OnDemandEvent event;
-        ConvertToOnDemandEvent(item, event);
+        SamgrUtil::ConvertToOnDemandEvent(item, event);
         onDemandEvents.push_back(event);
     }
     int32_t result = ERR_INVALID_VALUE;
@@ -1705,7 +1639,7 @@ int32_t SystemAbilityManager::UnloadSystemAbility(int32_t systemAbilityId)
         HILOGE("UnloadSystemAbility SA:%{public}d not supported!", systemAbilityId);
         return PROFILE_NOT_EXIST;
     }
-    if (!CheckCallerProcess(saProfile)) {
+    if (!SamgrUtil::CheckCallerProcess(saProfile)) {
         HILOGE("UnloadSystemAbility invalid caller process, SA:%{public}d", systemAbilityId);
         return INVALID_CALL_PROC;
     }
@@ -1743,7 +1677,7 @@ int32_t SystemAbilityManager::CancelUnloadSystemAbility(int32_t systemAbilityId)
         HILOGE("CancelUnloadSystemAbility SA:%{public}d not supported!", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
-    if (!CheckCallerProcess(saProfile)) {
+    if (!SamgrUtil::CheckCallerProcess(saProfile)) {
         HILOGE("CancelUnloadSystemAbility invalid caller process, SA:%{public}d", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
@@ -1773,7 +1707,7 @@ int32_t SystemAbilityManager::DoUnloadSystemAbility(int32_t systemAbilityId,
 
 int32_t SystemAbilityManager::UnloadAllIdleSystemAbility()
 {
-    if (!CheckCallerProcess("memmgrservice")) {
+    if (!SamgrUtil::CheckCallerProcess("memmgrservice")) {
         HILOGE("UnloadAllIdleSystemAbility invalid caller process, only support for memmgrservice");
         return ERR_PERMISSION_DENIED;
     }
@@ -2033,32 +1967,20 @@ void SystemAbilityManager::RemoveRemoteCallbackLocked(std::list<sptr<ISystemAbil
     }
 }
 
-std::string SystemAbilityManager::GetLocalNodeId()
-{
-    return std::string();
-}
-
-int32_t SystemAbilityManager::UpdateSaFreMap(int32_t uid, int32_t saId)
+int32_t SystemAbilityManager::UpdateSaFreMap(int32_t uid, int32_t saId) 
 {
     if (uid < 0) {
         HILOGW("UpdateSaFreMap return, uid not valid!");
         return -1;
     }
 
-    uint64_t key = GenerateFreKey(uid, saId);
+    uint64_t key = SamgrUtil::GenerateFreKey(uid, saId);
     lock_guard<mutex> autoLock(saFrequencyLock_);
     auto& count = saFrequencyMap_[key];
     if (count < MAX_SA_FREQUENCY_COUNT) {
         count++;
     }
     return count;
-}
-
-uint64_t SystemAbilityManager::GenerateFreKey(int32_t uid, int32_t saId) const
-{
-    uint32_t uSaid = static_cast<uint32_t>(saId);
-    uint64_t key = static_cast<uint64_t>(uid);
-    return (key << SHFIT_BIT) | uSaid;
 }
 
 void SystemAbilityManager::ReportGetSAPeriodically()

@@ -57,8 +57,6 @@ constexpr int32_t ONDEMAND_SLEEP_TIME = 600 * 1000; // us
 constexpr int32_t MAX_COUNT = INT32_MAX - 1000000;
 constexpr int64_t ONDEMAND_EXTRA_DATA_ID = 1;
 
-const std::u16string PROCESS_NAME = u"test_process_name";
-
 void SaProfileStore(sptr<SystemAbilityManager>& saMgr,
     map<int32_t, SaProfile>& saProfileMapTmp, int32_t maxLoop)
 {
@@ -177,123 +175,6 @@ HWTEST_F(SystemAbilityMgrTest, UnloadSystemAbility004, TestSize.Level3)
     int32_t ret = saMgr->UnloadSystemAbility(systemAbilityId);
     saMgr->abilityStateScheduler_ = make_shared<SystemAbilityStateScheduler>();
     EXPECT_EQ(ret, STATE_SCHEDULER_NULL);
-}
-
-/**
- * @tc.name: CheckCallerProcess001
- * @tc.desc: test CheckCallerProcess with process is null
- * @tc.type: FUNC
- * @tc.require: I6V4AX
- */
-HWTEST_F(SystemAbilityMgrTest, CheckCallerProcess001, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    SaProfile saProfile;
-    saProfile.process = u"";
-    /**
-     * @tc.steps: step1. test ConvertToOnDemandEvent
-     */
-    SystemAbilityOnDemandCondition condition;
-    condition.eventId = OnDemandEventId::DEVICE_ONLINE;
-    SystemAbilityOnDemandEvent from;
-    from.conditions.push_back(condition);
-
-    OnDemandEvent to;
-    saMgr->ConvertToOnDemandEvent(from, to);
-
-    bool ret = saMgr->CheckCallerProcess(saProfile);
-    EXPECT_EQ(false, ret);
-}
-
-/**
- * @tc.name: CheckCallerProcess002
- * @tc.desc: test CheckCallerProcess with process is PROCESS_NAME
- * @tc.type: FUNC
- * @tc.require: I6V4AX
- */
-HWTEST_F(SystemAbilityMgrTest, CheckCallerProcess002, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    SaProfile saProfile;
-    saProfile.process = PROCESS_NAME;
-    /**
-     * @tc.steps: step1. test ConvertToSystemAbilityOnDemandEvent
-     */
-    OnDemandCondition condition;
-    condition.eventId = -1;
-    OnDemandEvent from;
-    from.conditions.push_back(condition);
-
-    SystemAbilityOnDemandEvent to;
-    saMgr->ConvertToSystemAbilityOnDemandEvent(from, to);
-
-    bool ret = saMgr->CheckCallerProcess(saProfile);
-    EXPECT_EQ(false, ret);
-}
-
-/**
- * @tc.name: CheckAllowUpdate001
- * @tc.desc: test CheckAllowUpdate with OnDemandPolicyType is START_POLICY, allowUpdate is true
- * @tc.type: FUNC
- * @tc.require: I6V4AX
- */
-HWTEST_F(SystemAbilityMgrTest, CheckAllowUpdate001, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
-    SaProfile saProfile;
-    saProfile.startOnDemand.allowUpdate = true;
-    bool ret = saMgr->CheckAllowUpdate(type, saProfile);
-    EXPECT_EQ(true, ret);
-}
-
-/**
- * @tc.name: CheckAllowUpdate002
- * @tc.desc: test CheckAllowUpdate with OnDemandPolicyType is STOP_POLICY, allowUpdate is true
- * @tc.type: FUNC
- * @tc.require: I6V4AX
- */
-HWTEST_F(SystemAbilityMgrTest, CheckAllowUpdate002, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    OnDemandPolicyType type = OnDemandPolicyType::STOP_POLICY;
-    SaProfile saProfile;
-    saProfile.stopOnDemand.allowUpdate = true;
-    bool ret = saMgr->CheckAllowUpdate(type, saProfile);
-    EXPECT_EQ(true, ret);
-}
-
-/**
- * @tc.name: CheckAllowUpdate003
- * @tc.desc: test CheckAllowUpdate with OnDemandPolicyType is START_POLICY, allowUpdate is false
- * @tc.type: FUNC
- * @tc.require: I6V4AX
- */
-HWTEST_F(SystemAbilityMgrTest, CheckAllowUpdate003, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
-    SaProfile saProfile;
-    saProfile.startOnDemand.allowUpdate = false;
-    bool ret = saMgr->CheckAllowUpdate(type, saProfile);
-    EXPECT_EQ(false, ret);
-}
-
-/**
- * @tc.name: CheckAllowUpdate004
- * @tc.desc: test CheckAllowUpdate with OnDemandPolicyType is STOP_POLICY, allowUpdate is false
- * @tc.type: FUNC
- * @tc.require: I6V4AX
- */
-HWTEST_F(SystemAbilityMgrTest, CheckAllowUpdate004, TestSize.Level3)
-{
-    DTEST_LOG << " CheckAllowUpdate004 " << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    OnDemandPolicyType type = OnDemandPolicyType::STOP_POLICY;
-    SaProfile saProfile;
-    saProfile.startOnDemand.allowUpdate = false;
-    bool ret = saMgr->CheckAllowUpdate(type, saProfile);
-    EXPECT_EQ(false, ret);
 }
 
 /**

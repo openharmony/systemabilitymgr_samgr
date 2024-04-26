@@ -15,6 +15,7 @@
 
 #include "nlohmann/json.hpp"
 #include "system_ability_manager_util.h"
+#include "accesstoken_kit.h"
 #include "ipc_skeleton.h"
 #include "string_ex.h"
 #include "tools.h"
@@ -26,6 +27,7 @@ constexpr int32_t MAX_NAME_SIZE = 200;
 constexpr int32_t SPLIT_NAME_VECTOR_SIZE = 2;
 constexpr int32_t UID_ROOT = 0;
 constexpr int32_t UID_SYSTEM = 1000;
+constexpr int32_t SHFIT_BIT = 32;
 
 const string EVENT_TYPE = "eventId";
 const string EVENT_NAME = "name";
@@ -88,5 +90,82 @@ std::string SamgrUtil::EventToStr(const OnDemandEvent& event)
 std::string SamgrUtil::TransformDeviceId(const std::string& deviceId, int32_t type, bool isPrivate)
 {
     return isPrivate ? std::string() : deviceId;
+}
+
+bool SamgrUtil::CheckCallerProcess(const SaProfile& saProfile) 
+{
+    if (!CheckCallerProcess(Str16ToStr8(saProfile.process))) {
+        HILOGE("can't operate SA: %{public}d by proc:%{public}s",
+            saProfile.saId, Str16ToStr8(saProfile.process).c_str());
+        return false;
+    }
+    return true;
+}
+
+bool SamgrUtil::CheckCallerProcess(const std::string& callProcess) 
+{
+    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    Security::AccessToken::NativeTokenInfo nativeTokenInfo;
+    int32_t tokenInfoResult = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
+    if (tokenInfoResult != ERR_OK) {
+        HILOGE("get token info failed");
+        return false;
+    }
+
+    if (nativeTokenInfo.processName != callProcess) {
+        HILOGE("can't operate by proc:%{public}s", nativeTokenInfo.processName.c_str());
+        return false;
+    }
+    return true;
+}
+
+bool SamgrUtil::CheckAllowUpdate(OnDemandPolicyType type, const SaProfile& saProfile) 
+{
+    if (type == OnDemandPolicyType::START_POLICY && saProfile.startOnDemand.allowUpdate) {
+        return true;
+    } else if (type == OnDemandPolicyType::STOP_POLICY && saProfile.stopOnDemand.allowUpdate) {
+        return true;
+    }
+    return false;
+}
+
+void SamgrUtil::ConvertToOnDemandEvent(const SystemAbilityOnDemandEvent& from, OnDemandEvent& to) 
+{
+    to.eventId = static_cast<int32_t>(from.eventId);
+    to.name = from.name;
+    to.value = from.value;
+    to.persistence = from.persistence;
+    for (auto& item : from.conditions) {
+        OnDemandCondition condition;
+        condition.eventId = static_cast<int32_t>(item.eventId);
+        condition.name = item.name;
+        condition.value = item.value;
+        to.conditions.push_back(condition);
+    }
+    to.enableOnce = from.enableOnce;
+}
+
+void SamgrUtil::ConvertToSystemAbilityOnDemandEvent(const OnDemandEvent& from,
+    SystemAbilityOnDemandEvent& to) 
+{
+    to.eventId = static_cast<OnDemandEventId>(from.eventId);
+    to.name = from.name;
+    to.value = from.value;
+    to.persistence = from.persistence;
+    for (auto& item : from.conditions) {
+        SystemAbilityOnDemandCondition condition;
+        condition.eventId = static_cast<OnDemandEventId>(item.eventId);
+        condition.name = item.name;
+        condition.value = item.value;
+        to.conditions.push_back(condition);
+    }
+    to.enableOnce = from.enableOnce;
+}
+
+uint64_t SamgrUtil::GenerateFreKey(int32_t uid, int32_t saId)
+{
+    uint32_t uSaid = static_cast<uint32_t>(saId);
+    uint64_t key = static_cast<uint64_t>(uid);
+    return (key << SHFIT_BIT) | uSaid;
 }
 }

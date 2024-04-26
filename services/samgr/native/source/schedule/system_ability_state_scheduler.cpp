@@ -126,7 +126,7 @@ void SystemAbilityStateScheduler::InitSamgrProcessContext()
     processContext->abilityStateCountMap[SystemAbilityState::UNLOADABLE] = 0;
     processContext->abilityStateCountMap[SystemAbilityState::UNLOADING] = 0;
     processContext->pid = getpid();
-    processContext->uid = getuid();
+    processContext->uid = static_cast<int32_t>(getuid());
     processContextMap_[SAMGR_PROCESS_NAME] = processContext;
     processContextMap_[SAMGR_PROCESS_NAME]->saList.push_back(0);
     processContext->state = SystemProcessState::STARTED;
@@ -982,6 +982,24 @@ int32_t SystemAbilityStateScheduler::GetRunningSystemProcess(std::list<SystemPro
         }
     }
     return ERR_OK;
+}
+
+int32_t SystemAbilityStateScheduler::GetProcessNameByProcessId(int32_t pid, std::u16string& processName)
+{
+    HILOGD("[SA Scheduler] get processName by processId");
+    std::shared_lock<std::shared_mutex> readLock(processMapLock_);
+    for (auto it : processContextMap_) {
+        auto& processContext = it.second;
+        if (processContext == nullptr) {
+            continue;
+        }
+        std::lock_guard<std::mutex> autoLock(processContext->processLock);
+        if (processContext->pid == pid) {
+            processName = processContext->processName;
+            return ERR_OK;
+        }
+    }
+    return ERR_INVALID_VALUE;
 }
 
 void SystemAbilityStateScheduler::GetAllSystemAbilityInfo(std::string& result)
