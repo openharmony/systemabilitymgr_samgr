@@ -1120,7 +1120,7 @@ int32_t SystemAbilityManagerStub::GetRunningSaExtensionInfoListInner(MessageParc
 {
     if (!CheckPermission(EXT_TRANSACTION_PERMISSION)) {
         HILOGE("get SaExtInfoList CheckPermission fail!");
-        //return ERR_PERMISSION_DENIED;
+        return ERR_PERMISSION_DENIED;
     }
     std::string extension;
     if (!data.ReadString(extension)) {
