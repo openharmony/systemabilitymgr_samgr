@@ -300,4 +300,33 @@ bool LocalAbilityManagerProxy::IpcStatCmdProc(int32_t fd, int32_t cmd)
     }
     return true;
 }
+
+bool LocalAbilityManagerProxy::FfrtDumperProc(std::string& ffrtDumperInfo)
+{
+    sptr<IRemoteObject> iro = Remote();
+    if (iro == nullptr) {
+        HILOG_ERROR(LOG_CORE, "FfrtDumperProc Remote null");
+        return false;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(LOCAL_ABILITY_MANAGER_INTERFACE_TOKEN)) {
+        HILOG_WARN(LOG_CORE, "FfrtDumperProc write interface token failed");
+        return false;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t status = iro->SendRequest(
+        static_cast<uint32_t>(SafwkInterfaceCode::FFRT_DUMPER_TRANSACTION), data, reply, option);
+    if (status != NO_ERROR) {
+        HILOG_ERROR(LOG_CORE, "FfrtDumperProc SendRequest failed, return value : %{public}d", status);
+        return false;
+    }
+    if (!reply.ReadString(ffrtDumperInfo)) {
+        HILOG_WARN(LOG_CORE, "FfrtDumperProc read ffrtDumperInfo failed!");
+        return false;
+    }
+    return true;
+}
 }

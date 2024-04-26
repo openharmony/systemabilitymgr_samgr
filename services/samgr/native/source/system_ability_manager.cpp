@@ -62,6 +62,7 @@ const string RESOURCE_SCHEDULE_PROCESS_NAME = "resource_schedule_service";
 const string IPC_STAT_DUMP_PREFIX = "--ipc";
 constexpr const char* ONDEMAND_PERF_PARAM = "persist.samgr.perf.ondemand";
 constexpr const char* ONDEMAND_WORKER = "OndemandLoader";
+constexpr const char* ARGS_FFRT_PARAM = "--ffrt";
 
 constexpr uint32_t REPORT_GET_SA_INTERVAL = 24 * 60 * 60 * 1000; // ms and is one day
 constexpr int32_t MAX_SUBSCRIBE_COUNT = 256;
@@ -73,6 +74,7 @@ constexpr int32_t MEDIA_ANALYSIS_SERVICE_SA = 10120;
 constexpr int64_t ONDEMAND_PERF_DELAY_TIME = 60 * 1000; // ms
 constexpr int64_t CHECK_LOADED_DELAY_TIME = 4 * 1000; // ms
 constexpr int32_t SOFTBUS_SERVER_SA_ID = 4700;
+constexpr int32_t FFRT_DUMP_INDEX = 0;
 }
 
 std::mutex SystemAbilityManager::instanceLock;
@@ -225,7 +227,9 @@ int32_t SystemAbilityManager::Dump(int32_t fd, const std::vector<std::u16string>
     for (const auto& arg : args) {
         argsWithStr8.emplace_back(Str16ToStr8(arg));
     }
-
+    if ((argsWithStr8.size() > 0) && (argsWithStr8[FFRT_DUMP_INDEX] == ARGS_FFRT_PARAM)) {
+        return SystemAbilityManagerDumper::FfrtDumpProc(abilityStateScheduler_, fd, argsWithStr8);
+    }
     if ((argsWithStr8.size() > 0) && (argsWithStr8[IPC_STAT_PREFIX_INDEX] == IPC_STAT_DUMP_PREFIX)) {
         return IpcDumpProc(fd, argsWithStr8);
     } else {

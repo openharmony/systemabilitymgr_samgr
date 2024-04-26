@@ -16,10 +16,13 @@
 #include "system_ability_manager_dumper.h"
 
 #include "accesstoken_kit.h"
+#include "c/ffrt_watchdog.h"
+#include "file_ex.h"
 #include "ipc_skeleton.h"
 #include "system_ability_manager.h"
 #include "if_local_ability_manager.h"
 #include "ipc_payload_statistics.h"
+#include "samgr_err_code.h"
 
 namespace OHOS {
 namespace {
@@ -29,8 +32,12 @@ const std::string ARGS_QUERY_PROCESS_STATE = "-p";
 const std::string ARGS_QUERY_SA_IN_CURRENT_STATE = "-sm";
 const std::string ARGS_HELP = "-h";
 const std::string ARGS_QUERY_ALL_SA_STATE = "-l";
+constexpr const char* ARGS_FFRT_SEPARATOR = "|";
 constexpr size_t MIN_ARGS_SIZE = 1;
 constexpr size_t MAX_ARGS_SIZE = 2;
+constexpr int32_t FFRT_DUMP_PROC_LEN = 2;
+constexpr int32_t FFRT_DUMP_PIDS_INDEX = 1;
+constexpr int FFRT_BUFFER_SIZE = 512 * 1024;
 
 const std::string IPC_STAT_STR_START = "--start-stat";
 const std::string IPC_STAT_STR_STOP = "--stop-stat";
@@ -39,6 +46,116 @@ const std::string IPC_STAT_STR_ALL = "all";
 const std::string IPC_STAT_STR_SAMGR = "samgr";
 const std::string IPC_DUMP_SUCCESS = " success\n";
 const std::string IPC_DUMP_FAIL = " fail\n";
+}
+
+int32_t SystemAbilityManagerDumper::FfrtDumpProc(std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler,
+    int32_t fd, const std::vector<std::string>& args)
+{
+    if (!CanDump()) {
+        HILOGE("Dump failed, not allowed");
+        return ERR_PERMISSION_DENIED;
+    }
+    std::string result;
+    GetFfrtDumpInfoProc(abilityStateScheduler, args, result);
+    return SaveDumpResultToFd(fd, result);
+}
+
+bool SystemAbilityManagerDumper::GetFfrtDumpInfoProc(std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler,
+    const std::vector<std::string>& args, std::string& result)
+{
+    if (args.size() < FFRT_DUMP_PROC_LEN || args[FFRT_DUMP_PIDS_INDEX].empty()) {
+        HILOGE("FfrtDump param pid not exist");
+        IllegalInput(result);
+        return false;
+    }
+    std::string pidStr = args[FFRT_DUMP_PIDS_INDEX];
+    std::vector<int32_t> processIds;
+    SystemAbilityManagerDumper::FfrtDumpParser(processIds, pidStr);
+    if (processIds.empty()) {
+        HILOGE("FfrtDumpParser parse failed, illegal input processIdsStr %{public}s ", pidStr.c_str());
+        IllegalInput(result);
+        return false;
+    }
+    HILOGD("FfrtDumpProc: processIdsSize=%{public}zu", processIds.size());
+    for (const int32_t processId : processIds) {
+        if (processId == getpid()) {
+            GetSAMgrFfrtInfo(result);
+            continue;
+        }
+        std::u16string processName;
+        int32_t queryResult = abilityStateScheduler->GetProcessNameByProcessId(processId, processName);
+        if (queryResult != ERR_OK) {
+            HILOGE("GetProcessNameByProcessId failed, processId %{public}d not exist", processId);
+            result.append("process " + std::to_string(processId) + " not found!\n");
+            continue;
+        }
+        DumpFfrtInfoByProcName(processId, processName, result);
+    }
+    return true;
+}
+
+bool SystemAbilityManagerDumper::FfrtDumpParser(std::vector<int32_t>& processIds, const std::string& processIdsStr)
+{
+    std::string processIdsVecStr = processIdsStr + ARGS_FFRT_SEPARATOR;
+    std::size_t pos = processIdsVecStr.find(ARGS_FFRT_SEPARATOR);
+    while (pos != std::string::npos) {
+        std::string processIdStr = processIdsVecStr.substr(0, pos);
+        processIdsVecStr = processIdsVecStr.substr(pos + 1, processIdsVecStr.size() - pos - 1);
+        pos = processIdsVecStr.find(ARGS_FFRT_SEPARATOR);
+        int32_t processId = -1;
+        if (!StrToInt(processIdStr, processId)) {
+            HILOGE("StrToInt processIdStr %{public}s error", processIdStr.c_str());
+            continue;
+        }
+        if (processId > 0) {
+            processIds.emplace_back(processId);
+        }
+    }
+    return true;
+}
+
+void SystemAbilityManagerDumper::GetSAMgrFfrtInfo(std::string& result)
+{
+    char* buffer = new char[FFRT_BUFFER_SIZE + 1]();
+    buffer[FFRT_BUFFER_SIZE] = 0;
+    ffrt_watchdog_dumpinfo(buffer, FFRT_BUFFER_SIZE);
+    if (strlen(buffer) == 0) {
+        HILOGE("get samgr FfrtDumperInfo failed");
+        delete[] buffer;
+        return;
+    }
+    std::string ffrtDumpInfoStr(buffer);
+    result.append(ffrtDumpInfoStr + "\n");
+    delete[] buffer;
+}
+
+void SystemAbilityManagerDumper::DumpFfrtInfoByProcName(int32_t processId, const std::u16string processName,
+    std::string& result)
+{
+    sptr<ILocalAbilityManager> obj =
+        iface_cast<ILocalAbilityManager>(SystemAbilityManager::GetInstance()->GetSystemProcess(processName));
+    if (obj == nullptr) {
+        HILOGE("GetSystemProcess failed, processId:%{public}d processName:%{public}s not exist",
+            processId, Str16ToStr8(processName).c_str());
+        result.append("process " + std::to_string(processId) + " not found!\n");
+        return;
+    }
+    std::string resultForProcess;
+    if (!obj->FfrtDumperProc(resultForProcess)) {
+        HILOGE("safwk FfrtDumperProc execute failed");
+        return;
+    }
+    result.append(resultForProcess + "\n");
+}
+
+int32_t SystemAbilityManagerDumper::SaveDumpResultToFd(int32_t fd, const std::string& result)
+{
+    if (!SaveStringToFd(fd, result)) {
+        HILOGE("save to fd failed");
+        return SAVE_FD_FAIL;
+    }
+    HILOGD("save to fd success");
+    return ERR_OK;
 }
 
 bool SystemAbilityManagerDumper::StartSamgrIpcStatistics(std::string& result)

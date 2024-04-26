@@ -52,6 +52,7 @@ public:
 
     int32_t GetSystemProcessInfo(int32_t systemAbilityId, SystemProcessInfo& systemProcessInfo);
     int32_t GetRunningSystemProcess(std::list<SystemProcessInfo>& systemProcessInfos);
+    int32_t GetProcessNameByProcessId(int32_t pid, std::u16string& processName);
     void GetAllSystemAbilityInfo(std::string& result);
     void GetSystemAbilityInfo(int32_t said, std::string& result);
     void GetProcessInfo(const std::string& processName, std::string& result);

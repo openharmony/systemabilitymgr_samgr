@@ -25,6 +25,7 @@ enum SafwkInterfaceCode : uint32_t {
     IDLE_ABILITY_TRANSACTION = 4,
     SEND_STRATEGY_TO_SA_TRANSACTION = 5,
     IPC_STAT_CMD_TRANSACTION = 6,
+    FFRT_DUMPER_TRANSACTION = 7,
 };
 }
 #endif // !defined(SAFWK_IPC_INTERFACE_CODE_H)

@@ -38,6 +38,7 @@ public:
         const nlohmann::json& idleReason, int32_t& delayTime);
     bool SendStrategyToSA(int32_t type, int32_t systemAbilityId, int32_t level, std::string& action);
     bool IpcStatCmdProc(int32_t fd, int32_t cmd);
+    bool FfrtDumperProc(std::string& ffrtDumperInfo);
 private:
     static inline BrokerDelegator<LocalAbilityManagerProxy> delegator_;
 };
