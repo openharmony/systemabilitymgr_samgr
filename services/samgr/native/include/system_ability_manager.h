@@ -49,6 +49,19 @@ enum {
     UNKNOWN,
 };
 
+enum ListenerState {
+    INIT = 0,
+    NOTIFIED,
+};
+
+struct SAListener {
+    sptr<ISystemAbilityStatusChange> listener;
+    int32_t callingPid;
+    ListenerState state = ListenerState::INIT;
+    SAListener(sptr<ISystemAbilityStatusChange> lst, int32_t cpid, ListenerState sta = ListenerState::INIT)
+        :listener(lst), callingPid(cpid), state(sta) {}
+};
+
 class SystemAbilityManager : public DynamicCache<int32_t, sptr<IRemoteObject>>, public SystemAbilityManagerStub {
 public:
     virtual ~SystemAbilityManager();
@@ -187,7 +200,7 @@ private:
     bool GetSaProfile(int32_t saId, SaProfile& saProfile);
     void NotifySystemAbilityChanged(int32_t systemAbilityId, const std::string& deviceId, int32_t code,
         const sptr<ISystemAbilityStatusChange>& listener);
-    void UnSubscribeSystemAbilityLocked(std::list<std::pair<sptr<ISystemAbilityStatusChange>, int32_t>>& listenerList,
+    void UnSubscribeSystemAbilityLocked(std::list<SAListener>& listenerList,
         const sptr<IRemoteObject>& listener);
 
     void SendSystemAbilityAddedMsg(int32_t systemAbilityId, const sptr<IRemoteObject>& remoteObject);
@@ -258,7 +271,7 @@ private:
 
     // maybe hold listenerMapLock_ and then access onDemandLock_
     std::mutex listenerMapLock_;
-    std::map<int32_t, std::list<std::pair<sptr<ISystemAbilityStatusChange>, int32_t>>> listenerMap_;
+    std::map<int32_t, std::list<SAListener>> listenerMap_;
     std::map<int32_t, int32_t> subscribeCountMap_;
 
     std::mutex onDemandLock_;
