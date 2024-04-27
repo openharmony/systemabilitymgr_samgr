@@ -93,6 +93,8 @@ void SystemAbilityMgrTest::SetUp()
 
 void SystemAbilityMgrTest::TearDown()
 {
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->CleanFfrt();
     DTEST_LOG << "TearDown" << std::endl;
 }
 
