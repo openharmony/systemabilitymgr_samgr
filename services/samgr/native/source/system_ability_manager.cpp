@@ -632,13 +632,26 @@ int32_t SystemAbilityManager::FindSystemAbilityNotify(int32_t systemAbilityId, c
         systemAbilityId, code, listenerMap_.size());
     lock_guard<mutex> autoLock(listenerMapLock_);
     auto iter = listenerMap_.find(systemAbilityId);
-    if (iter != listenerMap_.end()) {
-        auto& listeners = iter->second;
-        for (const auto& item : listeners) {
-            NotifySystemAbilityChanged(systemAbilityId, deviceId, code, item.first);
+    if (iter == listenerMap_.end()) {
+        return ERR_OK;
+    }
+    auto& listeners = iter->second;
+    if (code == static_cast<uint32_t>(SamgrInterfaceCode::ADD_SYSTEM_ABILITY_TRANSACTION)) {
+        for (auto& item : listeners) {
+            if (item.state == ListenerState::INIT) {
+                NotifySystemAbilityChanged(systemAbilityId, deviceId, code, item.listener);
+                item.state = ListenerState::NOTIFIED;
+            } else {
+                HILOGI("FindSaNotify Listener has been notified,SA:%{public}d,callingPid:%{public}d",
+                    systemAbilityId, item.callingPid);
+            }
+        }
+    } else if(code == static_cast<uint32_t>(SamgrInterfaceCode::REMOVE_SYSTEM_ABILITY_TRANSACTION)) {
+        for (auto& item : listeners) {
+            NotifySystemAbilityChanged(systemAbilityId, deviceId, code, item.listener);
+            item.state = ListenerState::INIT;
         }
     }
-
     return ERR_OK;
 }
 
@@ -911,7 +924,7 @@ int32_t SystemAbilityManager::SubscribeSystemAbility(int32_t systemAbilityId,
         lock_guard<mutex> autoLock(listenerMapLock_);
         auto& listeners = listenerMap_[systemAbilityId];
         for (const auto& itemListener : listeners) {
-            if (listener->AsObject() == itemListener.first->AsObject()) {
+            if (listener->AsObject() == itemListener.listener->AsObject()) {
                 HILOGI("already exist listener object SA:%{public}d", systemAbilityId);
                 return ERR_OK;
             }
@@ -934,23 +947,36 @@ int32_t SystemAbilityManager::SubscribeSystemAbility(int32_t systemAbilityId,
             systemAbilityId, listeners.size(), count, callingPid);
     }
     sptr<IRemoteObject> targetObject = CheckSystemAbility(systemAbilityId);
-    if (targetObject != nullptr) {
-        HILOGI("NotifySaChanged add SA:%{public}d,cnt:%{public}d,callpid:%{public}d",
-            systemAbilityId, subscribeCountMap_[callingPid], callingPid);
-        NotifySystemAbilityChanged(systemAbilityId, "",
-            static_cast<uint32_t>(SamgrInterfaceCode::ADD_SYSTEM_ABILITY_TRANSACTION), listener);
+    if (targetObject == nullptr) {
+        return ERR_OK;
+    }
+    lock_guard<mutex> autoLock(listenerMapLock_);
+    auto& listeners = listenerMap_[systemAbilityId];
+    for (auto& itemListener : listeners) {
+        if (listener->AsObject() == itemListener.listener->AsObject()) {
+            if (itemListener.state == ListenerState::INIT) {
+                HILOGI("NotifySaChanged add SA:%{public}d,cnt:%{public}d,callpid:%{public}d",
+                    systemAbilityId, subscribeCountMap_[callingPid], callingPid);
+                NotifySystemAbilityChanged(systemAbilityId, "",
+                    static_cast<uint32_t>(SamgrInterfaceCode::ADD_SYSTEM_ABILITY_TRANSACTION), listener);
+                itemListener.state = ListenerState::NOTIFIED;
+            } else {
+                HILOGI("Subscribe Listener has been notified,SA:%{public}d,callpid:%{public}d",
+                    systemAbilityId, callingPid);
+            }
+            break;
+        }
     }
     return ERR_OK;
 }
 
 void SystemAbilityManager::UnSubscribeSystemAbilityLocked(
-    std::list<std::pair<sptr<ISystemAbilityStatusChange>, int32_t>>& listenerList,
-    const sptr<IRemoteObject>& listener)
+    std::list<SAListener>& listenerList, const sptr<IRemoteObject>& listener)
 {
     auto iter = listenerList.begin();
     while (iter != listenerList.end()) {
         auto& item = *iter;
-        if (item.first->AsObject() != listener) {
+        if (item.listener->AsObject() != listener) {
             ++iter;
             continue;
         }
@@ -958,7 +984,7 @@ void SystemAbilityManager::UnSubscribeSystemAbilityLocked(
         if (abilityStatusDeath_ != nullptr) {
             listener->RemoveDeathRecipient(abilityStatusDeath_);
         }
-        auto iterPair = subscribeCountMap_.find(item.second);
+        auto iterPair = subscribeCountMap_.find(item.callingPid);
         if (iterPair != subscribeCountMap_.end()) {
             --iterPair->second;
             if (iterPair->second == 0) {
@@ -966,7 +992,7 @@ void SystemAbilityManager::UnSubscribeSystemAbilityLocked(
             }
         }
         HILOGI("rm SA Status listener added by callPid:%{public}d,size:%{public}zu",
-            item.second, listenerList.size());
+            item.callingPid, listenerList.size());
         iter = listenerList.erase(iter);
         break;
     }

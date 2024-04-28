@@ -1278,7 +1278,7 @@ HWTEST_F(SystemAbilityMgrStubTest, FindSystemAbilityNotify001, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     int32_t pid = 1;
-    saMgr->listenerMap_[SAID].push_back(make_pair(nullptr, pid));
+    saMgr->listenerMap_[SAID].push_back({nullptr, pid});
     string deviceId = "test";
     int32_t code = 1;
     bool res = saMgr->FindSystemAbilityNotify(SAID, deviceId, code);
@@ -1717,7 +1717,7 @@ HWTEST_F(SystemAbilityMgrStubTest, SubscribeSystemAbility004, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     sptr<SaStatusChangeMock> listener(new SaStatusChangeMock());
-    saMgr->listenerMap_[SAID].push_back(make_pair(listener, SAID));
+    saMgr->listenerMap_[SAID].push_back({listener, SAID});
     int32_t res = saMgr->SubscribeSystemAbility(SAID, listener);
     EXPECT_EQ(res, ERR_OK);
 }
@@ -1778,7 +1778,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemAbility004, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     sptr<SaStatusChangeMock> listener(new SaStatusChangeMock());
-    saMgr->listenerMap_[SAID].push_back(make_pair(listener, SAID));
+    saMgr->listenerMap_[SAID].push_back({listener, SAID});
     saMgr->abilityStatusDeath_ = nullptr;
     saMgr->subscribeCountMap_.clear();
     int32_t res = saMgr->UnSubscribeSystemAbility(SAID, listener);
@@ -1798,7 +1798,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemAbility005, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     sptr<SaStatusChangeMock> listener(new SaStatusChangeMock());
-    saMgr->listenerMap_[SAID].push_back(make_pair(listener, SAID));
+    saMgr->listenerMap_[SAID].push_back({listener, SAID});
     saMgr->abilityStatusDeath_ = nullptr;
     int countNum = 2;
     saMgr->subscribeCountMap_[SAID] = countNum;
