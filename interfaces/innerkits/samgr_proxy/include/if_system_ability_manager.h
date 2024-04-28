@@ -290,6 +290,21 @@ public:
      */
     virtual int32_t GetExtensionRunningSaList(const std::string& extension,
         std::vector<sptr<IRemoteObject>>& saList) = 0;
+
+    /**
+     * GetRunningSaExtensionInfoList, Return list of started said and process hanlde that match extension.
+     *
+     * @param extension, extension, match with profile extension.
+     * @param infoList, list of started said and sa process remote obj that match extension
+     * @return ERR_OK indicates that the list of hanlde that match extension success.
+     */
+    struct SaExtensionInfo {
+        int32_t saId = -1;
+        sptr<IRemoteObject> processObj = nullptr;
+    };
+    virtual int32_t GetRunningSaExtensionInfoList(const std::string& extension,
+        std::vector<SaExtensionInfo>& infoList) = 0;
+
     virtual int32_t GetOnDemandReasonExtraData(int64_t extraDataId, MessageParcel& extraDataParcel) = 0;
     virtual int32_t GetOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
         std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents) = 0;

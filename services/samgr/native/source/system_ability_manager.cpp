@@ -2069,4 +2069,24 @@ int32_t SystemAbilityManager::GetExtensionRunningSaList(const std::string& exten
     return ERR_OK;
 }
 
+int32_t SystemAbilityManager::GetRunningSaExtensionInfoList(const std::string& extension,
+    std::vector<SaExtensionInfo>& infoList)
+{
+    lock_guard<mutex> autoLock(saProfileMapLock_);
+    for (const auto& [saId, value] : saProfileMap_) {
+        if (std::find(value.extension.begin(), value.extension.end(), extension)
+            != value.extension.end()) {
+            auto obj = GetSystemProcess(value.process);
+            if (obj == nullptr) {
+                HILOGD("get SaExtInfoList sa not load,ext:%{public}s SA:%{public}d", extension.c_str(), saId);
+                continue;
+            }
+            SaExtensionInfo tmp{saId, obj};
+            infoList.emplace_back(tmp);
+            HILOGD("get SaExtInfoList suc,ext:%{public}s,SA:%{public}d,proc:%{public}s",
+                extension.c_str(), saId, Str16ToStr8(value.process).c_str());
+        }
+    }
+    return ERR_OK;
+}
 } // namespace OHOS

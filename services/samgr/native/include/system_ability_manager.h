@@ -155,6 +155,8 @@ public:
     int32_t SendStrategy(int32_t type, std::vector<int32_t>& systemAbilityIds,
         int32_t level, std::string& action) override;
     bool CheckSaIsImmediatelyRecycle(int32_t systemAbilityId);
+    int32_t GetRunningSaExtensionInfoList(const std::string& extension,
+        std::vector<SaExtensionInfo>& infoList) override;
     int32_t GetExtensionSaIds(const std::string& extension, std::vector<int32_t>& saIds) override;
     int32_t GetExtensionRunningSaList(const std::string& extension, std::vector<sptr<IRemoteObject>>& saList) override;
     sptr<IRemoteObject> GetSystemProcess(const std::u16string& procName);
