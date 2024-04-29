@@ -276,6 +276,10 @@ HWTEST_F(CommonEventCollectTest, RemoveUnusedEvent001, TestSize.Level3)
 {
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
     OnDemandEvent event = {COMMON_EVENT, "", ""};
+    OnDemandEvent event1 = {COMMON_EVENT, "", ""};
+    OnDemandEvent event2 = {COMMON_EVENT, "TEST", "TEST"};
+    EXPECT_EQ(event == event1,true);
+    EXPECT_EQ(event1 == event2,false);
     int32_t ret = commonEventCollect->RemoveUnusedEvent(event);
     EXPECT_EQ(ret, ERR_OK);
 }
