@@ -318,6 +318,7 @@ enum {
     ARKUI_UI_APPEARANCE_SERVICE_ID                   = 7002,
     CA_DAEMON_ID                                     = 8001,
     ASSET_SERVICE_ID                                 = 8100,
+    EL5_FILEKEY_MANAGER_SERVICE_ID                   = 8250,
 
     // reserved for vendor
     VENDOR_SYS_ABILITY_ID_BEGIN                      = 0x00010000,  // 65536
