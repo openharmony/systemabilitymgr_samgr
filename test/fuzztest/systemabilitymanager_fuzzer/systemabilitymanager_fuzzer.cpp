@@ -19,6 +19,7 @@
 #include "sam_mock_permission.h"
 #include "system_ability_manager.h"
 #include "iservice_registry.h"
+#include "hisysevent_adapter.h"
 
 #include <cinttypes>
 #include <cstddef>
@@ -44,6 +45,7 @@ namespace {
     constexpr uint8_t SEAT_TWO = 2;
     constexpr uint8_t LIFT_OFFSET_TWO = 8;
     constexpr uint8_t SEAT_THREE = 3;
+    constexpr int64_t DURATION = 1;
     unsigned int g_dumpLevel = 0;
     const std::u16string SAMGR_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
     bool g_flag = false;
@@ -140,6 +142,27 @@ void FuzzSystemAbilityManager(const uint8_t* rawData, size_t size)
     manager->OnRemoteRequest(code % MAX_CALL_TRANSACTION, data, reply, option);
     manager->CleanFfrt();
 }
+
+void FuzzSamgrHisysevent(const uint8_t* rawData, size_t size)
+{
+    int32_t coverData = static_cast<int32_t>(Convert2Uint32(rawData));
+    int32_t saId = coverData;
+    int32_t keyStage = coverData;
+    ReportSaUnLoadDuration(saId, keyStage, DURATION);
+    ReportSaLoadDuration(saId, keyStage, DURATION);
+
+    int32_t pid = coverData;
+    int32_t uid = coverData;
+    ReportProcessStartFail("", pid, uid, "");
+    ReportProcessStopFail("", pid, uid, "");
+
+    ReportAddSystemAbilityFailed(saId, "");
+
+    int32_t count = coverData;
+
+    ReportGetSAFrequency(static_cast<uint32_t>(uid), static_cast<uint32_t>(saId), count);
+    WatchDogSendEvent(pid, static_cast<uint32_t>(uid), "", "");
+}
 }
 }
 
@@ -150,7 +173,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
         return 0;
     }
 
+    OHOS::Samgr::FuzzSamgrHisysevent(data, size);
     OHOS::Samgr::FuzzSystemAbilityManager(data, size);
+    
     return 0;
 }
 
