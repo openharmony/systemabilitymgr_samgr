@@ -27,6 +27,7 @@ config("samgr_proxy_private_config") {
   include_dirs = [
     "include",
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/lsamgr",
+    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy/include",
     "//foundation/systemabilitymgr/samgr/services/lsamgr/include",
     "//foundation/systemabilitymgr/samgr/services/samgr/native/include",
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/dynamic_cache/include",

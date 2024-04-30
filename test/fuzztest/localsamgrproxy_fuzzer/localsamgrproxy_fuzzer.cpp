@@ -60,6 +60,13 @@ public:
     {
         return true;
     }
+
+    int32_t SystemAbilityExtProc(const std::string& extension, int32_t said,
+        SystemAbilityExtensionPara* callback, bool isAsync = false) override
+    {
+        return 0;
+    }
+
     int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override
     {
         return 0;

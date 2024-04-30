@@ -39,8 +39,11 @@ public:
     bool SendStrategyToSA(int32_t type, int32_t systemAbilityId, int32_t level, std::string& action);
     bool IpcStatCmdProc(int32_t fd, int32_t cmd);
     bool FfrtDumperProc(std::string& ffrtDumperInfo);
+    int32_t SystemAbilityExtProc(const std::string& extension, int32_t said,
+        SystemAbilityExtensionPara* callback, bool isAsync = false);
 private:
     static inline BrokerDelegator<LocalAbilityManagerProxy> delegator_;
+    bool PrepareData(MessageParcel& data, int32_t said, const std::string& extension);
 };
 }
 #endif // !defined(LOCAL_ABILITY_MANAGER_PROXY_H)
