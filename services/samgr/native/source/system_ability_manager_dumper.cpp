@@ -16,7 +16,7 @@
 #include "system_ability_manager_dumper.h"
 
 #include "accesstoken_kit.h"
-#include "c/ffrt_watchdog.h"
+#include "ffrt_inner.h"
 #include "file_ex.h"
 #include "ipc_skeleton.h"
 #include "system_ability_manager.h"
@@ -118,7 +118,7 @@ void SystemAbilityManagerDumper::GetSAMgrFfrtInfo(std::string& result)
 {
     char* buffer = new char[FFRT_BUFFER_SIZE + 1]();
     buffer[FFRT_BUFFER_SIZE] = 0;
-    ffrt_watchdog_dumpinfo(buffer, FFRT_BUFFER_SIZE);
+    ffrt_dump(ffrt_dump_cmd_t::DUMP_INFO_ALL, buffer, FFRT_BUFFER_SIZE);
     if (strlen(buffer) == 0) {
         HILOGE("get samgr FfrtDumperInfo failed");
         delete[] buffer;
