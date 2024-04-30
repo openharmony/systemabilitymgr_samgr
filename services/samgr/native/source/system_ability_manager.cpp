@@ -636,7 +636,7 @@ int32_t SystemAbilityManager::FindSystemAbilityNotify(int32_t systemAbilityId, c
         return ERR_OK;
     }
     auto& listeners = iter->second;
-    if (code == static_cast<uint32_t>(SamgrInterfaceCode::ADD_SYSTEM_ABILITY_TRANSACTION)) {
+    if (code == static_cast<int32_t>(SamgrInterfaceCode::ADD_SYSTEM_ABILITY_TRANSACTION)) {
         for (auto& item : listeners) {
             if (item.state == ListenerState::INIT) {
                 NotifySystemAbilityChanged(systemAbilityId, deviceId, code, item.listener);
@@ -646,7 +646,7 @@ int32_t SystemAbilityManager::FindSystemAbilityNotify(int32_t systemAbilityId, c
                     systemAbilityId, item.callingPid);
             }
         }
-    } else if(code == static_cast<uint32_t>(SamgrInterfaceCode::REMOVE_SYSTEM_ABILITY_TRANSACTION)) {
+    } else if(code == static_cast<int32_t>(SamgrInterfaceCode::REMOVE_SYSTEM_ABILITY_TRANSACTION)) {
         for (auto& item : listeners) {
             NotifySystemAbilityChanged(systemAbilityId, deviceId, code, item.listener);
             item.state = ListenerState::INIT;
