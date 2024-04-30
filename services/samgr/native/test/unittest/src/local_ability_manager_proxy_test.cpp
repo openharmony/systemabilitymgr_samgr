@@ -358,4 +358,68 @@ HWTEST_F(LocalAbilityManagerProxyTest, FfrtDumperProc001, TestSize.Level3)
     bool ret = localAbility->FfrtDumperProc(ffrtDumperInfo);
     EXPECT_FALSE(ret);
 }
+
+/**
+ * @tc.name: SystemAbilityExtProc001
+ * @tc.desc: test SystemAbilityExtProc001
+ * @tc.type: FUNC
+ * @tc.require: I9IE98
+ */
+HWTEST_F(LocalAbilityManagerProxyTest, SystemAbilityExtProc001, TestSize.Level3)
+{
+    sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
+    sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
+    SystemAbilityExtensionPara callback;
+
+    int32_t result = localAbility->SystemAbilityExtProc(std::string(), TEST_SAID_VAILD, &callback);
+    EXPECT_EQ(result, INVALID_DATA);
+}
+
+/**
+ * @tc.name: SystemAbilityExtProc002
+ * @tc.desc: test SystemAbilityExtProc002
+ * @tc.type: FUNC
+ * @tc.require: I9IE98
+ */
+HWTEST_F(LocalAbilityManagerProxyTest, SystemAbilityExtProc002, TestSize.Level3)
+{
+    sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
+    sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
+    SystemAbilityExtensionPara callback;
+
+    int32_t result = localAbility->SystemAbilityExtProc("OnBackup", TEST_SAID_VAILD, &callback);
+    EXPECT_EQ(result, NO_ERROR);
+}
+
+/**
+ * @tc.name: SystemAbilityExtProc003
+ * @tc.desc: test SystemAbilityExtProc003
+ * @tc.type: FUNC
+ * @tc.require: I9IE98
+ */
+HWTEST_F(LocalAbilityManagerProxyTest, SystemAbilityExtProc003, TestSize.Level3)
+{
+    sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
+    sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
+    SystemAbilityExtensionPara callback;
+
+    int32_t result = localAbility->SystemAbilityExtProc("OnBackup", TEST_SAID_VAILD, &callback, true);
+    EXPECT_EQ(result, NO_ERROR);
+}
+
+/**
+ * @tc.name: SystemAbilityExtProc004
+ * @tc.desc: test SystemAbilityExtProc004
+ * @tc.type: FUNC
+ * @tc.require: I9IE98
+ */
+HWTEST_F(LocalAbilityManagerProxyTest, SystemAbilityExtProc004, TestSize.Level3)
+{
+    sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
+    sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
+    SystemAbilityExtensionPara callback;
+
+    int32_t result = localAbility->SystemAbilityExtProc("OnBackup", TEST_SAID_INVAILD, &callback, true);
+    EXPECT_EQ(result, INVALID_DATA);
+}
 }

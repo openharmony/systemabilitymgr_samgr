@@ -329,4 +329,72 @@ bool LocalAbilityManagerProxy::FfrtDumperProc(std::string& ffrtDumperInfo)
     }
     return true;
 }
+
+int32_t LocalAbilityManagerProxy::SystemAbilityExtProc(const std::string& extension, int32_t said,
+    SystemAbilityExtensionPara* callback, bool isAsync)
+{
+    if (said <= 0) {
+        HILOG_WARN(LOG_CORE, "SystemAbilityExtProc systemAbilityId invalid.");
+        return INVALID_DATA;
+    }
+
+    if (extension.empty()) {
+        HILOG_WARN(LOG_CORE, "SystemAbilityExtProc extension invalid.");
+        return INVALID_DATA;
+    }
+
+    sptr<IRemoteObject> iro = Remote();
+    if (iro == nullptr) {
+        HILOG_ERROR(LOG_CORE, "SystemAbilityExtProc Remote return null");
+        return OBJECT_NULL;
+    }
+
+    MessageParcel data;
+    if (!PrepareData(data, said, extension)) {
+        return INVALID_DATA;
+    }
+
+    if (callback != nullptr && !callback->InputParaSet(data)) {
+        HILOG_WARN(LOG_CORE, "SystemAbilityExtProc InputParaSet failed!");
+        return INVALID_DATA;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    if (isAsync) {
+        option.SetFlags(MessageOption::TF_ASYNC);
+    }
+
+    int32_t status = iro->SendRequest(
+        static_cast<uint32_t>(SafwkInterfaceCode::SYSTEM_ABILITY_EXT_TRANSACTION), data, reply, option);
+    if (status != NO_ERROR) {
+        HILOG_ERROR(LOG_CORE, "SystemAbilityExtProc SendRequest failed, return value : %{public}d", status);
+        return status;
+    }
+
+    if ((!isAsync) && callback != nullptr && !callback->OutputParaGet(reply)) {
+        HILOG_WARN(LOG_CORE, "SystemAbilityExtProc OutputParaGet failed!");
+        return INVALID_DATA;
+    }
+    return NO_ERROR;
+}
+
+bool LocalAbilityManagerProxy::PrepareData(MessageParcel& data, int32_t said, const std::string& extension)
+{
+    if (!data.WriteInterfaceToken(LOCAL_ABILITY_MANAGER_INTERFACE_TOKEN)) {
+        HILOG_WARN(LOG_CORE, "SystemAbilityExtProc interface token check failed");
+        return false;
+    }
+
+    if (!data.WriteInt32(said)) {
+        HILOG_WARN(LOG_CORE, "SystemAbilityExtProc write said failed!");
+        return false;
+    }
+
+    if (!data.WriteString(extension)) {
+        HILOG_WARN(LOG_CORE, "SystemAbilityExtProc write extension failed!");
+        return false;
+    }
+    return true;
+}
 }
