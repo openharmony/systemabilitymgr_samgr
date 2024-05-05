@@ -322,6 +322,7 @@ enum {
 
     // reserved for vendor
     VENDOR_SYS_ABILITY_ID_BEGIN                      = 0x00010000,  // 65536
+    MEDIA_MONITOR_SERVICE_ID                         = 66160,
     VENDOR_SYS_ABILITY_ID_END                        = 0x00020000,  // 131072
     LAST_SYS_ABILITY_ID                              = 0x00ffffff,  // 16777215
 };
