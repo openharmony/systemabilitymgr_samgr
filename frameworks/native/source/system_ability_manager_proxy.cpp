@@ -131,13 +131,13 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::GetSystemAbility(int32_t systemAb
 sptr<IRemoteObject> SystemAbilityManagerProxy::GetSystemAbilityWrapper(int32_t systemAbilityId, const string& deviceId)
 {
     if (!CheckInputSysAbilityId(systemAbilityId)) {
-        HILOGW("GetSystemAbilityWrapper SA invalid:%{public}d!", systemAbilityId);
+        HILOGW("GetSaWrap SA invalid:%{public}d!", systemAbilityId);
         return nullptr;
     }
 
     bool isExist = false;
     int32_t timeout = RETRY_TIME_OUT_NUMBER;
-    HILOGD("GetSystemAbilityWrapper:Waiting for SA:%{public}d, ", systemAbilityId);
+    HILOGD("GetSaWrap:Waiting for SA:%{public}d, ", systemAbilityId);
     do {
         sptr<IRemoteObject> svc;
         if (deviceId.empty()) {
@@ -156,7 +156,7 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::GetSystemAbilityWrapper(int32_t s
         }
         usleep(SLEEP_ONE_MILLI_SECOND_TIME * SLEEP_INTERVAL_TIME);
     } while (timeout--);
-    HILOGE("GetSystemAbilityWrapper SA:%{public}d didn't start. Returning nullptr", systemAbilityId);
+    HILOGE("GetSaWrap SA:%{public}d not start", systemAbilityId);
     return nullptr;
 }
 
@@ -164,7 +164,7 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbilityWrapper(int32_t
 {
     auto remote = Remote();
     if (remote == nullptr) {
-        HILOGI("GetSystemAbilityWrapper remote is nullptr !");
+        HILOGI("CheckSaWrap remote is nullptr !");
         return nullptr;
     }
     MessageParcel reply;

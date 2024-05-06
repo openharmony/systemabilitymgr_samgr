@@ -37,7 +37,7 @@ constexpr int32_t TO_MILLISECOND = 1000;
 }
 void DeviceStatusCollectManager::Init(const std::list<SaProfile>& saProfiles)
 {
-    HILOGI("DeviceStatusCollectManager Init begin");
+    HILOGI("DeviceStaMgr Init begin");
     FilterOnDemandSaProfiles(saProfiles);
     collectHandler_ = std::make_shared<FFRTHandler>("collect");
     sptr<ICollectPlugin> deviceParamCollect = new DeviceParamCollect(this);
@@ -61,7 +61,7 @@ void DeviceStatusCollectManager::Init(const std::list<SaProfile>& saProfiles)
     timedCollect->Init(onDemandSaProfiles_);
     collectPluginMap_[TIMED_EVENT] = timedCollect;
     StartCollect();
-    HILOGI("DeviceStatusCollectManager Init end");
+    HILOGI("DeviceStaMgr Init end");
 }
 
 void DeviceStatusCollectManager::FilterOnDemandSaProfiles(const std::list<SaProfile>& saProfiles)
@@ -137,7 +137,7 @@ void DeviceStatusCollectManager::GetSaControlListByEvent(const OnDemandEvent& ev
             }
         }
     }
-    HILOGD("DeviceStatusCollectManager saControlList size %{public}zu", saControlList.size());
+    HILOGD("DeviceStaMgr saControlList size %{public}zu", saControlList.size());
 }
 
 void DeviceStatusCollectManager::SortSaControlListByLoadPriority(std::list<SaControlInfo>& saControlList)
@@ -249,7 +249,7 @@ void DeviceStatusCollectManager::SetFfrt()
 
 void DeviceStatusCollectManager::StartCollect()
 {
-    HILOGI("DeviceStatusCollectManager OnStart begin");
+    HILOGI("DeviceStaMgr OnStart begin");
     if (collectHandler_ == nullptr) {
         return;
     }
@@ -264,7 +264,7 @@ void DeviceStatusCollectManager::StartCollect()
 void DeviceStatusCollectManager::ReportEvent(const OnDemandEvent& event)
 {
     if (collectHandler_ == nullptr) {
-        HILOGW("DeviceStatusCollectManager collectHandler_ is nullptr");
+        HILOGW("DeviceStaMgr collectHandler_ is nullptr");
         return;
     }
     std::list<SaControlInfo> saControlList;
@@ -272,7 +272,7 @@ void DeviceStatusCollectManager::ReportEvent(const OnDemandEvent& event)
     GetSaControlListByPersistEvent(event, saControlList);
     SortSaControlListByLoadPriority(saControlList);
     if (saControlList.empty()) {
-        HILOGD("DeviceStatusCollectManager no matched event");
+        HILOGD("DeviceStaMgr no matched event");
         if (event.eventId == DEVICE_ONLINE) {
             HILOGI("deviceOnline is empty");
         }
@@ -286,9 +286,9 @@ void DeviceStatusCollectManager::ReportEvent(const OnDemandEvent& event)
 
 void DeviceStatusCollectManager::PostDelayTask(std::function<void()> callback, int32_t delayTime)
 {
-    HILOGI("DeviceStatusCollectManager PostDelayTask begin");
+    HILOGI("DeviceStaMgr PostDelayTask begin");
     if (delayTime < 0 || delayTime > std::numeric_limits<int32_t>::max() / TO_MILLISECOND) {
-        HILOGE("DeviceStatusCollectManager PostDelayTask Failed : delayTime out of range %{public}d", delayTime);
+        HILOGE("DeviceStaMgr PostDelayTask Failed : delayTime out of range %{public}d", delayTime);
         return;
     }
     collectHandler_->PostTask(callback, delayTime * TO_MILLISECOND);
@@ -296,7 +296,7 @@ void DeviceStatusCollectManager::PostDelayTask(std::function<void()> callback, i
 
 int32_t DeviceStatusCollectManager::GetOnDemandReasonExtraData(int64_t extraDataId, OnDemandReasonExtraData& extraData)
 {
-    HILOGD("DeviceStatusCollectManager GetOnDemandReasonExtraData begin, extraDataId:%{public}d",
+    HILOGD("DeviceStaMgr GetOnDemandReasonExtraData begin, extraDataId:%{public}d",
         static_cast<int32_t>(extraDataId));
     if (collectPluginMap_.count(COMMON_EVENT) == 0) {
         HILOGE("not support get extra data");
@@ -339,13 +339,13 @@ int32_t DeviceStatusCollectManager::AddCollectEvents(const std::vector<OnDemandE
 int32_t DeviceStatusCollectManager::GetOnDemandEvents(int32_t systemAbilityId, OnDemandPolicyType type,
     std::vector<OnDemandEvent>& events)
 {
-    HILOGI("DeviceStatusCollectManager GetOnDemandEvents begin");
+    HILOGI("GetOnDemandEvents begin");
     std::shared_lock<std::shared_mutex> readLock(saProfilesLock_);
     auto iter = std::find_if(onDemandSaProfiles_.begin(), onDemandSaProfiles_.end(), [systemAbilityId](auto saProfile) {
         return saProfile.saId == systemAbilityId;
     });
     if (iter == onDemandSaProfiles_.end()) {
-        HILOGI("DeviceStatusCollectManager GetOnDemandEvents invalid saId:%{public}d", systemAbilityId);
+        HILOGI("GetOnDemandEvents invalid saId:%{public}d", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
     if (type == OnDemandPolicyType::START_POLICY) {
@@ -353,7 +353,7 @@ int32_t DeviceStatusCollectManager::GetOnDemandEvents(int32_t systemAbilityId, O
     } else if (type == OnDemandPolicyType::STOP_POLICY) {
         events = (*iter).stopOnDemand.onDemandEvents;
     } else {
-        HILOGE("DeviceStatusCollectManager GetOnDemandEvents invalid policy types");
+        HILOGE("GetOnDemandEvents invalid policy types");
         return ERR_INVALID_VALUE;
     }
     return ERR_OK;
@@ -361,7 +361,7 @@ int32_t DeviceStatusCollectManager::GetOnDemandEvents(int32_t systemAbilityId, O
 
 int32_t DeviceStatusCollectManager::RemoveUnusedEventsLocked(const std::vector<OnDemandEvent>& events)
 {
-    HILOGD("DeviceStatusCollectManager RemoveUnusedEventsLocked start");
+    HILOGD("RemoveUnusedEventsLocked start");
     if (events.size() == 0) {
         return ERR_OK;
     }
@@ -376,7 +376,7 @@ int32_t DeviceStatusCollectManager::RemoveUnusedEventsLocked(const std::vector<O
         }
         bool eventUsed = CheckEventUsedLocked(event);
         if (!eventUsed) {
-            HILOGI("DeviceStatusCollectManager CheckEventUsedLocked name: %{public}s", event.name.c_str());
+            HILOGI("CheckEventUsedLocked name: %{public}s", event.name.c_str());
             int32_t ret = collectPluginMap_[event.eventId]->RemoveUnusedEvent(event);
             if (ret != ERR_OK) {
                 HILOGE("Remove event failed, eventId: %{public}d", event.eventId);
@@ -464,11 +464,11 @@ void DeviceStatusCollectManager::StringToTypeAndSaid(const std::string& eventStr
     } else if (strType == "stop") {
         type = OnDemandPolicyType::STOP_POLICY;
     } else {
-        HILOGW("DeviceStatusCollectManager StringToTypeAndSaid failed");
+        HILOGW("StringToTypeAndSaid failed");
         return;
     }
     if (pos == string::npos) {
-        HILOGW("DeviceStatusCollectManager StringToSaid failed");
+        HILOGW("StringToSaid failed");
         return;
     }
     systemAbilityId = atoi((eventStr.substr(pos + 1, eventStr.size() - pos - 1)).c_str());
@@ -478,17 +478,17 @@ void DeviceStatusCollectManager::StringToTypeAndSaid(const std::string& eventStr
 int32_t DeviceStatusCollectManager::UpdateOnDemandEvents(int32_t systemAbilityId, OnDemandPolicyType type,
     const std::vector<OnDemandEvent>& events)
 {
-    HILOGI("DeviceStatusCollectManager UpdateOnDemandEvents begin");
+    HILOGI("UpdateOnDemandEvents begin");
     std::unique_lock<std::shared_mutex> writeLock(saProfilesLock_);
     auto iter = std::find_if(onDemandSaProfiles_.begin(), onDemandSaProfiles_.end(), [systemAbilityId](auto saProfile) {
         return saProfile.saId == systemAbilityId;
     });
     if (iter == onDemandSaProfiles_.end()) {
-        HILOGI("DeviceStatusCollectManager UpdateOnDemandEvents invalid saId:%{public}d", systemAbilityId);
+        HILOGI("UpdateOnDemandEvents invalid saId:%{public}d", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
     if (AddCollectEvents(events) != ERR_OK) {
-        HILOGI("DeviceStatusCollectManager AddCollectEvents failed saId:%{public}d", systemAbilityId);
+        HILOGI("AddCollectEvents failed saId:%{public}d", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
     std::vector<OnDemandEvent> oldEvents;
@@ -499,12 +499,12 @@ int32_t DeviceStatusCollectManager::UpdateOnDemandEvents(int32_t systemAbilityId
         oldEvents = (*iter).stopOnDemand.onDemandEvents;
         (*iter).stopOnDemand.onDemandEvents = events;
     } else {
-        HILOGE("DeviceStatusCollectManager UpdateOnDemandEvents policy types");
+        HILOGE("UpdateOnDemandEvents policy types");
         return ERR_INVALID_VALUE;
     }
     PersistOnDemandEvent(systemAbilityId, type, events);
     if (RemoveUnusedEventsLocked(oldEvents) != ERR_OK) {
-        HILOGE("DeviceStatusCollectManager RemoveUnusedEventsLocked failed saId:%{public}d", systemAbilityId);
+        HILOGE("RemoveUnusedEventsLocked failed saId:%{public}d", systemAbilityId);
     }
     return ERR_OK;
 }

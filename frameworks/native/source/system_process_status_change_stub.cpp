@@ -35,7 +35,7 @@ SystemProcessStatusChangeStub::SystemProcessStatusChangeStub()
 int32_t SystemProcessStatusChangeStub::OnRemoteRequest(uint32_t code,
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
-    HILOGI("SystemProcessStatusChangeStub::code:%{public}u, flags:%{public}d", code, option.GetFlags());
+    HILOGD("ProcStaChange,code:%{public}u,flags:%{public}d", code, option.GetFlags());
     if (!EnforceInterceToken(data)) {
         HILOGW("check interface token failed!");
         return ERR_PERMISSION_DENIED;
@@ -60,6 +60,7 @@ int32_t SystemProcessStatusChangeStub::OnSystemProcessStartedInner(MessageParcel
         return ERR_NULL_OBJECT;
     }
     systemProcessInfo.pid = data.ReadInt32();
+    HILOGI("onProcStart,pid:%{public}d", systemProcessInfo.pid);
     OnSystemProcessStarted(systemProcessInfo);
     return ERR_NONE;
 }
@@ -73,6 +74,7 @@ int32_t SystemProcessStatusChangeStub::OnSystemProcessStoppedInner(MessageParcel
         return ERR_NULL_OBJECT;
     }
     systemProcessInfo.pid = data.ReadInt32();
+    HILOGI("onProcStop,pid:%{public}d", systemProcessInfo.pid);
     OnSystemProcessStopped(systemProcessInfo);
     return ERR_NONE;
 }

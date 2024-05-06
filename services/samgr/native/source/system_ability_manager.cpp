@@ -451,7 +451,7 @@ int32_t SystemAbilityManager::UpdateOnDemandPolicy(int32_t systemAbilityId, OnDe
 void SystemAbilityManager::ProcessOnDemandEvent(const OnDemandEvent& event,
     const std::list<SaControlInfo>& saControlList)
 {
-    HILOGI("ProcessOnDemandEvent:%{public}d name:%{public}s value:%{public}s",
+    HILOGI("DoEvent:%{public}d name:%{public}s value:%{public}s",
         event.eventId, event.name.c_str(), event.value.c_str());
     sptr<ISystemAbilityLoadCallback> callback(new SystemAbilityLoadCallbackStub());
     if (abilityStateScheduler_ == nullptr) {
@@ -991,7 +991,7 @@ void SystemAbilityManager::UnSubscribeSystemAbilityLocked(
                 subscribeCountMap_.erase(iterPair);
             }
         }
-        HILOGI("rm SA Status listener added by callPid:%{public}d,size:%{public}zu",
+        HILOGI("rm SA listener callPid:%{public}d,size:%{public}zu",
             item.callingPid, listenerList.size());
         iter = listenerList.erase(iter);
         break;
