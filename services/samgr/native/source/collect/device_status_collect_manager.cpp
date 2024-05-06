@@ -339,13 +339,13 @@ int32_t DeviceStatusCollectManager::AddCollectEvents(const std::vector<OnDemandE
 int32_t DeviceStatusCollectManager::GetOnDemandEvents(int32_t systemAbilityId, OnDemandPolicyType type,
     std::vector<OnDemandEvent>& events)
 {
-    HILOGI("DeviceStaMgr GetOnDemandEvents begin");
+    HILOGI("GetOnDemandEvents begin");
     std::shared_lock<std::shared_mutex> readLock(saProfilesLock_);
     auto iter = std::find_if(onDemandSaProfiles_.begin(), onDemandSaProfiles_.end(), [systemAbilityId](auto saProfile) {
         return saProfile.saId == systemAbilityId;
     });
     if (iter == onDemandSaProfiles_.end()) {
-        HILOGI("DeviceStaMgr GetOnDemandEvents invalid saId:%{public}d", systemAbilityId);
+        HILOGI("GetOnDemandEvents invalid saId:%{public}d", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
     if (type == OnDemandPolicyType::START_POLICY) {
