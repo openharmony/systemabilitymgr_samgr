@@ -205,7 +205,8 @@ void ParseUtil::OpenSo(SaProfile& saProfile)
             saProfile.saId, duration);
         if (handle == nullptr) {
             ReportAddSystemAbilityFailed(saProfile.saId, fileName);
-            HILOGE("dlopen %{public}s failed with errno:%{public}s!", fileName.c_str(), dlerror());
+            HILOGE("SA:%{public}d dlopen %{public}s failed with errno:%{public}s!",
+                saProfile.saId, fileName.c_str(), dlerror());
             return;
         }
         saProfile.handle = handle;
