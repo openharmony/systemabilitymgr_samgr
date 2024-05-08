@@ -199,6 +199,7 @@ enum {
     AVSESSION_SERVICE_ID                             = 3010,
     AV_CODEC_SERVICE_ID                              = 3011,
     MEDIA_KEY_SYSTEM_SERVICE_ID                      = 3012,
+    MEDIA_MONITOR_SERVICE_ID                         = 3013,
     SUBSYS_MULTIMODAINPUT_SYS_ABILITY_ID_BEGIN       = 3100,
     MULTIMODAL_INPUT_SERVICE_ID                      = 3101,
     MULTIMODAL_CHANNEL_SERVICE_ID                    = 3102,
@@ -322,7 +323,6 @@ enum {
 
     // reserved for vendor
     VENDOR_SYS_ABILITY_ID_BEGIN                      = 0x00010000,  // 65536
-    MEDIA_MONITOR_SERVICE_ID                         = 66160,
     VENDOR_SYS_ABILITY_ID_END                        = 0x00020000,  // 131072
     LAST_SYS_ABILITY_ID                              = 0x00ffffff,  // 16777215
 };
