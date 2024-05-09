@@ -34,9 +34,9 @@ constexpr uint32_t REMOVE_EXTRA_DATA_EVENT = 12;
 constexpr uint32_t REMOVE_EXTRA_DATA_DELAY_TIME = 300000;
 constexpr int64_t MAX_EXTRA_DATA_ID = 1000000000;
 constexpr int32_t COMMON_EVENT_SERVICE_ID = 3299;
-const std::string UID = "uid";
-const std::string NET_TYPE = "NetType";
-const std::string BUNDLE_NAME = "bundleName";
+constexpr const char* UID = "uid";
+constexpr const char* NET_TYPE = "NetType";
+constexpr const char* BUNDLE_NAME = "bundleName";
 }
 
 CommonEventCollect::CommonEventCollect(const sptr<IReport>& report)

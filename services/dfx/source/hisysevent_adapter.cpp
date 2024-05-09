@@ -27,30 +27,30 @@
 namespace OHOS {
 using namespace OHOS::HiviewDFX;
 namespace {
-const std::string ADD_SYSTEMABILITY_FAIL = "ADD_SYSTEMABILITY_FAIL";
-const std::string CALLER_UID = "CALLER_UID";
-const std::string SAID = "SAID";
-const std::string COUNT = "COUNT";
-const std::string FILE_NAME = "FILE_NAME";
-const std::string GETSA__TAG = "GETSA_FREQUENCY";
+constexpr const char* ADD_SYSTEMABILITY_FAIL = "ADD_SYSTEMABILITY_FAIL";
+constexpr const char* CALLER_UID = "CALLER_UID";
+constexpr const char* SAID = "SAID";
+constexpr const char* COUNT = "COUNT";
+constexpr const char* FILE_NAME = "FILE_NAME";
+constexpr const char* GETSA__TAG = "GETSA_FREQUENCY";
 
-const std::string REASON = "REASON";
-const std::string ONDEMAND_SA_LOAD_FAIL = "ONDEMAND_SA_LOAD_FAIL";
-const std::string ONDEMAND_SA_LOAD = "ONDEMAND_SA_LOAD";
-const std::string EVENT = "EVENT";
-const std::string ONDEMAND_SA_UNLOAD = "ONDEMAND_SA_UNLOAD";
-const std::string SA_UNLOAD_FAIL = "SA_UNLOAD_FAIL";
-const std::string SA_LOAD_DURATION = "SA_LOAD_DURATION";
-const std::string SA_UNLOAD_DURATION = "SA_UNLOAD_DURATION";
-const std::string PROCESS_START_FAIL = "PROCESS_START_FAIL";
-const std::string PROCESS_STOP_FAIL = "PROCESS_STOP_FAIL";
-const std::string PROCESS_START_DURATION = "PROCESS_START_DURATION";
-const std::string PROCESS_STOP_DURATION = "PROCESS_STOP_DURATION";
-const std::string PROCESS_NAME = "PROCESS_NAME";
-const std::string PID = "PID";
-const std::string UID = "UID";
-const std::string DURATION = "DURATION";
-const std::string KEY_STAGE = "KEY_STAGE";
+constexpr const char* REASON = "REASON";
+constexpr const char* ONDEMAND_SA_LOAD_FAIL = "ONDEMAND_SA_LOAD_FAIL";
+constexpr const char* ONDEMAND_SA_LOAD = "ONDEMAND_SA_LOAD";
+constexpr const char* EVENT = "EVENT";
+constexpr const char* ONDEMAND_SA_UNLOAD = "ONDEMAND_SA_UNLOAD";
+constexpr const char* SA_UNLOAD_FAIL = "SA_UNLOAD_FAIL";
+constexpr const char* SA_LOAD_DURATION = "SA_LOAD_DURATION";
+constexpr const char* SA_UNLOAD_DURATION = "SA_UNLOAD_DURATION";
+constexpr const char* PROCESS_START_FAIL = "PROCESS_START_FAIL";
+constexpr const char* PROCESS_STOP_FAIL = "PROCESS_STOP_FAIL";
+constexpr const char* PROCESS_START_DURATION = "PROCESS_START_DURATION";
+constexpr const char* PROCESS_STOP_DURATION = "PROCESS_STOP_DURATION";
+constexpr const char* PROCESS_NAME = "PROCESS_NAME";
+constexpr const char* PID = "PID";
+constexpr const char* UID = "UID";
+constexpr const char* DURATION = "DURATION";
+constexpr const char* KEY_STAGE = "KEY_STAGE";
 }
 
 void ReportSaUnLoadFail(int32_t saId, const std::string& reason)
