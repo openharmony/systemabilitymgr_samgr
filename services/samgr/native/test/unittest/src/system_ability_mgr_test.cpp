@@ -2699,10 +2699,11 @@ HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent005, TestSize.Level3)
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
+    saMgr->abilityStateScheduler_ = systemAbilityStateScheduler;
     OnDemandEvent onDemandEvent;
     std::list<OnDemandEvent> onDemandList;
-    systemAbilityStateScheduler->startEnableOnceMap_.clear();
-    systemAbilityStateScheduler->startEnableOnceMap_[SAID] = onDemandList;
+    saMgr->abilityStateScheduler_->startEnableOnceMap_.clear();
+    saMgr->abilityStateScheduler_->startEnableOnceMap_[SAID] = onDemandList;
     SaControlInfo saControlInfo;
     saControlInfo.saId = SAID;
     saControlInfo.ondemandId = START_ON_DEMAND;
@@ -2710,7 +2711,7 @@ HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent005, TestSize.Level3)
     std::list<SaControlInfo> saControlList;
     saControlList.emplace_back(saControlInfo);
     saMgr->ProcessOnDemandEvent(onDemandEvent, saControlList);
-    EXPECT_TRUE(systemAbilityStateScheduler->startEnableOnceMap_.empty());
+    EXPECT_TRUE(saMgr->abilityStateScheduler_->startEnableOnceMap_.empty());
 }
 
 /**
@@ -2724,10 +2725,11 @@ HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent006, TestSize.Level3)
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
+    saMgr->abilityStateScheduler_ = systemAbilityStateScheduler;
     OnDemandEvent onDemandEvent;
     std::list<OnDemandEvent> onDemandList;
-    systemAbilityStateScheduler->stopEnableOnceMap_.clear();
-    systemAbilityStateScheduler->stopEnableOnceMap_[SAID] = onDemandList;
+    saMgr->abilityStateScheduler_->stopEnableOnceMap_.clear();
+    saMgr->abilityStateScheduler_->stopEnableOnceMap_[SAID] = onDemandList;
     SaControlInfo saControlInfo;
     saControlInfo.saId = SAID;
     saControlInfo.ondemandId = STOP_ON_DEMAND;
@@ -2735,7 +2737,7 @@ HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent006, TestSize.Level3)
     std::list<SaControlInfo> saControlList;
     saControlList.emplace_back(saControlInfo);
     saMgr->ProcessOnDemandEvent(onDemandEvent, saControlList);
-    EXPECT_TRUE(systemAbilityStateScheduler->stopEnableOnceMap_.empty());
+    EXPECT_TRUE(saMgr->abilityStateScheduler_->stopEnableOnceMap_.empty());
 }
 
 /**

@@ -42,7 +42,6 @@
 #include "system_ability_manager_dumper.h"
 #include "tools.h"
 #include "samgr_xcollie.h"
-#include "schedule/system_ability_state_scheduler.h"
 
 #ifdef SUPPORT_DEVICE_MANAGER
 #include "device_manager.h"

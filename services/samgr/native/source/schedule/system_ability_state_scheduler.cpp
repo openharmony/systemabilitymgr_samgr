@@ -30,7 +30,6 @@
 #include "parameters.h"
 #include "system_ability_manager_util.h"
 
-
 namespace OHOS {
 namespace {
 constexpr int64_t RESTART_TIME_INTERVAL_LIMIT = 20 * 1000;
@@ -1249,6 +1248,9 @@ int32_t SystemAbilityStateScheduler::CheckStartEnableOnce(const OnDemandEvent& e
         HILOGI("startEnableOnceMap_remove SA:%{public}d, eventId:%{public}d",
             saControl.saId, event.eventId);
     }
+    if (result != ERR_OK){
+        ReportSamgrSaLoadFail(saControl.saId, "ondemand load err:" + ToString(result));
+    }
     return result;
 }
 
@@ -1281,6 +1283,9 @@ int32_t SystemAbilityStateScheduler::CheckStopEnableOnce(const OnDemandEvent& ev
         }
         HILOGI("stopEnableOnceMap_ remove SA:%{public}d, eventId:%{public}d",
             saControl.saId, event.eventId);
+    }
+    if (result != ERR_OK){
+        ReportSamgrSaLoadFail(saControl.saId, "ondemand load err:" + ToString(result));
     }
     return result;
 }
