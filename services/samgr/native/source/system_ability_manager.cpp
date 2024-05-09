@@ -42,6 +42,7 @@
 #include "system_ability_manager_dumper.h"
 #include "tools.h"
 #include "samgr_xcollie.h"
+#include "schedule/system_ability_state_scheduler.h"
 
 #ifdef SUPPORT_DEVICE_MANAGER
 #include "device_manager.h"
@@ -453,90 +454,11 @@ void SystemAbilityManager::ProcessOnDemandEvent(const OnDemandEvent& event,
 {
     HILOGI("ProcessOnDemandEvent:%{public}d name:%{public}s value:%{public}s",
         event.eventId, event.name.c_str(), event.value.c_str());
-    sptr<ISystemAbilityLoadCallback> callback(new SystemAbilityLoadCallbackStub());
     if (abilityStateScheduler_ == nullptr) {
         HILOGE("abilityStateScheduler is nullptr");
         return;
-    }
-    for (auto& saControl : saControlList) {
-        int32_t result = ERR_INVALID_VALUE;
-        if (saControl.ondemandId == START_ON_DEMAND) {
-            result = CheckStartEnableOnce(event, saControl, callback);
-        } else if (saControl.ondemandId == STOP_ON_DEMAND) {
-            result = CheckStopEnableOnce(event, saControl);
-        } else {
-            HILOGE("ondemandId error");
-        }
-        if (result != ERR_OK) {
-            HILOGE("process ondemand event failed, ondemandId:%{public}d, SA:%{public}d",
-                saControl.ondemandId, saControl.saId);
-        }
-    }
-}
-
-int32_t SystemAbilityManager::CheckStartEnableOnce(const OnDemandEvent& event,
-    const SaControlInfo& saControl, sptr<ISystemAbilityLoadCallback> callback)
-{
-    int32_t result = ERR_INVALID_VALUE;
-    if (saControl.enableOnce) {
-        lock_guard<mutex> autoLock(startEnableOnceLock_);
-        auto iter = startEnableOnceMap_.find(saControl.saId);
-        if (iter != startEnableOnceMap_.end() && SamgrUtil::IsSameEvent(event, startEnableOnceMap_[saControl.saId])) {
-            HILOGI("ondemand canceled for enable-once, ondemandId:%{public}d, SA:%{public}d",
-                saControl.ondemandId, saControl.saId);
-            return result;
-        }
-        startEnableOnceMap_[saControl.saId].emplace_back(event);
-        HILOGI("startEnableOnceMap_ add SA:%{public}d, eventId:%{public}d",
-            saControl.saId, event.eventId);
-    }
-    auto callingPid = IPCSkeleton::GetCallingPid();
-    LoadRequestInfo loadRequestInfo = {LOCAL_DEVICE, callback, saControl.saId, callingPid, event};
-    result = abilityStateScheduler_->HandleLoadAbilityEvent(loadRequestInfo);
-    if (saControl.enableOnce && result != ERR_OK) {
-        lock_guard<mutex> autoLock(startEnableOnceLock_);
-        auto& events = startEnableOnceMap_[saControl.saId];
-        events.remove(event);
-        if (events.empty()) {
-            startEnableOnceMap_.erase(saControl.saId);
-        }
-        HILOGI("startEnableOnceMap_remove SA:%{public}d, eventId:%{public}d",
-            saControl.saId, event.eventId);
-    }
-    return result;
-}
-
-int32_t SystemAbilityManager::CheckStopEnableOnce(const OnDemandEvent& event,
-    const SaControlInfo& saControl)
-{
-    int32_t result = ERR_INVALID_VALUE;
-    if (saControl.enableOnce) {
-        lock_guard<mutex> autoLock(stopEnableOnceLock_);
-        auto iter = stopEnableOnceMap_.find(saControl.saId);
-        if (iter != stopEnableOnceMap_.end() && SamgrUtil::IsSameEvent(event, stopEnableOnceMap_[saControl.saId])) {
-            HILOGI("ondemand canceled for enable-once, ondemandId:%{public}d, SA:%{public}d",
-                saControl.ondemandId, saControl.saId);
-            return result;
-        }
-        stopEnableOnceMap_[saControl.saId].emplace_back(event);
-        HILOGI("stopEnableOnceMap_ add SA:%{public}d, eventId:%{public}d",
-            saControl.saId, event.eventId);
-    }
-    auto callingPid = IPCSkeleton::GetCallingPid();
-    std::shared_ptr<UnloadRequestInfo> unloadRequestInfo =
-        std::make_shared<UnloadRequestInfo>(event, saControl.saId, callingPid);
-    result = abilityStateScheduler_->HandleUnloadAbilityEvent(unloadRequestInfo);
-    if (saControl.enableOnce && result != ERR_OK) {
-        lock_guard<mutex> autoLock(stopEnableOnceLock_);
-        auto& events = stopEnableOnceMap_[saControl.saId];
-        events.remove(event);
-        if (events.empty()) {
-            stopEnableOnceMap_.erase(saControl.saId);
-        }
-        HILOGI("stopEnableOnceMap_ remove SA:%{public}d, eventId:%{public}d",
-            saControl.saId, event.eventId);
-    }
-    return result;
+    }   
+    abilityStateScheduler_->CheckEnableOnce(event, saControlList);
 }
 
 sptr<IRemoteObject> SystemAbilityManager::GetSystemAbility(int32_t systemAbilityId)

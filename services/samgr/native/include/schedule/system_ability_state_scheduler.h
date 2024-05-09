@@ -61,6 +61,10 @@ public:
     int32_t UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener);
     bool IsSystemProcessNeverStartedLocked(const std::u16string& processName);
     void InitSamgrProcessContext();
+    void CheckEnableOnce(const OnDemandEvent& event, const std::list<SaControlInfo>& saControlList);
+    int32_t CheckStartEnableOnce(const OnDemandEvent& event, const SaControlInfo& saControl,
+        sptr<ISystemAbilityLoadCallback> callback);
+    int32_t CheckStopEnableOnce(const OnDemandEvent& event, const SaControlInfo& saControl);
 private:
     void InitStateContext(const std::list<SaProfile>& saProfiles);
 
@@ -156,6 +160,10 @@ private:
     std::shared_mutex listenerSetLock_;
     std::list<sptr<ISystemProcessStatusChange>> processListeners_;
     sptr<IRemoteObject::DeathRecipient> processListenerDeath_;
+    std::mutex startEnableOnceLock_;
+    std::map<int32_t, std::list<OnDemandEvent>> startEnableOnceMap_;
+    std::mutex stopEnableOnceLock_;
+    std::map<int32_t, std::list<OnDemandEvent>> stopEnableOnceMap_;
 };
 } // namespace OHOS
 
