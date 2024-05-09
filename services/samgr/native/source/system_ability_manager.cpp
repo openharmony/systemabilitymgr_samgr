@@ -52,14 +52,14 @@ using namespace std;
 
 namespace OHOS {
 namespace {
-const string START_SAID = "said";
-const string PKG_NAME = "Samgr_Networking";
-const string PREFIX = "/system/profile/";
-const string LOCAL_DEVICE = "local";
-const string ONDEMAND_PARAM = "persist.samgr.perf.ondemand";
-const string DYNAMIC_CACHE_PARAM = "persist.samgr.cache.sa";
-const string RESOURCE_SCHEDULE_PROCESS_NAME = "resource_schedule_service";
-const string IPC_STAT_DUMP_PREFIX = "--ipc";
+constexpr const char* START_SAID = "said";
+constexpr const char* PKG_NAME = "Samgr_Networking";
+constexpr const char* PREFIX = "/system/profile/";
+constexpr const char* LOCAL_DEVICE = "local";
+constexpr const char* ONDEMAND_PARAM = "persist.samgr.perf.ondemand";
+constexpr const char* DYNAMIC_CACHE_PARAM = "persist.samgr.cache.sa";
+constexpr const char* RESOURCE_SCHEDULE_PROCESS_NAME = "resource_schedule_service";
+constexpr const char* IPC_STAT_DUMP_PREFIX = "--ipc";
 constexpr const char* ONDEMAND_PERF_PARAM = "persist.samgr.perf.ondemand";
 constexpr const char* ONDEMAND_WORKER = "OndemandLoader";
 constexpr const char* ARGS_FFRT_PARAM = "--ffrt";

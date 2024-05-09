@@ -30,8 +30,8 @@ using namespace std;
 
 namespace OHOS {
 namespace {
-const std::string LOOP_EVENT = "loopevent";
-const std::string ORDER_TIMED_EVENT = "timedevent";
+constexpr const char* LOOP_EVENT = "loopevent";
+constexpr const char* ORDER_TIMED_EVENT = "timedevent";
 constexpr int32_t MIN_INTERVAL = 30;
 }
 

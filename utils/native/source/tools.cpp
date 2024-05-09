@@ -18,7 +18,7 @@
 #include <string>
 
 namespace OHOS {
-const std::string EMPTY_DEVICEID = "";
+constexpr const char* EMPTY_DEVICEID = "";
 constexpr int NON_ANONYMIZE_LENGTH = 6;
 // template<typename T>
 std::u16string DeleteAllMark(const std::u16string& str, const std::u16string& mark)

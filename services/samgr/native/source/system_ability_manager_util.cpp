@@ -29,10 +29,10 @@ constexpr int32_t UID_ROOT = 0;
 constexpr int32_t UID_SYSTEM = 1000;
 constexpr int32_t SHFIT_BIT = 32;
 
-const string EVENT_TYPE = "eventId";
-const string EVENT_NAME = "name";
-const string EVENT_VALUE = "value";
-const string EVENT_EXTRA_DATA_ID = "extraDataId";
+constexpr const char* EVENT_TYPE = "eventId";
+constexpr const char* EVENT_NAME = "name";
+constexpr const char* EVENT_VALUE = "value";
+constexpr const char* EVENT_EXTRA_DATA_ID = "extraDataId";
 
 bool SamgrUtil::IsNameInValid(const std::u16string& name)
 {

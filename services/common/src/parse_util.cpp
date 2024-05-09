@@ -68,10 +68,10 @@ constexpr int32_t MAX_JSON_STRING_LENGTH = 128;
 constexpr int32_t FIRST_SYS_ABILITY_ID = 0x00000000;
 constexpr int32_t LAST_SYS_ABILITY_ID = 0x00ffffff;
 constexpr int32_t MAX_EXTENSIONO_NUM = 100;
-const string BOOT_START_PHASE = "BootStartPhase";
-const string CORE_START_PHASE = "CoreStartPhase";
-const string HIGH_LOAD_PRIORITY = "HighPriority";
-const string MEDIUM_LOAD_PRIORITY = "MediumPriority";
+constexpr const char* BOOT_START_PHASE = "BootStartPhase";
+constexpr const char* CORE_START_PHASE = "CoreStartPhase";
+constexpr const char* HIGH_LOAD_PRIORITY = "HighPriority";
+constexpr const char* MEDIUM_LOAD_PRIORITY = "MediumPriority";
 
 enum {
     BOOT_START = 1,

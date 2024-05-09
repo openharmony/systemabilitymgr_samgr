@@ -26,12 +26,12 @@
 
 namespace OHOS {
 namespace {
-const std::string HIDUMPER_PROCESS_NAME = "hidumper_service";
-const std::string ARGS_QUERY_SA_STATE = "-sa";
-const std::string ARGS_QUERY_PROCESS_STATE = "-p";
-const std::string ARGS_QUERY_SA_IN_CURRENT_STATE = "-sm";
-const std::string ARGS_HELP = "-h";
-const std::string ARGS_QUERY_ALL_SA_STATE = "-l";
+constexpr const char* HIDUMPER_PROCESS_NAME = "hidumper_service";
+constexpr const char* ARGS_QUERY_SA_STATE = "-sa";
+constexpr const char* ARGS_QUERY_PROCESS_STATE = "-p";
+constexpr const char* ARGS_QUERY_SA_IN_CURRENT_STATE = "-sm";
+constexpr const char* ARGS_HELP = "-h";
+constexpr const char* ARGS_QUERY_ALL_SA_STATE = "-l";
 constexpr const char* ARGS_FFRT_SEPARATOR = "|";
 constexpr size_t MIN_ARGS_SIZE = 1;
 constexpr size_t MAX_ARGS_SIZE = 2;
@@ -39,13 +39,13 @@ constexpr int32_t FFRT_DUMP_PROC_LEN = 2;
 constexpr int32_t FFRT_DUMP_PIDS_INDEX = 1;
 constexpr int FFRT_BUFFER_SIZE = 512 * 1024;
 
-const std::string IPC_STAT_STR_START = "--start-stat";
-const std::string IPC_STAT_STR_STOP = "--stop-stat";
-const std::string IPC_STAT_STR_GET = "--stat";
-const std::string IPC_STAT_STR_ALL = "all";
-const std::string IPC_STAT_STR_SAMGR = "samgr";
-const std::string IPC_DUMP_SUCCESS = " success\n";
-const std::string IPC_DUMP_FAIL = " fail\n";
+constexpr const char* IPC_STAT_STR_START = "--start-stat";
+constexpr const char* IPC_STAT_STR_STOP = "--stop-stat";
+constexpr const char* IPC_STAT_STR_GET = "--stat";
+constexpr const char* IPC_STAT_STR_ALL = "all";
+constexpr const char* IPC_STAT_STR_SAMGR = "samgr";
+constexpr const char* IPC_DUMP_SUCCESS = " success\n";
+constexpr const char* IPC_DUMP_FAIL = " fail\n";
 }
 
 int32_t SystemAbilityManagerDumper::FfrtDumpProc(std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler,
