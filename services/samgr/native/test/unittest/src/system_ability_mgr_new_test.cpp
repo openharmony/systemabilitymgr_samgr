@@ -84,7 +84,7 @@ void SaProfileRecover(sptr<SystemAbilityManager>& saMgr,
 void SaProfileExtensionTestPrevSet(sptr<SystemAbilityManager>& saMgr, int32_t maxLoop)
 {
     const int32_t mod_num = 2;
-    std::vector<std::string> extensionVec = { "backup", "restore", "alpha", "beta" };
+    std::vector<std::string> extensionVec = { "backup_test", "restore_test", "alpha", "beta" };
     for (int32_t loop = 0; loop < maxLoop; ++loop) {
         SaProfile saProfile;
         saProfile.process = Str8ToStr16(extensionVec[loop]);
@@ -114,7 +114,7 @@ void SaAbilityMapObjTestPrevSet(sptr<SystemAbilityManager>& saMgr, int32_t maxLo
 
 void ProcMapObjTestPrevSet(sptr<SystemAbilityManager>& saMgr, int32_t maxLoop)
 {
-    std::vector<std::string> extensionVec = { "backup", "restore", "alpha", "beta" };
+    std::vector<std::string> extensionVec = { "backup", "restore_test", "alpha", "beta" };
     for (int32_t loop = 0; loop < maxLoop; ++loop) {
         if (loop == 0) {
             continue;
@@ -598,7 +598,7 @@ HWTEST_F(SystemAbilityMgrTest, GetExtensionSaIdsInner002, TestSize.Level3)
     EXPECT_TRUE(saMgr != nullptr);
     MessageParcel data;
     MessageParcel reply;
-    data.WriteString("backup");
+    data.WriteString("backup_test");
     int32_t result = saMgr->GetExtensionSaIdsInner(data, reply);
     EXPECT_EQ(result, ERR_NONE);
     int32_t ret = reply.ReadInt32(result);
@@ -627,7 +627,7 @@ HWTEST_F(SystemAbilityMgrTest, GetExtensionSaIdsInner003, TestSize.Level3)
 
     MessageParcel data;
     MessageParcel reply;
-    data.WriteString("backup");
+    data.WriteString("backup_test");
     int32_t result = saMgr->GetExtensionSaIdsInner(data, reply);
     EXPECT_EQ(result, ERR_NONE);
     int32_t ret = reply.ReadInt32(result);
@@ -672,7 +672,7 @@ HWTEST_F(SystemAbilityMgrTest, GetExtensionRunningSaListInner002, TestSize.Level
     EXPECT_TRUE(saMgr != nullptr);
     MessageParcel data;
     MessageParcel reply;
-    data.WriteString("backup");
+    data.WriteString("backup_test");
     int32_t result = saMgr->GetExtensionRunningSaListInner(data, reply);
     EXPECT_EQ(result, ERR_NONE);
     int32_t ret = reply.ReadInt32(result);
@@ -703,7 +703,7 @@ HWTEST_F(SystemAbilityMgrTest, GetExtensionRunningSaListInner003, TestSize.Level
 
     MessageParcel data;
     MessageParcel reply;
-    data.WriteString("restore");
+    data.WriteString("restore_test");
     int32_t result = saMgr->GetExtensionRunningSaListInner(data, reply);
     EXPECT_EQ(result, ERR_NONE);
     int32_t ret = reply.ReadInt32(result);
@@ -740,7 +740,7 @@ HWTEST_F(SystemAbilityMgrTest, GetRunningSaExtensionInfoList001, TestSize.Level3
 
     MessageParcel data;
     MessageParcel reply;
-    data.WriteString("restore");
+    data.WriteString("restore_test");
     int32_t result = saMgr->GetRunningSaExtensionInfoListInner(data, reply);
     EXPECT_EQ(result, ERR_NONE);
     bool ret = reply.ReadInt32(result);
@@ -773,7 +773,7 @@ HWTEST_F(SystemAbilityMgrTest, GetRunningSaExtensionInfoList002, TestSize.Level3
 
     MessageParcel data;
     MessageParcel reply;
-    data.WriteString("restore");
+    data.WriteString("restore_test");
     int32_t result = saMgr->GetRunningSaExtensionInfoListInner(data, reply);
     EXPECT_EQ(result, ERR_NONE);
     bool ret = reply.ReadInt32(result);
