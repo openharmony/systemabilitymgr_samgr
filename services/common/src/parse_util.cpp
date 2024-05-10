@@ -86,27 +86,6 @@ enum {
     LESS_EQ = 4,
     LESS = 5
 };
-
-void ParseLibPath(const string& libPath, string& fileName, string& libDir)
-{
-    std::vector<string> libPathVec;
-    SplitStr(libPath, "/", libPathVec);
-    if ((libPathVec.size() > 0)) {
-        int fileNameIndex = static_cast<int>(libPathVec.size()) - 1;
-        fileName = libPathVec[fileNameIndex];
-        int libDirIndex = fileNameIndex - 1;
-        if (libDirIndex >= 0) {
-            libDir = libPathVec[libDirIndex];
-        }
-    }
-    if (libDir.empty()) {
-#ifdef __aarch64__
-        libDir = "lib64";
-#else
-        libDir = "lib";
-#endif
-    }
-}
 }
 
 ParseUtil::~ParseUtil()
@@ -149,11 +128,6 @@ void ParseUtil::ClearResource()
     saProfiles_.clear();
 }
 
-void ParseUtil::SetUpdateList(const std::vector<std::string>& updateVec)
-{
-    updateVec_ = updateVec;
-}
-
 void ParseUtil::OpenSo(uint32_t bootPhase)
 {
     for (auto& saProfile : saProfiles_) {
@@ -161,11 +135,6 @@ void ParseUtil::OpenSo(uint32_t bootPhase)
             OpenSo(saProfile);
         }
     }
-}
-
-bool ParseUtil::IsUpdateSA(const std::string& saId)
-{
-    return std::find(updateVec_.begin(), updateVec_.end(), saId) != updateVec_.end();
 }
 
 void ParseUtil::OpenSo(SaProfile& saProfile)
