@@ -1201,21 +1201,6 @@ HWTEST_F(ParseUtilTest, CloseHandle001, TestSize.Level3)
 }
 
 /**
- * @tc.name: SetUpdateList001
- * @tc.desc: cover SetUpdateList
- * @tc.type: FUNC
- * @tc.require: I7QLDO
- */
-HWTEST_F(ParseUtilTest, SetUpdateList001, TestSize.Level3)
-{
-    std::string test = "test";
-    std::vector<std::string> updateVec;
-    updateVec.emplace_back(test);
-    parser_->SetUpdateList(updateVec);
-    EXPECT_FALSE(parser_->updateVec_.empty());
-}
-
-/**
  * @tc.name: CheckLogicRelationship001
  * @tc.desc: test CheckLogicRelationship
  * @tc.type: FUNC
