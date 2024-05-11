@@ -114,7 +114,7 @@ void SaAbilityMapObjTestPrevSet(sptr<SystemAbilityManager>& saMgr, int32_t maxLo
 
 void ProcMapObjTestPrevSet(sptr<SystemAbilityManager>& saMgr, int32_t maxLoop)
 {
-    std::vector<std::string> extensionVec = { "backup", "restore_test", "alpha", "beta" };
+    std::vector<std::string> extensionVec = { "backup_test", "restore_test", "alpha", "beta" };
     for (int32_t loop = 0; loop < maxLoop; ++loop) {
         if (loop == 0) {
             continue;
