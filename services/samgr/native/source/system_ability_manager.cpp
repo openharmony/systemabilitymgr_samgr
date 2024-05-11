@@ -456,7 +456,7 @@ void SystemAbilityManager::ProcessOnDemandEvent(const OnDemandEvent& event,
     if (abilityStateScheduler_ == nullptr) {
         HILOGE("abilityStateScheduler is nullptr");
         return;
-    }   
+    }
     abilityStateScheduler_->CheckEnableOnce(event, saControlList);
 }
 

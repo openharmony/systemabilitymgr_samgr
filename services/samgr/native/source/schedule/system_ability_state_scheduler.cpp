@@ -1216,7 +1216,7 @@ void SystemAbilityStateScheduler::CheckEnableOnce(const OnDemandEvent& event, co
             HILOGE("process ondemand event failed, ondemandId:%{public}d, SA:%{public}d",
                 saControl.ondemandId, saControl.saId);
         }
-    }    
+    }
 }
 
 int32_t SystemAbilityStateScheduler::CheckStartEnableOnce(const OnDemandEvent& event,
