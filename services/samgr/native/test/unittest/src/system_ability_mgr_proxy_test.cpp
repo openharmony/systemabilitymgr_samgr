@@ -1020,12 +1020,12 @@ HWTEST_F(SystemAbilityMgrProxyTest, SendStrategy001, TestSize.Level1)
  * @tc.desc: test GetExtensionSaIds, GetExtensionSaIds
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrProxyTest, GetExtensionSaIds002, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrProxyTest, GetExtensionSaIds001, TestSize.Level3)
 {
     sptr<ISystemAbilityManager> samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     std::vector<int32_t> saIds;
 
-    int32_t ret = samgrProxy->GetExtensionSaIds("backup", saIds);
+    int32_t ret = samgrProxy->GetExtensionSaIds("backup_test", saIds);
     EXPECT_EQ(ret, ERR_OK);
     EXPECT_EQ(saIds.size(), 0);
 }
@@ -1040,7 +1040,7 @@ HWTEST_F(SystemAbilityMgrProxyTest, GetExtensionRunningSaList002, TestSize.Level
     sptr<ISystemAbilityManager> samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     std::vector<sptr<IRemoteObject>> saList;
 
-    int32_t ret = samgrProxy->GetExtensionRunningSaList("restore", saList);
+    int32_t ret = samgrProxy->GetExtensionRunningSaList("restore_test", saList);
     EXPECT_EQ(ret, ERR_OK);
     EXPECT_EQ(saList.size(), 0);
 }
