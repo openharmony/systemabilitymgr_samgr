@@ -86,27 +86,6 @@ enum {
     LESS_EQ = 4,
     LESS = 5
 };
-
-void ParseLibPath(const string& libPath, string& fileName, string& libDir)
-{
-    std::vector<string> libPathVec;
-    SplitStr(libPath, "/", libPathVec);
-    if ((libPathVec.size() > 0)) {
-        int fileNameIndex = static_cast<int>(libPathVec.size()) - 1;
-        fileName = libPathVec[fileNameIndex];
-        int libDirIndex = fileNameIndex - 1;
-        if (libDirIndex >= 0) {
-            libDir = libPathVec[libDirIndex];
-        }
-    }
-    if (libDir.empty()) {
-#ifdef __aarch64__
-        libDir = "lib64";
-#else
-        libDir = "lib";
-#endif
-    }
-}
 }
 
 ParseUtil::~ParseUtil()
@@ -149,11 +128,6 @@ void ParseUtil::ClearResource()
     saProfiles_.clear();
 }
 
-void ParseUtil::SetUpdateList(const std::vector<std::string>& updateVec)
-{
-    updateVec_ = updateVec;
-}
-
 void ParseUtil::OpenSo(uint32_t bootPhase)
 {
     for (auto& saProfile : saProfiles_) {
@@ -163,47 +137,28 @@ void ParseUtil::OpenSo(uint32_t bootPhase)
     }
 }
 
-bool ParseUtil::IsUpdateSA(const std::string& saId)
-{
-    return std::find(updateVec_.begin(), updateVec_.end(), saId) != updateVec_.end();
-}
-
 void ParseUtil::OpenSo(SaProfile& saProfile)
 {
     if (saProfile.handle == nullptr) {
-        string fileName;
-        string libDir;
-        ParseLibPath(saProfile.libPath, fileName, libDir);
-        if (libDir != "lib64" && libDir != "lib") {
-            HILOGE("invalid libDir %{public}s", libDir.c_str());
-            return;
-        }
-        bool loadFromModuleUpdate = false;
-        string updateLibPath = GetRealPath("/module_update/" + ToString(saProfile.saId) + "/" + libDir + "/"
-            + fileName);
-        if (IsUpdateSA(ToString(saProfile.saId)) && CheckPathExist(updateLibPath)) {
-            HILOGI("load module_update so");
-            loadFromModuleUpdate = true;
-        }
-
         string dlopenTag = ToString(saProfile.saId) + "_DLOPEN";
         HITRACE_METER_NAME(HITRACE_TAG_SAMGR, dlopenTag);
         int64_t begin = GetTickCount();
         DlHandle handle = nullptr;
         {
             SamgrXCollie samgrXCollie("safwk::openso_" + ToString(saProfile.saId));
-            if (loadFromModuleUpdate) {
-                handle = dlopen(updateLibPath.c_str(), RTLD_NOW);
-            }
-            if (handle == nullptr) {
-                handle = dlopen(saProfile.libPath.c_str(), RTLD_NOW);
-            }
+            handle = dlopen(saProfile.libPath.c_str(), RTLD_NOW);
         }
         int64_t duration = GetTickCount() - begin;
         ReportSaLoadDuration(saProfile.saId, SA_LOAD_OPENSO, duration);
         KHILOGI("SA:%{public}d OpenSo spend %{public}" PRId64 "ms",
             saProfile.saId, duration);
         if (handle == nullptr) {
+            std::vector<string> libPathVec;
+            string fileName = "";
+            SplitStr(saProfile.libPath, "/", libPathVec);
+            if (libPathVec.size() > 0) {
+                fileName = libPathVec[libPathVec.size() - 1];
+            }
             ReportAddSystemAbilityFailed(saProfile.saId, fileName);
             HILOGE("SA:%{public}d dlopen %{public}s failed with errno:%{public}s!",
                 saProfile.saId, fileName.c_str(), dlerror());
