@@ -32,9 +32,9 @@ namespace OHOS {
 namespace Samgr {
 namespace {
     constexpr size_t THRESHOLD = 10;
-    constexpr uint8_t MAX_CALL_TRANSACTION = 64;
+    constexpr uint8_t MAX_CALL_TRANSACTION = 40;
     constexpr int32_t OFFSET = 4;
-    constexpr int32_t INIT_TIME = 1;
+    constexpr int32_t INIT_TIME = 3;
     constexpr int32_t RETRY_TIME_OUT_NUMBER = 10;
     constexpr int32_t SLEEP_INTERVAL_TIME = 200000;
     constexpr int32_t DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID = 4802;
@@ -126,20 +126,27 @@ void FuzzSystemAbilityManager(const uint8_t* rawData, size_t size)
         HILOGI("samgrFuzz:Init");
         manager->Init();
         g_flag = true;
+        HILOGI("samgrFuzz:Init AddDeviceManager");
         AddDeviceManager();
+        sleep(INIT_TIME);
         if (!IsDmReady()) {
+            HILOGE("samgrFuzz:Init CleanFfrt");
             manager->CleanFfrt();
             return;
         }
-        sleep(INIT_TIME);
     } else {
+        HILOGI("samgrFuzz:AddDeviceManager");
         AddDeviceManager();
         if (!IsDmReady()) {
+            HILOGE("samgrFuzz:dm no ready,return");
             return;
         }
+        HILOGI("samgrFuzz:SetFfrt");
         manager->SetFfrt();
     }
+    HILOGI("samgrFuzz:code=%{public}u", code % MAX_CALL_TRANSACTION);
     manager->OnRemoteRequest(code % MAX_CALL_TRANSACTION, data, reply, option);
+    HILOGI("samgrFuzz:OnRemoteRequest end,CleanFfrt");
     manager->CleanFfrt();
 }
 
