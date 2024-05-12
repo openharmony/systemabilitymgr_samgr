@@ -14,6 +14,7 @@
  */
 
 #include "system_ability_mgr_util_test.h"
+#include "system_ability_manager.h"
 #include "system_ability_manager_util.h"
 #include "sam_mock_permission.h"
 #include "test_log.h"
@@ -268,4 +269,45 @@ HWTEST_F(SamgrUtilTest, CheckAllowUpdate004, TestSize.Level3)
     EXPECT_EQ(false, ret);
 }
 
+/**
+ * @tc.name: SetModuleUpdateParam001
+ * @tc.desc: test SetModuleUpdateParam with key and value is null
+ * @tc.type: FUNC
+ * @tc.require: I6V4AX
+ */
+HWTEST_F(SamgrUtilTest, SetModuleUpdateParam001, TestSize.Level3)
+{
+    std::string key = "";
+    std::string value = "";
+    SamgrUtil::SetModuleUpdateParam(key, value);
+}
+
+/**
+ * @tc.name: SetModuleUpdateParam002
+ * @tc.desc: test SetModuleUpdateParam with key and value is not null
+ * @tc.type: FUNC
+ * @tc.require: I6V4AX
+ */
+HWTEST_F(SamgrUtilTest, SetModuleUpdateParam002, TestSize.Level3)
+{
+    std::string key = "key";
+    std::string value = "value";
+    SamgrUtil::SetModuleUpdateParam(key, value);
+}
+
+/**
+ * @tc.name: SendUpdateSaState001
+ * @tc.desc: test SendUpdateSaState
+ * @tc.type: FUNC
+ * @tc.require: I6V4AX
+ */
+HWTEST_F(SamgrUtilTest, SendUpdateSaState001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->saProfileMap_.clear();
+    SaProfile saprofile;
+    saprofile.moduleUpdate = true;
+    saMgr->saProfileMap_[saprofile.saId] = saprofile;
+    SamgrUtil::SendUpdateSaState(saprofile.saId, "test");
+}
 }

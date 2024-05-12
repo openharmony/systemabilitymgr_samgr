@@ -16,3 +16,5 @@ bootevent.samgr.ready = samgr:samgr:0775:bool
 persist.samgr.perf.ondemand = samgr:samgr:0775:bool
 
 persist.samgr.cache.sa = samgr:samgr:0775
+
+persist.samgr.moduleupdate. = samgr:samgr:0775

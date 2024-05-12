@@ -14,7 +14,10 @@
  */
 
 #include "nlohmann/json.hpp"
+#include "system_ability_manager.h"
 #include "system_ability_manager_util.h"
+#include "parameter.h"
+#include "ffrt_handler.h"
 #include "accesstoken_kit.h"
 #include "ipc_skeleton.h"
 #include "string_ex.h"
@@ -33,6 +36,7 @@ constexpr const char* EVENT_TYPE = "eventId";
 constexpr const char* EVENT_NAME = "name";
 constexpr const char* EVENT_VALUE = "value";
 constexpr const char* EVENT_EXTRA_DATA_ID = "extraDataId";
+constexpr const char* MODULE_UPDATE_PARAM = "persist.samgr.moduleupdate";
 
 bool SamgrUtil::IsNameInValid(const std::u16string& name)
 {
@@ -167,5 +171,27 @@ uint64_t SamgrUtil::GenerateFreKey(int32_t uid, int32_t saId)
     uint32_t uSaid = static_cast<uint32_t>(saId);
     uint64_t key = static_cast<uint64_t>(uid);
     return (key << SHFIT_BIT) | uSaid;
+}
+
+void SamgrUtil::SetModuleUpdateParam(const std::string& key, const std::string& value)
+{
+    auto SetParamTask = [=] () {
+        int ret = SetParameter(key.c_str(), value.c_str());
+        if (ret != 0) {
+            HILOGE("SetModuleUpdateParam SetParameter error:%{public}d!", ret);
+            return;
+        }
+    };
+    ffrt::submit(SetParamTask);
+}
+
+void SamgrUtil::SendUpdateSaState(int32_t systemAbilityId, const std::string& updateSaState)
+{
+    if (SystemAbilityManager::GetInstance()->IsModuleUpdate(systemAbilityId)) {
+        std::string startKey = std::string(MODULE_UPDATE_PARAM) + ".start";
+        std::string saKey = std::string(MODULE_UPDATE_PARAM) + "." + std::to_string(systemAbilityId);
+        SamgrUtil::SetModuleUpdateParam(startKey, "true");
+        SamgrUtil::SetModuleUpdateParam(saKey, updateSaState);
+    }
 }
 }

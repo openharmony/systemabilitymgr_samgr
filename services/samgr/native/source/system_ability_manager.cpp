@@ -1303,6 +1303,17 @@ void SystemAbilityManager::SendSystemAbilityRemovedMsg(int32_t systemAbilityId)
     }
 }
 
+bool SystemAbilityManager::IsModuleUpdate(int32_t systemAbilityId)
+{
+    SaProfile saProfile;
+    bool ret = GetSaProfile(systemAbilityId, saProfile);
+    if (!ret) {
+        HILOGE("IsModuleUpdate SA:%{public}d not exist!", systemAbilityId);
+        return false;
+    }
+    return saProfile.moduleUpdate;
+}
+
 void SystemAbilityManager::SendCheckLoadedMsg(int32_t systemAbilityId, const std::u16string& name,
     const std::string& srcDeviceId, const sptr<ISystemAbilityLoadCallback>& callback)
 {
@@ -1330,6 +1341,7 @@ void SystemAbilityManager::SendCheckLoadedMsg(int32_t systemAbilityId, const std
         }
         HILOGI("SendCheckLoadedMsg SA:%{public}d, load timeout.", systemAbilityId);
         ReportSamgrSaLoadFail(systemAbilityId, "time out");
+        SamgrUtil::SendUpdateSaState(systemAbilityId, "loadfail");
         abilityStateScheduler_->SendAbilityStateEvent(systemAbilityId, AbilityStateEvent::ABILITY_LOAD_FAILED_EVENT);
         (void)GetSystemProcess(name);
     };
@@ -1728,6 +1740,7 @@ int32_t SystemAbilityManager::DoUnloadSystemAbility(int32_t systemAbilityId,
         return ERR_INVALID_VALUE;
     }
     ReportSamgrSaUnload(systemAbilityId, event.eventId);
+    SamgrUtil::SendUpdateSaState(systemAbilityId, "unload");
     return ERR_OK;
 }
 

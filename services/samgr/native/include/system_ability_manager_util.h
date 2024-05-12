@@ -38,6 +38,8 @@ public:
     static void ConvertToOnDemandEvent(const SystemAbilityOnDemandEvent& from, OnDemandEvent& to);
     static void ConvertToSystemAbilityOnDemandEvent(const OnDemandEvent& from, SystemAbilityOnDemandEvent& to);
     static uint64_t GenerateFreKey(int32_t uid, int32_t saId);
+    static void SetModuleUpdateParam(const std::string& key, const std::string& value);
+    static void SendUpdateSaState(int32_t systemAbilityId, const std::string& updateSaState);
 };
 } // namespace OHOS
 
