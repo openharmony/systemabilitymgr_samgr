@@ -1285,7 +1285,7 @@ int32_t SystemAbilityStateScheduler::CheckStopEnableOnce(const OnDemandEvent& ev
             saControl.saId, event.eventId);
     }
     if (result != ERR_OK){
-        ReportSamgrSaLoadFail(saControl.saId, "ondemand load err:" + ToString(result));
+        ReportSaUnLoadFail(saControl.saId, "ondemand unload err:" + ToString(result));
     }
     return result;
 }
