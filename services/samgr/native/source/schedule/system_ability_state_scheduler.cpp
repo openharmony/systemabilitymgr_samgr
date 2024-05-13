@@ -26,6 +26,7 @@
 #include "samgr_err_code.h"
 #include "string_ex.h"
 #include "system_ability_manager.h"
+#include "system_ability_manager_util.h"
 #include "samgr_xcollie.h"
 #include "parameters.h"
 #include "system_ability_manager_util.h"
@@ -808,6 +809,7 @@ int32_t SystemAbilityStateScheduler::GetAbnormallyDiedAbilityLocked(
         }
         if (abilityContext->state == SystemAbilityState::LOADED
             || abilityContext->state == SystemAbilityState::LOADING) {
+            SamgrUtil::SendUpdateSaState(abilityContext->systemAbilityId, "crash");
             HILOGI("Scheduler SA:%{public}d abnormally died", abilityContext->systemAbilityId);
             if (!abilityContext->isAutoRestart) {
                 continue;

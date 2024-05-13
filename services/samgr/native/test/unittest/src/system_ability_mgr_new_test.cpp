@@ -961,4 +961,48 @@ HWTEST_F(SystemAbilityMgrTest, LoadSystemAbilityFromRpc009, TestSize.Level1)
     int32_t ret = saMgr->LoadSystemAbilityFromRpc(srcDeviceId, systemAbilityId, callback);
     EXPECT_FALSE(ret);
 }
+
+/**
+ * @tc.name: IsModuleUpdate001
+ * @tc.desc: test IsModuleUpdate with saprofile is not exist.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, IsModuleUpdate001, TestSize.Level2)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->saProfileMap_.clear();
+    bool ret = saMgr->IsModuleUpdate(SAID);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: IsModuleUpdate002
+ * @tc.desc: test IsModuleUpdate with default.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, IsModuleUpdate002, TestSize.Level2)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->saProfileMap_.clear();
+    SaProfile saprofile;
+    saMgr->saProfileMap_[saprofile.saId] = saprofile;
+    bool ret = saMgr->IsModuleUpdate(saprofile.saId);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: IsModuleUpdate003
+ * @tc.desc: test IsModuleUpdate with moduleUpdate is true.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, IsModuleUpdate003, TestSize.Level2)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->saProfileMap_.clear();
+    SaProfile saprofile;
+    saprofile.moduleUpdate = true;
+    saMgr->saProfileMap_[saprofile.saId] = saprofile;
+    bool ret = saMgr->IsModuleUpdate(saprofile.saId);
+    EXPECT_TRUE(ret);
+}
 } // namespace OHOS

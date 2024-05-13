@@ -14,3 +14,5 @@
 persist.samgr.perf.ondemand = false
 
 persist.samgr.cache.sa = 0
+
+persist.samgr.moduleupdate.start = false

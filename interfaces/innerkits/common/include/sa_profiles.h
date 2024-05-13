@@ -118,6 +118,7 @@ struct SaProfile {
     std::vector<int32_t> dependSa;
     int32_t dependTimeout = 0;
     bool runOnCreate = false;
+    bool moduleUpdate = false;
     bool autoRestart = false;
     bool distributed = false;
     int32_t dumpLevel = 0;
