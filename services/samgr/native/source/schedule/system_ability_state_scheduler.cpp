@@ -1248,7 +1248,7 @@ int32_t SystemAbilityStateScheduler::CheckStartEnableOnce(const OnDemandEvent& e
         HILOGI("startEnableOnceMap_remove SA:%{public}d, eventId:%{public}d",
             saControl.saId, event.eventId);
     }
-    if (result != ERR_OK){
+    if (result != ERR_OK) {
         ReportSamgrSaLoadFail(saControl.saId, "ondemand load err:" + ToString(result));
     }
     return result;
@@ -1284,7 +1284,7 @@ int32_t SystemAbilityStateScheduler::CheckStopEnableOnce(const OnDemandEvent& ev
         HILOGI("stopEnableOnceMap_ remove SA:%{public}d, eventId:%{public}d",
             saControl.saId, event.eventId);
     }
-    if (result != ERR_OK){
+    if (result != ERR_OK) {
         ReportSaUnLoadFail(saControl.saId, "ondemand unload err:" + ToString(result));
     }
     return result;
