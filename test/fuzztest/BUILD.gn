@@ -17,6 +17,7 @@ group("fuzztest") {
   testonly = true
   deps = [
     "./localsamgrproxy_fuzzer:fuzztest",
+    "./samgr_fuzzer:fuzztest",
     "./systemabilitymanager_fuzzer:fuzztest",
   ]
 }

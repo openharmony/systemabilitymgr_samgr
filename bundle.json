@@ -107,8 +107,7 @@
             ],
             "test": [
                 "//foundation/systemabilitymgr/samgr/services/samgr/native/test:unittest",
-                "//foundation/systemabilitymgr/samgr/test/fuzztest/systemabilitymanager_fuzzer:fuzztest",
-                "//foundation/systemabilitymgr/samgr/test/fuzztest/localsamgrproxy_fuzzer:fuzztest",
+                "//foundation/systemabilitymgr/samgr/test/fuzztest:fuzztest",
                 "//foundation/systemabilitymgr/samgr/services/common/test:unittest",
                 "//foundation/systemabilitymgr/samgr/interfaces/innerkits/rust/tests:unittest"
             ]
