@@ -340,7 +340,7 @@ int32_t SystemAbilityManagerStub::CheckRemtSystemAbilityInner(MessageParcel& dat
     }
     ret = reply.WriteRemoteObject(remoteObject);
     if (!ret) {
-        HILOGW("CheckRemtSystemAbilityInner SA:%{public}d write reply failed.", systemAbilityId);
+        HILOGE("CheckRemtSystemAbilityInner SA:%{public}d write reply failed.", systemAbilityId);
         return ERR_FLATTEN_OBJECT;
     }
 
