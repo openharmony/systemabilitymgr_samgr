@@ -337,6 +337,7 @@ int32_t SystemAbilityManagerStub::CheckRemtSystemAbilityInner(MessageParcel& dat
     sptr<IRemoteObject> remoteObject = GetSystemAbility(systemAbilityId, uuid);
     if (remoteObject == nullptr) {
         HILOGD("CheckRemtSystemAbilityInner SA:%{public}d GetSystemAbility failed.", systemAbilityId);
+        return ERR_NULL_OBJECT;
     }
     ret = reply.WriteRemoteObject(remoteObject);
     if (!ret) {
@@ -412,6 +413,7 @@ int32_t SystemAbilityManagerStub::CheckSystemAbilityImmeInner(MessageParcel& dat
     sptr<IRemoteObject> remoteObject = CheckSystemAbility(systemAbilityId, isExist);
     if (remoteObject == nullptr) {
         HILOGD("CheckSystemAbilityImmeInner SA:%{public}d CheckSystemAbility failed.", systemAbilityId);
+        return ERR_NULL_OBJECT;
     }
     ret = reply.WriteRemoteObject(remoteObject);
     if (!ret) {
@@ -513,6 +515,7 @@ int32_t SystemAbilityManagerStub::GetSystemAbilityInner(MessageParcel& data, Mes
     sptr<IRemoteObject> remoteObject = GetSystemAbility(systemAbilityId);
     if (remoteObject == nullptr) {
         HILOGD("GetSystemAbilityInner SA:%{public}d GetSystemAbility failed.", systemAbilityId);
+        return ERR_NULL_OBJECT;
     }
     ret = reply.WriteRemoteObject(remoteObject);
     if (!ret) {
@@ -541,6 +544,7 @@ int32_t SystemAbilityManagerStub::CheckSystemAbilityInner(MessageParcel& data, M
     sptr<IRemoteObject> remoteObject = CheckSystemAbility(systemAbilityId);
     if (remoteObject == nullptr) {
         HILOGD("CheckSystemAbilityInner SA:%{public}d CheckSystemAbility failed.", systemAbilityId);
+        return ERR_NULL_OBJECT;
     }
     ret = reply.WriteRemoteObject(remoteObject);
     if (!ret) {
