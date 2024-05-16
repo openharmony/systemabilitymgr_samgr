@@ -26,6 +26,7 @@
 #include "sa_status_change_mock.h"
 #include "string_ex.h"
 #include "system_ability_definition.h"
+#include "if_local_ability_manager.h"
 #include "system_process_status_change_proxy.h"
 #include "test_log.h"
 #define private public
