@@ -35,6 +35,14 @@ config("sam_config") {
 }
 
 ohos_executable("samgr") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    cfi_no_nvcall = true
+    blocklist = "../../../cfi_blocklist.txt"
+  }
+
   install_enable = true
   sources = [
     "//foundation/systemabilitymgr/samgr/frameworks/native/source/system_ability_load_callback_stub.cpp",

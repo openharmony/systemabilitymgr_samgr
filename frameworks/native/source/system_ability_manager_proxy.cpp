@@ -565,6 +565,7 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::LoadSystemAbility(int32_t systemA
 
 int32_t SystemAbilityManagerProxy::LoadSystemAbility(int32_t systemAbilityId,
     const sptr<ISystemAbilityLoadCallback>& callback)
+    __attribute__((no_sanitize("cfi")))
 {
     if (!CheckInputSysAbilityId(systemAbilityId) || callback == nullptr) {
         HILOGE("LoadSystemAbility SA:%{public}d or callback invalid!", systemAbilityId);
