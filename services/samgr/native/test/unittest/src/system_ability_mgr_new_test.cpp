@@ -28,7 +28,6 @@
 #include "system_ability_definition.h"
 #include "system_process_status_change_proxy.h"
 #include "test_log.h"
-#include "if_local_ability_manager.h"
 #define private public
 #include "system_ability_manager.h"
 #ifdef SUPPORT_COMMON_EVENT
@@ -57,10 +56,6 @@ constexpr int32_t SHFIT_BIT = 32;
 constexpr int32_t ONDEMAND_SLEEP_TIME = 600 * 1000; // us
 constexpr int32_t MAX_COUNT = INT32_MAX - 1000000;
 constexpr int64_t ONDEMAND_EXTRA_DATA_ID = 1;
-constexpr int32_t MASK = 0x100;
-constexpr int32_t INTERFACE_TOKEN = 0;
-constexpr int64_t SLEEP_TIME = 1;
-constexpr int32_t RETRY_TIMES = 10;
 
 void SaProfileStore(sptr<SystemAbilityManager>& saMgr,
     map<int32_t, SaProfile>& saProfileMapTmp, int32_t maxLoop)
