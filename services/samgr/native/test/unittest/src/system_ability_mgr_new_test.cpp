@@ -495,7 +495,7 @@ HWTEST_F(SystemAbilityMgrTest, Dump002, TestSize.Level3)
 
 /**
  * @tc.name: Dump003
- * @tc.desc: call Dump, return ERR_OK
+ * @tc.desc: call Dump.
  * @tc.type: FUNC
  * @tc.require: I7VEPG
  */
@@ -515,7 +515,7 @@ HWTEST_F(SystemAbilityMgrTest, Dump003, TestSize.Level3)
 
 /**
  * @tc.name: Dump004
- * @tc.desc: call Dump, return ERR_OK
+ * @tc.desc: call Dump.
  * @tc.type: FUNC
  * @tc.require: I7VEPG
  */
@@ -535,7 +535,7 @@ HWTEST_F(SystemAbilityMgrTest, Dump004, TestSize.Level3)
 
 /**
  * @tc.name: Dump005
- * @tc.desc: call Dump, return ERR_OK
+ * @tc.desc: call Dump.
  * @tc.type: FUNC
  * @tc.require: I7VEPG
  */
