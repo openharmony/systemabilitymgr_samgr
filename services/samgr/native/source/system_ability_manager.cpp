@@ -1456,7 +1456,7 @@ int32_t SystemAbilityManager::StartDynamicSystemProcess(const std::u16string& na
     std::string eventStr = std::to_string(systemAbilityId) + "#" + std::to_string(event.eventId) + "#"
         + event.name + "#" + event.value + "#" + std::to_string(event.extraDataId) + "#";
     auto extraArgv = eventStr.c_str();
-    if (abilityStateScheduler_ && abilityStateScheduler_->IsSystemProcessNeverStartedLocked(name)) {
+    if (abilityStateScheduler_ && !abilityStateScheduler_->IsSystemProcessNeverStartedLocked(name)) {
         // Waiting for the init subsystem to perceive process death
         ServiceWaitForStatus(Str16ToStr8(name).c_str(), ServiceStatus::SERVICE_STOPPED, 1);
     }
