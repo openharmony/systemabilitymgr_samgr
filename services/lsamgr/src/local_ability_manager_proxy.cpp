@@ -32,6 +32,7 @@ namespace OHOS {
 #define LOG_TAG "SA"
 bool LocalAbilityManagerProxy::StartAbility(int32_t systemAbilityId, const std::string& eventStr)
 {
+    HILOG_INFO(LOG_CORE, "StartAbility proxy SA:%{public}d", systemAbilityId);
     if (systemAbilityId <= 0) {
         HILOG_WARN(LOG_CORE, "StartAbility systemAbilityId invalid.");
         return false;
@@ -71,6 +72,7 @@ bool LocalAbilityManagerProxy::StartAbility(int32_t systemAbilityId, const std::
         HILOG_ERROR(LOG_CORE, "StartAbility SendRequest failed, return value : %{public}d", status);
         return false;
     }
+    HILOG_INFO(LOG_CORE, "StartAbility SendRequest suc, SA:%{public}d, proc:%{public}d", systemAbilityId, getpid());
     return true;
 }
 
