@@ -596,6 +596,8 @@ int32_t SystemAbilityManager::StartOnDemandAbilityInner(const std::u16string& pr
     AbilityItem& abilityItem)
 {
     if (abilityItem.state != AbilityState::INIT) {
+        HILOGW("StartSaInner SA:%{public}d,state:%{public}d,proc:%{public}s",
+            systemAbilityId, abilityItem.state, Str16ToStr8(procName).c_str());
         return ERR_INVALID_VALUE;
     }
     sptr<ILocalAbilityManager> procObject =
