@@ -72,7 +72,7 @@ bool LocalAbilityManagerProxy::StartAbility(int32_t systemAbilityId, const std::
         HILOG_ERROR(LOG_CORE, "StartAbility SendRequest failed, return value : %{public}d", status);
         return false;
     }
-    HILOG_INFO(LOG_CORE, "StartAbility SendRequest suc, SA:%{public}d, proc:%{public}d", systemAbilityId, getpid());
+    HILOG_INFO(LOG_CORE, "StartAbility SendRequest suc, SA:%{public}d, pid:%{public}d", systemAbilityId, getpid());
     return true;
 }
 
