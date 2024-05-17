@@ -148,7 +148,7 @@ ohos_unittest("SystemAbilityMgrCollectTest") {
     cfi_cross_dso = true
     debug = false
     cfi_no_nvcall = true
-   blocklist = "../../../../../cfi_blocklist.txt"
+    blocklist = "../../../../../cfi_blocklist.txt"
   }
   module_out_path = module_output_path
 
@@ -258,7 +258,7 @@ ohos_unittest("SystemAbilityMgrDeviceNetworkingTest") {
     cfi_cross_dso = true
     debug = false
     cfi_no_nvcall = true
-   blocklist = "../../../../../cfi_blocklist.txt"
+    blocklist = "../../../../../cfi_blocklist.txt"
   }
   module_out_path = module_output_path
 
@@ -351,7 +351,7 @@ ohos_unittest("SystemAbilityMgrStubTest") {
     cfi_cross_dso = true
     debug = false
     cfi_no_nvcall = true
-   blocklist = "../../../../../cfi_blocklist.txt"
+    blocklist = "../../../../../cfi_blocklist.txt"
   }
   module_out_path = module_output_path
 
@@ -438,7 +438,7 @@ ohos_unittest("SystemAbilityMgrProxyTest") {
     cfi_cross_dso = true
     debug = false
     cfi_no_nvcall = true
-   blocklist = "../../../../../cfi_blocklist.txt"
+    blocklist = "../../../../../cfi_blocklist.txt"
   }
   module_out_path = module_output_path
 
@@ -494,7 +494,7 @@ ohos_unittest("LocalAbilityManagerProxyTest") {
     cfi_cross_dso = true
     debug = false
     cfi_no_nvcall = true
-   blocklist = "../../../../../cfi_blocklist.txt"
+    blocklist = "../../../../../cfi_blocklist.txt"
   }
   module_out_path = module_output_path
 
@@ -531,7 +531,7 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
     cfi_cross_dso = true
     debug = false
     cfi_no_nvcall = true
-   blocklist = "../../../../../cfi_blocklist.txt"
+    blocklist = "../../../../../cfi_blocklist.txt"
   }
   module_out_path = module_output_path
 
@@ -610,7 +610,7 @@ ohos_unittest("SystemAbilityMgrDumperTest") {
     cfi_cross_dso = true
     debug = false
     cfi_no_nvcall = true
-   blocklist = "../../../../../cfi_blocklist.txt"
+    blocklist = "../../../../../cfi_blocklist.txt"
   }
   module_out_path = module_output_path
 
@@ -787,7 +787,7 @@ ohos_static_library("samgr_proxy_tdd") {
     cfi_cross_dso = true
     debug = false
     cfi_no_nvcall = true
-   blocklist = "../../../../../cfi_blocklist.txt"
+    blocklist = "../../../../../cfi_blocklist.txt"
   }
   defines = [ "SAMGR_PROXY" ]
   sources = [
