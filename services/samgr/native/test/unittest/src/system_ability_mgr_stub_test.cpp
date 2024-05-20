@@ -559,7 +559,7 @@ HWTEST_F(SystemAbilityMgrStubTest, CheckRemtSystemAbilityInner004, TestSize.Leve
     std::string deviceId = "test";
     data.WriteString(deviceId);
     int32_t result = saMgr->CheckRemtSystemAbilityInner(data, reply);
-    EXPECT_EQ(result, ERR_FLATTEN_OBJECT);
+    EXPECT_EQ(result, ERR_NULL_OBJECT);
 }
 
 /**
@@ -658,7 +658,7 @@ HWTEST_F(SystemAbilityMgrStubTest, CheckSystemAbilityImmeInner003, TestSize.Leve
     data.WriteInt32(SAID);
     data.WriteBool(false);
     int32_t result = saMgr->CheckSystemAbilityImmeInner(data, reply);
-    EXPECT_EQ(result, ERR_FLATTEN_OBJECT);
+    EXPECT_EQ(result, ERR_NULL_OBJECT);
 }
 
 /**
@@ -844,7 +844,7 @@ HWTEST_F(SystemAbilityMgrStubTest, GetSystemAbilityInner002, TestSize.Level3)
     data.WriteInt32(SAID);
     saMgr->abilityMap_.clear();
     int32_t result = saMgr->GetSystemAbilityInner(data, reply);
-    EXPECT_EQ(result, ERR_FLATTEN_OBJECT);
+    EXPECT_EQ(result, ERR_NULL_OBJECT);
 }
 
 /**
@@ -896,7 +896,7 @@ HWTEST_F(SystemAbilityMgrStubTest, CheckSystemAbilityInner002, TestSize.Level3)
     data.WriteInt32(SAID);
     saMgr->abilityMap_.clear();
     int32_t result = saMgr->CheckSystemAbilityInner(data, reply);
-    EXPECT_EQ(result, ERR_FLATTEN_OBJECT);
+    EXPECT_EQ(result, ERR_NULL_OBJECT);
 }
 
 /**
