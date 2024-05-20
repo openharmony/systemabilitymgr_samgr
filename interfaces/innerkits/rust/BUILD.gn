@@ -18,6 +18,14 @@ rust_cxx("samgr_cxx_gen") {
 }
 
 ohos_static_library("samgr_rust_cpp") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    cfi_no_nvcall = true
+    blocklist = "../../../cfi_blocklist.txt"
+  }
+
   sources = [
     "src/cxx/status_change_wrapper.cpp",
     "src/cxx/system_ability_manager_wrapper.cpp",

@@ -51,6 +51,7 @@ int32_t SystemAbilityLoadCallbackStub::OnRemoteRequest(uint32_t code,
 }
 
 int32_t SystemAbilityLoadCallbackStub::OnLoadSystemAbilitySuccessInner(MessageParcel& data, MessageParcel& reply)
+    __attribute__((no_sanitize("cfi")))
 {
     int32_t systemAbilityId = -1;
     bool ret = data.ReadInt32(systemAbilityId);

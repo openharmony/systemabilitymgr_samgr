@@ -36,6 +36,14 @@ config("samgr_proxy_private_config") {
 }
 
 ohos_shared_library("samgr_proxy") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    cfi_no_nvcall = true
+    blocklist = "../../../cfi_blocklist.txt"
+  }
+
   version_script = "libsamgr_proxy.versionscript"
   defines = [ "SAMGR_PROXY" ]
   sources = [
