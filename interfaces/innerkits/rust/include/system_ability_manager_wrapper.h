@@ -54,6 +54,7 @@ int32_t AddOnDemandSystemAbilityInfo(int32_t systemAbilityId, const rust::str lo
 int32_t UnloadSystemAbility(int32_t systemAbilityId);
 int32_t CancelUnloadSystemAbility(int32_t systemAbilityId);
 int32_t UnloadAllIdleSystemAbility();
+int32_t GetCommonEventExtraDataIdlist(int32_t saId, rust::Vec<int64_t>& extraDataIdList, const std::string& eventName);
 SystemProcessInfo GetSystemProcessInfo(int32_t systemAbilityId);
 rust::Vec<SystemProcessInfo> GetRunningSystemProcess();
 int32_t SendStrategy(int32_t type, rust::Vec<int32_t> systemAbilityIds, int32_t level, std::string &action);

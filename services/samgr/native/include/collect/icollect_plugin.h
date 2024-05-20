@@ -65,7 +65,15 @@ public:
     {
         return ERR_OK;
     }
-    
+    virtual void SaveSaExtraDataId(int32_t saId, int64_t extraDataId) {};
+    virtual void ClearSaExtraDataId(int32_t saId) {};
+    virtual void SaveCacheCommonEventSaExtraId(const OnDemandEvent& event,
+        const std::list<SaControlInfo>& saControlList) {};
+    virtual int32_t GetSaExtraDataIdList(int32_t saId, std::vector<int64_t>& extraDataIdList,
+        const std::string& eventName = "")
+    {
+        return ERR_OK;
+    }
     void ReportEvent(const OnDemandEvent& event);
     void PostDelayTask(std::function<void()> callback, int32_t delayTime);
 private:

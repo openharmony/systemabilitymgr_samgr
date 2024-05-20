@@ -172,6 +172,8 @@ public:
         std::vector<SaExtensionInfo>& infoList) override;
     int32_t GetExtensionSaIds(const std::string& extension, std::vector<int32_t>& saIds) override;
     int32_t GetExtensionRunningSaList(const std::string& extension, std::vector<sptr<IRemoteObject>>& saList) override;
+    int32_t GetCommonEventExtraDataIdlist(int32_t saId, std::vector<int64_t>& extraDataIdList,
+        const std::string& eventName = "") override;
     sptr<IRemoteObject> GetSystemProcess(const std::u16string& procName);
     bool IsModuleUpdate(int32_t systemAbilityId);
 private:
@@ -225,6 +227,7 @@ private:
     void RemoveStartingAbilityCallback(CallbackList& callbackList, const sptr<IRemoteObject>& remoteObject);
     void RemoveStartingAbilityCallbackForDevice(AbilityItem& abilityItem, const sptr<IRemoteObject>& remoteObject);
     void RemoveStartingAbilityCallbackLocked(std::pair<sptr<ISystemAbilityLoadCallback>, int32_t>& itemPair);
+    bool IsCacheCommonEvent(int32_t systemAbilityId);
     void SendCheckLoadedMsg(int32_t systemAbilityId, const std::u16string& name, const std::string& srcDeviceId,
         const sptr<ISystemAbilityLoadCallback>& callback);
     void RemoveCheckLoadedMsg(int32_t systemAbilityId);

@@ -305,6 +305,9 @@ public:
     virtual int32_t GetRunningSaExtensionInfoList(const std::string& extension,
         std::vector<SaExtensionInfo>& infoList) = 0;
 
+    virtual int32_t GetCommonEventExtraDataIdlist(int32_t saId, std::vector<int64_t>& extraDataIdList,
+        const std::string& eventName = "") = 0;
+
     virtual int32_t GetOnDemandReasonExtraData(int64_t extraDataId, MessageParcel& extraDataParcel) = 0;
     virtual int32_t GetOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
         std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents) = 0;

@@ -29,6 +29,7 @@
 #include "nativetoken_kit.h"
 #include "sam_mock_permission.h"
 #include "softbus_bus_center.h"
+#include "system_ability_ondemand_reason.h"
 #include "system_ability_definition.h"
 #include "token_setproc.h"
 #include "parameter.h"
@@ -438,6 +439,39 @@ int32_t OnDemandHelper::GetExtensionRunningSaList(const std::string& extension,
     return ERR_OK;
 }
 
+void OnDemandHelper::GetCommonEventExtraId(int32_t saId, const std::string& eventName)
+{
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (sm == nullptr) {
+        cout << "GetCommonEventExtraId get samgr failed" << endl;
+        return;
+    }
+    std::vector<int64_t> extraDataIdList;
+    int32_t ret = sm->GetCommonEventExtraDataIdlist(saId, extraDataIdList, eventName);
+    if (ret != ERR_OK) {
+        cout << "GetCommonEventExtraDataIdlist failed ret is " << ret << endl;
+        return;
+    }
+    cout << __func__ << "extra id size: " << extraDataIdList.size() << endl;
+    for (auto& item : extraDataIdList) {
+        cout << item << ", ";
+        MessageParcel extraDataParcel;
+        ret = sm->GetOnDemandReasonExtraData(item, extraDataParcel);
+        if (ret != ERR_OK) {
+            cout << "get extra data failed" << endl;
+            continue;
+        }
+        auto extraData = extraDataParcel.ReadParcelable<OnDemandReasonExtraData>();
+        if (extraData == nullptr) {
+            cout << "get extra data read parcel fail" << endl;
+            continue;
+        }
+        auto want = extraData->GetWant();
+        cout << "get extra data event name is " << want["common_event_action_name"] << endl;
+    }
+    cout << endl;
+    return;
+}
 }
 
 static void TestProcess(OHOS::OnDemandHelper& ondemandHelper)
@@ -644,13 +678,34 @@ static void TestGetExtension(OHOS::OnDemandHelper& ondemandHelper)
     return;
 }
 
+static void TestCommonEvent(OHOS::OnDemandHelper& ondemandHelper)
+{
+    std::string cmd = "";
+    cout << "please input common event test case(1 get/2 get_with_event)" << endl;
+    cin >> cmd;
+    int32_t saId = 0;
+    std::string deviceId = ondemandHelper.GetFirstDevice();
+    cout << "please input systemAbilityId for " << cmd << " operation" << endl;
+    cin >> saId;
+    if (cmd == "1") {
+        ondemandHelper.GetCommonEventExtraId(saId, "");
+    } else if (cmd == "2") {
+        cout << "please input common event name" << endl;
+        std::string eventName;
+        cin >> eventName;
+        ondemandHelper.GetCommonEventExtraId(saId, eventName);
+    } else {
+        cout << "invalid input" << endl;
+    }
+}
+
 int main(int argc, char* argv[])
 {
     SamMockPermission::MockPermission();
     OHOS::OnDemandHelper& ondemandHelper = OnDemandHelper::GetInstance();
     string cmd = "load";
     do {
-        cout << "please input operation(sa/proc/param/policy/getExtension)" << endl;
+        cout << "please input operation(sa/proc/param/policy/getExtension/6 getEvent)" << endl;
         cmd.clear();
         cin.clear();
         cin >> cmd;
@@ -664,6 +719,8 @@ int main(int argc, char* argv[])
             TestOnDemandPolicy(ondemandHelper);
         } else if (cmd == "getExtension") {
             TestGetExtension(ondemandHelper);
+        } else if (cmd == "6") {
+            TestCommonEvent(ondemandHelper);
         } else {
             cout << "invalid input" << endl;
         }

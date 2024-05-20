@@ -173,6 +173,21 @@ uint64_t SamgrUtil::GenerateFreKey(int32_t uid, int32_t saId)
     return (key << SHFIT_BIT) | uSaid;
 }
 
+std::list<int32_t> SamgrUtil::GetCacheCommonEventSa(const OnDemandEvent& event,
+    const std::list<SaControlInfo>& saControlList)
+{
+    std::list<int32_t> saList;
+    if (event.eventId != COMMON_EVENT || event.extraDataId == -1) {
+        return saList;
+    }
+    for (auto& item : saControlList) {
+        if (item.cacheCommonEvent) {
+            saList.emplace_back(item.saId);
+        }
+    }
+    return saList;
+}
+
 void SamgrUtil::SetModuleUpdateParam(const std::string& key, const std::string& value)
 {
     auto SetParamTask = [=] () {

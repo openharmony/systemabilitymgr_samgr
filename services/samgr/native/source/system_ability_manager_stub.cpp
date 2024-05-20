@@ -174,6 +174,8 @@ SystemAbilityManagerStub::SystemAbilityManagerStub()
         &SystemAbilityManagerStub::GetExtensionRunningSaListInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_SA_EXTENSION_INFO_TRANSCATION)] =
         &SystemAbilityManagerStub::GetRunningSaExtensionInfoListInner;
+    memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_COMMON_EVENT_EXTRA_ID_LIST_TRANSCATION)] =
+        &SystemAbilityManagerStub::GetCommonEventExtraDataIdlistInner;
 }
 
 int32_t SystemAbilityManagerStub::OnRemoteRequest(uint32_t code,
@@ -1170,6 +1172,44 @@ int32_t SystemAbilityManagerStub::GetRunningSaExtensionInfoListInner(MessageParc
             HILOGE("get SaExtInfoList write obj failed.");
             return ERR_FLATTEN_OBJECT;
         }
+    }
+    return ERR_NONE;
+}
+
+int32_t SystemAbilityManagerStub::GetCommonEventExtraDataIdlistInner(MessageParcel& data, MessageParcel& reply)
+{
+    if (!CanRequest()) {
+        HILOGE("getExtraIdList PERMISSION DENIED!");
+        return ERR_PERMISSION_DENIED;
+    }
+    int32_t saId = -1;
+    if (!data.ReadInt32(saId)) {
+        HILOGE("getExtraIdList read said fail!");
+        return ERR_NULL_OBJECT;
+    }
+    if (!CheckInputSysAbilityId(saId)) {
+        HILOGW("getExtraIdList check SAId failed!");
+        return ERR_NULL_OBJECT;
+    }
+    std::string eventName;
+    if (!data.ReadString(eventName)) {
+        HILOGW("getExtraIdList read eventName failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    std::vector<int64_t> extraDataIdList;
+    int32_t result = GetCommonEventExtraDataIdlist(saId, extraDataIdList, eventName);
+    if (!reply.WriteInt32(result)) {
+        HILOGW("getExtraIdList write result failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (result != ERR_OK) {
+        HILOGE("getExtraIdList failed,ret:%{public}d", result);
+        return result;
+    }
+    if (!reply.WriteInt64Vector(extraDataIdList)) {
+        HILOGW("getExtraIdList write idlist failed.");
+        return ERR_FLATTEN_OBJECT;
     }
     return ERR_NONE;
 }

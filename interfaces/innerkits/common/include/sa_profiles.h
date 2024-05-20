@@ -98,6 +98,7 @@ struct SaControlInfo {
     int32_t saId;
     bool enableOnce = false;
     uint32_t loadPriority = LOW_PRIORITY;
+    bool cacheCommonEvent = false;
 };
 
 struct StartOnDemand {
@@ -131,6 +132,7 @@ struct SaProfile {
     DlHandle handle = nullptr;
     int32_t recycleStrategy = IMMEDIATELY;
     std::list<std::string> extension;
+    bool cacheCommonEvent = false;
 };
 }
 #endif // SAMGR_INTERFACE_INNERKITS_COMMOM_INCLUDE_SAPROFILE_H

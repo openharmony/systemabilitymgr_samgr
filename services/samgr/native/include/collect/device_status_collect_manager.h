@@ -42,6 +42,14 @@ public:
         std::vector<OnDemandEvent>& events);
     int32_t UpdateOnDemandEvents(int32_t systemAbilityId, OnDemandPolicyType type,
         const std::vector<OnDemandEvent>& events);
+    void SaveSaExtraDataId(int32_t saId, int64_t extraDataId);
+    void RemoveSaExtraDataId(int64_t extraDataId);
+    void ClearSaExtraDataId(int32_t saId);
+    void SaveCacheCommonEventSaExtraId(const OnDemandEvent& event,
+        const std::list<SaControlInfo>& saControlList);
+    int32_t GetSaExtraDataIdList(int32_t saId, std::vector<int64_t>& extraDataIdList,
+        const std::string& eventName = "");
+    int32_t IsExistInPluginMap(int32_t eventId);
 private:
     bool NeedPersistOnDemandEvent(const OnDemandEvent& event);
     void PersistOnDemandEvent(int32_t systemAbilityId, OnDemandPolicyType type,

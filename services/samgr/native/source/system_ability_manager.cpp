@@ -453,6 +453,9 @@ void SystemAbilityManager::ProcessOnDemandEvent(const OnDemandEvent& event,
 {
     HILOGI("DoEvent:%{public}d name:%{public}s value:%{public}s",
         event.eventId, event.name.c_str(), event.value.c_str());
+    if (collectManager_ != nullptr) {
+        collectManager_->SaveCacheCommonEventSaExtraId(event, saControlList);
+    }
     if (abilityStateScheduler_ == nullptr) {
         HILOGE("abilityStateScheduler is nullptr");
         return;
@@ -764,6 +767,9 @@ int32_t SystemAbilityManager::RemoveSystemAbility(int32_t systemAbilityId)
     SystemAbilityInvalidateCache(systemAbilityId);
     abilityStateScheduler_->SendAbilityStateEvent(systemAbilityId, AbilityStateEvent::ABILITY_UNLOAD_SUCCESS_EVENT);
     SendSystemAbilityRemovedMsg(systemAbilityId);
+    if (IsCacheCommonEvent(systemAbilityId) && collectManager_ != nullptr) {
+        collectManager_->ClearSaExtraDataId(systemAbilityId);
+    }
     return ERR_OK;
 }
 
@@ -785,6 +791,9 @@ int32_t SystemAbilityManager::RemoveSystemAbility(const sptr<IRemoteObject>& abi
                 (void)abilityMap_.erase(iter);
                 if (abilityDeath_ != nullptr) {
                     ability->RemoveDeathRecipient(abilityDeath_);
+                }
+                if (IsCacheCommonEvent(saId) && collectManager_ != nullptr) {
+                    collectManager_->ClearSaExtraDataId(saId);
                 }
                 KHILOGI("%{public}s called, SA:%{public}d removed, size:%{public}zu", __func__, saId,
                     abilityMap_.size());
@@ -1265,6 +1274,9 @@ void SystemAbilityManager::SendCheckLoadedMsg(int32_t systemAbilityId, const std
         HILOGI("SendCheckLoadedMsg SA:%{public}d, load timeout.", systemAbilityId);
         ReportSamgrSaLoadFail(systemAbilityId, "time out");
         SamgrUtil::SendUpdateSaState(systemAbilityId, "loadfail");
+        if (IsCacheCommonEvent(systemAbilityId) && collectManager_ != nullptr) {
+            collectManager_->ClearSaExtraDataId(systemAbilityId);
+        }
         abilityStateScheduler_->SendAbilityStateEvent(systemAbilityId, AbilityStateEvent::ABILITY_LOAD_FAILED_EVENT);
         (void)GetSystemProcess(name);
     };
@@ -1309,6 +1321,16 @@ void SystemAbilityManager::CleanCallbackForLoadFailed(int32_t systemAbilityId, c
         HILOGI("CleanCallback startingAbilityMap remove SA:%{public}d.", systemAbilityId);
         startingAbilityMap_.erase(iter);
     }
+}
+
+bool SystemAbilityManager::IsCacheCommonEvent(int32_t systemAbilityId)
+{
+    SaProfile saProfile;
+    if (!GetSaProfile(systemAbilityId, saProfile)) {
+        HILOGD("SA:%{public}d no profile!", systemAbilityId);
+        return false;
+    }
+    return saProfile.cacheCommonEvent;
 }
 
 void SystemAbilityManager::RemoveCheckLoadedMsg(int32_t systemAbilityId)
@@ -2050,5 +2072,19 @@ int32_t SystemAbilityManager::GetRunningSaExtensionInfoList(const std::string& e
         }
     }
     return ERR_OK;
+}
+
+int32_t SystemAbilityManager::GetCommonEventExtraDataIdlist(int32_t saId, std::vector<int64_t>& extraDataIdList,
+    const std::string& eventName)
+{
+    if (!IsCacheCommonEvent(saId)) {
+        HILOGI("SA:%{public}d no cache event", saId);
+        return ERR_OK;
+    }
+    if (collectManager_ == nullptr) {
+        HILOGE("collectManager is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    return collectManager_->GetSaExtraDataIdList(saId, extraDataIdList, eventName);
 }
 } // namespace OHOS

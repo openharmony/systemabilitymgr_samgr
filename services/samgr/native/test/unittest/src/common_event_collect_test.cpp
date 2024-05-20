@@ -33,6 +33,7 @@ using namespace OHOS;
 namespace OHOS {
 namespace {
 constexpr uint32_t COMMON_DIED_EVENT = 11;
+constexpr const char* COMMON_EVENT_ACTION_NAME = "common_event_action_name";
 }
 
 
@@ -484,6 +485,108 @@ HWTEST_F(CommonEventCollectTest, GetParamFromWant001, TestSize.Level3)
     EXPECT_EQ(commonEventCollect->GetParamFromWant("2", want), "2");
     EXPECT_EQ(commonEventCollect->GetParamFromWant("3", want), "3");
     EXPECT_EQ(commonEventCollect->GetParamFromWant("4", want), "");
+}
+
+/**
+ * @tc.name: GetExtraDataIdlist001
+ * @tc.desc: test GetExtraDataIdlist001 with one CommonEventData
+ * @tc.type: FUNC
+ * @tc.require: I6W735
+ */
+HWTEST_F(CommonEventCollectTest, GetExtraDataIdlist001, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
+    commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
+    commonEventCollect->extraDatas_.clear();
+    int64_t extraId = 100000;
+    int32_t saId = 1234;
+
+    std::map<std::string, std::string> wantMap1;
+    wantMap1[COMMON_EVENT_ACTION_NAME] = "common_event1";
+    OnDemandReasonExtraData extraData1(1, "1", wantMap1);
+    commonEventCollect->extraDatas_[extraId] = extraData1;
+
+    std::map<std::string, std::string> wantMap2;
+    wantMap2[COMMON_EVENT_ACTION_NAME] = "common_event2";
+    OnDemandReasonExtraData extraData2(2, "2", wantMap2);
+    commonEventCollect->extraDatas_[extraId + 1] = extraData2;
+
+    commonEventCollect->SaveSaExtraDataId(saId, extraId);
+    commonEventCollect->SaveSaExtraDataId(saId, extraId + 1);
+    commonEventCollect->SaveSaExtraDataId(saId, extraId + 2);
+    commonEventCollect->SaveSaExtraDataId(saId + 1, extraId);
+    commonEventCollect->SaveSaExtraDataId(saId + 1, extraId + 1);
+    commonEventCollect->SaveSaExtraDataId(saId + 1, extraId + 2);
+    EXPECT_EQ(commonEventCollect->saExtraDataIdMap_.size(), 2);
+
+    std::vector<int64_t> extraDataIdList;
+    int32_t ret = commonEventCollect->GetSaExtraDataIdList(1, extraDataIdList);
+    EXPECT_EQ(extraDataIdList.size(), 0);
+    extraDataIdList.clear();
+
+    ret = commonEventCollect->GetSaExtraDataIdList(saId, extraDataIdList);
+    EXPECT_EQ(extraDataIdList.size(), 3);
+    extraDataIdList.clear();
+
+    ret = commonEventCollect->GetSaExtraDataIdList(saId, extraDataIdList, "common_event1");
+    EXPECT_EQ(extraDataIdList.size(), 1);
+    commonEventCollect->extraDatas_.clear();
+    commonEventCollect->saExtraDataIdMap_.clear();
+}
+
+/**
+ * @tc.name: GetExtraDataIdlist001
+ * @tc.desc: test GetExtraDataIdlist001 with remove id
+ * @tc.type: FUNC
+ * @tc.require: I6W735
+ */
+HWTEST_F(CommonEventCollectTest, GetExtraDataIdlist002, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
+    commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
+    commonEventCollect->extraDatas_.clear();
+    int64_t extraId = 100000;
+    int32_t saId = 1234;
+
+    std::map<std::string, std::string> wantMap1;
+    wantMap1[COMMON_EVENT_ACTION_NAME] = "common_event1";
+    OnDemandReasonExtraData extraData1(1, "1", wantMap1);
+    commonEventCollect->extraDatas_[extraId] = extraData1;
+
+    std::map<std::string, std::string> wantMap2;
+    wantMap2[COMMON_EVENT_ACTION_NAME] = "common_event2";
+    OnDemandReasonExtraData extraData2(2, "2", wantMap2);
+    commonEventCollect->extraDatas_[extraId + 1] = extraData2;
+
+    commonEventCollect->SaveSaExtraDataId(saId, extraId);
+    commonEventCollect->SaveSaExtraDataId(saId, extraId + 1);
+    commonEventCollect->SaveSaExtraDataId(saId, extraId + 2);
+    commonEventCollect->SaveSaExtraDataId(saId + 1, extraId);
+    commonEventCollect->SaveSaExtraDataId(saId + 1, extraId + 1);
+    commonEventCollect->SaveSaExtraDataId(saId + 1, extraId + 2);
+    commonEventCollect->SaveSaExtraDataId(saId + 1, extraId + 3);
+    EXPECT_EQ(commonEventCollect->saExtraDataIdMap_.size(), 2);
+
+    std::vector<int64_t> extraDataIdList;
+    commonEventCollect->RemoveSaExtraDataId(extraId + 1);
+    int32_t ret = commonEventCollect->GetSaExtraDataIdList(saId, extraDataIdList, "common_event1");
+    EXPECT_EQ(extraDataIdList.size(), 1);
+    extraDataIdList.clear();
+
+    commonEventCollect->RemoveSaExtraDataId(extraId);
+    ret = commonEventCollect->GetSaExtraDataIdList(saId, extraDataIdList, "common_event1");
+    EXPECT_EQ(extraDataIdList.size(), 0);
+    extraDataIdList.clear();
+
+    commonEventCollect->RemoveSaExtraDataId(extraId + 2);
+    EXPECT_EQ(commonEventCollect->saExtraDataIdMap_.size(), 1);
+
+    ret = commonEventCollect->GetSaExtraDataIdList(saId + 1, extraDataIdList);
+    EXPECT_EQ(extraDataIdList.size(), 1);
+    commonEventCollect->extraDatas_.clear();
+    commonEventCollect->saExtraDataIdMap_.clear();
 }
 
 /**

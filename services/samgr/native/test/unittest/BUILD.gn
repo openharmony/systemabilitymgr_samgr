@@ -637,6 +637,7 @@ ohos_executable("ondemand") {
     "init:libbeget_proxy",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "safwk:system_ability_fwk",
   ]
   part_name = "samgr"
   subsystem_name = "systemabilitymgr"

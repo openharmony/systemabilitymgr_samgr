@@ -15,6 +15,7 @@ use cxx::{let_cxx_string, UniquePtr};
 use ipc::remote::{RemoteObj, RemoteStub};
 
 use crate::wrapper::{
+    GetCommonEventExtraDataIdlist,
     AbilityStub, AddOnDemandSystemAbilityInfo, AddSystemAbility, AddSystemAbilityConfig,
     CancelUnloadSystemAbility, CheckSystemAbility, CheckSystemAbilityWithDeviceId,
     GetContextManager, GetRunningSystemProcess, GetSystemAbility, GetSystemAbilityWithDeviceId,
@@ -226,6 +227,11 @@ impl SystemAbilityManager {
     pub fn send_strategy(s_type: i32, saids: Vec<i32>, level: i32, action: &str) -> i32 {
         let_cxx_string!(action = action);
         SendStrategy(s_type, saids, level, action)
+    }
+
+    pub fn get_common_event_extra_data_id_list(said: i32, extraids: &mut Vec<i64>, event_name: &str) -> i32 {
+        let_cxx_string!(event_name = event_name);
+        GetCommonEventExtraDataIdlist(said, extraids, &event_name)
     }
 
     pub fn subscribe_system_process(
