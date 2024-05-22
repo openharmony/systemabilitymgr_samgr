@@ -469,6 +469,7 @@ HWTEST_F(SystemAbilityMgrTest, UnloadAllIdleSystemAbility003, TestSize.Level3)
 
 HWTEST_F(SystemAbilityMgrTest, Dump001, TestSize.Level3)
 {
+    SamMockPermission::MockProcess("hidumper_service");
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     vector<std::u16string> args;
     args.push_back(u"test_name");
@@ -485,6 +486,7 @@ HWTEST_F(SystemAbilityMgrTest, Dump001, TestSize.Level3)
 
 HWTEST_F(SystemAbilityMgrTest, Dump002, TestSize.Level3)
 {
+    SamMockPermission::MockProcess("hidumper_service");
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     vector<std::u16string> args;
     vector<std::string> argsWithStr8;
@@ -503,6 +505,7 @@ HWTEST_F(SystemAbilityMgrTest, Dump002, TestSize.Level3)
 
 HWTEST_F(SystemAbilityMgrTest, Dump003, TestSize.Level3)
 {
+    SamMockPermission::MockProcess("hidumper_service");
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     vector<std::u16string> args;
     vector<std::string> argsWithStr8;
@@ -523,6 +526,7 @@ HWTEST_F(SystemAbilityMgrTest, Dump003, TestSize.Level3)
 
 HWTEST_F(SystemAbilityMgrTest, Dump004, TestSize.Level3)
 {
+    SamMockPermission::MockProcess("hidumper_service");
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     vector<std::u16string> args;
     vector<std::string> argsWithStr8;
@@ -543,6 +547,7 @@ HWTEST_F(SystemAbilityMgrTest, Dump004, TestSize.Level3)
 
 HWTEST_F(SystemAbilityMgrTest, Dump005, TestSize.Level3)
 {
+    SamMockPermission::MockProcess("hidumper_service");
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     vector<std::u16string> args;
     vector<std::string> argsWithStr8;
@@ -1108,6 +1113,7 @@ HWTEST_F(SystemAbilityMgrTest, IsModuleUpdate003, TestSize.Level2)
  */
 HWTEST_F(SystemAbilityMgrTest, IpcDumpProc001, TestSize.Level2)
 {
+    SamMockPermission::MockProcess("hidumper_service");
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     int32_t cmd = -1;
     int32_t fd = 1;
