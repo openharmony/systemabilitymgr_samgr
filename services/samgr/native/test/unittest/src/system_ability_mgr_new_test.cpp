@@ -26,6 +26,7 @@
 #include "sa_status_change_mock.h"
 #include "string_ex.h"
 #include "system_ability_definition.h"
+#include "if_local_ability_manager.h"
 #include "system_process_status_change_proxy.h"
 #include "test_log.h"
 #define private public
@@ -188,6 +189,22 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy001, TestSize.Level3)
     int32_t systemAbilityId = 1;
     OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
     std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
+    int32_t ret = saMgr->GetOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
+    EXPECT_EQ(ERR_INVALID_VALUE, ret);
+}
+
+/**
+ * @tc.desc: test GetOnDemandPolicy with OnDemandPolicyType is valid
+ * @tc.type: FUNC
+ * @tc.require: I6V4AX
+ */
+HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy002, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t systemAbilityId = 1;
+    OnDemandPolicyType type = OnDemandPolicyType::STOP_POLICY;
+    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
+    sptr<DeviceStatusCollectManager> collectManager_ = nullptr;
     int32_t ret = saMgr->GetOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
     EXPECT_EQ(ERR_INVALID_VALUE, ret);
 }
@@ -438,6 +455,7 @@ HWTEST_F(SystemAbilityMgrTest, UnloadAllIdleSystemAbility002, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrTest, UnloadAllIdleSystemAbility003, TestSize.Level3)
 {
+    SamMockPermission::MockProcess("memmgrservice");
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     int32_t ret = saMgr->UnloadAllIdleSystemAbility();
     EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
@@ -452,11 +470,94 @@ HWTEST_F(SystemAbilityMgrTest, UnloadAllIdleSystemAbility003, TestSize.Level3)
 
 HWTEST_F(SystemAbilityMgrTest, Dump001, TestSize.Level3)
 {
+    SamMockPermission::MockProcess("hidumper_service");
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     vector<std::u16string> args;
     args.push_back(u"test_name");
     int32_t result = saMgr->Dump(1, args);
     EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: Dump002
+ * @tc.desc: call Dump, return ERR_OK
+ * @tc.type: FUNC
+ * @tc.require: I7VEPG
+ */
+
+HWTEST_F(SystemAbilityMgrTest, Dump002, TestSize.Level3)
+{
+    SamMockPermission::MockProcess("hidumper_service");
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    vector<std::u16string> args;
+    vector<std::string> argsWithStr8;
+    args.push_back(u"test_name");
+    argsWithStr8.push_back("--ffrt");
+    int32_t result = saMgr->Dump(1, args);
+    EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: Dump003
+ * @tc.desc: call Dump.
+ * @tc.type: FUNC
+ * @tc.require: I7VEPG
+ */
+
+HWTEST_F(SystemAbilityMgrTest, Dump003, TestSize.Level3)
+{
+    SamMockPermission::MockProcess("hidumper_service");
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    vector<std::u16string> args;
+    vector<std::string> argsWithStr8;
+    args.push_back(u"test_name");
+    argsWithStr8.push_back("--ipc");
+    argsWithStr8.push_back("all");
+    int ret = true;
+    int32_t result = saMgr->Dump(1, args);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: Dump004
+ * @tc.desc: call Dump.
+ * @tc.type: FUNC
+ * @tc.require: I7VEPG
+ */
+
+HWTEST_F(SystemAbilityMgrTest, Dump004, TestSize.Level3)
+{
+    SamMockPermission::MockProcess("hidumper_service");
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    vector<std::u16string> args;
+    vector<std::string> argsWithStr8;
+    args.push_back(u"test_name");
+    argsWithStr8.push_back("--ipc");
+    argsWithStr8.push_back("samgr");
+    int ret = true;
+    int32_t result = saMgr->Dump(1, args);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: Dump005
+ * @tc.desc: call Dump.
+ * @tc.type: FUNC
+ * @tc.require: I7VEPG
+ */
+
+HWTEST_F(SystemAbilityMgrTest, Dump005, TestSize.Level3)
+{
+    SamMockPermission::MockProcess("hidumper_service");
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    vector<std::u16string> args;
+    vector<std::string> argsWithStr8;
+    args.push_back(u"test_name");
+    argsWithStr8.push_back("--ipc");
+    argsWithStr8.push_back("abc");
+    int ret = true;
+    int32_t result = saMgr->Dump(1, args);
+    EXPECT_TRUE(ret);
 }
 
 /**
@@ -1004,5 +1105,62 @@ HWTEST_F(SystemAbilityMgrTest, IsModuleUpdate003, TestSize.Level2)
     saMgr->saProfileMap_[saprofile.saId] = saprofile;
     bool ret = saMgr->IsModuleUpdate(saprofile.saId);
     EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: IpcDumpProc001
+ * @tc.desc: test IpcDumpProc.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, IpcDumpProc001, TestSize.Level2)
+{
+    SamMockPermission::MockProcess("hidumper_service");
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t cmd = -1;
+    int32_t fd = 1;
+    std::vector<std::string> args;
+    args.push_back("abc");
+    args.push_back("abcd");
+    int ret = saMgr->IpcDumpProc(fd, args);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: IpcStatSamgrProc001
+ * @tc.desc: test IpcStatSamgrProc.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, IpcStatSamgrProc001, TestSize.Level2)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t cmd = IPC_STAT_CMD_START - 1;
+    int32_t fd = 1;
+    bool ret = saMgr->IpcStatSamgrProc(fd, cmd);
+    EXPECT_FALSE(ret);
+    cmd = IPC_STAT_CMD_MAX;
+    bool result = saMgr->IpcStatSamgrProc(fd, cmd);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IpcStatSamgrProc002
+ * @tc.desc: test IpcStatSamgrProc.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, IpcStatSamgrProc002, TestSize.Level2)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t cmd = IPC_STAT_CMD_START;
+    int32_t dmd = IPC_STAT_CMD_STOP;
+    int32_t emd = IPC_STAT_CMD_GET;
+    int32_t fd = 1;
+    int ret = true;
+    saMgr->IpcStatSamgrProc(fd, cmd);
+    saMgr->IpcStatSamgrProc(fd, dmd);
+    saMgr->IpcStatSamgrProc(fd, emd);
+    EXPECT_TRUE(ret);
+    int32_t fmd = 4;
+    bool result = saMgr->IpcStatSamgrProc(fd, fmd);
+    EXPECT_FALSE(result);
 }
 } // namespace OHOS
