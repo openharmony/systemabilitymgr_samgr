@@ -119,6 +119,8 @@ mod ffi {
         ) -> UniquePtr<UnSubscribeSystemProcessHandler>;
 
         fn UnSubscribe(self: Pin<&mut UnSubscribeSystemProcessHandler>);
+
+        fn GetOnDemandReasonExtraData(extra_data_id: i64, parcel: Pin<&mut MessageParcel>) -> i32;
     }
 }
 
