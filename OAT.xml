@@ -58,6 +58,10 @@ Note:If the text contains special characters, please escape them according to th
             <filefilter name="copyrightPolicyFilter" desc="copyright文件头校验策略的过滤条件" >
                 <filteritem type="filepath" name="etc/samgr_standard.cfg" desc="cfg文件为json格式,无法添加版权头"/>
             </filefilter>
+            <filefilter name="binaryFileTypePolicyFilter" desc="Filters for binary file policies" >
+                <filteritem type="filepath" name="figures\en-us_image_0000001115820566.png" desc="icon"/>
+                <filteritem type="filepath" name="figures\zh-cn_image_0000001115820566.png" desc="icon"/>
+            </filefilter>
         </filefilterlist>
     </oatconfig>
 </configuration>
