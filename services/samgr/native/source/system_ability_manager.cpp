@@ -973,29 +973,29 @@ int32_t SystemAbilityManager::SubscribeSystemAbility(int32_t systemAbilityId,
 void SystemAbilityManager::UnSubscribeSystemAbilityLocked(
     std::list<SAListener>& listenerList, const sptr<IRemoteObject>& listener)
 {
-    auto iter = listenerList.begin();
-    while (iter != listenerList.end()) {
-        auto& item = *iter;
-        if (item.listener->AsObject() != listener) {
-            ++iter;
-            continue;
+    auto item = listenerList.begin();
+    for (; item != listenerList.end(); item++) {
+        if (item->listener == nullptr) {
+            HILOGE("listener is null");
+            return;
         }
-
-        if (abilityStatusDeath_ != nullptr) {
-            listener->RemoveDeathRecipient(abilityStatusDeath_);
+        if (item->listener->AsObject() == listener) {
+            break;
         }
-        auto iterPair = subscribeCountMap_.find(item.callingPid);
-        if (iterPair != subscribeCountMap_.end()) {
-            --iterPair->second;
-            if (iterPair->second == 0) {
-                subscribeCountMap_.erase(iterPair);
-            }
-        }
-        HILOGI("rm SA listener callPid:%{public}d,size:%{public}zu",
-            item.callingPid, listenerList.size());
-        iter = listenerList.erase(iter);
-        break;
     }
+    if (item == listenerList.end()) {
+        return;
+    }
+    int32_t callpid = item->callingPid;
+    auto iterPair = subscribeCountMap_.find(callpid);
+    if (iterPair != subscribeCountMap_.end()) {
+        --(iterPair->second);
+        if (iterPair->second == 0) {
+            subscribeCountMap_.erase(iterPair);
+        }
+    }
+    listenerList.erase(item);
+    HILOGI("rm SA listener callPid:%{public}d,size:%{public}zu", callpid, listenerList.size());
 }
 
 int32_t SystemAbilityManager::UnSubscribeSystemAbility(int32_t systemAbilityId,
@@ -1009,8 +1009,10 @@ int32_t SystemAbilityManager::UnSubscribeSystemAbility(int32_t systemAbilityId,
     lock_guard<mutex> autoLock(listenerMapLock_);
     auto& listeners = listenerMap_[systemAbilityId];
     UnSubscribeSystemAbilityLocked(listeners, listener->AsObject());
-    HILOGI("UnSubscribeSa:%{public}d,size:%{public}zu", systemAbilityId,
-        listeners.size());
+    if (abilityStatusDeath_ != nullptr) {
+        listener->AsObject()->RemoveDeathRecipient(abilityStatusDeath_);
+    }
+    HILOGI("UnSubscribeSa:%{public}d,size:%{public}zu", systemAbilityId, listeners.size());
     return ERR_OK;
 }
 
@@ -1021,6 +1023,9 @@ void SystemAbilityManager::UnSubscribeSystemAbility(const sptr<IRemoteObject>& r
     for (auto& item : listenerMap_) {
         auto& listeners = item.second;
         UnSubscribeSystemAbilityLocked(listeners, remoteObject);
+    }
+    if (abilityStatusDeath_ != nullptr) {
+        remoteObject->RemoveDeathRecipient(abilityStatusDeath_);
     }
 }
 
