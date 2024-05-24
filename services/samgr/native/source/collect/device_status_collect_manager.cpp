@@ -92,7 +92,7 @@ void DeviceStatusCollectManager::GetSaControlListByPersistEvent(const OnDemandEv
     SplitStr(value, "+", strVector);
     size_t vectorSize = strVector.size();
     for (size_t i = 0; i < vectorSize; i++) {
-        OnDemandPolicyType type;
+        OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
         int32_t systemAbilityId = -1;
         HILOGD("vector is : %{public}s", strVector[i].c_str());
         StringToTypeAndSaid(strVector[i], type, systemAbilityId);
