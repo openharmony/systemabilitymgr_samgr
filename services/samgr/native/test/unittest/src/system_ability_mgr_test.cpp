@@ -880,6 +880,22 @@ HWTEST_F(SystemAbilityMgrTest, ReportSubscribeOverflow001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UnSubscribeSystemAbilityDied001
+ * @tc.desc: test UnSubscribeSystemAbility with OnRemoteDied 
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, UnSubscribeSystemAbilityDied001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    ASSERT_TRUE(saMgr != nullptr);
+    sptr<SaStatusChangeMock> callback(new SaStatusChangeMock());
+    saMgr->listenerMap_[SAID].push_back({callback, SAID});
+    auto& count = saMgr->subscribeCountMap_[SAID];
+    ++count;
+    saMgr->UnSubscribeSystemAbility(callback->AsObject());
+}
+
+/**
  * @tc.name: ReportLoadSAOverflow001
  * @tc.desc: ReportLoadSAOverflow001
  * @tc.type: FUNC
