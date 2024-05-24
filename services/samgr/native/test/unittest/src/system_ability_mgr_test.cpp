@@ -882,7 +882,7 @@ HWTEST_F(SystemAbilityMgrTest, ReportSubscribeOverflow001, TestSize.Level1)
 
 /**
  * @tc.name: UnSubscribeSystemAbilityDied001
- * @tc.desc: test UnSubscribeSystemAbility with OnRemoteDied 
+ * @tc.desc: test UnSubscribeSystemAbility with OnRemoteDied
  * @tc.type: FUNC
  */
 HWTEST_F(SystemAbilityMgrTest, UnSubscribeSystemAbilityDied001, TestSize.Level1)
