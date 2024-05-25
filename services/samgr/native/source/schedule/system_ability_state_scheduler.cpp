@@ -28,6 +28,7 @@
 #include "system_ability_manager.h"
 #include "samgr_xcollie.h"
 #include "parameters.h"
+#include "system_ability_manager_util.h"
 
 namespace OHOS {
 namespace {
@@ -236,7 +237,12 @@ int32_t SystemAbilityStateScheduler::HandleLoadAbilityEvent(const LoadRequestInf
         "ProcSta:%{public}d,SASta:%{public}d", loadRequestInfo.systemAbilityId, loadRequestInfo.callingPid,
         loadRequestInfo.loadEvent.eventId, abilityContext->ownProcessContext->state, abilityContext->state);
     std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
-    return HandleLoadAbilityEventLocked(abilityContext, loadRequestInfo);
+    int32_t result = HandleLoadAbilityEventLocked(abilityContext, loadRequestInfo);
+    if (result != ERR_OK) {
+        HILOGE("Scheduler SA:%{public}d handle load fail,ret:%{public}d",
+            loadRequestInfo.systemAbilityId, result);
+    }
+    return result;
 }
 
 int32_t SystemAbilityStateScheduler::HandleLoadAbilityEventLocked(
@@ -294,7 +300,6 @@ int32_t SystemAbilityStateScheduler::HandleUnloadAbilityEvent(
     std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
     int32_t result = HandleUnloadAbilityEventLocked(abilityContext, unloadRequestInfo);
     if (result != ERR_OK) {
-        ReportSaUnLoadFail(unloadRequestInfo->systemAbilityId, "err:" + ToString(result));
         HILOGE("Scheduler SA:%{public}d handle unload fail,ret:%{public}d",
             unloadRequestInfo->systemAbilityId, result);
     }
@@ -546,7 +551,7 @@ bool SystemAbilityStateScheduler::CanUnloadAllSystemAbility(
     const std::shared_ptr<SystemProcessContext>& processContext)
 {
     std::lock_guard<std::mutex> autoLock(processContext->stateCountLock);
-	return CanUnloadAllSystemAbilityLocked(processContext, true);
+    return CanUnloadAllSystemAbilityLocked(processContext, true);
 }
 
 bool SystemAbilityStateScheduler::CanUnloadAllSystemAbilityLocked(
@@ -734,7 +739,7 @@ bool SystemAbilityStateScheduler::CanKillSystemProcess(
     const std::shared_ptr<SystemProcessContext>& processContext)
 {
     std::lock_guard<std::mutex> autoLock(processContext->stateCountLock);
-	return CanKillSystemProcessLocked(processContext);
+    return CanKillSystemProcessLocked(processContext);
 }
 
 bool SystemAbilityStateScheduler::CanKillSystemProcessLocked(
@@ -756,7 +761,8 @@ int32_t SystemAbilityStateScheduler::KillSystemProcessLocked(
     int32_t result = ERR_OK;
     {
         SamgrXCollie samgrXCollie("samgr::killProccess_" + Str16ToStr8(processContext->processName));
-        result = ServiceControlWithExtra(Str16ToStr8(processContext->processName).c_str(), ServiceAction::STOP, nullptr, 0);
+        result = ServiceControlWithExtra(Str16ToStr8(processContext->processName).c_str(),
+            ServiceAction::STOP, nullptr, 0);
     }
 
     int64_t duration = GetTickCount() - begin;
@@ -811,7 +817,7 @@ int32_t SystemAbilityStateScheduler::GetAbnormallyDiedAbilityLocked(
             if (!abilityContext->isAutoRestart) {
                 continue;
             }
-            if (system::GetBoolParameter("min.memmory.watermark", false)) {
+            if (system::GetBoolParameter("resourceschedule.memmgr.min.memmory.watermark", false)) {
                 HILOGW("restart fail,watermark=true");
                 continue;
             }
@@ -1157,7 +1163,7 @@ int32_t SystemAbilityStateScheduler::ProcessDelayUnloadEvent(int32_t systemAbili
         return GET_SA_CONTEXT_FAIL;
     }
     std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
-	return ProcessDelayUnloadEventLocked(systemAbilityId);
+    return ProcessDelayUnloadEventLocked(systemAbilityId);
 }
 
 int32_t SystemAbilityStateScheduler::ProcessDelayUnloadEventLocked(int32_t systemAbilityId)
@@ -1199,6 +1205,97 @@ int32_t SystemAbilityStateScheduler::ProcessDelayUnloadEventLocked(int32_t syste
     }
 }
 
+void SystemAbilityStateScheduler::CheckEnableOnce(const OnDemandEvent& event,
+    const std::list<SaControlInfo>& saControlList)
+{
+    sptr<ISystemAbilityLoadCallback> callback(new SystemAbilityLoadCallbackStub());
+    for (auto& saControl : saControlList) {
+        int32_t result = ERR_INVALID_VALUE;
+        if (saControl.ondemandId == START_ON_DEMAND) {
+            result = CheckStartEnableOnce(event, saControl, callback);
+        } else if (saControl.ondemandId == STOP_ON_DEMAND) {
+            result = CheckStopEnableOnce(event, saControl);
+        } else {
+            HILOGE("ondemandId error");
+        }
+        if (result != ERR_OK) {
+            HILOGE("process ondemand event failed, ondemandId:%{public}d, SA:%{public}d",
+                saControl.ondemandId, saControl.saId);
+        }
+    }
+}
+
+int32_t SystemAbilityStateScheduler::CheckStartEnableOnce(const OnDemandEvent& event,
+    const SaControlInfo& saControl, sptr<ISystemAbilityLoadCallback> callback)
+{
+    int32_t result = ERR_INVALID_VALUE;
+    if (saControl.enableOnce) {
+        lock_guard<mutex> autoLock(startEnableOnceLock_);
+        auto iter = startEnableOnceMap_.find(saControl.saId);
+        if (iter != startEnableOnceMap_.end() && SamgrUtil::IsSameEvent(event, startEnableOnceMap_[saControl.saId])) {
+            HILOGI("ondemand canceled for enable-once, ondemandId:%{public}d, SA:%{public}d",
+                saControl.ondemandId, saControl.saId);
+            return result;
+        }
+        startEnableOnceMap_[saControl.saId].emplace_back(event);
+        HILOGI("startEnableOnceMap_ add SA:%{public}d, eventId:%{public}d",
+            saControl.saId, event.eventId);
+    }
+    auto callingPid = IPCSkeleton::GetCallingPid();
+    LoadRequestInfo loadRequestInfo = {LOCAL_DEVICE, callback, saControl.saId, callingPid, event};
+    result = HandleLoadAbilityEvent(loadRequestInfo);
+    if (saControl.enableOnce && result != ERR_OK) {
+        lock_guard<mutex> autoLock(startEnableOnceLock_);
+        auto& events = startEnableOnceMap_[saControl.saId];
+        events.remove(event);
+        if (events.empty()) {
+            startEnableOnceMap_.erase(saControl.saId);
+        }
+        HILOGI("startEnableOnceMap_remove SA:%{public}d, eventId:%{public}d",
+            saControl.saId, event.eventId);
+    }
+    if (result != ERR_OK) {
+        ReportSamgrSaLoadFail(saControl.saId, "ondemand load err:" + ToString(result));
+    }
+    return result;
+}
+
+int32_t SystemAbilityStateScheduler::CheckStopEnableOnce(const OnDemandEvent& event,
+    const SaControlInfo& saControl)
+{
+    int32_t result = ERR_INVALID_VALUE;
+    if (saControl.enableOnce) {
+        lock_guard<mutex> autoLock(stopEnableOnceLock_);
+        auto iter = stopEnableOnceMap_.find(saControl.saId);
+        if (iter != stopEnableOnceMap_.end() && SamgrUtil::IsSameEvent(event, stopEnableOnceMap_[saControl.saId])) {
+            HILOGI("ondemand canceled for enable-once, ondemandId:%{public}d, SA:%{public}d",
+                saControl.ondemandId, saControl.saId);
+            return result;
+        }
+        stopEnableOnceMap_[saControl.saId].emplace_back(event);
+        HILOGI("stopEnableOnceMap_ add SA:%{public}d, eventId:%{public}d",
+            saControl.saId, event.eventId);
+    }
+    auto callingPid = IPCSkeleton::GetCallingPid();
+    std::shared_ptr<UnloadRequestInfo> unloadRequestInfo =
+        std::make_shared<UnloadRequestInfo>(event, saControl.saId, callingPid);
+    result = HandleUnloadAbilityEvent(unloadRequestInfo);
+    if (saControl.enableOnce && result != ERR_OK) {
+        lock_guard<mutex> autoLock(stopEnableOnceLock_);
+        auto& events = stopEnableOnceMap_[saControl.saId];
+        events.remove(event);
+        if (events.empty()) {
+            stopEnableOnceMap_.erase(saControl.saId);
+        }
+        HILOGI("stopEnableOnceMap_ remove SA:%{public}d, eventId:%{public}d",
+            saControl.saId, event.eventId);
+    }
+    if (result != ERR_OK) {
+        ReportSaUnLoadFail(saControl.saId, "Ondemand unload err:" + ToString(result));
+    }
+    return result;
+}
+
 void SystemAbilityStateScheduler::UnloadEventHandler::ProcessEvent(uint32_t eventId)
 {
     int32_t systemAbilityId = static_cast<int32_t>(eventId);
@@ -1218,7 +1315,8 @@ void SystemAbilityStateScheduler::UnloadEventHandler::ProcessEvent(uint32_t even
     }
 }
 
-bool SystemAbilityStateScheduler::UnloadEventHandler::SendEvent(uint32_t eventId, int64_t extraDataId, uint64_t delayTime)
+bool SystemAbilityStateScheduler::UnloadEventHandler::SendEvent(uint32_t eventId,
+    int64_t extraDataId, uint64_t delayTime)
 {
     if (handler_ == nullptr) {
         HILOGE("SystemAbilityStateScheduler SendEvent handler is null!");

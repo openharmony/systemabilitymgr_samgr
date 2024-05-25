@@ -230,6 +230,7 @@ int32_t SystemAbilityManager::Dump(int32_t fd, const std::vector<std::u16string>
     if ((argsWithStr8.size() > 0) && (argsWithStr8[FFRT_DUMP_INDEX] == ARGS_FFRT_PARAM)) {
         return SystemAbilityManagerDumper::FfrtDumpProc(abilityStateScheduler_, fd, argsWithStr8);
     }
+
     if ((argsWithStr8.size() > 0) && (argsWithStr8[IPC_STAT_PREFIX_INDEX] == IPC_STAT_DUMP_PREFIX)) {
         return IpcDumpProc(fd, argsWithStr8);
     } else {
@@ -453,90 +454,11 @@ void SystemAbilityManager::ProcessOnDemandEvent(const OnDemandEvent& event,
 {
     HILOGI("DoEvent:%{public}d name:%{public}s value:%{public}s",
         event.eventId, event.name.c_str(), event.value.c_str());
-    sptr<ISystemAbilityLoadCallback> callback(new SystemAbilityLoadCallbackStub());
     if (abilityStateScheduler_ == nullptr) {
         HILOGE("abilityStateScheduler is nullptr");
         return;
     }
-    for (auto& saControl : saControlList) {
-        int32_t result = ERR_INVALID_VALUE;
-        if (saControl.ondemandId == START_ON_DEMAND) {
-            result = CheckStartEnableOnce(event, saControl, callback);
-        } else if (saControl.ondemandId == STOP_ON_DEMAND) {
-            result = CheckStopEnableOnce(event, saControl);
-        } else {
-            HILOGE("ondemandId error");
-        }
-        if (result != ERR_OK) {
-            HILOGE("process ondemand event failed, ondemandId:%{public}d, SA:%{public}d",
-                saControl.ondemandId, saControl.saId);
-        }
-    }
-}
-
-int32_t SystemAbilityManager::CheckStartEnableOnce(const OnDemandEvent& event,
-    const SaControlInfo& saControl, sptr<ISystemAbilityLoadCallback> callback)
-{
-    int32_t result = ERR_INVALID_VALUE;
-    if (saControl.enableOnce) {
-        lock_guard<mutex> autoLock(startEnableOnceLock_);
-        auto iter = startEnableOnceMap_.find(saControl.saId);
-        if (iter != startEnableOnceMap_.end() && SamgrUtil::IsSameEvent(event, startEnableOnceMap_[saControl.saId])) {
-            HILOGI("ondemand canceled for enable-once, ondemandId:%{public}d, SA:%{public}d",
-                saControl.ondemandId, saControl.saId);
-            return result;
-        }
-        startEnableOnceMap_[saControl.saId].emplace_back(event);
-        HILOGI("startEnableOnceMap_ add SA:%{public}d, eventId:%{public}d",
-            saControl.saId, event.eventId);
-    }
-    auto callingPid = IPCSkeleton::GetCallingPid();
-    LoadRequestInfo loadRequestInfo = {LOCAL_DEVICE, callback, saControl.saId, callingPid, event};
-    result = abilityStateScheduler_->HandleLoadAbilityEvent(loadRequestInfo);
-    if (saControl.enableOnce && result != ERR_OK) {
-        lock_guard<mutex> autoLock(startEnableOnceLock_);
-        auto& events = startEnableOnceMap_[saControl.saId];
-        events.remove(event);
-        if (events.empty()) {
-            startEnableOnceMap_.erase(saControl.saId);
-        }
-        HILOGI("startEnableOnceMap_remove SA:%{public}d, eventId:%{public}d",
-            saControl.saId, event.eventId);
-    }
-    return result;
-}
-
-int32_t SystemAbilityManager::CheckStopEnableOnce(const OnDemandEvent& event,
-    const SaControlInfo& saControl)
-{
-    int32_t result = ERR_INVALID_VALUE;
-    if (saControl.enableOnce) {
-        lock_guard<mutex> autoLock(stopEnableOnceLock_);
-        auto iter = stopEnableOnceMap_.find(saControl.saId);
-        if (iter != stopEnableOnceMap_.end() && SamgrUtil::IsSameEvent(event, stopEnableOnceMap_[saControl.saId])) {
-            HILOGI("ondemand canceled for enable-once, ondemandId:%{public}d, SA:%{public}d",
-                saControl.ondemandId, saControl.saId);
-            return result;
-        }
-        stopEnableOnceMap_[saControl.saId].emplace_back(event);
-        HILOGI("stopEnableOnceMap_ add SA:%{public}d, eventId:%{public}d",
-            saControl.saId, event.eventId);
-    }
-    auto callingPid = IPCSkeleton::GetCallingPid();
-    std::shared_ptr<UnloadRequestInfo> unloadRequestInfo =
-        std::make_shared<UnloadRequestInfo>(event, saControl.saId, callingPid);
-    result = abilityStateScheduler_->HandleUnloadAbilityEvent(unloadRequestInfo);
-    if (saControl.enableOnce && result != ERR_OK) {
-        lock_guard<mutex> autoLock(stopEnableOnceLock_);
-        auto& events = stopEnableOnceMap_[saControl.saId];
-        events.remove(event);
-        if (events.empty()) {
-            stopEnableOnceMap_.erase(saControl.saId);
-        }
-        HILOGI("stopEnableOnceMap_ remove SA:%{public}d, eventId:%{public}d",
-            saControl.saId, event.eventId);
-    }
-    return result;
+    abilityStateScheduler_->CheckEnableOnce(event, saControlList);
 }
 
 sptr<IRemoteObject> SystemAbilityManager::GetSystemAbility(int32_t systemAbilityId)
@@ -646,7 +568,7 @@ int32_t SystemAbilityManager::FindSystemAbilityNotify(int32_t systemAbilityId, c
                     systemAbilityId, item.callingPid);
             }
         }
-    } else if(code == static_cast<int32_t>(SamgrInterfaceCode::REMOVE_SYSTEM_ABILITY_TRANSACTION)) {
+    } else if (code == static_cast<int32_t>(SamgrInterfaceCode::REMOVE_SYSTEM_ABILITY_TRANSACTION)) {
         for (auto& item : listeners) {
             NotifySystemAbilityChanged(systemAbilityId, deviceId, code, item.listener);
             item.state = ListenerState::INIT;
@@ -675,6 +597,8 @@ int32_t SystemAbilityManager::StartOnDemandAbilityInner(const std::u16string& pr
     AbilityItem& abilityItem)
 {
     if (abilityItem.state != AbilityState::INIT) {
+        HILOGW("StartSaInner SA:%{public}d,state:%{public}d,proc:%{public}s",
+            systemAbilityId, abilityItem.state, Str16ToStr8(procName).c_str());
         return ERR_INVALID_VALUE;
     }
     sptr<ILocalAbilityManager> procObject =
@@ -911,6 +835,33 @@ vector<u16string> SystemAbilityManager::ListSystemAbilities(uint32_t dumpFlags)
     return list;
 }
 
+void SystemAbilityManager::CheckListenerNotify(int32_t systemAbilityId,
+    const sptr<ISystemAbilityStatusChange>& listener)
+{
+    sptr<IRemoteObject> targetObject = CheckSystemAbility(systemAbilityId);
+    if (targetObject == nullptr) {
+        return;
+    }
+    lock_guard<mutex> autoLock(listenerMapLock_);
+    auto& listeners = listenerMap_[systemAbilityId];
+    for (auto& itemListener : listeners) {
+        if (listener->AsObject() == itemListener.listener->AsObject()) {
+            int32_t callingPid = itemListener.callingPid;
+            if (itemListener.state == ListenerState::INIT) {
+                HILOGI("NotifySaChanged add SA:%{public}d,cnt:%{public}d,callpid:%{public}d",
+                    systemAbilityId, subscribeCountMap_[callingPid], callingPid);
+                NotifySystemAbilityChanged(systemAbilityId, "",
+                    static_cast<uint32_t>(SamgrInterfaceCode::ADD_SYSTEM_ABILITY_TRANSACTION), listener);
+                itemListener.state = ListenerState::NOTIFIED;
+            } else {
+                HILOGI("Subscribe Listener has been notified,SA:%{public}d,callpid:%{public}d",
+                    systemAbilityId, callingPid);
+            }
+            break;
+        }
+    }
+}
+
 int32_t SystemAbilityManager::SubscribeSystemAbility(int32_t systemAbilityId,
     const sptr<ISystemAbilityStatusChange>& listener)
 {
@@ -946,27 +897,7 @@ int32_t SystemAbilityManager::SubscribeSystemAbility(int32_t systemAbilityId,
         HILOGI("Subscribe SA:%{public}d,size:%{public}zu,cnt:%{public}d,callpid:%{public}d",
             systemAbilityId, listeners.size(), count, callingPid);
     }
-    sptr<IRemoteObject> targetObject = CheckSystemAbility(systemAbilityId);
-    if (targetObject == nullptr) {
-        return ERR_OK;
-    }
-    lock_guard<mutex> autoLock(listenerMapLock_);
-    auto& listeners = listenerMap_[systemAbilityId];
-    for (auto& itemListener : listeners) {
-        if (listener->AsObject() == itemListener.listener->AsObject()) {
-            if (itemListener.state == ListenerState::INIT) {
-                HILOGI("NotifySaChanged add SA:%{public}d,cnt:%{public}d,callpid:%{public}d",
-                    systemAbilityId, subscribeCountMap_[callingPid], callingPid);
-                NotifySystemAbilityChanged(systemAbilityId, "",
-                    static_cast<uint32_t>(SamgrInterfaceCode::ADD_SYSTEM_ABILITY_TRANSACTION), listener);
-                itemListener.state = ListenerState::NOTIFIED;
-            } else {
-                HILOGI("Subscribe Listener has been notified,SA:%{public}d,callpid:%{public}d",
-                    systemAbilityId, callingPid);
-            }
-            break;
-        }
-    }
+    CheckListenerNotify(systemAbilityId, listener);
     return ERR_OK;
 }
 
@@ -1998,7 +1929,7 @@ void SystemAbilityManager::RemoveRemoteCallbackLocked(std::list<sptr<ISystemAbil
     }
 }
 
-int32_t SystemAbilityManager::UpdateSaFreMap(int32_t uid, int32_t saId) 
+int32_t SystemAbilityManager::UpdateSaFreMap(int32_t uid, int32_t saId)
 {
     if (uid < 0) {
         HILOGW("UpdateSaFreMap return, uid not valid!");

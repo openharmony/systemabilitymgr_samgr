@@ -23,6 +23,7 @@
 #define private public
 #include "schedule/system_ability_state_scheduler.h"
 #include "event_handler.h"
+#include "system_ability_manager.h"
 
 using namespace std;
 using namespace testing;
@@ -41,9 +42,12 @@ constexpr int32_t DELAY_TIME = 2;
 constexpr int32_t INVALID_DELAY_TIME = -1;
 constexpr int32_t MAX_DELAY_TIME_TEST = 5 * 60 * 1000;
 constexpr int32_t BEYOND_DELAY_TIME_TEST = 5 * 60 * 1000 + 1;
+constexpr int32_t TEST_SYSTEM_ABILITY1 = 1491;
+constexpr int32_t TEST_SYSTEM_ABILITY2 = 1492;
 const std::u16string process = u"test";
 const std::u16string process_invalid = u"test_invalid";
 const std::string LOCAL_DEVICE = "local";
+const std::string SA_TAG_DEVICE_ON_LINE = "deviceonline";
 }
 void SystemAbilityStateSchedulerTest::SetUpTestCase()
 {
@@ -1941,6 +1945,237 @@ HWTEST_F(SystemAbilityStateSchedulerTest, ProcessDelayUnloadEvent003, TestSize.L
 }
 
 /**
+ * @tc.name: Test CheckStartEnableOnce001
+ * @tc.desc: CheckStartEnableOnce001
+ * @tc.type: FUNC
+ * @tc.require: I6H10P
+ */
+HWTEST_F(SystemAbilityStateSchedulerTest, CheckStartEnableOnce001, TestSize.Level3)
+{
+    DTEST_LOG << " CheckStartEnableOnce001 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    OnDemandEvent event1 = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
+    OnDemandEvent event2 = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
+    bool res = (event1 == event2);
+    EXPECT_EQ(res, true);
+    SaControlInfo saControl = { START_ON_DEMAND, TEST_SYSTEM_ABILITY1};
+    sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    int32_t result = systemAbilityStateScheduler->CheckStartEnableOnce(event1, saControl, callback);
+    EXPECT_EQ(result, GET_SA_CONTEXT_FAIL);
+    saMgr->RemoveSystemAbility(TEST_SYSTEM_ABILITY1);
+}
+
+/**
+ * @tc.name: Test CheckStartEnableOnce002
+ * @tc.desc: CheckStartEnableOnce002
+ * @tc.type: FUNC
+ * @tc.require: I6H10P
+ */
+HWTEST_F(SystemAbilityStateSchedulerTest, CheckStartEnableOnce002, TestSize.Level3)
+{
+    DTEST_LOG << " CheckStartEnableOnce002 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
+    SaControlInfo saControl = { START_ON_DEMAND, TEST_SYSTEM_ABILITY1, true};
+    sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    int32_t result = systemAbilityStateScheduler->CheckStartEnableOnce(event, saControl, callback);
+    EXPECT_EQ(result, GET_SA_CONTEXT_FAIL);
+    saMgr->RemoveSystemAbility(TEST_SYSTEM_ABILITY1);
+}
+
+/**
+ * @tc.name: Test CheckStartEnableOnce003
+ * @tc.desc: CheckStartEnableOnce003
+ * @tc.type: FUNC
+ * @tc.require: I6H10P
+ */
+HWTEST_F(SystemAbilityStateSchedulerTest, CheckStartEnableOnce003, TestSize.Level3)
+{
+    DTEST_LOG << " CheckStartEnableOnce003 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
+    SaControlInfo saControl = { START_ON_DEMAND, TEST_SYSTEM_ABILITY1, true};
+    sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    systemAbilityStateScheduler->startEnableOnceMap_[saControl.saId].emplace_back(event);
+    int32_t result = systemAbilityStateScheduler->CheckStartEnableOnce(event, saControl, callback);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    saMgr->RemoveSystemAbility(TEST_SYSTEM_ABILITY1);
+}
+
+/**
+ * @tc.name: Test CheckStartEnableOnce004
+ * @tc.desc: CheckStartEnableOnce004 saControl.enableOnce is true
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+HWTEST_F(SystemAbilityStateSchedulerTest, CheckStartEnableOnce004, TestSize.Level3)
+{
+    DTEST_LOG << " CheckStartEnableOnce004 " << std::endl;
+    SaControlInfo saControl;
+    saControl.enableOnce = true;
+    OnDemandEvent event;
+    sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    systemAbilityStateScheduler->startEnableOnceMap_[saControl.saId].emplace_back(event);
+    int32_t result = systemAbilityStateScheduler->CheckStartEnableOnce(event, saControl, callback);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: CheckStartEnableOnce005
+ * @tc.desc: test CheckStartEnableOnce with startEnableOnceMap_ contains saControl's SaID and event is same
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityStateSchedulerTest, CheckStartEnableOnce005, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    OnDemandEvent onDemandEvent;
+    std::list<OnDemandEvent> onDemandList;
+    onDemandList.emplace_back(onDemandEvent);
+    systemAbilityStateScheduler->startEnableOnceMap_.clear();
+    systemAbilityStateScheduler->startEnableOnceMap_[SAID] = onDemandList;
+    SaControlInfo saControlInfo;
+    saControlInfo.saId = SAID;
+    saControlInfo.enableOnce = true;
+    sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
+
+    int32_t ret = systemAbilityStateScheduler->CheckStartEnableOnce(onDemandEvent, saControlInfo, callback);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: CheckStartEnableOnce006
+ * @tc.desc: test CheckStartEnableOnce with startEnableOnceMap_ is empty
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityStateSchedulerTest, CheckStartEnableOnce006, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    OnDemandEvent onDemandEvent;
+    SaControlInfo saControlInfo;
+    saControlInfo.saId = SAID;
+    saControlInfo.enableOnce = true;
+    systemAbilityStateScheduler->startEnableOnceMap_.clear();
+    sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
+    int32_t ret = systemAbilityStateScheduler->CheckStartEnableOnce(onDemandEvent, saControlInfo, callback);
+    EXPECT_EQ(ret, GET_SA_CONTEXT_FAIL);
+}
+
+/**
+ * @tc.name: CheckStartEnableOnce007
+ * @tc.desc: test CheckStartEnableOnce with startEnableOnceMap_ is not empty and event is not same
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityStateSchedulerTest, CheckStartEnableOnce007, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    OnDemandEvent anotherOnDemandEvent;
+    OnDemandEvent onDemandEvent;
+    std::list<OnDemandEvent> onDemandList;
+    onDemandList.emplace_back(onDemandEvent);
+    systemAbilityStateScheduler->startEnableOnceMap_.clear();
+    systemAbilityStateScheduler->startEnableOnceMap_[SAID] = onDemandList;
+    SaControlInfo saControlInfo;
+    saControlInfo.enableOnce = true;
+    saControlInfo.saId = SAID;
+    sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
+    int32_t ret = systemAbilityStateScheduler->CheckStartEnableOnce(anotherOnDemandEvent, saControlInfo, callback);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: CheckStartEnableOnce008
+ * @tc.desc: test CheckStartEnableOnce with saControl's enableOnce is false
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityStateSchedulerTest, CheckStartEnableOnce008, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    OnDemandEvent onDemandEvent;
+    systemAbilityStateScheduler->startEnableOnceMap_.clear();
+    SaControlInfo saControlInfo;
+    sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
+    int32_t ret = systemAbilityStateScheduler->CheckStartEnableOnce(onDemandEvent, saControlInfo, callback);
+    EXPECT_EQ(ret, GET_SA_CONTEXT_FAIL);
+}
+
+/**
+ * @tc.name: Test CheckStopEnableOnce001
+ * @tc.desc: CheckStopEnableOnce001
+ * @tc.type: FUNC
+ * @tc.require: I6H10P
+ */
+HWTEST_F(SystemAbilityStateSchedulerTest, CheckStopEnableOnce001, TestSize.Level3)
+{
+    DTEST_LOG << " CheckStopEnableOnce001 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "off" };
+    SaControlInfo saControl = { STOP_ON_DEMAND, TEST_SYSTEM_ABILITY1};
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    int32_t result = systemAbilityStateScheduler->CheckStopEnableOnce(event, saControl);
+    EXPECT_EQ(result, GET_SA_CONTEXT_FAIL);
+    saMgr->RemoveSystemAbility(TEST_SYSTEM_ABILITY1);
+}
+
+/**
+ * @tc.name: Test CheckStopEnableOnce002
+ * @tc.desc: CheckStopEnableOnce002
+ * @tc.type: FUNC
+ * @tc.require: I6H10P
+ */
+HWTEST_F(SystemAbilityStateSchedulerTest, CheckStopEnableOnce002, TestSize.Level3)
+{
+    DTEST_LOG << " CheckStopEnableOnce002 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "off" };
+    SaControlInfo saControl = { STOP_ON_DEMAND, TEST_SYSTEM_ABILITY1, true};
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    int32_t result = systemAbilityStateScheduler->CheckStopEnableOnce(event, saControl);
+    EXPECT_EQ(result, GET_SA_CONTEXT_FAIL);
+    saMgr->RemoveSystemAbility(TEST_SYSTEM_ABILITY1);
+}
+
+/**
+ * @tc.name: Test CheckStopEnableOnce003
+ * @tc.desc: CheckStopEnableOnce003
+ * @tc.type: FUNC
+ * @tc.require: I6H10P
+ */
+HWTEST_F(SystemAbilityStateSchedulerTest, CheckStopEnableOnce003, TestSize.Level3)
+{
+    DTEST_LOG << " CheckStopEnableOnce003 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "off" };
+    SaControlInfo saControl = { STOP_ON_DEMAND, TEST_SYSTEM_ABILITY1, true};
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    systemAbilityStateScheduler->stopEnableOnceMap_[saControl.saId].emplace_back(event);
+    int32_t result = systemAbilityStateScheduler->CheckStopEnableOnce(event, saControl);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    saMgr->RemoveSystemAbility(TEST_SYSTEM_ABILITY1);
+}
+
+/**
  * @tc.name: ProcessEvent001
  * @tc.desc: test ProcessEvent, event is nullptr
  * @tc.type: FUNC
@@ -2198,7 +2433,6 @@ HWTEST_F(SystemAbilityStateSchedulerTest, LimitDelayUnloadTime001, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require: I7FBV6
  */
-
 HWTEST_F(SystemAbilityStateSchedulerTest, LimitDelayUnloadTime002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =

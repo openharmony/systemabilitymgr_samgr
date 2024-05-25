@@ -61,6 +61,10 @@ public:
     int32_t UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener);
     bool IsSystemProcessNeverStartedLocked(const std::u16string& processName);
     void InitSamgrProcessContext();
+    void CheckEnableOnce(const OnDemandEvent& event, const std::list<SaControlInfo>& saControlList);
+    int32_t CheckStartEnableOnce(const OnDemandEvent& event, const SaControlInfo& saControl,
+        sptr<ISystemAbilityLoadCallback> callback);
+    int32_t CheckStopEnableOnce(const OnDemandEvent& event, const SaControlInfo& saControl);
 private:
     void InitStateContext(const std::list<SaProfile>& saProfiles);
 
@@ -78,7 +82,7 @@ private:
     int32_t SendDelayUnloadEventLocked(uint32_t systemAbilityId, int32_t delayTime = UNLOAD_DELAY_TIME);
     int32_t RemoveDelayUnloadEventLocked(uint32_t systemAbilityId);
     int32_t ProcessDelayUnloadEvent(int32_t systemAbilityId);
-	int32_t ProcessDelayUnloadEventLocked(int32_t systemAbilityId);
+    int32_t ProcessDelayUnloadEventLocked(int32_t systemAbilityId);
 
     int32_t PendLoadEventLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext,
         const LoadRequestInfo& loadRequestInfo);
@@ -106,7 +110,7 @@ private:
 
     int32_t TryKillSystemProcess(const std::shared_ptr<SystemProcessContext>& processContext);
     bool CanKillSystemProcess(const std::shared_ptr<SystemProcessContext>& processContext);
-	bool CanKillSystemProcessLocked(const std::shared_ptr<SystemProcessContext>& processContext);
+    bool CanKillSystemProcessLocked(const std::shared_ptr<SystemProcessContext>& processContext);
     int32_t KillSystemProcessLocked(const std::shared_ptr<SystemProcessContext>& processContext);
 
     bool CanRestartProcessLocked(const std::shared_ptr<SystemProcessContext>& processContext);
@@ -156,6 +160,10 @@ private:
     std::shared_mutex listenerSetLock_;
     std::list<sptr<ISystemProcessStatusChange>> processListeners_;
     sptr<IRemoteObject::DeathRecipient> processListenerDeath_;
+    std::mutex startEnableOnceLock_;
+    std::map<int32_t, std::list<OnDemandEvent>> startEnableOnceMap_;
+    std::mutex stopEnableOnceLock_;
+    std::map<int32_t, std::list<OnDemandEvent>> stopEnableOnceMap_;
 };
 } // namespace OHOS
 
