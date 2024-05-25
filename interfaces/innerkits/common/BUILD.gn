@@ -40,6 +40,7 @@ ohos_shared_library("samgr_common") {
     cfi_no_nvcall = true
     blocklist = "../../../cfi_blocklist.txt"
   }
+  branch_protector_ret = "pac_ret"
 
   sources = [
     "//foundation/systemabilitymgr/samgr/services/common/src/parse_util.cpp",

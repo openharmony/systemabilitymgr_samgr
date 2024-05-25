@@ -13,3 +13,6 @@
 
 [cfi]
 type:*OHOS::SystemAbility*
+src:*foundation/systemabilitymgr/samgr/services/samgr/native/test/unittest/*
+src:*foundation/systemabilitymgr/samgr/services/samgr/test/unittest/*
+src:*foundation/systemabilitymgr/samgr/services/samgr/test/fuzztest/*

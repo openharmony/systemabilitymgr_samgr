@@ -28,6 +28,7 @@ ohos_shared_library("dynamic_cache") {
     cfi_no_nvcall = true
     blocklist = "../../../cfi_blocklist.txt"
   }
+  branch_protector_ret = "pac_ret"
 
   all_dependent_configs = [ ":dynamic_cache_config" ]
   public_configs = [ ":dynamic_cache_config" ]

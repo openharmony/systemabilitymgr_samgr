@@ -16,13 +16,6 @@ import("//build/test.gni")
 module_output_path = "samgr/samgr"
 
 ohos_unittest("ParseUtilTest") {
-  sanitize = {
-    cfi = true
-    cfi_cross_dso = true
-    debug = false
-    cfi_no_nvcall = true
-    blocklist = "../../../../cfi_blocklist.txt"
-  }
   module_out_path = module_output_path
   resource_config_file =
       "//foundation/systemabilitymgr/samgr/test/resource/ohos_test.xml"

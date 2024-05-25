@@ -43,6 +43,7 @@ ohos_shared_library("samgr_proxy") {
     cfi_no_nvcall = true
     blocklist = "../../../cfi_blocklist.txt"
   }
+  branch_protector_ret = "pac_ret"
 
   version_script = "libsamgr_proxy.versionscript"
   defines = [ "SAMGR_PROXY" ]

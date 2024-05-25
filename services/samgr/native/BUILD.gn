@@ -42,6 +42,7 @@ ohos_executable("samgr") {
     cfi_no_nvcall = true
     blocklist = "../../../cfi_blocklist.txt"
   }
+  branch_protector_ret = "pac_ret"
 
   install_enable = true
   sources = [
