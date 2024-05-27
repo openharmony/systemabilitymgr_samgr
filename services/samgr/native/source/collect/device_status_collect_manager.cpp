@@ -119,7 +119,7 @@ void DeviceStatusCollectManager::GetSaControlListByEvent(const OnDemandEvent& ev
                 CheckExtraMessages(event, *iterStart)) {
                 // maybe the process is being killed, let samgr make decisions.
                 SaControlInfo control = { START_ON_DEMAND, profile.saId, iterStart->enableOnce,
-                    iterStart->loadPriority };
+                    iterStart->loadPriority, profile.cacheCommonEvent };
                 saControlList.emplace_back(control);
                 break;
             }
@@ -131,7 +131,7 @@ void DeviceStatusCollectManager::GetSaControlListByEvent(const OnDemandEvent& ev
                 CheckExtraMessages(event, *iterStop)) {
                 // maybe the process is starting, let samgr make decisions.
                 SaControlInfo control = { STOP_ON_DEMAND, profile.saId, iterStop->enableOnce,
-                    iterStop->loadPriority };
+                    iterStop->loadPriority, profile.cacheCommonEvent };
                 saControlList.emplace_back(control);
                 break;
             }
@@ -294,16 +294,25 @@ void DeviceStatusCollectManager::PostDelayTask(std::function<void()> callback, i
     collectHandler_->PostTask(callback, delayTime * TO_MILLISECOND);
 }
 
+int32_t DeviceStatusCollectManager::IsExistInPluginMap(int32_t eventId)
+{
+    if (collectPluginMap_.count(eventId) == 0) {
+        HILOGE("eventid:%{public}d collect not exist", eventId);
+        return ERR_INVALID_VALUE;
+    }
+    if (collectPluginMap_[eventId] == nullptr) {
+        HILOGE("eventid:%{public}d collect is null", eventId);
+        return ERR_INVALID_VALUE;
+    }
+    return ERR_OK;
+}
+
 int32_t DeviceStatusCollectManager::GetOnDemandReasonExtraData(int64_t extraDataId, OnDemandReasonExtraData& extraData)
 {
     HILOGD("DeviceStaMgr GetOnDemandReasonExtraData begin, extraDataId:%{public}d",
         static_cast<int32_t>(extraDataId));
-    if (collectPluginMap_.count(COMMON_EVENT) == 0) {
+    if (IsExistInPluginMap(COMMON_EVENT) != ERR_OK) {
         HILOGE("not support get extra data");
-        return ERR_INVALID_VALUE;
-    }
-    if (collectPluginMap_[COMMON_EVENT] == nullptr) {
-        HILOGE("CommonEventCollect is nullptr");
         return ERR_INVALID_VALUE;
     }
     if (!collectPluginMap_[COMMON_EVENT]->GetOnDemandReasonExtraData(extraDataId, extraData)) {
@@ -311,6 +320,53 @@ int32_t DeviceStatusCollectManager::GetOnDemandReasonExtraData(int64_t extraData
         return ERR_INVALID_VALUE;
     }
     return ERR_OK;
+}
+
+void DeviceStatusCollectManager::SaveSaExtraDataId(int32_t saId, int64_t extraDataId)
+{
+    HILOGD("DeviceStaMgr SaveSaExtraDataId begin, SA:%{public}d, extraDataId:%{public}d",
+        saId, static_cast<int32_t>(extraDataId));
+    if (IsExistInPluginMap(COMMON_EVENT) != ERR_OK) {
+        HILOGE("CommonEventCollect is nullptr");
+        return;
+    }
+    collectPluginMap_[COMMON_EVENT]->SaveSaExtraDataId(saId, extraDataId);
+    return;
+}
+
+void DeviceStatusCollectManager::ClearSaExtraDataId(int32_t saId)
+{
+    HILOGD("DeviceStaMgr ClearSaExtraDataId begin, SA:%{public}d", saId);
+    if (IsExistInPluginMap(COMMON_EVENT) != ERR_OK) {
+        HILOGE("CommonEventCollect is nullptr");
+        return;
+    }
+    collectPluginMap_[COMMON_EVENT]->ClearSaExtraDataId(saId);
+    return;
+}
+
+void DeviceStatusCollectManager::SaveCacheCommonEventSaExtraId(const OnDemandEvent& event,
+    const std::list<SaControlInfo>& saControlList)
+{
+    HILOGD("DeviceStaMgr SaveCacheCommonEventSaExtraId begin");
+    if (IsExistInPluginMap(COMMON_EVENT) != ERR_OK) {
+        HILOGE("CommonEventCollect is nullptr");
+        return;
+    }
+    collectPluginMap_[COMMON_EVENT]->SaveCacheCommonEventSaExtraId(event, saControlList);
+    return;
+}
+
+int32_t DeviceStatusCollectManager::GetSaExtraDataIdList(int32_t saId, std::vector<int64_t>& extraDataIdList,
+    const std::string& eventName)
+{
+    HILOGD("DeviceStaMgr GetSaExtraDataIdList begin, SA:%{public}d, event:%{public}s",
+        saId, eventName.c_str());
+    if (IsExistInPluginMap(COMMON_EVENT) != ERR_OK) {
+        HILOGE("CommonEventCollect is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    return collectPluginMap_[COMMON_EVENT]->GetSaExtraDataIdList(saId, extraDataIdList, eventName);
 }
 
 int32_t DeviceStatusCollectManager::AddCollectEvents(const std::vector<OnDemandEvent>& events)

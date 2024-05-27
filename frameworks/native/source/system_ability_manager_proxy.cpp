@@ -1438,4 +1438,54 @@ int32_t SystemAbilityManagerProxy::GetRunningSaExtensionInfoList(const std::stri
     }
     return ERR_OK;
 }
+
+int32_t SystemAbilityManagerProxy::GetCommonEventExtraDataIdlist(int32_t saId, std::vector<int64_t>& extraDataIdList,
+    const std::string& eventName)
+{
+    HILOGD("getExtraIdList called");
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("getExtraIdList remote is nullptr");
+        return ERR_INVALID_OPERATION;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        HILOGE("getExtraIdList write token failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(saId)) {
+        HILOGE("getExtraIdList write said failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString(eventName)) {
+        HILOGW("getExtraIdList write eventname failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::GET_COMMON_EVENT_EXTRA_ID_LIST_TRANSCATION), data, reply, option);
+    if (err != ERR_NONE) {
+        HILOGE("getExtraIdList SendRequest error: %{public}d!", err);
+        return err;
+    }
+    HILOGD("getExtraIdList SendRequest succeed!");
+    int32_t result = 0;
+    if (!reply.ReadInt32(result)) {
+        HILOGE("getExtraIdList Read result failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (result != ERR_OK) {
+        HILOGE("getExtraIdList failed: %{public}d!", result);
+        return result;
+    }
+    if (!reply.ReadInt64Vector(&extraDataIdList)) {
+        HILOGW("getExtraIdList read idlist failed");
+        extraDataIdList.clear();
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ERR_OK;
+}
 } // namespace OHOS

@@ -33,3 +33,25 @@ fn basic() {
     let infos = SystemAbilityManager::get_running_system_process();
     assert!(!infos.is_empty());
 }
+
+#[test]
+fn common_event() {
+    init();
+    let obj_j = SystemAbilityManager::check_system_ability(1494);
+    if let Some(obj) = obj_j {
+        let mut id_list:Vec<i64> = vec![];
+        let ret = SystemAbilityManager::get_common_event_extra_data_id_list(1494, &mut id_list, "");
+        assert_eq!(ret, 0);
+        for id in id_list {
+            println!("all extra id is {}", id)
+        }
+
+        let mut id_list:Vec<i64> = vec![];
+        let ret = 
+            SystemAbilityManager::get_common_event_extra_data_id_list(1494, &mut id_list, "usual.event.SCREEN_ON");
+        assert_eq!(ret, 0);
+        for id in id_list {
+            println!("usual.event.SCREEN_ON event extra id is {}", id)
+        }
+    }
+}

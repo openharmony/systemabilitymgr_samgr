@@ -286,6 +286,24 @@ rust::Vec<SystemProcessInfo> GetRunningSystemProcess()
     return res;
 }
 
+int32_t GetCommonEventExtraDataIdlist(int32_t saId, rust::Vec<int64_t>& extraDataIdList, const std::string& eventName)
+{
+    auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (sysm == nullptr) {
+        return -1;
+    }
+
+    std::vector<int64_t> idList;
+    auto ret = sysm->GetCommonEventExtraDataIdlist(saId, idList, eventName);
+    if (ret != ERR_OK) {
+        return ret;
+    }
+    for (auto id : idList) {
+        extraDataIdList.push_back(id);
+    }
+    return ret;
+}
+
 std::unique_ptr<UnSubscribeSystemProcessHandler> SubscribeSystemProcess(
     rust::Fn<void(const OHOS::SamgrRust::SystemProcessInfo &systemProcessInfo)> onStart_,
     rust::Fn<void(const OHOS::SamgrRust::SystemProcessInfo &systemProcessInfo)> onStop_)

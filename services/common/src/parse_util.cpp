@@ -48,6 +48,7 @@ constexpr const char* SA_TAG_RUN_ON_CREATE = "run-on-create";
 constexpr const char* SA_TAG_MODULE_UPDATE = "module-update";
 constexpr const char* SA_TAG_AUTO_RESTART = "auto-restart";
 constexpr const char* SA_TAG_DISTRIBUTED = "distributed";
+constexpr const char* SA_TAG_CACHE_COMMON_EVENT = "cache-common-event";
 constexpr const char* SA_TAG_DUMP_LEVEL = "dump-level";
 constexpr const char* SA_TAG_CAPABILITY = "capability";
 constexpr const char* SA_TAG_PERMISSION = "permission";
@@ -388,6 +389,7 @@ bool ParseUtil::ParseSystemAbilityGetSaExtInfo(SaProfile& saProfile, nlohmann::j
     GetBoolFromJson(systemAbilityJson, SA_TAG_MODULE_UPDATE, saProfile.moduleUpdate);
     GetBoolFromJson(systemAbilityJson, SA_TAG_AUTO_RESTART, saProfile.autoRestart);
     GetBoolFromJson(systemAbilityJson, SA_TAG_DISTRIBUTED, saProfile.distributed);
+    GetBoolFromJson(systemAbilityJson, SA_TAG_CACHE_COMMON_EVENT, saProfile.cacheCommonEvent);
     GetIntArrayFromJson(systemAbilityJson, SA_TAG_DEPEND, saProfile.dependSa);
     GetInt32FromJson(systemAbilityJson, SA_TAG_DEPEND_TIMEOUT, saProfile.dependTimeout);
     if (saProfile.dependTimeout == 0) {

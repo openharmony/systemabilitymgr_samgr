@@ -63,6 +63,7 @@ private:
     int32_t GetExtensionSaIdsInner(MessageParcel& data, MessageParcel& reply);
     int32_t GetExtensionRunningSaListInner(MessageParcel& data, MessageParcel& reply);
     int32_t GetRunningSaExtensionInfoListInner(MessageParcel& data, MessageParcel& reply);
+    int32_t GetCommonEventExtraDataIdlistInner(MessageParcel& data, MessageParcel& reply);
     static int32_t GetHapIdMultiuser(int32_t uid);
     void SetAbilityFuncMap();
     void SetProcessFuncMap();

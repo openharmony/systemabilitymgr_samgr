@@ -270,6 +270,43 @@ HWTEST_F(SamgrUtilTest, CheckAllowUpdate004, TestSize.Level3)
 }
 
 /**
+ * @tc.name: GetCacheCommonEventSa001
+ * @tc.desc: call GetCacheCommonEventSa, return salist
+ * @tc.type: FUNC
+ * @tc.require: I7VEPG
+ */
+HWTEST_F(SamgrUtilTest, GetCacheCommonEventSa001, TestSize.Level3)
+{
+    SaControlInfo info1;
+    info1.saId = 1;
+    info1.cacheCommonEvent = true;
+    SaControlInfo info2;
+    info2.saId = 2;
+    info2.cacheCommonEvent = true;
+    SaControlInfo info3;
+    info3.saId = 3;
+    std::list<SaControlInfo> saControlList;
+    saControlList.push_back(info1);
+    saControlList.push_back(info2);
+    saControlList.push_back(info3);
+
+    OnDemandEvent event;
+    event.eventId = 0;
+    std::list<int32_t> saList = SamgrUtil::GetCacheCommonEventSa(event, saControlList);
+    EXPECT_EQ(saList.size(), 0);
+
+    event.eventId = COMMON_EVENT;
+    event.extraDataId = -1;
+    saList = SamgrUtil::GetCacheCommonEventSa(event, saControlList);
+    EXPECT_EQ(saList.size(), 0);
+
+    event.eventId = COMMON_EVENT;
+    event.extraDataId = 1;
+    saList = SamgrUtil::GetCacheCommonEventSa(event, saControlList);
+    EXPECT_EQ(saList.size(), 2);
+}
+
+/**
  * @tc.name: SetModuleUpdateParam001
  * @tc.desc: test SetModuleUpdateParam with key and value is null
  * @tc.type: FUNC

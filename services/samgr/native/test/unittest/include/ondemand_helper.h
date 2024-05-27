@@ -47,6 +47,7 @@ public:
     void GetOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type);
     void UpdateOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
         std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents);
+    void GetCommonEventExtraId(int32_t saId, const std::string& eventName = "");
     int32_t GetExtensionSaIds(const std::string& extension, std::vector<int32_t> &saIds);
     int32_t GetExtensionRunningSaList(const std::string& extension, std::vector<sptr<IRemoteObject>>& saList);
 protected:

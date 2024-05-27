@@ -16,6 +16,7 @@
 #include "common_event_collect.h"
 
 #include "ability_death_recipient.h"
+#include "system_ability_manager_util.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
 #include "matching_skills.h"
@@ -37,6 +38,7 @@ constexpr int32_t COMMON_EVENT_SERVICE_ID = 3299;
 constexpr const char* UID = "uid";
 constexpr const char* NET_TYPE = "NetType";
 constexpr const char* BUNDLE_NAME = "bundleName";
+constexpr const char* COMMON_EVENT_ACTION_NAME = "common_event_action_name";
 }
 
 CommonEventCollect::CommonEventCollect(const sptr<IReport>& report)
@@ -323,6 +325,7 @@ int64_t CommonEventCollect::SaveOnDemandReasonExtraData(const EventFwk::CommonEv
     for (auto key : extraDataKey_[want.GetAction()]) {
         wantMap[key] = GetParamFromWant(key, want);
     }
+    wantMap[COMMON_EVENT_ACTION_NAME] = want.GetAction();
     OnDemandReasonExtraData extraData(data.GetCode(), data.GetData(), wantMap);
     int64_t extraDataId = GenerateExtraDataIdLocked();
     extraDatas_[extraDataId] = extraData;
@@ -350,6 +353,7 @@ void CommonEventCollect::RemoveOnDemandReasonExtraData(int64_t extraDataId)
     std::lock_guard<std::mutex> autoLock(extraDataLock_);
     extraDatas_.erase(extraDataId);
     HILOGD("CommonEventCollect remove extraData %{public}d", static_cast<int32_t>(extraDataId));
+    RemoveSaExtraDataId(extraDataId);
 }
 
 bool CommonEventCollect::GetOnDemandReasonExtraData(int64_t extraDataId, OnDemandReasonExtraData& extraData)
@@ -361,6 +365,93 @@ bool CommonEventCollect::GetOnDemandReasonExtraData(int64_t extraDataId, OnDeman
     }
     extraData = extraDatas_[extraDataId];
     return true;
+}
+
+void CommonEventCollect::SaveCacheCommonEventSaExtraId(const OnDemandEvent& event,
+    const std::list<SaControlInfo>& saControlList)
+{
+    std::list<int32_t> saList = SamgrUtil::GetCacheCommonEventSa(event, saControlList);
+    if (saList.empty()) {
+        return;
+    }
+    for (auto& item : saList) {
+        SaveSaExtraDataId(item, event.extraDataId);
+    }
+}
+
+void CommonEventCollect::SaveSaExtraDataId(int32_t saId, int64_t extraDataId)
+{
+    std::lock_guard<std::mutex> autoLock(saExtraDataIdLock_);
+    auto& extraIdList = saExtraDataIdMap_[saId];
+    extraIdList.emplace_back(extraDataId);
+    HILOGI("save SA:%{public}d,exId:%{public}d,n:%{public}zu", saId, static_cast<int32_t>(extraDataId),
+        extraIdList.size());
+}
+
+void CommonEventCollect::RemoveSaExtraDataId(int64_t extraDataId)
+{
+    std::lock_guard<std::mutex> autoLock(saExtraDataIdLock_);
+    HILOGD("rm saExtraId:%{public}d", static_cast<int32_t>(extraDataId));
+    auto iter = saExtraDataIdMap_.begin();
+    while (iter != saExtraDataIdMap_.end()) {
+        auto& tmpList = iter->second;
+        auto listIter = std::find(tmpList.begin(), tmpList.end(), extraDataId);
+        if (listIter != tmpList.end()) {
+            HILOGI("rm SA:%{public}d,exId:%{public}d,n:%{public}zu", iter->first,
+                static_cast<int32_t>(extraDataId), tmpList.size());
+            tmpList.erase(listIter);
+        }
+        if (tmpList.size() == 0) {
+            HILOGI("rm exId SA:%{public}d", iter->first);
+            iter = saExtraDataIdMap_.erase(iter);
+        } else {
+            ++iter;
+        }
+    }
+}
+
+void CommonEventCollect::ClearSaExtraDataId(int32_t saId)
+{
+    std::lock_guard<std::mutex> autoLock(saExtraDataIdLock_);
+    if (saExtraDataIdMap_.count(saId) == 0) {
+        return;
+    }
+    HILOGI("clear SA:%{public}d,map n:%{public}zu", saId, saExtraDataIdMap_.size());
+    saExtraDataIdMap_[saId].clear();
+    saExtraDataIdMap_.erase(saId);
+}
+
+int32_t CommonEventCollect::GetSaExtraDataIdList(int32_t saId, std::vector<int64_t>& extraDataidList,
+    const std::string& eventName)
+{
+    std::lock_guard<std::mutex> autoLock(saExtraDataIdLock_);
+    if (saExtraDataIdMap_.count(saId) == 0) {
+        HILOGD("NF exId SA:%{public}d", saId);
+        return ERR_OK;
+    }
+    HILOGD("get exId SA:%{public}d event:%{public}s", saId, eventName.c_str());
+    std::list<int64_t> temp = saExtraDataIdMap_[saId];
+    if (eventName == "") {
+        std::copy(temp.begin(), temp.end(), std::back_inserter(extraDataidList));
+        return ERR_OK;
+    }
+    for (auto& item : temp) {
+        OnDemandReasonExtraData extraData;
+        if (!GetOnDemandReasonExtraData(item, extraData)) {
+            HILOGD("NF exId:%{public}d", static_cast<int32_t>(item));
+            continue;
+        }
+        std::map<std::string, std::string> want = extraData.GetWant();
+        std::string extraEventName = want[COMMON_EVENT_ACTION_NAME];
+        if (extraEventName != eventName) {
+            HILOGD("exId:%{public}d event:%{public}s not match extra:%{public}s", static_cast<int32_t>(item),
+                eventName.c_str(), extraEventName.c_str());
+            continue;
+        }
+        HILOGD("get exId:%{public}d", static_cast<int32_t>(item));
+        extraDataidList.push_back(item);
+    }
+    return ERR_OK;
 }
 
 bool CommonEventCollect::AddCommonEventName(const std::string& eventName)

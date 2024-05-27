@@ -1054,4 +1054,30 @@ HWTEST_F(SystemAbilityMgrProxyTest, GetRunningSaExtensionInfoList001, TestSize.L
     EXPECT_EQ(ret, 1);
     EXPECT_EQ(infoList.size(), 0);
 }
+
+/**
+ * @tc.name: GetCommonEventExtraDataIdlist001
+ * @tc.desc: test GetCommonEventExtraDataIdlist
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, GetCommonEventExtraDataIdlist001, TestSize.Level3)
+{
+    sptr<ISystemAbilityManager> samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    std::vector<int64_t> idList;
+    int32_t ret = samgrProxy->GetCommonEventExtraDataIdlist(-1, idList);
+    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+    EXPECT_EQ(idList.size(), 0);
+
+    ret = samgrProxy->GetCommonEventExtraDataIdlist(-1, idList, "test");
+    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+    EXPECT_EQ(idList.size(), 0);
+
+    ret = samgrProxy->GetCommonEventExtraDataIdlist(1, idList);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(idList.size(), 0);
+
+    ret = samgrProxy->GetCommonEventExtraDataIdlist(1, idList, "test");
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(idList.size(), 0);
+}
 }

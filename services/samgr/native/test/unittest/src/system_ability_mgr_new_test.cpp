@@ -90,6 +90,7 @@ void SaProfileExtensionTestPrevSet(sptr<SystemAbilityManager>& saMgr, int32_t ma
         SaProfile saProfile;
         saProfile.process = Str8ToStr16(extensionVec[loop]);
         saProfile.extension.push_back(extensionVec[loop % mod_num]);
+        saProfile.cacheCommonEvent = true;
         if (loop >= (maxLoop - mod_num)) {
             saProfile.extension.push_back(extensionVec[(loop + 1) % mod_num]);
         }
@@ -574,6 +575,51 @@ HWTEST_F(SystemAbilityMgrTest, AddSamgrToAbilityMap001, TestSize.Level3)
     args.push_back(u"test_name");
     int32_t result = saMgr->Dump(1, args);
     EXPECT_EQ(result, ERR_OK);
+}
+
+/**
+ * @tc.name: GetCommonEventExtraIdList001
+ * @tc.desc: call GetCommonEventExtraIdList001, return ERR_OK
+ * @tc.type: FUNC
+ * @tc.require: I7VEPG
+ */
+HWTEST_F(SystemAbilityMgrTest, GetCommonEventExtraIdList001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+
+    const int32_t maxLoop = 4;
+    map<int32_t, SaProfile> saProfileMapTmp;
+    SaProfileStore(saMgr, saProfileMapTmp, maxLoop);
+    SaProfileExtensionTestPrevSet(saMgr, maxLoop);
+    OnDemandEvent event;
+    std::list<SaControlInfo> saControlList;
+    saMgr->collectManager_->SaveCacheCommonEventSaExtraId(event, saControlList);
+
+    event.eventId = COMMON_EVENT;
+    event.extraDataId = 1000000;
+    SaControlInfo info;
+    info.saId = SAID;
+    info.cacheCommonEvent = true;
+    saControlList.push_back(info);
+    saMgr->collectManager_->SaveCacheCommonEventSaExtraId(event, saControlList);
+
+    std::vector<int64_t> extraDataIdList;
+    int32_t ret = saMgr->GetCommonEventExtraDataIdlist(SAID, extraDataIdList);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(extraDataIdList.size(), 1);
+    extraDataIdList.clear();
+
+    ret = saMgr->GetCommonEventExtraDataIdlist(SAID, extraDataIdList, "test");
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(extraDataIdList.size(), 0);
+    extraDataIdList.clear();
+
+    saMgr->collectManager_->ClearSaExtraDataId(SAID);
+    ret = saMgr->GetCommonEventExtraDataIdlist(SAID, extraDataIdList);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(extraDataIdList.size(), 0);
+
+    SaProfileRecover(saMgr, saProfileMapTmp, maxLoop);
 }
 
 /**

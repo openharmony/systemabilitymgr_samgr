@@ -50,6 +50,13 @@ public:
     void InitCommonEventState(const OnDemandEvent& evnet);
     bool CheckExtraMessage(int64_t extraDataId, const OnDemandEvent& profileEvent) override;
     void SaveOnDemandConditionExtraData(const EventFwk::CommonEventData& data);
+    void SaveSaExtraDataId(int32_t saId, int64_t extraDataId) override;
+    void RemoveSaExtraDataId(int64_t extraDataId);
+    void ClearSaExtraDataId(int32_t saId) override;
+    void SaveCacheCommonEventSaExtraId(const OnDemandEvent& event,
+        const std::list<SaControlInfo>& saControlList) override;
+    int GetSaExtraDataIdList(int32_t saId, std::vector<int64_t>& extraDataIdList,
+        const std::string& eventName = "") override;
 private:
     int64_t GenerateExtraDataIdLocked();
     bool AddCommonEventName(const std::string& eventName);
@@ -69,6 +76,8 @@ private:
     int64_t extraDataId_ = 0;
     std::map<int64_t, OnDemandReasonExtraData> extraDatas_;
     std::map<std::string, std::set<std::string>> extraDataKey_;
+    std::mutex saExtraDataIdLock_;
+    std::map<int32_t, std::list<int64_t>> saExtraDataIdMap_;
 };
 
 class CommonEventListener : public SystemAbilityStatusChangeStub {

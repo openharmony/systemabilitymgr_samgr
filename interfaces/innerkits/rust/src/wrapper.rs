@@ -107,6 +107,12 @@ mod ffi {
             action: Pin<&mut CxxString>,
         ) -> i32;
 
+        fn GetCommonEventExtraDataIdlist(
+            said: i32,
+            extraids: &mut Vec<i64>,
+            event_name: &CxxString,
+        ) -> i32;
+
         fn AddSystemAbility(
             said: i32,
             ability: Box<AbilityStub>,
