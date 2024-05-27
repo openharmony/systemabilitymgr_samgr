@@ -455,7 +455,6 @@ HWTEST_F(SystemAbilityMgrTest, UnloadAllIdleSystemAbility002, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrTest, UnloadAllIdleSystemAbility003, TestSize.Level3)
 {
-    SamMockPermission::MockProcess("memmgrservice");
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     int32_t ret = saMgr->UnloadAllIdleSystemAbility();
     EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
