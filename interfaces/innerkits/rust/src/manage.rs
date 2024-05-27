@@ -12,16 +12,18 @@
 // limitations under the License.
 
 use cxx::{let_cxx_string, UniquePtr};
+use ipc::parcel::MsgParcel;
 use ipc::remote::{RemoteObj, RemoteStub};
 
 use crate::wrapper::{
     AbilityStub, AddOnDemandSystemAbilityInfo, AddSystemAbility, AddSystemAbilityConfig,
     CancelUnloadSystemAbility, CheckSystemAbility, CheckSystemAbilityWithDeviceId,
-    GetContextManager, GetRunningSystemProcess, GetSystemAbility, GetSystemAbilityWithDeviceId,
-    GetSystemProcessInfo, ListSystemAbilities, ListSystemAbilitiesWithDumpFlag, LoadSystemAbility,
-    LoadSystemAbilityWithCallback, RemoveSystemAbility, SendStrategy, SubscribeSystemAbility,
-    SubscribeSystemProcess, SystemProcessInfo, UnSubscribeSystemAbilityHandler,
-    UnSubscribeSystemProcessHandler, UnloadAllIdleSystemAbility, UnloadSystemAbility,
+    GetContextManager, GetOnDemandReasonExtraData, GetRunningSystemProcess, GetSystemAbility,
+    GetSystemAbilityWithDeviceId, GetSystemProcessInfo, ListSystemAbilities,
+    ListSystemAbilitiesWithDumpFlag, LoadSystemAbility, LoadSystemAbilityWithCallback,
+    RemoveSystemAbility, SendStrategy, SubscribeSystemAbility, SubscribeSystemProcess,
+    SystemProcessInfo, UnSubscribeSystemAbilityHandler, UnSubscribeSystemProcessHandler,
+    UnloadAllIdleSystemAbility, UnloadSystemAbility,
 };
 use crate::DumpFlagPriority;
 
@@ -235,6 +237,10 @@ impl SystemAbilityManager {
         UnsubscribeHandler::new(Unsubscribe::Process(SubscribeSystemProcess(
             on_start, on_stop,
         )))
+    }
+
+    pub fn get_on_demand_reason_extra_date(extra_data_id: i64, parcel: &mut MsgParcel) -> i32 {
+        GetOnDemandReasonExtraData(extra_data_id, parcel.pin_mut().unwrap())
     }
 }
 

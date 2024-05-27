@@ -62,6 +62,8 @@ std::unique_ptr<UnSubscribeSystemProcessHandler> SubscribeSystemProcess(
     rust::Fn<void(const OHOS::SamgrRust::SystemProcessInfo &systemProcessInfo)> onStart_,
     rust::Fn<void(const OHOS::SamgrRust::SystemProcessInfo &systemProcessInfo)> onStop_);
 
+int32_t GetOnDemandReasonExtraData(int64_t extraDataId, MessageParcel &parcel);
+
 struct RemoteServiceStub : public OHOS::IPCObjectStub {
 public:
     explicit RemoteServiceStub(AbilityStub *stub);

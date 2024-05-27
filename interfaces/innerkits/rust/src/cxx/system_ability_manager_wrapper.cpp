@@ -300,6 +300,16 @@ std::unique_ptr<UnSubscribeSystemProcessHandler> SubscribeSystemProcess(
     return std::make_unique<UnSubscribeSystemProcessHandler>(listener);
 }
 
+int32_t GetOnDemandReasonExtraData(int64_t extraDataId, MessageParcel &parcel)
+{
+    auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (sysm == nullptr) {
+        HILOGE("rust side get SystemAbilityManager failed");
+        return -1;
+    }
+    return sysm->GetOnDemandReasonExtraData(extraDataId, parcel);
+}
+
 int32_t SendStrategy(int32_t type, rust::Vec<int32_t> systemAbilityIds, int32_t level, std::string &action)
 {
     auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
