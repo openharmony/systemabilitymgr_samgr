@@ -81,7 +81,8 @@ private:
 };
 class CommonHandler {
     public:
-        CommonHandler(const sptr<CommonEventCollect>& collect) :commonCollect_(collect) {
+        CommonHandler(const sptr<CommonEventCollect>& collect) :commonCollect_(collect)
+        {
             handler_ = std::make_shared<FFRTHandler>("CommonHandler");
         }
         ~CommonHandler() = default;

@@ -50,8 +50,8 @@
                 "base_group": [],
                 "fwk_group": [
                     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/common:samgr_common",
-                    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy",
-                    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/dynamic_cache:dynamic_cache"
+                    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/dynamic_cache:dynamic_cache",
+                    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/samgr_proxy:samgr_proxy"
                 ],
                 "service_group": [
                     "//foundation/systemabilitymgr/samgr/etc:samgr_etc",

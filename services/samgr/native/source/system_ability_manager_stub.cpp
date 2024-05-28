@@ -27,6 +27,7 @@
 #include "memory_guard.h"
 #include "sam_log.h"
 #include "string_ex.h"
+#include "hisysevent_adapter.h"
 #include "system_ability_manager.h"
 #include "system_ability_manager_util.h"
 #include "system_ability_on_demand_event.h"
@@ -651,6 +652,7 @@ int32_t SystemAbilityManagerStub::LoadSystemAbilityInner(MessageParcel& data, Me
 
     int32_t result = LoadSystemAbility(systemAbilityId, callback);
     if (result != ERR_OK) {
+        ReportSamgrSaLoadFail(systemAbilityId, "interface load err:" + ToString(result));
         HILOGE("loadSaInner fail ret:%{public}d", result);
     }
     HILOGD("LoadSystemAbilityInner result is %{public}d", result);
@@ -738,6 +740,7 @@ int32_t SystemAbilityManagerStub::UnloadSystemAbilityInner(MessageParcel& data, 
 
     int32_t result = UnloadSystemAbility(systemAbilityId);
     if (result != ERR_OK) {
+        ReportSaUnLoadFail(systemAbilityId, "interface unload err:" + ToString(result));
         HILOGE("unloadSa fail ret:%{public}d", result);
     }
     HILOGD("UnloadSystemAbilityInner result is %{public}d", result);

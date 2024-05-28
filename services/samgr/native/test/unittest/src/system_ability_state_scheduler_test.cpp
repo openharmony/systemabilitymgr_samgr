@@ -48,7 +48,6 @@ const std::u16string process = u"test";
 const std::u16string process_invalid = u"test_invalid";
 const std::string LOCAL_DEVICE = "local";
 const std::string SA_TAG_DEVICE_ON_LINE = "deviceonline";
-
 }
 void SystemAbilityStateSchedulerTest::SetUpTestCase()
 {
