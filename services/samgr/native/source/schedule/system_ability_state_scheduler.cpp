@@ -1020,6 +1020,18 @@ void SystemAbilityStateScheduler::GetAllSystemAbilityInfo(std::string& result)
         result += "\n";
         result += "sa_pending_event:               ";
         result += PENDINGEVENT_ENUM_STR[static_cast<int32_t>(it.second->pendingEvent)];
+        if (it.second->ownProcessContext != nullptr) {
+            std::lock_guard<std::mutex> autoLock(it.second->ownProcessContext->stateCountLock);
+            result += '\n';
+            result += "process_name:                   ";
+            result += Str16ToStr8(it.second->ownProcessContext->processName);
+            result += '\n';
+            result += "pid:                            ";
+            result += std::to_string(it.second->ownProcessContext->pid);
+            result += '\n';
+            result += "uid:                            ";
+            result += std::to_string(it.second->ownProcessContext->uid);
+        }
         result += "\n---------------------------------------------------\n";
     }
 }
@@ -1102,6 +1114,18 @@ void SystemAbilityStateScheduler::GetAllSystemAbilityInfoByState(const std::stri
         result += '\n';
         result += "sa_pending_event:               ";
         result += PENDINGEVENT_ENUM_STR[static_cast<int32_t>(it.second->pendingEvent)];
+        if (it.second->ownProcessContext != nullptr) {
+            std::lock_guard<std::mutex> autoLock(it.second->ownProcessContext->stateCountLock);
+            result += '\n';
+            result += "process_name:                   ";
+            result += Str16ToStr8(it.second->ownProcessContext->processName);
+            result += '\n';
+            result += "pid:                            ";
+            result += std::to_string(it.second->ownProcessContext->pid);
+            result += '\n';
+            result += "uid:                            ";
+            result += std::to_string(it.second->ownProcessContext->uid);
+        }
         result += "\n---------------------------------------------------\n";
     }
 }

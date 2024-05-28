@@ -76,6 +76,8 @@ HWTEST_F(SystemAbilityManagerDumperTest, ShowAllSystemAbilityInfo001, TestSize.L
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
+    std::shared_ptr<SystemProcessContext> systemProcessContext = std::make_shared<SystemProcessContext>();
+    systemAbilityContext->ownProcessContext = systemProcessContext;
     systemAbilityStateScheduler->abilityContextMap_.clear();
     systemAbilityStateScheduler->abilityContextMap_[401] = systemAbilityContext;
     SystemAbilityManagerDumper::ShowAllSystemAbilityInfo(systemAbilityStateScheduler, result);
@@ -190,7 +192,9 @@ HWTEST_F(SystemAbilityManagerDumperTest, ShowAllSystemAbilityInfoInState001, Tes
         std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
+    std::shared_ptr<SystemProcessContext> systemProcessContext = std::make_shared<SystemProcessContext>();
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
+    systemAbilityContext->ownProcessContext = systemProcessContext;
     systemAbilityContext->state = SystemAbilityState::LOADED;
     systemAbilityStateScheduler->abilityContextMap_[said] = systemAbilityContext;
     SystemAbilityManagerDumper::ShowAllSystemAbilityInfoInState(state, systemAbilityStateScheduler, result);
