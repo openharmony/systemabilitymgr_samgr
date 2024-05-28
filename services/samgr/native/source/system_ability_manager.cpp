@@ -230,6 +230,7 @@ int32_t SystemAbilityManager::Dump(int32_t fd, const std::vector<std::u16string>
     if ((argsWithStr8.size() > 0) && (argsWithStr8[FFRT_DUMP_INDEX] == ARGS_FFRT_PARAM)) {
         return SystemAbilityManagerDumper::FfrtDumpProc(abilityStateScheduler_, fd, argsWithStr8);
     }
+
     if ((argsWithStr8.size() > 0) && (argsWithStr8[IPC_STAT_PREFIX_INDEX] == IPC_STAT_DUMP_PREFIX)) {
         return IpcDumpProc(fd, argsWithStr8);
     } else {
@@ -570,7 +571,7 @@ int32_t SystemAbilityManager::FindSystemAbilityNotify(int32_t systemAbilityId, c
                     systemAbilityId, item.callingPid);
             }
         }
-    } else if(code == static_cast<int32_t>(SamgrInterfaceCode::REMOVE_SYSTEM_ABILITY_TRANSACTION)) {
+    } else if (code == static_cast<int32_t>(SamgrInterfaceCode::REMOVE_SYSTEM_ABILITY_TRANSACTION)) {
         for (auto& item : listeners) {
             NotifySystemAbilityChanged(systemAbilityId, deviceId, code, item.listener);
             item.state = ListenerState::INIT;
@@ -843,6 +844,33 @@ vector<u16string> SystemAbilityManager::ListSystemAbilities(uint32_t dumpFlags)
     return list;
 }
 
+void SystemAbilityManager::CheckListenerNotify(int32_t systemAbilityId,
+    const sptr<ISystemAbilityStatusChange>& listener)
+{
+    sptr<IRemoteObject> targetObject = CheckSystemAbility(systemAbilityId);
+    if (targetObject == nullptr) {
+        return;
+    }
+    lock_guard<mutex> autoLock(listenerMapLock_);
+    auto& listeners = listenerMap_[systemAbilityId];
+    for (auto& itemListener : listeners) {
+        if (listener->AsObject() == itemListener.listener->AsObject()) {
+            int32_t callingPid = itemListener.callingPid;
+            if (itemListener.state == ListenerState::INIT) {
+                HILOGI("NotifySaChanged add SA:%{public}d,cnt:%{public}d,callpid:%{public}d",
+                    systemAbilityId, subscribeCountMap_[callingPid], callingPid);
+                NotifySystemAbilityChanged(systemAbilityId, "",
+                    static_cast<uint32_t>(SamgrInterfaceCode::ADD_SYSTEM_ABILITY_TRANSACTION), listener);
+                itemListener.state = ListenerState::NOTIFIED;
+            } else {
+                HILOGI("Subscribe Listener has been notified,SA:%{public}d,callpid:%{public}d",
+                    systemAbilityId, callingPid);
+            }
+            break;
+        }
+    }
+}
+
 int32_t SystemAbilityManager::SubscribeSystemAbility(int32_t systemAbilityId,
     const sptr<ISystemAbilityStatusChange>& listener)
 {
@@ -878,27 +906,7 @@ int32_t SystemAbilityManager::SubscribeSystemAbility(int32_t systemAbilityId,
         HILOGI("Subscribe SA:%{public}d,size:%{public}zu,cnt:%{public}d,callpid:%{public}d",
             systemAbilityId, listeners.size(), count, callingPid);
     }
-    sptr<IRemoteObject> targetObject = CheckSystemAbility(systemAbilityId);
-    if (targetObject == nullptr) {
-        return ERR_OK;
-    }
-    lock_guard<mutex> autoLock(listenerMapLock_);
-    auto& listeners = listenerMap_[systemAbilityId];
-    for (auto& itemListener : listeners) {
-        if (listener->AsObject() == itemListener.listener->AsObject()) {
-            if (itemListener.state == ListenerState::INIT) {
-                HILOGI("NotifySaChanged add SA:%{public}d,cnt:%{public}d,callpid:%{public}d",
-                    systemAbilityId, subscribeCountMap_[callingPid], callingPid);
-                NotifySystemAbilityChanged(systemAbilityId, "",
-                    static_cast<uint32_t>(SamgrInterfaceCode::ADD_SYSTEM_ABILITY_TRANSACTION), listener);
-                itemListener.state = ListenerState::NOTIFIED;
-            } else {
-                HILOGI("Subscribe Listener has been notified,SA:%{public}d,callpid:%{public}d",
-                    systemAbilityId, callingPid);
-            }
-            break;
-        }
-    }
+    CheckListenerNotify(systemAbilityId, listener);
     return ERR_OK;
 }
 
@@ -1956,7 +1964,7 @@ void SystemAbilityManager::RemoveRemoteCallbackLocked(std::list<sptr<ISystemAbil
     }
 }
 
-int32_t SystemAbilityManager::UpdateSaFreMap(int32_t uid, int32_t saId) 
+int32_t SystemAbilityManager::UpdateSaFreMap(int32_t uid, int32_t saId)
 {
     if (uid < 0) {
         HILOGW("UpdateSaFreMap return, uid not valid!");

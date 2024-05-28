@@ -162,7 +162,7 @@ void CommonEventCollect::CleanFailedEventLocked(const std::string& eventName)
 bool CommonEventCollect::CreateCommonEventSubscriber()
 {
     std::lock_guard<std::mutex> autoLock(commonEventSubscriberLock_);
-	return CreateCommonEventSubscriberLocked();
+    return CreateCommonEventSubscriberLocked();
 }
 
 bool CommonEventCollect::CreateCommonEventSubscriberLocked()

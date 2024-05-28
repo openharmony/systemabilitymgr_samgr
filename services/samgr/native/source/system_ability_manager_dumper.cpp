@@ -249,7 +249,7 @@ bool SystemAbilityManagerDumper::IpcDumpCmdParser(int32_t& cmd, const std::vecto
         cmd = IPC_STAT_CMD_START;
     } else if (args[IPC_STAT_CMD_INDEX] == IPC_STAT_STR_STOP) {
         cmd = IPC_STAT_CMD_STOP;
-    } else if (args[IPC_STAT_CMD_INDEX] == IPC_STAT_STR_GET){
+    } else if (args[IPC_STAT_CMD_INDEX] == IPC_STAT_STR_GET) {
         cmd = IPC_STAT_CMD_GET;
     } else {
         return false;

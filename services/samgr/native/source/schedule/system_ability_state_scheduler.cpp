@@ -26,7 +26,6 @@
 #include "samgr_err_code.h"
 #include "string_ex.h"
 #include "system_ability_manager.h"
-#include "system_ability_manager_util.h"
 #include "samgr_xcollie.h"
 #include "parameters.h"
 #include "system_ability_manager_util.h"
@@ -238,7 +237,12 @@ int32_t SystemAbilityStateScheduler::HandleLoadAbilityEvent(const LoadRequestInf
         "ProcSta:%{public}d,SASta:%{public}d", loadRequestInfo.systemAbilityId, loadRequestInfo.callingPid,
         loadRequestInfo.loadEvent.eventId, abilityContext->ownProcessContext->state, abilityContext->state);
     std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
-    return HandleLoadAbilityEventLocked(abilityContext, loadRequestInfo);
+    int32_t result = HandleLoadAbilityEventLocked(abilityContext, loadRequestInfo);
+    if (result != ERR_OK) {
+        HILOGE("Scheduler SA:%{public}d handle load fail,ret:%{public}d",
+            loadRequestInfo.systemAbilityId, result);
+    }
+    return result;
 }
 
 int32_t SystemAbilityStateScheduler::HandleLoadAbilityEventLocked(
@@ -296,7 +300,6 @@ int32_t SystemAbilityStateScheduler::HandleUnloadAbilityEvent(
     std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
     int32_t result = HandleUnloadAbilityEventLocked(abilityContext, unloadRequestInfo);
     if (result != ERR_OK) {
-        ReportSaUnLoadFail(unloadRequestInfo->systemAbilityId, "err:" + ToString(result));
         HILOGE("Scheduler SA:%{public}d handle unload fail,ret:%{public}d",
             unloadRequestInfo->systemAbilityId, result);
     }
@@ -548,7 +551,7 @@ bool SystemAbilityStateScheduler::CanUnloadAllSystemAbility(
     const std::shared_ptr<SystemProcessContext>& processContext)
 {
     std::lock_guard<std::mutex> autoLock(processContext->stateCountLock);
-	return CanUnloadAllSystemAbilityLocked(processContext, true);
+    return CanUnloadAllSystemAbilityLocked(processContext, true);
 }
 
 bool SystemAbilityStateScheduler::CanUnloadAllSystemAbilityLocked(
@@ -736,7 +739,7 @@ bool SystemAbilityStateScheduler::CanKillSystemProcess(
     const std::shared_ptr<SystemProcessContext>& processContext)
 {
     std::lock_guard<std::mutex> autoLock(processContext->stateCountLock);
-	return CanKillSystemProcessLocked(processContext);
+    return CanKillSystemProcessLocked(processContext);
 }
 
 bool SystemAbilityStateScheduler::CanKillSystemProcessLocked(
@@ -758,7 +761,8 @@ int32_t SystemAbilityStateScheduler::KillSystemProcessLocked(
     int32_t result = ERR_OK;
     {
         SamgrXCollie samgrXCollie("samgr::killProccess_" + Str16ToStr8(processContext->processName));
-        result = ServiceControlWithExtra(Str16ToStr8(processContext->processName).c_str(), ServiceAction::STOP, nullptr, 0);
+        result = ServiceControlWithExtra(Str16ToStr8(processContext->processName).c_str(),
+            ServiceAction::STOP, nullptr, 0);
     }
 
     int64_t duration = GetTickCount() - begin;
@@ -814,7 +818,7 @@ int32_t SystemAbilityStateScheduler::GetAbnormallyDiedAbilityLocked(
             if (!abilityContext->isAutoRestart) {
                 continue;
             }
-            if (system::GetBoolParameter("min.memmory.watermark", false)) {
+            if (system::GetBoolParameter("resourceschedule.memmgr.min.memmory.watermark", false)) {
                 HILOGW("restart fail,watermark=true");
                 continue;
             }
@@ -1184,7 +1188,7 @@ int32_t SystemAbilityStateScheduler::ProcessDelayUnloadEvent(int32_t systemAbili
         return GET_SA_CONTEXT_FAIL;
     }
     std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
-	return ProcessDelayUnloadEventLocked(systemAbilityId);
+    return ProcessDelayUnloadEventLocked(systemAbilityId);
 }
 
 int32_t SystemAbilityStateScheduler::ProcessDelayUnloadEventLocked(int32_t systemAbilityId)
@@ -1226,7 +1230,8 @@ int32_t SystemAbilityStateScheduler::ProcessDelayUnloadEventLocked(int32_t syste
     }
 }
 
-void SystemAbilityStateScheduler::CheckEnableOnce(const OnDemandEvent& event, const std::list<SaControlInfo>& saControlList)
+void SystemAbilityStateScheduler::CheckEnableOnce(const OnDemandEvent& event,
+    const std::list<SaControlInfo>& saControlList)
 {
     sptr<ISystemAbilityLoadCallback> callback(new SystemAbilityLoadCallbackStub());
     for (auto& saControl : saControlList) {
@@ -1335,7 +1340,8 @@ void SystemAbilityStateScheduler::UnloadEventHandler::ProcessEvent(uint32_t even
     }
 }
 
-bool SystemAbilityStateScheduler::UnloadEventHandler::SendEvent(uint32_t eventId, int64_t extraDataId, uint64_t delayTime)
+bool SystemAbilityStateScheduler::UnloadEventHandler::SendEvent(uint32_t eventId,
+    int64_t extraDataId, uint64_t delayTime)
 {
     if (handler_ == nullptr) {
         HILOGE("SystemAbilityStateScheduler SendEvent handler is null!");
