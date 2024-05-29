@@ -27,6 +27,7 @@
 #include "memory_guard.h"
 #include "sam_log.h"
 #include "string_ex.h"
+#include "hisysevent_adapter.h"
 #include "system_ability_manager.h"
 #include "system_ability_manager_util.h"
 #include "system_ability_on_demand_event.h"
@@ -334,9 +335,14 @@ int32_t SystemAbilityManagerStub::CheckRemtSystemAbilityInner(MessageParcel& dat
         return ERR_FLATTEN_OBJECT;
     }
     std::string uuid = SamgrUtil::TransformDeviceId(deviceId, UUID, false);
-    ret = reply.WriteRemoteObject(GetSystemAbility(systemAbilityId, uuid));
+    sptr<IRemoteObject> remoteObject = GetSystemAbility(systemAbilityId, uuid);
+    if (remoteObject == nullptr) {
+        HILOGD("CheckRemtSystemAbilityInner SA:%{public}d GetSystemAbility failed.", systemAbilityId);
+        return ERR_NULL_OBJECT;
+    }
+    ret = reply.WriteRemoteObject(remoteObject);
     if (!ret) {
-        HILOGW("CheckRemtSystemAbilityInner SA:%{public}d write reply failed.", systemAbilityId);
+        HILOGE("CheckRemtSystemAbilityInner SA:%{public}d write reply failed.", systemAbilityId);
         return ERR_FLATTEN_OBJECT;
     }
 
@@ -405,9 +411,14 @@ int32_t SystemAbilityManagerStub::CheckSystemAbilityImmeInner(MessageParcel& dat
         HILOGW("CheckSystemAbilityImmeInner read isExist failed!");
         return ERR_FLATTEN_OBJECT;
     }
-    ret = reply.WriteRemoteObject(CheckSystemAbility(systemAbilityId, isExist));
+    sptr<IRemoteObject> remoteObject = CheckSystemAbility(systemAbilityId, isExist);
+    if (remoteObject == nullptr) {
+        HILOGD("CheckSystemAbilityImmeInner SA:%{public}d CheckSystemAbility failed.", systemAbilityId);
+        return ERR_NULL_OBJECT;
+    }
+    ret = reply.WriteRemoteObject(remoteObject);
     if (!ret) {
-        HILOGD("CheckSystemAbilityImmeInner SA:%{public}d, callpid:%{public}d, write obj fail, spend %{public}"
+        HILOGE("CheckSystemAbilityImmeInner SA:%{public}d, callpid:%{public}d, write obj fail, spend %{public}"
             PRId64 " ms", systemAbilityId, OHOS::IPCSkeleton::GetCallingPid(), OHOS::GetTickCount() - begin);
         return ERR_FLATTEN_OBJECT;
     }
@@ -502,10 +513,14 @@ int32_t SystemAbilityManagerStub::GetSystemAbilityInner(MessageParcel& data, Mes
         HILOGE("GetSystemAbilityInner selinux permission denied! SA : %{public}d", systemAbilityId);
         return ERR_PERMISSION_DENIED;
     }
-
-    ret = reply.WriteRemoteObject(GetSystemAbility(systemAbilityId));
+    sptr<IRemoteObject> remoteObject = GetSystemAbility(systemAbilityId);
+    if (remoteObject == nullptr) {
+        HILOGD("GetSystemAbilityInner SA:%{public}d GetSystemAbility failed.", systemAbilityId);
+        return ERR_NULL_OBJECT;
+    }
+    ret = reply.WriteRemoteObject(remoteObject);
     if (!ret) {
-        HILOGW("GetSystemAbilityInner SA:%{public}d write reply failed.", systemAbilityId);
+        HILOGE("GetSystemAbilityInner SA:%{public}d write reply failed.", systemAbilityId);
         return ERR_FLATTEN_OBJECT;
     }
     return ERR_NONE;
@@ -527,9 +542,14 @@ int32_t SystemAbilityManagerStub::CheckSystemAbilityInner(MessageParcel& data, M
         HILOGD("CheckSystemAbilityInner selinux permission denied! SA : %{public}d", systemAbilityId);
         return ERR_PERMISSION_DENIED;
     }
-
-    ret = reply.WriteRemoteObject(CheckSystemAbility(systemAbilityId));
+    sptr<IRemoteObject> remoteObject = CheckSystemAbility(systemAbilityId);
+    if (remoteObject == nullptr) {
+        HILOGD("CheckSystemAbilityInner SA:%{public}d CheckSystemAbility failed.", systemAbilityId);
+        return ERR_NULL_OBJECT;
+    }
+    ret = reply.WriteRemoteObject(remoteObject);
     if (!ret) {
+        HILOGE("CheckSystemAbilityInner SA:%{public}d write reply failed.", systemAbilityId);
         return ERR_FLATTEN_OBJECT;
     }
     return ERR_NONE;
@@ -632,6 +652,7 @@ int32_t SystemAbilityManagerStub::LoadSystemAbilityInner(MessageParcel& data, Me
 
     int32_t result = LoadSystemAbility(systemAbilityId, callback);
     if (result != ERR_OK) {
+        ReportSamgrSaLoadFail(systemAbilityId, "interface load err:" + ToString(result));
         HILOGE("loadSaInner fail ret:%{public}d", result);
     }
     HILOGD("LoadSystemAbilityInner result is %{public}d", result);
@@ -719,6 +740,7 @@ int32_t SystemAbilityManagerStub::UnloadSystemAbilityInner(MessageParcel& data, 
 
     int32_t result = UnloadSystemAbility(systemAbilityId);
     if (result != ERR_OK) {
+        ReportSaUnLoadFail(systemAbilityId, "interface unload err:" + ToString(result));
         HILOGE("unloadSa fail ret:%{public}d", result);
     }
     HILOGD("UnloadSystemAbilityInner result is %{public}d", result);

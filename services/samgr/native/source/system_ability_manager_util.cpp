@@ -92,7 +92,7 @@ std::string SamgrUtil::TransformDeviceId(const std::string& deviceId, int32_t ty
     return isPrivate ? std::string() : deviceId;
 }
 
-bool SamgrUtil::CheckCallerProcess(const SaProfile& saProfile) 
+bool SamgrUtil::CheckCallerProcess(const SaProfile& saProfile)
 {
     if (!CheckCallerProcess(Str16ToStr8(saProfile.process))) {
         HILOGE("can't operate SA: %{public}d by proc:%{public}s",
@@ -102,7 +102,7 @@ bool SamgrUtil::CheckCallerProcess(const SaProfile& saProfile)
     return true;
 }
 
-bool SamgrUtil::CheckCallerProcess(const std::string& callProcess) 
+bool SamgrUtil::CheckCallerProcess(const std::string& callProcess)
 {
     uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
     Security::AccessToken::NativeTokenInfo nativeTokenInfo;
@@ -119,7 +119,7 @@ bool SamgrUtil::CheckCallerProcess(const std::string& callProcess)
     return true;
 }
 
-bool SamgrUtil::CheckAllowUpdate(OnDemandPolicyType type, const SaProfile& saProfile) 
+bool SamgrUtil::CheckAllowUpdate(OnDemandPolicyType type, const SaProfile& saProfile)
 {
     if (type == OnDemandPolicyType::START_POLICY && saProfile.startOnDemand.allowUpdate) {
         return true;
@@ -129,7 +129,7 @@ bool SamgrUtil::CheckAllowUpdate(OnDemandPolicyType type, const SaProfile& saPro
     return false;
 }
 
-void SamgrUtil::ConvertToOnDemandEvent(const SystemAbilityOnDemandEvent& from, OnDemandEvent& to) 
+void SamgrUtil::ConvertToOnDemandEvent(const SystemAbilityOnDemandEvent& from, OnDemandEvent& to)
 {
     to.eventId = static_cast<int32_t>(from.eventId);
     to.name = from.name;
@@ -146,7 +146,7 @@ void SamgrUtil::ConvertToOnDemandEvent(const SystemAbilityOnDemandEvent& from, O
 }
 
 void SamgrUtil::ConvertToSystemAbilityOnDemandEvent(const OnDemandEvent& from,
-    SystemAbilityOnDemandEvent& to) 
+    SystemAbilityOnDemandEvent& to)
 {
     to.eventId = static_cast<OnDemandEventId>(from.eventId);
     to.name = from.name;

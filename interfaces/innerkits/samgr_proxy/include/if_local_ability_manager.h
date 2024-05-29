@@ -32,10 +32,10 @@ enum {
     IPC_STAT_CMD_GET = 2,
     IPC_STAT_CMD_MAX = 3
 };
-
 class SystemAbilityExtensionPara {
 public:
-    SystemAbilityExtensionPara() {
+    SystemAbilityExtensionPara()
+    {
         data_ = nullptr;
         reply_ = nullptr;
     };
@@ -43,16 +43,17 @@ public:
 
     MessageParcel *data_;
     MessageParcel *reply_;
-    virtual bool InputParaSet(MessageParcel& data) {
+    virtual bool InputParaSet(MessageParcel& data)
+    {
         (void)data;
         return true;
     };
-    virtual bool OutputParaGet(MessageParcel& reply) {
+    virtual bool OutputParaGet(MessageParcel& reply)
+    {
         (void)reply;
         return true;
     };
 };
-
 class ILocalAbilityManager : public IRemoteBroker {
 public:
     virtual bool StartAbility(int32_t systemAbilityId, const std::string& eventStr) = 0;
