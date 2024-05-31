@@ -33,6 +33,8 @@
 #include "system_ability_manager.h"
 #ifdef SUPPORT_COMMON_EVENT
 #include "common_event_collect.h"
+#include "ipc_skeleton.h"
+#include "accesstoken_kit.h"
 #endif
 
 using namespace std;
@@ -209,6 +211,96 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy002, TestSize.Level3)
     int32_t ret = saMgr->GetOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
     EXPECT_EQ(ERR_INVALID_VALUE, ret);
 }
+
+HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy003, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t systemAbilityId = 1;
+    OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
+
+    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    Security::AccessToken::NativeTokenInfo nativeTokenInfo;
+    int32_t tokenInfoResult = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
+    SaProfile saProfile;
+    saProfile.process = Str8ToStr16(nativeTokenInfo.processName);
+    saProfile.startOnDemand.allowUpdate = false;
+    saMgr->saProfileMap_[1] = saProfile;
+
+    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
+    int32_t ret = saMgr->GetOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
+    EXPECT_EQ(ERR_PERMISSION_DENIED, ret);
+}
+
+HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy004, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t systemAbilityId = 1;
+    OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
+
+    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    Security::AccessToken::NativeTokenInfo nativeTokenInfo;
+    int32_t tokenInfoResult = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
+    SaProfile saProfile;
+    saProfile.process = Str8ToStr16(nativeTokenInfo.processName);
+    saProfile.startOnDemand.allowUpdate = true;
+    saMgr->saProfileMap_[1] = saProfile;
+
+    sptr<DeviceStatusCollectManager> collectManager = nullptr;
+    saMgr->collectManager_ = collectManager;
+    
+    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
+    int32_t ret = saMgr->GetOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
+    EXPECT_EQ(ERR_INVALID_VALUE, ret);
+}
+
+
+HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy005, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t systemAbilityId = 1;
+    OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
+
+    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    Security::AccessToken::NativeTokenInfo nativeTokenInfo;
+    int32_t tokenInfoResult = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
+    SaProfile saProfile;
+    saProfile.process = Str8ToStr16(nativeTokenInfo.processName);
+    saProfile.startOnDemand.allowUpdate = true;
+    saMgr->saProfileMap_[1] = saProfile;
+
+    sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
+    saMgr->collectManager_ = collectManager;
+    
+    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
+    int32_t ret = saMgr->GetOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
+    EXPECT_EQ(ERR_INVALID_VALUE, ret);
+}
+
+HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy006, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t systemAbilityId = 1;
+    OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
+
+    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    Security::AccessToken::NativeTokenInfo nativeTokenInfo;
+    int32_t tokenInfoResult = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
+    SaProfile saProfile;
+    saProfile.process = Str8ToStr16(nativeTokenInfo.processName);
+    saProfile.saId = 1;
+    saProfile.startOnDemand.allowUpdate = true;
+    saMgr->saProfileMap_[1] = saProfile;
+
+    sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
+    collectManager->onDemandSaProfiles_.emplace_back(saProfile);
+    saMgr->collectManager_ = collectManager;
+    
+    
+    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents ;
+    int32_t ret = saMgr->GetOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
+    EXPECT_EQ(ERR_OK, ret);
+}
+
 
 /**
  * @tc.name: UpdateOnDemandPolicy001
