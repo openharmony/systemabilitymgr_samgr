@@ -25,9 +25,7 @@ config("sam_test_config") {
     "//foundation/systemabilitymgr/samgr/services/dfx/include",
     "//foundation/systemabilitymgr/samgr/utils/native/include",
     "//foundation/systemabilitymgr/samgr/services/lsamgr/include",
-    "//third_party/json/include",
-    "//third_party/json/single_include",
-  ]
+]
 }
 
 config("samgr_proxy_config") {
@@ -41,7 +39,6 @@ config("samgr_proxy_private_config") {
     "//foundation/systemabilitymgr/samgr/services/lsamgr/include",
     "//foundation/systemabilitymgr/samgr/services/samgr/native/include",
     "//foundation/systemabilitymgr/samgr/utils/native/include",
-    "//third_party/json/include",
   ]
 }
 
