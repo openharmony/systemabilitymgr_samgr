@@ -15,9 +15,7 @@ import("//build/ohos.gni")
 import("//foundation/systemabilitymgr/samgr/services/samgr/var.gni")
 
 config("all_config_samgr_common") {
-  include_dirs = [
-    "include",
-  ]
+  include_dirs = [ "include" ]
 }
 
 config("config_samgr_common") {
