@@ -26,7 +26,6 @@ config("sam_test_config") {
     "//foundation/systemabilitymgr/samgr/utils/native/include",
     "//foundation/systemabilitymgr/samgr/services/lsamgr/include",
   ]
-]
 }
 
 config("samgr_proxy_config") {
