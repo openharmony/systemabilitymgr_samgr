@@ -25,6 +25,7 @@ config("sam_test_config") {
     "//foundation/systemabilitymgr/samgr/services/dfx/include",
     "//foundation/systemabilitymgr/samgr/utils/native/include",
     "//foundation/systemabilitymgr/samgr/services/lsamgr/include",
+  ]
 ]
 }
 
