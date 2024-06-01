@@ -112,6 +112,7 @@ ohos_unittest("SystemAbilityMgrTest") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "ipc:libdbinder",
+    "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
   ]
   defines = []
@@ -206,6 +207,7 @@ ohos_unittest("SystemAbilityMgrCollectTest") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "ipc:libdbinder",
+    "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
   ]
   defines = []
@@ -305,6 +307,7 @@ ohos_unittest("SystemAbilityMgrDeviceNetworkingTest") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "ipc:libdbinder",
+    "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
   ]
   defines = []
@@ -387,6 +390,7 @@ ohos_unittest("SystemAbilityMgrStubTest") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "ipc:libdbinder",
+    "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
   ]
   defines = []
@@ -454,6 +458,7 @@ ohos_unittest("SystemAbilityMgrProxyTest") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "ipc:ipc_single",
+    "json:nlohmann_json_static",
   ]
 }
 
@@ -484,6 +489,7 @@ ohos_unittest("LocalAbilityManagerProxyTest") {
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_core",
+    "json:nlohmann_json_static",
   ]
 }
 
@@ -550,6 +556,7 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "ipc:libdbinder",
+    "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
   ]
 
@@ -612,6 +619,7 @@ ohos_unittest("SystemAbilityMgrDumperTest") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "ipc:libdbinder",
+    "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
   ]
 }
@@ -641,6 +649,7 @@ ohos_executable("ondemand") {
     "init:libbeget_proxy",
     "init:libbegetutil",
     "ipc:ipc_core",
+    "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
   ]
   part_name = "samgr"
@@ -686,7 +695,10 @@ ohos_executable("TestTool") {
     ":samgr_proxy_tdd",
     "${samgr_dir}/interfaces/innerkits/common:samgr_common",
   ]
-  external_deps = [ "hilog:libhilog" ]
+  external_deps = [ 
+    "hilog:libhilog", 
+    "json:nlohmann_json_static",
+  ]
 
   cflags = []
   if (target_cpu == "arm") {
