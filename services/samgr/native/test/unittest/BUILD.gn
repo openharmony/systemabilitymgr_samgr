@@ -695,10 +695,7 @@ ohos_executable("TestTool") {
     ":samgr_proxy_tdd",
     "${samgr_dir}/interfaces/innerkits/common:samgr_common",
   ]
-  external_deps = [ 
-    "hilog:libhilog", 
-    "json:nlohmann_json_static",
-  ]
+  external_deps = [ "hilog:libhilog" ]
 
   cflags = []
   if (target_cpu == "arm") {
@@ -736,6 +733,7 @@ ohos_executable("TestTool") {
     "init:libbegetutil",
     "ipc:ipc_core",
     "ipc:libdbinder",
+    "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
   ]
   part_name = "samgr"
