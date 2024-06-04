@@ -519,6 +519,16 @@ sptr<IRemoteObject> SystemAbilityManager::CheckSystemAbility(int32_t systemAbili
 sptr<IRemoteObject> SystemAbilityManager::CheckSystemAbility(int32_t systemAbilityId,
     const std::string& deviceId)
 {
+    SaProfile saProfile;
+    bool ret = GetSaProfile(systemAbilityId, saProfile);
+    if (!ret) {
+        HILOGE("CheckSystemAbilityFromRpc SA:%{public}d not supported!", systemAbilityId);
+        return nullptr;
+    }
+    if (!saProfile.distributed) {
+        HILOGE("CheckSystemAbilityFromRpc SA:%{public}d not distributed!", systemAbilityId);
+        return nullptr;
+    }
     return DoMakeRemoteBinder(systemAbilityId, IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), deviceId);
 }
 
@@ -1754,6 +1764,17 @@ bool SystemAbilityManager::ActiveSystemAbility(int32_t systemAbilityId, const st
 int32_t SystemAbilityManager::LoadSystemAbility(int32_t systemAbilityId, const std::string& deviceId,
     const sptr<ISystemAbilityLoadCallback>& callback)
 {
+    SaProfile saProfile;
+    bool ret = GetSaProfile(systemAbilityId, saProfile);
+    if (!ret) {
+        HILOGE("LoadSystemAbilityFromRpc SA:%{public}d not supported!", systemAbilityId);
+        return PROFILE_NOT_EXIST;
+    }
+    if (!saProfile.distributed) {
+        HILOGE("LoadSystemAbilityFromRpc SA:%{public}d not distributed!", systemAbilityId);
+        return SA_NOT_DISTRIBUTED;
+    }
+
     std::string key = ToString(systemAbilityId) + "_" + deviceId;
     {
         lock_guard<mutex> autoLock(loadRemoteLock_);
