@@ -1764,17 +1764,6 @@ bool SystemAbilityManager::ActiveSystemAbility(int32_t systemAbilityId, const st
 int32_t SystemAbilityManager::LoadSystemAbility(int32_t systemAbilityId, const std::string& deviceId,
     const sptr<ISystemAbilityLoadCallback>& callback)
 {
-    SaProfile saProfile;
-    bool ret = GetSaProfile(systemAbilityId, saProfile);
-    if (!ret) {
-        HILOGE("LoadSystemAbilityFromRpc SA:%{public}d not supported!", systemAbilityId);
-        return PROFILE_NOT_EXIST;
-    }
-    if (!saProfile.distributed) {
-        HILOGE("LoadSystemAbilityFromRpc SA:%{public}d not distributed!", systemAbilityId);
-        return SA_NOT_DISTRIBUTED;
-    }
-
     std::string key = ToString(systemAbilityId) + "_" + deviceId;
     {
         lock_guard<mutex> autoLock(loadRemoteLock_);
