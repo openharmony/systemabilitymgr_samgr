@@ -45,6 +45,7 @@ enum SamgrErrCode {
     NOT_ONDEMAND_SA,
     SA_OBJ_NULL,
     LISTENER_NULL,
+    SA_NOT_DISTRIBUTED,
 
 // scheduler
     GET_SA_CONTEXT_FAIL = 2000,
