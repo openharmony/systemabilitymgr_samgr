@@ -336,6 +336,42 @@ sptr<IRemoteObject> OnDemandHelper::GetSystemAbility(int32_t systemAbilityId)
     return remoteObject;
 }
 
+sptr<IRemoteObject> OnDemandHelper::CheckSystemAbility(int32_t systemAbilityId)
+{
+    int64_t begin = GetTickCount();
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (sm == nullptr) {
+        cout << "GetSystemAbilityManager samgr object null!" << endl;
+        return nullptr;
+    }
+    sptr<IRemoteObject> remoteObject = sm->CheckSystemAbility(systemAbilityId);
+    if (remoteObject == nullptr) {
+        cout << "CheckSystemAbility systemAbilityId:" << systemAbilityId << " failed !" << endl;
+        return nullptr;
+    }
+    cout << "CheckSystemAbility result: success "<< " spend:"
+        << (GetTickCount() - begin) << " ms" << " systemAbilityId:" << systemAbilityId << endl;
+    return remoteObject;
+}
+
+sptr<IRemoteObject> OnDemandHelper::CheckSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
+{
+    int64_t begin = GetTickCount();
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (sm == nullptr) {
+        cout << "GetSystemAbilityManager samgr object null!" << endl;
+        return nullptr;
+    }
+    sptr<IRemoteObject> remoteObject = sm->CheckSystemAbility(systemAbilityId, deviceId);
+    if (remoteObject == nullptr) {
+        cout << "CheckSystemAbilityRmt systemAbilityId:" << systemAbilityId << " failed !" << endl;
+        return nullptr;
+    }
+    cout << "CheckSystemAbilityRmt result: success "<< " spend:"
+        << (GetTickCount() - begin) << " ms" << " systemAbilityId:" << systemAbilityId << endl;
+    return remoteObject;
+}
+
 void OnDemandHelper::GetOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type)
 {
     SamMockPermission::MockProcess("listen_test");
@@ -699,13 +735,31 @@ static void TestCommonEvent(OHOS::OnDemandHelper& ondemandHelper)
     }
 }
 
+static void TestCheckSystemAbility(OHOS::OnDemandHelper& ondemandHelper)
+{
+    std::string cmd = "";
+    cout << "please input check case(local/remote)" << endl;
+    cin >> cmd;
+    int32_t saId = 0;
+    cout << "please input systemAbilityId for " << cmd << " operation" << endl;
+    cin >> saId;
+    if (cmd == "local") {
+        ondemandHelper.CheckSystemAbility(saId);
+    } else if (cmd == "remote") {
+        std::string deviceId = ondemandHelper.GetFirstDevice();
+        ondemandHelper.CheckSystemAbility(saId, deviceId);
+    } else {
+        cout << "invalid input" << endl;
+    }
+}
+
 int main(int argc, char* argv[])
 {
     SamMockPermission::MockPermission();
     OHOS::OnDemandHelper& ondemandHelper = OnDemandHelper::GetInstance();
     string cmd = "load";
     do {
-        cout << "please input operation(sa/proc/param/policy/getExtension/6 getEvent)" << endl;
+        cout << "please input operation(sa/proc/param/policy/getExtension/6 getEvent/check)" << endl;
         cmd.clear();
         cin.clear();
         cin >> cmd;
@@ -721,6 +775,8 @@ int main(int argc, char* argv[])
             TestGetExtension(ondemandHelper);
         } else if (cmd == "6") {
             TestCommonEvent(ondemandHelper);
+        } else if (cmd == "check") {
+            TestCheckSystemAbility(ondemandHelper);
         } else {
             cout << "invalid input" << endl;
         }

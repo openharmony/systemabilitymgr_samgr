@@ -39,6 +39,8 @@ public:
     void LoadRemoteAbilityMutiCb(int32_t systemAbilityId, const std::string& deviceId);
     void LoadRemoteAbilityPressure(int32_t systemAbilityId, const std::string& deviceId);
     sptr<IRemoteObject> GetSystemAbility(int32_t systemAbilityId);
+    sptr<IRemoteObject> CheckSystemAbility(int32_t systemAbilityId);
+    sptr<IRemoteObject> CheckSystemAbility(int32_t systemAbilityId, const std::string& deviceId);
     void OnLoadSystemAbility(int32_t systemAbilityId);
     void InitSystemProcessStatusChange();
     void GetSystemProcess();
