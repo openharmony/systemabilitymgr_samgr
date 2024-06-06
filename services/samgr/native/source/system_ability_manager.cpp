@@ -1438,7 +1438,7 @@ int32_t SystemAbilityManager::StartDynamicSystemProcess(const std::u16string& na
     int64_t begin = GetTickCount();
     int result = ERR_INVALID_VALUE;
     {
-        SamgrXCollie samgrXCollie("samgr::startProccess_" + ToString(systemAbilityId));
+        SamgrXCollie samgrXCollie("samgr--startProccess_" + ToString(systemAbilityId));
         result = ServiceControlWithExtra(Str16ToStr8(name).c_str(), ServiceAction::START, &extraArgv, 1);
     }
 
@@ -1739,7 +1739,7 @@ bool SystemAbilityManager::IdleSystemAbility(int32_t systemAbilityId, const std:
         HILOGE("get process:%{public}s fail", Str16ToStr8(procName).c_str());
         return false;
     }
-    SamgrXCollie samgrXCollie("samgr::IdleSa_" + ToString(systemAbilityId));
+    SamgrXCollie samgrXCollie("samgr--IdleSa_" + ToString(systemAbilityId));
     return procObject->IdleAbility(systemAbilityId, idleReason, delayTime);
 }
 
@@ -1757,7 +1757,7 @@ bool SystemAbilityManager::ActiveSystemAbility(int32_t systemAbilityId, const st
         HILOGE("get process:%{public}s fail", Str16ToStr8(procName).c_str());
         return false;
     }
-    SamgrXCollie samgrXCollie("samgr::ActiveSa_" + ToString(systemAbilityId));
+    SamgrXCollie samgrXCollie("samgr--ActiveSa_" + ToString(systemAbilityId));
     return procObject->ActiveAbility(systemAbilityId, activeReason);
 }
 
@@ -1844,7 +1844,7 @@ sptr<DBinderServiceStub> SystemAbilityManager::DoMakeRemoteBinder(int32_t system
     if (dBinderService_ != nullptr) {
         string strName = to_string(systemAbilityId);
         {
-            SamgrXCollie samgrXCollie("samgr::MakeRemoteBinder_" + strName);
+            SamgrXCollie samgrXCollie("samgr--MakeRemoteBinder_" + strName);
             remoteBinder = dBinderService_->MakeRemoteBinder(Str8ToStr16(strName),
                 networkId, systemAbilityId, callingPid, callingUid);
         }
