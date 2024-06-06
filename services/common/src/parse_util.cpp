@@ -147,7 +147,7 @@ void ParseUtil::OpenSo(SaProfile& saProfile)
         int64_t begin = GetTickCount();
         DlHandle handle = nullptr;
         {
-            SamgrXCollie samgrXCollie("safwk::openso_" + ToString(saProfile.saId));
+            SamgrXCollie samgrXCollie("safwk--openso_" + ToString(saProfile.saId));
             handle = dlopen(saProfile.libPath.c_str(), RTLD_NOW);
         }
         int64_t duration = GetTickCount() - begin;
