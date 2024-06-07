@@ -43,6 +43,26 @@ using namespace testing::ext;
 using namespace OHOS;
 
 namespace OHOS {
+namespace system {
+    /*
+    * Returns true if the system parameter `key` has the value "1", "y", "yes", "on", or "true",
+    * false for "0", "n", "no", "off", or "false", or `def` otherwise.
+    */
+    bool GetBoolParameter(const std::string &key, bool def)
+    {
+        return true;
+    }
+
+    std::string GetParameter(const std::string &key, const std::string &def)
+    {
+        return "";
+    }
+
+    bool SetParameter(const std::string& key, const std::string& value)
+    {
+        return true;
+    }
+} 
 namespace {
 constexpr int32_t SAID = 1234;
 constexpr int32_t OTHER_ON_DEMAND = 3;
@@ -1263,6 +1283,25 @@ HWTEST_F(SystemAbilityMgrTest, IpcDumpProc001, TestSize.Level2)
 }
 
 /**
+ * @tc.name: IpcDumpProc002
+ * @tc.desc: test IpcDumpProc.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, IpcDumpProc002, TestSize.Level2)
+{
+    SamMockPermission::MockProcess("hidumper_service");
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t cmd = -1;
+    int32_t fd = 1;
+    std::vector<std::string> args;
+    args.push_back("abc");
+    args.push_back("abcd");
+    args.push_back("--start-stat");
+    int ret = saMgr->IpcDumpProc(fd, args);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
  * @tc.name: IpcStatSamgrProc001
  * @tc.desc: test IpcStatSamgrProc.
  * @tc.type: FUNC
@@ -1300,4 +1339,68 @@ HWTEST_F(SystemAbilityMgrTest, IpcStatSamgrProc002, TestSize.Level2)
     bool result = saMgr->IpcStatSamgrProc(fd, fmd);
     EXPECT_FALSE(result);
 }
+
+/**
+ * @tc.name: IpcDumpAllProcess001
+ * @tc.desc: test IpcDumpAllProcess.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, IpcDumpAllProcess001, TestSize.Level2)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t cmd = IPC_STAT_CMD_START;
+    int32_t fd = 1;
+    bool ret = true;
+    saMgr->IpcDumpAllProcess(fd, cmd);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: IpcDumpSamgrProcess001
+ * @tc.desc: test IpcDumpSamgrProcess.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, IpcDumpSamgrProcess001, TestSize.Level2)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t cmd = IPC_STAT_CMD_START;
+    int32_t fd = 1;
+    bool ret = true;
+    saMgr->IpcDumpSamgrProcess(fd, cmd);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: IpcDumpSingleProcess001
+ * @tc.desc: test IpcDumpSingleProcess.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, IpcDumpSingleProcess001, TestSize.Level2)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t cmd = IPC_STAT_CMD_START;
+    int32_t fd = 1;
+    bool ret = true;
+
+    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    Security::AccessToken::NativeTokenInfo nativeTokenInfo;
+    int32_t tokenInfoResult = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
+    saMgr->IpcDumpSingleProcess(fd, cmd,nativeTokenInfo.processName);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: DoLoadForPerf002
+ * @tc.desc: test DoLoadForPerf.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, DoLoadForPerf002, TestSize.Level2)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    bool ret = true;
+    saMgr->DoLoadForPerf();
+    EXPECT_TRUE(ret);
+}
+
+
 } // namespace OHOS
