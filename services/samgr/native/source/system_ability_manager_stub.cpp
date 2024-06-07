@@ -622,7 +622,7 @@ int32_t SystemAbilityManagerStub::LoadSystemAbilityInner(MessageParcel& data, Me
     sptr<IRemoteObject> remoteObject = nullptr;
     sptr<ISystemAbilityLoadCallback> callback = nullptr;
     {
-        SamgrXCollie samgrXCollie("samgrStub::loadSa_readData");
+        SamgrXCollie samgrXCollie("samgrStub--loadSa_readData");
         ret = data.ReadInt32(systemAbilityId);
         if (!ret) {
             HILOGW("LoadSystemAbilityInner read SAId failed!");
@@ -659,7 +659,7 @@ int32_t SystemAbilityManagerStub::LoadSystemAbilityInner(MessageParcel& data, Me
     }
     HILOGD("LoadSystemAbilityInner result is %{public}d", result);
     {
-        SamgrXCollie samgrXCollie("samgrStub::loadSa_writeResult_" + ToString(systemAbilityId));
+        SamgrXCollie samgrXCollie("samgrStub--loadSa_writeResult_" + ToString(systemAbilityId));
         ret = reply.WriteInt32(result);
     }
     if (!ret) {
@@ -677,7 +677,7 @@ int32_t SystemAbilityManagerStub::LoadRemoteSystemAbilityInner(MessageParcel& da
     sptr<IRemoteObject> remoteObject = nullptr;
     sptr<ISystemAbilityLoadCallback> callback = nullptr;
     {
-        SamgrXCollie samgrXCollie("samgrStub::loadRmtSa_readData");
+        SamgrXCollie samgrXCollie("samgrStub--loadRmtSa_readData");
         ret = data.ReadInt32(systemAbilityId);
         if (!ret) {
             HILOGW("LoadRemoteSystemAbilityInner read SAId invalid");
@@ -713,7 +713,7 @@ int32_t SystemAbilityManagerStub::LoadRemoteSystemAbilityInner(MessageParcel& da
     int32_t result = LoadSystemAbility(systemAbilityId, deviceId, callback);
     HILOGD("LoadRemoteSystemAbilityInner result is %{public}d", result);
     {
-        SamgrXCollie samgrXCollie("samgrStub::loadRmtSa_writeResult_" + ToString(systemAbilityId));
+        SamgrXCollie samgrXCollie("samgrStub--loadRmtSa_writeResult_" + ToString(systemAbilityId));
         ret = reply.WriteInt32(result);
     }
     if (!ret) {
@@ -728,7 +728,7 @@ int32_t SystemAbilityManagerStub::UnloadSystemAbilityInner(MessageParcel& data, 
     int32_t systemAbilityId = -1;
     bool ret = false;
     {
-        SamgrXCollie samgrXCollie("samgrStub::unloadSa_readData");
+        SamgrXCollie samgrXCollie("samgrStub--unloadSa_readData");
         ret = data.ReadInt32(systemAbilityId);
         if (!ret) {
             HILOGW("UnloadSystemAbilityInner read SAId invalid");
@@ -747,7 +747,7 @@ int32_t SystemAbilityManagerStub::UnloadSystemAbilityInner(MessageParcel& data, 
     }
     HILOGD("UnloadSystemAbilityInner result is %{public}d", result);
     {
-        SamgrXCollie samgrXCollie("samgrStub::unloadSa_writeResult_" + ToString(systemAbilityId));
+        SamgrXCollie samgrXCollie("samgrStub--unloadSa_writeResult_" + ToString(systemAbilityId));
         ret = reply.WriteInt32(result);
     }
     if (!ret) {
