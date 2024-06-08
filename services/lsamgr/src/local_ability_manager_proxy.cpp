@@ -260,12 +260,7 @@ bool LocalAbilityManagerProxy::SendStrategyToSA(int32_t type, int32_t systemAbil
         HILOG_ERROR(LOG_CORE, "SendStrategy SendRequest failed, return value : %{public}d", status);
         return false;
     }
-    bool result = false;
-    if (!reply.ReadBool(result)) {
-        HILOG_WARN(LOG_CORE, "SendStrategy read result failed!");
-        return false;
-    }
-    return result;
+    return true;
 }
 
 bool LocalAbilityManagerProxy::IpcStatCmdProc(int32_t fd, int32_t cmd)
