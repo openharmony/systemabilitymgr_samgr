@@ -2040,8 +2040,7 @@ int32_t SystemAbilityManager::SendStrategy(int32_t type, std::vector<int32_t>& s
             HILOGW("get process:%{public}s fail", Str16ToStr8(procName).c_str());
             return ERR_INVALID_VALUE;
         }
-        bool ret = procObject->SendStrategyToSA(type, saId, level, action);
-        HILOGI("SendStrategy %{public}d %{public}s", saId, ret ? "success" : "failed");
+        procObject->SendStrategyToSA(type, saId, level, action);
     }
     return ERR_OK;
 }
