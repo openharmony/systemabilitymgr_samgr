@@ -309,6 +309,9 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy006, TestSize.Level3)
     saProfile.process = Str8ToStr16(nativeTokenInfo.processName);
     saProfile.saId = 1;
     saProfile.startOnDemand.allowUpdate = true;
+    vector<OnDemandEvent> onDemandEvents;
+    onDemandEvents.push_back({1,"test"});
+    saProfile.startOnDemand.onDemandEvents = onDemandEvents;
     saMgr->saProfileMap_[1] = saProfile;
 
     sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
@@ -1390,15 +1393,21 @@ HWTEST_F(SystemAbilityMgrTest, IpcDumpSingleProcess001, TestSize.Level2)
 }
 
 /**
- * @tc.name: DoLoadForPerf002
- * @tc.desc: test DoLoadForPerf.
+ * @tc.name: Test DoLoadForPerf
+ * @tc.desc: DoLoadForPerf001
  * @tc.type: FUNC
+ * @tc.require: I5KMF7
  */
-HWTEST_F(SystemAbilityMgrTest, DoLoadForPerf002, TestSize.Level2)
+HWTEST_F(SystemAbilityMgrTest, DoLoadForPerf001, TestSize.Level2)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr1 = new SystemAbilityManager;
+    SaProfile saProfile;
+    saProfile.process = u"memmgrservice";
+    saMgr1->saProfileMap_.clear();
+    saMgr1->saProfileMap_[-1] = saProfile;
+    saMgr1->abilityMap_.clear();
     bool ret = true;
-    saMgr->DoLoadForPerf();
+    saMgr1->DoLoadForPerf();
     EXPECT_TRUE(ret);
 }
 

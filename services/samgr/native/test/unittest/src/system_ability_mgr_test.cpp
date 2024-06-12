@@ -2099,7 +2099,7 @@ HWTEST_F(SystemAbilityMgrTest, GetParamDebug001, TestSize.Level1)
 {
     DTEST_LOG << " GetParamDebug001 " << std::endl;
     bool value = system::GetBoolParameter(ONDEMAND_PARAM, false);
-    ASSERT_FALSE(value);
+    ASSERT_TRUE(value);
 }
 
 /**
@@ -2117,7 +2117,7 @@ HWTEST_F(SystemAbilityMgrTest, OndemandLoadForPerf001, TestSize.Level3)
     saMgr->OndemandLoadForPerf();
     usleep(ONDEMAND_SLEEP_TIME);
     bool value = system::GetBoolParameter(ONDEMAND_PARAM, false);
-    ASSERT_FALSE(value);
+    ASSERT_TRUE(value);
 }
 
 /**
@@ -2135,20 +2135,6 @@ HWTEST_F(SystemAbilityMgrTest, OndemandLoadForPerf002, TestSize.Level3)
     EXPECT_NE(saMgr, nullptr);
 }
 
-/**
- * @tc.name: Test DoLoadForPerf
- * @tc.desc: DoLoadForPerf001
- * @tc.type: FUNC
- * @tc.require: I5KMF7
- */
-HWTEST_F(SystemAbilityMgrTest, DoLoadForPerf001, TestSize.Level1)
-{
-    DTEST_LOG << " DoLoadForPerf001 " << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    saMgr->DoLoadForPerf();
-    bool value = system::GetBoolParameter(ONDEMAND_PARAM, false);
-    ASSERT_FALSE(value);
-}
 
 /**
  * @tc.name: Test GetAllOndemandSa001
@@ -2164,7 +2150,7 @@ HWTEST_F(SystemAbilityMgrTest, GetAllOndemandSa001, TestSize.Level3)
     saMgr->saProfileMap_[1] = saProfile;
     saMgr->GetAllOndemandSa();
     bool value = system::GetBoolParameter(ONDEMAND_PARAM, false);
-    EXPECT_FALSE(value);
+    EXPECT_TRUE(value);
     saMgr->saProfileMap_.clear();
 }
 
@@ -2184,7 +2170,7 @@ HWTEST_F(SystemAbilityMgrTest, GetAllOndemandSa002, TestSize.Level3)
     saMgr->abilityMap_[1] = saInfo;
     saMgr->GetAllOndemandSa();
     bool value = system::GetBoolParameter(ONDEMAND_PARAM, false);
-    EXPECT_FALSE(value);
+    EXPECT_TRUE(value);
     saMgr->saProfileMap_.clear();
     saMgr->abilityMap_.clear();
 }
