@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- *     http://www.apache.org/licenses/LICENSE-2.0
+ * http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -58,11 +58,11 @@ namespace system {
         return "";
     }
 
-    bool SetParameter(const std::string& key, const std::string& value)
+    bool SetParameter(const std::string &key, const std::string &value)
     {
         return true;
     }
-} 
+}
 namespace {
 constexpr int32_t SAID = 1234;
 constexpr int32_t OTHER_ON_DEMAND = 3;
@@ -80,8 +80,7 @@ constexpr int32_t ONDEMAND_SLEEP_TIME = 600 * 1000; // us
 constexpr int32_t MAX_COUNT = INT32_MAX - 1000000;
 constexpr int64_t ONDEMAND_EXTRA_DATA_ID = 1;
 
-void SaProfileStore(sptr<SystemAbilityManager>& saMgr,
-    map<int32_t, SaProfile>& saProfileMapTmp, int32_t maxLoop)
+void SaProfileStore(sptr<SystemAbilityManager> &saMgr, map<int32_t, SaProfile> &saProfileMapTmp, int32_t maxLoop)
 {
     for (int32_t loop = 0; loop < maxLoop; ++loop) {
         if (saMgr->saProfileMap_.count(SAID + loop) > 0) {
@@ -91,8 +90,7 @@ void SaProfileStore(sptr<SystemAbilityManager>& saMgr,
     return;
 }
 
-void SaProfileRecover(sptr<SystemAbilityManager>& saMgr,
-    map<int32_t, SaProfile> saProfileMapTmp, int32_t maxLoop)
+void SaProfileRecover(sptr<SystemAbilityManager> &saMgr, map<int32_t, SaProfile> saProfileMapTmp, int32_t maxLoop)
 {
     for (int32_t loop = 0; loop < maxLoop; ++loop) {
         if (saProfileMapTmp.count(SAID + loop) > 0) {
@@ -104,7 +102,7 @@ void SaProfileRecover(sptr<SystemAbilityManager>& saMgr,
     return;
 }
 
-void SaProfileExtensionTestPrevSet(sptr<SystemAbilityManager>& saMgr, int32_t maxLoop)
+void SaProfileExtensionTestPrevSet(sptr<SystemAbilityManager> &saMgr, int32_t maxLoop)
 {
     const int32_t mod_num = 2;
     std::vector<std::string> extensionVec = { "backup_test", "restore_test", "alpha", "beta" };
@@ -121,7 +119,7 @@ void SaProfileExtensionTestPrevSet(sptr<SystemAbilityManager>& saMgr, int32_t ma
     return;
 }
 
-void SaAbilityMapObjTestPrevSet(sptr<SystemAbilityManager>& saMgr, int32_t maxLoop)
+void SaAbilityMapObjTestPrevSet(sptr<SystemAbilityManager> &saMgr, int32_t maxLoop)
 {
     for (int32_t loop = 0; loop < maxLoop; ++loop) {
         if (loop == 0) {
@@ -136,7 +134,7 @@ void SaAbilityMapObjTestPrevSet(sptr<SystemAbilityManager>& saMgr, int32_t maxLo
     return;
 }
 
-void ProcMapObjTestPrevSet(sptr<SystemAbilityManager>& saMgr, int32_t maxLoop)
+void ProcMapObjTestPrevSet(sptr<SystemAbilityManager> &saMgr, int32_t maxLoop)
 {
     std::vector<std::string> extensionVec = { "backup_test", "restore_test", "alpha", "beta" };
     for (int32_t loop = 0; loop < maxLoop; ++loop) {
@@ -237,7 +235,6 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy003, TestSize.Level3)
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     int32_t systemAbilityId = 1;
     OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
-
     uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
     Security::AccessToken::NativeTokenInfo nativeTokenInfo;
     int32_t tokenInfoResult = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
@@ -245,7 +242,6 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy003, TestSize.Level3)
     saProfile.process = Str8ToStr16(nativeTokenInfo.processName);
     saProfile.startOnDemand.allowUpdate = false;
     saMgr->saProfileMap_[1] = saProfile;
-
     std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
     int32_t ret = saMgr->GetOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
     EXPECT_EQ(ERR_PERMISSION_DENIED, ret);
@@ -256,7 +252,6 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy004, TestSize.Level3)
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     int32_t systemAbilityId = 1;
     OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
-
     uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
     Security::AccessToken::NativeTokenInfo nativeTokenInfo;
     int32_t tokenInfoResult = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
@@ -264,10 +259,8 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy004, TestSize.Level3)
     saProfile.process = Str8ToStr16(nativeTokenInfo.processName);
     saProfile.startOnDemand.allowUpdate = true;
     saMgr->saProfileMap_[1] = saProfile;
-
     sptr<DeviceStatusCollectManager> collectManager = nullptr;
     saMgr->collectManager_ = collectManager;
-    
     std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
     int32_t ret = saMgr->GetOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
     EXPECT_EQ(ERR_INVALID_VALUE, ret);
@@ -279,7 +272,6 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy005, TestSize.Level3)
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     int32_t systemAbilityId = 1;
     OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
-
     uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
     Security::AccessToken::NativeTokenInfo nativeTokenInfo;
     int32_t tokenInfoResult = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
@@ -287,10 +279,8 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy005, TestSize.Level3)
     saProfile.process = Str8ToStr16(nativeTokenInfo.processName);
     saProfile.startOnDemand.allowUpdate = true;
     saMgr->saProfileMap_[1] = saProfile;
-
     sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
     saMgr->collectManager_ = collectManager;
-    
     std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
     int32_t ret = saMgr->GetOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
     EXPECT_EQ(ERR_INVALID_VALUE, ret);
@@ -301,7 +291,6 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy006, TestSize.Level3)
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     int32_t systemAbilityId = 1;
     OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
-
     uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
     Security::AccessToken::NativeTokenInfo nativeTokenInfo;
     int32_t tokenInfoResult = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
@@ -310,16 +299,13 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy006, TestSize.Level3)
     saProfile.saId = 1;
     saProfile.startOnDemand.allowUpdate = true;
     vector<OnDemandEvent> onDemandEvents;
-    onDemandEvents.push_back({1,"test"});
+    onDemandEvents.push_back({ 1, "test" });
     saProfile.startOnDemand.onDemandEvents = onDemandEvents;
     saMgr->saProfileMap_[1] = saProfile;
-
     sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
     collectManager->onDemandSaProfiles_.emplace_back(saProfile);
     saMgr->collectManager_ = collectManager;
-    
-    
-    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents ;
+    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
     int32_t ret = saMgr->GetOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
     EXPECT_EQ(ERR_OK, ret);
 }
@@ -1388,7 +1374,7 @@ HWTEST_F(SystemAbilityMgrTest, IpcDumpSingleProcess001, TestSize.Level2)
     uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
     Security::AccessToken::NativeTokenInfo nativeTokenInfo;
     int32_t tokenInfoResult = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
-    saMgr->IpcDumpSingleProcess(fd, cmd,nativeTokenInfo.processName);
+    saMgr->IpcDumpSingleProcess(fd, cmd, nativeTokenInfo.processName);
     EXPECT_TRUE(ret);
 }
 
@@ -1410,6 +1396,4 @@ HWTEST_F(SystemAbilityMgrTest, DoLoadForPerf001, TestSize.Level2)
     saMgr1->DoLoadForPerf();
     EXPECT_TRUE(ret);
 }
-
-
 } // namespace OHOS
