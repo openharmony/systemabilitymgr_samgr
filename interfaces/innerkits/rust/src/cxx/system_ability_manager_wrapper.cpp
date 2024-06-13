@@ -34,6 +34,8 @@
 namespace OHOS {
 namespace SamgrRust {
 
+static constexpr size_t MAX_RUST_STR_LEN = 1024;
+
 rust::Vec<rust::String> ListSystemAbilities()
 {
     auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -189,6 +191,10 @@ std::unique_ptr<UnSubscribeSystemAbilityHandler> SubscribeSystemAbility(int32_t 
 
 int32_t AddOnDemandSystemAbilityInfo(int32_t systemAbilityId, const rust::str localAbilityManagerName)
 {
+    if (localAbilityManagerName.length() > MAX_RUST_STR_LEN) {
+        return -1;
+    }
+
     auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (sysm == nullptr) {
         HILOGE("rust side get SystemAbilityManager failed");
@@ -286,7 +292,7 @@ rust::Vec<SystemProcessInfo> GetRunningSystemProcess()
     return res;
 }
 
-int32_t GetCommonEventExtraDataIdlist(int32_t saId, rust::Vec<int64_t>& extraDataIdList, const std::string& eventName)
+int32_t GetCommonEventExtraDataIdlist(int32_t saId, rust::Vec<int64_t> &extraDataIdList, const std::string &eventName)
 {
     auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (sysm == nullptr) {
