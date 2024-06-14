@@ -677,7 +677,8 @@ bool ParseUtil::CheckLogicRelationship(const std::string& state, const std::stri
             logicRelationship = LESS;
         }
     }
-    int32_t stateInt, profileInt;
+    int32_t stateInt;
+    int32_t profileInt;
     if (!StrToInt(profile.substr(valueStartPosition, profile.length() - 1), profileInt)) {
         return false;
     }

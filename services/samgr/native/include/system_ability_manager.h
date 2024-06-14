@@ -164,7 +164,7 @@ private:
     void DoInsertSaData(const std::u16string& name, const sptr<IRemoteObject>& ability, const SAExtraProp& extraProp);
     bool IsNameInValid(const std::u16string& name);
     int32_t StartOnDemandAbility(int32_t systemAbilityId, bool& isExist);
-	int32_t StartOnDemandAbilityLocked(int32_t systemAbilityId, bool& isExist);
+    int32_t StartOnDemandAbilityLocked(int32_t systemAbilityId, bool& isExist);
     void ParseRemoteSaName(const std::u16string& name, std::string& deviceId, std::u16string& saName);
     bool IsLocalDeviceId(const std::string& deviceId);
     bool CheckDistributedPermission();
@@ -190,7 +190,7 @@ private:
         const sptr<ISystemAbilityLoadCallback>& callback);
     void NotifySystemAbilityLoadFail(int32_t systemAbilityId, const sptr<ISystemAbilityLoadCallback>& callback);
     int32_t StartingSystemProcess(const std::u16string& name, int32_t systemAbilityId, const OnDemandEvent& event);
-	int32_t StartingSystemProcessLocked(const std::u16string& name, int32_t systemAbilityId,
+    int32_t StartingSystemProcessLocked(const std::u16string& name, int32_t systemAbilityId,
 	    const OnDemandEvent& event);
     void StartOnDemandAbility(const std::u16string& name, int32_t systemAbilityId);
 	void StartOnDemandAbilityLocked(const std::u16string& name, int32_t systemAbilityId);
