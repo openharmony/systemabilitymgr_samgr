@@ -4,7 +4,7 @@
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
  *
- * http://www.apache.org/licenses/LICENSE-2.0
+ *     http://www.apache.org/licenses/LICENSE-2.0
  *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
@@ -81,7 +81,7 @@ constexpr int32_t MAX_COUNT = INT32_MAX - 1000000;
 constexpr int64_t ONDEMAND_EXTRA_DATA_ID = 1;
 
 void SaProfileStore(sptr<SystemAbilityManager>& saMgr,
-    map<int32_t, SaProfile> &saProfileMapTmp, int32_t maxLoop)
+    map<int32_t, SaProfile>& saProfileMapTmp, int32_t maxLoop)
 {
     for (int32_t loop = 0; loop < maxLoop; ++loop) {
         if (saMgr->saProfileMap_.count(SAID + loop) > 0) {
