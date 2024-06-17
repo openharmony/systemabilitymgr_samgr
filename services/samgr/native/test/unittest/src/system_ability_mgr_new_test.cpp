@@ -33,6 +33,8 @@
 #include "system_ability_manager.h"
 #ifdef SUPPORT_COMMON_EVENT
 #include "common_event_collect.h"
+#include "ipc_skeleton.h"
+#include "accesstoken_kit.h"
 #endif
 
 using namespace std;
@@ -41,6 +43,26 @@ using namespace testing::ext;
 using namespace OHOS;
 
 namespace OHOS {
+namespace system {
+    /*
+    * Returns true if the system parameter `key` has the value "1", "y", "yes", "on", or "true",
+    * false for "0", "n", "no", "off", or "false", or `def` otherwise.
+    */
+    bool GetBoolParameter(const std::string &key, bool def)
+    {
+        return true;
+    }
+
+    std::string GetParameter(const std::string &key, const std::string &def)
+    {
+        return "";
+    }
+
+    bool SetParameter(const std::string &key, const std::string &value)
+    {
+        return true;
+    }
+}
 namespace {
 constexpr int32_t SAID = 1234;
 constexpr int32_t OTHER_ON_DEMAND = 3;
@@ -209,6 +231,87 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy002, TestSize.Level3)
     int32_t ret = saMgr->GetOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
     EXPECT_EQ(ERR_INVALID_VALUE, ret);
 }
+
+HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy003, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t systemAbilityId = 1;
+    OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
+    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    Security::AccessToken::NativeTokenInfo nativeTokenInfo;
+    int32_t tokenInfoResult = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
+    SaProfile saProfile;
+    saProfile.process = Str8ToStr16(nativeTokenInfo.processName);
+    saProfile.startOnDemand.allowUpdate = false;
+    saMgr->saProfileMap_[1] = saProfile;
+    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
+    int32_t ret = saMgr->GetOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
+    EXPECT_EQ(ERR_PERMISSION_DENIED, ret);
+}
+
+HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy004, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t systemAbilityId = 1;
+    OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
+    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    Security::AccessToken::NativeTokenInfo nativeTokenInfo;
+    int32_t tokenInfoResult = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
+    SaProfile saProfile;
+    saProfile.process = Str8ToStr16(nativeTokenInfo.processName);
+    saProfile.startOnDemand.allowUpdate = true;
+    saMgr->saProfileMap_[1] = saProfile;
+    sptr<DeviceStatusCollectManager> collectManager = nullptr;
+    saMgr->collectManager_ = collectManager;
+    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
+    int32_t ret = saMgr->GetOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
+    EXPECT_EQ(ERR_INVALID_VALUE, ret);
+}
+
+
+HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy005, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t systemAbilityId = 1;
+    OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
+    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    Security::AccessToken::NativeTokenInfo nativeTokenInfo;
+    int32_t tokenInfoResult = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
+    SaProfile saProfile;
+    saProfile.process = Str8ToStr16(nativeTokenInfo.processName);
+    saProfile.startOnDemand.allowUpdate = true;
+    saMgr->saProfileMap_[1] = saProfile;
+    sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
+    saMgr->collectManager_ = collectManager;
+    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
+    int32_t ret = saMgr->GetOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
+    EXPECT_EQ(ERR_INVALID_VALUE, ret);
+}
+
+HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy006, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t systemAbilityId = 1;
+    OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
+    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    Security::AccessToken::NativeTokenInfo nativeTokenInfo;
+    int32_t tokenInfoResult = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
+    SaProfile saProfile;
+    saProfile.process = Str8ToStr16(nativeTokenInfo.processName);
+    saProfile.saId = 1;
+    saProfile.startOnDemand.allowUpdate = true;
+    vector<OnDemandEvent> onDemandEvents;
+    onDemandEvents.push_back({ 1, "test" });
+    saProfile.startOnDemand.onDemandEvents = onDemandEvents;
+    saMgr->saProfileMap_[1] = saProfile;
+    sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
+    collectManager->onDemandSaProfiles_.emplace_back(saProfile);
+    saMgr->collectManager_ = collectManager;
+    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
+    int32_t ret = saMgr->GetOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
+    EXPECT_EQ(ERR_OK, ret);
+}
+
 
 /**
  * @tc.name: UpdateOnDemandPolicy001
@@ -1171,6 +1274,25 @@ HWTEST_F(SystemAbilityMgrTest, IpcDumpProc001, TestSize.Level2)
 }
 
 /**
+ * @tc.name: IpcDumpProc002
+ * @tc.desc: test IpcDumpProc.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, IpcDumpProc002, TestSize.Level2)
+{
+    SamMockPermission::MockProcess("hidumper_service");
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t cmd = -1;
+    int32_t fd = 1;
+    std::vector<std::string> args;
+    args.push_back("abc");
+    args.push_back("abcd");
+    args.push_back("--start-stat");
+    int ret = saMgr->IpcDumpProc(fd, args);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
  * @tc.name: IpcStatSamgrProc001
  * @tc.desc: test IpcStatSamgrProc.
  * @tc.type: FUNC
@@ -1207,5 +1329,73 @@ HWTEST_F(SystemAbilityMgrTest, IpcStatSamgrProc002, TestSize.Level2)
     int32_t fmd = 4;
     bool result = saMgr->IpcStatSamgrProc(fd, fmd);
     EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: IpcDumpAllProcess001
+ * @tc.desc: test IpcDumpAllProcess.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, IpcDumpAllProcess001, TestSize.Level2)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t cmd = IPC_STAT_CMD_START;
+    int32_t fd = 1;
+    bool ret = true;
+    saMgr->IpcDumpAllProcess(fd, cmd);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: IpcDumpSamgrProcess001
+ * @tc.desc: test IpcDumpSamgrProcess.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, IpcDumpSamgrProcess001, TestSize.Level2)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t cmd = IPC_STAT_CMD_START;
+    int32_t fd = 1;
+    bool ret = true;
+    saMgr->IpcDumpSamgrProcess(fd, cmd);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: IpcDumpSingleProcess001
+ * @tc.desc: test IpcDumpSingleProcess.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, IpcDumpSingleProcess001, TestSize.Level2)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t cmd = IPC_STAT_CMD_START;
+    int32_t fd = 1;
+    bool ret = true;
+
+    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    Security::AccessToken::NativeTokenInfo nativeTokenInfo;
+    int32_t tokenInfoResult = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
+    saMgr->IpcDumpSingleProcess(fd, cmd, nativeTokenInfo.processName);
+    EXPECT_TRUE(ret);
+}
+
+/**
+ * @tc.name: Test DoLoadForPerf
+ * @tc.desc: DoLoadForPerf001
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrTest, DoLoadForPerf001, TestSize.Level2)
+{
+    sptr<SystemAbilityManager> saMgr1 = new SystemAbilityManager;
+    SaProfile saProfile;
+    saProfile.process = u"memmgrservice";
+    saMgr1->saProfileMap_.clear();
+    saMgr1->saProfileMap_[-1] = saProfile;
+    saMgr1->abilityMap_.clear();
+    bool ret = true;
+    saMgr1->DoLoadForPerf();
+    EXPECT_TRUE(ret);
 }
 } // namespace OHOS
