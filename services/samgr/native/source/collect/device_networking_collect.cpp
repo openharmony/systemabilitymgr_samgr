@@ -192,21 +192,16 @@ void DeviceInitCallBack::OnRemoteDied()
 void DeviceStateCallback::OnDeviceOnline(const DmDeviceInfo& deviceInfo)
 {
     HILOGI("DeviceNetworkingCollect OnDeviceOnline size %{public}zu", deviceOnlineSet_.size());
-    bool isOnline = false;
     {
         lock_guard<mutex> autoLock(deviceOnlineLock_);
-        isOnline = deviceOnlineSet_.empty();
         deviceOnlineSet_.emplace(deviceInfo.networkId);
     }
-    if (isOnline) {
+
+    if (collect_ != nullptr) {
         OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
-        if (collect_ != nullptr) {
-            collect_->ReportEvent(event);
-        } else {
-            HILOGE("OnDeviceOnline collect_ isnull");
-        }
+        collect_->ReportEvent(event);
     } else {
-        HILOGI("OnDeviceOnline not report size %{public}zu", deviceOnlineSet_.size());
+        HILOGE("OnDeviceOnline collect_ isnull");
     }
 }
 
@@ -218,9 +213,6 @@ void DeviceStateCallback::OnDeviceOffline(const DmDeviceInfo& deviceInfo)
         lock_guard<mutex> autoLock(deviceOnlineLock_);
         deviceOnlineSet_.erase(deviceInfo.networkId);
         isOffline = deviceOnlineSet_.empty();
-        if (isOffline) {
-            isExistDeviceReady_ = false;
-        }
     }
     if (isOffline) {
         OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "off" };
@@ -261,12 +253,12 @@ void DeviceStateCallback::OnDeviceReady(const DmDeviceInfo& deviceInfo)
 {
     HILOGI("DeviceNetworkingCollect DeviceStateCallback OnDeviceReady");
     lock_guard<mutex> autoLock(deviceOnlineLock_);
-    if (!isExistDeviceReady_) {
-        OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "ready" };
-        if (collect_ != nullptr) {
-            collect_->ReportEvent(event);
-        }
-        isExistDeviceReady_ = true;
+    OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "ready" };
+
+    if (collect_ != nullptr) {
+        collect_->ReportEvent(event);
+    } else {
+        HILOGE("OnDeviceOnline collect_ isnull");
     }
 }
 
