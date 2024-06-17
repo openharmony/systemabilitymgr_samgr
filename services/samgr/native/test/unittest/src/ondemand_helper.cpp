@@ -720,7 +720,6 @@ static void TestCommonEvent(OHOS::OnDemandHelper& ondemandHelper)
     cout << "please input common event test case(1 get/2 get_with_event)" << endl;
     cin >> cmd;
     int32_t saId = 0;
-    std::string deviceId = ondemandHelper.GetFirstDevice();
     cout << "please input systemAbilityId for " << cmd << " operation" << endl;
     cin >> saId;
     if (cmd == "1") {
