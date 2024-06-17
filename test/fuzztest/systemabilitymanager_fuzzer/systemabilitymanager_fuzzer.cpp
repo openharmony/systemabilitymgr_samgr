@@ -65,9 +65,9 @@ void FuzzSystemAbilityManager(const uint8_t* rawData, size_t size)
     MessageParcel reply;
     MessageOption option;
     sptr<SystemAbilityManager> manager = SystemAbilityManager::GetInstance();
-    if (!flag_) {
+    if (!g_flag) {
         sleep(INIT_TIME);
-        flag_ = true;
+        g_flag = true;
     } else {
         manager->SetFfrt();
     }
