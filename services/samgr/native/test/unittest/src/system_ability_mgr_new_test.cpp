@@ -80,7 +80,8 @@ constexpr int32_t ONDEMAND_SLEEP_TIME = 600 * 1000; // us
 constexpr int32_t MAX_COUNT = INT32_MAX - 1000000;
 constexpr int64_t ONDEMAND_EXTRA_DATA_ID = 1;
 
-void SaProfileStore(sptr<SystemAbilityManager> &saMgr, map<int32_t, SaProfile> &saProfileMapTmp, int32_t maxLoop)
+void SaProfileStore(sptr<SystemAbilityManager>& saMgr,
+    map<int32_t, SaProfile> &saProfileMapTmp, int32_t maxLoop)
 {
     for (int32_t loop = 0; loop < maxLoop; ++loop) {
         if (saMgr->saProfileMap_.count(SAID + loop) > 0) {
@@ -90,7 +91,8 @@ void SaProfileStore(sptr<SystemAbilityManager> &saMgr, map<int32_t, SaProfile> &
     return;
 }
 
-void SaProfileRecover(sptr<SystemAbilityManager> &saMgr, map<int32_t, SaProfile> saProfileMapTmp, int32_t maxLoop)
+void SaProfileRecover(sptr<SystemAbilityManager>& saMgr,
+    map<int32_t, SaProfile> saProfileMapTmp, int32_t maxLoop)
 {
     for (int32_t loop = 0; loop < maxLoop; ++loop) {
         if (saProfileMapTmp.count(SAID + loop) > 0) {
@@ -102,7 +104,7 @@ void SaProfileRecover(sptr<SystemAbilityManager> &saMgr, map<int32_t, SaProfile>
     return;
 }
 
-void SaProfileExtensionTestPrevSet(sptr<SystemAbilityManager> &saMgr, int32_t maxLoop)
+void SaProfileExtensionTestPrevSet(sptr<SystemAbilityManager>& saMgr, int32_t maxLoop)
 {
     const int32_t mod_num = 2;
     std::vector<std::string> extensionVec = { "backup_test", "restore_test", "alpha", "beta" };
@@ -119,7 +121,7 @@ void SaProfileExtensionTestPrevSet(sptr<SystemAbilityManager> &saMgr, int32_t ma
     return;
 }
 
-void SaAbilityMapObjTestPrevSet(sptr<SystemAbilityManager> &saMgr, int32_t maxLoop)
+void SaAbilityMapObjTestPrevSet(sptr<SystemAbilityManager>& saMgr, int32_t maxLoop)
 {
     for (int32_t loop = 0; loop < maxLoop; ++loop) {
         if (loop == 0) {
@@ -134,7 +136,7 @@ void SaAbilityMapObjTestPrevSet(sptr<SystemAbilityManager> &saMgr, int32_t maxLo
     return;
 }
 
-void ProcMapObjTestPrevSet(sptr<SystemAbilityManager> &saMgr, int32_t maxLoop)
+void ProcMapObjTestPrevSet(sptr<SystemAbilityManager>& saMgr, int32_t maxLoop)
 {
     std::vector<std::string> extensionVec = { "backup_test", "restore_test", "alpha", "beta" };
     for (int32_t loop = 0; loop < maxLoop; ++loop) {
