@@ -197,8 +197,8 @@ void DeviceStateCallback::OnDeviceOnline(const DmDeviceInfo& deviceInfo)
         deviceOnlineSet_.emplace(deviceInfo.networkId);
     }
 
-    OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
     if (collect_ != nullptr) {
+        OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
         collect_->ReportEvent(event);
     } else {
         HILOGE("OnDeviceOnline collect_ isnull");
