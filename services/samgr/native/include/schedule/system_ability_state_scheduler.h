@@ -76,7 +76,7 @@ private:
     int32_t SendDelayUnloadEventLocked(uint32_t systemAbilityId, int32_t delayTime = UNLOAD_DELAY_TIME);
     int32_t RemoveDelayUnloadEventLocked(uint32_t systemAbilityId);
     int32_t ProcessDelayUnloadEvent(int32_t systemAbilityId);
-	int32_t ProcessDelayUnloadEventLocked(int32_t systemAbilityId);
+    int32_t ProcessDelayUnloadEventLocked(int32_t systemAbilityId);
 
     int32_t PendLoadEventLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext,
         const LoadRequestInfo& loadRequestInfo);
@@ -104,7 +104,7 @@ private:
 
     int32_t TryKillSystemProcess(const std::shared_ptr<SystemProcessContext>& processContext);
     bool CanKillSystemProcess(const std::shared_ptr<SystemProcessContext>& processContext);
-	bool CanKillSystemProcessLocked(const std::shared_ptr<SystemProcessContext>& processContext);
+    bool CanKillSystemProcessLocked(const std::shared_ptr<SystemProcessContext>& processContext);
     int32_t KillSystemProcessLocked(const std::shared_ptr<SystemProcessContext>& processContext);
 
     bool CanRestartProcessLocked(const std::shared_ptr<SystemProcessContext>& processContext);

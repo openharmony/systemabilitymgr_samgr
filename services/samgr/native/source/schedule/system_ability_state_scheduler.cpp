@@ -500,7 +500,7 @@ bool SystemAbilityStateScheduler::CanUnloadAllSystemAbility(
     const std::shared_ptr<SystemProcessContext>& processContext)
 {
     std::shared_lock<std::shared_mutex> sharedLock(processContext->stateCountLock);
-	return CanUnloadAllSystemAbilityLocked(processContext, true);
+    return CanUnloadAllSystemAbilityLocked(processContext, true);
 }
 
 bool SystemAbilityStateScheduler::CanUnloadAllSystemAbilityLocked(
@@ -683,7 +683,7 @@ bool SystemAbilityStateScheduler::CanKillSystemProcess(
     const std::shared_ptr<SystemProcessContext>& processContext)
 {
     std::shared_lock<std::shared_mutex> sharedLock(processContext->stateCountLock);
-	return CanKillSystemProcessLocked(processContext);
+    return CanKillSystemProcessLocked(processContext);
 }
 
 bool SystemAbilityStateScheduler::CanKillSystemProcessLocked(
@@ -1072,7 +1072,7 @@ int32_t SystemAbilityStateScheduler::ProcessDelayUnloadEvent(int32_t systemAbili
         return ERR_INVALID_VALUE;
     }
     std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
-	return ProcessDelayUnloadEventLocked(systemAbilityId);
+    return ProcessDelayUnloadEventLocked(systemAbilityId);
 }
 
 int32_t SystemAbilityStateScheduler::ProcessDelayUnloadEventLocked(int32_t systemAbilityId)
@@ -1129,7 +1129,8 @@ void SystemAbilityStateScheduler::UnloadEventHandler::ProcessEvent(uint32_t even
     }
 }
 
-bool SystemAbilityStateScheduler::UnloadEventHandler::SendEvent(uint32_t eventId, int64_t extraDataId, uint64_t delayTime)
+bool SystemAbilityStateScheduler::UnloadEventHandler::SendEvent(uint32_t eventId,
+    int64_t extraDataId, uint64_t delayTime)
 {
     if (handler_ == nullptr) {
         HILOGE("SystemAbilityStateScheduler SendEvent handler is null!");

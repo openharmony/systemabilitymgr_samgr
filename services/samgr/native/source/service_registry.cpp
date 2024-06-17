@@ -26,7 +26,6 @@
 #include "iremote_proxy.h"
 #include "message_option.h"
 #include "message_parcel.h"
-#include "parcel_helper.h"
 #include "refbase.h"
 #include "sam_log.h"
 #include "string_ex.h"
@@ -75,10 +74,22 @@ public:
     {
         HILOGI("%{public}s called", __func__);
         MessageParcel data;
-        PARCEL_WRITE_HELPER_RET(data, Int32, MASK, nullptr);
-        PARCEL_WRITE_HELPER_RET(data, Int32, INTERFACE_TOKEN, nullptr);
-        PARCEL_WRITE_HELPER_RET(data, String16, IServiceRegistry::GetDescriptor(), nullptr);
-        PARCEL_WRITE_HELPER_RET(data, String16, name.data(), nullptr);
+        if (!data.WriteInt32(MASK)) {
+            HILOGE("%{public}s write MASK failed!", __func__);
+            return nullptr;
+        }
+        if (!data.WriteInt32(INTERFACE_TOKEN)) {
+            HILOGE("%{public}s write INTERFACE_TOKEN failed!", __func__);
+            return nullptr;
+        }
+        if (!data.WriteString16(IServiceRegistry::GetDescriptor())) {
+            HILOGE("%{public}s write Descriptor failed!", __func__);
+            return nullptr;
+        }
+        if (!data.WriteString16(name.data())) {
+            HILOGE("%{public}s write name failed!", __func__);
+            return nullptr;
+        }
         sptr<IRemoteObject> remote = Remote();
         if (remote == nullptr) {
             HILOGE("ServiceRegistryProxy::CheckService remote is nullptr !");
@@ -96,13 +107,34 @@ public:
     {
         HILOGD("%{public}s called", __func__);
         MessageParcel data;
-        PARCEL_WRITE_HELPER_RET(data, Int32, MASK, ERR_FLATTEN_OBJECT);
-        PARCEL_WRITE_HELPER_RET(data, Int32, INTERFACE_TOKEN, ERR_FLATTEN_OBJECT);
-        PARCEL_WRITE_HELPER_RET(data, String16, IServiceRegistry::GetDescriptor(), ERR_FLATTEN_OBJECT);
-        PARCEL_WRITE_HELPER_RET(data, String16, name.data(), ERR_FLATTEN_OBJECT);
-        PARCEL_WRITE_HELPER_RET(data, RemoteObject, service, ERR_FLATTEN_OBJECT);
-        PARCEL_WRITE_HELPER_RET(data, Int32, (allowIsolated ? 1 : 0), ERR_FLATTEN_OBJECT);
-        PARCEL_WRITE_HELPER_RET(data, Int32, dumpsysPriority, ERR_FLATTEN_OBJECT);
+        if (!data.WriteInt32(MASK)) {
+            HILOGE("%{public}s write MASK failed!", __func__);
+            return ERR_FLATTEN_OBJECT;
+        }
+        if (!data.WriteInt32(INTERFACE_TOKEN)) {
+            HILOGE("%{public}s write INTERFACE_TOKEN failed!", __func__);
+            return ERR_FLATTEN_OBJECT;
+        }
+        if (!data.WriteString16(IServiceRegistry::GetDescriptor())) {
+            HILOGE("%{public}s write Descriptor failed!", __func__);
+            return ERR_FLATTEN_OBJECT;
+        }
+        if (!data.WriteString16(name.data())) {
+            HILOGE("%{public}s write name failed!", __func__);
+            return ERR_FLATTEN_OBJECT;
+        }
+        if (!data.WriteRemoteObject(service)) {
+            HILOGE("%{public}s write RemoteObject failed!", __func__);
+            return ERR_FLATTEN_OBJECT;
+        }
+        if (!data.WriteInt32((allowIsolated ? 1 : 0))) {
+            HILOGE("%{public}s write allowIsolated failed!", __func__);
+            return ERR_FLATTEN_OBJECT;
+        }
+        if (!data.WriteInt32(dumpsysPriority)) {
+            HILOGE("%{public}s write dumpsysPriority failed!", __func__);
+            return ERR_FLATTEN_OBJECT;
+        }
         sptr<IRemoteObject> remote = Remote();
         if (remote == nullptr) {
             HILOGE("ServiceRegistryProxy::AddService remote is nullptr !");
