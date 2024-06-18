@@ -1083,7 +1083,7 @@ HWTEST_F(SystemAbilityMgrStubTest, LoadRemoteSystemAbilityInner005, TestSize.Lev
     EXPECT_TRUE(saMgr != nullptr);
     MessageParcel data;
     MessageParcel reply;
-    data.WriteInt32(INVALID_SAID);    
+    data.WriteInt32(INVALID_SAID);
     int32_t result = saMgr->LoadRemoteSystemAbilityInner(data, reply);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
 }
