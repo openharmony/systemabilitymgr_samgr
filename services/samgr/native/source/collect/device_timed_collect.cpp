@@ -226,6 +226,9 @@ int64_t DeviceTimedCollect::CalculateDelayTime(const std::string& timeString)
     std::tm inputTime;
     strptime(const_cast<char*>(timeString.c_str()), "%Y-%m-%d-%H:%M:%S", &inputTime);
     std::time_t orderTime = mktime(&inputTime);
+    if (orderTime == -1) {
+        return -1;
+    }
     int64_t timeGap = orderTime - time(nullptr);
     return timeGap;
 }
