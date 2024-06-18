@@ -193,7 +193,7 @@ private:
     int32_t StartingSystemProcessLocked(const std::u16string& name, int32_t systemAbilityId,
 	    const OnDemandEvent& event);
     void StartOnDemandAbility(const std::u16string& name, int32_t systemAbilityId);
-	void StartOnDemandAbilityLocked(const std::u16string& name, int32_t systemAbilityId);
+    void StartOnDemandAbilityLocked(const std::u16string& name, int32_t systemAbilityId);
     int32_t StartOnDemandAbilityInner(const std::u16string& name, int32_t systemAbilityId, AbilityItem& abilityItem);
     int32_t StartDynamicSystemProcess(const std::u16string& name, int32_t systemAbilityId, const OnDemandEvent& event);
     bool StopOnDemandAbility(const std::u16string& name, int32_t systemAbilityId, const OnDemandEvent& event);
