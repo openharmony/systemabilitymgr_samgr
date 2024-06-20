@@ -167,20 +167,13 @@ bool CommonEventCollect::CreateCommonEventSubscriber()
 
 bool CommonEventCollect::CreateCommonEventSubscriberLocked()
 {
-    EventFwk::MatchingSkills skill;
     if (commonEventSubscriber_ != nullptr) {
-        skill = commonEventSubscriber_->GetSubscribeInfo().GetMatchingSkills();
-        AddSkillsEvent(skill);
-        bool isUnsubscribe = EventFwk::CommonEventManager::UnSubscribeCommonEvent(commonEventSubscriber_);
-        if (!isUnsubscribe) {
-            HILOGE("OnAddSystemAbility isUnsubscribe failed!");
-        }
-    } else {
-        skill = EventFwk::MatchingSkills();
-        AddSkillsEvent(skill);
-        EventFwk::CommonEventSubscribeInfo info(skill);
-        commonEventSubscriber_ = std::make_shared<CommonEventSubscriber>(info, this);
+        commonEventSubscriber_.reset();
     }
+    EventFwk::MatchingSkills skill = EventFwk::MatchingSkills();
+    AddSkillsEvent(skill);
+    EventFwk::CommonEventSubscribeInfo info(skill);
+    commonEventSubscriber_ = std::make_shared<CommonEventSubscriber>(info, this);
     return EventFwk::CommonEventManager::SubscribeCommonEvent(commonEventSubscriber_);
 }
 
