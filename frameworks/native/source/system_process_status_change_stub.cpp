@@ -27,9 +27,9 @@ namespace OHOS {
 SystemProcessStatusChangeStub::SystemProcessStatusChangeStub()
 {
     memberFuncMap_[ON_SYSTEM_PROCESS_STARTED] =
-        &SystemProcessStatusChangeStub::OnSystemProcessStartedInner;
+        SystemProcessStatusChangeStub::onSystemProcessStartedInner;
     memberFuncMap_[ON_SYSTEM_PROCESS_STOPPED] =
-        &SystemProcessStatusChangeStub::OnSystemProcessStoppedInner;
+        SystemProcessStatusChangeStub::onSystemProcessStoppedInner;
 }
 
 int32_t SystemProcessStatusChangeStub::OnRemoteRequest(uint32_t code,
@@ -42,10 +42,7 @@ int32_t SystemProcessStatusChangeStub::OnRemoteRequest(uint32_t code,
     }
     auto iter = memberFuncMap_.find(code);
     if (iter != memberFuncMap_.end()) {
-        auto memberFunc = iter->second;
-        if (memberFunc != nullptr) {
-            return (this->*memberFunc)(data, reply);
-        }
+        return iter->second(this, data, reply);
     }
     HILOGW("unknown request code!");
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
