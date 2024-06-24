@@ -34,9 +34,9 @@ constexpr int32_t LAST_SYS_ABILITY_ID = 0x00ffffff;
 SystemAbilityStatusChangeStub::SystemAbilityStatusChangeStub()
 {
     memberFuncMap_[ON_ADD_SYSTEM_ABILITY] =
-        &SystemAbilityStatusChangeStub::OnAddSystemAbilityInner;
+        SystemAbilityStatusChangeStub::LocalOnAddSystemAbility;
     memberFuncMap_[ON_REMOVE_SYSTEM_ABILITY] =
-        &SystemAbilityStatusChangeStub::OnRemoveSystemAbilityInner;
+        SystemAbilityStatusChangeStub::LocalOnRemoveSystemAbility;
 }
 
 int32_t SystemAbilityStatusChangeStub::OnRemoteRequest(uint32_t code,
@@ -49,10 +49,7 @@ int32_t SystemAbilityStatusChangeStub::OnRemoteRequest(uint32_t code,
     }
     auto iter = memberFuncMap_.find(code);
     if (iter != memberFuncMap_.end()) {
-        auto memberFunc = iter->second;
-        if (memberFunc != nullptr) {
-            return (this->*memberFunc)(data, reply);
-        }
+        return iter->second(this, data, reply);
     }
     HILOGW("unknown request code!");
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);

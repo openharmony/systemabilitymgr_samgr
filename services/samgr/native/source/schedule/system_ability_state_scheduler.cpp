@@ -1347,7 +1347,7 @@ bool SystemAbilityStateScheduler::UnloadEventHandler::SendEvent(uint32_t eventId
         HILOGE("SystemAbilityStateScheduler SendEvent handler is null!");
         return false;
     }
-    auto task = std::bind(&SystemAbilityStateScheduler::UnloadEventHandler::ProcessEvent, this, eventId);
+    auto task = [this, eventId] {this->ProcessEvent(eventId);};
     return handler_->PostTask(task, std::to_string(eventId), delayTime);
 }
 
