@@ -27,15 +27,15 @@ public:
     ~SystemProcessStatusChangeStub() = default;
     int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 private:
-    static int32_t onSystemProcessStartedInner(SystemProcessStatusChangeStub *stub,
+    static int32_t LocalSystemProcessStarted(SystemProcessStatusChangeStub *stub,
         MessageParcel& data, MessageParcel& reply)
     {
-        return stub->OnSystemProcessStartedInner(data, reply);
+        return stub->LocalSystemProcessStarted(data, reply);
     }
-    static int32_t onSystemProcessStoppedInner(SystemProcessStatusChangeStub *stub,
+    static int32_t LocalSystemProcessStopped(SystemProcessStatusChangeStub *stub,
         MessageParcel& data, MessageParcel& reply)
     {
-        return stub->OnSystemProcessStoppedInner(data, reply);
+        return stub->LocalSystemProcessStopped(data, reply);
     }
     int32_t OnSystemProcessStartedInner(MessageParcel& data, MessageParcel& reply);
     int32_t OnSystemProcessStoppedInner(MessageParcel& data, MessageParcel& reply);
