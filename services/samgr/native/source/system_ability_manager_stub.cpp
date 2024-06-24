@@ -110,47 +110,47 @@ constexpr const char *EXT_TRANSACTION_PERMISSION = "ohos.permission.ACCESS_EXT_S
 void SystemAbilityManagerStub::SetAbilityFuncMap()
 {
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_SYSTEM_ABILITY_TRANSACTION)] =
-        SystemAbilityManagerStub::_GetSystemAbilityInner;
+        SystemAbilityManagerStub::GetSystemAbilityInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::CHECK_SYSTEM_ABILITY_TRANSACTION)] =
-        SystemAbilityManagerStub::_CheckSystemAbilityInner;
+        SystemAbilityManagerStub::CheckSystemAbilityInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::ADD_SYSTEM_ABILITY_TRANSACTION)] =
-        SystemAbilityManagerStub::_AddSystemAbilityInner;
+        SystemAbilityManagerStub::AddSystemAbilityInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::REMOVE_SYSTEM_ABILITY_TRANSACTION)] =
-        SystemAbilityManagerStub::_RemoveSystemAbilityInner;
+        SystemAbilityManagerStub::RemoveSystemAbilityInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::LIST_SYSTEM_ABILITY_TRANSACTION)] =
-        SystemAbilityManagerStub::_ListSystemAbilityInner;
+        SystemAbilityManagerStub::ListSystemAbilityInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::SUBSCRIBE_SYSTEM_ABILITY_TRANSACTION)] =
-        SystemAbilityManagerStub::_SubsSystemAbilityInner;
+        SystemAbilityManagerStub::SubsSystemAbilityInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::CHECK_REMOTE_SYSTEM_ABILITY_TRANSACTION)] =
-        SystemAbilityManagerStub::_CheckRemtSystemAbilityInner;
+        SystemAbilityManagerStub::CheckRemtSystemAbilityInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::ADD_ONDEMAND_SYSTEM_ABILITY_TRANSACTION)] =
-        SystemAbilityManagerStub::_AddOndemandSystemAbilityInner;
+        SystemAbilityManagerStub::AddOndemandSystemAbilityInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::CHECK_SYSTEM_ABILITY_IMMEDIATELY_TRANSACTION)] =
-        SystemAbilityManagerStub::_CheckSystemAbilityImmeInner;
+        SystemAbilityManagerStub::CheckSystemAbilityImmeInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::UNSUBSCRIBE_SYSTEM_ABILITY_TRANSACTION)] =
-        SystemAbilityManagerStub::_UnSubsSystemAbilityInner;
+        SystemAbilityManagerStub::UnSubsSystemAbilityInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::LOAD_SYSTEM_ABILITY_TRANSACTION)] =
-        SystemAbilityManagerStub::_LoadSystemAbilityInner;
+        SystemAbilityManagerStub::LoadSystemAbilityInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::LOAD_REMOTE_SYSTEM_ABILITY_TRANSACTION)] =
-        SystemAbilityManagerStub::_LoadRemoteSystemAbilityInner;
+        SystemAbilityManagerStub::LoadRemoteSystemAbilityInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::UNLOAD_SYSTEM_ABILITY_TRANSACTION)] =
-        SystemAbilityManagerStub::_UnloadSystemAbilityInner;
+        SystemAbilityManagerStub::UnloadSystemAbilityInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::CANCEL_UNLOAD_SYSTEM_ABILITY_TRANSACTION)] =
-        SystemAbilityManagerStub::_CancelUnloadSystemAbilityInner;
+        SystemAbilityManagerStub::CancelUnloadSystemAbilityInner;
 }
 
 void SystemAbilityManagerStub::SetProcessFuncMap()
 {
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::ADD_SYSTEM_PROCESS_TRANSACTION)] =
-        SystemAbilityManagerStub::_AddSystemProcessInner;
+        SystemAbilityManagerStub::AddSystemProcessInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_SYSTEM_PROCESS_INFO_TRANSACTION)] =
-        SystemAbilityManagerStub::_GetSystemProcessInfoInner;
+        SystemAbilityManagerStub::GetSystemProcessInfoInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_RUNNING_SYSTEM_PROCESS_TRANSACTION)] =
-        SystemAbilityManagerStub::_GetRunningSystemProcessInner;
+        SystemAbilityManagerStub::GetRunningSystemProcessInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::SUBSCRIBE_SYSTEM_PROCESS_TRANSACTION)] =
-        SystemAbilityManagerStub::_SubscribeSystemProcessInner;
+        SystemAbilityManagerStub::SubscribeSystemProcessInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::UNSUBSCRIBE_SYSTEM_PROCESS_TRANSACTION)] =
-        SystemAbilityManagerStub::_UnSubscribeSystemProcessInner;
+        SystemAbilityManagerStub::UnSubscribeSystemProcessInner;
 }
 
 SystemAbilityManagerStub::SystemAbilityManagerStub()
@@ -158,25 +158,25 @@ SystemAbilityManagerStub::SystemAbilityManagerStub()
     SetAbilityFuncMap();
     SetProcessFuncMap();
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_ONDEMAND_REASON_EXTRA_DATA_TRANSACTION)] =
-        SystemAbilityManagerStub::_GetOnDemandReasonExtraDataInner;
+        SystemAbilityManagerStub::GetOnDemandReasonExtraDataInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_ONDEAMND_POLICY_TRANSACTION)] =
-        SystemAbilityManagerStub::_GetOnDemandPolicyInner;
+        SystemAbilityManagerStub::GetOnDemandPolicyInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::UPDATE_ONDEAMND_POLICY_TRANSACTION)] =
-        SystemAbilityManagerStub::_UpdateOnDemandPolicyInner;
+        SystemAbilityManagerStub::UpdateOnDemandPolicyInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_ONDEMAND_SYSTEM_ABILITY_IDS_TRANSACTION)] =
-        SystemAbilityManagerStub::_GetOnDemandSystemAbilityIdsInner;
+        SystemAbilityManagerStub::GetOnDemandSystemAbilityIdsInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::SEND_STRATEGY_TRANASACTION)] =
-        SystemAbilityManagerStub::_SendStrategyInner;
+        SystemAbilityManagerStub::SendStrategyInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::UNLOAD_ALL_IDLE_SYSTEM_ABILITY_TRANSACTION)] =
-        SystemAbilityManagerStub::_UnloadAllIdleSystemAbilityInner;
+        SystemAbilityManagerStub::UnloadAllIdleSystemAbilityInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_EXTENSION_SA_IDS_TRANSCATION)] =
-        SystemAbilityManagerStub::_GetExtensionSaIdsInner;
+        SystemAbilityManagerStub::GetExtensionSaIdsInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_EXTERNSION_SA_LIST_TRANSCATION)] =
-        SystemAbilityManagerStub::_GetExtensionRunningSaListInner;
+        SystemAbilityManagerStub::GetExtensionRunningSaListInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_SA_EXTENSION_INFO_TRANSCATION)] =
-        SystemAbilityManagerStub::_GetRunningSaExtensionInfoListInner;
+        SystemAbilityManagerStub::GetRunningSaExtensionInfoListInner;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_COMMON_EVENT_EXTRA_ID_LIST_TRANSCATION)] =
-        SystemAbilityManagerStub::_GetCommonEventExtraDataIdlistInner;
+        SystemAbilityManagerStub::GetCommonEventExtraDataIdlistInner;
 }
 
 int32_t SystemAbilityManagerStub::OnRemoteRequest(uint32_t code,
@@ -191,7 +191,7 @@ int32_t SystemAbilityManagerStub::OnRemoteRequest(uint32_t code,
     }
     auto itFunc = memberFuncMap_.find(code);
     if (itFunc != memberFuncMap_.end()) {
-        return itFunc->second(this,data, reply);
+        return itFunc->second(this, data, reply);
     }
     HILOGW("SAMStub: default case, need check.");
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
