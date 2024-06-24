@@ -214,7 +214,7 @@ private:
     void SetProcessFuncMap();
 
     using SystemAbilityManagerStubFunc =
-        int32_t (*)(SystemAbilityManagerStub* stub,MessageParcel& data, MessageParcel& reply);
+        int32_t (*)(SystemAbilityManagerStub* stub, MessageParcel& data, MessageParcel& reply);
     std::map<uint32_t, SystemAbilityManagerStubFunc> memberFuncMap_;
 };
 } // namespace OHOS
