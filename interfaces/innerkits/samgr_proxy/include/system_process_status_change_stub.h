@@ -30,12 +30,12 @@ private:
     static int32_t LocalSystemProcessStarted(SystemProcessStatusChangeStub *stub,
         MessageParcel& data, MessageParcel& reply)
     {
-        return stub->LocalSystemProcessStarted(data, reply);
+        return stub->OnSystemProcessStartedInner(data, reply);
     }
     static int32_t LocalSystemProcessStopped(SystemProcessStatusChangeStub *stub,
         MessageParcel& data, MessageParcel& reply)
     {
-        return stub->LocalSystemProcessStopped(data, reply);
+        return stub->OnSystemProcessStoppedInner(data, reply);
     }
     int32_t OnSystemProcessStartedInner(MessageParcel& data, MessageParcel& reply);
     int32_t OnSystemProcessStoppedInner(MessageParcel& data, MessageParcel& reply);
