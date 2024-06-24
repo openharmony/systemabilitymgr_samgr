@@ -27,9 +27,9 @@ namespace OHOS {
 SystemProcessStatusChangeStub::SystemProcessStatusChangeStub()
 {
     memberFuncMap_[ON_SYSTEM_PROCESS_STARTED] =
-        SystemProcessStatusChangeStub::onSystemProcessStartedInner;
+        SystemProcessStatusChangeStub::LocalSystemProcessStarted;
     memberFuncMap_[ON_SYSTEM_PROCESS_STOPPED] =
-        SystemProcessStatusChangeStub::onSystemProcessStoppedInner;
+        SystemProcessStatusChangeStub::LocalSystemProcessStopped;
 }
 
 int32_t SystemProcessStatusChangeStub::OnRemoteRequest(uint32_t code,
