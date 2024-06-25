@@ -35,147 +35,147 @@ protected:
 
 private:
     static int32_t ListSystemAbilityInner(SystemAbilityManagerStub* stub,
-     MessageParcel& data, MessageParcel& reply)
+        MessageParcel& data, MessageParcel& reply)
     {
         return stub->ListSystemAbilityInner(data, reply);
     }
     static int32_t SubsSystemAbilityInner(SystemAbilityManagerStub* stub,
-     MessageParcel& data, MessageParcel& reply)
+        MessageParcel& data, MessageParcel& reply)
     {
         return stub->SubsSystemAbilityInner(data, reply);
     }
     static int32_t UnSubsSystemAbilityInner(SystemAbilityManagerStub* stub,
-     MessageParcel& data, MessageParcel& reply)
+        MessageParcel& data, MessageParcel& reply)
     {
         return stub->UnSubsSystemAbilityInner(data, reply);
     }
     static int32_t CheckRemtSystemAbilityInner(SystemAbilityManagerStub* stub,
-     MessageParcel& data, MessageParcel& reply)
+        MessageParcel& data, MessageParcel& reply)
     {
         return stub->CheckRemtSystemAbilityInner(data, reply);
     }
     static int32_t AddOndemandSystemAbilityInner(SystemAbilityManagerStub* stub,
-     MessageParcel& data, MessageParcel& reply)
+        MessageParcel& data, MessageParcel& reply)
     {
         return stub->AddOndemandSystemAbilityInner(data, reply);
     }
     static int32_t CheckSystemAbilityImmeInner(SystemAbilityManagerStub* stub,
-     MessageParcel& data, MessageParcel& reply)
+        MessageParcel& data, MessageParcel& reply)
     {
         return stub->CheckSystemAbilityImmeInner(data, reply);
     }
     static int32_t AddSystemAbilityInner(SystemAbilityManagerStub* stub,
-     MessageParcel& data, MessageParcel& reply)
+        MessageParcel& data, MessageParcel& reply)
     {
         return stub->AddSystemAbilityInner(data, reply);
     }
     static int32_t GetSystemAbilityInner(SystemAbilityManagerStub* stub,
-     MessageParcel& data, MessageParcel& reply)
+        MessageParcel& data, MessageParcel& reply)
     {
         return stub->GetSystemAbilityInner(data, reply);
     }
     static int32_t CheckSystemAbilityInner(SystemAbilityManagerStub* stub,
-     MessageParcel& data, MessageParcel& reply)
+        MessageParcel& data, MessageParcel& reply)
     {
         return stub->CheckSystemAbilityInner(data, reply);
     }
     static int32_t AddSystemProcessInner(SystemAbilityManagerStub* stub,
-     MessageParcel& data, MessageParcel& reply)
+        MessageParcel& data, MessageParcel& reply)
     {
         return stub->AddSystemProcessInner(data, reply);
     }
     static int32_t RemoveSystemAbilityInner(SystemAbilityManagerStub* stub,
-     MessageParcel& data, MessageParcel& reply)
+        MessageParcel& data, MessageParcel& reply)
     {
         return stub->RemoveSystemAbilityInner(data, reply);
     }
     static int32_t GetSystemProcessInfoInner(SystemAbilityManagerStub* stub,
-     MessageParcel& data, MessageParcel& reply)
+        MessageParcel& data, MessageParcel& reply)
     {
         return stub->GetSystemProcessInfoInner(data, reply);
     }
     static int32_t GetRunningSystemProcessInner(SystemAbilityManagerStub* stub,
-     MessageParcel& data, MessageParcel& reply)
+        MessageParcel& data, MessageParcel& reply)
     {
         return stub->GetRunningSystemProcessInner(data, reply);
     }
     static int32_t SubscribeSystemProcessInner(SystemAbilityManagerStub* stub,
-     MessageParcel& data, MessageParcel& reply)
+        MessageParcel& data, MessageParcel& reply)
     {
         return stub->SubscribeSystemProcessInner(data, reply);
     }
     static int32_t UnSubscribeSystemProcessInner(SystemAbilityManagerStub* stub,
-     MessageParcel& data, MessageParcel& reply)
+        MessageParcel& data, MessageParcel& reply)
     {
         return stub->UnSubscribeSystemProcessInner(data, reply);
     }
     static int32_t LoadSystemAbilityInner(SystemAbilityManagerStub* stub,
-     MessageParcel& data, MessageParcel& reply)
+        MessageParcel& data, MessageParcel& reply)
     {
         return stub->LoadSystemAbilityInner(data, reply);
     }
     static int32_t LoadRemoteSystemAbilityInner(SystemAbilityManagerStub* stub,
-     MessageParcel& data, MessageParcel& reply)
+        MessageParcel& data, MessageParcel& reply)
     {
         return stub->LoadRemoteSystemAbilityInner(data, reply);
     }
     static int32_t UnloadSystemAbilityInner(SystemAbilityManagerStub* stub,
-     MessageParcel& data, MessageParcel& reply)
+        MessageParcel& data, MessageParcel& reply)
     {
         return stub->UnloadSystemAbilityInner(data, reply);
     }
     static int32_t CancelUnloadSystemAbilityInner(SystemAbilityManagerStub* stub,
-     MessageParcel& data, MessageParcel& reply)
+        MessageParcel& data, MessageParcel& reply)
     {
         return stub->CancelUnloadSystemAbilityInner(data, reply);
     }
     static int32_t UnloadAllIdleSystemAbilityInner(SystemAbilityManagerStub* stub,
-     MessageParcel& data, MessageParcel& reply)
+        MessageParcel& data, MessageParcel& reply)
     {
         return stub->UnloadAllIdleSystemAbilityInner(data, reply);
     }
     static int32_t GetOnDemandReasonExtraDataInner(SystemAbilityManagerStub* stub,
-     MessageParcel& data, MessageParcel& reply)
+        MessageParcel& data, MessageParcel& reply)
     {
         return stub->GetOnDemandReasonExtraDataInner(data, reply);
     }
     static int32_t GetOnDemandPolicyInner(SystemAbilityManagerStub* stub,
-     MessageParcel& data, MessageParcel& reply)
+        MessageParcel& data, MessageParcel& reply)
     {
         return stub->GetOnDemandPolicyInner(data, reply);
     }
     static int32_t UpdateOnDemandPolicyInner(SystemAbilityManagerStub* stub,
-     MessageParcel& data, MessageParcel& reply)
+        MessageParcel& data, MessageParcel& reply)
     {
         return stub->UpdateOnDemandPolicyInner(data, reply);
     }
     static int32_t GetOnDemandSystemAbilityIdsInner(SystemAbilityManagerStub* stub,
-     MessageParcel& data, MessageParcel& reply)
+        MessageParcel& data, MessageParcel& reply)
     {
         return stub->GetOnDemandSystemAbilityIdsInner(data, reply);
     }
     static int32_t SendStrategyInner(SystemAbilityManagerStub* stub,
-     MessageParcel& data, MessageParcel& reply)
+        MessageParcel& data, MessageParcel& reply)
     {
         return stub->SendStrategyInner(data, reply);
     }
     static int32_t GetExtensionSaIdsInner(SystemAbilityManagerStub* stub,
-     MessageParcel& data, MessageParcel& reply)
+        MessageParcel& data, MessageParcel& reply)
     {
         return stub->GetExtensionSaIdsInner(data, reply);
     }
     static int32_t GetExtensionRunningSaListInner(SystemAbilityManagerStub* stub,
-     MessageParcel& data, MessageParcel& reply)
+        MessageParcel& data, MessageParcel& reply)
     {
         return stub->GetExtensionRunningSaListInner(data, reply);
     }
     static int32_t GetRunningSaExtensionInfoListInner(SystemAbilityManagerStub* stub,
-     MessageParcel& data, MessageParcel& reply)
+        MessageParcel& data, MessageParcel& reply)
     {
         return stub->GetRunningSaExtensionInfoListInner(data, reply);
     }
     static int32_t GetCommonEventExtraDataIdlistInner(SystemAbilityManagerStub* stub,
-     MessageParcel& data, MessageParcel& reply)
+        MessageParcel& data, MessageParcel& reply)
     {
         return stub->GetCommonEventExtraDataIdlistInner(data, reply);
     }
