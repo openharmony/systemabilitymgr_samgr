@@ -541,7 +541,7 @@ bool CommonHandler::SendEvent(uint32_t eventId)
         HILOGE("CommonEventCollect SendEvent handler is null!");
         return false;
     }
-    auto task = std::bind(&CommonHandler::ProcessEvent, this, eventId, 0);
+    auto task = [this, eventId] {this->ProcessEvent(eventId, 0);};
     return handler_->PostTask(task);
 }
 
@@ -551,7 +551,7 @@ bool CommonHandler::SendEvent(uint32_t eventId, int64_t extraDataId, uint64_t de
         HILOGE("CommonEventCollect SendEvent handler is null!");
         return false;
     }
-    auto task = std::bind(&CommonHandler::ProcessEvent, this, eventId, extraDataId);
+    auto task = [this, eventId, extraDataId] {this->ProcessEvent(eventId, extraDataId);};
     return handler_->PostTask(task, delayTime);
 }
 

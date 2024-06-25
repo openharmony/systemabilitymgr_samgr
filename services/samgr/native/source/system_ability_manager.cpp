@@ -262,7 +262,7 @@ void SystemAbilityManager::AddSamgrToAbilityMap()
 void SystemAbilityManager::StartDfxTimer()
 {
     reportEventTimer_->Setup();
-    uint32_t timerId = reportEventTimer_->Register(std::bind(&SystemAbilityManager::ReportGetSAPeriodically, this),
+    uint32_t timerId = reportEventTimer_->Register([this] {this->ReportGetSAPeriodically();},
         REPORT_GET_SA_INTERVAL);
     HILOGI("StartDfxTimer timerId : %{public}u!", timerId);
 }
@@ -1784,8 +1784,9 @@ int32_t SystemAbilityManager::LoadSystemAbility(int32_t systemAbilityId, const s
     }
     auto callingPid = IPCSkeleton::GetCallingPid();
     auto callingUid = IPCSkeleton::GetCallingUid();
-    auto task = std::bind(&SystemAbilityManager::DoLoadRemoteSystemAbility, this,
-        systemAbilityId, callingPid, callingUid, deviceId, callback);
+    auto task = [this, systemAbilityId, callingPid, callingUid, deviceId, callback] {
+        this->DoLoadRemoteSystemAbility(systemAbilityId, callingPid, callingUid, deviceId, callback);
+    };
     std::thread thread(task);
     thread.detach();
     return ERR_OK;
