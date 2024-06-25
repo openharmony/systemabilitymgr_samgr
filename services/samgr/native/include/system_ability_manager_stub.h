@@ -152,12 +152,12 @@ private:
     static int32_t GetOnDemandSystemAbilityIdsInner(SystemAbilityManagerStub* stub,
      MessageParcel& data, MessageParcel& reply)
     {
-        return stub->GetOnDemandSystemAbilityIdsInner(data,reply);
+        return stub->GetOnDemandSystemAbilityIdsInner(data, reply);
     }
     static int32_t SendStrategyInner(SystemAbilityManagerStub* stub,
      MessageParcel& data, MessageParcel& reply)
     {
-        return stub->SendStrategyInner(data,reply);
+        return stub->SendStrategyInner(data, reply);
     }
     static int32_t GetExtensionSaIdsInner(SystemAbilityManagerStub* stub,
      MessageParcel& data, MessageParcel& reply)
