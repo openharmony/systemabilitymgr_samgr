@@ -292,7 +292,7 @@ void WorkHandler::ProcessEvent(uint32_t eventId)
     }
     if (!collect_->AddDeviceChangeListener()) {
         HILOGW("AddDeviceChangeListener retry");
-        auto task = std::bind(&WorkHandler::ProcessEvent, this, INIT_EVENT);
+        auto task = [this] {this->ProcessEvent(INIT_EVENT);};
         if (handler_ == nullptr) {
             HILOGE("NetworkingCollect ProcessEvent handler is null!");
             return;
@@ -308,7 +308,7 @@ bool WorkHandler::SendEvent(uint32_t eventId)
         HILOGE("NetworkingCollect SendEvent handler is null!");
         return false;
     }
-    auto task = std::bind(&WorkHandler::ProcessEvent, this, eventId);
+    auto task = [this, eventId] {this->ProcessEvent(eventId);};
     return handler_->PostTask(task);
 }
 
@@ -318,7 +318,7 @@ bool WorkHandler::SendEvent(uint32_t eventId, uint64_t delayTime)
         HILOGE("NetworkingCollect SendEvent handler is null!");
         return false;
     }
-    auto task = std::bind(&WorkHandler::ProcessEvent, this, eventId);
+    auto task = [this, eventId] {this->ProcessEvent(eventId);};
     return handler_->PostTask(task, delayTime);
 }
 }  // namespace OHOS

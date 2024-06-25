@@ -31,13 +31,23 @@ protected:
     static bool CheckInputSysAbilityId(int32_t systemAbilityId);
 
 private:
+    static int32_t LocalOnAddSystemAbility(SystemAbilityStatusChangeStub* stub, MessageParcel& data,
+        MessageParcel& reply)
+    {
+        return stub->OnAddSystemAbilityInner(data, reply);
+    }
+    static int32_t LocalOnRemoveSystemAbility(SystemAbilityStatusChangeStub* stub, MessageParcel& data,
+        MessageParcel& reply)
+    {
+        return stub->OnRemoveSystemAbilityInner(data, reply);
+    }
     int32_t OnAddSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t OnRemoveSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
     static bool CanRequest();
     static bool EnforceInterceToken(MessageParcel& data);
 
     using SystemAbilityStatusChangeStubFunc =
-        int32_t (SystemAbilityStatusChangeStub::*)(MessageParcel& data, MessageParcel& reply);
+        int32_t (*)(SystemAbilityStatusChangeStub* stub, MessageParcel& data, MessageParcel& reply);
     std::map<uint32_t, SystemAbilityStatusChangeStubFunc> memberFuncMap_;
 };
 }
