@@ -1189,6 +1189,7 @@ bool SystemAbilityManager::IsDistributedSystemAbility(int32_t systemAbilityId)
     }
     return saProfile.distributed;
 }
+
 int32_t SystemAbilityManager::GetRunningSystemProcess(std::list<SystemProcessInfo>& systemProcessInfos)
 {
     if (abilityStateScheduler_ == nullptr) {
