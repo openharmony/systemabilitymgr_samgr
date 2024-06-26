@@ -1184,7 +1184,7 @@ bool SystemAbilityManager::IsDistributedSystemAbility(int32_t systemAbilityId)
     SaProfile saProfile;
     bool ret = GetSaProfile(systemAbilityId, saProfile);
     if (!ret) {
-        HILOGE("IsDistributedSystemAbility SA:%{public}d not exist!", systemAbilityId);
+        HILOGE("IsDistributedSa SA:%{public}d no Profile!", systemAbilityId);
         return false;
     }
     return saProfile.distributed;
