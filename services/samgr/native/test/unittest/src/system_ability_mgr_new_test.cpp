@@ -1398,4 +1398,23 @@ HWTEST_F(SystemAbilityMgrTest, DoLoadForPerf001, TestSize.Level2)
     saMgr1->DoLoadForPerf();
     EXPECT_TRUE(ret);
 }
+/**
+ * @tc.name: Test IsDistributedSystemAbility
+ * @tc.desc: IsDistributedSystemAbility001
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrTest, IsDistributedSystemAbility001, TestSize.Level2)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    bool res = saMgr->IsDistributedSystemAbility(-1);
+    EXPECT_FALSE(res);
+    SaProfile saProfile;
+    saProfile.distributed = true;
+    saProfile.process = u"memmgrservice";
+    saMgr->saProfileMap_.clear();
+    saMgr->saProfileMap_[1] = saProfile;
+    res = saMgr->IsDistributedSystemAbility(1);
+    EXPECT_TRUE(res);
+}
 } // namespace OHOS
