@@ -18,6 +18,7 @@
 #include <condition_variable>
 #include <unistd.h>
 #include <vector>
+#include <dlfcn.h>
 
 #include "errors.h"
 #include "ipc_types.h"
@@ -54,6 +55,19 @@ public:
     sptr<IRemoteObject> loadproxy_;
     std::mutex callbackLock_;
 };
+
+static void* g_selfSoHandle = nullptr;
+
+extern "C" __attribute__((constructor)) void InitSamgrProxy()
+{
+    HILOGD("InitSamgrProxy::start");
+    Dl_info info;
+    dladdr(reinterpret_cast<void *>(InitSamgrProxy), &info);
+    if (g_selfSoHandle == nullptr) {
+        g_selfSoHandle = dlopen(info.dli_fname, RTLD_LAZY);
+    }
+    HILOGD("InitSamgrProxy::done");
+}
 
 void SystemAbilityProxyCallback::OnLoadSystemAbilitySuccess(
     int32_t systemAbilityId, const sptr<IRemoteObject> &remoteObject)
