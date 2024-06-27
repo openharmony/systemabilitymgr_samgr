@@ -35,7 +35,8 @@ enum {
 
 class SystemAbilityExtensionPara {
 public:
-    SystemAbilityExtensionPara() {
+    SystemAbilityExtensionPara()
+    {
         data_ = nullptr;
         reply_ = nullptr;
     };
@@ -43,11 +44,13 @@ public:
 
     MessageParcel *data_;
     MessageParcel *reply_;
-    virtual bool InputParaSet(MessageParcel& data) {
+    virtual bool InputParaSet(MessageParcel& data)
+    {
         (void)data;
         return true;
     };
-    virtual bool OutputParaGet(MessageParcel& reply) {
+    virtual bool OutputParaGet(MessageParcel& reply)
+    {
         (void)reply;
         return true;
     };
