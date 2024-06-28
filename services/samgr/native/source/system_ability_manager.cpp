@@ -527,7 +527,7 @@ sptr<IRemoteObject> SystemAbilityManager::CheckSystemAbility(int32_t systemAbili
     }
     if (!saProfile.distributed) {
         HILOGE("CheckSystemAbilityFromRpc SA:%{public}d not distributed!", systemAbilityId);
-        return nullptr;
+        //return nullptr;
     }
     return DoMakeRemoteBinder(systemAbilityId, IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), deviceId);
 }
