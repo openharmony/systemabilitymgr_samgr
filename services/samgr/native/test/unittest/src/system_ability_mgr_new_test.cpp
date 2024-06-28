@@ -1416,5 +1416,11 @@ HWTEST_F(SystemAbilityMgrTest, IsDistributedSystemAbility001, TestSize.Level2)
     saMgr->saProfileMap_[1] = saProfile;
     res = saMgr->IsDistributedSystemAbility(1);
     EXPECT_TRUE(res);
+    res = saMgr->IsDistributedSystemAbility(2);
+    EXPECT_FALSE(res);
+    saProfile.distributed = false;
+    saMgr->saProfileMap_[2] = saProfile;
+    res = saMgr->IsDistributedSystemAbility(2);
+    EXPECT_FALSE(res);
 }
 } // namespace OHOS
