@@ -490,7 +490,7 @@ sptr<IRemoteObject> SystemAbilityManager::GetSystemAbilityFromRemote(int32_t sys
     }
     if (!(iter->second.isDistributed)) {
         HILOGW("GetSystemAbilityFromRemote SA:%{public}d not distributed", systemAbilityId);
-        //return nullptr;
+        return nullptr;
     }
     HILOGI("GetSystemAbilityFromRemote found SA:%{public}d.", systemAbilityId);
     return iter->second.remoteObj;
@@ -527,7 +527,7 @@ sptr<IRemoteObject> SystemAbilityManager::CheckSystemAbility(int32_t systemAbili
     }
     if (!saProfile.distributed) {
         HILOGE("CheckSystemAbilityFromRpc SA:%{public}d not distributed!", systemAbilityId);
-        //return nullptr;
+        return nullptr;
     }
     return DoMakeRemoteBinder(systemAbilityId, IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), deviceId);
 }
@@ -1637,7 +1637,7 @@ bool SystemAbilityManager::LoadSystemAbilityFromRpc(const std::string& srcDevice
 
     if (!saProfile.distributed) {
         HILOGE("LoadSystemAbilityFromRpc SA:%{public}d not distributed!", systemAbilityId);
-        //return false;
+        return false;
     }
     OnDemandEvent onDemandEvent = {INTERFACE_CALL, "loadFromRpc"};
     LoadRequestInfo loadRequestInfo = {srcDeviceId, callback, systemAbilityId, -1, onDemandEvent};
