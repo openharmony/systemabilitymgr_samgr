@@ -1052,6 +1052,10 @@ int32_t SystemAbilityManagerStub::GetOnDemandSystemAbilityIdsInner(MessageParcel
 {
     std::vector<int32_t> systemAbilityIds;
     int32_t result = GetOnDemandSystemAbilityIds(systemAbilityIds);
+    if (result != ERR_OK) {
+        HILOGW("GetOnDemandSystemAbilityIds failed, ret:%{public}d", result);
+        return result;
+    }
     if (!reply.WriteInt32(result)) {
         HILOGE("GetOnDemandSystemAbilityIdsInner write result failed.");
         return ERR_FLATTEN_OBJECT;
@@ -1093,6 +1097,10 @@ int32_t SystemAbilityManagerStub::GetExtensionSaIdsInner(MessageParcel& data, Me
 
     std::vector<int32_t> saIds;
     int32_t result = GetExtensionSaIds(extension, saIds);
+    if (result != ERR_OK) {
+        HILOGW("GetExtensionSaIds failed, ret:%{public}d", result);
+        return result;
+    }
     if (!reply.WriteInt32(result)) {
         HILOGW("%{public}s write reply failed.", __func__);
         return ERR_FLATTEN_OBJECT;
@@ -1119,6 +1127,10 @@ int32_t SystemAbilityManagerStub::GetExtensionRunningSaListInner(MessageParcel& 
 
     std::vector<sptr<IRemoteObject>> saList;
     int32_t result = GetExtensionRunningSaList(extension, saList);
+    if (result != ERR_OK) {
+        HILOGW("GetExtensionRunningSaList failed, ret:%{public}d", result);
+        return result;
+    }
     if (!reply.WriteInt32(result)) {
         HILOGW("%{public}s write reply failed.", __func__);
         return ERR_FLATTEN_OBJECT;
