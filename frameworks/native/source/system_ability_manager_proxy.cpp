@@ -60,11 +60,25 @@ static void* g_selfSoHandle = nullptr;
 
 extern "C" __attribute__((constructor)) void InitSamgrProxy()
 {
-    HILOGD("InitSamgrProxy::start");
+    if (g_selfSoHandle != nullptr) {
+        return;
+    }
     Dl_info info;
-    dladdr(reinterpret_cast<void *>(InitSamgrProxy), &info);
+    int ret = dladdr(reinterpret_cast<void *>(InitSamgrProxy), &info);
+    if (ret == 0) {
+        HILOGE("InitSamgrProxy dladdr fail");
+        return;
+    }
+
+    char path[PATH_MAX] = {'\0'};
+    if (realpath(info.dli_fname, path) == nullptr) {
+        HILOGE("InitSamgrProxy realpath fail");
+        return;
+    }
+    g_selfSoHandle = dlopen(path, RTLD_LAZY);
     if (g_selfSoHandle == nullptr) {
-        g_selfSoHandle = dlopen(info.dli_fname, RTLD_LAZY);
+        HILOGE("InitSamgrProxy dlopen fail");
+        return;
     }
     HILOGD("InitSamgrProxy::done");
 }

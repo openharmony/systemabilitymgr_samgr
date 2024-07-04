@@ -77,19 +77,19 @@ bool SystemAbilityManagerDumper::GetFfrtDumpInfoProc(std::shared_ptr<SystemAbili
         return false;
     }
     HILOGD("FfrtDumpProc: processIdsSize=%{public}zu", processIds.size());
-    for (const int32_t processId : processIds) {
-        if (processId == getpid()) {
+    for (const int32_t pid : processIds) {
+        if (pid == getpid()) {
             GetSAMgrFfrtInfo(result);
             continue;
         }
         std::u16string processName;
-        int32_t queryResult = abilityStateScheduler->GetProcessNameByProcessId(processId, processName);
+        int32_t queryResult = abilityStateScheduler->GetProcessNameByProcessId(pid, processName);
         if (queryResult != ERR_OK) {
-            HILOGE("GetProcessNameByProcessId failed, processId %{public}d not exist", processId);
-            result.append("process " + std::to_string(processId) + " not found!\n");
+            HILOGE("GetProcessNameByProcessId failed, pid %{public}d not exist", pid);
+            result.append("process " + std::to_string(pid) + " not found!\n");
             continue;
         }
-        DumpFfrtInfoByProcName(processId, processName, result);
+        DumpFfrtInfoByProcName(pid, processName, result);
     }
     return true;
 }
@@ -129,15 +129,15 @@ void SystemAbilityManagerDumper::GetSAMgrFfrtInfo(std::string& result)
     delete[] buffer;
 }
 
-void SystemAbilityManagerDumper::DumpFfrtInfoByProcName(int32_t processId, const std::u16string processName,
+void SystemAbilityManagerDumper::DumpFfrtInfoByProcName(int32_t pid, const std::u16string processName,
     std::string& result)
 {
     sptr<ILocalAbilityManager> obj =
         iface_cast<ILocalAbilityManager>(SystemAbilityManager::GetInstance()->GetSystemProcess(processName));
     if (obj == nullptr) {
-        HILOGE("GetSystemProcess failed, processId:%{public}d processName:%{public}s not exist",
-            processId, Str16ToStr8(processName).c_str());
-        result.append("process " + std::to_string(processId) + " not found!\n");
+        HILOGE("GetSystemProcess failed, pid:%{public}d processName:%{public}s not exist",
+            pid, Str16ToStr8(processName).c_str());
+        result.append("process " + std::to_string(pid) + " not found!\n");
         return;
     }
     std::string resultForProcess;
