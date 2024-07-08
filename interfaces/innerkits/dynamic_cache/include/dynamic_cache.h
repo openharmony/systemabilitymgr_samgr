@@ -65,7 +65,7 @@ public:
         }
         return res;
     }
-
+    __attribute__((no_sanitize("cfi")))
     void ClearCache()
     {
         std::lock_guard<std::mutex> autoLock(queryCacheLock_);
