@@ -1450,7 +1450,7 @@ int32_t SystemAbilityManager::StartDynamicSystemProcess(const std::u16string& na
         ServiceWaitForStatus(Str16ToStr8(name).c_str(), ServiceStatus::SERVICE_STOPPED, 1);
     }
     char initTime[MAX_INIT_TIME_LEN + 1] = { 0 };
-    (void)GetParameter(BOOT_INIT_TIME_PARAM, DEFAULT_INIT_TIME, initTime, sizeof(initTime));
+    (void)GetParameter(BOOT_INIT_TIME_PARAM, DEFAULT_INIT_TIME, initTime, MAX_INIT_TIME_LEN);
     int64_t begin = GetTickCount();
     int result = ERR_INVALID_VALUE;
     if (strcmp(initTime, DEFAULT_INIT_TIME) == 0) {
