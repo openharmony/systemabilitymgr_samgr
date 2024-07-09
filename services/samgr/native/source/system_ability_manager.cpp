@@ -1448,7 +1448,7 @@ int32_t SystemAbilityManager::StartDynamicSystemProcess(const std::u16string& na
         // Waiting for the init subsystem to perceive process death
         ServiceWaitForStatus(Str16ToStr8(name).c_str(), ServiceStatus::SERVICE_STOPPED, 1);
     }
-    std::string initTime = system::GetParameter(BOOT_INIT_PARAM, DEFAULT_BOOT_INIT_TIME);
+    std::string initTime = system::GetParameter(BOOT_INIT_TIME_PARAM, DEFAULT_BOOT_INIT_TIME);
     int64_t begin = GetTickCount();
     int result = ERR_INVALID_VALUE;
     if (initTime == DEFAULT_BOOT_INIT_TIME) {
