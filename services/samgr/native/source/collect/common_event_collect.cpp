@@ -554,7 +554,7 @@ CommonEventSubscriber::CommonEventSubscriber(const EventFwk::CommonEventSubscrib
 
 void CommonEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData& data)
 {
-    auto OnReceiveTask = [&] () {
+    auto OnReceiveTask = [=] () {
         std::string action = data.GetWant().GetAction();
         int32_t code = data.GetCode();
         auto collect = collect_.promote();
