@@ -168,6 +168,11 @@ bool CommonEventCollect::CreateCommonEventSubscriber()
 bool CommonEventCollect::CreateCommonEventSubscriberLocked()
 {
     if (commonEventSubscriber_ != nullptr) {
+        bool isUnsubscribe = EventFwk::CommonEventManager::UnSubscribeCommonEvent(commonEventSubscriber_);
+        if (!isUnsubscribe) {
+            HILOGE("CreateCommonEventSubscriberLocked isUnsubscribe failed!");
+            return false;
+        }
         commonEventSubscriber_.reset();
     }
     EventFwk::MatchingSkills skill = EventFwk::MatchingSkills();
