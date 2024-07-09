@@ -14,7 +14,7 @@
     "component": {
         "name": "samgr",
         "subsystem": "systemabilitymgr",
-        "features": [ "samgr_feature_coverage = false" ],
+        "features": [ "samgr_feature_coverage" ],
         "adapted_system_type": [
             "standard"
         ],
