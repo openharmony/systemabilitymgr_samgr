@@ -64,7 +64,7 @@ constexpr const char* ONDEMAND_PERF_PARAM = "persist.samgr.perf.ondemand";
 constexpr const char* ONDEMAND_WORKER = "OndemandLoader";
 constexpr const char* ARGS_FFRT_PARAM = "--ffrt";
 constexpr const char* BOOT_INIT_TIME_PARAM = "ohos.boot.time.init";
-constexpr const char* DEFAULT_INIT_TIME = "0";
+constexpr const char* DEFAULT_BOOT_INIT_TIME = "0";
 
 constexpr uint32_t REPORT_GET_SA_INTERVAL = 24 * 60 * 60 * 1000; // ms and is one day
 constexpr int32_t MAX_SUBSCRIBE_COUNT = 256;
@@ -77,7 +77,6 @@ constexpr int64_t ONDEMAND_PERF_DELAY_TIME = 60 * 1000; // ms
 constexpr int64_t CHECK_LOADED_DELAY_TIME = 4 * 1000; // ms
 constexpr int32_t SOFTBUS_SERVER_SA_ID = 4700;
 constexpr int32_t FFRT_DUMP_INDEX = 0;
-constexpr int32_t MAX_INIT_TIME_LEN = 64;
 }
 
 std::mutex SystemAbilityManager::instanceLock;
@@ -1449,11 +1448,10 @@ int32_t SystemAbilityManager::StartDynamicSystemProcess(const std::u16string& na
         // Waiting for the init subsystem to perceive process death
         ServiceWaitForStatus(Str16ToStr8(name).c_str(), ServiceStatus::SERVICE_STOPPED, 1);
     }
-    char initTime[MAX_INIT_TIME_LEN + 1] = { 0 };
-    (void)GetParameter(BOOT_INIT_TIME_PARAM, DEFAULT_INIT_TIME, initTime, MAX_INIT_TIME_LEN);
+    std::string initTime = system::GetParameter(BOOT_INIT_PARAM, DEFAULT_BOOT_INIT_TIME);
     int64_t begin = GetTickCount();
     int result = ERR_INVALID_VALUE;
-    if (strcmp(initTime, DEFAULT_INIT_TIME) == 0) {
+    if (initTime == DEFAULT_BOOT_INIT_TIME) {
         result = ServiceControlWithExtra(Str16ToStr8(name).c_str(), ServiceAction::START, &extraArgv, 1);
     } else {
         SamgrXCollie samgrXCollie("samgr--startProccess_" + ToString(systemAbilityId));
