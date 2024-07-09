@@ -170,7 +170,7 @@ bool CommonEventCollect::CreateCommonEventSubscriberLocked()
     if (commonEventSubscriber_ != nullptr) {
         bool isUnsubscribe = EventFwk::CommonEventManager::UnSubscribeCommonEvent(commonEventSubscriber_);
         if (!isUnsubscribe) {
-            HILOGE("OnAddSystemAbility isUnsubscribe failed!");
+            HILOGE("CreateCommonEventSubscriberLocked isUnsubscribe failed!");
             return false;
         }
         commonEventSubscriber_.reset();
