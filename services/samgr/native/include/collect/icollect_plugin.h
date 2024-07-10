@@ -37,6 +37,7 @@ public:
     {
     }
 
+    virtual void RemoveWhiteCommonEvent() {}
     virtual int32_t OnStart() = 0;
     virtual int32_t OnStop() = 0;
     virtual void Init(const std::list<SaProfile>& saProfiles) {};

@@ -177,6 +177,7 @@ public:
         const std::string& eventName = "") override;
     sptr<IRemoteObject> GetSystemProcess(const std::u16string& procName);
     bool IsModuleUpdate(int32_t systemAbilityId);
+    void RemoveWhiteCommonEvent();
 private:
     enum class AbilityState {
         INIT,

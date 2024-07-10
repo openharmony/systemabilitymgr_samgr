@@ -29,6 +29,7 @@
 #include "samgr_xcollie.h"
 #include "parameters.h"
 #include "system_ability_manager_util.h"
+#include "system_ability_definition.h"
 
 namespace OHOS {
 namespace {
@@ -815,6 +816,9 @@ int32_t SystemAbilityStateScheduler::GetAbnormallyDiedAbilityLocked(
             || abilityContext->state == SystemAbilityState::LOADING) {
             SamgrUtil::SendUpdateSaState(abilityContext->systemAbilityId, "crash");
             HILOGI("Scheduler SA:%{public}d abnormally died", abilityContext->systemAbilityId);
+            if (abilityContext->systemAbilityId == SUBSYS_ACCOUNT_SYS_ABILITY_ID_BEGIN) {
+                SystemAbilityManager::GetInstance()->RemoveWhiteCommonEvent();
+            }
             if (!abilityContext->isAutoRestart) {
                 continue;
             }
