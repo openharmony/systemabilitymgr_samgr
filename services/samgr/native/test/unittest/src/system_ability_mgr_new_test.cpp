@@ -202,6 +202,24 @@ HWTEST_F(SystemAbilityMgrTest, UnloadSystemAbility004, TestSize.Level3)
 }
 
 /**
+ * @tc.name: StartDynamicSystemProcess
+ * @tc.desc: start invalid process, return fail.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, StartDynamicSystemProcess001, TestSize.Level3)
+{
+    cout << "begin StartDynamicSystemProcess001 "<< endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    std::u16string invalidProcess = u"1234567890123456789012345678901234567890123456789"
+        "01234567890123456789012345678901234567890123456";
+    OnDemandEvent event;
+    int result = saMgr->StartDynamicSystemProcess(invalidProcess, 100, event);
+    cout << "begin StartDynamicSystemProcess001 result is "<< result <endl;
+    EXPECT_EQ(result, 102);
+}
+
+/**
  * @tc.desc: test GetOnDemandPolicy with OnDemandPolicyType is valid
  * @tc.type: FUNC
  * @tc.require: I6V4AX
@@ -820,158 +838,6 @@ HWTEST_F(SystemAbilityMgrTest, SetFfrt003, TestSize.Level3)
 }
 
 /**
- * @tc.name: GetExtensionSaIdsInner001
- * @tc.desc: test GetExtensionSaIdsInner, read extension failed!
- * @tc.type: FUNC
- */
-HWTEST_F(SystemAbilityMgrTest, GetExtensionSaIdsInner001, TestSize.Level3)
-{
-    DTEST_LOG << __func__ << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
-    MessageParcel data;
-    MessageParcel reply;
-    int32_t result = saMgr->GetExtensionSaIdsInner(data, reply);
-    EXPECT_EQ(result, ERR_FLATTEN_OBJECT);
-}
-
-/**
- * @tc.name: GetExtensionSaIdsInner002
- * @tc.desc: test GetExtensionSaIdsInner, read null extension!
- * @tc.type: FUNC
- */
-HWTEST_F(SystemAbilityMgrTest, GetExtensionSaIdsInner002, TestSize.Level3)
-{
-    DTEST_LOG << __func__ << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
-    MessageParcel data;
-    MessageParcel reply;
-    data.WriteString("backup_test");
-    int32_t result = saMgr->GetExtensionSaIdsInner(data, reply);
-    EXPECT_EQ(result, ERR_NONE);
-    int32_t ret = reply.ReadInt32(result);
-    EXPECT_EQ(ret, true);
-
-    vector<int32_t> saIds;
-    ret = reply.ReadInt32Vector(&saIds);
-    EXPECT_EQ(ret, true);
-    EXPECT_EQ(saIds.size(), 0);
-}
-
-/**
- * @tc.name: GetExtensionSaIdsInner003
- * @tc.desc: test GetExtensionSaIdsInner, get extension success with backup!
- * @tc.type: FUNC
- */
-HWTEST_F(SystemAbilityMgrTest, GetExtensionSaIdsInner003, TestSize.Level3)
-{
-    DTEST_LOG << __func__ << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
-    const int32_t maxLoop = 4;
-    map<int32_t, SaProfile> saProfileMapTmp;
-    SaProfileStore(saMgr, saProfileMapTmp, maxLoop);
-    SaProfileExtensionTestPrevSet(saMgr, maxLoop);
-
-    MessageParcel data;
-    MessageParcel reply;
-    data.WriteString("backup_test");
-    int32_t result = saMgr->GetExtensionSaIdsInner(data, reply);
-    EXPECT_EQ(result, ERR_NONE);
-    int32_t ret = reply.ReadInt32(result);
-    EXPECT_EQ(ret, true);
-
-    vector<int32_t> saIds;
-    ret = reply.ReadInt32Vector(&saIds);
-    EXPECT_EQ(ret, true);
-    EXPECT_EQ(saIds.size(), 3);
-    EXPECT_EQ(saIds[0], SAID);
-    EXPECT_EQ(saIds[1], SAID + 2);
-    EXPECT_EQ(saIds[2], SAID + 3);
-
-    SaProfileRecover(saMgr, saProfileMapTmp, maxLoop);
-}
-
-/**
- * @tc.name: GetExtensionRunningSaListInner001
- * @tc.desc: test GetExtensionRunningSaListInner, read extension failed!
- * @tc.type: FUNC
- */
-HWTEST_F(SystemAbilityMgrTest, GetExtensionRunningSaListInner001, TestSize.Level3)
-{
-    DTEST_LOG << __func__ << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
-    MessageParcel data;
-    MessageParcel reply;
-    int32_t result = saMgr->GetExtensionRunningSaListInner(data, reply);
-    EXPECT_EQ(result, ERR_FLATTEN_OBJECT);
-}
-
-/**
- * @tc.name: GetExtensionRunningSaListInner002
- * @tc.desc: test GetExtensionRunningSaListInner, read null extension!
- * @tc.type: FUNC
- */
-HWTEST_F(SystemAbilityMgrTest, GetExtensionRunningSaListInner002, TestSize.Level3)
-{
-    DTEST_LOG << __func__ << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
-    MessageParcel data;
-    MessageParcel reply;
-    data.WriteString("backup_test");
-    int32_t result = saMgr->GetExtensionRunningSaListInner(data, reply);
-    EXPECT_EQ(result, ERR_NONE);
-    int32_t ret = reply.ReadInt32(result);
-    EXPECT_EQ(ret, true);
-
-    int32_t size;
-    ret = reply.ReadInt32(size);
-    EXPECT_EQ(ret, true);
-    EXPECT_EQ(size, 0);
-}
-
-/**
- * @tc.name: GetExtensionRunningSaListInner003
- * @tc.desc: test GetExtensionRunningSaListInner, get extension success with restore!
- * @tc.type: FUNC
- */
-HWTEST_F(SystemAbilityMgrTest, GetExtensionRunningSaListInner003, TestSize.Level3)
-{
-    DTEST_LOG << __func__ << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
-    const int32_t maxLoop = 4;
-    map<int32_t, SaProfile> saProfileMapTmp;
-
-    SaProfileStore(saMgr, saProfileMapTmp, maxLoop);
-    SaProfileExtensionTestPrevSet(saMgr, maxLoop);
-    SaAbilityMapObjTestPrevSet(saMgr, maxLoop);
-
-    MessageParcel data;
-    MessageParcel reply;
-    data.WriteString("restore_test");
-    int32_t result = saMgr->GetExtensionRunningSaListInner(data, reply);
-    EXPECT_EQ(result, ERR_NONE);
-    int32_t ret = reply.ReadInt32(result);
-    EXPECT_EQ(ret, true);
-
-    int32_t size;
-    ret = reply.ReadInt32(size);
-    EXPECT_EQ(ret, true);
-    EXPECT_EQ(size, 3);
-    for (int32_t i = 0; i < size; ++i) {
-        sptr<IRemoteObject> obj = reply.ReadRemoteObject();
-        EXPECT_NE(obj, nullptr);
-    }
-
-    saMgr->abilityMap_.clear();
-    SaProfileRecover(saMgr, saProfileMapTmp, maxLoop);
-}
-
-/**
  * @tc.name: GetRunningSaExtensionInfoList001
  * @tc.desc: test GetRunningSaExtensionInfoList, not exist obj
  * @tc.type: FUNC
@@ -1271,6 +1137,158 @@ HWTEST_F(SystemAbilityMgrTest, IpcDumpProc001, TestSize.Level2)
     args.push_back("abcd");
     int ret = saMgr->IpcDumpProc(fd, args);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: GetExtensionSaIdsInner002
+ * @tc.desc: test GetExtensionSaIdsInner, read null extension!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, GetExtensionSaIdsInner002, TestSize.Level3)
+{
+    DTEST_LOG << __func__ << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteString("backup_test");
+    int32_t result = saMgr->GetExtensionSaIdsInner(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+    int32_t ret = reply.ReadInt32(result);
+    EXPECT_EQ(ret, true);
+
+    vector<int32_t> saIds;
+    ret = reply.ReadInt32Vector(&saIds);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(saIds.size(), 0);
+}
+
+/**
+ * @tc.name: GetExtensionSaIdsInner003
+ * @tc.desc: test GetExtensionSaIdsInner, get extension success with backup!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, GetExtensionSaIdsInner003, TestSize.Level3)
+{
+    DTEST_LOG << __func__ << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    const int32_t maxLoop = 4;
+    map<int32_t, SaProfile> saProfileMapTmp;
+    SaProfileStore(saMgr, saProfileMapTmp, maxLoop);
+    SaProfileExtensionTestPrevSet(saMgr, maxLoop);
+
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteString("backup_test");
+    int32_t result = saMgr->GetExtensionSaIdsInner(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+    int32_t ret = reply.ReadInt32(result);
+    EXPECT_EQ(ret, true);
+
+    vector<int32_t> saIds;
+    ret = reply.ReadInt32Vector(&saIds);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(saIds.size(), 3);
+    EXPECT_EQ(saIds[0], SAID);
+    EXPECT_EQ(saIds[1], SAID + 2);
+    EXPECT_EQ(saIds[2], SAID + 3);
+
+    SaProfileRecover(saMgr, saProfileMapTmp, maxLoop);
+}
+
+/**
+ * @tc.name: GetExtensionRunningSaListInner001
+ * @tc.desc: test GetExtensionRunningSaListInner, read extension failed!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, GetExtensionRunningSaListInner001, TestSize.Level3)
+{
+    DTEST_LOG << __func__ << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t result = saMgr->GetExtensionRunningSaListInner(data, reply);
+    EXPECT_EQ(result, ERR_FLATTEN_OBJECT);
+}
+
+/**
+ * @tc.name: GetExtensionRunningSaListInner002
+ * @tc.desc: test GetExtensionRunningSaListInner, read null extension!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, GetExtensionRunningSaListInner002, TestSize.Level3)
+{
+    DTEST_LOG << __func__ << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteString("backup_test");
+    int32_t result = saMgr->GetExtensionRunningSaListInner(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+    int32_t ret = reply.ReadInt32(result);
+    EXPECT_EQ(ret, true);
+
+    int32_t size;
+    ret = reply.ReadInt32(size);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(size, 0);
+}
+
+/**
+ * @tc.name: GetExtensionRunningSaListInner003
+ * @tc.desc: test GetExtensionRunningSaListInner, get extension success with restore!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, GetExtensionRunningSaListInner003, TestSize.Level3)
+{
+    DTEST_LOG << __func__ << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    const int32_t maxLoop = 4;
+    map<int32_t, SaProfile> saProfileMapTmp;
+
+    SaProfileStore(saMgr, saProfileMapTmp, maxLoop);
+    SaProfileExtensionTestPrevSet(saMgr, maxLoop);
+    SaAbilityMapObjTestPrevSet(saMgr, maxLoop);
+
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteString("restore_test");
+    int32_t result = saMgr->GetExtensionRunningSaListInner(data, reply);
+    EXPECT_EQ(result, ERR_NONE);
+    int32_t ret = reply.ReadInt32(result);
+    EXPECT_EQ(ret, true);
+
+    int32_t size;
+    ret = reply.ReadInt32(size);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(size, 3);
+    for (int32_t i = 0; i < size; ++i) {
+        sptr<IRemoteObject> obj = reply.ReadRemoteObject();
+        EXPECT_NE(obj, nullptr);
+    }
+
+    saMgr->abilityMap_.clear();
+    SaProfileRecover(saMgr, saProfileMapTmp, maxLoop);
+}
+
+/**
+ * @tc.name: GetExtensionSaIdsInner001
+ * @tc.desc: test GetExtensionSaIdsInner, read extension failed!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, GetExtensionSaIdsInner001, TestSize.Level3)
+{
+    DTEST_LOG << __func__ << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t result = saMgr->GetExtensionSaIdsInner(data, reply);
+    EXPECT_EQ(result, ERR_FLATTEN_OBJECT);
 }
 
 /**
