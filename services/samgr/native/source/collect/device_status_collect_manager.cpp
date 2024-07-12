@@ -66,7 +66,7 @@ void DeviceStatusCollectManager::Init(const std::list<SaProfile>& saProfiles)
 
 void DeviceStatusCollectManager::RemoveWhiteCommonEvent()
 {
-    if (IsExistInPluginMap(COMMON_EVENT) != ERR_OK) {
+    if (IsExistInPluginMap(COMMON_EVENT) == ERR_OK) {
         collectPluginMap_[COMMON_EVENT]->RemoveWhiteCommonEvent();
     }
 }
