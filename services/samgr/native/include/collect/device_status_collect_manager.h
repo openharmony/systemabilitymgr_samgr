@@ -50,6 +50,7 @@ public:
     int32_t GetSaExtraDataIdList(int32_t saId, std::vector<int64_t>& extraDataIdList,
         const std::string& eventName = "");
     int32_t IsExistInPluginMap(int32_t eventId);
+    void RemoveWhiteCommonEvent();
 private:
     bool NeedPersistOnDemandEvent(const OnDemandEvent& event);
     void PersistOnDemandEvent(int32_t systemAbilityId, OnDemandPolicyType type,

@@ -114,6 +114,13 @@ void SystemAbilityManager::Init()
     SetKey(DYNAMIC_CACHE_PARAM);
 }
 
+void SystemAbilityManager::RemoveWhiteCommonEvent()
+{
+    if (collectManager_ != nullptr) {
+        collectManager_->RemoveWhiteCommonEvent();
+    }
+}
+
 void SystemAbilityManager::CleanFfrt()
 {
     if (workHandler_ != nullptr) {

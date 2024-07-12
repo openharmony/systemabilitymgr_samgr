@@ -46,6 +46,13 @@ CommonEventCollect::CommonEventCollect(const sptr<IReport>& report)
 {
 }
 
+void CommonEventCollect::RemoveWhiteCommonEvent()
+{
+    std::lock_guard<std::mutex> autoLock(commonEventStateLock_);
+    commonEventWhitelist.erase(EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED);
+    HILOGI("rm USER_UNLOCKED,size=%{public}zu", commonEventWhitelist.size());
+}
+
 void CommonEventCollect::CleanFfrt()
 {
     if (workHandler_ != nullptr) {

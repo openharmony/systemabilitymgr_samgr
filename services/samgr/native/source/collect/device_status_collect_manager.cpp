@@ -64,6 +64,13 @@ void DeviceStatusCollectManager::Init(const std::list<SaProfile>& saProfiles)
     HILOGI("DeviceStaMgr Init end");
 }
 
+void DeviceStatusCollectManager::RemoveWhiteCommonEvent()
+{
+    if (IsExistInPluginMap(COMMON_EVENT) == ERR_OK) {
+        collectPluginMap_[COMMON_EVENT]->RemoveWhiteCommonEvent();
+    }
+}
+
 void DeviceStatusCollectManager::FilterOnDemandSaProfiles(const std::list<SaProfile>& saProfiles)
 {
     std::unique_lock<std::shared_mutex> writeLock(saProfilesLock_);
