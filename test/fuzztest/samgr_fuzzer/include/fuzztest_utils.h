@@ -17,14 +17,61 @@
 #define SAMGR_TEST_FUZZTEST_SYSTEM_ABILITY_MANAGER_FUZZER_UTILS_H
 #include <cstddef>
 #include <cstdint>
+#include "system_ability_status_change_stub.h"
+#include "system_ability_load_callback_stub.h"
+#include "system_process_status_change_stub.h"
 namespace OHOS {
 namespace Samgr {
 class FuzzTestUtils {
 public:
     static void FuzzTestRemoteRequest(const uint8_t *rawData, size_t size, uint32_t code);
+    static void FuzzTestRemoteRequest(MessageParcel& data, uint32_t code);
+    static bool BuildBoolFromData(const uint8_t* data, size_t size)
+    {
+        if ((data == nullptr) || (size < sizeof(bool))) {
+            return false;
+        }
+        bool boolVal = static_cast<bool>(*data);
+        return boolVal;
+    }
+    static int32_t BuildInt32FromData(const uint8_t* data, size_t size)
+    {
+        if ((data == nullptr) || (size < sizeof(int32_t))) {
+            return 0;
+        }
+        int32_t int32Val = *reinterpret_cast<const int32_t *>(data);
+        return int32Val;
+    }
+    static std::string BuildStringFromData(const uint8_t* data, size_t size)
+    {
+        if ((data == nullptr) || (size == 0)) {
+            return "";
+        }
+        std::string strVal(reinterpret_cast<const char *>(data), size);
+        return strVal;
+    }
 private:
     static bool IsDmReady();
     static void AddDeviceManager();
+};
+
+class MockSystemProcessStatusChange : public SystemProcessStatusChangeStub {
+public:
+    void OnSystemProcessStarted(SystemProcessInfo& systemProcessInfo) override {}
+    void OnSystemProcessStopped(SystemProcessInfo& systemProcessInfo) override {}
+};
+
+class MockSystemAbilityStatusChange : public SystemAbilityStatusChangeStub {
+public:
+    void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override {}
+    void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override {}
+};
+
+class MockSystemAbilityLoadCallback : public SystemAbilityLoadCallbackStub {
+public:
+    void OnLoadSystemAbilitySuccess(int32_t systemAbilityId, const sptr<IRemoteObject>& remoteObject) override {}
+
+    void OnLoadSystemAbilityFail(int32_t systemAbilityId) override {}
 };
 }
 } // namespace OHOS

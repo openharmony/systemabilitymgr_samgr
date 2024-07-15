@@ -13,9 +13,11 @@
  * limitations under the License.
  */
 
-#include "unsubscribesystemprocess_fuzzer.h"
+#include "addsystemprocess_fuzzer.h"
 
 #include "fuzztest_utils.h"
+#include "string_ex.h"
+#include "itest_transaction_service.h"
 #include "samgr_ipc_interface_code.h"
 namespace OHOS {
 namespace Samgr {
@@ -23,25 +25,16 @@ namespace {
 constexpr size_t THRESHOLD = 4;
 const std::u16string SAMGR_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 }
-
-void FuzzSubscribeSystemProcess(const uint8_t *data, size_t size)
+void FuzzAddSystemProcess(const uint8_t *data, size_t size)
 {
-    sptr<MockSystemProcessStatusChange> listener = new(std::nothrow) MockSystemProcessStatusChange();
+    sptr<IRemoteObject> procObj = new(std::nothrow) MockSystemAbilityStatusChange();
     MessageParcel parcelData;
     parcelData.WriteInterfaceToken(SAMGR_INTERFACE_TOKEN);
-    parcelData.WriteRemoteObject(listener);
+    std::u16string procName = Str8ToStr16(FuzzTestUtils::BuildStringFromData(data, size));
+    parcelData.WriteString16(procName);
+    parcelData.WriteRemoteObject(procObj);
     FuzzTestUtils::FuzzTestRemoteRequest(parcelData,
-        static_cast<uint32_t>(SamgrInterfaceCode::SUBSCRIBE_SYSTEM_PROCESS_TRANSACTION));
-}
-
-void FuzzUnSubscribeSystemProcess(const uint8_t *data, size_t size)
-{
-    sptr<MockSystemProcessStatusChange> listener = new(std::nothrow) MockSystemProcessStatusChange();
-    MessageParcel parcelData;
-    parcelData.WriteInterfaceToken(SAMGR_INTERFACE_TOKEN);
-    parcelData.WriteRemoteObject(listener);
-    FuzzTestUtils::FuzzTestRemoteRequest(parcelData,
-        static_cast<uint32_t>(SamgrInterfaceCode::UNSUBSCRIBE_SYSTEM_PROCESS_TRANSACTION));
+        static_cast<uint32_t>(SamgrInterfaceCode::ADD_SYSTEM_PROCESS_TRANSACTION));
 }
 }
 }
@@ -51,7 +44,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     if (size < OHOS::Samgr::THRESHOLD) {
         return 0;
     }
-    OHOS::Samgr::FuzzSubscribeSystemProcess(data, size);
-    OHOS::Samgr::FuzzUnSubscribeSystemProcess(data, size);
+    OHOS::Samgr::FuzzAddSystemProcess(data, size);
     return 0;
 }

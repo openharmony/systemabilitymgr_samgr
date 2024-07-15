@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "unsubscribesystemprocess_fuzzer.h"
+#include "unsubscribesystemability_fuzzer.h"
 
 #include "fuzztest_utils.h"
 #include "samgr_ipc_interface_code.h"
@@ -24,24 +24,28 @@ constexpr size_t THRESHOLD = 4;
 const std::u16string SAMGR_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 }
 
-void FuzzSubscribeSystemProcess(const uint8_t *data, size_t size)
+void FuzzSubscribeSystemAbility(const uint8_t *data, size_t size)
 {
-    sptr<MockSystemProcessStatusChange> listener = new(std::nothrow) MockSystemProcessStatusChange();
+    sptr<MockSystemAbilityStatusChange> listener = new(std::nothrow) MockSystemAbilityStatusChange();
     MessageParcel parcelData;
     parcelData.WriteInterfaceToken(SAMGR_INTERFACE_TOKEN);
+    int32_t systemAbilityId = FuzzTestUtils::BuildInt32FromData(data, size);
+    parcelData.WriteInt32(systemAbilityId);
     parcelData.WriteRemoteObject(listener);
     FuzzTestUtils::FuzzTestRemoteRequest(parcelData,
-        static_cast<uint32_t>(SamgrInterfaceCode::SUBSCRIBE_SYSTEM_PROCESS_TRANSACTION));
+        static_cast<uint32_t>(SamgrInterfaceCode::SUBSCRIBE_SYSTEM_ABILITY_TRANSACTION));
 }
 
-void FuzzUnSubscribeSystemProcess(const uint8_t *data, size_t size)
+void FuzzUnSubscribeSystemAbility(const uint8_t *data, size_t size)
 {
-    sptr<MockSystemProcessStatusChange> listener = new(std::nothrow) MockSystemProcessStatusChange();
+    sptr<MockSystemAbilityStatusChange> listener = new(std::nothrow) MockSystemAbilityStatusChange();
     MessageParcel parcelData;
     parcelData.WriteInterfaceToken(SAMGR_INTERFACE_TOKEN);
+    int32_t systemAbilityId = FuzzTestUtils::BuildInt32FromData(data, size);
+    parcelData.WriteInt32(systemAbilityId);
     parcelData.WriteRemoteObject(listener);
     FuzzTestUtils::FuzzTestRemoteRequest(parcelData,
-        static_cast<uint32_t>(SamgrInterfaceCode::UNSUBSCRIBE_SYSTEM_PROCESS_TRANSACTION));
+        static_cast<uint32_t>(SamgrInterfaceCode::UNSUBSCRIBE_SYSTEM_ABILITY_TRANSACTION));
 }
 }
 }
@@ -51,7 +55,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     if (size < OHOS::Samgr::THRESHOLD) {
         return 0;
     }
-    OHOS::Samgr::FuzzSubscribeSystemProcess(data, size);
-    OHOS::Samgr::FuzzUnSubscribeSystemProcess(data, size);
+    OHOS::Samgr::FuzzSubscribeSystemAbility(data, size);
+    OHOS::Samgr::FuzzUnSubscribeSystemAbility(data, size);
     return 0;
 }
