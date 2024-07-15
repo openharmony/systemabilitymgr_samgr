@@ -215,7 +215,7 @@ HWTEST_F(SystemAbilityMgrTest, StartDynamicSystemProcess001, TestSize.Level3)
         "01234567890123456789012345678901234567890123456";
     OnDemandEvent event;
     int result = saMgr->StartDynamicSystemProcess(invalidProcess, 100, event);
-    cout << "begin StartDynamicSystemProcess001 result is "<< result <endl;
+    cout << "begin StartDynamicSystemProcess001 result is "<< result << endl;
     EXPECT_EQ(result, 102);
 }
 
