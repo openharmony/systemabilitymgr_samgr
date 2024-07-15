@@ -1887,16 +1887,14 @@ void SystemAbilityManager::NotifyRpcLoadCompleted(const std::string& srcDeviceId
     }
     auto notifyTask = [srcDeviceId, systemAbilityId, remoteObject, this]() {
         if (dBinderService_ != nullptr) {
+            SamgrXCollie samgrXCollie("samgr--LoadSystemAbilityComplete_" + ToString(systemAbilityId));
             dBinderService_->LoadSystemAbilityComplete(srcDeviceId, systemAbilityId, remoteObject);
             return;
         }
         HILOGW("NotifyRpcLoadCompleted failed, SA:%{public}d, deviceId : %{public}s",
             systemAbilityId, AnonymizeDeviceId(srcDeviceId).c_str());
     };
-    bool ret = workHandler_->PostTask(notifyTask);
-    if (!ret) {
-        HILOGW("NotifyRpcLoadCompleted PostTask failed!");
-    }
+    ffrt::submit(notifyTask);
 }
 
 void SystemAbilityManager::RemoveStartingAbilityCallbackLocked(
