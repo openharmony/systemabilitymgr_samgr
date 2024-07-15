@@ -1122,24 +1122,6 @@ HWTEST_F(SystemAbilityMgrTest, IsModuleUpdate003, TestSize.Level2)
 }
 
 /**
- * @tc.name: IpcDumpProc001
- * @tc.desc: test IpcDumpProc.
- * @tc.type: FUNC
- */
-HWTEST_F(SystemAbilityMgrTest, IpcDumpProc001, TestSize.Level2)
-{
-    SamMockPermission::MockProcess("hidumper_service");
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    int32_t cmd = -1;
-    int32_t fd = 1;
-    std::vector<std::string> args;
-    args.push_back("abc");
-    args.push_back("abcd");
-    int ret = saMgr->IpcDumpProc(fd, args);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-}
-
-/**
  * @tc.name: GetExtensionSaIdsInner002
  * @tc.desc: test GetExtensionSaIdsInner, read null extension!
  * @tc.type: FUNC
@@ -1289,6 +1271,24 @@ HWTEST_F(SystemAbilityMgrTest, GetExtensionSaIdsInner001, TestSize.Level3)
     MessageParcel reply;
     int32_t result = saMgr->GetExtensionSaIdsInner(data, reply);
     EXPECT_EQ(result, ERR_FLATTEN_OBJECT);
+}
+
+/**
+ * @tc.name: IpcDumpProc001
+ * @tc.desc: test IpcDumpProc.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, IpcDumpProc001, TestSize.Level2)
+{
+    SamMockPermission::MockProcess("hidumper_service");
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t cmd = -1;
+    int32_t fd = 1;
+    std::vector<std::string> args;
+    args.push_back("abc");
+    args.push_back("abcd");
+    int ret = saMgr->IpcDumpProc(fd, args);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
 
 /**
