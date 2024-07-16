@@ -753,6 +753,19 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleUnloadAbilityEventLock001, TestS
     EXPECT_EQ(ret, UNLOAD_REQUEST_NULL);
 }
 
+HWTEST_F(SystemAbilityStateSchedulerTest, KillSystemProcessLocked002, TestSize.Level3)
+{
+    cout << "begin KillSystemProcessLocked002 "<< endl;
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::shared_ptr<SystemProcessContext> systemProcessContext = std::make_shared<SystemProcessContext>();
+    systemProcessContext->processName = u"1234567890123456789012345678901234567890123456789"
+        "01234567890123456789012345678901234567890123456";
+    int result = systemAbilityStateScheduler->KillSystemProcessLocked(systemProcessContext);
+    cout << "begin KillSystemProcessLocked002 result is "<< result << endl;
+    EXPECT_EQ(result, 102);
+}
+
 /**
  * @tc.name: HandleCancelUnloadAbilityEvent001
  * @tc.desc: test HandleCancelUnloadAbilityEvent, SA is invalid
