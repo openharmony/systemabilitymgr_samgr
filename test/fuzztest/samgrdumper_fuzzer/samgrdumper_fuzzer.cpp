@@ -15,6 +15,8 @@
 
 #include "samgrdumper_fuzzer.h"
 
+#define private public
+#include "system_ability_manager.h"
 #include "system_ability_manager_dumper.h"
 #include "schedule/system_ability_state_scheduler.h"
 #include "sam_mock_permission.h"
@@ -50,6 +52,10 @@ void SamgrDumperFuzzTest(const uint8_t* data, size_t size)
     std::string strVal = BuildStringFromData(data, size);
     std::vector<std::string> args;
     SplitStr(strVal, " ", args);
+    std::vector<std::u16string> argsWithStr16;
+    for (size_t i = 0; i < args.size(); i++) {
+        argsWithStr16.emplace_back(Str8ToStr16(args[i]));
+    }
     std::string result;
     std::shared_ptr<SystemAbilityStateScheduler> scheduler = std::make_shared<SystemAbilityStateScheduler>();
     int32_t fd = BuildInt32FromData(data, size);
@@ -57,12 +63,23 @@ void SamgrDumperFuzzTest(const uint8_t* data, size_t size)
     SystemAbilityManagerDumper::Dump(scheduler, args, result);
     int32_t cmd = -1;
     SystemAbilityManagerDumper::IpcDumpCmdParser(cmd, args);
-    std::string processName = "samgr";
+    std::string processName = BuildStringFromData(data, size);
     SystemAbilityManagerDumper::IpcDumpIsSamgr(processName);
     SystemAbilityManagerDumper::IpcDumpIsAllProcess(processName);
     SystemAbilityManagerDumper::GetSamgrIpcStatistics(result);
     SystemAbilityManagerDumper::StopSamgrIpcStatistics(result);
     SystemAbilityManagerDumper::StartSamgrIpcStatistics(result);
+    SystemAbilityManagerDumper::GetFfrtDumpInfoProc(scheduler, args, result);
+    SystemAbilityManagerDumper::GetSAMgrFfrtInfo(result);
+    int32_t pid = BuildInt32FromData(data, size);
+    SystemAbilityManagerDumper::DumpFfrtInfoByProcName(pid, Str8ToStr16(processName), result);
+
+    sptr<SystemAbilityManager> manager = SystemAbilityManager::GetInstance();
+    manager->Dump(fd, argsWithStr16);
+    manager->IpcDumpProc(fd, args);
+    manager->IpcDumpAllProcess(fd, cmd);
+    manager->IpcDumpSamgrProcess(fd, cmd);
+    manager->IpcDumpSingleProcess(fd, cmd, processName);
 }
 }
 }
