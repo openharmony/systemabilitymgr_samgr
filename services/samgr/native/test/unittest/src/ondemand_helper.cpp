@@ -696,24 +696,6 @@ static void TestOnDemandPolicy(OHOS::OnDemandHelper& ondemandHelper)
     }
 }
 
-static void TestGetExtension(OHOS::OnDemandHelper& ondemandHelper)
-{
-    std::string extension;
-    cin >> extension;
-
-    std::vector<int32_t> saIds;
-    if (ondemandHelper.GetExtensionSaIds(extension, saIds) != ERR_OK) {
-        cout << "get extension: " << extension << " failed" << endl;
-        return;
-    }
-    std::vector<sptr<IRemoteObject>> saList;
-    if (ondemandHelper.GetExtensionRunningSaList(extension, saList) != ERR_OK) {
-        cout << "get handle extension: " << extension << " failed" << endl;
-        return;
-    }
-    return;
-}
-
 static void TestCommonEvent(OHOS::OnDemandHelper& ondemandHelper)
 {
     std::string cmd = "";
@@ -732,6 +714,24 @@ static void TestCommonEvent(OHOS::OnDemandHelper& ondemandHelper)
     } else {
         cout << "invalid input" << endl;
     }
+}
+
+static void TestGetExtension(OHOS::OnDemandHelper& ondemandHelper)
+{
+    std::string extension;
+    cin >> extension;
+
+    std::vector<int32_t> saIds;
+    if (ondemandHelper.GetExtensionSaIds(extension, saIds) != ERR_OK) {
+        cout << "get extension: " << extension << " failed" << endl;
+        return;
+    }
+    std::vector<sptr<IRemoteObject>> saList;
+    if (ondemandHelper.GetExtensionRunningSaList(extension, saList) != ERR_OK) {
+        cout << "get handle extension: " << extension << " failed" << endl;
+        return;
+    }
+    return;
 }
 
 static void TestCheckSystemAbility(OHOS::OnDemandHelper& ondemandHelper)
@@ -758,7 +758,7 @@ int main(int argc, char* argv[])
     OHOS::OnDemandHelper& ondemandHelper = OnDemandHelper::GetInstance();
     string cmd = "load";
     do {
-        cout << "please input operation(sa/proc/param/policy/getExtension/6 getEvent/check)" << endl;
+        cout << "please input operation(sa/proc/param/policy/getExtension/check/6 getEvent)" << endl;
         cmd.clear();
         cin.clear();
         cin >> cmd;
@@ -770,10 +770,10 @@ int main(int argc, char* argv[])
             TestProcess(ondemandHelper);
         } else if (cmd == "policy") {
             TestOnDemandPolicy(ondemandHelper);
-        } else if (cmd == "getExtension") {
-            TestGetExtension(ondemandHelper);
         } else if (cmd == "6") {
             TestCommonEvent(ondemandHelper);
+        } else if (cmd == "getExtension") {
+            TestGetExtension(ondemandHelper);
         } else if (cmd == "check") {
             TestCheckSystemAbility(ondemandHelper);
         } else {
