@@ -295,7 +295,14 @@ bool LocalAbilityManagerProxy::IpcStatCmdProc(int32_t fd, int32_t cmd)
         HILOG_ERROR(LOG_CORE, "IpcStatCmdProc SendRequest failed, return value : %{public}d", status);
         return false;
     }
-    return true;
+
+    bool result = false;
+    if (!reply.ReadBool(result)) {
+        HILOG_WARN(LOG_CORE, "IpcStatCmdProc read bool faild");
+        return false;
+    }
+
+    return result;
 }
 
 bool LocalAbilityManagerProxy::FfrtDumperProc(std::string& ffrtDumperInfo)

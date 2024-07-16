@@ -316,7 +316,12 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t system
     if (err != ERR_NONE) {
         return nullptr;
     }
-    sptr<IRemoteObject> irsp(reply.ReadRemoteObject());
+
+    sptr<IRemoteObject> irsp = reply.ReadRemoteObject();
+    if (irsp == nullptr) {
+        HILOGW("CheckSystemAbility read remote object failed");
+        return nullptr;
+    }
 
     ret = reply.ReadBool(isExist);
     if (!ret) {
