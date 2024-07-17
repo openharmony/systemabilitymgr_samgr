@@ -48,15 +48,15 @@ public:
     {
         return true;
     }
-    bool SendStrategyToSA(int32_t type, int32_t systemAbilityId, int32_t level, std::string& action) override
-    {
-        return true;
-    }
     bool IpcStatCmdProc(int32_t fd, int32_t cmd) override
     {
         return true;
     }
     bool FfrtDumperProc(std::string& ffrtDumperInfo) override
+    {
+        return true;
+    }
+    bool SendStrategyToSA(int32_t type, int32_t systemAbilityId, int32_t level, std::string& action) override
     {
         return true;
     }

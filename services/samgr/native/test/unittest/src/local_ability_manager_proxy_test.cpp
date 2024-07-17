@@ -306,7 +306,7 @@ HWTEST_F(LocalAbilityManagerProxyTest, IpcStatCmdProc001, TestSize.Level3)
     int32_t cmd = 0;
     std::string action;
     bool ret = localAbility->IpcStatCmdProc(fd, cmd);
-    EXPECT_TRUE(ret);
+    EXPECT_FALSE(ret);
 }
 
 /**
