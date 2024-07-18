@@ -68,6 +68,7 @@ public:
     void AddLimitDelayUnloadTime(int32_t systemAbilityId);
 private:
     void InitStateContext(const std::list<SaProfile>& saProfiles);
+
     int32_t LimitDelayUnloadTime(int32_t delayUnloadTime);
     bool GetSystemAbilityContext(int32_t systemAbilityId,
         std::shared_ptr<SystemAbilityContext>& abilityContext);
