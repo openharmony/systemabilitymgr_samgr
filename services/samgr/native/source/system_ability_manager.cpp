@@ -1038,7 +1038,7 @@ int32_t SystemAbilityManager::AddSystemAbility(int32_t systemAbilityId, const sp
         HILOGE("abilityStateScheduler is nullptr");
         return ERR_INVALID_VALUE;
     }
-    abilityStateScheduler_->AddLimitDelayUnloadTime(systemAbilityId);
+    abilityStateScheduler_->UpdateLimitDelayUnloadTime(systemAbilityId);
     SystemAbilityInvalidateCache(systemAbilityId);
     abilityStateScheduler_->SendAbilityStateEvent(systemAbilityId, AbilityStateEvent::ABILITY_LOAD_SUCCESS_EVENT);
     SendSystemAbilityAddedMsg(systemAbilityId, ability);

@@ -65,7 +65,7 @@ public:
     int32_t CheckStartEnableOnce(const OnDemandEvent& event, const SaControlInfo& saControl,
         sptr<ISystemAbilityLoadCallback> callback);
     int32_t CheckStopEnableOnce(const OnDemandEvent& event, const SaControlInfo& saControl);
-    void AddLimitDelayUnloadTime(int32_t systemAbilityId);
+    void UpdateLimitDelayUnloadTime(int32_t systemAbilityId);
 private:
     void InitStateContext(const std::list<SaProfile>& saProfiles);
 

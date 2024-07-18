@@ -174,7 +174,7 @@ bool SystemAbilityStateScheduler::GetSystemAbilityContext(int32_t systemAbilityI
     return true;
 }
 
-void SystemAbilityStateScheduler::AddLimitDelayUnloadTime(int32_t systemAbilityId)
+void SystemAbilityStateScheduler::UpdateLimitDelayUnloadTime(int32_t systemAbilityId)
 {
     std::shared_ptr<SystemAbilityContext> abilityContext;
     if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
