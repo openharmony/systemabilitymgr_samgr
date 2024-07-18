@@ -190,18 +190,19 @@ void SystemAbilityStateScheduler::AddLimitDelayUnloadTime(int32_t systemAbilityI
         HILOGE("Scheduler AddLimitDelayUnloadTime SA:%{public}d not in any proc", systemAbilityId);
         return;
     }
-    if (abilityContext->timeStamp == 0) {
-        abilityContext->timeStamp = GetTickCount();
-    } else {
+    if (abilityContext->timeStamp != 0) 
+    {
         int64_t begin = abilityContext->timeStamp;
         int64_t end = GetTickCount();
         if (end - begin <= MAX_DUATION) {
             int64_t onceDelayTime = abilityContext->delayUnloadTime;
             onceDelayTime += ONCE_DELAY_TIME;
             abilityContext->delayUnloadTime = LimitDelayUnloadTime(onceDelayTime);
-            HILOGI("Scheduler AddLimitDelayUnloadTime delayUnloadTime is %{public}d", abilityContext->delayUnloadTime);
+            HILOGI("delayUnloadTime is %{public}d", abilityContext->delayUnloadTime);
         }
     }
+    abilityContext->timeStamp = GetTickCount();
+    
 }
 
 bool SystemAbilityStateScheduler::GetSystemProcessContext(const std::u16string& processName,
