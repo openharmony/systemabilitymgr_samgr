@@ -1009,6 +1009,18 @@ void SystemAbilityManager::NotifyRemoteDeviceOffline(const std::string& deviceId
     }
 }
 
+void SystemAbilityManager::RefreshListenerState(int32_t systemAbilityId)
+{
+    lock_guard<mutex> autoLock(listenerMapLock_);
+    auto iter = listenerMap_.find(systemAbilityId);
+    if (iter != listenerMap_.end()) {
+        auto& listeners = iter->second;
+        for (auto& item : listeners) {
+            item.state = ListenerState::INIT;
+        }
+    }
+}
+
 int32_t SystemAbilityManager::AddSystemAbility(int32_t systemAbilityId, const sptr<IRemoteObject>& ability,
     const SAExtraProp& extraProp)
 {
@@ -1016,6 +1028,7 @@ int32_t SystemAbilityManager::AddSystemAbility(int32_t systemAbilityId, const sp
         HILOGE("AddSystemAbilityExtra input params is invalid.");
         return ERR_INVALID_VALUE;
     }
+    RefreshListenerState(systemAbilityId);
     {
         unique_lock<shared_mutex> writeLock(abilityMapLock_);
         auto saSize = abilityMap_.size();
