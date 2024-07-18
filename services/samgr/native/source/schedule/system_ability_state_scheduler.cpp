@@ -176,19 +176,9 @@ bool SystemAbilityStateScheduler::GetSystemAbilityContext(int32_t systemAbilityI
 
 void SystemAbilityStateScheduler::AddLimitDelayUnloadTime(int32_t systemAbilityId)
 {
-    std::shared_lock<std::shared_mutex> readLock(abiltyMapLock_);
-    if (abilityContextMap_.count(systemAbilityId) == 0) {
-        HILOGD("Scheduler AddLimitDelayUnloadTime SA:%{public}d not in SA profiles", systemAbilityId);
-        return;
-    }
-    std::shared_ptr<SystemAbilityContext> abilityContext = abilityContextMap_[systemAbilityId];
-    if (abilityContext == nullptr) {
-        HILOGE("Scheduler AddLimitDelayUnloadTime SA:%{public}d context is null", systemAbilityId);
-        return;
-    }
-    if (abilityContext->ownProcessContext == nullptr) {
-        HILOGE("Scheduler AddLimitDelayUnloadTime SA:%{public}d not in any proc", systemAbilityId);
-        return;
+    std::shared_ptr<SystemAbilityContext> abilityContext;
+    if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
+        return false;
     }
     if (abilityContext->timeStamp != 0) 
     {
@@ -202,7 +192,6 @@ void SystemAbilityStateScheduler::AddLimitDelayUnloadTime(int32_t systemAbilityI
         }
     }
     abilityContext->timeStamp = GetTickCount();
-    
 }
 
 bool SystemAbilityStateScheduler::GetSystemProcessContext(const std::u16string& processName,
