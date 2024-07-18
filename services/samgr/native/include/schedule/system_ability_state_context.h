@@ -16,6 +16,7 @@
 #ifndef OHOS_SYSTEM_ABILITY_MANAGER_SYSTEM_ABILITY_STATE_CONTEXT_H
 #define OHOS_SYSTEM_ABILITY_MANAGER_SYSTEM_ABILITY_STATE_CONTEXT_H
 
+#include <cstdint>
 #include <list>
 #include <map>
 #include <memory>
@@ -86,6 +87,7 @@ struct SystemAbilityContext {
     std::shared_ptr<UnloadRequestInfo> unloadRequest;
     int32_t systemAbilityId = -1;
     int32_t delayUnloadTime = 0;
+    int64_t timeStamp = 0;
     SystemAbilityState state = SystemAbilityState::NOT_LOADED;
     PendingEvent pendingEvent = PendingEvent::NO_EVENT;
     bool isAutoRestart = false;

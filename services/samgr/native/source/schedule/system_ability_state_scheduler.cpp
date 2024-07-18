@@ -38,6 +38,8 @@ constexpr int32_t MAX_SUBSCRIBE_COUNT = 256;
 constexpr int32_t UNLOAD_TIMEOUT_TIME = 5 * 1000;
 constexpr const char* LOCAL_DEVICE = "local";
 constexpr int32_t MAX_DELAY_TIME = 5 * 60 * 1000;
+constexpr int32_t MAX_DUATION = 10 * 60 * 1000; // ms
+constexpr int32_t ONCE_DELAY_TIME = 10 * 1000; // ms
 constexpr const char* CANCEL_UNLOAD = "cancelUnload";
 constexpr const char* KEY_EVENT_ID = "eventId";
 constexpr const char* KEY_NAME = "name";
@@ -170,6 +172,36 @@ bool SystemAbilityStateScheduler::GetSystemAbilityContext(int32_t systemAbilityI
         return false;
     }
     return true;
+}
+
+void SystemAbilityStateScheduler::AddLimitDelayUnloadTime(int32_t systemAbilityId)
+{
+    std::shared_lock<std::shared_mutex> readLock(abiltyMapLock_);
+    if (abilityContextMap_.count(systemAbilityId) == 0) {
+        HILOGD("Scheduler AddLimitDelayUnloadTime SA:%{public}d not in SA profiles", systemAbilityId);
+        return;
+    }
+    std::shared_ptr<SystemAbilityContext> abilityContext = abilityContextMap_[systemAbilityId];
+    if (abilityContext == nullptr) {
+        HILOGE("Scheduler AddLimitDelayUnloadTime SA:%{public}d context is null", systemAbilityId);
+        return;
+    }
+    if (abilityContext->ownProcessContext == nullptr) {
+        HILOGE("Scheduler AddLimitDelayUnloadTime SA:%{public}d not in any proc", systemAbilityId);
+        return;
+    }
+    if (abilityContext->timeStamp == 0) {
+        abilityContext->timeStamp = GetTickCount();
+    } else {
+        int64_t begin = abilityContext->timeStamp;
+        int64_t end = GetTickCount();
+        if (end - begin <= MAX_DUATION) {
+            int64_t onceDelayTime = abilityContext->delayUnloadTime;
+            onceDelayTime += ONCE_DELAY_TIME;
+            abilityContext->delayUnloadTime = LimitDelayUnloadTime(onceDelayTime);
+            HILOGI("Scheduler AddLimitDelayUnloadTime delayUnloadTime is %{public}d", abilityContext->delayUnloadTime);
+        }
+    }
 }
 
 bool SystemAbilityStateScheduler::GetSystemProcessContext(const std::u16string& processName,
