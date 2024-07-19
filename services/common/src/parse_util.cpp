@@ -146,7 +146,9 @@ void ParseUtil::OpenSo(SaProfile& saProfile)
         HITRACE_METER_NAME(HITRACE_TAG_SAMGR, dlopenTag);
         int64_t begin = GetTickCount();
         DlHandle handle = nullptr;
-        {
+        if (saProfile.runOnCreate) {
+            handle = dlopen(saProfile.libPath.c_str(), RTLD_NOW);
+        } else {
             SamgrXCollie samgrXCollie("safwk--openso_" + ToString(saProfile.saId));
             handle = dlopen(saProfile.libPath.c_str(), RTLD_NOW);
         }
