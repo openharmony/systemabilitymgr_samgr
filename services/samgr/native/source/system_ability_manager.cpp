@@ -1009,6 +1009,18 @@ void SystemAbilityManager::NotifyRemoteDeviceOffline(const std::string& deviceId
     }
 }
 
+void SystemAbilityManager::RefreshListenerState(int32_t systemAbilityId)
+{
+    lock_guard<mutex> autoLock(listenerMapLock_);
+    auto iter = listenerMap_.find(systemAbilityId);
+    if (iter != listenerMap_.end()) {
+        auto& listeners = iter->second;
+        for (auto& item : listeners) {
+            item.state = ListenerState::INIT;
+        }
+    }
+}
+
 int32_t SystemAbilityManager::AddSystemAbility(int32_t systemAbilityId, const sptr<IRemoteObject>& ability,
     const SAExtraProp& extraProp)
 {
@@ -1016,6 +1028,7 @@ int32_t SystemAbilityManager::AddSystemAbility(int32_t systemAbilityId, const sp
         HILOGE("AddSystemAbilityExtra input params is invalid.");
         return ERR_INVALID_VALUE;
     }
+    RefreshListenerState(systemAbilityId);
     {
         unique_lock<shared_mutex> writeLock(abilityMapLock_);
         auto saSize = abilityMap_.size();
@@ -1023,11 +1036,7 @@ int32_t SystemAbilityManager::AddSystemAbility(int32_t systemAbilityId, const sp
             HILOGE("map size error, (Has been greater than %zu)", saSize);
             return ERR_INVALID_VALUE;
         }
-        SAInfo saInfo;
-        saInfo.remoteObj = ability;
-        saInfo.isDistributed = extraProp.isDistributed;
-        saInfo.capability = extraProp.capability;
-        saInfo.permission = Str16ToStr8(extraProp.permission);
+        SAInfo saInfo = { ability, extraProp.isDistributed, extraProp.capability, Str16ToStr8(extraProp.permission) };
         if (abilityMap_.count(systemAbilityId) > 0) {
             auto callingPid = IPCSkeleton::GetCallingPid();
             auto callingUid = IPCSkeleton::GetCallingUid();
@@ -1041,7 +1050,6 @@ int32_t SystemAbilityManager::AddSystemAbility(int32_t systemAbilityId, const sp
     if (abilityDeath_ != nullptr) {
         ability->AddDeathRecipient(abilityDeath_);
     }
-
     u16string strName = Str8ToStr16(to_string(systemAbilityId));
     if (extraProp.isDistributed && dBinderService_ != nullptr) {
         dBinderService_->RegisterRemoteProxy(strName, systemAbilityId);

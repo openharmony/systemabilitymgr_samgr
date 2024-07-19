@@ -198,6 +198,7 @@ private:
     void DoInsertSaData(const std::u16string& name, const sptr<IRemoteObject>& ability, const SAExtraProp& extraProp);
     int32_t StartOnDemandAbility(int32_t systemAbilityId, bool& isExist);
     int32_t StartOnDemandAbilityLocked(int32_t systemAbilityId, bool& isExist);
+    void RefreshListenerState(int32_t systemAbilityId);
     int32_t AddSystemAbility(const std::u16string& name, const sptr<IRemoteObject>& ability,
         const SAExtraProp& extraProp);
     int32_t FindSystemAbilityNotify(int32_t systemAbilityId, int32_t code);
