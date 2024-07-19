@@ -25,6 +25,10 @@
 #include <set>
 
 namespace OHOS {
+struct TimeInfo {
+    bool normal = false;
+    bool awake = false;
+};
 class DeviceTimedCollect : public ICollectPlugin {
 public:
     explicit DeviceTimedCollect(const sptr<IReport>& report);
@@ -37,6 +41,9 @@ public:
     int32_t RemoveUnusedEvent(const OnDemandEvent& event) override;
 private:
     void SaveTimedEvent(const OnDemandEvent& onDemandEvent);
+    void SaveTimedInfos(const OnDemandEvent& onDemandEvent, int32_t interval);
+    void ReportEventByTimeInfo(int32_t interval);
+    void PostDelayTaskByTimeInfo(std::function<void()> callback, int32_t interval, int32_t disTime);
     int64_t CalculateDelayTime(const std::string& timeString);
     void PostPersistenceLoopTasks();
     void PostNonPersistenceLoopTasks();
@@ -55,6 +62,7 @@ private:
 
     void RemoveNonPersistenceLoopTask(int32_t interval);
     void RemovePersistenceLoopTask(int32_t interval);
+    void RemoveTimesInfo(const OnDemandEvent& onDemandEvent, int32_t interval);
     std::set<int32_t> nonPersitenceLoopEventSet_;
     std::set<int32_t> persitenceLoopEventSet_;
     std::mutex nonPersitenceLoopEventSetLock_;
@@ -63,6 +71,8 @@ private:
     std::mutex persitenceTimedEventSetLock_;
     std::map<int32_t, std::function<void()>> nonPersitenceLoopTasks_;
     std::map<int32_t, std::function<void()>> persitenceLoopTasks_;
+    std::mutex timeInfosLock_;
+    std::map<int32_t, TimeInfo> timeInfos_;
 #ifdef PREFERENCES_ENABLE
     std::shared_ptr<PreferencesUtil> preferencesUtil_;
 #endif
