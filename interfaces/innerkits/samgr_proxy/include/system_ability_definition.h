@@ -318,6 +318,7 @@ enum {
     SUBSYS_ACE_SYS_ABILITY_ID_BEGIN                  = 7001,
     ARKUI_UI_APPEARANCE_SERVICE_ID                   = 7002,
     CA_DAEMON_ID                                     = 8001,
+    TRUSTED_SERVICE_ID                               = 8002,
     ASSET_SERVICE_ID                                 = 8100,
     EL5_FILEKEY_MANAGER_SERVICE_ID                   = 8250,
     COMM_FIREWALL_MANAGER_SYS_ABILITY_ID             = 8300,
