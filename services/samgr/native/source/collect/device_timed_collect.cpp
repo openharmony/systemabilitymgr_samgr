@@ -157,7 +157,7 @@ void DeviceTimedCollect::SaveTimedInfos(const OnDemandEvent& onDemandEvent, int3
         timeInfos_[interval].awake = true;
     }
     HILOGD("SaveTimedInfos : %{public}d : %{public}d , %{public}d", interval,
-	    timeInfos_[interval].normal, timeInfos_[interval].awake);
+        timeInfos_[interval].normal, timeInfos_[interval].awake);
 }
 
 void DeviceTimedCollect::SaveTimedEvent(const OnDemandEvent& onDemandEvent)
@@ -382,7 +382,7 @@ void DeviceTimedCollect::RemoveTimesInfo(const OnDemandEvent& onDemandEvent, int
         timeInfos_[interval].awake = false;
     }
     HILOGD("RemoveTimesInfo : %{public}d : %{public}d , %{public}d", interval,
-	    timeInfos_[interval].normal, timeInfos_[interval].awake);
+        timeInfos_[interval].normal, timeInfos_[interval].awake);
 }
 
 void DeviceTimedCollect::RemoveNonPersistenceLoopTask(int32_t interval)
