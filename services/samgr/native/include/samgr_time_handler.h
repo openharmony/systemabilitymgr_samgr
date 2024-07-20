@@ -30,16 +30,14 @@
 namespace OHOS {
 class SamgrTimeHandler {
 public:
-    typedef std::function<void()> TaskType; // 任务类型
+    typedef std::function<void()> TaskType;
     ~SamgrTimeHandler();
     static SamgrTimeHandler* GetInstance();
     bool PostTask(TaskType func, uint64_t delayTime);
 
 private:
-    int epollfd;
-    bool flag;
-    const static uint32_t INIT_NUM = 4;
-    const static uint32_t MAX_EVENT = 8;
+    int epollfd = -1;
+    bool flag = false;
     ConcurrentMap <uint32_t, TaskType> timeFunc;
     static SamgrTimeHandler* volatile singleton;
 

@@ -42,7 +42,7 @@ public:
 private:
     void SaveTimedEvent(const OnDemandEvent& onDemandEvent);
     void SaveTimedInfos(const OnDemandEvent& onDemandEvent, int32_t interval);
-    void ReportEventByTimeInfo(int32_t interval);
+    void ReportEventByTimeInfo(int32_t interval, bool persistence);
     void PostDelayTaskByTimeInfo(std::function<void()> callback, int32_t interval, int32_t disTime);
     int64_t CalculateDelayTime(const std::string& timeString);
     void PostPersistenceLoopTasks();

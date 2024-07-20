@@ -18,7 +18,8 @@
 
 namespace OHOS {
 namespace {
-constexpr uint64_t CONVERSION_FACTOR = 1000; // ms to us
+constexpr uint32_t INIT_NUM = 4;
+constexpr uint32_t MAX_EVENT = 8;
 }
 SamgrTimeHandler* volatile SamgrTimeHandler::singleton = nullptr;
 static std::recursive_mutex mtx;
