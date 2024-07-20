@@ -180,9 +180,9 @@ void SystemAbilityStateScheduler::UpdateLimitDelayUnloadTime(int32_t systemAbili
     if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
         return false;
     }
-    if (abilityContext->timeStamp != 0) 
+    if (abilityContext->lastStartTime != 0) 
     {
-        int64_t begin = abilityContext->timeStamp;
+        int64_t begin = abilityContext->lastStartTime;
         int64_t end = GetTickCount();
         if (end - begin <= MAX_DUATION) {
             int64_t onceDelayTime = abilityContext->delayUnloadTime;
@@ -191,7 +191,9 @@ void SystemAbilityStateScheduler::UpdateLimitDelayUnloadTime(int32_t systemAbili
             HILOGI("delayUnloadTime is %{public}d", abilityContext->delayUnloadTime);
         }
     }
-    abilityContext->timeStamp = GetTickCount();
+    abilityContext->lastStartTime = GetTickCount();
+    std::unique_lock<std::shared_mutex> abiltyWriteLock(abiltyMapLock_);
+    abilityContextMap_[systemAbilityId] = abilityContext;
 }
 
 bool SystemAbilityStateScheduler::GetSystemProcessContext(const std::u16string& processName,
