@@ -1122,6 +1122,22 @@ HWTEST_F(SystemAbilityMgrTest, IsModuleUpdate003, TestSize.Level2)
 }
 
 /**
+ * @tc.name: GetExtensionSaIdsInner001
+ * @tc.desc: test GetExtensionSaIdsInner, read extension failed!
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, GetExtensionSaIdsInner001, TestSize.Level3)
+{
+    DTEST_LOG << __func__ << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t result = saMgr->GetExtensionSaIdsInner(data, reply);
+    EXPECT_EQ(result, ERR_FLATTEN_OBJECT);
+}
+
+/**
  * @tc.name: GetExtensionSaIdsInner002
  * @tc.desc: test GetExtensionSaIdsInner, read null extension!
  * @tc.type: FUNC
@@ -1255,22 +1271,6 @@ HWTEST_F(SystemAbilityMgrTest, GetExtensionRunningSaListInner003, TestSize.Level
 
     saMgr->abilityMap_.clear();
     SaProfileRecover(saMgr, saProfileMapTmp, maxLoop);
-}
-
-/**
- * @tc.name: GetExtensionSaIdsInner001
- * @tc.desc: test GetExtensionSaIdsInner, read extension failed!
- * @tc.type: FUNC
- */
-HWTEST_F(SystemAbilityMgrTest, GetExtensionSaIdsInner001, TestSize.Level3)
-{
-    DTEST_LOG << __func__ << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
-    MessageParcel data;
-    MessageParcel reply;
-    int32_t result = saMgr->GetExtensionSaIdsInner(data, reply);
-    EXPECT_EQ(result, ERR_FLATTEN_OBJECT);
 }
 
 /**

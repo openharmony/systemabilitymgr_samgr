@@ -143,7 +143,7 @@ samgr组件是OpenHarmony的核心组件，提供OpenHarmony系统服务启动�
 >           "ondemand" : true,
 >           "uid" : "system",
 >           "gid" : ["system", "shell"]
->       }   
+>       }
 >   ]
 >}
 >```

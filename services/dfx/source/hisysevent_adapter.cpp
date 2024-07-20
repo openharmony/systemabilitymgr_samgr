@@ -198,7 +198,7 @@ void ReportGetSAFrequency(uint32_t callerUid, uint32_t said, int32_t count)
         SAID, said,
         COUNT, count);
     if (ret != 0) {
-        HILOGE("hisysevent report get sa frequency failed! ret %{public}d.", ret);
+        HILOGD("hisysevent report get sa frequency failed! ret %{public}d.", ret);
     }
 }
 
