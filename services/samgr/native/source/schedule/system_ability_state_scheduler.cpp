@@ -38,7 +38,7 @@ constexpr int32_t MAX_SUBSCRIBE_COUNT = 256;
 constexpr int32_t UNLOAD_TIMEOUT_TIME = 5 * 1000;
 constexpr const char* LOCAL_DEVICE = "local";
 constexpr int32_t MAX_DELAY_TIME = 5 * 60 * 1000;
-constexpr int32_t MAX_DUATION = 10 * 60 * 1000; // ms
+constexpr int32_t MAX_DURATION = 10 * 60 * 1000; // ms
 constexpr int32_t ONCE_DELAY_TIME = 10 * 1000; // ms
 constexpr const char* CANCEL_UNLOAD = "cancelUnload";
 constexpr const char* KEY_EVENT_ID = "eventId";
@@ -178,13 +178,12 @@ void SystemAbilityStateScheduler::UpdateLimitDelayUnloadTime(int32_t systemAbili
 {
     std::shared_ptr<SystemAbilityContext> abilityContext;
     if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
-        return false;
+        return;
     }
-    if (abilityContext->lastStartTime != 0) 
-    {
+    if (abilityContext->lastStartTime != 0) {
         int64_t begin = abilityContext->lastStartTime;
         int64_t end = GetTickCount();
-        if (end - begin <= MAX_DUATION) {
+        if (end - begin <= MAX_DURATION) {
             int64_t onceDelayTime = abilityContext->delayUnloadTime;
             onceDelayTime += ONCE_DELAY_TIME;
             abilityContext->delayUnloadTime = LimitDelayUnloadTime(onceDelayTime);
