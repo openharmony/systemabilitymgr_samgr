@@ -140,7 +140,7 @@ void DeviceTimedCollect::ReportEventByTimeInfo(int32_t interval, bool persistenc
         OnDemandEvent event = { TIMED_EVENT, AWAKE_LOOP_EVENT, to_string(interval), -1, persistence };
         HILOGD("ReportEventByTimeInfo report awake: %{public}d", interval);
         ReportEvent(event);
-    }   
+    }
 }
 
 void DeviceTimedCollect::SaveTimedInfos(const OnDemandEvent& onDemandEvent, int32_t interval)
@@ -156,12 +156,13 @@ void DeviceTimedCollect::SaveTimedInfos(const OnDemandEvent& onDemandEvent, int3
     if (onDemandEvent.name == AWAKE_LOOP_EVENT) {
         timeInfos_[interval].awake = true;
     }
-    HILOGD("SaveTimedInfos : %{public}d : %{public}d , %{public}d", interval, timeInfos_[interval].normal, timeInfos_[interval].awake);
+    HILOGD("SaveTimedInfos : %{public}d : %{public}d , %{public}d", interval,
+	    timeInfos_[interval].normal, timeInfos_[interval].awake);
 }
 
 void DeviceTimedCollect::SaveTimedEvent(const OnDemandEvent& onDemandEvent)
 {
-    if (onDemandEvent.eventId == TIMED_EVENT && (onDemandEvent.name == LOOP_EVENT 
+    if (onDemandEvent.eventId == TIMED_EVENT && (onDemandEvent.name == LOOP_EVENT
             || onDemandEvent.name == AWAKE_LOOP_EVENT)) {
         HILOGI("DeviceTimedCollect save timed task: %{public}s", onDemandEvent.value.c_str());
         int32_t interval = atoi(onDemandEvent.value.c_str());
@@ -380,7 +381,8 @@ void DeviceTimedCollect::RemoveTimesInfo(const OnDemandEvent& onDemandEvent, int
     if (onDemandEvent.name == AWAKE_LOOP_EVENT) {
         timeInfos_[interval].awake = false;
     }
-    HILOGD("RemoveTimesInfo : %{public}d : %{public}d , %{public}d", interval, timeInfos_[interval].normal, timeInfos_[interval].awake);
+    HILOGD("RemoveTimesInfo : %{public}d : %{public}d , %{public}d", interval,
+	    timeInfos_[interval].normal, timeInfos_[interval].awake);
 }
 
 void DeviceTimedCollect::RemoveNonPersistenceLoopTask(int32_t interval)
