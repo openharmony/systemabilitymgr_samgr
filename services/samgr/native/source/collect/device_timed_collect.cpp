@@ -288,6 +288,10 @@ int64_t DeviceTimedCollect::CalculateDelayTime(const std::string& timeString)
 void DeviceTimedCollect::PostPersistenceTimedTaskLocked(std::string timeString, int64_t timeGap)
 {
 #ifdef PREFERENCES_ENABLE
+    if (timeGap <= 0) {
+        HILOGE("PostPersistenceTimedTask invalid timeGap: %{public}lld", timeGap);
+        return;
+    }
     auto timedTask = [this, timeString] () {
         OnDemandEvent event = { TIMED_EVENT, ORDER_TIMED_EVENT, timeString, -1, true };
         ReportEvent(event);
@@ -296,7 +300,7 @@ void DeviceTimedCollect::PostPersistenceTimedTaskLocked(std::string timeString, 
     int64_t currentTime = TimeUtils::GetTimestamp();
     int64_t upgradeTime = currentTime + timeGap;
     preferencesUtil_->SaveLong(timeString, upgradeTime);
-    PostDelayTask(timedTask, timeGap);
+    SamgrTimeHandler::GetInstance()->PostTask(timedTask, timeGap);
 #endif
 }
 
