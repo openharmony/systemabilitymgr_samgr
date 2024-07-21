@@ -306,6 +306,10 @@ void DeviceTimedCollect::PostNonPersistenceTimedTaskLocked(std::string timeStrin
         OnDemandEvent event = { TIMED_EVENT, ORDER_TIMED_EVENT, timeString };
         ReportEvent(event);
     };
+    if (timeGap <= 0) {
+        HILOGE("PostNonPersistenceTimedTask invalid timeGap: %{public}lld", timeGap);
+        return;
+    }
     SamgrTimeHandler::GetInstance()->PostTask(timedTask, timeGap);
 }
 
@@ -341,6 +345,7 @@ int32_t DeviceTimedCollect::AddCollectEvent(const OnDemandEvent& event)
         HILOGE("DeviceTimedCollect awake clock invalid interval: %{public}d", interval);
         return ERR_INVALID_VALUE;
     }
+    SaveTimedInfos(event, interval);
     std::lock_guard<std::mutex> autoLock(nonPersitenceLoopEventSetLock_);
     auto iter = nonPersitenceLoopEventSet_.find(interval);
     if (iter != nonPersitenceLoopEventSet_.end()) {
@@ -348,7 +353,6 @@ int32_t DeviceTimedCollect::AddCollectEvent(const OnDemandEvent& event)
     }
     HILOGI("DeviceTimedCollect add collect events: %{public}d", interval);
     nonPersitenceLoopEventSet_.insert(interval);
-    SaveTimedInfos(event, interval);
     PostNonPersistenceLoopTaskLocked(interval);
     return ERR_OK;
 }
