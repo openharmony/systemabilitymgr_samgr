@@ -134,12 +134,14 @@ void DeviceTimedCollect::ReportEventByTimeInfo(int32_t interval, bool persistenc
     }
     if (timeInfos_[interval].normal) {
         OnDemandEvent event = { TIMED_EVENT, LOOP_EVENT, to_string(interval), -1, persistence };
-        HILOGD("ReportEventByTimeInfo report normal: %{public}d", interval);
+        HILOGI("ReportEventByTimeInfo report normal: %{public}d ,persistence : %{public}d",
+            interval, persistence);
         ReportEvent(event);
     }
     if (timeInfos_[interval].awake) {
         OnDemandEvent event = { TIMED_EVENT, AWAKE_LOOP_EVENT, to_string(interval), -1, persistence };
-        HILOGD("ReportEventByTimeInfo report awake: %{public}d", interval);
+        HILOGI("ReportEventByTimeInfo report awake: %{public}d ,persistence : %{public}d",
+            interval, persistence);
         ReportEvent(event);
     }
 }
@@ -163,8 +165,8 @@ void DeviceTimedCollect::SaveTimedInfos(const OnDemandEvent& onDemandEvent, int3
 
 void DeviceTimedCollect::SaveTimedEvent(const OnDemandEvent& onDemandEvent)
 {
-    if (onDemandEvent.eventId == TIMED_EVENT && (onDemandEvent.name == LOOP_EVENT
-            || onDemandEvent.name == AWAKE_LOOP_EVENT)) {
+    if (onDemandEvent.eventId == TIMED_EVENT &&
+           (onDemandEvent.name == LOOP_EVENT || onDemandEvent.name == AWAKE_LOOP_EVENT)) {
         HILOGI("DeviceTimedCollect save timed task: %{public}s", onDemandEvent.value.c_str());
         int32_t interval = atoi(onDemandEvent.value.c_str());
         if (interval < MIN_INTERVAL) {
