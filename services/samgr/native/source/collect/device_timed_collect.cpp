@@ -134,12 +134,12 @@ void DeviceTimedCollect::ReportEventByTimeInfo(int32_t interval, bool persistenc
     }
     if (timeInfos_[interval].normal) {
         OnDemandEvent event = { TIMED_EVENT, LOOP_EVENT, to_string(interval), -1, persistence };
-        HILOGI("report normal:%{public}d ,persistence:%{public}d",interval, persistence);
+        HILOGI("report normal:%{public}d ,persistence:%{public}d", interval, persistence);
         ReportEvent(event);
     }
     if (timeInfos_[interval].awake) {
         OnDemandEvent event = { TIMED_EVENT, AWAKE_LOOP_EVENT, to_string(interval), -1, persistence };
-        HILOGI("report awake:%{public}d ,persistence:%{public}d",interval, persistence);
+        HILOGI("report awake:%{public}d ,persistence:%{public}d", interval, persistence);
         ReportEvent(event);
     }
 }
