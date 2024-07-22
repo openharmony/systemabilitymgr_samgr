@@ -60,13 +60,11 @@ public:
     {
         return true;
     }
-
     int32_t SystemAbilityExtProc(const std::string& extension, int32_t said,
         SystemAbilityExtensionPara* callback, bool isAsync = false) override
     {
         return 0;
     }
-
     int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override
     {
         return 0;
@@ -136,15 +134,11 @@ void LocalSamgrProxyFuzzTest(const uint8_t* data, size_t size)
     }
     g_LocalSamgrProxy->IdleAbility(saId, reason, delayTime);
 
-    std::string action = stringValue;
-    g_LocalSamgrProxy->SendStrategyToSA(TYPE, saId, LEVEL, action);
-
-    int32_t fd = intValue;
-    int32_t cmd = intValue;
-    g_LocalSamgrProxy->IpcStatCmdProc(fd, cmd);
-
     std::string ffrtDumpInfo = eventStr;
     g_LocalSamgrProxy->FfrtDumperProc(ffrtDumpInfo);
+
+    std::string action = stringValue;
+    g_LocalSamgrProxy->SendStrategyToSA(TYPE, saId, LEVEL, action);
 }
 }
 }
