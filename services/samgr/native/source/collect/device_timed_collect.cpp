@@ -26,6 +26,7 @@
 #include "sa_profiles.h"
 #include "system_ability_manager.h"
 #include "samgr_time_handler.h"
+#include <cinttypes>
 
 using namespace std;
 
@@ -289,7 +290,7 @@ void DeviceTimedCollect::PostPersistenceTimedTaskLocked(std::string timeString, 
 {
 #ifdef PREFERENCES_ENABLE
     if (timeGap <= 0) {
-        HILOGE("PostPersistenceTimedTask invalid timeGap: %{public}lld", timeGap);
+        HILOGE("PostPersistenceTimedTask invalid timeGap: %{public}" PRId64 "ms", timeGap);
         return;
     }
     auto timedTask = [this, timeString] () {
@@ -311,7 +312,7 @@ void DeviceTimedCollect::PostNonPersistenceTimedTaskLocked(std::string timeStrin
         ReportEvent(event);
     };
     if (timeGap <= 0) {
-        HILOGE("PostNonPersistenceTimedTask invalid timeGap: %{public}lld", timeGap);
+        HILOGE("PostNonPersistenceTimedTask invalid timeGap: %{public}" PRId64 "ms", timeGap);
         return;
     }
     SamgrTimeHandler::GetInstance()->PostTask(timedTask, timeGap);
