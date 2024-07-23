@@ -25,14 +25,18 @@
 #include "sam_log.h"
 #include "sa_profiles.h"
 #include "system_ability_manager.h"
+#include "samgr_time_handler.h"
+#include <cinttypes>
 
 using namespace std;
 
 namespace OHOS {
 namespace {
 constexpr const char* LOOP_EVENT = "loopevent";
+constexpr const char* AWAKE_LOOP_EVENT = "awakeloopevent";
 constexpr const char* ORDER_TIMED_EVENT = "timedevent";
 constexpr int32_t MIN_INTERVAL = 30;
+constexpr int32_t MIN_AWAKE_INTERVAL = 3600;
 }
 
 DeviceTimedCollect::DeviceTimedCollect(const sptr<IReport>& report)
@@ -87,7 +91,7 @@ void DeviceTimedCollect::ProcessPersistenceTimedTask(int64_t disTime, std::strin
         ReportEvent(event);
         preferencesUtil_->Remove(timeString);
     };
-    PostDelayTask(timedTask, disTime);
+    SamgrTimeHandler::GetInstance()->PostTask(timedTask, disTime);
 #endif
 }
 
@@ -109,28 +113,66 @@ void DeviceTimedCollect::ProcessPersistenceLoopTask(int64_t disTime, int64_t tri
         return;
     }
     persitenceLoopTasks_[interval] = [this, interval] () {
-        OnDemandEvent event = { TIMED_EVENT, LOOP_EVENT, to_string(interval), -1, true };
-        ReportEvent(event);
+        ReportEventByTimeInfo(interval, true);
         PostPersistenceDelayTask(persitenceLoopTasks_[interval], interval, interval);
     };
     if (disTime <= 0) {
-        OnDemandEvent event = { TIMED_EVENT, LOOP_EVENT, strInterval, -1, true };
-        ReportEvent(event);
+        ReportEventByTimeInfo(interval, true);
         // In order to enable the timer to start on time next time and make up for the missing time
         disTime = interval - abs(disTime) % interval;
         PostPersistenceDelayTask(persitenceLoopTasks_[interval], interval, disTime);
     } else {
-        PostDelayTask(persitenceLoopTasks_[interval], disTime);
+        PostDelayTaskByTimeInfo(persitenceLoopTasks_[interval], interval, disTime);
     }
+}
+
+void DeviceTimedCollect::ReportEventByTimeInfo(int32_t interval, bool persistence)
+{
+    if (timeInfos_.count(interval) == 0) {
+        TimeInfo info;
+        timeInfos_[interval] = info;
+    }
+    if (timeInfos_[interval].normal) {
+        OnDemandEvent event = { TIMED_EVENT, LOOP_EVENT, to_string(interval), -1, persistence };
+        HILOGI("report normal:%{public}d ,persistence:%{public}d", interval, persistence);
+        ReportEvent(event);
+    }
+    if (timeInfos_[interval].awake) {
+        OnDemandEvent event = { TIMED_EVENT, AWAKE_LOOP_EVENT, to_string(interval), -1, persistence };
+        HILOGI("report awake:%{public}d ,persistence:%{public}d", interval, persistence);
+        ReportEvent(event);
+    }
+}
+
+void DeviceTimedCollect::SaveTimedInfos(const OnDemandEvent& onDemandEvent, int32_t interval)
+{
+    lock_guard<mutex> autoLock(timeInfosLock_);
+    if (timeInfos_.count(interval) == 0) {
+        TimeInfo info;
+        timeInfos_[interval] = info;
+    }
+    if (onDemandEvent.name == LOOP_EVENT) {
+        timeInfos_[interval].normal = true;
+    }
+    if (onDemandEvent.name == AWAKE_LOOP_EVENT) {
+        timeInfos_[interval].awake = true;
+    }
+    HILOGD("SaveTimedInfos : %{public}d : %{public}d , %{public}d", interval,
+        timeInfos_[interval].normal, timeInfos_[interval].awake);
 }
 
 void DeviceTimedCollect::SaveTimedEvent(const OnDemandEvent& onDemandEvent)
 {
-    if (onDemandEvent.eventId == TIMED_EVENT && onDemandEvent.name == LOOP_EVENT) {
+    if (onDemandEvent.eventId == TIMED_EVENT &&
+        (onDemandEvent.name == LOOP_EVENT || onDemandEvent.name == AWAKE_LOOP_EVENT)) {
         HILOGI("DeviceTimedCollect save timed task: %{public}s", onDemandEvent.value.c_str());
         int32_t interval = atoi(onDemandEvent.value.c_str());
         if (interval < MIN_INTERVAL) {
             HILOGE("DeviceTimedCollect invalid interval %{public}s", onDemandEvent.value.c_str());
+            return;
+        }
+        if (interval < MIN_AWAKE_INTERVAL && onDemandEvent.name == AWAKE_LOOP_EVENT) {
+            HILOGE("SaveTimedEvent awake clock invalid interval: %{public}d", interval);
             return;
         }
         if (onDemandEvent.persistence) {
@@ -140,6 +182,7 @@ void DeviceTimedCollect::SaveTimedEvent(const OnDemandEvent& onDemandEvent)
             lock_guard<mutex> autoLock(nonPersitenceLoopEventSetLock_);
             nonPersitenceLoopEventSet_.insert(interval);
         }
+        SaveTimedInfos(onDemandEvent, interval);
     }
 }
 
@@ -149,8 +192,7 @@ void DeviceTimedCollect::PostPersistenceLoopTaskLocked(int32_t interval)
         return;
     }
     persitenceLoopTasks_[interval] = [this, interval] () {
-        OnDemandEvent event = { TIMED_EVENT, LOOP_EVENT, to_string(interval), -1, true };
-        ReportEvent(event);
+        ReportEventByTimeInfo(interval, true);
         PostPersistenceDelayTask(persitenceLoopTasks_[interval], interval, interval);
     };
     PostPersistenceDelayTask(persitenceLoopTasks_[interval], interval, interval);
@@ -163,17 +205,31 @@ void DeviceTimedCollect::PostNonPersistenceLoopTaskLocked(int32_t interval)
         return;
     }
     nonPersitenceLoopTasks_[interval] = [this, interval] () {
-        OnDemandEvent event = { TIMED_EVENT, LOOP_EVENT, to_string(interval) };
         lock_guard<mutex> autoLock(nonPersitenceLoopEventSetLock_);
         if (nonPersitenceLoopEventSet_.find(interval) != nonPersitenceLoopEventSet_.end()) {
             HILOGI("DeviceTimedCollect ReportEvent interval: %{public}d", interval);
-            ReportEvent(event);
-            PostDelayTask(nonPersitenceLoopTasks_[interval], interval);
+            ReportEventByTimeInfo(interval, false);
+            PostDelayTaskByTimeInfo(nonPersitenceLoopTasks_[interval], interval, interval);
         } else {
             HILOGD("DeviceTimedCollect interval %{public}d has been remove", interval);
         }
     };
-    PostDelayTask(nonPersitenceLoopTasks_[interval], interval);
+    PostDelayTaskByTimeInfo(nonPersitenceLoopTasks_[interval], interval, interval);
+}
+
+void DeviceTimedCollect::PostDelayTaskByTimeInfo(std::function<void()> callback,
+    int32_t interval, int32_t disTime)
+{
+    lock_guard<mutex> autoLock(timeInfosLock_);
+    if (timeInfos_.count(interval) == 0) {
+        TimeInfo info;
+        timeInfos_[interval] = info;
+    }
+    if (timeInfos_[interval].awake) {
+        SamgrTimeHandler::GetInstance()->PostTask(callback, disTime);
+    } else {
+        PostDelayTask(callback, disTime);
+    }
 }
 
 void DeviceTimedCollect::PostPersistenceDelayTask(std::function<void()> postTask,
@@ -183,7 +239,7 @@ void DeviceTimedCollect::PostPersistenceDelayTask(std::function<void()> postTask
     int64_t currentTime = TimeUtils::GetTimestamp();
     int64_t upgradeTime = currentTime + static_cast<int64_t>(disTime);
     preferencesUtil_->SaveLong(to_string(interval), upgradeTime);
-    PostDelayTask(postTask, disTime);
+    PostDelayTaskByTimeInfo(postTask, interval, disTime);
     HILOGI("save persistence time %{public}d, interval time %{public}d", static_cast<int32_t>(upgradeTime), interval);
 #endif
 }
@@ -233,6 +289,10 @@ int64_t DeviceTimedCollect::CalculateDelayTime(const std::string& timeString)
 void DeviceTimedCollect::PostPersistenceTimedTaskLocked(std::string timeString, int64_t timeGap)
 {
 #ifdef PREFERENCES_ENABLE
+    if (timeGap <= 0) {
+        HILOGE("PostPersistenceTimedTask invalid timeGap: %{public}" PRId64 "ms", timeGap);
+        return;
+    }
     auto timedTask = [this, timeString] () {
         OnDemandEvent event = { TIMED_EVENT, ORDER_TIMED_EVENT, timeString, -1, true };
         ReportEvent(event);
@@ -241,7 +301,7 @@ void DeviceTimedCollect::PostPersistenceTimedTaskLocked(std::string timeString, 
     int64_t currentTime = TimeUtils::GetTimestamp();
     int64_t upgradeTime = currentTime + timeGap;
     preferencesUtil_->SaveLong(timeString, upgradeTime);
-    PostDelayTask(timedTask, timeGap);
+    SamgrTimeHandler::GetInstance()->PostTask(timedTask, timeGap);
 #endif
 }
 
@@ -251,12 +311,16 @@ void DeviceTimedCollect::PostNonPersistenceTimedTaskLocked(std::string timeStrin
         OnDemandEvent event = { TIMED_EVENT, ORDER_TIMED_EVENT, timeString };
         ReportEvent(event);
     };
-    PostDelayTask(timedTask, timeGap);
+    if (timeGap <= 0) {
+        HILOGE("PostNonPersistenceTimedTask invalid timeGap: %{public}" PRId64 "ms", timeGap);
+        return;
+    }
+    SamgrTimeHandler::GetInstance()->PostTask(timedTask, timeGap);
 }
 
 int32_t DeviceTimedCollect::AddCollectEvent(const OnDemandEvent& event)
 {
-    if (event.name != LOOP_EVENT && event.name != ORDER_TIMED_EVENT) {
+    if (event.name != LOOP_EVENT && event.name != ORDER_TIMED_EVENT && event.name != AWAKE_LOOP_EVENT) {
         HILOGE("DeviceTimedCollect invalid event name: %{public}s", event.name.c_str());
         return ERR_INVALID_VALUE;
     }
@@ -282,6 +346,11 @@ int32_t DeviceTimedCollect::AddCollectEvent(const OnDemandEvent& event)
         HILOGE("DeviceTimedCollect invalid interval: %{public}d", interval);
         return ERR_INVALID_VALUE;
     }
+    if (interval < MIN_AWAKE_INTERVAL && event.name == AWAKE_LOOP_EVENT) {
+        HILOGE("DeviceTimedCollect awake clock invalid interval: %{public}d", interval);
+        return ERR_INVALID_VALUE;
+    }
+    SaveTimedInfos(event, interval);
     std::lock_guard<std::mutex> autoLock(nonPersitenceLoopEventSetLock_);
     auto iter = nonPersitenceLoopEventSet_.find(interval);
     if (iter != nonPersitenceLoopEventSet_.end()) {
@@ -295,7 +364,7 @@ int32_t DeviceTimedCollect::AddCollectEvent(const OnDemandEvent& event)
 
 int32_t DeviceTimedCollect::RemoveUnusedEvent(const OnDemandEvent& event)
 {
-    if (event.name != LOOP_EVENT) {
+    if (event.name != LOOP_EVENT && event.name != AWAKE_LOOP_EVENT) {
         HILOGE("DeviceTimedCollect invalid event name: %{public}s", event.name.c_str());
         return ERR_INVALID_VALUE;
     }
@@ -305,7 +374,24 @@ int32_t DeviceTimedCollect::RemoveUnusedEvent(const OnDemandEvent& event)
     } else {
         RemoveNonPersistenceLoopTask(interval);
     }
+    RemoveTimesInfo(event, interval);
     return ERR_OK;
+}
+
+void DeviceTimedCollect::RemoveTimesInfo(const OnDemandEvent& onDemandEvent, int32_t interval)
+{
+    lock_guard<mutex> autoLock(timeInfosLock_);
+    if (timeInfos_.count(interval) == 0) {
+        return;
+    }
+    if (onDemandEvent.name == LOOP_EVENT) {
+        timeInfos_[interval].normal = false;
+    }
+    if (onDemandEvent.name == AWAKE_LOOP_EVENT) {
+        timeInfos_[interval].awake = false;
+    }
+    HILOGD("RemoveTimesInfo : %{public}d : %{public}d , %{public}d", interval,
+        timeInfos_[interval].normal, timeInfos_[interval].awake);
 }
 
 void DeviceTimedCollect::RemoveNonPersistenceLoopTask(int32_t interval)
