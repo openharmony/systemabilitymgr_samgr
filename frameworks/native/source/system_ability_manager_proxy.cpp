@@ -75,7 +75,15 @@ extern "C" __attribute__((constructor)) void InitSamgrProxy()
         HILOGE("InitSamgrProxy realpath fail");
         return;
     }
-    g_selfSoHandle = dlopen(path, RTLD_LAZY);
+    std::vector<std::string> strVector;
+    SplitStr(path, "/", strVector);
+    auto vectorSize = strVector.size();
+    if (vectorSize <= 0) {
+        HILOGE("InitSamgrProxy SplitStr fail");
+        return;
+    }
+    auto& fileName = strVector[vectorSize - 1];
+    g_selfSoHandle = dlopen(fileName.c_str(), RTLD_LAZY);
     if (g_selfSoHandle == nullptr) {
         HILOGE("InitSamgrProxy dlopen fail");
         return;

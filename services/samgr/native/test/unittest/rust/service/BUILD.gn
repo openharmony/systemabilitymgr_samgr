@@ -20,8 +20,8 @@ ohos_rust_shared_library("test_access_token") {
   ]
 
   external_deps = [
-    "access_token:libnativetoken",
-    "access_token:libtoken_setproc",
+    "access_token:libnativetoken_shared",
+    "access_token:libtokensetproc_shared",
   ]
 
   crate_name = "test_access_token"
