@@ -69,8 +69,8 @@ ohos_rust_systemtest("rust_samgr_sdv_test") {
     "//third_party/rust/crates/cxx:lib",
   ]
   external_deps = [
-    "access_token:libnativetoken",
-    "access_token:libtoken_setproc",
+    "access_token:libnativetoken_shared",
+    "access_token:libtokensetproc_shared",
     "hilog:hilog_rust",
     "ipc:ipc_rust",
     "safwk:system_ability_fwk_rust",
