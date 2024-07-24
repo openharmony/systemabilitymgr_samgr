@@ -41,7 +41,7 @@ SamgrTimeHandler::SamgrTimeHandler()
 {
     HILOGI("SamgrTimeHandler init start");
     epollfd = epoll_create(INIT_NUM);
-	flag = false;
+    flag = false;
     StartThread();
 }
 
