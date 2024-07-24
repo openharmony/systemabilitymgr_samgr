@@ -21,5 +21,5 @@ int AccessTokenKit::VerifyAccessToken(AccessTokenID tokenID, const std::string& 
 {
     return PERMISSION_GRANTED;
 }
-}
-}
+} // namespace Security::AccessToken
+} // namespace OHOS
