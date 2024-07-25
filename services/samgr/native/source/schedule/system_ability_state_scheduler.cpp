@@ -192,8 +192,6 @@ void SystemAbilityStateScheduler::UpdateLimitDelayUnloadTime(int32_t systemAbili
         }
     }
     abilityContext->lastStartTime = GetTickCount();
-    std::unique_lock<std::shared_mutex> abiltyWriteLock(abiltyMapLock_);
-    abilityContextMap_[systemAbilityId] = abilityContext;
 }
 
 bool SystemAbilityStateScheduler::GetSystemProcessContext(const std::u16string& processName,
