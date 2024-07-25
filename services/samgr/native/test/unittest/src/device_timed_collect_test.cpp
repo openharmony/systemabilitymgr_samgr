@@ -490,3 +490,4 @@ HWTEST_F(DeviceTimedCollectTest, RemoveUnusedEvent005, TestSize.Level3)
     ret = deviceTimedCollect->RemoveUnusedEvent(event2);
     EXPECT_EQ(ret, ERR_OK);
 }
+}
