@@ -182,6 +182,67 @@ HWTEST_F(DeviceTimedCollectTest, Init007, TestSize.Level3)
 }
 
 /**
+ * @tc.name: Init008
+ * @tc.desc: test Init
+ * @tc.type: FUNC
+ */
+HWTEST_F(DeviceTimedCollectTest, Init008, TestSize.Level3)
+{
+    std::list<SaProfile> saProfiles;
+    SaProfile saProfile;
+    OnDemandEvent onDemandEvent = {TIMED_EVENT, "loopevent", "3600"};
+    saProfile.startOnDemand.onDemandEvents.push_back(onDemandEvent);
+    saProfiles.push_back(saProfile);
+    SaProfile saProfile2;
+    OnDemandEvent onDemandEvent2 = {TIMED_EVENT, "awakeloopevent", "3601"};
+    saProfile2.startOnDemand.onDemandEvents.push_back(onDemandEvent2);
+    saProfiles.push_back(saProfile2);
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
+        std::make_shared<DeviceTimedCollect>(collect);
+    deviceTimedCollect->Init(saProfiles);
+    EXPECT_EQ(deviceTimedCollect->nonPersitenceLoopEventSet_.size(), 2);
+}
+
+/**
+ * @tc.name: ReportEventByTimeInfo001
+ * @tc.desc: test ReportEventByTimeInfo, collect is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6OU0A
+ */
+HWTEST_F(DeviceTimedCollectTest, ReportEventByTimeInfo001, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = nullptr;
+    std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
+        std::make_shared<DeviceTimedCollect>(collect);
+    TimeInfo info;
+    info.awake = true;
+    info.normal = true;
+    deviceTimedCollect->timeInfos_[3600] = info;
+    deviceTimedCollect->ReportEventByTimeInfo(3600,false);
+    EXPECT_EQ(collect, nullptr);
+}
+
+/**
+ * @tc.name: PostDelayTaskByTimeInfo001
+ * @tc.desc: test PostDelayTaskByTimeInfo, collect is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6OU0A
+ */
+HWTEST_F(DeviceTimedCollectTest, PostDelayTaskByTimeInfo001, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = nullptr;
+    std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
+        std::make_shared<DeviceTimedCollect>(collect);
+    TimeInfo info;
+    info.awake = true;
+    info.normal = true;
+    deviceTimedCollect->timeInfos_[3600] = info;
+    deviceTimedCollect->PostDelayTaskByTimeInfo(deviceTimedCollect->nonPersitenceLoopTasks_[0], 3600, 3600);
+    EXPECT_EQ(collect, nullptr);
+}
+
+/**
  * @tc.name: ReportEvent001
  * @tc.desc: test ReportEvent, report is nullptr
  * @tc.type: FUNC
@@ -408,4 +469,24 @@ HWTEST_F(DeviceTimedCollectTest, RemoveUnusedEvent004, TestSize.Level3)
     int32_t ret = deviceTimedCollect->RemoveUnusedEvent(event);
     EXPECT_EQ(ret, ERR_OK);
 }
+
+/**
+ * @tc.name: RemoveUnusedEvent005
+ * @tc.desc: test RemoveUnusedEvent, with event.name in nonPersitenceLoopEventSet_
+ * @tc.type: FUNC
+ * @tc.require: I7VZ98
+ */
+HWTEST_F(DeviceTimedCollectTest, RemoveUnusedEvent005, TestSize.Level3)
+{
+    sptr<IReport> report;
+    std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
+        std::make_shared<DeviceTimedCollect>(report);
+    OnDemandEvent event = {TIMED_EVENT, "awakeloopevent", "3600", -1, true};
+    deviceTimedCollect->nonPersitenceLoopEventSet_.insert(3600);
+    int32_t ret = deviceTimedCollect->RemoveUnusedEvent(event);
+    EXPECT_EQ(ret, ERR_OK);
+    OnDemandEvent event2 = {TIMED_EVENT, "loopevent", "3600", -1, true};
+    deviceTimedCollect->nonPersitenceLoopEventSet_.insert(3600);
+    ret = deviceTimedCollect->RemoveUnusedEvent(event2);
+    EXPECT_EQ(ret, ERR_OK);
 }

@@ -130,8 +130,7 @@ void DeviceTimedCollect::ReportEventByTimeInfo(int32_t interval, bool persistenc
 {
     lock_guard<mutex> autoLock(timeInfosLock_);
     if (timeInfos_.count(interval) == 0) {
-        TimeInfo info;
-        timeInfos_[interval] = info;
+        return;
     }
     if (timeInfos_[interval].normal) {
         OnDemandEvent event = { TIMED_EVENT, LOOP_EVENT, to_string(interval), -1, persistence };
@@ -223,8 +222,7 @@ void DeviceTimedCollect::PostDelayTaskByTimeInfo(std::function<void()> callback,
 {
     lock_guard<mutex> autoLock(timeInfosLock_);
     if (timeInfos_.count(interval) == 0) {
-        TimeInfo info;
-        timeInfos_[interval] = info;
+        return;
     }
     if (timeInfos_[interval].awake) {
         SamgrTimeHandler::GetInstance()->PostTask(callback, disTime);
@@ -390,6 +388,9 @@ void DeviceTimedCollect::RemoveTimesInfo(const OnDemandEvent& onDemandEvent, int
     }
     if (onDemandEvent.name == AWAKE_LOOP_EVENT) {
         timeInfos_[interval].awake = false;
+    }
+    if (!timeInfos_[interval].normal && !timeInfos_[interval].awake) {
+        timeInfos_.erase(interval);
     }
     HILOGD("RemoveTimesInfo : %{public}d : %{public}d , %{public}d", interval,
         timeInfos_[interval].normal, timeInfos_[interval].awake);
