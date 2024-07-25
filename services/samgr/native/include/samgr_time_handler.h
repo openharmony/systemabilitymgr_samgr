@@ -28,7 +28,6 @@
 #include <mutex>
 #include <concurrent_map.h>
 #include <atomic>
-
 namespace OHOS {
 class SamgrTimeHandler {
 public:
