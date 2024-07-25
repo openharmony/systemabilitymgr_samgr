@@ -219,7 +219,7 @@ HWTEST_F(DeviceTimedCollectTest, ReportEventByTimeInfo001, TestSize.Level3)
     info.awake = true;
     info.normal = true;
     deviceTimedCollect->timeInfos_[3600] = info;
-    deviceTimedCollect->ReportEventByTimeInfo(3600,false);
+    deviceTimedCollect->ReportEventByTimeInfo(3600, false);
     EXPECT_EQ(collect, nullptr);
 }
 
