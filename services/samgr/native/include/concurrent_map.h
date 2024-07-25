@@ -41,11 +41,6 @@ public:
         return *this;
     }
 
-    V &operator[](const K &key)
-    {
-        return map_[key];
-    }
-
     // when multithread calling size() return a tmp status, some threads may insert just after size() call
     int Size()
     {

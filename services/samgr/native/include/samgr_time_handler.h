@@ -27,6 +27,7 @@
 #include <unistd.h>
 #include <mutex>
 #include <concurrent_map.h>
+#include <atomic>
 namespace OHOS {
 class SamgrTimeHandler {
 public:
@@ -36,15 +37,26 @@ public:
     bool PostTask(TaskType func, uint64_t delayTime);
 
 private:
-    int epollfd = -1;
-    bool flag = false;
-    ConcurrentMap <uint32_t, TaskType> timeFunc;
-    static SamgrTimeHandler* volatile singleton;
-
-private:
     SamgrTimeHandler();
+    class Deletor {
+    public:
+        ~Deletor()
+        {
+            if (nullptr != SamgrTimeHandler::singleton) {
+                delete SamgrTimeHandler::singleton;
+                SamgrTimeHandler::singleton = nullptr;
+            }
+        }
+    };
     void StartThread();
     void OnTime(SamgrTimeHandler &handle, int number, struct epoll_event events[]);
+
+private:
+    int epollfd = -1;
+    std::atomic<bool> flag = false;
+    ConcurrentMap <uint32_t, TaskType> timeFunc;
+    static SamgrTimeHandler* volatile singleton;
+    static Deletor deletor;
 };
 } // namespace OHOS
 #endif // OHOS_SAMGR_TIME_HANDLER_H

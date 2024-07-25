@@ -128,6 +128,7 @@ void DeviceTimedCollect::ProcessPersistenceLoopTask(int64_t disTime, int64_t tri
 
 void DeviceTimedCollect::ReportEventByTimeInfo(int32_t interval, bool persistence)
 {
+    lock_guard<mutex> autoLock(timeInfosLock_);
     if (timeInfos_.count(interval) == 0) {
         TimeInfo info;
         timeInfos_[interval] = info;

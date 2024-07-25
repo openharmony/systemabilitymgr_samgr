@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Huawei Device Co., Ltd.
+ * Copyright (C) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,22 +16,23 @@
 #include "samgr_time_handler.h"
 #include "sam_log.h"
 
+using namespace std;
 namespace OHOS {
 namespace {
 constexpr uint32_t INIT_NUM = 4;
 constexpr uint32_t MAX_EVENT = 8;
 }
 SamgrTimeHandler* volatile SamgrTimeHandler::singleton = nullptr;
-static std::recursive_mutex mtx;
+SamgrTimeHandler::Deletor SamgrTimeHandler::deletor;
+static mutex mtx;
 
 SamgrTimeHandler* SamgrTimeHandler::GetInstance()
 {
     if (singleton == nullptr) {
-        mtx.lock();
+        lock_guard<mutex> autoLock(mtx);
         if (singleton == nullptr) {
             singleton = new SamgrTimeHandler;
         }
-        mtx.unlock();
     }
     return singleton;
 }
@@ -40,6 +41,7 @@ SamgrTimeHandler::SamgrTimeHandler()
 {
     HILOGI("SamgrTimeHandler init start");
     epollfd = epoll_create(INIT_NUM);
+    flag = false;
     StartThread();
 }
 
@@ -47,7 +49,7 @@ void SamgrTimeHandler::StartThread()
 {
     std::function<void()> func = [this]() {
         struct epoll_event events[MAX_EVENT];
-        int number;
+        int number = 0;
         while (!this->timeFunc.IsEmpty()) {
             number = epoll_wait(this->epollfd, events, MAX_EVENT, -1);
             OnTime((*this), number, events);
@@ -63,12 +65,12 @@ void SamgrTimeHandler::OnTime(SamgrTimeHandler &handle, int number, struct epoll
 {
     for (int i = 0; i < number; i++) {
         uint32_t timerfd = events[i].data.u32;
-        uint64_t unused;
+        uint64_t unused = 0;
         int ret = read(timerfd, &unused, sizeof(unused));
         if (ret == sizeof(uint64_t)) {
-            TaskType func_time;
-            handle.timeFunc.Find(timerfd, func_time);
-            func_time();
+            TaskType funcTime;
+            handle.timeFunc.Find(timerfd, funcTime);
+            funcTime();
             handle.timeFunc.Erase(timerfd);
             epoll_ctl(this->epollfd, EPOLL_CTL_DEL, timerfd, nullptr);
         }
@@ -83,9 +85,6 @@ SamgrTimeHandler::~SamgrTimeHandler()
     };
     timeFunc.Clear(closeFunc);
     ::close(epollfd);
-    if (singleton != nullptr) {
-        delete singleton;
-    }
 }
 
 
@@ -109,13 +108,13 @@ bool SamgrTimeHandler::PostTask(TaskType func, uint64_t delayTime)
         ::close(timerfd);
         return false;
     }
-    struct itimerspec new_value = {};
-    new_value.it_value.tv_sec = delayTime;
-    new_value.it_value.tv_nsec = 0;
-    new_value.it_interval.tv_sec = 0;
-    new_value.it_interval.tv_nsec = 0;
+    struct itimerspec newValue = {};
+    newValue.it_value.tv_sec = delayTime;
+    newValue.it_value.tv_nsec = 0;
+    newValue.it_interval.tv_sec = 0;
+    newValue.it_interval.tv_nsec = 0;
 
-    if (timerfd_settime(timerfd, 0, &new_value, NULL) == -1) {
+    if (timerfd_settime(timerfd, 0, &newValue, NULL) == -1) {
         HILOGE("timerfd_settime failed : %{public}s", strerror(errno));
         ::close(timerfd);
         return false;
