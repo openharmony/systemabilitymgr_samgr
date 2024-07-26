@@ -197,11 +197,30 @@ HWTEST_F(DeviceTimedCollectTest, Init008, TestSize.Level3)
     OnDemandEvent onDemandEvent2 = {TIMED_EVENT, "awakeloopevent", "3601"};
     saProfile2.startOnDemand.onDemandEvents.push_back(onDemandEvent2);
     saProfiles.push_back(saProfile2);
+    SaProfile saProfile3;
+    OnDemandEvent onDemandEvent3 = {TIMED_EVENT, "awakeloopevent", "36"};
+    saProfile3.startOnDemand.onDemandEvents.push_back(onDemandEvent3);
+    saProfiles.push_back(saProfile3);
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(collect);
     deviceTimedCollect->Init(saProfiles);
     EXPECT_EQ(deviceTimedCollect->nonPersitenceLoopEventSet_.size(), 2);
+}
+
+/**
+ * @tc.name: OnStart001
+ * @tc.desc: test OnStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(DeviceTimedCollectTest, OnStart001, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
+        std::make_shared<DeviceTimedCollect>(collect);
+    deviceTimedCollect->nonPersitenceLoopEventSet_.insert(101);
+    deviceTimedCollect->OnStart();
+    EXPECT_NE(collect, nullptr);
 }
 
 /**
@@ -386,6 +405,32 @@ HWTEST_F(DeviceTimedCollectTest, AddCollectEvent006, TestSize.Level3)
     OnDemandEvent event = {TIMED_EVENT, "mockevent", "10", -1, true};
     int32_t ret = deviceTimedCollect->AddCollectEvent(event);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: AddCollectEvent007
+ * @tc.type: FUNC
+ * @tc.require: I7G775
+ */
+HWTEST_F(DeviceTimedCollectTest, AddCollectEvent007, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
+        std::make_shared<DeviceTimedCollect>(collect);
+    OnDemandEvent event = {TIMED_EVENT, "timedevent", "2017-9-1-16:59:10", -1, true};
+    int32_t ret = deviceTimedCollect->AddCollectEvent(event);
+    EXPECT_EQ(ret, ERR_OK);
+    OnDemandEvent event1 = {TIMED_EVENT, "timedevent", "2099-9-1-16:59:10", -1, true};
+    ret = deviceTimedCollect->AddCollectEvent(event1);
+    OnDemandEvent event2 = {TIMED_EVENT, "awakeloopevent", "100", -1, true};
+    ret = deviceTimedCollect->AddCollectEvent(event2);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    OnDemandEvent event3 = {TIMED_EVENT, "awakeloopevent", "100", -1, false};
+    ret = deviceTimedCollect->AddCollectEvent(event3);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    OnDemandEvent event4 = {TIMED_EVENT, "awakeloopevent", "3601", -1, false};
+    ret = deviceTimedCollect->AddCollectEvent(event4);
+    EXPECT_EQ(ret, ERR_OK);
 }
 
 /**
