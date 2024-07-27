@@ -206,6 +206,7 @@ HWTEST_F(DeviceTimedCollectTest, Init008, TestSize.Level3)
         std::make_shared<DeviceTimedCollect>(collect);
     deviceTimedCollect->Init(saProfiles);
     EXPECT_EQ(deviceTimedCollect->nonPersitenceLoopEventSet_.size(), 2);
+    deviceTimedCollect->timeInfos_.clear();
 }
 
 /**
@@ -221,6 +222,7 @@ HWTEST_F(DeviceTimedCollectTest, OnStart001, TestSize.Level3)
     deviceTimedCollect->nonPersitenceLoopEventSet_.insert(101);
     deviceTimedCollect->OnStart();
     EXPECT_NE(collect, nullptr);
+    deviceTimedCollect->timeInfos_.clear();
 }
 
 /**
@@ -259,6 +261,7 @@ HWTEST_F(DeviceTimedCollectTest, PostDelayTaskByTimeInfo001, TestSize.Level3)
     deviceTimedCollect->timeInfos_[3600] = info;
     deviceTimedCollect->PostDelayTaskByTimeInfo(deviceTimedCollect->nonPersitenceLoopTasks_[0], 3600, 3600);
     EXPECT_EQ(collect, nullptr);
+    deviceTimedCollect->timeInfos_.clear();
 }
 
 /**
@@ -431,6 +434,7 @@ HWTEST_F(DeviceTimedCollectTest, AddCollectEvent007, TestSize.Level3)
     OnDemandEvent event4 = {TIMED_EVENT, "awakeloopevent", "3601", -1, false};
     ret = deviceTimedCollect->AddCollectEvent(event4);
     EXPECT_EQ(ret, ERR_OK);
+    deviceTimedCollect->timeInfos_.clear();
 }
 
 /**
@@ -534,5 +538,6 @@ HWTEST_F(DeviceTimedCollectTest, RemoveUnusedEvent005, TestSize.Level3)
     deviceTimedCollect->nonPersitenceLoopEventSet_.insert(3600);
     ret = deviceTimedCollect->RemoveUnusedEvent(event2);
     EXPECT_EQ(ret, ERR_OK);
+    deviceTimedCollect->timeInfos_.clear();
 }
 }
