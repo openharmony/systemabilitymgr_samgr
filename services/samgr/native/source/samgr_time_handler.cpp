@@ -49,9 +49,8 @@ void SamgrTimeHandler::StartThread()
 {
     std::function<void()> func = [this]() {
         struct epoll_event events[MAX_EVENT];
-        int number = 0;
         while (!this->timeFunc.IsEmpty()) {
-            number = epoll_wait(this->epollfd, events, MAX_EVENT, -1);
+            int number = epoll_wait(this->epollfd, events, MAX_EVENT, -1);
             OnTime((*this), number, events);
         }
         this->flag = false;
@@ -102,14 +101,14 @@ bool SamgrTimeHandler::PostTask(TaskType func, uint64_t delayTime)
     }
     epoll_event event {};
     event.events = EPOLLIN | EPOLLWAKEUP;
-    event.data.u32 = timerfd;
+    event.data.u32 = static_cast<uint32_t>(timerfd);
     if (epoll_ctl(epollfd, EPOLL_CTL_ADD, timerfd, &event) == -1) {
         HILOGE("epoll_ctl(EPOLL_CTL_ADD) failed : %{public}s", strerror(errno));
         ::close(timerfd);
         return false;
     }
     struct itimerspec newValue = {};
-    newValue.it_value.tv_sec = delayTime;
+    newValue.it_value.tv_sec = static_cast<int64_t>(delayTime);
     newValue.it_value.tv_nsec = 0;
     newValue.it_interval.tv_sec = 0;
     newValue.it_interval.tv_nsec = 0;

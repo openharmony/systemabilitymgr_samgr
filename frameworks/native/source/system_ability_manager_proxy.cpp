@@ -78,7 +78,7 @@ extern "C" __attribute__((constructor)) void InitSamgrProxy()
     std::vector<std::string> strVector;
     SplitStr(path, "/", strVector);
     auto vectorSize = strVector.size();
-    if (vectorSize <= 0) {
+    if (vectorSize == 0) {
         HILOGE("InitSamgrProxy SplitStr fail");
         return;
     }
