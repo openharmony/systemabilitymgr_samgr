@@ -21,6 +21,7 @@
 
 #include "sa_profiles.h"
 #include "system_ability_on_demand_event.h"
+#include "ffrt_handler.h"
 
 namespace OHOS {
 class SamgrUtil {
@@ -42,6 +43,9 @@ public:
         const std::list<SaControlInfo>& saControlList);
     static void SetModuleUpdateParam(const std::string& key, const std::string& value);
     static void SendUpdateSaState(int32_t systemAbilityId, const std::string& updateSaState);
+    static void InvalidateSACache();
+private:
+    static std::shared_ptr<FFRTHandler> setParmHandler_;
 };
 } // namespace OHOS
 

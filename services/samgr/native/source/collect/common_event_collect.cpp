@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <cinttypes>
+
 #include "common_event_collect.h"
 
 #include "ability_death_recipient.h"
@@ -174,6 +176,7 @@ bool CommonEventCollect::CreateCommonEventSubscriber()
 
 bool CommonEventCollect::CreateCommonEventSubscriberLocked()
 {
+    int64_t begin = GetTickCount();
     if (commonEventSubscriber_ != nullptr) {
         bool isUnsubscribe = EventFwk::CommonEventManager::UnSubscribeCommonEvent(commonEventSubscriber_);
         if (!isUnsubscribe) {
@@ -186,7 +189,9 @@ bool CommonEventCollect::CreateCommonEventSubscriberLocked()
     AddSkillsEvent(skill);
     EventFwk::CommonEventSubscribeInfo info(skill);
     commonEventSubscriber_ = std::make_shared<CommonEventSubscriber>(info, this);
-    return EventFwk::CommonEventManager::SubscribeCommonEvent(commonEventSubscriber_);
+    bool ret = EventFwk::CommonEventManager::SubscribeCommonEvent(commonEventSubscriber_);
+    HILOGI("SubsComEvt %{public}" PRId64 "ms %{public}s", (GetTickCount() - begin), ret ? "suc" : "fail");
+    return ret;
 }
 
 bool CommonEventCollect::SendEvent(uint32_t eventId)
