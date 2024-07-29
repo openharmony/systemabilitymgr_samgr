@@ -17,7 +17,6 @@
 #include "system_ability_manager.h"
 #include "system_ability_manager_util.h"
 #include "parameter.h"
-#include "ffrt_handler.h"
 #include "accesstoken_kit.h"
 #include "ipc_skeleton.h"
 #include "string_ex.h"
@@ -37,6 +36,7 @@ constexpr const char* EVENT_NAME = "name";
 constexpr const char* EVENT_VALUE = "value";
 constexpr const char* EVENT_EXTRA_DATA_ID = "extraDataId";
 constexpr const char* MODULE_UPDATE_PARAM = "persist.samgr.moduleupdate";
+std::shared_ptr<FFRTHandler> SamgrUtil::setParmHandler_ = make_shared<FFRTHandler>("setParmHandler");
 
 bool SamgrUtil::IsNameInValid(const std::u16string& name)
 {
@@ -197,7 +197,7 @@ void SamgrUtil::SetModuleUpdateParam(const std::string& key, const std::string& 
             return;
         }
     };
-    ffrt::submit(SetParamTask);
+    setParmHandler_->PostTask(SetParamTask);
 }
 
 void SamgrUtil::SendUpdateSaState(int32_t systemAbilityId, const std::string& updateSaState)
@@ -208,5 +208,13 @@ void SamgrUtil::SendUpdateSaState(int32_t systemAbilityId, const std::string& up
         SamgrUtil::SetModuleUpdateParam(startKey, "true");
         SamgrUtil::SetModuleUpdateParam(saKey, updateSaState);
     }
+}
+
+void SamgrUtil::InvalidateSACache()
+{
+    auto invalidateCacheTask = [] () {
+        SystemAbilityManager::GetInstance()->InvalidateCache();
+    };
+    setParmHandler_->PostTask(invalidateCacheTask);
 }
 }

@@ -1078,10 +1078,7 @@ void SystemAbilityManager::SystemAbilityInvalidateCache(int32_t systemAbilityId)
         HILOGD("SystemAbilityInvalidateCache SA:%{public}d.", systemAbilityId);
         return;
     }
-    auto invalidateCacheTask = [this] () {
-        InvalidateCache();
-    };
-    ffrt::submit(invalidateCacheTask);
+    SamgrUtil::InvalidateSACache();
 }
 
 int32_t SystemAbilityManager::AddSystemProcess(const u16string& procName,
