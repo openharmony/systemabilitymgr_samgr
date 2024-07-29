@@ -65,6 +65,8 @@ constexpr const char* SA_TAG_PARAM = "param";
 constexpr const char* SA_TAG_TIEMD_EVENT = "timedevent";
 constexpr const char* SA_TAG_RECYCLE_STRATEGY = "recycle-strategy";
 constexpr const char* SA_TAG_EXTENSION = "extension";
+constexpr const char* SA_TAG_UNREF_UNLOAD = "unreferenced-unload";
+constexpr const char* SA_TAG_LONGTIMEUNUSED_UNLOAD = "longtimeunused-unload";
 constexpr int32_t MAX_JSON_OBJECT_SIZE = 50 * 1024;
 constexpr int32_t MAX_JSON_STRING_LENGTH = 128;
 constexpr int32_t FIRST_SYS_ABILITY_ID = 0x00000000;
@@ -490,7 +492,9 @@ void ParseUtil::ParseStopOndemandTag(const nlohmann::json& systemAbilityJson,
     }
     ParseOndemandTag(onDemandJson, stopOnDemand.onDemandEvents);
     GetBoolFromJson(onDemandJson, SA_TAG_ALLOW_UPDATE, stopOnDemand.allowUpdate);
+    GetBoolFromJson(onDemandJson, SA_TAG_UNREF_UNLOAD, stopOnDemand.unrefUnload);
     GetInt32FromJson(onDemandJson, SA_TAG_RECYCLE_DELAYTIME, stopOnDemand.delayTime);
+    GetInt32FromJson(onDemandJson, SA_TAG_LONGTIMEUNUSED_UNLOAD, stopOnDemand.unusedTimeout);
 }
 
 void ParseUtil::GetOnDemandArrayFromJson(int32_t eventId, const nlohmann::json& obj,

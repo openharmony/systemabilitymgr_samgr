@@ -959,6 +959,18 @@ HWTEST_F(ParseUtilTest, ParseSystemAbility001, TestSize.Level3)
     systemAbilityJson["bootphase"] = "aaa";
     ret = parser_->ParseSystemAbility(saProfile, systemAbilityJson);
     EXPECT_EQ(ret, true);
+
+    int32_t testTime = 9999;
+    systemAbilityJson["longtimeunused-unload"] = testTime;
+    ret = parser_->ParseSystemAbility(saProfile, systemAbilityJson);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(saProfile.stopOnDemand.unusedTimeout, testTime);
+
+    systemAbilityJson["unreferenced-unload"] = true;
+    ret = parser_->ParseSystemAbility(saProfile, systemAbilityJson);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(saProfile.stopOnDemand.unrefUnload, true);
+
     DTEST_LOG << " ParseSystemAbility001 END" << std::endl;
 }
 

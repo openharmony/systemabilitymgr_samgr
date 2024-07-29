@@ -27,6 +27,7 @@
 #include "device_switch_collect.h"
 #endif
 #include "device_param_collect.h"
+#include "ref_count_collect.h"
 #include "memory_guard.h"
 #include "sam_log.h"
 #include "system_ability_manager.h"
@@ -60,6 +61,10 @@ void DeviceStatusCollectManager::Init(const std::list<SaProfile>& saProfiles)
     sptr<ICollectPlugin> timedCollect = new DeviceTimedCollect(this);
     timedCollect->Init(onDemandSaProfiles_);
     collectPluginMap_[TIMED_EVENT] = timedCollect;
+    sptr<ICollectPlugin> refCountCollect = new RefCountCollect(this);
+    refCountCollect->Init(saProfiles);
+    collectPluginMap_[UNREF_EVENT] = refCountCollect;
+
     StartCollect();
     HILOGI("DeviceStaMgr Init end");
 }
@@ -281,6 +286,12 @@ void DeviceStatusCollectManager::ReportEvent(const OnDemandEvent& event)
     auto callback = [event, saControlList = std::move(saControlList)] () {
         SystemAbilityManager::GetInstance()->ProcessOnDemandEvent(event, saControlList);
     };
+    collectHandler_->PostTask(callback);
+}
+
+void DeviceStatusCollectManager::PostTask(std::function<void()> callback)
+{
+    HILOGI("DeviceStaMgr PostTask begin");
     collectHandler_->PostTask(callback);
 }
 

@@ -31,6 +31,7 @@ enum {
     PARAM,
     COMMON_EVENT,
     TIMED_EVENT,
+    UNREF_EVENT,
 };
 
 enum {
@@ -108,7 +109,9 @@ struct StartOnDemand {
 
 struct StopOnDemand {
     bool allowUpdate = false;
+    bool unrefUnload = false;
     int32_t delayTime = 20000;
+    int32_t unusedTimeout = -1;
     std::vector<OnDemandEvent> onDemandEvents;
 };
 

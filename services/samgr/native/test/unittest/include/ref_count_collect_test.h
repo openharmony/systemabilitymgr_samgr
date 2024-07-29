@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2024 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_SYSTEM_ABILITY_MANAGER_REPORT_INTERFACE_H
-#define OHOS_SYSTEM_ABILITY_MANAGER_REPORT_INTERFACE_H
+#ifndef SAMGR_TEST_UNITTEST_REF_COUNT_COLLECT_TEST_H
+#define SAMGR_TEST_UNITTEST_REF_COUNT_COLLECT_TEST_H
 
-#include "refbase.h"
-#include "sa_profiles.h"
+#include "gtest/gtest.h"
+#include "ref_count_collect.h"
 
 namespace OHOS {
-class IReport : public virtual RefBase {
-public:
-    IReport() = default;
-    virtual ~IReport() = default;
-    virtual void ReportEvent(const OnDemandEvent& event) = 0;
-    virtual void PostTask(std::function<void()> callback) = 0;
-    virtual void PostDelayTask(std::function<void()> callback, int32_t delayTime) = 0;
+class RefCountCollectTest : public testing::Test {
+protected:
+    static void SetUpTestCase();
+    static void TearDownTestCase();
+    void SetUp();
+    void TearDown();
+    std::shared_ptr<RefCountCollect> collect;
 };
 } // namespace OHOS
-#endif // OHOS_SYSTEM_ABILITY_MANAGER_REPORT_INTERFACE_H
+#endif /* SAMGR_TEST_UNITTEST_REF_COUNT_COLLECT_TEST_H */

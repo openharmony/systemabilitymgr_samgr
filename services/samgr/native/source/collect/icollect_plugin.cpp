@@ -14,6 +14,7 @@
  */
 
 #include "icollect_plugin.h"
+#include "sam_log.h"
 
 namespace OHOS {
 ICollectPlugin::ICollectPlugin(const sptr<IReport>& report) : report_(report)
@@ -24,6 +25,17 @@ void ICollectPlugin::ReportEvent(const OnDemandEvent& event)
 {
     if (report_ != nullptr) {
         report_->ReportEvent(event);
+    } else {
+        HILOGE("report_ is nullptr");
+    }
+}
+
+void ICollectPlugin::PostTask(std::function<void()> callback)
+{
+    if (report_ != nullptr) {
+        report_->PostTask(callback);
+    } else {
+        HILOGE("report_ is nullptr");
     }
 }
 
@@ -31,6 +43,8 @@ void ICollectPlugin::PostDelayTask(std::function<void()> callback, int32_t delay
 {
     if (report_ != nullptr) {
         report_->PostDelayTask(callback, delayTime);
+    } else {
+        HILOGE("report_ is nullptr");
     }
 }
 }  // namespace OHOS
