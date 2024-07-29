@@ -49,9 +49,8 @@ void SamgrTimeHandler::StartThread()
 {
     std::function<void()> func = [this]() {
         struct epoll_event events[MAX_EVENT];
-        int number = 0;
         while (!this->timeFunc.IsEmpty()) {
-            number = epoll_wait(this->epollfd, events, MAX_EVENT, -1);
+            int number = epoll_wait(this->epollfd, events, MAX_EVENT, -1);
             OnTime((*this), number, events);
         }
         this->flag = false;
