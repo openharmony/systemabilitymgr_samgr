@@ -2474,7 +2474,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, UpdateLimitDelayUnloadTime002, TestSiz
     abilityContext->lastStartTime = GetTickCount();
     int32_t delaytime = abilityContext->delayUnloadTime;
     systemAbilityStateScheduler->UpdateLimitDelayUnloadTime(abilityContext->systemAbilityId);
-    int32_t delaytime += ONCE_DELAY_TIME;
+    delaytime += ONCE_DELAY_TIME;
     EXPECT_EQ(delaytime, abilityContext->delayUnloadTime);
 }
 
