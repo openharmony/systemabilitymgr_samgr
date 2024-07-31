@@ -2442,6 +2442,45 @@ HWTEST_F(SystemAbilityStateSchedulerTest, LimitDelayUnloadTime002, TestSize.Leve
 }
 
 /**
+ * @tc.name: UpdateLimitDelayUnloadTime001
+ * @tc.desc: test UpdateLimitDelayUnloadTime lastStartTime equal to 0,report success
+ * @tc.type: FUNC
+ * @tc.require: I6FDNZ
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, UpdateLimitDelayUnloadTime001, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::shared_ptr<SystemAbilityContext> abilityContext = std::make_shared<SystemAbilityContext>();
+    abilityContext->systemAbilityId = SAID;
+    abilityContext->lastStartTime = 0;
+    int32_t delaytime = abilityContext->delayUnloadTime;
+    systemAbilityStateScheduler->UpdateLimitDelayUnloadTime(abilityContext->systemAbilityId);
+    EXPECT_EQ(delaytime, abilityContext->delayUnloadTime);
+}
+
+/**
+ * @tc.name: UpdateLimitDelayUnloadTime002
+ * @tc.desc: test UpdateLimitDelayUnloadTime with lastStartTime not equal to 0 ,report success
+ * @tc.type: FUNC
+ * @tc.require: I6FDNZ
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, UpdateLimitDelayUnloadTime002, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::shared_ptr<SystemAbilityContext> abilityContext = std::make_shared<SystemAbilityContext>();
+    abilityContext->systemAbilityId = SAID;
+    abilityContext->lastStartTime = GetTickCount();
+    int32_t delaytime = abilityContext->delayUnloadTime;
+    systemAbilityStateScheduler->UpdateLimitDelayUnloadTime(abilityContext->systemAbilityId);
+    int32_t delaytime += ONCE_DELAY_TIME;
+    EXPECT_EQ(delaytime, abilityContext->delayUnloadTime);
+}
+
+/**
  * @tc.name: PostUnloadTimeoutTask001
  * @tc.desc: test PostUnloadTimeoutTask with state is SystemProcessState::STOPPING
  * @tc.type: FUNC
