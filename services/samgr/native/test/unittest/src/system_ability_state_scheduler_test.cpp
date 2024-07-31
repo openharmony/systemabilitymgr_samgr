@@ -2443,7 +2443,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, LimitDelayUnloadTime002, TestSize.Leve
 
 /**
  * @tc.name: UpdateLimitDelayUnloadTime001
- * @tc.desc: test UpdateLimitDelayUnloadTime lastStartTime equal to 0,report success
+ * @tc.desc: test UpdateLimitDelayUnloadTime with saId invalid
  * @tc.type: FUNC
  * @tc.require: I6FDNZ
  */
@@ -2453,16 +2453,14 @@ HWTEST_F(SystemAbilityStateSchedulerTest, UpdateLimitDelayUnloadTime001, TestSiz
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
     std::shared_ptr<SystemAbilityContext> abilityContext = std::make_shared<SystemAbilityContext>();
-    abilityContext->systemAbilityId = SAID;
-    abilityContext->lastStartTime = 0;
-    int32_t delaytime = abilityContext->delayUnloadTime;
+    abilityContext->systemAbilityId = -1;
     systemAbilityStateScheduler->UpdateLimitDelayUnloadTime(abilityContext->systemAbilityId);
-    EXPECT_EQ(delaytime, abilityContext->delayUnloadTime);
+    EXPECT_EQ(abilityContext, nullptr);
 }
 
 /**
  * @tc.name: UpdateLimitDelayUnloadTime002
- * @tc.desc: test UpdateLimitDelayUnloadTime with lastStartTime not equal to 0 ,report success
+ * @tc.desc: test UpdateLimitDelayUnloadTime with lastStartTime not equal to 0
  * @tc.type: FUNC
  * @tc.require: I6FDNZ
  */
