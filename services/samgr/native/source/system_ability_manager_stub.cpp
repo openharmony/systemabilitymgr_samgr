@@ -105,6 +105,7 @@ using namespace OHOS::Security;
 namespace OHOS {
 namespace {
 constexpr const char *EXT_TRANSACTION_PERMISSION = "ohos.permission.ACCESS_EXT_SYSTEM_ABILITY";
+constexpr uint32_t TIMEOUT = 6;
 }
 
 void SystemAbilityManagerStub::SetAbilityFuncMap()
@@ -263,6 +264,7 @@ int32_t SystemAbilityManagerStub::SubsSystemAbilityInner(MessageParcel& data, Me
         HILOGW("SubsSystemAbilityInner iface_cast failed!");
         return ERR_NULL_OBJECT;
     }
+    SamgrXCollie samgrXCollie("samgr--SubsSA_" + ToString(systemAbilityId), TIMEOUT);
     int32_t result = SubscribeSystemAbility(systemAbilityId, listener);
     HILOGD("SubsSystemAbilityInner result is %{public}d", result);
     ret = reply.WriteInt32(result);
@@ -410,6 +412,7 @@ int32_t SystemAbilityManagerStub::CheckSystemAbilityImmeInner(MessageParcel& dat
         HILOGW("CheckSystemAbilityImmeInner read isExist failed!");
         return ERR_FLATTEN_OBJECT;
     }
+    SamgrXCollie samgrXCollie("samgr--CheckSAImme_" + ToString(systemAbilityId), TIMEOUT);
     sptr<IRemoteObject> remoteObject = CheckSystemAbility(systemAbilityId, isExist);
     if (remoteObject == nullptr) {
         HILOGD("CheckSystemAbilityImmeInner SA:%{public}d CheckSystemAbility failed.", systemAbilityId);
