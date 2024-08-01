@@ -28,7 +28,7 @@ void FuzzSubscribeSystemProcess(const uint8_t *data, size_t size)
 {
     sptr<MockSystemProcessStatusChange> listener = new(std::nothrow) MockSystemProcessStatusChange();
     if (listener == nullptr) {
-        return nullptr;
+        return;
     }
     MessageParcel parcelData;
     parcelData.WriteInterfaceToken(SAMGR_INTERFACE_TOKEN);
@@ -41,7 +41,7 @@ void FuzzUnSubscribeSystemProcess(const uint8_t *data, size_t size)
 {
     sptr<MockSystemProcessStatusChange> listener = new(std::nothrow) MockSystemProcessStatusChange();
     if (listener == nullptr) {
-        return nullptr;
+        return;
     }
     MessageParcel parcelData;
     parcelData.WriteInterfaceToken(SAMGR_INTERFACE_TOKEN);
