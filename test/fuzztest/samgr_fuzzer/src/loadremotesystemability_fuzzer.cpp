@@ -28,7 +28,7 @@ void FuzzLoadSystemAbility(const uint8_t *data, size_t size)
 {
     sptr<MockSystemAbilityLoadCallback> saLoadCb = new(std::nothrow) MockSystemAbilityLoadCallback();
     if (saLoadCb == nullptr) {
-        return nullptr;
+        return;
     }
     MessageParcel parcelData;
     parcelData.WriteInterfaceToken(SAMGR_INTERFACE_TOKEN);
