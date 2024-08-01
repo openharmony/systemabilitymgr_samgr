@@ -27,6 +27,9 @@ const std::u16string SAMGR_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 void FuzzSubscribeSystemAbility(const uint8_t *data, size_t size)
 {
     sptr<MockSystemAbilityStatusChange> listener = new(std::nothrow) MockSystemAbilityStatusChange();
+    if (listener == nullptr) {
+        return nullptr;
+    }
     MessageParcel parcelData;
     parcelData.WriteInterfaceToken(SAMGR_INTERFACE_TOKEN);
     int32_t systemAbilityId = FuzzTestUtils::BuildInt32FromData(data, size);
@@ -39,6 +42,9 @@ void FuzzSubscribeSystemAbility(const uint8_t *data, size_t size)
 void FuzzUnSubscribeSystemAbility(const uint8_t *data, size_t size)
 {
     sptr<MockSystemAbilityStatusChange> listener = new(std::nothrow) MockSystemAbilityStatusChange();
+    if (listener == nullptr) {
+        return nullptr;
+    }
     MessageParcel parcelData;
     parcelData.WriteInterfaceToken(SAMGR_INTERFACE_TOKEN);
     int32_t systemAbilityId = FuzzTestUtils::BuildInt32FromData(data, size);
