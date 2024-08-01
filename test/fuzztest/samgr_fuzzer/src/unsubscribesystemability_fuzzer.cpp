@@ -28,7 +28,7 @@ void FuzzSubscribeSystemAbility(const uint8_t *data, size_t size)
 {
     sptr<MockSystemAbilityStatusChange> listener = new(std::nothrow) MockSystemAbilityStatusChange();
     if (listener == nullptr) {
-        return nullptr;
+        return;
     }
     MessageParcel parcelData;
     parcelData.WriteInterfaceToken(SAMGR_INTERFACE_TOKEN);
@@ -43,7 +43,7 @@ void FuzzUnSubscribeSystemAbility(const uint8_t *data, size_t size)
 {
     sptr<MockSystemAbilityStatusChange> listener = new(std::nothrow) MockSystemAbilityStatusChange();
     if (listener == nullptr) {
-        return nullptr;
+        return;
     }
     MessageParcel parcelData;
     parcelData.WriteInterfaceToken(SAMGR_INTERFACE_TOKEN);
