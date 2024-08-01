@@ -1004,11 +1004,7 @@ int32_t SystemAbilityManager::AddSystemAbility(int32_t systemAbilityId, const sp
             HILOGE("map size error, (Has been greater than %zu)", saSize);
             return ERR_INVALID_VALUE;
         }
-        SAInfo saInfo;
-        saInfo.remoteObj = ability;
-        saInfo.isDistributed = extraProp.isDistributed;
-        saInfo.capability = extraProp.capability;
-        saInfo.permission = Str16ToStr8(extraProp.permission);
+        SAInfo saInfo = { ability, extraProp.isDistributed, extraProp.capability, Str16ToStr8(extraProp.permission) };
         if (abilityMap_.count(systemAbilityId) > 0) {
             auto callingPid = IPCSkeleton::GetCallingPid();
             auto callingUid = IPCSkeleton::GetCallingUid();
