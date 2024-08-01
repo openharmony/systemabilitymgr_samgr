@@ -2489,7 +2489,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, UpdateLimitDelayUnloadTime002, TestSiz
 
 /**
  * @tc.name: UpdateLimitDelayUnloadTime002
- * @tc.desc: test UpdateLimitDelayUnloadTime with duation greater than 
+ * @tc.desc: test UpdateLimitDelayUnloadTime with duation greater than duration
  * @tc.type: FUNC
  * @tc.require: I6FDNZ
  */
