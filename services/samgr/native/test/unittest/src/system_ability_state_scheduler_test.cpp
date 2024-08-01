@@ -2455,8 +2455,9 @@ HWTEST_F(SystemAbilityStateSchedulerTest, UpdateLimitDelayUnloadTime001, TestSiz
         std::make_shared<SystemAbilityStateScheduler>();
     std::shared_ptr<SystemAbilityContext> abilityContext = std::make_shared<SystemAbilityContext>();
     abilityContext->systemAbilityId = -1;
+    abilityContext->lastStartTime = 0;
     systemAbilityStateScheduler->UpdateLimitDelayUnloadTime(abilityContext->systemAbilityId);
-    EXPECT_EQ(abilityContext, nullptr);
+    EXPECT_EQ(abilityContext->lastStartTime, 0);
 }
 
 /**
@@ -2470,11 +2471,17 @@ HWTEST_F(SystemAbilityStateSchedulerTest, UpdateLimitDelayUnloadTime002, TestSiz
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
+    int said = 401;
+    std::list<SaProfile> saProfiles;
+    systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> abilityContext = std::make_shared<SystemAbilityContext>();
-    abilityContext->systemAbilityId = SAID;
+    std::shared_ptr<SystemProcessContext> systemProcessContext = std::make_shared<SystemProcessContext>();
+    systemAbilityStateScheduler->abilityContextMap_.clear();
+    abilityContext->ownProcessContext = systemProcessContext;
+    systemAbilityStateScheduler->abilityContextMap_[said] = abilityContext;
     abilityContext->lastStartTime = GetTickCount();
     int32_t delaytime = abilityContext->delayUnloadTime;
-    systemAbilityStateScheduler->UpdateLimitDelayUnloadTime(abilityContext->systemAbilityId);
+    systemAbilityStateScheduler->UpdateLimitDelayUnloadTime(said);
     delaytime += ONCE_DELAY_TIME;
     EXPECT_EQ(delaytime, abilityContext->delayUnloadTime);
 }
