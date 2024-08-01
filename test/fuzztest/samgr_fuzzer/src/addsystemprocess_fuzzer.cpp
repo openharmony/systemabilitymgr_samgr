@@ -29,7 +29,7 @@ void FuzzAddSystemProcess(const uint8_t *data, size_t size)
 {
     sptr<IRemoteObject> procObj = new(std::nothrow) MockSystemAbilityStatusChange();
     if (procObj == nullptr) {
-        return nullptr;
+        return;
     }
     MessageParcel parcelData;
     parcelData.WriteInterfaceToken(SAMGR_INTERFACE_TOKEN);
