@@ -317,6 +317,8 @@ HWTEST_F(DeviceNetworkingCollectTest, ProcessEvent001, TestSize.Level3)
     EXPECT_EQ(true, ret);
     ret = networkingCollect->workHandler_->SendEvent(DM_DIED_EVENT);
     EXPECT_EQ(true, ret);
+    ret = networkingCollect->workHandler_->SendEvent(DM_DIED_EVENT, 10);
+    EXPECT_EQ(true, ret);
     DTEST_LOG << " ProcessEvent001 END" << std::endl;
 }
 
@@ -449,5 +451,139 @@ HWTEST_F(DeviceNetworkingCollectTest, CheckCondition006, TestSize.Level3)
     bool result = networkingCollect->CheckCondition(condition);
     EXPECT_FALSE(result);
     DTEST_LOG << " CheckCondition006 END" << std::endl;
+}
+
+/**
+ * @tc.name: ffrt001
+ * @tc.desc: test ffrt.
+ * @tc.type: FUNC
+ * @tc.require: I6OU0A
+ */
+HWTEST_F(DeviceNetworkingCollectTest, ffrt001, TestSize.Level3)
+{
+    DTEST_LOG << " test ffrt001 BEGIN" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
+    networkingCollect->OnStart();
+    networkingCollect->SetFfrt();
+    networkingCollect->CleanFfrt();
+    networkingCollect->OnStop();
+    EXPECT_NE(collect,nullptr);
+    DTEST_LOG << " test ffrt001 END" << std::endl;
+}
+
+/**
+ * @tc.name: ReportMissedEvents001
+ * @tc.desc: test ReportMissedEvents.
+ * @tc.type: FUNC
+ * @tc.require: I6OU0A
+ */
+HWTEST_F(DeviceNetworkingCollectTest, ReportMissedEvents001, TestSize.Level3)
+{
+    DTEST_LOG << " test ReportMissedEvents BEGIN" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
+    networkingCollect->OnStart();
+    networkingCollect->ReportMissedEvents();
+    networkingCollect->stateCallback_->deviceOnlineSet_.emplace("1");
+    networkingCollect->ReportMissedEvents();
+    EXPECT_NE(collect,nullptr);
+    DTEST_LOG << " test ReportMissedEvents END" << std::endl;
+}
+
+/**
+ * @tc.name: UpdateDeviceOnlineSet001
+ * @tc.desc: test UpdateDeviceOnlineSet.
+ * @tc.type: FUNC
+ * @tc.require: I6OU0A
+ */
+HWTEST_F(DeviceNetworkingCollectTest, UpdateDeviceOnlineSet001, TestSize.Level3)
+{
+    DTEST_LOG << " test UpdateDeviceOnlineSet BEGIN" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
+    networkingCollect->OnStart();
+    networkingCollect->UpdateDeviceOnlineSet("1");
+    EXPECT_NE(collect,nullptr);
+    DTEST_LOG << " test UpdateDeviceOnlineSet END" << std::endl;
+}
+
+/**
+ * @tc.name: ClearDeviceOnlineSet001
+ * @tc.desc: test ClearDeviceOnlineSet.
+ * @tc.type: FUNC
+ * @tc.require: I6OU0A
+ */
+HWTEST_F(DeviceNetworkingCollectTest, ClearDeviceOnlineSet001, TestSize.Level3)
+{
+    DTEST_LOG << " test ClearDeviceOnlineSet BEGIN" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
+    networkingCollect->OnStart();
+    networkingCollect->ClearDeviceOnlineSet();
+    EXPECT_NE(collect,nullptr);
+    DTEST_LOG << " test ClearDeviceOnlineSet END" << std::endl;
+}
+
+/**
+ * @tc.name: OnRemoteDied002
+ * @tc.desc: test OnRemoteDied.
+ * @tc.type: FUNC
+ * @tc.require: I6OU0A
+ */
+HWTEST_F(DeviceNetworkingCollectTest, OnRemoteDied002, TestSize.Level3)
+{
+    DTEST_LOG << " test OnRemoteDied BEGIN" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
+    networkingCollect->OnStart();
+    networkingCollect->initCallback_->OnRemoteDied();
+    EXPECT_NE(collect,nullptr);
+    DTEST_LOG << " test OnRemoteDied END" << std::endl;
+}
+
+/**
+ * @tc.name: OnDeviceOnline002
+ * @tc.desc: test OnDeviceOnline.
+ * @tc.type: FUNC
+ * @tc.require: I6OU0A
+ */
+HWTEST_F(DeviceNetworkingCollectTest, OnDeviceOnline002, TestSize.Level3)
+{
+    DTEST_LOG << " test OnDeviceOnline BEGIN" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
+    networkingCollect->OnStart();
+    DistributedHardware::DmDeviceInfo dmDeviceInfo = {
+        .deviceId = "asdad",
+        .deviceName = "asda",
+        .deviceTypeId = 1,
+    };
+    networkingCollect->stateCallback_->OnDeviceOnline(dmDeviceInfo);
+    EXPECT_NE(collect,nullptr);
+    DTEST_LOG << " test OnDeviceOnline END" << std::endl;
+}
+
+/**
+ * @tc.name: OnDeviceOffline003
+ * @tc.desc: test OnDeviceOffline
+ * @tc.type: FUNC
+ */
+HWTEST_F(DeviceNetworkingCollectTest, OnDeviceOffline003, TestSize.Level3)
+{
+    DTEST_LOG << " OnDeviceOffline003 BEGIN" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
+    networkingCollect->OnStart();
+    DistributedHardware::DmDeviceInfo dmDeviceInfo = {
+        .deviceId = "asdad",
+        .deviceName = "asda",
+        .deviceTypeId = 1,
+    };
+    networkingCollect->stateCallback_->OnDeviceOffline(dmDeviceInfo);
+    networkingCollect->stateCallback_->OnDeviceChanged(dmDeviceInfo);
+    networkingCollect->stateCallback_->OnDeviceReady(dmDeviceInfo);
+    EXPECT_NE(collect,nullptr);
+    DTEST_LOG << " OnDeviceOffline003 END" << std::endl;
 }
 } // namespace OHOS
