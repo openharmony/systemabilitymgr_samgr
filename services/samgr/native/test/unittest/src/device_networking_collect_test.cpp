@@ -468,7 +468,7 @@ HWTEST_F(DeviceNetworkingCollectTest, ffrt001, TestSize.Level3)
     networkingCollect->SetFfrt();
     networkingCollect->CleanFfrt();
     networkingCollect->OnStop();
-    EXPECT_NE(collect,nullptr);
+    EXPECT_NE(collect, nullptr);
     DTEST_LOG << " test ffrt001 END" << std::endl;
 }
 
@@ -487,7 +487,7 @@ HWTEST_F(DeviceNetworkingCollectTest, ReportMissedEvents001, TestSize.Level3)
     networkingCollect->ReportMissedEvents();
     networkingCollect->stateCallback_->deviceOnlineSet_.emplace("1");
     networkingCollect->ReportMissedEvents();
-    EXPECT_NE(collect,nullptr);
+    EXPECT_NE(collect, nullptr);
     DTEST_LOG << " test ReportMissedEvents END" << std::endl;
 }
 
@@ -504,7 +504,7 @@ HWTEST_F(DeviceNetworkingCollectTest, UpdateDeviceOnlineSet001, TestSize.Level3)
     sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
     networkingCollect->OnStart();
     networkingCollect->UpdateDeviceOnlineSet("1");
-    EXPECT_NE(collect,nullptr);
+    EXPECT_NE(collect, nullptr);
     DTEST_LOG << " test UpdateDeviceOnlineSet END" << std::endl;
 }
 
@@ -521,7 +521,7 @@ HWTEST_F(DeviceNetworkingCollectTest, ClearDeviceOnlineSet001, TestSize.Level3)
     sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
     networkingCollect->OnStart();
     networkingCollect->ClearDeviceOnlineSet();
-    EXPECT_NE(collect,nullptr);
+    EXPECT_NE(collect, nullptr);
     DTEST_LOG << " test ClearDeviceOnlineSet END" << std::endl;
 }
 
@@ -538,7 +538,7 @@ HWTEST_F(DeviceNetworkingCollectTest, OnRemoteDied002, TestSize.Level3)
     sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
     networkingCollect->OnStart();
     networkingCollect->initCallback_->OnRemoteDied();
-    EXPECT_NE(collect,nullptr);
+    EXPECT_NE(collect, nullptr);
     DTEST_LOG << " test OnRemoteDied END" << std::endl;
 }
 
@@ -560,7 +560,7 @@ HWTEST_F(DeviceNetworkingCollectTest, OnDeviceOnline002, TestSize.Level3)
         .deviceTypeId = 1,
     };
     networkingCollect->stateCallback_->OnDeviceOnline(dmDeviceInfo);
-    EXPECT_NE(collect,nullptr);
+    EXPECT_NE(collect, nullptr);
     DTEST_LOG << " test OnDeviceOnline END" << std::endl;
 }
 
@@ -583,7 +583,7 @@ HWTEST_F(DeviceNetworkingCollectTest, OnDeviceOffline003, TestSize.Level3)
     networkingCollect->stateCallback_->OnDeviceOffline(dmDeviceInfo);
     networkingCollect->stateCallback_->OnDeviceChanged(dmDeviceInfo);
     networkingCollect->stateCallback_->OnDeviceReady(dmDeviceInfo);
-    EXPECT_NE(collect,nullptr);
+    EXPECT_NE(collect, nullptr);
     DTEST_LOG << " OnDeviceOffline003 END" << std::endl;
 }
 } // namespace OHOS

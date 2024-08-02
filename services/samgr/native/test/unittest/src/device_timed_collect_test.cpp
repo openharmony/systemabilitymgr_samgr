@@ -244,7 +244,7 @@ HWTEST_F(DeviceTimedCollectTest, OnStart002, TestSize.Level3)
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(collect);
     int64_t currentTime = TimeUtils::GetTimestamp();
-    preferencesUtil_->SaveString("timedevent_2017-9-1-16:59:10","start#149999#");
+    preferencesUtil_->SaveString("timedevent_2017-9-1-16:59:10", "start#149999#");
     preferencesUtil_->SaveLong("2017-9-1-16:59:10", currentTime + 10);
     preferencesUtil_->SaveLong("2017-9-1-16:59:11", currentTime - 10);
     deviceTimedCollect->OnStart();

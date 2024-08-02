@@ -792,7 +792,7 @@ HWTEST_F(CommonEventCollectTest, RemoveWhiteCommonEvent001, TestSize.Level3)
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
     commonEventCollect->RemoveWhiteCommonEvent();
-    EXPECT_NE(commonEventCollect,nullptr);
+    EXPECT_NE(commonEventCollect, nullptr);
     DTEST_LOG << " RemoveWhiteCommonEvent001 END" << std::endl;
 }
 
@@ -813,7 +813,7 @@ HWTEST_F(CommonEventCollectTest, CleanFailedEventLocked001, TestSize.Level3)
     commonEventCollect->CleanFailedEventLocked("test");
     commonEventCollect->commonEventSubscriber_ = nullptr;
     commonEventCollect->CleanFailedEventLocked("test");
-    EXPECT_NE(commonEventCollect,nullptr);
+    EXPECT_NE(commonEventCollect, nullptr);
     DTEST_LOG << " CleanFailedEventLocked001 END" << std::endl;
 }
 
@@ -830,7 +830,7 @@ HWTEST_F(CommonEventCollectTest, OnRemoveSystemAbility001, TestSize.Level3)
     commonEventListener->OnRemoveSystemAbility(1, "test");
     commonEventListener->commonEventCollect_ = nullptr;
     commonEventListener->OnAddSystemAbility(1, "test");
-    EXPECT_NE(commonEventCollect,nullptr);
+    EXPECT_NE(commonEventCollect, nullptr);
     DTEST_LOG << " OnRemoveSystemAbility001 END" << std::endl;
 }
 } // namespace OHOS
