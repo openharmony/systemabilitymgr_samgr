@@ -69,11 +69,13 @@ void SamgrTimeHandler::StartThread()
 
 void SamgrTimeHandler::OnTime(SamgrTimeHandler &handle, int number, struct epoll_event events[])
 {
-    HILOGI("SamgrTimeHandler OnTime: %{public}d", number);
+    if (number > 0) {
+        HILOGI("SamgrTimeHandler OnTime: %{public}d", number);
+    }
     for (int i = 0; i < number; i++) {
         uint32_t timerfd = events[i].data.u32;
         uint64_t unused = 0;
-        HILOGI("SamgrTimeHandler timerfd: %{public}u s", timerfd);
+        HILOGI("SamgrTimeHandler timerfd: %{public}u", timerfd);
         int ret = read(timerfd, &unused, sizeof(unused));
         if (ret == sizeof(uint64_t)) {
             TaskType funcTime;
@@ -96,11 +98,22 @@ SamgrTimeHandler::~SamgrTimeHandler()
     ::close(epollfd);
 }
 
+int SamgrTimeHandler::CreateAndRetry()
+{
+    int timerfd = -1;
+    for (int i = 0;i < 3;i++) {
+        timerfd = timerfd_create(CLOCK_BOOTTIME_ALARM, 0);
+        if (timerfd != -1) {
+            return timerfd;
+        }
+    }
+    return timerfd;
+}
 
 bool SamgrTimeHandler::PostTask(TaskType func, uint64_t delayTime)
 {
     HILOGI("SamgrTimeHandler postTask start: %{public}" PRId64 "s", delayTime);
-    int timerfd = timerfd_create(CLOCK_BOOTTIME_ALARM, 0);
+    int timerfd = CreateAndRetry();
     if (timerfd == -1) {
         HILOGE("timerfd_create CLOCK_BOOTTIME_ALARM not support: %{public}s", strerror(errno));
         timerfd = timerfd_create(CLOCK_MONOTONIC, 0);
