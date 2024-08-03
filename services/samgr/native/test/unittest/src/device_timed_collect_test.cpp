@@ -21,6 +21,12 @@
 #define private public
 #include "device_status_collect_manager.h"
 #include "device_timed_collect.h"
+#ifdef PREFERENCES_ENABLE
+#include "preferences_errno.h"
+#include "preferences_helper.h"
+#include "preferences_value.h"
+#include "device_timed_collect_tool.h"
+#endif
 
 using namespace std;
 using namespace testing;
@@ -223,6 +229,34 @@ HWTEST_F(DeviceTimedCollectTest, OnStart001, TestSize.Level3)
     deviceTimedCollect->OnStart();
     EXPECT_NE(collect, nullptr);
     deviceTimedCollect->timeInfos_.clear();
+}
+
+/**
+ * @tc.name: OnStart002
+ * @tc.desc: test OnStart
+ * @tc.type: FUNC
+ */
+HWTEST_F(DeviceTimedCollectTest, OnStart002, TestSize.Level3)
+{
+#ifdef PREFERENCES_ENABLE
+    PreferencesUtil preferencesUtil_ = PreferencesUtil::GetInstance();
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
+        std::make_shared<DeviceTimedCollect>(collect);
+    int64_t currentTime = TimeUtils::GetTimestamp();
+    preferencesUtil_->SaveString("timedevent_2017-9-1-16:59:10", "start#149999#");
+    preferencesUtil_->SaveLong("2017-9-1-16:59:10", currentTime + 10);
+    preferencesUtil_->SaveLong("2017-9-1-16:59:11", currentTime - 10);
+    deviceTimedCollect->OnStart();
+    EXPECT_NE(collect, nullptr);
+    preferencesUtil_->RefreshSync();
+    preferencesUtil_->IsExist("2017-9-1-16:59:10");
+    preferencesUtil_->Remove("timedevent_2017-9-1-16:59:10");
+    preferencesUtil_->Remove("2017-9-1-16:59:10");
+    preferencesUtil_->Remove("2017-9-1-16:59:11");
+    preferencesUtil_->IsExist("2017-9-1-16:59:10");
+    deviceTimedCollect->timeInfos_.clear();
+#endif
 }
 
 /**
