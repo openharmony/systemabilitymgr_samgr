@@ -22,6 +22,7 @@ namespace OHOS {
 namespace {
 constexpr uint32_t INIT_NUM = 4;
 constexpr uint32_t MAX_EVENT = 8;
+constexpr uint32_t RETRY_TIMES = 3;
 }
 SamgrTimeHandler* volatile SamgrTimeHandler::singleton = nullptr;
 SamgrTimeHandler::Deletor SamgrTimeHandler::deletor;
@@ -99,14 +100,14 @@ SamgrTimeHandler::~SamgrTimeHandler()
 
 int SamgrTimeHandler::CreateAndRetry()
 {
-    int timerfd = -1;
-    for (int i = 0;i < 3;i++) {
-        timerfd = timerfd_create(CLOCK_BOOTTIME_ALARM, 0);
+    for (int i = 0; i < RETRY_TIMES; i++) {
+        int timerfd = timerfd_create(CLOCK_BOOTTIME_ALARM, 0);
         if (timerfd != -1) {
             return timerfd;
         }
+        HILOGE("timerfd_create set alarm err: %{public}s", strerror(errno));
     }
-    return timerfd;
+    return -1;
 }
 
 bool SamgrTimeHandler::PostTask(TaskType func, uint64_t delayTime)
@@ -114,7 +115,6 @@ bool SamgrTimeHandler::PostTask(TaskType func, uint64_t delayTime)
     HILOGI("SamgrTimeHandler postTask start: %{public}" PRId64 "s", delayTime);
     int timerfd = CreateAndRetry();
     if (timerfd == -1) {
-        HILOGE("timerfd_create CLOCK_BOOTTIME_ALARM not support: %{public}s", strerror(errno));
         timerfd = timerfd_create(CLOCK_MONOTONIC, 0);
         if (timerfd == -1) {
             HILOGE("timerfd_create fail : %{public}s", strerror(errno));
