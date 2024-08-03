@@ -317,8 +317,8 @@ HWTEST_F(DeviceNetworkingCollectTest, ProcessEvent001, TestSize.Level3)
     EXPECT_EQ(true, ret);
     ret = networkingCollect->workHandler_->SendEvent(DM_DIED_EVENT);
     EXPECT_EQ(true, ret);
-    ret = networkingCollect->workHandler_->SendEvent(DM_DIED_EVENT, 10);
-    EXPECT_EQ(true, ret);
+    ret = networkingCollect->workHandler_->SendEvent(DM_DIED_EVENT, -1);
+    EXPECT_EQ(false, ret);
     DTEST_LOG << " ProcessEvent001 END" << std::endl;
 }
 
