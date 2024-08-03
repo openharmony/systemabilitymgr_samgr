@@ -91,7 +91,7 @@ void DeviceTimedCollect::ProcessPersistenceTimedTask(int64_t disTime, std::strin
         ReportEvent(event);
         preferencesUtil_->Remove(timeString);
     };
-    if(!SamgrTimeHandler::GetInstance()->PostTask(timedTask, disTime)) {
+    if (!SamgrTimeHandler::GetInstance()->PostTask(timedTask, disTime)) {
         PostDelayTask(timedTask, disTime);
     }
 #endif
@@ -227,7 +227,7 @@ void DeviceTimedCollect::PostDelayTaskByTimeInfo(std::function<void()> callback,
         return;
     }
     if (timeInfos_[interval].awake) {
-        if(!SamgrTimeHandler::GetInstance()->PostTask(callback, disTime)) {
+        if (!SamgrTimeHandler::GetInstance()->PostTask(callback, disTime)) {
             PostDelayTask(callback, disTime);
         }
     } else {
@@ -304,7 +304,7 @@ void DeviceTimedCollect::PostPersistenceTimedTaskLocked(std::string timeString, 
     int64_t currentTime = TimeUtils::GetTimestamp();
     int64_t upgradeTime = currentTime + timeGap;
     preferencesUtil_->SaveLong(timeString, upgradeTime);
-    if(!SamgrTimeHandler::GetInstance()->PostTask(timedTask, timeGap)) {
+    if (!SamgrTimeHandler::GetInstance()->PostTask(timedTask, timeGap)) {
         PostDelayTask(timedTask, timeGap);
     }
 #endif
@@ -320,7 +320,7 @@ void DeviceTimedCollect::PostNonPersistenceTimedTaskLocked(std::string timeStrin
         HILOGE("PostNonPersistenceTimedTask invalid timeGap: %{public}" PRId64 "ms", timeGap);
         return;
     }
-    if(!SamgrTimeHandler::GetInstance()->PostTask(timedTask, timeGap)) {
+    if (!SamgrTimeHandler::GetInstance()->PostTask(timedTask, timeGap)) {
         PostDelayTask(timedTask, timeGap);
     }
 }
