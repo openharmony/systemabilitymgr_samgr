@@ -73,7 +73,7 @@ void SamgrTimeHandler::OnTime(SamgrTimeHandler &handle, int number, struct epoll
     for (int i = 0; i < number; i++) {
         uint32_t timerfd = events[i].data.u32;
         uint64_t unused = 0;
-        HILOGI("SamgrTimeHandler timerfd: %{public}" PRId32 "s", timerfd);
+        HILOGI("SamgrTimeHandler timerfd: %{public}u s", timerfd);
         int ret = read(timerfd, &unused, sizeof(unused));
         if (ret == sizeof(uint64_t)) {
             TaskType funcTime;
