@@ -51,7 +51,6 @@ SamgrTimeHandler::SamgrTimeHandler()
 
 void SamgrTimeHandler::StartThread()
 {
-    HILOGI("SamgrTimeHandler thread start");
     std::function<void()> func = [this]() {
         HILOGI("SamgrTimeHandler thread start");
         struct epoll_event events[MAX_EVENT];
