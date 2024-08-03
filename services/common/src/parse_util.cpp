@@ -70,6 +70,7 @@ constexpr int32_t MAX_JSON_STRING_LENGTH = 128;
 constexpr int32_t FIRST_SYS_ABILITY_ID = 0x00000000;
 constexpr int32_t LAST_SYS_ABILITY_ID = 0x00ffffff;
 constexpr int32_t MAX_EXTENSIONO_NUM = 100;
+constexpr int32_t MAX_DLOPEN_SECONDS = 60;
 constexpr const char* BOOT_START_PHASE = "BootStartPhase";
 constexpr const char* CORE_START_PHASE = "CoreStartPhase";
 constexpr const char* HIGH_LOAD_PRIORITY = "HighPriority";
@@ -149,7 +150,7 @@ void ParseUtil::OpenSo(SaProfile& saProfile)
         if (saProfile.runOnCreate) {
             handle = dlopen(saProfile.libPath.c_str(), RTLD_NOW);
         } else {
-            SamgrXCollie samgrXCollie("safwk--openso_" + ToString(saProfile.saId));
+            SamgrXCollie samgrXCollie("safwk--openso_" + ToString(saProfile.saId), MAX_DLOPEN_SECONDS);
             handle = dlopen(saProfile.libPath.c_str(), RTLD_NOW);
         }
         int64_t duration = GetTickCount() - begin;
