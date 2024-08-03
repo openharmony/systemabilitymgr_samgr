@@ -15,6 +15,7 @@
 
 #include "samgr_time_handler.h"
 #include "sam_log.h"
+#include <cinttypes>
 
 using namespace std;
 namespace OHOS {
@@ -41,19 +42,25 @@ SamgrTimeHandler::SamgrTimeHandler()
 {
     HILOGI("SamgrTimeHandler init start");
     epollfd = epoll_create(INIT_NUM);
+    if (epollfd == -1) {
+        HILOGE("SamgrTimeHandler epoll_create error");
+    }
     flag = false;
     StartThread();
 }
 
 void SamgrTimeHandler::StartThread()
 {
+    HILOGI("SamgrTimeHandler thread start");
     std::function<void()> func = [this]() {
+        HILOGI("SamgrTimeHandler thread start");
         struct epoll_event events[MAX_EVENT];
         while (!this->timeFunc.IsEmpty()) {
             int number = epoll_wait(this->epollfd, events, MAX_EVENT, -1);
             OnTime((*this), number, events);
         }
         this->flag = false;
+        HILOGI("SamgrTimeHandler thread end");
     };
     std::thread t(func);
     this->flag = true;
@@ -62,13 +69,16 @@ void SamgrTimeHandler::StartThread()
 
 void SamgrTimeHandler::OnTime(SamgrTimeHandler &handle, int number, struct epoll_event events[])
 {
+    HILOGI("SamgrTimeHandler OnTime: %{public}d", number);
     for (int i = 0; i < number; i++) {
         uint32_t timerfd = events[i].data.u32;
         uint64_t unused = 0;
+        HILOGI("SamgrTimeHandler timerfd: %{public}" PRId32 "s", timerfd);
         int ret = read(timerfd, &unused, sizeof(unused));
         if (ret == sizeof(uint64_t)) {
             TaskType funcTime;
-            handle.timeFunc.Find(timerfd, funcTime);
+            bool hasFunction = handle.timeFunc.Find(timerfd, funcTime);
+            HILOGI("SamgrTimeHandler hasFunction: %{public}d", hasFunction);
             funcTime();
             handle.timeFunc.Erase(timerfd);
             epoll_ctl(this->epollfd, EPOLL_CTL_DEL, timerfd, nullptr);
@@ -89,10 +99,10 @@ SamgrTimeHandler::~SamgrTimeHandler()
 
 bool SamgrTimeHandler::PostTask(TaskType func, uint64_t delayTime)
 {
-    HILOGD("SamgrTimeHandler postTask start: %{public}d", (int)delayTime);
+    HILOGI("SamgrTimeHandler postTask start: %{public}" PRId64 "s", delayTime);
     int timerfd = timerfd_create(CLOCK_BOOTTIME_ALARM, 0);
     if (timerfd == -1) {
-        HILOGD("timerfd_create CLOCK_BOOTTIME_ALARM not support: %{public}s", strerror(errno));
+        HILOGE("timerfd_create CLOCK_BOOTTIME_ALARM not support: %{public}s", strerror(errno));
         timerfd = timerfd_create(CLOCK_MONOTONIC, 0);
         if (timerfd == -1) {
             HILOGE("timerfd_create fail : %{public}s", strerror(errno));
