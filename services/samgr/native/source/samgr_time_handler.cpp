@@ -100,7 +100,7 @@ SamgrTimeHandler::~SamgrTimeHandler()
 
 int SamgrTimeHandler::CreateAndRetry()
 {
-    for (in32_t i = 0; i < RETRY_TIMES; i++) {
+    for (int32_t i = 0; i < RETRY_TIMES; i++) {
         int timerfd = timerfd_create(CLOCK_BOOTTIME_ALARM, 0);
         if (timerfd != -1) {
             return timerfd;
