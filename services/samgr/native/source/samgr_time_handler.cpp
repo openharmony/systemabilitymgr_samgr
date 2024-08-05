@@ -22,7 +22,7 @@ namespace OHOS {
 namespace {
 constexpr uint32_t INIT_NUM = 4;
 constexpr uint32_t MAX_EVENT = 8;
-constexpr uint32_t RETRY_TIMES = 3;
+constexpr int32_t RETRY_TIMES = 3;
 }
 SamgrTimeHandler* volatile SamgrTimeHandler::singleton = nullptr;
 SamgrTimeHandler::Deletor SamgrTimeHandler::deletor;
@@ -100,7 +100,7 @@ SamgrTimeHandler::~SamgrTimeHandler()
 
 int SamgrTimeHandler::CreateAndRetry()
 {
-    for (int i = 0; i < RETRY_TIMES; i++) {
+    for (int32_t i = 0; i < RETRY_TIMES; i++) {
         int timerfd = timerfd_create(CLOCK_BOOTTIME_ALARM, 0);
         if (timerfd != -1) {
             return timerfd;
