@@ -17,6 +17,7 @@ group("fuzztest") {
   testonly = true
   deps = [
     "./samgr_fuzzer:fuzztest",
+    "./samgrcoverage_fuzzer:fuzztest",
     "./samgrdumper_fuzzer:fuzztest",
     "./systemabilitymanager_fuzzer:fuzztest",
   ]
