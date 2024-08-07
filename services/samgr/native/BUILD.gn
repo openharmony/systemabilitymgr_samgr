@@ -54,6 +54,7 @@ ohos_executable("samgr") {
     "//foundation/systemabilitymgr/samgr/services/samgr/native/source/collect/device_status_collect_manager.cpp",
     "//foundation/systemabilitymgr/samgr/services/samgr/native/source/collect/device_timed_collect.cpp",
     "//foundation/systemabilitymgr/samgr/services/samgr/native/source/collect/icollect_plugin.cpp",
+    "//foundation/systemabilitymgr/samgr/services/samgr/native/source/collect/ref_count_collect.cpp",
     "//foundation/systemabilitymgr/samgr/services/samgr/native/source/ffrt_handler.cpp",
     "//foundation/systemabilitymgr/samgr/services/samgr/native/source/main.cpp",
     "//foundation/systemabilitymgr/samgr/services/samgr/native/source/memory_guard.cpp",
