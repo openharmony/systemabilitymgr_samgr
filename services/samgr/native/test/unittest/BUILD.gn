@@ -595,9 +595,7 @@ ohos_unittest("SystemAbilityMgrDumperTest") {
     cflags = [ "-DBINDER_IPC_32BIT" ]
   }
 
-  deps = [
-    ":samgr_proxy_tdd",
-  ]
+  deps = [ ":samgr_proxy_tdd" ]
 
   external_deps = [
     "access_token:libaccesstoken_sdk",
