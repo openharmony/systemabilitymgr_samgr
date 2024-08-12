@@ -356,6 +356,50 @@ HWTEST_F(SystemAbilityMgrStubTest, GetOnDemandReasonExtraDataInner001, TestSize.
 }
 
 /**
+ * @tc.name: GetExtensionSaIdsInner001
+ * @tc.desc: test GetExtensionSaIdsInner with permission is denied
+ * @tc.type: FUNC
+ * @tc.require: I6XB42
+ */
+HWTEST_F(SystemAbilityMgrStubTest, GetExtensionSaIdsInner001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = saMgr->GetExtensionSaIdsInner(data, reply);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: GetExtensionRunningSaListInner001
+ * @tc.desc: test GetExtensionRunningSaListInner with permission is denied
+ * @tc.type: FUNC
+ * @tc.require: I6XB42
+ */
+HWTEST_F(SystemAbilityMgrStubTest, GetExtensionRunningSaListInner001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = saMgr->GetExtensionRunningSaListInner(data, reply);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: GetCommonEventExtraDataIdlistInner001
+ * @tc.desc: test GetCommonEventExtraDataIdlistInner with permission is denied
+ * @tc.type: FUNC
+ * @tc.require: I6XB42
+ */
+HWTEST_F(SystemAbilityMgrStubTest, GetCommonEventExtraDataIdlistInner001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = saMgr->GetCommonEventExtraDataIdlistInner(data, reply);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+}
+/**
  * @tc.name: ListSystemAbilityInner002
  * @tc.desc: test ListSystemAbilityInner, read dumpflag failed!
  * @tc.type: FUNC
