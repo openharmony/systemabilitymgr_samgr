@@ -941,7 +941,7 @@ HWTEST_F(SystemAbilityMgrProxyTest, ReadOnDemandEventsFromParcel005, TestSize.Le
 HWTEST_F(SystemAbilityMgrProxyTest, OnRemoteRequest003, TestSize.Level3)
 {
     DTEST_LOG << " OnRemoteRequest003 start " << std::endl;
-    sptr<SystemProcessStatusChangeStub> procStub = new SystemProcessStatusChangeStub();
+    sptr<SystemProcessStatusChangeStub> procStub = new SystemProcessStatusChange();
     uint32_t code = 1000;
     MessageParcel data;
     data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN);
