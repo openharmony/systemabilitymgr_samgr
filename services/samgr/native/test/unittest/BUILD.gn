@@ -244,6 +244,12 @@ ohos_unittest("SystemAbilityMgrCollectTest") {
     external_deps += [ "bluetooth:btframework" ]
     defines += [ "SUPPORT_SWITCH_COLLECT" ]
   }
+  if (support_device_manager) {
+    sources +=
+        [ "${samgr_services_dir}/source/collect/device_networking_collect.cpp" ]
+    external_deps += [ "device_manager:devicemanagersdk" ]
+    defines += [ "SUPPORT_DEVICE_MANAGER" ]
+  }
 }
 
 ohos_unittest("SystemAbilityMgrDeviceNetworkingTest") {
