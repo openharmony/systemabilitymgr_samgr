@@ -21,7 +21,7 @@
 namespace OHOS {
 class SamgrXCollie {
 public:
-    SamgrXCollie(const std::string& tag, uint32_t timeoutSeconds = 10,
+    SamgrXCollie(const std::string& tag, uint32_t timeoutSeconds = 60,
         std::function<void(void *)> func = nullptr, void* arg = nullptr, uint32_t flag = 1);
     ~SamgrXCollie();
 
