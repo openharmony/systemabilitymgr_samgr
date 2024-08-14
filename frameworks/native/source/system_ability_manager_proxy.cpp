@@ -277,7 +277,7 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t system
         return nullptr;
     }
 
-    HILOGD("CheckSystemAbility: SA:%{public}d.", systemAbilityId,);
+    HILOGD("CheckSystemAbility: SA:%{public}d.", systemAbilityId);
     
     auto remote = Remote();
     if (remote == nullptr) {
