@@ -608,8 +608,8 @@ HWTEST_F(DeviceTimedCollectTest, SaveInner002, TestSize.Level3)
     std::shared_ptr<PreferencesUtil> preferencesUtil_ = PreferencesUtil::GetInstance();
     const std::string key;
     const std::string value;
-    preferencesUtil_.ptr_ = nullptr;
-    bool ret = preferencesUtil_->SaveInner(Tooltest.ptr_, key, value);
+    preferencesUtil_->ptr_ = nullptr;
+    bool ret = preferencesUtil_->SaveInner(preferencesUtil_->ptr_, key, value);
     EXPECT_EQ(ret, false);
 #endif
 }
