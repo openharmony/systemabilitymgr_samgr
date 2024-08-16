@@ -36,6 +36,7 @@ public:
     void SetFfrt();
     void ReportEvent(const OnDemandEvent& event) override;
     void StartCollect();
+    void PostTask(std::function<void()> callback) override;
     void PostDelayTask(std::function<void()> callback, int32_t delayTime) override;
     int32_t GetOnDemandReasonExtraData(int64_t extraDataId, OnDemandReasonExtraData& extraData);
     int32_t GetOnDemandEvents(int32_t systemAbilityId, OnDemandPolicyType type,

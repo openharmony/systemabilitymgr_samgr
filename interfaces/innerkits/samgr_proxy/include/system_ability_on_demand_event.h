@@ -33,6 +33,7 @@ enum class OnDemandEventId {
     PARAM = 3,
     COMMON_EVENT = 4,
     TIMED_EVENT = 5,
+    UNREF_EVENT = 6,
 };
 
 struct SystemAbilityOnDemandCondition {

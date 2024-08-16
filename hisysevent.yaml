@@ -89,3 +89,8 @@ SERVICE_BLOCK:
   PID: {type: INT32, desc: caller pid}
   UID: {type: UINT32, desc: caller uid}
   MSG: {type: STRING, desc: time msg}
+
+SA_IDLE:
+  __BASE: {type: BEHAVIOR, level: MINOR, desc: sa idle event}
+  SAID: {type: INT32, desc: system ability id}
+  REASON: {type: STRING, desc: sa idle reason}

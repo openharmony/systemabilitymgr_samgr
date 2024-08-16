@@ -46,7 +46,7 @@ public:
     {
         return false;
     }
-    
+
     virtual bool CheckExtraMessage(int64_t extraDataId, const OnDemandEvent& profileEvent)
     {
         return true;
@@ -76,6 +76,7 @@ public:
         return ERR_OK;
     }
     void ReportEvent(const OnDemandEvent& event);
+    void PostTask(std::function<void()> callback);
     void PostDelayTask(std::function<void()> callback, int32_t delayTime);
 private:
     sptr<IReport> report_;

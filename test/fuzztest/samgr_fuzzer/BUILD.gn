@@ -150,6 +150,7 @@ foreach(item, samgr_fuzztests) {
       "${samgr_services_dir}/source/collect/device_status_collect_manager.cpp",
       "${samgr_services_dir}/source/collect/device_timed_collect.cpp",
       "${samgr_services_dir}/source/collect/icollect_plugin.cpp",
+      "${samgr_services_dir}/source/collect/ref_count_collect.cpp",
       "${samgr_services_dir}/source/ffrt_handler.cpp",
       "${samgr_services_dir}/source/memory_guard.cpp",
       "${samgr_services_dir}/source/rpc_callback_imp.cpp",

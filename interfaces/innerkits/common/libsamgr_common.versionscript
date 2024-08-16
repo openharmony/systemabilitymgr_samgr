@@ -25,6 +25,7 @@
     *ReportProcessStopFail*;
     *ReportProcessStartDuration*;
     *ReportProcessStopDuration*;
+    *ReportSAIdle*;
   local:
     *;
 };
