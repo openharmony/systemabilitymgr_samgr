@@ -770,7 +770,6 @@ ohos_rust_unittest("rust_samgr_test_client") {
 
   sources = [ "./rust/rust_samgr_test.rs" ]
   deps = [
-    "//foundation/communication/ipc/interfaces/innerkits/rust:ipc_rust",
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/rust:samgr_rust",
     "//foundation/systemabilitymgr/samgr/services/samgr/native/test/unittest/rust/service:test_access_token",
   ]

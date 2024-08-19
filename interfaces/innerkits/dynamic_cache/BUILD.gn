@@ -30,7 +30,6 @@ ohos_shared_library("dynamic_cache") {
   }
   branch_protector_ret = "pac_ret"
 
-  all_dependent_configs = [ ":dynamic_cache_config" ]
   public_configs = [ ":dynamic_cache_config" ]
   if (is_standard_system) {
     external_deps = [
