@@ -1284,7 +1284,8 @@ int32_t SystemAbilityStateScheduler::CheckStartEnableOnce(const OnDemandEvent& e
             saControl.saId, event.eventId);
     }
     if (result != ERR_OK) {
-        ReportSamgrSaLoadFail(saControl.saId, "ondemand load err:" + ToString(result));
+        ReportSamgrSaLoadFail(saControl.saId, IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(),
+            "ondemand load err:" + ToString(result));
     }
     return result;
 }
@@ -1320,7 +1321,8 @@ int32_t SystemAbilityStateScheduler::CheckStopEnableOnce(const OnDemandEvent& ev
             saControl.saId, event.eventId);
     }
     if (result != ERR_OK) {
-        ReportSaUnLoadFail(saControl.saId, "Ondemand unload err:" + ToString(result));
+        ReportSaUnLoadFail(saControl.saId, IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(),
+            "Ondemand unload err:" + ToString(result));
     }
     return result;
 }

@@ -18,6 +18,7 @@
 #include <cinttypes>
 #include <dlfcn.h>
 #include <fstream>
+#include <unistd.h>
 #include <memory>
 #include <sstream>
 #include <vector>
@@ -166,7 +167,7 @@ void ParseUtil::OpenSo(SaProfile& saProfile)
             if (libPathVec.size() > 0) {
                 fileName = libPathVec[libPathVec.size() - 1];
             }
-            ReportAddSystemAbilityFailed(saProfile.saId, fileName);
+            ReportAddSystemAbilityFailed(saProfile.saId, getpid(), getuid(), fileName);
             HILOGE("SA:%{public}d dlopen %{public}s failed with errno:%{public}s!",
                 saProfile.saId, fileName.c_str(), dlerror());
             return;

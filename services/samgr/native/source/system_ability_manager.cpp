@@ -815,6 +815,7 @@ int32_t SystemAbilityManager::RemoveSystemAbility(const sptr<IRemoteObject>& abi
                 if (IsCacheCommonEvent(saId) && collectManager_ != nullptr) {
                     collectManager_->ClearSaExtraDataId(saId);
                 }
+                ReportSaCrash(saId);
                 KHILOGI("%{public}s called, SA:%{public}d removed, size:%{public}zu", __func__, saId,
                     abilityMap_.size());
                 break;
@@ -846,6 +847,7 @@ int32_t SystemAbilityManager::RemoveDiedSystemAbility(int32_t systemAbilityId)
             ability->RemoveDeathRecipient(abilityDeath_);
         }
         (void)abilityMap_.erase(itSystemAbility);
+        ReportSaCrash(systemAbilityId);
         KHILOGI("%{public}s called, SA:%{public}d removed, size:%{public}zu", __func__, systemAbilityId,
             abilityMap_.size());
     }
@@ -1320,7 +1322,8 @@ void SystemAbilityManager::SendCheckLoadedMsg(int32_t systemAbilityId, const std
             return;
         }
         HILOGI("SendCheckLoadedMsg SA:%{public}d, load timeout.", systemAbilityId);
-        ReportSamgrSaLoadFail(systemAbilityId, "time out");
+        ReportSamgrSaLoadFail(systemAbilityId, IPCSkeleton::GetCallingPid(),
+            IPCSkeleton::GetCallingUid(), "time out");
         SamgrUtil::SendUpdateSaState(systemAbilityId, "loadfail");
         if (IsCacheCommonEvent(systemAbilityId) && collectManager_ != nullptr) {
             collectManager_->ClearSaExtraDataId(systemAbilityId);
@@ -1592,7 +1595,7 @@ int32_t SystemAbilityManager::DoLoadSystemAbility(int32_t systemAbilityId, const
                     systemAbilityId, count, callingPid);
             }
         }
-        ReportSamgrSaLoad(systemAbilityId, event.eventId);
+        ReportSamgrSaLoad(systemAbilityId, IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), event.eventId);
         HILOGI("LoadSa SA:%{public}d size:%{public}zu,count:%{public}d",
             systemAbilityId, abilityItem.callbackMap[LOCAL_DEVICE].size(), count);
     }
@@ -1735,7 +1738,7 @@ int32_t SystemAbilityManager::DoUnloadSystemAbility(int32_t systemAbilityId,
         HILOGE("unload system ability failed, SA:%{public}d", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
-    ReportSamgrSaUnload(systemAbilityId, event.eventId);
+    ReportSamgrSaUnload(systemAbilityId, IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), event.eventId);
     SamgrUtil::SendUpdateSaState(systemAbilityId, "unload");
     return ERR_OK;
 }
