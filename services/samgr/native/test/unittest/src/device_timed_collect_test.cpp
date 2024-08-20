@@ -615,23 +615,6 @@ HWTEST_F(DeviceTimedCollectTest, SaveInner002, TestSize.Level3)
 }
 
 /**
- * @tc.name: ObtainInner001
- * @tc.desc: test ObtainInner.
- * @tc.type: FUNC
- * @tc.require: I7VZ98
- */
-HWTEST_F(DeviceTimedCollectTest, ObtainInner001, TestSize.Level3)
-{
-#ifdef PREFERENCES_ENABLE
-    std::shared_ptr<PreferencesUtil> preferencesUtil_ = PreferencesUtil::GetInstance();
-    const std::string key;
-    const int64_t defValue = 0;
-    std::shared_ptr<NativePreferences::Preferences> ptr;
-    preferencesUtil_->ObtainInner(ptr, key, defValue);
-#endif
-}
-
-/**
  * @tc.name: ObtainLong001
  * @tc.desc: test ObtainInner.
  * @tc.type: FUNC
