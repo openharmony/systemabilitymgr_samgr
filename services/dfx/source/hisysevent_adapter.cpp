@@ -38,6 +38,7 @@ constexpr const char* REASON = "REASON";
 constexpr const char* ONDEMAND_SA_LOAD_FAIL = "ONDEMAND_SA_LOAD_FAIL";
 constexpr const char* ONDEMAND_SA_LOAD = "ONDEMAND_SA_LOAD";
 constexpr const char* EVENT = "EVENT";
+constexpr const char* SA_CRASH = "SA_CRASH";
 constexpr const char* ONDEMAND_SA_UNLOAD = "ONDEMAND_SA_UNLOAD";
 constexpr const char* SA_UNLOAD_FAIL = "SA_UNLOAD_FAIL";
 constexpr const char* SA_LOAD_DURATION = "SA_LOAD_DURATION";
@@ -54,12 +55,25 @@ constexpr const char* DURATION = "DURATION";
 constexpr const char* KEY_STAGE = "KEY_STAGE";
 }
 
-void ReportSaUnLoadFail(int32_t saId, const std::string& reason)
+void ReportSaCrash(int32_t saId)
+{
+    int ret = HiSysEventWrite(HiSysEvent::Domain::SAMGR,
+        SA_CRASH,
+        HiSysEvent::EventType::FAULT,
+        SAID, saId);
+    if (ret != 0) {
+        HILOGE("report sa crash failed! SA:%{public}d, ret:%{public}d.", saId, ret);
+    }
+}
+
+void ReportSaUnLoadFail(int32_t saId, int32_t pid, int32_t uid, const std::string& reason)
 {
     int ret = HiSysEventWrite(HiSysEvent::Domain::SAMGR,
         SA_UNLOAD_FAIL,
         HiSysEvent::EventType::FAULT,
         SAID, saId,
+        PID, pid,
+        UID, uid,
         REASON, reason);
     if (ret != 0) {
         HILOGE("report sa unload fail event failed! SA:%{public}d, ret %{public}d.", saId, ret);
@@ -142,48 +156,56 @@ void ReportProcessStopFail(const std::string& processName, int32_t pid, int32_t 
     ReportProcessFail(PROCESS_STOP_FAIL, processName, pid, uid, reason);
 }
 
-void ReportSamgrSaLoadFail(int32_t said, const std::string& reason)
+void ReportSamgrSaLoadFail(int32_t said, int32_t pid, int32_t uid, const std::string& reason)
 {
     int ret = HiSysEventWrite(HiSysEvent::Domain::SAMGR,
         ONDEMAND_SA_LOAD_FAIL,
         HiSysEvent::EventType::FAULT,
         SAID, said,
+        PID, pid,
+        UID, uid,
         REASON, reason);
     if (ret != 0) {
         HILOGE("hisysevent report samgr sa load fail event failed! ret %{public}d.", ret);
     }
 }
 
-void ReportSamgrSaLoad(int32_t said, int32_t eventId)
+void ReportSamgrSaLoad(int32_t said, int32_t pid, int32_t uid, int32_t eventId)
 {
     int ret = HiSysEventWrite(HiSysEvent::Domain::SAMGR,
         ONDEMAND_SA_LOAD,
         HiSysEvent::EventType::BEHAVIOR,
         SAID, said,
+        PID, pid,
+        UID, uid,
         EVENT, eventId);
     if (ret != 0) {
         HILOGE("hisysevent report samgr sa load event failed! ret %{public}d.", ret);
     }
 }
 
-void ReportSamgrSaUnload(int32_t said, int32_t eventId)
+void ReportSamgrSaUnload(int32_t said, int32_t pid, int32_t uid, int32_t eventId)
 {
     int ret = HiSysEventWrite(HiSysEvent::Domain::SAMGR,
         ONDEMAND_SA_UNLOAD,
         HiSysEvent::EventType::BEHAVIOR,
         SAID, said,
+        PID, pid,
+        UID, uid,
         EVENT, eventId);
     if (ret != 0) {
         HILOGE("hisysevent report samgr sa unload event failed! ret %{public}d.", ret);
     }
 }
 
-void ReportAddSystemAbilityFailed(int32_t said, const std::string& filaName)
+void ReportAddSystemAbilityFailed(int32_t said, int32_t pid, int32_t uid, const std::string& filaName)
 {
     int ret = HiSysEventWrite(HiSysEvent::Domain::SAMGR,
         ADD_SYSTEMABILITY_FAIL,
         HiSysEvent::EventType::FAULT,
         SAID, said,
+        PID, pid,
+        UID, uid,
         FILE_NAME, filaName);
     if (ret != 0) {
         HILOGE("hisysevent report add system ability event failed! ret %{public}d.", ret);

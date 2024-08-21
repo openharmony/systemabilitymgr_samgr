@@ -18,20 +18,22 @@
 
 #include <string>
 namespace OHOS {
-void ReportAddSystemAbilityFailed(int32_t said, const std::string& filaName);
+void ReportAddSystemAbilityFailed(int32_t said, int32_t pid, int32_t uid, const std::string& filaName);
 
 void ReportGetSAFrequency(uint32_t callerUid, uint32_t said, int32_t count);
 
 void WatchDogSendEvent(int32_t pid, uint32_t uid, const std::string& sendMsg,
     const std::string& eventName);
 
-void ReportSamgrSaLoadFail(int32_t said, const std::string& reason);
+void ReportSaCrash(int32_t saId);
 
-void ReportSamgrSaLoad(int32_t said, int32_t eventId);
+void ReportSamgrSaLoadFail(int32_t said, int32_t pid, int32_t uid, const std::string& reason);
 
-void ReportSamgrSaUnload(int32_t said, int32_t eventId);
+void ReportSamgrSaLoad(int32_t said, int32_t pid, int32_t uid, int32_t eventId);
 
-void ReportSaUnLoadFail(int32_t saId, const std::string& reason);
+void ReportSamgrSaUnload(int32_t said, int32_t pid, int32_t uid, int32_t eventId);
+
+void ReportSaUnLoadFail(int32_t saId, int32_t pid, int32_t uid, const std::string& reason);
 
 void ReportSaLoadDuration(int32_t saId, int32_t keyStage, int64_t duration);
 
