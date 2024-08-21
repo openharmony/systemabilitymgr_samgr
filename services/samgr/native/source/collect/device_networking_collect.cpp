@@ -142,6 +142,7 @@ bool DeviceNetworkingCollect::AddDeviceChangeListener()
             HILOGE("RegisterDevStateCallback error");
             return false;
         }
+        HILOGI("AddDeviceChangeListener success");
         return true;
     }
     return false;
@@ -252,7 +253,6 @@ void DeviceStateCallback::OnDeviceChanged(const DmDeviceInfo& deviceInfo)
 void DeviceStateCallback::OnDeviceReady(const DmDeviceInfo& deviceInfo)
 {
     HILOGI("DeviceNetworkingCollect DeviceStateCallback OnDeviceReady");
-    lock_guard<mutex> autoLock(deviceOnlineLock_);
     OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "ready" };
 
     if (collect_ != nullptr) {
@@ -299,7 +299,6 @@ void WorkHandler::ProcessEvent(uint32_t eventId)
         }
         handler_->PostTask(task, DELAY_TIME);
     }
-    HILOGI("AddDeviceChangeListener success");
 }
 
 bool WorkHandler::SendEvent(uint32_t eventId)

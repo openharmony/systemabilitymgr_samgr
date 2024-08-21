@@ -27,6 +27,7 @@
 #include "sam_log.h"
 #include "sa_profiles.h"
 #include "system_ability_manager.h"
+#include "samgr_xcollie.h"
 
 using namespace OHOS::AppExecFwk;
 namespace OHOS {
@@ -178,10 +179,14 @@ bool CommonEventCollect::CreateCommonEventSubscriberLocked()
 {
     int64_t begin = GetTickCount();
     if (commonEventSubscriber_ != nullptr) {
-        bool isUnsubscribe = EventFwk::CommonEventManager::UnSubscribeCommonEvent(commonEventSubscriber_);
-        if (!isUnsubscribe) {
-            HILOGE("CreateCommonEventSubscriberLocked isUnsubscribe failed!");
-            return false;
+        HILOGI("UnSubsComEvt start");
+        {
+            SamgrXCollie samgrXCollie("samgr--UnSubscribeCommonEvent");
+            bool isUnsubscribe = EventFwk::CommonEventManager::UnSubscribeCommonEvent(commonEventSubscriber_);
+            if (!isUnsubscribe) {
+                HILOGE("CreateCommonEventSubscriberLocked isUnsubscribe failed!");
+                return false;
+            }
         }
         commonEventSubscriber_.reset();
     }
@@ -317,7 +322,6 @@ std::string CommonEventCollect::GetParamFromWant(const std::string& key, const A
 
 int64_t CommonEventCollect::SaveOnDemandReasonExtraData(const EventFwk::CommonEventData& data)
 {
-    std::lock_guard<std::mutex> autoLock(extraDataLock_);
     HILOGD("CommonEventCollect extraData code: %{public}d, data: %{public}s", data.GetCode(),
         data.GetData().c_str());
     AAFwk::Want want = data.GetWant();
@@ -337,6 +341,8 @@ int64_t CommonEventCollect::SaveOnDemandReasonExtraData(const EventFwk::CommonEv
     }
     wantMap[COMMON_EVENT_ACTION_NAME] = want.GetAction();
     OnDemandReasonExtraData extraData(data.GetCode(), data.GetData(), wantMap);
+
+    std::lock_guard<std::mutex> autoLock(extraDataLock_);
     int64_t extraDataId = GenerateExtraDataIdLocked();
     extraDatas_[extraDataId] = extraData;
     HILOGI("CommonEventCollect save extraData %{public}d", static_cast<int32_t>(extraDataId));
