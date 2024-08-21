@@ -961,14 +961,11 @@ HWTEST_F(ParseUtilTest, ParseSystemAbility001, TestSize.Level3)
     EXPECT_EQ(ret, true);
 
     int32_t testTime = 9999;
-    systemAbilityJson["longtimeunused-unload"] = testTime;
+    systemAbilityJson["stop-on-demand"] = {{"longtimeunused-unload", testTime}, {"unreferenced-unload", true}};
     ret = parser_->ParseSystemAbility(saProfile, systemAbilityJson);
     EXPECT_EQ(ret, true);
     EXPECT_EQ(saProfile.stopOnDemand.unusedTimeout, testTime);
 
-    systemAbilityJson["unreferenced-unload"] = true;
-    ret = parser_->ParseSystemAbility(saProfile, systemAbilityJson);
-    EXPECT_EQ(ret, true);
     EXPECT_EQ(saProfile.stopOnDemand.unrefUnload, true);
 
     DTEST_LOG << " ParseSystemAbility001 END" << std::endl;
