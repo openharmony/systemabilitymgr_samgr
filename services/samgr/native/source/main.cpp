@@ -29,7 +29,10 @@ int main(int argc, char *argv[])
     KHILOGI("%{public}s called, enter System Ability Manager ", __func__);
     Samgr::MemoryGuard cacheGuard;
     OHOS::sptr<OHOS::SystemAbilityManager> manager = OHOS::SystemAbilityManager::GetInstance();
-    manager->Init();
+    {
+        SamgrXCollie samgrXCollie("samgr--Init");
+        manager->Init();
+    }
     KHILOGI("System Ability Manager enter init");
     OHOS::sptr<OHOS::IRemoteObject> serv = manager->AsObject();
 
