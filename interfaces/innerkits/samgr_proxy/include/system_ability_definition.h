@@ -102,7 +102,7 @@ enum {
     COMM_MDNS_MANAGER_SYS_ABILITY_ID                 = 1161,
     COMM_NETSYS_EXT_SYS_ABILITY_ID                   = 1162,
     COMM_DISTRIBUTED_NET_ABILITY_ID                  = 1163,
-    COMM_BLUETOOTH_MANAGER_SYS_ABILITY_ID            = 1166,
+    COMM_BLUETOOTH_MANAGER_SYS_ABILITY_ID            = 0x000102d0,
     SMART_COMM_SYS_ABILITY_ID                        = 1180,
     NEARLINK_HOST_SYS_ABILITY_ID                     = 1190,
     SUBSYS_DFX_SYS_ABILITY_ID_BEGIN                  = 1200,
