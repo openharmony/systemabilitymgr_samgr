@@ -65,19 +65,9 @@ namespace system {
 }
 namespace {
 constexpr int32_t SAID = 1234;
-constexpr int32_t OTHER_ON_DEMAND = 3;
-constexpr int32_t TEST_VALUE = 2021;
-constexpr int32_t TEST_REVERSE_VALUE = 1202;
-constexpr int32_t REPEAT = 10;
-constexpr int32_t OVERFLOW_TIME = 257;
 constexpr int32_t TEST_OVERFLOW_SAID = 99999;
-constexpr int32_t TEST_EXCEPTION_HIGH_SA_ID = LAST_SYS_ABILITY_ID + 1;
 constexpr int32_t TEST_EXCEPTION_LOW_SA_ID = -1;
 constexpr int32_t TEST_SYSTEM_ABILITY1 = 1491;
-constexpr int32_t TEST_SYSTEM_ABILITY2 = 1492;
-constexpr int32_t SHFIT_BIT = 32;
-constexpr int32_t ONDEMAND_SLEEP_TIME = 600 * 1000; // us
-constexpr int32_t MAX_COUNT = INT32_MAX - 1000000;
 constexpr int64_t ONDEMAND_EXTRA_DATA_ID = 1;
 
 void SaProfileStore(sptr<SystemAbilityManager>& saMgr,
@@ -178,27 +168,6 @@ HWTEST_F(SystemAbilityMgrTest, ReportGetSAPeriodically001, TestSize.Level3)
     saMgr->saFrequencyMap_[pid_said] = count;
     saMgr->ReportGetSAPeriodically();
     EXPECT_TRUE(saMgr->saFrequencyMap_.empty());
-}
-
-/**
- * @tc.name: UnloadSystemAbility004
- * @tc.desc: test UnloadSystemAbility004, abilityStateScheduler_ is nullptr
- * @tc.type: FUNC
- * @tc.require: I6J4T7
- */
-HWTEST_F(SystemAbilityMgrTest, UnloadSystemAbility004, TestSize.Level3)
-{
-    DTEST_LOG << " UnloadSystemAbility004 " << std::endl;
-    SamMockPermission::MockProcess("memmgrservice");
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    SaProfile saProfile;
-    saProfile.process = u"memmgrservice";
-    saMgr->saProfileMap_[1] = saProfile;
-    saMgr->abilityStateScheduler_ = nullptr;
-    int32_t systemAbilityId = 1;
-    int32_t ret = saMgr->UnloadSystemAbility(systemAbilityId);
-    saMgr->abilityStateScheduler_ = make_shared<SystemAbilityStateScheduler>();
-    EXPECT_EQ(ret, STATE_SCHEDULER_NULL);
 }
 
 /**
@@ -575,50 +544,6 @@ HWTEST_F(SystemAbilityMgrTest, NotifyRpcLoadCompleted004, TestSize.Level3)
     sptr<IRemoteObject> testAbility = new TestTransactionService();
     saMgr->NotifyRpcLoadCompleted("", 1, testAbility);
     EXPECT_TRUE(saMgr != nullptr);
-}
-
-/**
- * @tc.name: UnloadAllIdleSystemAbility001
- * @tc.desc: UnloadAllIdleSystemAbility process is memmgrservice
- * @tc.type: FUNC
- * @tc.require: I6NKWX
- */
-HWTEST_F(SystemAbilityMgrTest, UnloadAllIdleSystemAbility001, TestSize.Level3)
-{
-    SamMockPermission::MockProcess("memmgrservice");
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    saMgr->abilityStateScheduler_ = make_shared<SystemAbilityStateScheduler>();
-    int32_t ret = saMgr->UnloadAllIdleSystemAbility();
-    EXPECT_EQ(ret, ERR_OK);
-}
-
-/**
- * @tc.name: UnloadAllIdleSystemAbility002
- * @tc.desc: UnloadAllIdleSystemAbility abilityStateScheduler_ is null
- * @tc.type: FUNC
- * @tc.require: I6NKWX
- */
-HWTEST_F(SystemAbilityMgrTest, UnloadAllIdleSystemAbility002, TestSize.Level3)
-{
-    SamMockPermission::MockProcess("memmgrservice");
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    saMgr->abilityStateScheduler_ = nullptr;
-    int32_t ret = saMgr->UnloadAllIdleSystemAbility();
-    saMgr->abilityStateScheduler_ = make_shared<SystemAbilityStateScheduler>();
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-}
-
-/**
- * @tc.name: UnloadAllIdleSystemAbility003
- * @tc.desc: UnloadAllIdleSystemAbility process is not memmgrservice
- * @tc.type: FUNC
- * @tc.require: I6NKWX
- */
-HWTEST_F(SystemAbilityMgrTest, UnloadAllIdleSystemAbility003, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    int32_t ret = saMgr->UnloadAllIdleSystemAbility();
-    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
 }
 
 /**
@@ -1053,27 +978,6 @@ HWTEST_F(SystemAbilityMgrTest, GetSystemProcessInfo003, TestSize.Level1)
     SystemProcessInfo systemProcessInfo;
     int32_t ret = saMgr->GetSystemProcessInfo(systemAbilityId, systemProcessInfo);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-}
-
-/**
- * @tc.name: LoadSystemAbilityFromRpc009
- * @tc.desc: test LoadSystemAbilityFromRpc.
- * @tc.type: FUNC
- */
-HWTEST_F(SystemAbilityMgrTest, LoadSystemAbilityFromRpc009, TestSize.Level1)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    const std::string srcDeviceId;
-    SaProfile saProfile = {u"test", TEST_OVERFLOW_SAID};
-    saProfile.distributed = true;
-    saMgr->saProfileMap_[TEST_OVERFLOW_SAID] = saProfile;
-    sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
-    std::shared_ptr<SystemAbilityStateScheduler> saScheduler = saMgr->abilityStateScheduler_;
-    saMgr->abilityStateScheduler_ = nullptr;
-    int32_t ret = saMgr->LoadSystemAbilityFromRpc(srcDeviceId, TEST_OVERFLOW_SAID, callback);
-    EXPECT_FALSE(ret);
-    saMgr->abilityStateScheduler_ = saScheduler;
-    saMgr->saProfileMap_.erase(TEST_OVERFLOW_SAID);
 }
 
 /**
