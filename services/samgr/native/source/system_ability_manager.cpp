@@ -631,6 +631,7 @@ int32_t SystemAbilityManager::StartOnDemandAbilityInner(const std::u16string& pr
     }
     auto event = abilityItem.event;
     auto eventStr = SamgrUtil::EventToStr(event);
+    HILOGI("StartSA:%{public}d", systemAbilityId);
     procObject->StartAbility(systemAbilityId, eventStr);
     abilityItem.state = AbilityState::STARTING;
     return ERR_OK;
@@ -653,6 +654,7 @@ bool SystemAbilityManager::StopOnDemandAbilityInner(const std::u16string& procNa
         return false;
     }
     auto eventStr = SamgrUtil::EventToStr(event);
+    HILOGI("StopSA:%{public}d", systemAbilityId);
     return procObject->StopAbility(systemAbilityId, eventStr);
 }
 
@@ -1454,6 +1456,12 @@ void SystemAbilityManager::NotifySystemAbilityLoadFail(int32_t systemAbilityId,
     callback->OnLoadSystemAbilityFail(systemAbilityId);
 }
 
+bool SystemAbilityManager::IsInitBootFinished()
+{
+    std::string initTime = system::GetParameter(BOOT_INIT_TIME_PARAM, DEFAULT_BOOT_INIT_TIME);
+    return initTime != DEFAULT_BOOT_INIT_TIME;
+}
+
 int32_t SystemAbilityManager::StartDynamicSystemProcess(const std::u16string& name,
     int32_t systemAbilityId, const OnDemandEvent& event)
 {
@@ -1462,12 +1470,15 @@ int32_t SystemAbilityManager::StartDynamicSystemProcess(const std::u16string& na
     auto extraArgv = eventStr.c_str();
     if (abilityStateScheduler_ && !abilityStateScheduler_->IsSystemProcessNeverStartedLocked(name)) {
         // Waiting for the init subsystem to perceive process death
-        ServiceWaitForStatus(Str16ToStr8(name).c_str(), ServiceStatus::SERVICE_STOPPED, 1);
+        int ret = ServiceWaitForStatus(Str16ToStr8(name).c_str(), ServiceStatus::SERVICE_STOPPED, 1);
+        if (ret != 0) {
+            HILOGE("ServiceWaitForStatus proc:%{public}s,SA:%{public}d timeout",
+                Str16ToStr8(name).c_str(), systemAbilityId);
+        }
     }
-    std::string initTime = system::GetParameter(BOOT_INIT_TIME_PARAM, DEFAULT_BOOT_INIT_TIME);
     int64_t begin = GetTickCount();
     int result = ERR_INVALID_VALUE;
-    if (initTime == DEFAULT_BOOT_INIT_TIME) {
+    if (!IsInitBootFinished()) {
         result = ServiceControlWithExtra(Str16ToStr8(name).c_str(), ServiceAction::START, &extraArgv, 1);
     } else {
         SamgrXCollie samgrXCollie("samgr--startProccess_" + ToString(systemAbilityId));
@@ -1565,15 +1576,15 @@ int32_t SystemAbilityManager::StartingSystemProcess(const std::u16string& procNa
 int32_t SystemAbilityManager::DoLoadSystemAbility(int32_t systemAbilityId, const std::u16string& procName,
     const sptr<ISystemAbilityLoadCallback>& callback, int32_t callingPid, const OnDemandEvent& event)
 {
+    sptr<IRemoteObject> targetObject = CheckSystemAbility(systemAbilityId);
+    if (targetObject != nullptr) {
+        HILOGI("DoLoadSystemAbility notify SA:%{public}d callpid:%{public}d!", systemAbilityId, callingPid);
+        NotifySystemAbilityLoaded(systemAbilityId, targetObject, callback);
+        return ERR_OK;
+    }
     int32_t result = ERR_INVALID_VALUE;
     {
         lock_guard<mutex> autoLock(onDemandLock_);
-        sptr<IRemoteObject> targetObject = CheckSystemAbility(systemAbilityId);
-        if (targetObject != nullptr) {
-            HILOGI("DoLoadSystemAbility notify SA:%{public}d callpid:%{public}d!", systemAbilityId, callingPid);
-            NotifySystemAbilityLoaded(systemAbilityId, targetObject, callback);
-            return ERR_OK;
-        }
         auto& abilityItem = startingAbilityMap_[systemAbilityId];
         for (const auto& itemCallback : abilityItem.callbackMap[LOCAL_DEVICE]) {
             if (callback->AsObject() == itemCallback.first->AsObject()) {
@@ -1608,13 +1619,13 @@ int32_t SystemAbilityManager::DoLoadSystemAbility(int32_t systemAbilityId, const
 int32_t SystemAbilityManager::DoLoadSystemAbilityFromRpc(const std::string& srcDeviceId, int32_t systemAbilityId,
     const std::u16string& procName, const sptr<ISystemAbilityLoadCallback>& callback, const OnDemandEvent& event)
 {
+    sptr<IRemoteObject> targetObject = CheckSystemAbility(systemAbilityId);
+    if (targetObject != nullptr) {
+        SendLoadedSystemAbilityMsg(systemAbilityId, targetObject, callback);
+        return ERR_OK;
+    }
     {
         lock_guard<mutex> autoLock(onDemandLock_);
-        sptr<IRemoteObject> targetObject = CheckSystemAbility(systemAbilityId);
-        if (targetObject != nullptr) {
-            SendLoadedSystemAbilityMsg(systemAbilityId, targetObject, callback);
-            return ERR_OK;
-        }
         auto& abilityItem = startingAbilityMap_[systemAbilityId];
         abilityItem.callbackMap[srcDeviceId].emplace_back(callback, 0);
         StartingSystemProcessLocked(procName, systemAbilityId, event);
@@ -1729,15 +1740,17 @@ int32_t SystemAbilityManager::CancelUnloadSystemAbility(int32_t systemAbilityId)
 int32_t SystemAbilityManager::DoUnloadSystemAbility(int32_t systemAbilityId,
     const std::u16string& procName, const OnDemandEvent& event)
 {
-    lock_guard<mutex> autoLock(onDemandLock_);
     sptr<IRemoteObject> targetObject = CheckSystemAbility(systemAbilityId);
     if (targetObject == nullptr) {
         return ERR_OK;
     }
-    bool result = StopOnDemandAbilityInner(procName, systemAbilityId, event);
-    if (!result) {
-        HILOGE("unload system ability failed, SA:%{public}d", systemAbilityId);
-        return ERR_INVALID_VALUE;
+    {
+        lock_guard<mutex> autoLock(onDemandLock_);
+        bool result = StopOnDemandAbilityInner(procName, systemAbilityId, event);
+        if (!result) {
+            HILOGE("unload system ability failed, SA:%{public}d", systemAbilityId);
+            return ERR_INVALID_VALUE;
+        }
     }
     ReportSamgrSaUnload(systemAbilityId, IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), event.eventId);
     SamgrUtil::SendUpdateSaState(systemAbilityId, "unload");
@@ -1771,6 +1784,7 @@ bool SystemAbilityManager::IdleSystemAbility(int32_t systemAbilityId, const std:
         HILOGE("get process:%{public}s fail", Str16ToStr8(procName).c_str());
         return false;
     }
+    HILOGI("IdleSA:%{public}d", systemAbilityId);
     SamgrXCollie samgrXCollie("samgr--IdleSa_" + ToString(systemAbilityId));
     return procObject->IdleAbility(systemAbilityId, idleReason, delayTime);
 }
@@ -1789,6 +1803,7 @@ bool SystemAbilityManager::ActiveSystemAbility(int32_t systemAbilityId, const st
         HILOGE("get process:%{public}s fail", Str16ToStr8(procName).c_str());
         return false;
     }
+    HILOGI("ActiveSA:%{public}d", systemAbilityId);
     SamgrXCollie samgrXCollie("samgr--ActiveSa_" + ToString(systemAbilityId));
     return procObject->ActiveAbility(systemAbilityId, activeReason);
 }
