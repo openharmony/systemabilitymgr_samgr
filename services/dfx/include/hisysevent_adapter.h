@@ -18,6 +18,8 @@
 
 #include <string>
 namespace OHOS {
+void ReportSaMainExit(const std::string& reason);
+
 void ReportAddSystemAbilityFailed(int32_t said, int32_t pid, int32_t uid, const std::string& filaName);
 
 void ReportGetSAFrequency(uint32_t callerUid, uint32_t said, int32_t count);
