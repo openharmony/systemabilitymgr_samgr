@@ -15,12 +15,14 @@
 
 #include "samgr_time_handler.h"
 #include "sam_log.h"
+#include <cinttypes>
 
 using namespace std;
 namespace OHOS {
 namespace {
 constexpr uint32_t INIT_NUM = 4;
 constexpr uint32_t MAX_EVENT = 8;
+constexpr int32_t RETRY_TIMES = 3;
 }
 SamgrTimeHandler* volatile SamgrTimeHandler::singleton = nullptr;
 SamgrTimeHandler::Deletor SamgrTimeHandler::deletor;
@@ -41,6 +43,9 @@ SamgrTimeHandler::SamgrTimeHandler()
 {
     HILOGI("SamgrTimeHandler init start");
     epollfd = epoll_create(INIT_NUM);
+    if (epollfd == -1) {
+        HILOGE("SamgrTimeHandler epoll_create error");
+    }
     flag = false;
     StartThread();
 }
@@ -48,12 +53,14 @@ SamgrTimeHandler::SamgrTimeHandler()
 void SamgrTimeHandler::StartThread()
 {
     std::function<void()> func = [this]() {
+        HILOGI("SamgrTimeHandler thread start");
         struct epoll_event events[MAX_EVENT];
         while (!this->timeFunc.IsEmpty()) {
             int number = epoll_wait(this->epollfd, events, MAX_EVENT, -1);
             OnTime((*this), number, events);
         }
         this->flag = false;
+        HILOGI("SamgrTimeHandler thread end");
     };
     std::thread t(func);
     this->flag = true;
@@ -62,13 +69,18 @@ void SamgrTimeHandler::StartThread()
 
 void SamgrTimeHandler::OnTime(SamgrTimeHandler &handle, int number, struct epoll_event events[])
 {
+    if (number > 0) {
+        HILOGI("SamgrTimeHandler OnTime: %{public}d", number);
+    }
     for (int i = 0; i < number; i++) {
         uint32_t timerfd = events[i].data.u32;
         uint64_t unused = 0;
+        HILOGI("SamgrTimeHandler timerfd: %{public}u", timerfd);
         int ret = read(timerfd, &unused, sizeof(unused));
         if (ret == sizeof(uint64_t)) {
             TaskType funcTime;
-            handle.timeFunc.Find(timerfd, funcTime);
+            bool hasFunction = handle.timeFunc.Find(timerfd, funcTime);
+            HILOGI("SamgrTimeHandler hasFunction: %{public}d", hasFunction);
             funcTime();
             handle.timeFunc.Erase(timerfd);
             epoll_ctl(this->epollfd, EPOLL_CTL_DEL, timerfd, nullptr);
@@ -87,13 +99,23 @@ SamgrTimeHandler::~SamgrTimeHandler()
     ::close(epollfd);
 }
 
+int SamgrTimeHandler::CreateAndRetry()
+{
+    for (int32_t i = 0; i < RETRY_TIMES; i++) {
+        int timerfd = timerfd_create(CLOCK_BOOTTIME_ALARM, 0);
+        if (timerfd != -1) {
+            return timerfd;
+        }
+        HILOGE("timerfd_create set alarm err: %{public}s", strerror(errno));
+    }
+    return -1;
+}
 
 bool SamgrTimeHandler::PostTask(TaskType func, uint64_t delayTime)
 {
-    HILOGD("SamgrTimeHandler postTask start: %{public}d", (int)delayTime);
-    int timerfd = timerfd_create(CLOCK_BOOTTIME_ALARM, 0);
+    HILOGI("SamgrTimeHandler postTask start: %{public}" PRId64 "s", delayTime);
+    int timerfd = CreateAndRetry();
     if (timerfd == -1) {
-        HILOGD("timerfd_create CLOCK_BOOTTIME_ALARM not support: %{public}s", strerror(errno));
         timerfd = timerfd_create(CLOCK_MONOTONIC, 0);
         if (timerfd == -1) {
             HILOGE("timerfd_create fail : %{public}s", strerror(errno));

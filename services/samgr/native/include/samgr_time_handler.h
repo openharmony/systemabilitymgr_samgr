@@ -50,6 +50,7 @@ private:
     };
     void StartThread();
     void OnTime(SamgrTimeHandler &handle, int number, struct epoll_event events[]);
+    int CreateAndRetry();
 
 private:
     int epollfd = -1;
