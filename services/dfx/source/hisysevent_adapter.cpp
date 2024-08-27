@@ -43,6 +43,7 @@ constexpr const char* ONDEMAND_SA_UNLOAD = "ONDEMAND_SA_UNLOAD";
 constexpr const char* SA_UNLOAD_FAIL = "SA_UNLOAD_FAIL";
 constexpr const char* SA_LOAD_DURATION = "SA_LOAD_DURATION";
 constexpr const char* SA_UNLOAD_DURATION = "SA_UNLOAD_DURATION";
+constexpr const char* SA_MAIN_EXIT = "SA_MAIN_EXIT";
 constexpr const char* PROCESS_START_FAIL = "PROCESS_START_FAIL";
 constexpr const char* PROCESS_STOP_FAIL = "PROCESS_STOP_FAIL";
 constexpr const char* PROCESS_START_DURATION = "PROCESS_START_DURATION";
@@ -91,6 +92,17 @@ static void ReportSaDuration(const std::string& eventName, int32_t saId, int32_t
     if (ret != 0) {
         HILOGE("report event:%{public}s failed! SA:%{public}d, ret:%{public}d.",
             eventName.c_str(), saId, ret);
+    }
+}
+
+void ReportSaMainExit(const std::string& reason)
+{
+    int ret = HiSysEventWrite(HiSysEvent::Domain::SAMGR,
+        SA_MAIN_EXIT,
+        HiSysEvent::EventType::FAULT,
+        REASON, reason);
+    if (ret != 0) {
+        HILOGE("report sa main exit event failed! ret:%{public}d.", ret);
     }
 }
 
