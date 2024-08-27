@@ -626,7 +626,8 @@ HWTEST_F(DeviceTimedCollectTest, ObtainLong001, TestSize.Level3)
     std::shared_ptr<PreferencesUtil> preferencesUtil_ = PreferencesUtil::GetInstance();
     const std::string key;
     const int64_t defValue = 0;
-    preferencesUtil_->ObtainLong(key, defValue);
+    int64_t ret = preferencesUtil_->ObtainLong(key, defValue);
+    EXPECT_EQ(ret, 0);
 #endif
 }
 }
