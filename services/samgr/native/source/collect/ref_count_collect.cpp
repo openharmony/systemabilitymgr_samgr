@@ -82,8 +82,8 @@ void RefCountCollect::IdentifyUnrefOndemand()
         if (saProxy == nullptr) {
             continue;
         }
-        int32_t refCount = saProxy->GetStrongRefCountForStub();
-        HILOGD("ondemand SA:%{public}d, ref count:%{public}d", saId, refCount);
+        uint32_t refCount = saProxy->GetStrongRefCountForStub();
+        HILOGD("ondemand SA:%{public}d, ref count:%{public}u", saId, refCount);
         if (refCount == 1) {
             HILOGI("ondemand SA:%{public}d, ref count:1", saId);
             SaControlInfo control = { STOP_ON_DEMAND, saId };
@@ -113,8 +113,8 @@ void RefCountCollect::IdentifyUnrefResident()
         if (saProxy == nullptr) {
             continue;
         }
-        int32_t refCount = saProxy->GetStrongRefCountForStub();
-        HILOGD("resident SA:%{public}d, ref count:%{public}d", saId, refCount);
+        uint32_t refCount = saProxy->GetStrongRefCountForStub();
+        HILOGD("resident SA:%{public}d, ref count:%{public}u", saId, refCount);
         if (refCount == 1) {
             ReportSAIdle(saId, "ref count 1");
             HILOGI("resident SA:%{public}d, ref count:1", saId);
