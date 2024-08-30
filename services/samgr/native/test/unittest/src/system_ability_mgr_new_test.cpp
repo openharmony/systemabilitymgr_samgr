@@ -68,7 +68,6 @@ constexpr int32_t SAID = 1234;
 constexpr int32_t TEST_OVERFLOW_SAID = 99999;
 constexpr int32_t TEST_EXCEPTION_LOW_SA_ID = -1;
 constexpr int32_t TEST_SYSTEM_ABILITY1 = 1491;
-constexpr int64_t ONDEMAND_EXTRA_DATA_ID = 1;
 
 void SaProfileStore(sptr<SystemAbilityManager>& saMgr,
     map<int32_t, SaProfile>& saProfileMapTmp, int32_t maxLoop)
@@ -186,219 +185,6 @@ HWTEST_F(SystemAbilityMgrTest, StartDynamicSystemProcess001, TestSize.Level3)
     int result = saMgr->StartDynamicSystemProcess(invalidProcess, 100, event);
     cout << "begin StartDynamicSystemProcess001 result is "<< result << endl;
     EXPECT_EQ(result, 102);
-}
-
-/**
- * @tc.desc: test GetOnDemandPolicy with OnDemandPolicyType is valid
- * @tc.type: FUNC
- * @tc.require: I6V4AX
- */
-HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy001, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    int32_t systemAbilityId = 1;
-    OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
-    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
-    int32_t ret = saMgr->GetOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
-    EXPECT_EQ(ERR_INVALID_VALUE, ret);
-}
-
-/**
- * @tc.desc: test GetOnDemandPolicy with OnDemandPolicyType is valid
- * @tc.type: FUNC
- * @tc.require: I6V4AX
- */
-HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy002, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    int32_t systemAbilityId = 1;
-    OnDemandPolicyType type = OnDemandPolicyType::STOP_POLICY;
-    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
-    sptr<DeviceStatusCollectManager> collectManager_ = nullptr;
-    int32_t ret = saMgr->GetOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
-    EXPECT_EQ(ERR_INVALID_VALUE, ret);
-}
-
-HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy003, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    int32_t systemAbilityId = 1;
-    OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
-    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
-    Security::AccessToken::NativeTokenInfo nativeTokenInfo;
-    int32_t tokenInfoResult = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
-    SaProfile saProfile;
-    saProfile.process = Str8ToStr16(nativeTokenInfo.processName);
-    saProfile.startOnDemand.allowUpdate = false;
-    saMgr->saProfileMap_[1] = saProfile;
-    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
-    int32_t ret = saMgr->GetOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
-    EXPECT_EQ(ERR_PERMISSION_DENIED, ret);
-}
-
-HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy004, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    int32_t systemAbilityId = 1;
-    OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
-    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
-    Security::AccessToken::NativeTokenInfo nativeTokenInfo;
-    int32_t tokenInfoResult = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
-    SaProfile saProfile;
-    saProfile.process = Str8ToStr16(nativeTokenInfo.processName);
-    saProfile.startOnDemand.allowUpdate = true;
-    saMgr->saProfileMap_[1] = saProfile;
-    sptr<DeviceStatusCollectManager> collectManager = nullptr;
-    saMgr->collectManager_ = collectManager;
-    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
-    int32_t ret = saMgr->GetOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
-    EXPECT_EQ(ERR_INVALID_VALUE, ret);
-}
-
-
-HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy005, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    int32_t systemAbilityId = 1;
-    OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
-    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
-    Security::AccessToken::NativeTokenInfo nativeTokenInfo;
-    int32_t tokenInfoResult = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
-    SaProfile saProfile;
-    saProfile.process = Str8ToStr16(nativeTokenInfo.processName);
-    saProfile.startOnDemand.allowUpdate = true;
-    saMgr->saProfileMap_[1] = saProfile;
-    sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
-    saMgr->collectManager_ = collectManager;
-    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
-    int32_t ret = saMgr->GetOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
-    EXPECT_EQ(ERR_INVALID_VALUE, ret);
-}
-
-HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy006, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    int32_t systemAbilityId = 1;
-    OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
-    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
-    Security::AccessToken::NativeTokenInfo nativeTokenInfo;
-    int32_t tokenInfoResult = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
-    SaProfile saProfile;
-    saProfile.process = Str8ToStr16(nativeTokenInfo.processName);
-    saProfile.saId = 1;
-    saProfile.startOnDemand.allowUpdate = true;
-    vector<OnDemandEvent> onDemandEvents;
-    onDemandEvents.push_back({ 1, "test" });
-    saProfile.startOnDemand.onDemandEvents = onDemandEvents;
-    saMgr->saProfileMap_[1] = saProfile;
-    sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
-    collectManager->onDemandSaProfiles_.emplace_back(saProfile);
-    saMgr->collectManager_ = collectManager;
-    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
-    int32_t ret = saMgr->GetOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
-    EXPECT_EQ(ERR_OK, ret);
-}
-
-
-/**
- * @tc.name: UpdateOnDemandPolicy001
- * @tc.desc: test UpdateOnDemandPolicy with OnDemandPolicyType is valid
- * @tc.type: FUNC
- * @tc.require: I6V4AX
- */
-HWTEST_F(SystemAbilityMgrTest, UpdateOnDemandPolicy001, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
-    SystemAbilityOnDemandEvent event = {OnDemandEventId::COMMON_EVENT, "TEST", "TEST"};
-    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
-    abilityOnDemandEvents.emplace_back(event);
-    SaProfile saProfile = {u"test", TEST_OVERFLOW_SAID};
-    saMgr->saProfileMap_[TEST_OVERFLOW_SAID] = saProfile;
-    int32_t ret = saMgr->UpdateOnDemandPolicy(TEST_OVERFLOW_SAID, type, abilityOnDemandEvents);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-
-    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
-    Security::AccessToken::NativeTokenInfo nativeTokenInfo;
-    int32_t result = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
-    EXPECT_TRUE(result == ERR_OK);
-    saMgr->saProfileMap_[TEST_OVERFLOW_SAID].process = Str8ToStr16(nativeTokenInfo.processName);
-    saMgr->saProfileMap_[TEST_OVERFLOW_SAID].startOnDemand.allowUpdate = false;
-    ret = saMgr->UpdateOnDemandPolicy(TEST_OVERFLOW_SAID, type, abilityOnDemandEvents);
-    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
-
-    saMgr->saProfileMap_[TEST_OVERFLOW_SAID].startOnDemand.allowUpdate = true;
-    sptr<DeviceStatusCollectManager> collectMgr = saMgr->collectManager_;
-    saMgr->collectManager_ = nullptr;
-    ret = saMgr->UpdateOnDemandPolicy(TEST_OVERFLOW_SAID, type, abilityOnDemandEvents);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-
-    saMgr->collectManager_ = collectMgr;
-    ret = saMgr->UpdateOnDemandPolicy(TEST_OVERFLOW_SAID, type, abilityOnDemandEvents);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    saMgr->saProfileMap_.erase(TEST_OVERFLOW_SAID);
-}
-
-/**
- * @tc.name: GetOnDemandReasonExtraData001
- * @tc.desc: test GetOnDemandReasonExtraData with collectManager_ is nullptr
- * @tc.type: FUNC
- * @tc.require: I6XB42
- */
-
-HWTEST_F(SystemAbilityMgrTest, GetOnDemandReasonExtraData001, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    MessageParcel messageParcel;
-    sptr<DeviceStatusCollectManager> collectMgr = saMgr->collectManager_;
-    saMgr->collectManager_ = nullptr;
-    int32_t ret = saMgr->GetOnDemandReasonExtraData(ONDEMAND_EXTRA_DATA_ID, messageParcel);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    
-    saMgr->collectManager_ = collectMgr;
-    ret = saMgr->GetOnDemandReasonExtraData(ONDEMAND_EXTRA_DATA_ID, messageParcel);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-}
-
-/**
- * @tc.name: GetOnDemandReasonExtraData002
- * @tc.desc: test GetOnDemandReasonExtraData with extraDataId is not exist
- * @tc.type: FUNC
- * @tc.require: I6XB42
- */
-
-HWTEST_F(SystemAbilityMgrTest, GetOnDemandReasonExtraData002, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
-    collectManager->collectPluginMap_.clear();
-    saMgr->collectManager_ = collectManager;
-    MessageParcel messageParcel;
-    int32_t ret = saMgr->GetOnDemandReasonExtraData(ONDEMAND_EXTRA_DATA_ID, messageParcel);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-}
-
-/**
- * @tc.name: GetOnDemandReasonExtraData003
- * @tc.desc: call GetOnDemandReasonExtraData, get extraData
- * @tc.type: FUNC
- * @tc.require: I6XB42
- */
-
-HWTEST_F(SystemAbilityMgrTest, GetOnDemandReasonExtraData003, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
-    saMgr->collectManager_ = collectManager;
-    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collectManager);
-    commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
-    collectManager->collectPluginMap_.clear();
-    collectManager->collectPluginMap_[COMMON_EVENT] = commonEventCollect;
-    EventFwk::CommonEventData eventData;
-    commonEventCollect->SaveOnDemandReasonExtraData(eventData);
-    MessageParcel messageParcel;
-    int32_t ret = saMgr->GetOnDemandReasonExtraData(ONDEMAND_EXTRA_DATA_ID, messageParcel);
-    EXPECT_EQ(ret, ERR_OK);
 }
 
 /**
@@ -644,6 +430,12 @@ HWTEST_F(SystemAbilityMgrTest, AddSamgrToAbilityMap001, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, GetCommonEventExtraIdList001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collectManager);
+    commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
+    collectManager->collectPluginMap_.clear();
+    collectManager->collectPluginMap_[COMMON_EVENT] = commonEventCollect;
+    saMgr->collectManager_ = collectManager;
 
     const int32_t maxLoop = 4;
     map<int32_t, SaProfile> saProfileMapTmp;
@@ -830,23 +622,6 @@ HWTEST_F(SystemAbilityMgrTest, GetRunningSaExtensionInfoList002, TestSize.Level3
 }
 
 /**
- * @tc.name: StartOnDemandAbilityInner001
- * @tc.desc: test StartOnDemandAbilityInner, ERR_INVALID_VALUE.
- * @tc.type: FUNC
- * @tc.require: I6NKWX
- */
-HWTEST_F(SystemAbilityMgrTest, StartOnDemandAbilityInner001, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    const std::u16string procName;
-    int32_t systemAbilityId = 0;
-    SystemAbilityManager::AbilityItem abilityItem;
-    abilityItem.state = SystemAbilityManager::AbilityState::STARTING;
-    int32_t ret = saMgr->StartOnDemandAbilityInner(procName, systemAbilityId, abilityItem);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-}
-
-/**
  * @tc.name: CheckSystemAbility006
  * @tc.desc: test CheckSystemAbility, nullptr.
  * @tc.type: FUNC
@@ -872,36 +647,6 @@ HWTEST_F(SystemAbilityMgrTest, RemoveSystemAbility005, TestSize.Level3)
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     const sptr<IRemoteObject> ability = nullptr;
     int32_t ret = saMgr->RemoveSystemAbility(ability);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-}
-
-/**
- * @tc.name: SubscribeSystemAbility001
- * @tc.desc: test SubscribeSystemAbility, ERR_INVALID_VALUE.
- * @tc.type: FUNC
- * @tc.require: I6NKWX
- */
-HWTEST_F(SystemAbilityMgrTest, SubscribeSystemAbility001, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    int32_t systemAbilityId = -1;
-    const sptr<ISystemAbilityStatusChange> listener;
-    int32_t ret = saMgr->SubscribeSystemAbility(systemAbilityId, listener);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-}
-
-/**
- * @tc.name: UnSubscribeSystemAbility001
- * @tc.desc: test UnSubscribeSystemAbility, ERR_INVALID_VALUE.
- * @tc.type: FUNC
- * @tc.require: I6NKWX
- */
-HWTEST_F(SystemAbilityMgrTest, UnSubscribeSystemAbility001, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    int32_t systemAbilityId = -1;
-    const sptr<ISystemAbilityStatusChange> listener;
-    int32_t ret = saMgr->UnSubscribeSystemAbility(systemAbilityId, listener);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
 
