@@ -78,11 +78,6 @@ ohos_unittest("SystemAbilityMgrTest") {
     "${samgr_services_dir}/test/unittest/src/mock_accesstoken_kit.cpp",
     "${samgr_services_dir}/test/unittest/src/mock_permission.cpp",
     "${samgr_services_dir}/test/unittest/src/sa_status_change_mock.cpp",
-    "${samgr_services_dir}/test/unittest/src/system_ability_mgr_load_test.cpp",
-    "${samgr_services_dir}/test/unittest/src/system_ability_mgr_new_test.cpp",
-    "${samgr_services_dir}/test/unittest/src/system_ability_mgr_ondemand_test.cpp",
-    "${samgr_services_dir}/test/unittest/src/system_ability_mgr_subscribe_test.cpp",
-    "${samgr_services_dir}/test/unittest/src/system_ability_mgr_test.cpp",
     "//foundation/systemabilitymgr/samgr/frameworks/native/source/system_process_status_change_stub.cpp",
     "//foundation/systemabilitymgr/samgr/services/dfx/source/hisysevent_adapter.cpp",
     "//foundation/systemabilitymgr/samgr/services/lsamgr/src/local_ability_manager_proxy.cpp",
@@ -134,8 +129,14 @@ ohos_unittest("SystemAbilityMgrTest") {
   }
 
   if (support_common_event) {
-    sources +=
-        [ "${samgr_services_dir}/source/collect/common_event_collect.cpp" ]
+    sources += [
+      "${samgr_services_dir}/source/collect/common_event_collect.cpp",
+      "${samgr_services_dir}/test/unittest/src/system_ability_mgr_load_test.cpp",
+      "${samgr_services_dir}/test/unittest/src/system_ability_mgr_new_test.cpp",
+      "${samgr_services_dir}/test/unittest/src/system_ability_mgr_ondemand_test.cpp",
+      "${samgr_services_dir}/test/unittest/src/system_ability_mgr_subscribe_test.cpp",
+      "${samgr_services_dir}/test/unittest/src/system_ability_mgr_test.cpp",
+    ]
     external_deps += [
       "ability_base:want",
       "common_event_service:cesfwk_innerkits",
