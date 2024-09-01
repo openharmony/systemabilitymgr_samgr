@@ -577,22 +577,19 @@ CommonEventSubscriber::CommonEventSubscriber(const EventFwk::CommonEventSubscrib
 
 void CommonEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData& data)
 {
-    auto OnReceiveTask = [=] () {
-        std::string action = data.GetWant().GetAction();
-        int32_t code = data.GetCode();
-        auto collect = collect_.promote();
-        if (collect == nullptr) {
-            HILOGE("CommonEventCollect collect is nullptr");
-            return;
-        }
-        collect->SaveAction(action);
-        int64_t extraDataId = collect->SaveOnDemandReasonExtraData(data);
-        HILOGI("OnReceiveEvent get action: %{public}s code: %{public}d, extraDataId %{public}d",
-            action.c_str(), code, static_cast<int32_t>(extraDataId));
-        collect->SaveOnDemandConditionExtraData(data);
-        OnDemandEvent event = {COMMON_EVENT, action, std::to_string(code), extraDataId};
-        collect->ReportEvent(event);
-    };
-    ffrt::submit(OnReceiveTask);
+    std::string action = data.GetWant().GetAction();
+    int32_t code = data.GetCode();
+    auto collect = collect_.promote();
+    if (collect == nullptr) {
+        HILOGE("CommonEventCollect collect is nullptr");
+        return;
+    }
+    collect->SaveAction(action);
+    int64_t extraDataId = collect->SaveOnDemandReasonExtraData(data);
+    HILOGI("OnReceiveEvent get action: %{public}s code: %{public}d, extraDataId %{public}d",
+        action.c_str(), code, static_cast<int32_t>(extraDataId));
+    collect->SaveOnDemandConditionExtraData(data);
+    OnDemandEvent event = {COMMON_EVENT, action, std::to_string(code), extraDataId};
+    collect->ReportEvent(event);
 }
 } // namespace OHOS
