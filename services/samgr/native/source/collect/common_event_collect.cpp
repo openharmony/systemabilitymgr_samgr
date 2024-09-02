@@ -345,7 +345,8 @@ int64_t CommonEventCollect::SaveOnDemandReasonExtraData(const EventFwk::CommonEv
     std::lock_guard<std::mutex> autoLock(extraDataLock_);
     int64_t extraDataId = GenerateExtraDataIdLocked();
     extraDatas_[extraDataId] = extraData;
-    HILOGI("CommonEventCollect save extraData %{public}d", static_cast<int32_t>(extraDataId));
+    HILOGI("CommonEventCollect save extraData %{public}d,n:%{public}zu",
+        static_cast<int32_t>(extraDataId), extraDatas_.size());
     if (workHandler_ == nullptr) {
         HILOGI("CommonEventCollect workHandler is nullptr");
         return -1;

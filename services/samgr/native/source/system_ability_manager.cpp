@@ -454,7 +454,8 @@ int32_t SystemAbilityManager::UpdateOnDemandPolicy(int32_t systemAbilityId, OnDe
         HILOGE("UpdateOnDemandPolicy add collect event failed");
         return result;
     }
-    HILOGI("UpdateOnDemandPolicy policy size : %{public}zu.", onDemandEvents.size());
+    HILOGI("UpdateOnDemandPolicy policy size:%{public}zu ,callingPid:%{public}d",
+        onDemandEvents.size(), IPCSkeleton::GetCallingPid());
     return ERR_OK;
 }
 
@@ -1443,6 +1444,9 @@ void SystemAbilityManager::NotifySystemAbilityLoaded(int32_t systemAbilityId, co
         }
     }
     startingAbilityMap_.erase(iter);
+    if (!startingAbilityMap_.empty()) {
+        HILOGI("startingAbility size:%{public}zu", startingAbilityMap_.size());
+    }
 }
 
 void SystemAbilityManager::NotifySystemAbilityLoadFail(int32_t systemAbilityId,
