@@ -322,7 +322,7 @@ enum {
     ASSET_SERVICE_ID                                 = 8100,
     EL5_FILEKEY_MANAGER_SERVICE_ID                   = 8250,
     COMM_FIREWALL_MANAGER_SYS_ABILITY_ID             = 8300,
-    SUBSYS_WEBVIEW_SYS_UPDATE_SERVICE_ID             = 8350,
+
     // reserved for vendor
     VENDOR_SYS_ABILITY_ID_BEGIN                      = 0x00010000,  // 65536
     VENDOR_SYS_ABILITY_ID_END                        = 0x00020000,  // 131072
