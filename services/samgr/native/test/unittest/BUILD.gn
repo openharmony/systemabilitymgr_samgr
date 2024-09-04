@@ -649,6 +649,38 @@ ohos_unittest("SystemAbilityMgrDumperTest") {
   ]
 }
 
+ohos_executable("manual_ondemand") {
+  testonly = true
+  sources = [
+    "${samgr_services_dir}/test/unittest/src/mock_permission.cpp",
+    "./src/manual_ondemand_helper.cpp",
+  ]
+  configs = [
+    ":sam_test_config",
+    "//foundation/systemabilitymgr/samgr/test/resource:coverage_flags",
+  ]
+  deps = [ ":samgr_proxy_tdd" ]
+
+  cflags = []
+  if (target_cpu == "arm") {
+    cflags += [ "-DBINDER_IPC_32BIT" ]
+  }
+  external_deps = [
+    "access_token:libnativetoken_shared",
+    "access_token:libtokensetproc_shared",
+    "c_utils:utils",
+    "dsoftbus:softbus_client",
+    "hilog:libhilog",
+    "init:libbeget_proxy",
+    "init:libbegetutil",
+    "ipc:ipc_core",
+    "json:nlohmann_json_static",
+    "safwk:system_ability_fwk",
+  ]
+  part_name = "samgr"
+  subsystem_name = "systemabilitymgr"
+}
+
 ohos_executable("ondemand") {
   testonly = true
   sources = [
@@ -832,6 +864,7 @@ group("unittest") {
     ":SystemAbilityMgrTest",
     ":SystemAbilityStateSchedulerTest",
     ":TestTool",
+    ":manual_ondemand",
     ":ondemand",
 
     #":rust_samgr_test_client",
