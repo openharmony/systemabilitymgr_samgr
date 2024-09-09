@@ -285,7 +285,7 @@ HWTEST_F(SystemAbilityMgrTest, GetAllOndemandSa001, TestSize.Level3)
 {
     DTEST_LOG << " GetAllOndemandSa001 " << std::endl;
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     saMgr->saProfileMap_[1] = saProfile;
     saMgr->GetAllOndemandSa();
     bool value = system::GetBoolParameter(ONDEMAND_PARAM, false);
@@ -303,7 +303,7 @@ HWTEST_F(SystemAbilityMgrTest, GetAllOndemandSa002, TestSize.Level3)
 {
     DTEST_LOG << " GetAllOndemandSa002 " << std::endl;
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     saMgr->saProfileMap_[1] = saProfile;
     SAInfo saInfo;
     saMgr->abilityMap_[1] = saInfo;
@@ -337,7 +337,7 @@ HWTEST_F(SystemAbilityMgrTest, GetAllOndemandSa003, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, GetAllOndemandSa004, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     saMgr->saProfileMap_.clear();
     saMgr->saProfileMap_[SAID] = saProfile;
     auto ret = saMgr->GetAllOndemandSa();
@@ -414,7 +414,7 @@ HWTEST_F(SystemAbilityMgrTest, DoLoadOnDemandAbility001, TestSize.Level0)
     bool isExist = true;
     bool result = saMgr->DoLoadOnDemandAbility(DISTRIBUTED_SCHED_TEST_TT_ID, isExist);
     EXPECT_EQ(result, true);
-    SaProfile saProfile = {u"test", DISTRIBUTED_SCHED_TEST_TT_ID};
+    CommonSaProfile saProfile = {u"test", DISTRIBUTED_SCHED_TEST_TT_ID};
     saProfile.cacheCommonEvent = true;
     saMgr->saProfileMap_[DISTRIBUTED_SCHED_TEST_TT_ID] = saProfile;
     int32_t ret = saMgr->RemoveSystemAbility(DISTRIBUTED_SCHED_TEST_TT_ID);
@@ -478,9 +478,9 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy003, TestSize.Level3)
     uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
     Security::AccessToken::NativeTokenInfo nativeTokenInfo;
     int32_t tokenInfoResult = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     saProfile.process = Str8ToStr16(nativeTokenInfo.processName);
-    saProfile.startOnDemand.allowUpdate = false;
+    saProfile.startAllowUpdate= false;
     saMgr->saProfileMap_[1] = saProfile;
     std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
     int32_t ret = saMgr->GetOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
@@ -495,9 +495,9 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy004, TestSize.Level3)
     uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
     Security::AccessToken::NativeTokenInfo nativeTokenInfo;
     int32_t tokenInfoResult = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     saProfile.process = Str8ToStr16(nativeTokenInfo.processName);
-    saProfile.startOnDemand.allowUpdate = true;
+    saProfile.startAllowUpdate = true;
     saMgr->saProfileMap_[1] = saProfile;
     sptr<DeviceStatusCollectManager> collectManager = nullptr;
     saMgr->collectManager_ = collectManager;
@@ -514,9 +514,9 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy005, TestSize.Level3)
     uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
     Security::AccessToken::NativeTokenInfo nativeTokenInfo;
     int32_t tokenInfoResult = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     saProfile.process = Str8ToStr16(nativeTokenInfo.processName);
-    saProfile.startOnDemand.allowUpdate = true;
+    saProfile.startAllowUpdate = true;
     saMgr->saProfileMap_[1] = saProfile;
     sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
     saMgr->collectManager_ = collectManager;
@@ -540,7 +540,7 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy006, TestSize.Level3)
     vector<OnDemandEvent> onDemandEvents;
     onDemandEvents.push_back({ 1, "test" });
     saProfile.startOnDemand.onDemandEvents = onDemandEvents;
-    saMgr->saProfileMap_[1] = saProfile;
+    SamgrUtil::FilterCommonSaProfile(saProfile,  saMgr->saProfileMap_[1]);
     sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
     collectManager->onDemandSaProfiles_.emplace_back(saProfile);
     saMgr->collectManager_ = collectManager;
@@ -562,7 +562,7 @@ HWTEST_F(SystemAbilityMgrTest, UpdateOnDemandPolicy001, TestSize.Level3)
     SystemAbilityOnDemandEvent event = {OnDemandEventId::COMMON_EVENT, "TEST", "TEST"};
     std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
     abilityOnDemandEvents.emplace_back(event);
-    SaProfile saProfile = {u"test", TEST_OVERFLOW_SAID};
+    CommonSaProfile saProfile = {u"test", TEST_OVERFLOW_SAID};
     saMgr->saProfileMap_[TEST_OVERFLOW_SAID] = saProfile;
     int32_t ret = saMgr->UpdateOnDemandPolicy(TEST_OVERFLOW_SAID, type, abilityOnDemandEvents);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
@@ -572,11 +572,11 @@ HWTEST_F(SystemAbilityMgrTest, UpdateOnDemandPolicy001, TestSize.Level3)
     int32_t result = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
     EXPECT_TRUE(result == ERR_OK);
     saMgr->saProfileMap_[TEST_OVERFLOW_SAID].process = Str8ToStr16(nativeTokenInfo.processName);
-    saMgr->saProfileMap_[TEST_OVERFLOW_SAID].startOnDemand.allowUpdate = false;
+    saMgr->saProfileMap_[TEST_OVERFLOW_SAID].startAllowUpdate = false;
     ret = saMgr->UpdateOnDemandPolicy(TEST_OVERFLOW_SAID, type, abilityOnDemandEvents);
     EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
 
-    saMgr->saProfileMap_[TEST_OVERFLOW_SAID].startOnDemand.allowUpdate = true;
+    saMgr->saProfileMap_[TEST_OVERFLOW_SAID].startAllowUpdate = true;
     sptr<DeviceStatusCollectManager> collectMgr = saMgr->collectManager_;
     saMgr->collectManager_ = nullptr;
     ret = saMgr->UpdateOnDemandPolicy(TEST_OVERFLOW_SAID, type, abilityOnDemandEvents);

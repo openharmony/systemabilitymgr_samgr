@@ -137,5 +137,17 @@ struct SaProfile {
     std::list<std::string> extension;
     bool cacheCommonEvent = false;
 };
+
+struct CommonSaProfile {
+    std::u16string process;
+    int32_t saId = 0;
+    bool moduleUpdate = false;
+    bool distributed = false;
+    bool cacheCommonEvent = false;
+    bool startAllowUpdate;
+    bool stopAllowUpdate;
+    int32_t recycleStrategy = IMMEDIATELY;
+    std::list<std::string> extension;
+};
 }
 #endif // SAMGR_INTERFACE_INNERKITS_COMMOM_INCLUDE_SAPROFILE_H

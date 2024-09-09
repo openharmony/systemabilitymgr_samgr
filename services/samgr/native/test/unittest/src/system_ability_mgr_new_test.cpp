@@ -70,7 +70,7 @@ constexpr int32_t TEST_EXCEPTION_LOW_SA_ID = -1;
 constexpr int32_t TEST_SYSTEM_ABILITY1 = 1491;
 
 void SaProfileStore(sptr<SystemAbilityManager>& saMgr,
-    map<int32_t, SaProfile>& saProfileMapTmp, int32_t maxLoop)
+    map<int32_t, CommonSaProfile>& saProfileMapTmp, int32_t maxLoop)
 {
     for (int32_t loop = 0; loop < maxLoop; ++loop) {
         if (saMgr->saProfileMap_.count(SAID + loop) > 0) {
@@ -81,7 +81,7 @@ void SaProfileStore(sptr<SystemAbilityManager>& saMgr,
 }
 
 void SaProfileRecover(sptr<SystemAbilityManager>& saMgr,
-    map<int32_t, SaProfile> saProfileMapTmp, int32_t maxLoop)
+    map<int32_t, CommonSaProfile> saProfileMapTmp, int32_t maxLoop)
 {
     for (int32_t loop = 0; loop < maxLoop; ++loop) {
         if (saProfileMapTmp.count(SAID + loop) > 0) {
@@ -98,7 +98,7 @@ void SaProfileExtensionTestPrevSet(sptr<SystemAbilityManager>& saMgr, int32_t ma
     const int32_t mod_num = 2;
     std::vector<std::string> extensionVec = { "backup_test", "restore_test", "alpha", "beta" };
     for (int32_t loop = 0; loop < maxLoop; ++loop) {
-        SaProfile saProfile;
+        CommonSaProfile saProfile;
         saProfile.process = Str8ToStr16(extensionVec[loop]);
         saProfile.extension.push_back(extensionVec[loop % mod_num]);
         saProfile.cacheCommonEvent = true;
@@ -200,7 +200,7 @@ HWTEST_F(SystemAbilityMgrTest, GetSystemAbilityWithDevice001, TestSize.Level3)
     auto ability = saMgr->GetSystemAbility(TEST_EXCEPTION_LOW_SA_ID, deviceId);
     EXPECT_EQ(ability, nullptr);
 
-    SaProfile saProfile = {u"test", TEST_OVERFLOW_SAID};
+    CommonSaProfile saProfile = {u"test", TEST_OVERFLOW_SAID};
     saMgr->saProfileMap_[TEST_OVERFLOW_SAID] = saProfile;
     ability = saMgr->GetSystemAbility(TEST_OVERFLOW_SAID, deviceId);
     EXPECT_EQ(ability, nullptr);
@@ -438,7 +438,7 @@ HWTEST_F(SystemAbilityMgrTest, GetCommonEventExtraIdList001, TestSize.Level3)
     saMgr->collectManager_ = collectManager;
 
     const int32_t maxLoop = 4;
-    map<int32_t, SaProfile> saProfileMapTmp;
+    map<int32_t, CommonSaProfile> saProfileMapTmp;
     SaProfileStore(saMgr, saProfileMapTmp, maxLoop);
     SaProfileExtensionTestPrevSet(saMgr, maxLoop);
     OnDemandEvent event;
@@ -558,7 +558,7 @@ HWTEST_F(SystemAbilityMgrTest, GetRunningSaExtensionInfoList001, TestSize.Level3
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
     const int32_t maxLoop = 4;
-    map<int32_t, SaProfile> saProfileMapTmp;
+    map<int32_t, CommonSaProfile> saProfileMapTmp;
 
     SaProfileStore(saMgr, saProfileMapTmp, maxLoop);
     SaProfileExtensionTestPrevSet(saMgr, maxLoop);
@@ -590,7 +590,7 @@ HWTEST_F(SystemAbilityMgrTest, GetRunningSaExtensionInfoList002, TestSize.Level3
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
     const int32_t maxLoop = 4;
-    map<int32_t, SaProfile> saProfileMapTmp;
+    map<int32_t, CommonSaProfile> saProfileMapTmp;
 
     SaProfileStore(saMgr, saProfileMapTmp, maxLoop);
     SaProfileExtensionTestPrevSet(saMgr, maxLoop);
@@ -747,7 +747,7 @@ HWTEST_F(SystemAbilityMgrTest, IsModuleUpdate002, TestSize.Level2)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     saMgr->saProfileMap_.clear();
-    SaProfile saprofile;
+    CommonSaProfile saprofile;
     saMgr->saProfileMap_[saprofile.saId] = saprofile;
     bool ret = saMgr->IsModuleUpdate(saprofile.saId);
     EXPECT_FALSE(ret);
@@ -762,7 +762,7 @@ HWTEST_F(SystemAbilityMgrTest, IsModuleUpdate003, TestSize.Level2)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     saMgr->saProfileMap_.clear();
-    SaProfile saprofile;
+    CommonSaProfile saprofile;
     saprofile.moduleUpdate = true;
     saMgr->saProfileMap_[saprofile.saId] = saprofile;
     bool ret = saMgr->IsModuleUpdate(saprofile.saId);
@@ -820,7 +820,7 @@ HWTEST_F(SystemAbilityMgrTest, GetExtensionSaIdsInner003, TestSize.Level3)
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
     const int32_t maxLoop = 4;
-    map<int32_t, SaProfile> saProfileMapTmp;
+    map<int32_t, CommonSaProfile> saProfileMapTmp;
     SaProfileStore(saMgr, saProfileMapTmp, maxLoop);
     SaProfileExtensionTestPrevSet(saMgr, maxLoop);
 
@@ -894,7 +894,7 @@ HWTEST_F(SystemAbilityMgrTest, GetExtensionRunningSaListInner003, TestSize.Level
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
     const int32_t maxLoop = 4;
-    map<int32_t, SaProfile> saProfileMapTmp;
+    map<int32_t, CommonSaProfile> saProfileMapTmp;
 
     SaProfileStore(saMgr, saProfileMapTmp, maxLoop);
     SaProfileExtensionTestPrevSet(saMgr, maxLoop);
@@ -1093,7 +1093,7 @@ HWTEST_F(SystemAbilityMgrTest, IpcDumpSingleProcess001, TestSize.Level2)
 HWTEST_F(SystemAbilityMgrTest, DoLoadForPerf001, TestSize.Level2)
 {
     sptr<SystemAbilityManager> saMgr1 = new SystemAbilityManager;
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     saProfile.process = u"memmgrservice";
     saMgr1->saProfileMap_.clear();
     saMgr1->saProfileMap_[-1] = saProfile;
@@ -1113,7 +1113,7 @@ HWTEST_F(SystemAbilityMgrTest, IsDistributedSystemAbility001, TestSize.Level2)
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     bool res = saMgr->IsDistributedSystemAbility(-1);
     EXPECT_FALSE(res);
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     saProfile.distributed = true;
     saProfile.process = u"memmgrservice";
     saMgr->saProfileMap_.clear();

@@ -1166,8 +1166,8 @@ HWTEST_F(SystemAbilityMgrStubTest, InitSaProfile002, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrStubTest, GetSaProfile001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    SaProfile saProfilein;
-    SaProfile SaProfileout;
+    CommonSaProfile saProfilein;
+    CommonSaProfile SaProfileout;
     saMgr->saProfileMap_[SAID] = saProfilein;
     bool res = saMgr->GetSaProfile(SAID, SaProfileout);
     saMgr->saProfileMap_.clear();
@@ -2154,7 +2154,7 @@ HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbilityFromRpc001, TestSize.Level1)
 HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbilityFromRpc002, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     saProfile.distributed = false;
     string srcDeviceId;
     sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
@@ -2173,7 +2173,7 @@ HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbilityFromRpc003, TestSize.Level3)
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
     sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     saProfile.distributed = true;
     SAInfo saInfo;
     saInfo.remoteObj = testAbility;
@@ -2196,7 +2196,7 @@ HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbilityFromRpc004, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     u16string procName = u"procname";
     int countNum = 2;
     saProfile.distributed = true;
@@ -2301,7 +2301,7 @@ HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbility003, TestSize.Level1)
 HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbility004, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     SAInfo saInfo;
     sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
     SystemAbilityManager::AbilityItem abilityItem;
@@ -2324,7 +2324,7 @@ HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbility004, TestSize.Level1)
 HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbility005, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     SAInfo saInfo;
     sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
     SystemAbilityManager::AbilityItem abilityItem;
@@ -2378,7 +2378,7 @@ HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbility007, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbility008, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     SAInfo saInfo;
     sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
     sptr<SystemAbilityLoadCallbackMock> callbackTwo = new SystemAbilityLoadCallbackMock();
@@ -2673,7 +2673,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility003, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     saMgr->saProfileMap_[SAID] = saProfile;
     int32_t result = saMgr->UnloadSystemAbility(SAID);
     EXPECT_EQ(result, INVALID_CALL_PROC);
@@ -2690,7 +2690,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility004, TestSize.Level3)
     SamMockPermission::MockProcess("invalidProcess");
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     saProfile.process = u"testProcess";
     saMgr->saProfileMap_[SAID] = saProfile;
     int32_t result = saMgr->UnloadSystemAbility(SAID);
@@ -2710,7 +2710,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility005, TestSize.Level3)
     saMgr->abilityStateScheduler_->processContextMap_.clear();
     saMgr->abilityStateScheduler_->abilityContextMap_.clear();
     EXPECT_TRUE(saMgr != nullptr);
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     saProfile.process = u"memmgrservice";
     saMgr->saProfileMap_[SAID] = saProfile;
     int32_t result = saMgr->UnloadSystemAbility(SAID);

@@ -1471,7 +1471,7 @@ HWTEST_F(SystemAbilityMgrTest, RemoveSystemAbility007, TestSize.Level0)
     sptr<IRemoteObject> testAbility = new TestTransactionService();
     ISystemAbilityManager::SAExtraProp saExtraProp;
     saMgr->AddSystemAbility(DISTRIBUTED_SCHED_TEST_TT_ID, testAbility, saExtraProp);
-    SaProfile saProfile = {u"test", DISTRIBUTED_SCHED_TEST_TT_ID};
+    CommonSaProfile saProfile = {u"test", DISTRIBUTED_SCHED_TEST_TT_ID};
     saProfile.cacheCommonEvent = true;
     saMgr->saProfileMap_[DISTRIBUTED_SCHED_TEST_TT_ID] = saProfile;
     int32_t ret = saMgr->RemoveSystemAbility(testAbility);

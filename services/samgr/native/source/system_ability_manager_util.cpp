@@ -96,7 +96,7 @@ std::string SamgrUtil::TransformDeviceId(const std::string& deviceId, int32_t ty
     return isPrivate ? std::string() : deviceId;
 }
 
-bool SamgrUtil::CheckCallerProcess(const SaProfile& saProfile)
+bool SamgrUtil::CheckCallerProcess(const CommonSaProfile& saProfile)
 {
     if (!CheckCallerProcess(Str16ToStr8(saProfile.process))) {
         HILOGE("can't operate SA: %{public}d by proc:%{public}s",
@@ -123,11 +123,11 @@ bool SamgrUtil::CheckCallerProcess(const std::string& callProcess)
     return true;
 }
 
-bool SamgrUtil::CheckAllowUpdate(OnDemandPolicyType type, const SaProfile& saProfile)
+bool SamgrUtil::CheckAllowUpdate(OnDemandPolicyType type, const CommonSaProfile& saProfile)
 {
-    if (type == OnDemandPolicyType::START_POLICY && saProfile.startOnDemand.allowUpdate) {
+    if (type == OnDemandPolicyType::START_POLICY && saProfile.startAllowUpdate) {
         return true;
-    } else if (type == OnDemandPolicyType::STOP_POLICY && saProfile.stopOnDemand.allowUpdate) {
+    } else if (type == OnDemandPolicyType::STOP_POLICY && saProfile.stopAllowUpdate) {
         return true;
     }
     return false;
@@ -216,5 +216,18 @@ void SamgrUtil::InvalidateSACache()
         SystemAbilityManager::GetInstance()->InvalidateCache();
     };
     setParmHandler_->PostTask(invalidateCacheTask);
+}
+
+void SamgrUtil::FilterCommonSaProfile(SaProfile _old, CommonSaProfile& _new)
+{
+    _new.process = _old.process;
+    _new.saId = _old.saId;
+    _new.moduleUpdate = _old.moduleUpdate;
+    _new.distributed = _old.distributed;
+    _new.cacheCommonEvent = _old.cacheCommonEvent;
+    _new.startAllowUpdate = _old.startOnDemand.allowUpdate;
+    _new.stopAllowUpdate = _old.stopOnDemand.allowUpdate;
+    _new.recycleStrategy = _old.recycleStrategy;
+    _new.extension.assign(_old.extension.begin(), _old.extension.end());
 }
 }
