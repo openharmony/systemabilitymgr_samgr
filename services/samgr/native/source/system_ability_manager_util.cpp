@@ -218,7 +218,7 @@ void SamgrUtil::InvalidateSACache()
     setParmHandler_->PostTask(invalidateCacheTask);
 }
 
-void SamgrUtil::FilterCommonSaProfile(SaProfile _old, CommonSaProfile& _new)
+void SamgrUtil::FilterCommonSaProfile(const SaProfile& _old, CommonSaProfile& _new)
 {
     _new.process = _old.process;
     _new.saId = _old.saId;
