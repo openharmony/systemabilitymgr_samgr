@@ -218,16 +218,16 @@ void SamgrUtil::InvalidateSACache()
     setParmHandler_->PostTask(invalidateCacheTask);
 }
 
-void SamgrUtil::FilterCommonSaProfile(const SaProfile& _old, CommonSaProfile& _new)
+void SamgrUtil::FilterCommonSaProfile(const SaProfile& oldProfile, CommonSaProfile& newProfile)
 {
-    _new.process = _old.process;
-    _new.saId = _old.saId;
-    _new.moduleUpdate = _old.moduleUpdate;
-    _new.distributed = _old.distributed;
-    _new.cacheCommonEvent = _old.cacheCommonEvent;
-    _new.startAllowUpdate = _old.startOnDemand.allowUpdate;
-    _new.stopAllowUpdate = _old.stopOnDemand.allowUpdate;
-    _new.recycleStrategy = _old.recycleStrategy;
-    _new.extension.assign(_old.extension.begin(), _old.extension.end());
+    newProfile.process = oldProfile.process;
+    newProfile.saId = oldProfile.saId;
+    newProfile.moduleUpdate = oldProfile.moduleUpdate;
+    newProfile.distributed = oldProfile.distributed;
+    newProfile.cacheCommonEvent = oldProfile.cacheCommonEvent;
+    newProfile.startAllowUpdate = oldProfile.startOnDemand.allowUpdate;
+    newProfile.stopAllowUpdate = oldProfile.stopOnDemand.allowUpdate;
+    newProfile.recycleStrategy = oldProfile.recycleStrategy;
+    newProfile.extension.assign(oldProfile.extension.begin(), oldProfile.extension.end());
 }
 }

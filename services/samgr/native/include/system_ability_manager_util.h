@@ -44,7 +44,7 @@ public:
     static void SetModuleUpdateParam(const std::string& key, const std::string& value);
     static void SendUpdateSaState(int32_t systemAbilityId, const std::string& updateSaState);
     static void InvalidateSACache();
-    static void FilterCommonSaProfile(const SaProfile& _old, CommonSaProfile& _new);
+    static void FilterCommonSaProfile(const SaProfile& oldProfile, CommonSaProfile& newProfile);
 private:
     static std::shared_ptr<FFRTHandler> setParmHandler_;
 };
