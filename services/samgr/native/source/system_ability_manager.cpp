@@ -310,7 +310,7 @@ void SystemAbilityManager::InitSaProfile()
     onDemandSaIdsSet_.insert(HIDUMPER_SERVICE_SA);
     onDemandSaIdsSet_.insert(MEDIA_ANALYSIS_SERVICE_SA);
     for (const auto& saInfo : saInfos) {
-        saProfileMap_[saInfo.saId] = saInfo;
+        SamgrUtil::FilterCommonSaProfile(saInfo, saProfileMap_[saInfo.saId]);
         if (!saInfo.runOnCreate) {
             HILOGI("InitProfile saId %{public}d", saInfo.saId);
             onDemandSaIdsSet_.insert(saInfo.saId);
@@ -372,7 +372,7 @@ void SystemAbilityManager::DoLoadForPerf()
     }
 }
 
-bool SystemAbilityManager::GetSaProfile(int32_t saId, SaProfile& saProfile)
+bool SystemAbilityManager::GetSaProfile(int32_t saId, CommonSaProfile& saProfile)
 {
     lock_guard<mutex> autoLock(saProfileMapLock_);
     auto iter = saProfileMap_.find(saId);
@@ -387,7 +387,7 @@ bool SystemAbilityManager::GetSaProfile(int32_t saId, SaProfile& saProfile)
 int32_t SystemAbilityManager::GetOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
     std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents)
 {
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     if (!GetSaProfile(systemAbilityId, saProfile)) {
         HILOGE("GetOnDemandPolicy invalid SA:%{public}d", systemAbilityId);
         return ERR_INVALID_VALUE;
@@ -424,7 +424,7 @@ int32_t SystemAbilityManager::GetOnDemandPolicy(int32_t systemAbilityId, OnDeman
 int32_t SystemAbilityManager::UpdateOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
     const std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents)
 {
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     if (!GetSaProfile(systemAbilityId, saProfile)) {
         HILOGE("UpdateOnDemandPolicy invalid SA:%{public}d", systemAbilityId);
         return ERR_INVALID_VALUE;
@@ -529,7 +529,7 @@ sptr<IRemoteObject> SystemAbilityManager::CheckSystemAbility(int32_t systemAbili
 sptr<IRemoteObject> SystemAbilityManager::CheckSystemAbility(int32_t systemAbilityId,
     const std::string& deviceId)
 {
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     bool ret = GetSaProfile(systemAbilityId, saProfile);
     if (!ret) {
         HILOGE("CheckSystemAbilityFromRpc SA:%{public}d not supported!", systemAbilityId);
@@ -1201,7 +1201,7 @@ int32_t SystemAbilityManager::GetSystemProcessInfo(int32_t systemAbilityId, Syst
 
 bool SystemAbilityManager::IsDistributedSystemAbility(int32_t systemAbilityId)
 {
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     bool ret = GetSaProfile(systemAbilityId, saProfile);
     if (!ret) {
         HILOGE("IsDistributedSa SA:%{public}d no Profile!", systemAbilityId);
@@ -1291,7 +1291,7 @@ void SystemAbilityManager::SendSystemAbilityRemovedMsg(int32_t systemAbilityId)
 
 bool SystemAbilityManager::IsModuleUpdate(int32_t systemAbilityId)
 {
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     bool ret = GetSaProfile(systemAbilityId, saProfile);
     if (!ret) {
         HILOGE("IsModuleUpdate SA:%{public}d not exist!", systemAbilityId);
@@ -1380,7 +1380,7 @@ void SystemAbilityManager::CleanCallbackForLoadFailed(int32_t systemAbilityId, c
 
 bool SystemAbilityManager::IsCacheCommonEvent(int32_t systemAbilityId)
 {
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     if (!GetSaProfile(systemAbilityId, saProfile)) {
         HILOGD("SA:%{public}d no profile!", systemAbilityId);
         return false;
@@ -1645,7 +1645,7 @@ int32_t SystemAbilityManager::LoadSystemAbility(int32_t systemAbilityId,
         HILOGW("LoadSystemAbility SAId or callback invalid!");
         return INVALID_INPUT_PARA;
     }
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     bool ret = GetSaProfile(systemAbilityId, saProfile);
     if (!ret) {
         HILOGE("LoadSystemAbility SA:%{public}d not supported!", systemAbilityId);
@@ -1664,7 +1664,7 @@ bool SystemAbilityManager::LoadSystemAbilityFromRpc(const std::string& srcDevice
         HILOGW("LoadSystemAbility said or callback invalid!");
         return false;
     }
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     bool ret = GetSaProfile(systemAbilityId, saProfile);
     if (!ret) {
         HILOGE("LoadSystemAbilityFromRpc SA:%{public}d not supported!", systemAbilityId);
@@ -1686,7 +1686,7 @@ bool SystemAbilityManager::LoadSystemAbilityFromRpc(const std::string& srcDevice
 
 int32_t SystemAbilityManager::UnloadSystemAbility(int32_t systemAbilityId)
 {
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     bool ret = GetSaProfile(systemAbilityId, saProfile);
     if (!ret) {
         HILOGE("UnloadSystemAbility SA:%{public}d not supported!", systemAbilityId);
@@ -1709,7 +1709,7 @@ int32_t SystemAbilityManager::UnloadSystemAbility(int32_t systemAbilityId)
 
 bool SystemAbilityManager::CheckSaIsImmediatelyRecycle(int32_t systemAbilityId)
 {
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     bool ret = GetSaProfile(systemAbilityId, saProfile);
     if (!ret) {
         HILOGE("UnloadSystemAbility SA:%{public}d not supported!", systemAbilityId);
@@ -1724,7 +1724,7 @@ int32_t SystemAbilityManager::CancelUnloadSystemAbility(int32_t systemAbilityId)
         HILOGW("CancelUnloadSystemAbility SAId or callback invalid!");
         return ERR_INVALID_VALUE;
     }
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     bool ret = GetSaProfile(systemAbilityId, saProfile);
     if (!ret) {
         HILOGE("CancelUnloadSystemAbility SA:%{public}d not supported!", systemAbilityId);
@@ -2078,7 +2078,7 @@ int32_t SystemAbilityManager::SendStrategy(int32_t type, std::vector<int32_t>& s
     }
 
     for (auto saId : systemAbilityIds) {
-        SaProfile saProfile;
+        CommonSaProfile saProfile;
         if (!GetSaProfile(saId, saProfile)) {
             HILOGW("not found SA: %{public}d.", saId);
             return ERR_INVALID_VALUE;

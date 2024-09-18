@@ -205,7 +205,7 @@ private:
     int32_t FindSystemAbilityNotify(int32_t systemAbilityId, const std::string& deviceId, int32_t code);
 
     void InitSaProfile();
-    bool GetSaProfile(int32_t saId, SaProfile& saProfile);
+    bool GetSaProfile(int32_t saId, CommonSaProfile& saProfile);
     void CheckListenerNotify(int32_t systemAbilityId, const sptr<ISystemAbilityStatusChange>& listener);
     void NotifySystemAbilityChanged(int32_t systemAbilityId, const std::string& deviceId, int32_t code,
         const sptr<ISystemAbilityStatusChange>& listener);
@@ -293,7 +293,7 @@ private:
 
     std::shared_ptr<FFRTHandler> workHandler_;
 
-    std::map<int32_t, SaProfile> saProfileMap_;
+    std::map<int32_t, CommonSaProfile> saProfileMap_;
     std::set<int32_t> onDemandSaIdsSet_;
     std::mutex saProfileMapLock_;
     std::mutex loadRemoteLock_;

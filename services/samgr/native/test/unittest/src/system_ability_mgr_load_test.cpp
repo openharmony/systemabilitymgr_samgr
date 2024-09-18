@@ -510,7 +510,7 @@ HWTEST_F(SystemAbilityMgrTest, LoadSystemAbilityFromRpc006, TestSize.Level2)
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     std::string deviceId = "2222222";
     int32_t systemAbilityId = 1;
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     saMgr->saProfileMap_[1] = saProfile;
     bool ret = saMgr->LoadSystemAbilityFromRpc(deviceId, systemAbilityId, nullptr);
     EXPECT_FALSE(ret);
@@ -528,7 +528,7 @@ HWTEST_F(SystemAbilityMgrTest, LoadSystemAbilityFromRpc007, TestSize.Level2)
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     std::string deviceId = "2222222";
     int32_t systemAbilityId = 1;
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     saProfile.distributed = true;
     saMgr->saProfileMap_[1] = saProfile;
     saMgr->abilityStateScheduler_ = nullptr;
@@ -548,7 +548,7 @@ HWTEST_F(SystemAbilityMgrTest, LoadSystemAbilityFromRpc008, TestSize.Level2)
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     std::string deviceId = "2222222";
     int32_t systemAbilityId = 1;
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     saProfile.distributed = true;
     saMgr->saProfileMap_[1] = saProfile;
     bool ret = saMgr->LoadSystemAbilityFromRpc(deviceId, systemAbilityId, nullptr);
@@ -565,7 +565,7 @@ HWTEST_F(SystemAbilityMgrTest, LoadSystemAbilityFromRpc009, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     const std::string srcDeviceId;
-    SaProfile saProfile = {u"test", TEST_OVERFLOW_SAID};
+    CommonSaProfile saProfile = {u"test", TEST_OVERFLOW_SAID};
     saProfile.distributed = true;
     saMgr->saProfileMap_[TEST_OVERFLOW_SAID] = saProfile;
     sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
@@ -599,7 +599,7 @@ HWTEST_F(SystemAbilityMgrTest, UnloadSystemAbility001, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, UnloadSystemAbility002, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     saMgr->saProfileMap_[1] = saProfile;
     saMgr->abilityStateScheduler_ = nullptr;
     int32_t result = saMgr->UnloadSystemAbility(1);
@@ -618,7 +618,7 @@ HWTEST_F(SystemAbilityMgrTest, UnloadSystemAbility004, TestSize.Level3)
     DTEST_LOG << " UnloadSystemAbility004 " << std::endl;
     SamMockPermission::MockProcess("memmgrservice");
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     saProfile.process = u"memmgrservice";
     saMgr->saProfileMap_[1] = saProfile;
     saMgr->abilityStateScheduler_ = nullptr;
@@ -669,7 +669,7 @@ HWTEST_F(SystemAbilityMgrTest, CancelUnloadSystemAbility003, TestSize.Level3)
 {
     DTEST_LOG << " CancelUnloadSystemAbility003 " << std::endl;
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     saMgr->saProfileMap_[1] = saProfile;
     int32_t systemAbilityId = 1;
     int32_t ret = saMgr->CancelUnloadSystemAbility(systemAbilityId);
@@ -687,7 +687,7 @@ HWTEST_F(SystemAbilityMgrTest, CancelUnloadSystemAbility004, TestSize.Level3)
     DTEST_LOG << " CancelUnloadSystemAbility004 " << std::endl;
     SamMockPermission::MockProcess("mockProcess");
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     saProfile.process = u"mockProcess";
     saMgr->saProfileMap_[1] = saProfile;
     int32_t systemAbilityId = 1;
@@ -706,7 +706,7 @@ HWTEST_F(SystemAbilityMgrTest, CancelUnloadSystemAbility005, TestSize.Level3)
     DTEST_LOG << " CancelUnloadSystemAbility005 " << std::endl;
     SamMockPermission::MockProcess("mockProcess");
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     saProfile.process = u"mockProcess";
     saMgr->saProfileMap_[1] = saProfile;
     int32_t systemAbilityId = 1;
@@ -731,7 +731,7 @@ HWTEST_F(SystemAbilityMgrTest, CancelUnloadSystemAbility006, TestSize.Level3)
     Security::AccessToken::NativeTokenInfo nativeTokenInfo;
     int32_t result = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
     EXPECT_TRUE(result == ERR_OK);
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     saProfile.saId = TEST_OVERFLOW_SAID;
     saProfile.process = Str8ToStr16(nativeTokenInfo.processName);
     saMgr->saProfileMap_[TEST_OVERFLOW_SAID] = saProfile;
