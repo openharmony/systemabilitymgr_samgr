@@ -144,8 +144,8 @@ struct CommonSaProfile {
     bool moduleUpdate = false;
     bool distributed = false;
     bool cacheCommonEvent = false;
-    bool startAllowUpdate;
-    bool stopAllowUpdate;
+    bool startAllowUpdate = false;
+    bool stopAllowUpdate = false;
     int32_t recycleStrategy = IMMEDIATELY;
     std::list<std::string> extension;
 };
