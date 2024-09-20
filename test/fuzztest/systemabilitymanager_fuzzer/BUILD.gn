@@ -81,7 +81,7 @@ ohos_fuzztest("SystemAbilityManagerFuzzTest") {
     "hitrace:hitrace_meter",
     "init:libbeget_proxy",
     "init:libbegetutil",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "ipc:libdbinder",
     "safwk:system_ability_fwk",
     "samgr:samgr_common",

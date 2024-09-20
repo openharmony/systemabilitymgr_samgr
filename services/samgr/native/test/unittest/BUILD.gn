@@ -303,7 +303,7 @@ ohos_unittest("SystemAbilityMgrDeviceNetworkingTest") {
     "hitrace:hitrace_meter",
     "init:libbeget_proxy",
     "init:libbegetutil",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "ipc:libdbinder",
     "safwk:system_ability_fwk",
   ]
@@ -452,7 +452,6 @@ ohos_unittest("SystemAbilityMgrProxyTest") {
     "googletest:gtest_main",
     "hilog:libhilog",
     "init:libbegetutil",
-    "ipc:ipc_core",
     "ipc:ipc_single",
   ]
 }
@@ -549,7 +548,7 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
     "hitrace:hitrace_meter",
     "init:libbeget_proxy",
     "init:libbegetutil",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "ipc:libdbinder",
     "safwk:system_ability_fwk",
   ]
@@ -609,7 +608,7 @@ ohos_unittest("SystemAbilityMgrDumperTest") {
     "hitrace:hitrace_meter",
     "init:libbeget_proxy",
     "init:libbegetutil",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "ipc:libdbinder",
     "safwk:system_ability_fwk",
   ]
@@ -639,7 +638,7 @@ ohos_executable("ondemand") {
     "hilog:libhilog",
     "init:libbeget_proxy",
     "init:libbegetutil",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "safwk:system_ability_fwk",
   ]
   part_name = "samgr"
