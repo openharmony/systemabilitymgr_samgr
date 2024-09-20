@@ -14,7 +14,7 @@
     "component": {
         "name": "samgr",
         "subsystem": "systemabilitymgr",
-        "features": [ "samgr_feature_coverage = false" ],
+        "features": [ "samgr_feature_coverage" ],
         "adapted_system_type": [
             "standard"
         ],
@@ -108,8 +108,7 @@
             "test": [
                 "//foundation/systemabilitymgr/samgr/services/samgr/native/test:unittest",
                 "//foundation/systemabilitymgr/samgr/test/fuzztest:fuzztest",
-                "//foundation/systemabilitymgr/samgr/services/common/test:unittest",
-                "//foundation/systemabilitymgr/samgr/interfaces/innerkits/rust/tests:unittest"
+                "//foundation/systemabilitymgr/samgr/services/common/test:unittest"
             ]
         }
     }

@@ -48,8 +48,8 @@ namespace {
     {
 #ifdef WITH_SELINUX
         int64_t begin = OHOS::GetTickCount();
-        auto callingPid = OHOS::IPCSkeleton::GetCallingPid();
-        auto ret = selinuxChecker_->GetServiceCheck(callingPid, std::to_string(said)) == 0;
+        auto callingSid = OHOS::IPCSkeleton::GetCallingSid();
+        auto ret = selinuxChecker_->GetServiceCheck(callingSid, std::to_string(said)) == 0;
         HILOG_SE_DEBUG(LOG_CORE, "[Performance] GetServiceCheck SA : %{public}d spend %{public}" PRId64 " ms",
             said, OHOS::GetTickCount() - begin);
         return  ret;
@@ -62,8 +62,8 @@ namespace {
     {
 #ifdef WITH_SELINUX
         int64_t begin = OHOS::GetTickCount();
-        auto callingPid = OHOS::IPCSkeleton::GetCallingPid();
-        auto ret = selinuxChecker_->AddServiceCheck(callingPid, std::to_string(said)) == 0;
+        auto callingSid = OHOS::IPCSkeleton::GetCallingSid();
+        auto ret = selinuxChecker_->AddServiceCheck(callingSid, std::to_string(said)) == 0;
         HILOG_SE_DEBUG(LOG_CORE, "[Performance] AddServiceCheck SA : %{public}d spend %{public}" PRId64 " ms",
             said, OHOS::GetTickCount() - begin);
         return ret;
@@ -76,8 +76,8 @@ namespace {
     {
 #ifdef WITH_SELINUX
         int64_t begin = OHOS::GetTickCount();
-        auto callingPid = OHOS::IPCSkeleton::GetCallingPid();
-        auto ret = selinuxChecker_->GetRemoteServiceCheck(callingPid, std::to_string(said)) == 0;
+        auto callingSid = OHOS::IPCSkeleton::GetCallingSid();
+        auto ret = selinuxChecker_->GetRemoteServiceCheck(callingSid, std::to_string(said)) == 0;
         HILOG_SE_DEBUG(LOG_CORE, "[Performance] GetRemoteServiceCheck SA : %{public}d spend %{public}" PRId64 " ms",
             said, OHOS::GetTickCount() - begin);
         return ret;
@@ -90,8 +90,8 @@ namespace {
     {
 #ifdef WITH_SELINUX
         int64_t begin = OHOS::GetTickCount();
-        auto callingPid = OHOS::IPCSkeleton::GetCallingPid();
-        auto ret = selinuxChecker_->ListServiceCheck(callingPid) == 0;
+        auto callingSid = OHOS::IPCSkeleton::GetCallingSid();
+        auto ret = selinuxChecker_->ListServiceCheck(callingSid) == 0;
         HILOG_SE_DEBUG(LOG_CORE, "[Performance] ListServiceCheck spend %{public}" PRId64 " ms",
             OHOS::GetTickCount() - begin);
         return ret;
@@ -110,47 +110,47 @@ constexpr const char *EXT_TRANSACTION_PERMISSION = "ohos.permission.ACCESS_EXT_S
 void SystemAbilityManagerStub::SetAbilityFuncMap()
 {
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_SYSTEM_ABILITY_TRANSACTION)] =
-        &SystemAbilityManagerStub::GetSystemAbilityInner;
+        SystemAbilityManagerStub::LocalGetSystemAbility;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::CHECK_SYSTEM_ABILITY_TRANSACTION)] =
-        &SystemAbilityManagerStub::CheckSystemAbilityInner;
+        SystemAbilityManagerStub::LocalCheckSystemAbility;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::ADD_SYSTEM_ABILITY_TRANSACTION)] =
-        &SystemAbilityManagerStub::AddSystemAbilityInner;
+        SystemAbilityManagerStub::LocalAddSystemAbility;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::REMOVE_SYSTEM_ABILITY_TRANSACTION)] =
-        &SystemAbilityManagerStub::RemoveSystemAbilityInner;
+        SystemAbilityManagerStub::LocalRemoveSystemAbility;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::LIST_SYSTEM_ABILITY_TRANSACTION)] =
-        &SystemAbilityManagerStub::ListSystemAbilityInner;
+        SystemAbilityManagerStub::LocalListSystemAbility;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::SUBSCRIBE_SYSTEM_ABILITY_TRANSACTION)] =
-        &SystemAbilityManagerStub::SubsSystemAbilityInner;
+        SystemAbilityManagerStub::LocalSubsSystemAbility;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::CHECK_REMOTE_SYSTEM_ABILITY_TRANSACTION)] =
-        &SystemAbilityManagerStub::CheckRemtSystemAbilityInner;
+        SystemAbilityManagerStub::LocalCheckRemtSystemAbility;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::ADD_ONDEMAND_SYSTEM_ABILITY_TRANSACTION)] =
-        &SystemAbilityManagerStub::AddOndemandSystemAbilityInner;
+        SystemAbilityManagerStub::LocalAddOndemandSystemAbility;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::CHECK_SYSTEM_ABILITY_IMMEDIATELY_TRANSACTION)] =
-        &SystemAbilityManagerStub::CheckSystemAbilityImmeInner;
+        SystemAbilityManagerStub::LocalCheckSystemAbilityImme;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::UNSUBSCRIBE_SYSTEM_ABILITY_TRANSACTION)] =
-        &SystemAbilityManagerStub::UnSubsSystemAbilityInner;
+        SystemAbilityManagerStub::LocalUnSubsSystemAbility;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::LOAD_SYSTEM_ABILITY_TRANSACTION)] =
-        &SystemAbilityManagerStub::LoadSystemAbilityInner;
+        SystemAbilityManagerStub::LocalLoadSystemAbility;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::LOAD_REMOTE_SYSTEM_ABILITY_TRANSACTION)] =
-        &SystemAbilityManagerStub::LoadRemoteSystemAbilityInner;
+        SystemAbilityManagerStub::LocalLoadRemoteSystemAbility;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::UNLOAD_SYSTEM_ABILITY_TRANSACTION)] =
-        &SystemAbilityManagerStub::UnloadSystemAbilityInner;
+        SystemAbilityManagerStub::LocalUnloadSystemAbility;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::CANCEL_UNLOAD_SYSTEM_ABILITY_TRANSACTION)] =
-        &SystemAbilityManagerStub::CancelUnloadSystemAbilityInner;
+        SystemAbilityManagerStub::LocalCancelUnloadSystemAbility;
 }
 
 void SystemAbilityManagerStub::SetProcessFuncMap()
 {
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::ADD_SYSTEM_PROCESS_TRANSACTION)] =
-        &SystemAbilityManagerStub::AddSystemProcessInner;
+        SystemAbilityManagerStub::LocalAddSystemProcess;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_SYSTEM_PROCESS_INFO_TRANSACTION)] =
-        &SystemAbilityManagerStub::GetSystemProcessInfoInner;
+        SystemAbilityManagerStub::LocalGetSystemProcessInfo;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_RUNNING_SYSTEM_PROCESS_TRANSACTION)] =
-        &SystemAbilityManagerStub::GetRunningSystemProcessInner;
+        SystemAbilityManagerStub::LocalGetRunningSystemProcess;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::SUBSCRIBE_SYSTEM_PROCESS_TRANSACTION)] =
-        &SystemAbilityManagerStub::SubscribeSystemProcessInner;
+        SystemAbilityManagerStub::LocalSubscribeSystemProcess;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::UNSUBSCRIBE_SYSTEM_PROCESS_TRANSACTION)] =
-        &SystemAbilityManagerStub::UnSubscribeSystemProcessInner;
+        SystemAbilityManagerStub::LocalUnSubscribeSystemProcess;
 }
 
 SystemAbilityManagerStub::SystemAbilityManagerStub()
@@ -158,25 +158,25 @@ SystemAbilityManagerStub::SystemAbilityManagerStub()
     SetAbilityFuncMap();
     SetProcessFuncMap();
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_ONDEMAND_REASON_EXTRA_DATA_TRANSACTION)] =
-        &SystemAbilityManagerStub::GetOnDemandReasonExtraDataInner;
+        SystemAbilityManagerStub::LocalGetOnDemandReasonExtraData;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_ONDEAMND_POLICY_TRANSACTION)] =
-        &SystemAbilityManagerStub::GetOnDemandPolicyInner;
+        SystemAbilityManagerStub::LocalGetOnDemandPolicy;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::UPDATE_ONDEAMND_POLICY_TRANSACTION)] =
-        &SystemAbilityManagerStub::UpdateOnDemandPolicyInner;
+        SystemAbilityManagerStub::LocalUpdateOnDemandPolicy;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_ONDEMAND_SYSTEM_ABILITY_IDS_TRANSACTION)] =
-        &SystemAbilityManagerStub::GetOnDemandSystemAbilityIdsInner;
+        SystemAbilityManagerStub::LocalGetOnDemandSystemAbilityIds;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::SEND_STRATEGY_TRANASACTION)] =
-        &SystemAbilityManagerStub::SendStrategyInner;
+        SystemAbilityManagerStub::LocalSendStrategy;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::UNLOAD_ALL_IDLE_SYSTEM_ABILITY_TRANSACTION)] =
-        &SystemAbilityManagerStub::UnloadAllIdleSystemAbilityInner;
+        SystemAbilityManagerStub::LocalUnloadAllIdleSystemAbility;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_EXTENSION_SA_IDS_TRANSCATION)] =
-        &SystemAbilityManagerStub::GetExtensionSaIdsInner;
+        SystemAbilityManagerStub::LocalGetExtensionSaIds;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_EXTERNSION_SA_LIST_TRANSCATION)] =
-        &SystemAbilityManagerStub::GetExtensionRunningSaListInner;
+        SystemAbilityManagerStub::LocalGetExtensionRunningSaList;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_SA_EXTENSION_INFO_TRANSCATION)] =
-        &SystemAbilityManagerStub::GetRunningSaExtensionInfoListInner;
+        SystemAbilityManagerStub::LocalGetRunningSaExtensionInfoList;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_COMMON_EVENT_EXTRA_ID_LIST_TRANSCATION)] =
-        &SystemAbilityManagerStub::GetCommonEventExtraDataIdlistInner;
+        SystemAbilityManagerStub::LocalGetCommonEventExtraDataIdlist;
 }
 
 int32_t SystemAbilityManagerStub::OnRemoteRequest(uint32_t code,
@@ -191,10 +191,7 @@ int32_t SystemAbilityManagerStub::OnRemoteRequest(uint32_t code,
     }
     auto itFunc = memberFuncMap_.find(code);
     if (itFunc != memberFuncMap_.end()) {
-        auto memberFunc = itFunc->second;
-        if (memberFunc != nullptr) {
-            return (this->*memberFunc)(data, reply);
-        }
+        return itFunc->second(this, data, reply);
     }
     HILOGW("SAMStub: default case, need check.");
     return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -266,6 +263,7 @@ int32_t SystemAbilityManagerStub::SubsSystemAbilityInner(MessageParcel& data, Me
         HILOGW("SubsSystemAbilityInner iface_cast failed!");
         return ERR_NULL_OBJECT;
     }
+    SamgrXCollie samgrXCollie("samgr--SubsSA_" + ToString(systemAbilityId));
     int32_t result = SubscribeSystemAbility(systemAbilityId, listener);
     HILOGD("SubsSystemAbilityInner result is %{public}d", result);
     ret = reply.WriteInt32(result);
@@ -413,6 +411,7 @@ int32_t SystemAbilityManagerStub::CheckSystemAbilityImmeInner(MessageParcel& dat
         HILOGW("CheckSystemAbilityImmeInner read isExist failed!");
         return ERR_FLATTEN_OBJECT;
     }
+    SamgrXCollie samgrXCollie("samgr--CheckSAImme_" + ToString(systemAbilityId));
     sptr<IRemoteObject> remoteObject = CheckSystemAbility(systemAbilityId, isExist);
     if (remoteObject == nullptr) {
         HILOGD("CheckSystemAbilityImmeInner SA:%{public}d CheckSystemAbility failed.", systemAbilityId);
@@ -622,7 +621,7 @@ int32_t SystemAbilityManagerStub::LoadSystemAbilityInner(MessageParcel& data, Me
     sptr<IRemoteObject> remoteObject = nullptr;
     sptr<ISystemAbilityLoadCallback> callback = nullptr;
     {
-        SamgrXCollie samgrXCollie("samgrStub::loadSa_readData");
+        SamgrXCollie samgrXCollie("samgrStub--loadSa_readData");
         ret = data.ReadInt32(systemAbilityId);
         if (!ret) {
             HILOGW("LoadSystemAbilityInner read SAId failed!");
@@ -654,12 +653,13 @@ int32_t SystemAbilityManagerStub::LoadSystemAbilityInner(MessageParcel& data, Me
 
     int32_t result = LoadSystemAbility(systemAbilityId, callback);
     if (result != ERR_OK) {
-        ReportSamgrSaLoadFail(systemAbilityId, "interface load err:" + ToString(result));
+        ReportSamgrSaLoadFail(systemAbilityId, IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(),
+            "interface load err:" + ToString(result));
         HILOGE("loadSaInner fail ret:%{public}d", result);
     }
     HILOGD("LoadSystemAbilityInner result is %{public}d", result);
     {
-        SamgrXCollie samgrXCollie("samgrStub::loadSa_writeResult_" + ToString(systemAbilityId));
+        SamgrXCollie samgrXCollie("samgrStub--loadSa_writeResult_" + ToString(systemAbilityId));
         ret = reply.WriteInt32(result);
     }
     if (!ret) {
@@ -677,7 +677,7 @@ int32_t SystemAbilityManagerStub::LoadRemoteSystemAbilityInner(MessageParcel& da
     sptr<IRemoteObject> remoteObject = nullptr;
     sptr<ISystemAbilityLoadCallback> callback = nullptr;
     {
-        SamgrXCollie samgrXCollie("samgrStub::loadRmtSa_readData");
+        SamgrXCollie samgrXCollie("samgrStub--loadRmtSa_readData");
         ret = data.ReadInt32(systemAbilityId);
         if (!ret) {
             HILOGW("LoadRemoteSystemAbilityInner read SAId invalid");
@@ -713,7 +713,7 @@ int32_t SystemAbilityManagerStub::LoadRemoteSystemAbilityInner(MessageParcel& da
     int32_t result = LoadSystemAbility(systemAbilityId, deviceId, callback);
     HILOGD("LoadRemoteSystemAbilityInner result is %{public}d", result);
     {
-        SamgrXCollie samgrXCollie("samgrStub::loadRmtSa_writeResult_" + ToString(systemAbilityId));
+        SamgrXCollie samgrXCollie("samgrStub--loadRmtSa_writeResult_" + ToString(systemAbilityId));
         ret = reply.WriteInt32(result);
     }
     if (!ret) {
@@ -728,7 +728,7 @@ int32_t SystemAbilityManagerStub::UnloadSystemAbilityInner(MessageParcel& data, 
     int32_t systemAbilityId = -1;
     bool ret = false;
     {
-        SamgrXCollie samgrXCollie("samgrStub::unloadSa_readData");
+        SamgrXCollie samgrXCollie("samgrStub--unloadSa_readData");
         ret = data.ReadInt32(systemAbilityId);
         if (!ret) {
             HILOGW("UnloadSystemAbilityInner read SAId invalid");
@@ -742,12 +742,13 @@ int32_t SystemAbilityManagerStub::UnloadSystemAbilityInner(MessageParcel& data, 
 
     int32_t result = UnloadSystemAbility(systemAbilityId);
     if (result != ERR_OK) {
-        ReportSaUnLoadFail(systemAbilityId, "interface unload err:" + ToString(result));
+        ReportSaUnLoadFail(systemAbilityId, IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(),
+            "interface unload err:" + ToString(result));
         HILOGE("unloadSa fail ret:%{public}d", result);
     }
     HILOGD("UnloadSystemAbilityInner result is %{public}d", result);
     {
-        SamgrXCollie samgrXCollie("samgrStub::unloadSa_writeResult_" + ToString(systemAbilityId));
+        SamgrXCollie samgrXCollie("samgrStub--unloadSa_writeResult_" + ToString(systemAbilityId));
         ret = reply.WriteInt32(result);
     }
     if (!ret) {
@@ -1055,6 +1056,10 @@ int32_t SystemAbilityManagerStub::GetOnDemandSystemAbilityIdsInner(MessageParcel
 {
     std::vector<int32_t> systemAbilityIds;
     int32_t result = GetOnDemandSystemAbilityIds(systemAbilityIds);
+    if (result != ERR_OK) {
+        HILOGW("GetOnDemandSystemAbilityIds failed, ret:%{public}d", result);
+        return result;
+    }
     if (!reply.WriteInt32(result)) {
         HILOGE("GetOnDemandSystemAbilityIdsInner write result failed.");
         return ERR_FLATTEN_OBJECT;
@@ -1068,10 +1073,10 @@ int32_t SystemAbilityManagerStub::GetOnDemandSystemAbilityIdsInner(MessageParcel
 
 bool SystemAbilityManagerStub::CanRequest()
 {
-    auto accessTokenId = IPCSkeleton::GetCallingTokenID();
-    AccessToken::ATokenTypeEnum tokenType = AccessToken::AccessTokenKit::GetTokenTypeFlag(accessTokenId);
-    HILOGD("CanRequest tokenId:%{private}u, tokenType:%{public}d",
-        accessTokenId, tokenType);
+    auto tid = IPCSkeleton::GetCallingTokenID();
+    AccessToken::ATokenTypeEnum tokenType = AccessToken::AccessTokenKit::GetTokenTypeFlag(tid);
+    HILOGD("CanRequest tid:%{private}u, tokenType:%{public}d",
+        tid, tokenType);
     return (tokenType == AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
 }
 
@@ -1096,6 +1101,10 @@ int32_t SystemAbilityManagerStub::GetExtensionSaIdsInner(MessageParcel& data, Me
 
     std::vector<int32_t> saIds;
     int32_t result = GetExtensionSaIds(extension, saIds);
+    if (result != ERR_OK) {
+        HILOGW("GetExtensionSaIds failed, ret:%{public}d", result);
+        return result;
+    }
     if (!reply.WriteInt32(result)) {
         HILOGW("%{public}s write reply failed.", __func__);
         return ERR_FLATTEN_OBJECT;
@@ -1122,6 +1131,10 @@ int32_t SystemAbilityManagerStub::GetExtensionRunningSaListInner(MessageParcel& 
 
     std::vector<sptr<IRemoteObject>> saList;
     int32_t result = GetExtensionRunningSaList(extension, saList);
+    if (result != ERR_OK) {
+        HILOGW("GetExtensionRunningSaList failed, ret:%{public}d", result);
+        return result;
+    }
     if (!reply.WriteInt32(result)) {
         HILOGW("%{public}s write reply failed.", __func__);
         return ERR_FLATTEN_OBJECT;

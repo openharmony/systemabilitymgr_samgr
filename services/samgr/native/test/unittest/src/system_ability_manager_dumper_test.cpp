@@ -62,6 +62,36 @@ HWTEST_F(SystemAbilityManagerDumperTest, CanDump001, TestSize.Level3)
 }
 
 /**
+ * @tc.name: FfrtDumpProc001
+ * @tc.desc: FfrtDumpProc
+ * @tc.type: FUNC
+ * @tc.require: I9I86P
+ */
+
+HWTEST_F(SystemAbilityManagerDumperTest, FfrtDumpProc001, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler;
+    int32_t fd = -1;
+    const std::vector<std::string> args;
+    auto ret = SystemAbilityManagerDumper::FfrtDumpProc(abilityStateScheduler, fd, args);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: GetSAMgrFfrtInfo001
+ * @tc.desc: GetSAMgrFfrtInfo
+ * @tc.type: FUNC
+ * @tc.require: I9I86P
+ */
+
+HWTEST_F(SystemAbilityManagerDumperTest, GetSAMgrFfrtInfo001, TestSize.Level3)
+{
+    std::string result;
+    SystemAbilityManagerDumper::GetSAMgrFfrtInfo(result);
+    EXPECT_NE(result.size(), 0);
+}
+
+/**
  * @tc.name: ShowAllSystemAbilityInfo001
  * @tc.desc: ShowAllSystemAbilityInfo
  * @tc.type: FUNC

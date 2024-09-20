@@ -167,7 +167,7 @@ HWTEST_F(SamgrUtilTest, TransformDeviceId002, TestSize.Level3)
  */
 HWTEST_F(SamgrUtilTest, CheckCallerProcess001, TestSize.Level3)
 {
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     saProfile.process = u"";
     /**
      * @tc.steps: step1. test ConvertToOnDemandEvent
@@ -192,7 +192,7 @@ HWTEST_F(SamgrUtilTest, CheckCallerProcess001, TestSize.Level3)
  */
 HWTEST_F(SamgrUtilTest, CheckCallerProcess002, TestSize.Level3)
 {
-    SaProfile saProfile;
+    CommonSaProfile saProfile;
     saProfile.process = PROCESS_NAME;
     /**
      * @tc.steps: step1. test ConvertToSystemAbilityOnDemandEvent
@@ -218,8 +218,8 @@ HWTEST_F(SamgrUtilTest, CheckCallerProcess002, TestSize.Level3)
 HWTEST_F(SamgrUtilTest, CheckAllowUpdate001, TestSize.Level3)
 {
     OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
-    SaProfile saProfile;
-    saProfile.startOnDemand.allowUpdate = true;
+    CommonSaProfile saProfile;
+    saProfile.startAllowUpdate = true;
     bool ret = SamgrUtil::CheckAllowUpdate(type, saProfile);
     EXPECT_EQ(true, ret);
 }
@@ -233,8 +233,8 @@ HWTEST_F(SamgrUtilTest, CheckAllowUpdate001, TestSize.Level3)
 HWTEST_F(SamgrUtilTest, CheckAllowUpdate002, TestSize.Level3)
 {
     OnDemandPolicyType type = OnDemandPolicyType::STOP_POLICY;
-    SaProfile saProfile;
-    saProfile.stopOnDemand.allowUpdate = true;
+    CommonSaProfile saProfile;
+    saProfile.stopAllowUpdate = true;
     bool ret = SamgrUtil::CheckAllowUpdate(type, saProfile);
     EXPECT_EQ(true, ret);
 }
@@ -248,8 +248,8 @@ HWTEST_F(SamgrUtilTest, CheckAllowUpdate002, TestSize.Level3)
 HWTEST_F(SamgrUtilTest, CheckAllowUpdate003, TestSize.Level3)
 {
     OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
-    SaProfile saProfile;
-    saProfile.startOnDemand.allowUpdate = false;
+    CommonSaProfile saProfile;
+    saProfile.startAllowUpdate= false;
     bool ret = SamgrUtil::CheckAllowUpdate(type, saProfile);
     EXPECT_EQ(false, ret);
 }
@@ -263,8 +263,8 @@ HWTEST_F(SamgrUtilTest, CheckAllowUpdate003, TestSize.Level3)
 HWTEST_F(SamgrUtilTest, CheckAllowUpdate004, TestSize.Level3)
 {
     OnDemandPolicyType type = OnDemandPolicyType::STOP_POLICY;
-    SaProfile saProfile;
-    saProfile.startOnDemand.allowUpdate = false;
+    CommonSaProfile saProfile;
+    saProfile.startAllowUpdate = false;
     bool ret = SamgrUtil::CheckAllowUpdate(type, saProfile);
     EXPECT_EQ(false, ret);
 }
@@ -342,7 +342,7 @@ HWTEST_F(SamgrUtilTest, SendUpdateSaState001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     saMgr->saProfileMap_.clear();
-    SaProfile saprofile;
+    CommonSaProfile saprofile;
     saprofile.moduleUpdate = true;
     saMgr->saProfileMap_[saprofile.saId] = saprofile;
     SamgrUtil::SendUpdateSaState(saprofile.saId, "test");

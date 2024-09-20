@@ -18,6 +18,7 @@
 #include <cinttypes>
 #include <dlfcn.h>
 #include <fstream>
+#include <unistd.h>
 #include <memory>
 #include <sstream>
 #include <vector>
@@ -65,11 +66,14 @@ constexpr const char* SA_TAG_PARAM = "param";
 constexpr const char* SA_TAG_TIEMD_EVENT = "timedevent";
 constexpr const char* SA_TAG_RECYCLE_STRATEGY = "recycle-strategy";
 constexpr const char* SA_TAG_EXTENSION = "extension";
+constexpr const char* SA_TAG_UNREF_UNLOAD = "unreferenced-unload";
+constexpr const char* SA_TAG_LONGTIMEUNUSED_UNLOAD = "longtimeunused-unload";
 constexpr int32_t MAX_JSON_OBJECT_SIZE = 50 * 1024;
 constexpr int32_t MAX_JSON_STRING_LENGTH = 128;
 constexpr int32_t FIRST_SYS_ABILITY_ID = 0x00000000;
 constexpr int32_t LAST_SYS_ABILITY_ID = 0x00ffffff;
 constexpr int32_t MAX_EXTENSIONO_NUM = 100;
+constexpr int32_t MAX_DLOPEN_SECONDS = 60;
 constexpr const char* BOOT_START_PHASE = "BootStartPhase";
 constexpr const char* CORE_START_PHASE = "CoreStartPhase";
 constexpr const char* HIGH_LOAD_PRIORITY = "HighPriority";
@@ -146,8 +150,10 @@ void ParseUtil::OpenSo(SaProfile& saProfile)
         HITRACE_METER_NAME(HITRACE_TAG_SAMGR, dlopenTag);
         int64_t begin = GetTickCount();
         DlHandle handle = nullptr;
-        {
-            SamgrXCollie samgrXCollie("safwk::openso_" + ToString(saProfile.saId));
+        if (saProfile.runOnCreate) {
+            handle = dlopen(saProfile.libPath.c_str(), RTLD_NOW);
+        } else {
+            SamgrXCollie samgrXCollie("safwk--openso_" + ToString(saProfile.saId), MAX_DLOPEN_SECONDS);
             handle = dlopen(saProfile.libPath.c_str(), RTLD_NOW);
         }
         int64_t duration = GetTickCount() - begin;
@@ -161,7 +167,7 @@ void ParseUtil::OpenSo(SaProfile& saProfile)
             if (libPathVec.size() > 0) {
                 fileName = libPathVec[libPathVec.size() - 1];
             }
-            ReportAddSystemAbilityFailed(saProfile.saId, fileName);
+            ReportAddSystemAbilityFailed(saProfile.saId, getpid(), getuid(), fileName);
             HILOGE("SA:%{public}d dlopen %{public}s failed with errno:%{public}s!",
                 saProfile.saId, fileName.c_str(), dlerror());
             return;
@@ -490,7 +496,9 @@ void ParseUtil::ParseStopOndemandTag(const nlohmann::json& systemAbilityJson,
     }
     ParseOndemandTag(onDemandJson, stopOnDemand.onDemandEvents);
     GetBoolFromJson(onDemandJson, SA_TAG_ALLOW_UPDATE, stopOnDemand.allowUpdate);
+    GetBoolFromJson(onDemandJson, SA_TAG_UNREF_UNLOAD, stopOnDemand.unrefUnload);
     GetInt32FromJson(onDemandJson, SA_TAG_RECYCLE_DELAYTIME, stopOnDemand.delayTime);
+    GetInt32FromJson(onDemandJson, SA_TAG_LONGTIMEUNUSED_UNLOAD, stopOnDemand.unusedTimeout);
 }
 
 void ParseUtil::GetOnDemandArrayFromJson(int32_t eventId, const nlohmann::json& obj,

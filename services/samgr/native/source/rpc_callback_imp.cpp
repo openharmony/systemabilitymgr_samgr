@@ -24,6 +24,11 @@ sptr<IRemoteObject> RpcCallbackImp::GetSystemAbilityFromRemote(int32_t systemAbi
     return SystemAbilityManager::GetInstance()->GetSystemAbilityFromRemote(systemAbilityId);
 }
 
+bool RpcCallbackImp::IsDistributedSystemAbility(int32_t systemAbilityId)
+{
+    return SystemAbilityManager::GetInstance()->IsDistributedSystemAbility(systemAbilityId);
+}
+
 bool RpcCallbackImp::LoadSystemAbilityFromRemote(const std::string& srcNetworkId, int32_t systemAbilityId)
 {
     HILOGI("LoadSystemAbilityFromRemote! deviceId : %{public}s, said : %{public}d",

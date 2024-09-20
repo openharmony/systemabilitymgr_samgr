@@ -120,7 +120,41 @@ void FuzzTestUtils::FuzzTestRemoteRequest(const uint8_t *rawData, size_t size, u
         HILOGI("TestRequest=%{public}u:SetFfrt", code);
         manager->SetFfrt();
     }
-    manager->OnRemoteRequest(code, data, reply, option);
+    int32_t ret = manager->OnRemoteRequest(code, data, reply, option);
+    HILOGI("TestRequest=%{public}u: ret=%{public}u", code, ret);
+    manager->CleanFfrt();
+}
+
+void FuzzTestUtils::FuzzTestRemoteRequest(MessageParcel& data, uint32_t code)
+{
+    SamMockPermission::MockPermission();
+    MessageParcel reply;
+    MessageOption option;
+    sptr<SystemAbilityManager> manager = SystemAbilityManager::GetInstance();
+    if (!g_flag) {
+        HILOGI("FuzzTestRequest=%{public}u:Init", code);
+        manager->Init();
+        g_flag = true;
+        HILOGI("FuzzTestRequest=%{public}u:Init AddDeviceManager", code);
+        AddDeviceManager();
+        sleep(INIT_TIME);
+        if (!IsDmReady()) {
+            HILOGE("FuzzTestRequest=%{public}u:Init CleanFfrt", code);
+            manager->CleanFfrt();
+            return;
+        }
+    } else {
+        HILOGI("FuzzTestRequest=%{public}u:AddDeviceManager", code);
+        AddDeviceManager();
+        if (!IsDmReady()) {
+            HILOGE("FuzzTestRequest=%{public}u:dm no ready,return", code);
+            return;
+        }
+        HILOGI("FuzzTestRequest=%{public}u:SetFfrt", code);
+        manager->SetFfrt();
+    }
+    int32_t ret = manager->OnRemoteRequest(code, data, reply, option);
+    HILOGI("FuzzTestRequest=%{public}u: ret=%{public}u", code, ret);
     manager->CleanFfrt();
 }
 }

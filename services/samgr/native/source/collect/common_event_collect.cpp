@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 
+#include <cinttypes>
+
 #include "common_event_collect.h"
 
 #include "ability_death_recipient.h"
@@ -25,6 +27,7 @@
 #include "sam_log.h"
 #include "sa_profiles.h"
 #include "system_ability_manager.h"
+#include "samgr_xcollie.h"
 
 using namespace OHOS::AppExecFwk;
 namespace OHOS {
@@ -44,6 +47,13 @@ constexpr const char* COMMON_EVENT_ACTION_NAME = "common_event_action_name";
 CommonEventCollect::CommonEventCollect(const sptr<IReport>& report)
     : ICollectPlugin(report)
 {
+}
+
+void CommonEventCollect::RemoveWhiteCommonEvent()
+{
+    std::lock_guard<std::mutex> autoLock(commonEventStateLock_);
+    commonEventWhitelist.erase(EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED);
+    HILOGI("rm USER_UNLOCKED,size=%{public}zu", commonEventWhitelist.size());
 }
 
 void CommonEventCollect::CleanFfrt()
@@ -167,21 +177,26 @@ bool CommonEventCollect::CreateCommonEventSubscriber()
 
 bool CommonEventCollect::CreateCommonEventSubscriberLocked()
 {
-    EventFwk::MatchingSkills skill;
+    int64_t begin = GetTickCount();
     if (commonEventSubscriber_ != nullptr) {
-        skill = commonEventSubscriber_->GetSubscribeInfo().GetMatchingSkills();
-        AddSkillsEvent(skill);
-        bool isUnsubscribe = EventFwk::CommonEventManager::UnSubscribeCommonEvent(commonEventSubscriber_);
-        if (!isUnsubscribe) {
-            HILOGE("OnAddSystemAbility isUnsubscribe failed!");
+        HILOGI("UnSubsComEvt start");
+        {
+            SamgrXCollie samgrXCollie("samgr--UnSubscribeCommonEvent");
+            bool isUnsubscribe = EventFwk::CommonEventManager::UnSubscribeCommonEvent(commonEventSubscriber_);
+            if (!isUnsubscribe) {
+                HILOGE("CreateCommonEventSubscriberLocked isUnsubscribe failed!");
+                return false;
+            }
         }
-    } else {
-        skill = EventFwk::MatchingSkills();
-        AddSkillsEvent(skill);
-        EventFwk::CommonEventSubscribeInfo info(skill);
-        commonEventSubscriber_ = std::make_shared<CommonEventSubscriber>(info, this);
+        commonEventSubscriber_.reset();
     }
-    return EventFwk::CommonEventManager::SubscribeCommonEvent(commonEventSubscriber_);
+    EventFwk::MatchingSkills skill = EventFwk::MatchingSkills();
+    AddSkillsEvent(skill);
+    EventFwk::CommonEventSubscribeInfo info(skill);
+    commonEventSubscriber_ = std::make_shared<CommonEventSubscriber>(info, this);
+    bool ret = EventFwk::CommonEventManager::SubscribeCommonEvent(commonEventSubscriber_);
+    HILOGI("SubsComEvt %{public}" PRId64 "ms %{public}s", (GetTickCount() - begin), ret ? "suc" : "fail");
+    return ret;
 }
 
 bool CommonEventCollect::SendEvent(uint32_t eventId)
@@ -307,7 +322,6 @@ std::string CommonEventCollect::GetParamFromWant(const std::string& key, const A
 
 int64_t CommonEventCollect::SaveOnDemandReasonExtraData(const EventFwk::CommonEventData& data)
 {
-    std::lock_guard<std::mutex> autoLock(extraDataLock_);
     HILOGD("CommonEventCollect extraData code: %{public}d, data: %{public}s", data.GetCode(),
         data.GetData().c_str());
     AAFwk::Want want = data.GetWant();
@@ -327,9 +341,12 @@ int64_t CommonEventCollect::SaveOnDemandReasonExtraData(const EventFwk::CommonEv
     }
     wantMap[COMMON_EVENT_ACTION_NAME] = want.GetAction();
     OnDemandReasonExtraData extraData(data.GetCode(), data.GetData(), wantMap);
+
+    std::lock_guard<std::mutex> autoLock(extraDataLock_);
     int64_t extraDataId = GenerateExtraDataIdLocked();
     extraDatas_[extraDataId] = extraData;
-    HILOGI("CommonEventCollect save extraData %{public}d", static_cast<int32_t>(extraDataId));
+    HILOGI("CommonEventCollect save extraData %{public}d,n:%{public}zu",
+        static_cast<int32_t>(extraDataId), extraDatas_.size());
     if (workHandler_ == nullptr) {
         HILOGI("CommonEventCollect workHandler is nullptr");
         return -1;
@@ -541,7 +558,7 @@ bool CommonHandler::SendEvent(uint32_t eventId)
         HILOGE("CommonEventCollect SendEvent handler is null!");
         return false;
     }
-    auto task = std::bind(&CommonHandler::ProcessEvent, this, eventId, 0);
+    auto task = [this, eventId] {this->ProcessEvent(eventId, 0);};
     return handler_->PostTask(task);
 }
 
@@ -551,7 +568,7 @@ bool CommonHandler::SendEvent(uint32_t eventId, int64_t extraDataId, uint64_t de
         HILOGE("CommonEventCollect SendEvent handler is null!");
         return false;
     }
-    auto task = std::bind(&CommonHandler::ProcessEvent, this, eventId, extraDataId);
+    auto task = [this, eventId, extraDataId] {this->ProcessEvent(eventId, extraDataId);};
     return handler_->PostTask(task, delayTime);
 }
 

@@ -142,6 +142,7 @@ bool DeviceNetworkingCollect::AddDeviceChangeListener()
             HILOGE("RegisterDevStateCallback error");
             return false;
         }
+        HILOGI("AddDeviceChangeListener success");
         return true;
     }
     return false;
@@ -192,21 +193,16 @@ void DeviceInitCallBack::OnRemoteDied()
 void DeviceStateCallback::OnDeviceOnline(const DmDeviceInfo& deviceInfo)
 {
     HILOGI("DeviceNetworkingCollect OnDeviceOnline size %{public}zu", deviceOnlineSet_.size());
-    bool isOnline = false;
     {
         lock_guard<mutex> autoLock(deviceOnlineLock_);
-        isOnline = deviceOnlineSet_.empty();
         deviceOnlineSet_.emplace(deviceInfo.networkId);
     }
-    if (isOnline) {
+
+    if (collect_ != nullptr) {
         OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
-        if (collect_ != nullptr) {
-            collect_->ReportEvent(event);
-        } else {
-            HILOGE("OnDeviceOnline collect_ isnull");
-        }
+        collect_->ReportEvent(event);
     } else {
-        HILOGI("OnDeviceOnline not report size %{public}zu", deviceOnlineSet_.size());
+        HILOGE("OnDeviceOnline collect_ isnull");
     }
 }
 
@@ -218,9 +214,6 @@ void DeviceStateCallback::OnDeviceOffline(const DmDeviceInfo& deviceInfo)
         lock_guard<mutex> autoLock(deviceOnlineLock_);
         deviceOnlineSet_.erase(deviceInfo.networkId);
         isOffline = deviceOnlineSet_.empty();
-        if (isOffline) {
-            isExistDeviceReady_ = false;
-        }
     }
     if (isOffline) {
         OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "off" };
@@ -260,13 +253,12 @@ void DeviceStateCallback::OnDeviceChanged(const DmDeviceInfo& deviceInfo)
 void DeviceStateCallback::OnDeviceReady(const DmDeviceInfo& deviceInfo)
 {
     HILOGI("DeviceNetworkingCollect DeviceStateCallback OnDeviceReady");
-    lock_guard<mutex> autoLock(deviceOnlineLock_);
-    if (!isExistDeviceReady_) {
-        OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "ready" };
-        if (collect_ != nullptr) {
-            collect_->ReportEvent(event);
-        }
-        isExistDeviceReady_ = true;
+    OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "ready" };
+
+    if (collect_ != nullptr) {
+        collect_->ReportEvent(event);
+    } else {
+        HILOGE("OnDeviceOnline collect_ isnull");
     }
 }
 
@@ -300,14 +292,13 @@ void WorkHandler::ProcessEvent(uint32_t eventId)
     }
     if (!collect_->AddDeviceChangeListener()) {
         HILOGW("AddDeviceChangeListener retry");
-        auto task = std::bind(&WorkHandler::ProcessEvent, this, INIT_EVENT);
+        auto task = [this] {this->ProcessEvent(INIT_EVENT);};
         if (handler_ == nullptr) {
             HILOGE("NetworkingCollect ProcessEvent handler is null!");
             return;
         }
         handler_->PostTask(task, DELAY_TIME);
     }
-    HILOGI("AddDeviceChangeListener success");
 }
 
 bool WorkHandler::SendEvent(uint32_t eventId)
@@ -316,7 +307,7 @@ bool WorkHandler::SendEvent(uint32_t eventId)
         HILOGE("NetworkingCollect SendEvent handler is null!");
         return false;
     }
-    auto task = std::bind(&WorkHandler::ProcessEvent, this, eventId);
+    auto task = [this, eventId] {this->ProcessEvent(eventId);};
     return handler_->PostTask(task);
 }
 
@@ -326,7 +317,7 @@ bool WorkHandler::SendEvent(uint32_t eventId, uint64_t delayTime)
         HILOGE("NetworkingCollect SendEvent handler is null!");
         return false;
     }
-    auto task = std::bind(&WorkHandler::ProcessEvent, this, eventId);
+    auto task = [this, eventId] {this->ProcessEvent(eventId);};
     return handler_->PostTask(task, delayTime);
 }
 }  // namespace OHOS

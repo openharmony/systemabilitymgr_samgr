@@ -93,6 +93,7 @@ HWTEST_F(CommonEventCollectTest, OnStop001, TestSize.Level3)
 {
     DTEST_LOG << " OnStop001 BEGIN" << std::endl;
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
+    commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
     int32_t ret = commonEventCollect->OnStop();
     EXPECT_EQ(ERR_OK, ret);
 }
@@ -141,8 +142,11 @@ HWTEST_F(CommonEventCollectTest, ProcessEvent001, TestSize.Level3)
     DTEST_LOG << " ProcessEvent001 BEGIN" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
+    commonEventCollect->workHandler_ = nullptr;
+    int32_t ret = commonEventCollect->SendEvent(COMMON_DIED_EVENT + 1);
+    EXPECT_EQ(false, ret);
     commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
-    int32_t ret = commonEventCollect->workHandler_->SendEvent(COMMON_DIED_EVENT + 1);
+    ret = commonEventCollect->workHandler_->SendEvent(COMMON_DIED_EVENT + 1);
     EXPECT_EQ(true, ret);
     auto workHandler = std::static_pointer_cast<CommonHandler>(commonEventCollect->workHandler_);
     workHandler->commonCollect_ = nullptr;
@@ -246,6 +250,8 @@ HWTEST_F(CommonEventCollectTest, OnReceiveEvent001, TestSize.Level3)
     commonEventCollect->SaveAction(action);
     action = EventFwk::CommonEventSupport::COMMON_EVENT_DISCHARGING;
     commonEventCollect->SaveAction(action);
+    action = EventFwk::CommonEventSupport::COMMON_EVENT_POWER_DISCONNECTED;
+    commonEventCollect->SaveAction(action);
     commonEventCollect->workHandler_ = nullptr;
     int32_t ret = commonEventCollect->OnStop();
     EXPECT_EQ(ERR_OK, ret);
@@ -261,8 +267,10 @@ HWTEST_F(CommonEventCollectTest, AddCollectEvent001, TestSize.Level3)
 {
     DTEST_LOG << "AddCollectEvent001 begin" << std::endl;
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
-    OnDemandEvent event;
+    OnDemandEvent event = {COMMON_EVENT, "TEST", "TEST"};;
     int32_t ret = commonEventCollect->AddCollectEvent(event);
+    EXPECT_EQ(ret, ERR_OK);
+    ret = commonEventCollect->AddCollectEvent(event);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "AddCollectEvent001 end" << std::endl;
 }
@@ -774,4 +782,55 @@ HWTEST_F(CommonEventCollectTest, SaveOnDemandConditionExtraData001, TestSize.Lev
     DTEST_LOG << " SaveOnDemandConditionExtraData001 END" << std::endl;
 }
 
+/**
+ * @tc.name: RemoveWhiteCommonEvent001
+ * @tc.desc: test RemoveWhiteCommonEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonEventCollectTest, RemoveWhiteCommonEvent001, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
+    commonEventCollect->RemoveWhiteCommonEvent();
+    EXPECT_NE(commonEventCollect, nullptr);
+    DTEST_LOG << " RemoveWhiteCommonEvent001 END" << std::endl;
+}
+
+/**
+ * @tc.name: CleanFailedEventLocked001
+ * @tc.desc: test CleanFailedEventLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonEventCollectTest, CleanFailedEventLocked001, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
+    EventFwk::MatchingSkills skill = EventFwk::MatchingSkills();
+    EventFwk::CommonEventSubscribeInfo info(skill);
+    std::shared_ptr<CommonEventSubscriber> commonEventStatusSubscriber
+        = std::make_shared<CommonEventSubscriber>(info, commonEventCollect);
+    commonEventCollect->commonEventSubscriber_ = commonEventStatusSubscriber;
+    commonEventCollect->CleanFailedEventLocked("test");
+    commonEventCollect->commonEventSubscriber_ = nullptr;
+    commonEventCollect->CleanFailedEventLocked("test");
+    EXPECT_NE(commonEventCollect, nullptr);
+    DTEST_LOG << " CleanFailedEventLocked001 END" << std::endl;
+}
+
+/**
+ * @tc.name: OnRemoveSystemAbility001
+ * @tc.desc: test OnRemoveSystemAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonEventCollectTest, OnRemoveSystemAbility001, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
+    sptr<CommonEventListener> commonEventListener = new CommonEventListener(commonEventCollect);
+    commonEventListener->OnRemoveSystemAbility(1, "test");
+    commonEventListener->commonEventCollect_ = nullptr;
+    commonEventListener->OnAddSystemAbility(1, "test");
+    EXPECT_NE(commonEventCollect, nullptr);
+    DTEST_LOG << " OnRemoveSystemAbility001 END" << std::endl;
+}
 } // namespace OHOS

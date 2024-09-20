@@ -782,6 +782,176 @@ HWTEST_F(SystemAbilityMgrProxyTest, GetRunningSystemProcess001, TestSize.Level3)
 }
 
 /**
+ * @tc.name: ReadSystemProcessFromParcel001
+ * @tc.desc: ReadSystemProcessFromParcel
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, ReadSystemProcessFromParcel001, TestSize.Level3)
+{
+    DTEST_LOG << " ReadSystemProcessFromParcel001 start " << std::endl;
+    sptr<SystemAbilityManagerProxy> sm = new SystemAbilityManagerProxy(nullptr);
+    std::list<SystemProcessInfo> systemProcessInfos;
+    MessageParcel reply;
+    int32_t ret = sm->ReadSystemProcessFromParcel(reply, systemProcessInfos);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
+
+/**
+ * @tc.name: ReadSystemProcessFromParcel002
+ * @tc.desc: ReadSystemProcessFromParce2
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, ReadSystemProcessFromParcel002, TestSize.Level3)
+{
+    DTEST_LOG << " ReadSystemProcessFromParcel002 start " << std::endl;
+    sptr<SystemAbilityManagerProxy> sm = new SystemAbilityManagerProxy(nullptr);
+    std::list<SystemProcessInfo> systemProcessInfos;
+    MessageParcel reply;
+    int32_t size = 0;
+    reply.WriteInt32(size);
+    int32_t ret = sm->ReadSystemProcessFromParcel(reply, systemProcessInfos);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: ReadSystemProcessFromParcel003
+ * @tc.desc: ReadSystemProcessFromParcel
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, ReadSystemProcessFromParcel003, TestSize.Level3)
+{
+    DTEST_LOG << " ReadSystemProcessFromParcel003 start " << std::endl;
+    sptr<SystemAbilityManagerProxy> sm = new SystemAbilityManagerProxy(nullptr);
+    std::list<SystemProcessInfo> systemProcessInfos;
+    MessageParcel reply;
+    int32_t size = 1;
+    reply.WriteInt32(size);
+    int32_t ret = sm->ReadSystemProcessFromParcel(reply, systemProcessInfos);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
+
+/**
+ * @tc.name: ReadSystemProcessFromParcel004
+ * @tc.desc: ReadSystemProcessFromParcel
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, ReadSystemProcessFromParcel004, TestSize.Level3)
+{
+    DTEST_LOG << " ReadSystemProcessFromParcel004 start " << std::endl;
+    sptr<SystemAbilityManagerProxy> sm = new SystemAbilityManagerProxy(nullptr);
+    std::list<SystemProcessInfo> systemProcessInfos;
+    MessageParcel reply;
+    int32_t size = 1;
+    reply.WriteInt32(size);
+    reply.WriteString("testProcessName");
+    int32_t ret = sm->ReadSystemProcessFromParcel(reply, systemProcessInfos);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
+
+/**
+ * @tc.name: ReadSystemProcessFromParcel005
+ * @tc.desc: ReadSystemProcessFromParcel
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, ReadSystemProcessFromParcel005, TestSize.Level3)
+{
+    DTEST_LOG << " ReadSystemProcessFromParcel005 start " << std::endl;
+    sptr<SystemAbilityManagerProxy> sm = new SystemAbilityManagerProxy(nullptr);
+    std::list<SystemProcessInfo> systemProcessInfos;
+    MessageParcel reply;
+    int32_t size = 1;
+    reply.WriteInt32(size);
+    reply.WriteString("testProcessName");
+    int32_t pid = 12345;
+    reply.WriteInt32(pid);
+    int32_t ret = sm->ReadSystemProcessFromParcel(reply, systemProcessInfos);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
+}
+
+/**
+ * @tc.name: ReadSystemProcessFromParcel006
+ * @tc.desc: ReadSystemProcessFromParcel
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, ReadSystemProcessFromParcel006, TestSize.Level3)
+{
+    DTEST_LOG << " ReadSystemProcessFromParcel006 start " << std::endl;
+    sptr<SystemAbilityManagerProxy> sm = new SystemAbilityManagerProxy(nullptr);
+    std::list<SystemProcessInfo> systemProcessInfos;
+    MessageParcel reply;
+    int32_t size = 1;
+    reply.WriteInt32(size);
+    reply.WriteString("testProcessName");
+    int32_t pid = 12345;
+    reply.WriteInt32(pid);
+    int32_t uid = 6789;
+    reply.WriteInt32(uid);
+    int32_t ret = sm->ReadSystemProcessFromParcel(reply, systemProcessInfos);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: LoadSystemAbility006
+ * @tc.desc: LoadSystemAbility
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, LoadSystemAbility006, TestSize.Level1)
+{
+    DTEST_LOG << " LoadSystemAbility006 start " << std::endl;
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    int32_t timeout = -1;
+    sptr<IRemoteObject> ret = sm->LoadSystemAbility(TEST_SAID_INVALID, timeout);
+    EXPECT_EQ(ret, nullptr);
+}
+
+/**
+ * @tc.name: ReadOnDemandEventsFromParcel005
+ * @tc.desc: ReadOnDemandEventsFromParcel
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, ReadOnDemandEventsFromParcel005, TestSize.Level3)
+{
+    DTEST_LOG << " ReadOnDemandEventsFromParcel005 start " << std::endl;
+    std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
+    MessageParcel reply;
+    int32_t size = 1;
+    reply.WriteInt32(size);
+    bool prersistence = false;
+    reply.WriteBool(prersistence);
+    int32_t conditionsSize = -1;
+    reply.WriteInt32(conditionsSize);
+    bool ret = OnDemandEventToParcel::ReadOnDemandEventsFromParcel(abilityOnDemandEvents, reply);
+    EXPECT_EQ(ret, false);
+}
+
+/**
+ * @tc.name: OnRemoteRequest003
+ * @tc.desc: OnRemoteRequest
+ * @tc.type: FUNC
+ * @tc.require: I5KMF7
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, OnRemoteRequest003, TestSize.Level3)
+{
+    DTEST_LOG << " OnRemoteRequest003 start " << std::endl;
+    sptr<SystemProcessStatusChangeStub> procStub = new SystemProcessStatusChange();
+    uint32_t code = 1000;
+    MessageParcel data;
+    data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN);
+    MessageParcel reply;
+    MessageOption option;
+    int32_t ret = procStub->OnRemoteRequest(code, data, reply, option);
+    EXPECT_NE(ret, ERR_NONE);
+}
+
+/**
  * @tc.name: SubscribeSystemProcess001
  * @tc.desc: SubscribeSystemProcess
  * @tc.type: FUNC
@@ -1020,7 +1190,7 @@ HWTEST_F(SystemAbilityMgrProxyTest, SendStrategy001, TestSize.Level1)
  * @tc.desc: test GetExtensionSaIds, GetExtensionSaIds
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrProxyTest, GetExtensionSaIds001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrProxyTest, GetExtensionSaIds002, TestSize.Level3)
 {
     sptr<ISystemAbilityManager> samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     std::vector<int32_t> saIds;
@@ -1050,7 +1220,7 @@ HWTEST_F(SystemAbilityMgrProxyTest, GetRunningSaExtensionInfoList001, TestSize.L
     sptr<ISystemAbilityManager> samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
 
     std::vector<ISystemAbilityManager::SaExtensionInfo> infoList;
-    int32_t ret = samgrProxy->GetRunningSaExtensionInfoList("backup", infoList);
+    int32_t ret = samgrProxy->GetRunningSaExtensionInfoList("backup_test", infoList);
     EXPECT_EQ(ret, 1);
     EXPECT_EQ(infoList.size(), 0);
 }

@@ -34,7 +34,7 @@ int main(int argc, char *argv[])
     OHOS::sptr<OHOS::IRemoteObject> serv = manager->AsObject();
 
     {
-        SamgrXCollie samgrXCollie("samgr::main_setContextObject");
+        SamgrXCollie samgrXCollie("samgr--main_setContextObject");
         if (!IPCSkeleton::SetContextObject(serv)) {
             KHILOGE("set context fail!");
         }

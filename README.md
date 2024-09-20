@@ -148,9 +148,9 @@ Figure 1 Architecture of Samgr
 >           "ondemand" : true,
 >           "uid" : "system",
 >           "gid" : ["system", "shell"]
->       }   
+>       }
 >   ]
->}  
+>}
 >```
 >3. The **LoadSystemAbility** method applies to dynamic loading of system abilities. In other scenarios, use the **CheckSystemAbility** method to obtain a system ability.
 >4. The process name in the .cfg file must be the same as that in the .json configuration file of the system ability.

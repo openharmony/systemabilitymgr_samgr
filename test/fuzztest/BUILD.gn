@@ -16,8 +16,9 @@ import("//build/test.gni")
 group("fuzztest") {
   testonly = true
   deps = [
-    "./localsamgrproxy_fuzzer:fuzztest",
     "./samgr_fuzzer:fuzztest",
+    "./samgrcoverage_fuzzer:fuzztest",
+    "./samgrdumper_fuzzer:fuzztest",
     "./systemabilitymanager_fuzzer:fuzztest",
   ]
 }

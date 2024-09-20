@@ -959,6 +959,15 @@ HWTEST_F(ParseUtilTest, ParseSystemAbility001, TestSize.Level3)
     systemAbilityJson["bootphase"] = "aaa";
     ret = parser_->ParseSystemAbility(saProfile, systemAbilityJson);
     EXPECT_EQ(ret, true);
+
+    int32_t testTime = 9999;
+    systemAbilityJson["stop-on-demand"] = {{"longtimeunused-unload", testTime}, {"unreferenced-unload", true}};
+    ret = parser_->ParseSystemAbility(saProfile, systemAbilityJson);
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(saProfile.stopOnDemand.unusedTimeout, testTime);
+
+    EXPECT_EQ(saProfile.stopOnDemand.unrefUnload, true);
+
     DTEST_LOG << " ParseSystemAbility001 END" << std::endl;
 }
 
@@ -1342,6 +1351,27 @@ HWTEST_F(ParseUtilTest, ParseSystemAbilityGetExtension003, TestSize.Level3)
     EXPECT_EQ(saProfile.extension.size(), MAX_EXTENSIONO_NUM);
 
     DTEST_LOG << " ParseSystemAbilityGetExtension003 END" << std::endl;
+}
+
+/**
+ * @tc.name: GetOndemandPriorityPara001
+ * @tc.desc: GetOndemandPriorityPara
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseUtilTest, GetOndemandPriorityPara005, TestSize.Level3)
+{
+    DTEST_LOG << " GetOndemandPriorityPara001 BEGIN" << std::endl;
+    std::string loadPriority = "HighPriority";
+    uint32_t ret = parser_->GetOndemandPriorityPara(loadPriority);
+    EXPECT_EQ(ret, static_cast<uint32_t>(HIGH_PRIORITY));
+
+    loadPriority = "MediumPriority";
+    ret = parser_->GetOndemandPriorityPara(loadPriority);
+    EXPECT_EQ(ret, static_cast<uint32_t>(MEDIUM_PRIORITY));
+
+    loadPriority = "NEW_TEST";
+    ret = parser_->GetOndemandPriorityPara(loadPriority);
+    EXPECT_EQ(ret, static_cast<uint32_t>(LOW_PRIORITY));
 }
 
 } // namespace SAMGR
