@@ -76,7 +76,6 @@ private:
     std::mutex extraDataLock_;
     int64_t extraDataId_ = 0;
     std::map<int64_t, OnDemandReasonExtraData> extraDatas_;
-    std::map<std::string, std::set<std::string>> extraDataKey_;
     std::mutex saExtraDataIdLock_;
     std::map<int32_t, std::list<int64_t>> saExtraDataIdMap_;
 };

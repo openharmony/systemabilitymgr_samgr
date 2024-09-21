@@ -149,5 +149,12 @@ struct CommonSaProfile {
     int32_t recycleStrategy = IMMEDIATELY;
     std::list<std::string> extension;
 };
+
+struct CollMgrSaProfile {
+    int32_t saId = 0;
+    std::vector<OnDemandEvent> startOnDemandEvents;
+    std::vector<OnDemandEvent> stopOnDemandEvents;
+    bool cacheCommonEvent = false;
+};
 }
 #endif // SAMGR_INTERFACE_INNERKITS_COMMOM_INCLUDE_SAPROFILE_H

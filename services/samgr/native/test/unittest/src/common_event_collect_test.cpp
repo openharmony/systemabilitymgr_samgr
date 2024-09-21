@@ -348,10 +348,6 @@ HWTEST_F(CommonEventCollectTest, SaveOnDemandReasonExtraData002, TestSize.Level3
     std::list<SaProfile> onDemandSaProfiles;
     onDemandSaProfiles.push_back(saProfile);
     commonEventCollect->Init(onDemandSaProfiles);
-    for (auto pair: extraMessages) {
-        EXPECT_TRUE(commonEventCollect->extraDataKey_[""].count(pair.first));
-    }
-
     EventFwk::CommonEventData eventData;
     auto want = eventData.GetWant();
     want.SetParam((const std::string)"12", 56);
@@ -442,7 +438,6 @@ HWTEST_F(CommonEventCollectTest, InitCommonEventState001, TestSize.Level3)
     OnDemandEvent event = {COMMON_EVENT, "1", "", -1, false, conditions, false, 3, extraMessages};
     commonEventCollect->InitCommonEventState(event);
     EXPECT_EQ(commonEventCollect->commonEventNames_.size(), 1);
-    EXPECT_EQ(commonEventCollect->extraDataKey_["1"].size(), 2);
 }
 
 /**

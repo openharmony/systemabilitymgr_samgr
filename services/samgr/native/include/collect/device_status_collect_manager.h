@@ -73,7 +73,7 @@ private:
     std::map<int32_t, sptr<ICollectPlugin>> collectPluginMap_;
     std::shared_ptr<FFRTHandler> collectHandler_;
     std::shared_mutex saProfilesLock_;
-    std::list<SaProfile> onDemandSaProfiles_;
+    std::list<CollMgrSaProfile> onDemandSaProfiles_;
 };
 } // namespace OHOS
 #endif // OHOS_SYSTEM_ABILITY_MANAGER_DEVICE_STATUS_COLLECT_MANAGER_H
