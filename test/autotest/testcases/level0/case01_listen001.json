@@ -1,0 +1,15 @@
+{
+  "description": "Kill a process, check process registration and death listening",
+  "environment": [
+    {
+      "type": "device",
+      "label": "phone"
+    }
+  ],
+  "driver": {
+    "type": "DeviceTest",
+    "py_file": [
+      "testcases/level0/case01_listen001.py"
+    ]
+  }
+}
