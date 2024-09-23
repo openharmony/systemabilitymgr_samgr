@@ -44,6 +44,8 @@ constexpr int32_t MAX_DELAY_TIME_TEST = 5 * 60 * 1000;
 constexpr int32_t BEYOND_DELAY_TIME_TEST = 5 * 60 * 1000 + 1;
 constexpr int32_t TEST_SYSTEM_ABILITY1 = 1491;
 constexpr int32_t TEST_SYSTEM_ABILITY2 = 1492;
+constexpr int32_t ONCE_DELAY_TIME = 10 * 1000; //ms
+constexpr int32_t MAX_DURATION = 11 * 60 * 1000; // ms
 const std::u16string process = u"test";
 const std::u16string process_invalid = u"test_invalid";
 const std::string LOCAL_DEVICE = "local";
@@ -751,6 +753,19 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleUnloadAbilityEventLock001, TestS
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
     int32_t ret = systemAbilityStateScheduler->HandleUnloadAbilityEventLocked(systemAbilityContext, nullptr);
     EXPECT_EQ(ret, UNLOAD_REQUEST_NULL);
+}
+
+HWTEST_F(SystemAbilityStateSchedulerTest, KillSystemProcessLocked002, TestSize.Level3)
+{
+    cout << "begin KillSystemProcessLocked002 "<< endl;
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::shared_ptr<SystemProcessContext> systemProcessContext = std::make_shared<SystemProcessContext>();
+    systemProcessContext->processName = u"1234567890123456789012345678901234567890123456789"
+        "01234567890123456789012345678901234567890123456";
+    int result = systemAbilityStateScheduler->KillSystemProcessLocked(systemProcessContext);
+    cout << "begin KillSystemProcessLocked002 result is "<< result << endl;
+    EXPECT_EQ(result, 102);
 }
 
 /**
@@ -2439,6 +2454,75 @@ HWTEST_F(SystemAbilityStateSchedulerTest, LimitDelayUnloadTime002, TestSize.Leve
         std::make_shared<SystemAbilityStateScheduler>();
     int32_t ret = systemAbilityStateScheduler->LimitDelayUnloadTime(BEYOND_DELAY_TIME_TEST);
     EXPECT_EQ(ret, MAX_DELAY_TIME_TEST);
+}
+
+/**
+ * @tc.name: UpdateLimitDelayUnloadTime001
+ * @tc.desc: test UpdateLimitDelayUnloadTime with saId invalid
+ * @tc.type: FUNC
+ * @tc.require: I6FDNZ
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, UpdateLimitDelayUnloadTime001, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::shared_ptr<SystemAbilityContext> abilityContext = std::make_shared<SystemAbilityContext>();
+    abilityContext->systemAbilityId = -1;
+    abilityContext->lastStartTime = 0;
+    systemAbilityStateScheduler->UpdateLimitDelayUnloadTime(abilityContext->systemAbilityId);
+    EXPECT_EQ(abilityContext->lastStartTime, 0);
+}
+
+/**
+ * @tc.name: UpdateLimitDelayUnloadTime002
+ * @tc.desc: test UpdateLimitDelayUnloadTime with lastStartTime not equal to 0
+ * @tc.type: FUNC
+ * @tc.require: I6FDNZ
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, UpdateLimitDelayUnloadTime002, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    int said = 401;
+    std::list<SaProfile> saProfiles;
+    systemAbilityStateScheduler->Init(saProfiles);
+    std::shared_ptr<SystemAbilityContext> abilityContext = std::make_shared<SystemAbilityContext>();
+    std::shared_ptr<SystemProcessContext> systemProcessContext = std::make_shared<SystemProcessContext>();
+    systemAbilityStateScheduler->abilityContextMap_.clear();
+    abilityContext->ownProcessContext = systemProcessContext;
+    systemAbilityStateScheduler->abilityContextMap_[said] = abilityContext;
+    abilityContext->lastStartTime = GetTickCount();
+    int32_t delaytime = abilityContext->delayUnloadTime;
+    systemAbilityStateScheduler->UpdateLimitDelayUnloadTime(said);
+    delaytime += ONCE_DELAY_TIME;
+    EXPECT_EQ(delaytime, abilityContext->delayUnloadTime);
+}
+
+/**
+ * @tc.name: UpdateLimitDelayUnloadTime002
+ * @tc.desc: test UpdateLimitDelayUnloadTime with duation greater than duration
+ * @tc.type: FUNC
+ * @tc.require: I6FDNZ
+ */
+
+HWTEST_F(SystemAbilityStateSchedulerTest, UpdateLimitDelayUnloadTime003, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    int said = 401;
+    std::list<SaProfile> saProfiles;
+    systemAbilityStateScheduler->Init(saProfiles);
+    std::shared_ptr<SystemAbilityContext> abilityContext = std::make_shared<SystemAbilityContext>();
+    std::shared_ptr<SystemProcessContext> systemProcessContext = std::make_shared<SystemProcessContext>();
+    systemAbilityStateScheduler->abilityContextMap_.clear();
+    abilityContext->ownProcessContext = systemProcessContext;
+    systemAbilityStateScheduler->abilityContextMap_[said] = abilityContext;
+    abilityContext->lastStartTime = GetTickCount() - MAX_DURATION;
+    int32_t delaytime = abilityContext->delayUnloadTime;
+    systemAbilityStateScheduler->UpdateLimitDelayUnloadTime(said);
+    EXPECT_EQ(delaytime, abilityContext->delayUnloadTime);
 }
 
 /**

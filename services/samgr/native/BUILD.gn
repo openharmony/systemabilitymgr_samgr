@@ -54,10 +54,12 @@ ohos_executable("samgr") {
     "//foundation/systemabilitymgr/samgr/services/samgr/native/source/collect/device_status_collect_manager.cpp",
     "//foundation/systemabilitymgr/samgr/services/samgr/native/source/collect/device_timed_collect.cpp",
     "//foundation/systemabilitymgr/samgr/services/samgr/native/source/collect/icollect_plugin.cpp",
+    "//foundation/systemabilitymgr/samgr/services/samgr/native/source/collect/ref_count_collect.cpp",
     "//foundation/systemabilitymgr/samgr/services/samgr/native/source/ffrt_handler.cpp",
     "//foundation/systemabilitymgr/samgr/services/samgr/native/source/main.cpp",
     "//foundation/systemabilitymgr/samgr/services/samgr/native/source/memory_guard.cpp",
     "//foundation/systemabilitymgr/samgr/services/samgr/native/source/rpc_callback_imp.cpp",
+    "//foundation/systemabilitymgr/samgr/services/samgr/native/source/samgr_time_handler.cpp",
     "//foundation/systemabilitymgr/samgr/services/samgr/native/source/schedule/system_ability_event_handler.cpp",
     "//foundation/systemabilitymgr/samgr/services/samgr/native/source/schedule/system_ability_state_machine.cpp",
     "//foundation/systemabilitymgr/samgr/services/samgr/native/source/schedule/system_ability_state_scheduler.cpp",
@@ -86,7 +88,7 @@ ohos_executable("samgr") {
   ]
   defines = []
   if (use_musl) {
-    if (use_jemalloc && use_jemalloc_dfx_intf) {
+    if (musl_use_jemalloc && musl_use_jemalloc_dfx_intf) {
       defines += [ "CONFIG_USE_JEMALLOC_DFX_INTF" ]
     }
   }

@@ -57,6 +57,7 @@ public:
         const std::list<SaControlInfo>& saControlList) override;
     int GetSaExtraDataIdList(int32_t saId, std::vector<int64_t>& extraDataIdList,
         const std::string& eventName = "") override;
+    void RemoveWhiteCommonEvent() override;
 private:
     int64_t GenerateExtraDataIdLocked();
     bool AddCommonEventName(const std::string& eventName);

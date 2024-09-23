@@ -29,6 +29,7 @@
 #include "samgr_xcollie.h"
 #include "parameters.h"
 #include "system_ability_manager_util.h"
+#include "system_ability_definition.h"
 
 namespace OHOS {
 namespace {
@@ -38,6 +39,8 @@ constexpr int32_t MAX_SUBSCRIBE_COUNT = 256;
 constexpr int32_t UNLOAD_TIMEOUT_TIME = 5 * 1000;
 constexpr const char* LOCAL_DEVICE = "local";
 constexpr int32_t MAX_DELAY_TIME = 5 * 60 * 1000;
+constexpr int32_t MAX_DURATION = 10 * 60 * 1000; // ms
+constexpr int32_t ONCE_DELAY_TIME = 10 * 1000; // ms
 constexpr const char* CANCEL_UNLOAD = "cancelUnload";
 constexpr const char* KEY_EVENT_ID = "eventId";
 constexpr const char* KEY_NAME = "name";
@@ -170,6 +173,26 @@ bool SystemAbilityStateScheduler::GetSystemAbilityContext(int32_t systemAbilityI
         return false;
     }
     return true;
+}
+
+void SystemAbilityStateScheduler::UpdateLimitDelayUnloadTime(int32_t systemAbilityId)
+{
+    std::shared_ptr<SystemAbilityContext> abilityContext;
+    if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
+        return;
+    }
+    std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
+    if (abilityContext->lastStartTime != 0) {
+        int64_t begin = abilityContext->lastStartTime;
+        int64_t end = GetTickCount();
+        if (end - begin <= MAX_DURATION) {
+            int64_t onceDelayTime = abilityContext->delayUnloadTime;
+            onceDelayTime += ONCE_DELAY_TIME;
+            abilityContext->delayUnloadTime = LimitDelayUnloadTime(onceDelayTime);
+            HILOGI("DelayUnloadTime is %{public}d, SA:%{public}d", abilityContext->delayUnloadTime, systemAbilityId);
+        }
+    }
+    abilityContext->lastStartTime = GetTickCount();
 }
 
 bool SystemAbilityStateScheduler::GetSystemProcessContext(const std::u16string& processName,
@@ -760,7 +783,7 @@ int32_t SystemAbilityStateScheduler::KillSystemProcessLocked(
     int64_t begin = GetTickCount();
     int32_t result = ERR_OK;
     {
-        SamgrXCollie samgrXCollie("samgr::killProccess_" + Str16ToStr8(processContext->processName));
+        SamgrXCollie samgrXCollie("samgr--killProccess_" + Str16ToStr8(processContext->processName));
         result = ServiceControlWithExtra(Str16ToStr8(processContext->processName).c_str(),
             ServiceAction::STOP, nullptr, 0);
     }
@@ -815,6 +838,9 @@ int32_t SystemAbilityStateScheduler::GetAbnormallyDiedAbilityLocked(
             || abilityContext->state == SystemAbilityState::LOADING) {
             SamgrUtil::SendUpdateSaState(abilityContext->systemAbilityId, "crash");
             HILOGI("Scheduler SA:%{public}d abnormally died", abilityContext->systemAbilityId);
+            if (abilityContext->systemAbilityId == SUBSYS_ACCOUNT_SYS_ABILITY_ID_BEGIN) {
+                SystemAbilityManager::GetInstance()->RemoveWhiteCommonEvent();
+            }
             if (!abilityContext->isAutoRestart) {
                 continue;
             }
@@ -1280,7 +1306,8 @@ int32_t SystemAbilityStateScheduler::CheckStartEnableOnce(const OnDemandEvent& e
             saControl.saId, event.eventId);
     }
     if (result != ERR_OK) {
-        ReportSamgrSaLoadFail(saControl.saId, "ondemand load err:" + ToString(result));
+        ReportSamgrSaLoadFail(saControl.saId, IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(),
+            "ondemand load err:" + ToString(result));
     }
     return result;
 }
@@ -1316,7 +1343,8 @@ int32_t SystemAbilityStateScheduler::CheckStopEnableOnce(const OnDemandEvent& ev
             saControl.saId, event.eventId);
     }
     if (result != ERR_OK) {
-        ReportSaUnLoadFail(saControl.saId, "Ondemand unload err:" + ToString(result));
+        ReportSaUnLoadFail(saControl.saId, IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(),
+            "Ondemand unload err:" + ToString(result));
     }
     return result;
 }
@@ -1347,7 +1375,7 @@ bool SystemAbilityStateScheduler::UnloadEventHandler::SendEvent(uint32_t eventId
         HILOGE("SystemAbilityStateScheduler SendEvent handler is null!");
         return false;
     }
-    auto task = std::bind(&SystemAbilityStateScheduler::UnloadEventHandler::ProcessEvent, this, eventId);
+    auto task = [this, eventId] {this->ProcessEvent(eventId);};
     return handler_->PostTask(task, std::to_string(eventId), delayTime);
 }
 

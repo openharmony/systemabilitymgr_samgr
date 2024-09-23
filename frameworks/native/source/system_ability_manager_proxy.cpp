@@ -18,6 +18,7 @@
 #include <condition_variable>
 #include <unistd.h>
 #include <vector>
+#include <dlfcn.h>
 
 #include "errors.h"
 #include "ipc_types.h"
@@ -50,10 +51,45 @@ public:
     void OnLoadSystemAbilitySuccess(int32_t systemAbilityId,
         const sptr<IRemoteObject> &remoteObject) override;
     void OnLoadSystemAbilityFail(int32_t systemAbilityId) override;
+    std::mutex callbackLock_;
     std::condition_variable cv_;
     sptr<IRemoteObject> loadproxy_;
-    std::mutex callbackLock_;
 };
+
+static void* g_selfSoHandle = nullptr;
+
+extern "C" __attribute__((constructor)) void InitSamgrProxy()
+{
+    if (g_selfSoHandle != nullptr) {
+        return;
+    }
+    Dl_info info;
+    int ret = dladdr(reinterpret_cast<void *>(InitSamgrProxy), &info);
+    if (ret == 0) {
+        HILOGE("InitSamgrProxy dladdr fail");
+        return;
+    }
+
+    char path[PATH_MAX] = {'\0'};
+    if (realpath(info.dli_fname, path) == nullptr) {
+        HILOGE("InitSamgrProxy realpath fail");
+        return;
+    }
+    std::vector<std::string> strVector;
+    SplitStr(path, "/", strVector);
+    auto vectorSize = strVector.size();
+    if (vectorSize == 0) {
+        HILOGE("InitSamgrProxy SplitStr fail");
+        return;
+    }
+    auto& fileName = strVector[vectorSize - 1];
+    g_selfSoHandle = dlopen(fileName.c_str(), RTLD_LAZY);
+    if (g_selfSoHandle == nullptr) {
+        HILOGE("InitSamgrProxy dlopen fail");
+        return;
+    }
+    HILOGD("InitSamgrProxy::done");
+}
 
 void SystemAbilityProxyCallback::OnLoadSystemAbilitySuccess(
     int32_t systemAbilityId, const sptr<IRemoteObject> &remoteObject)
@@ -140,15 +176,24 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::GetSystemAbilityWrapper(int32_t s
     HILOGD("GetSaWrap:Waiting for SA:%{public}d, ", systemAbilityId);
     do {
         sptr<IRemoteObject> svc;
+        int32_t errCode = ERR_NONE;
         if (deviceId.empty()) {
-            svc = CheckSystemAbility(systemAbilityId, isExist);
+            svc = CheckSystemAbility(systemAbilityId, isExist, errCode);
+            if (errCode == ERR_PERMISSION_DENIED) {
+                HILOGE("GetSaWrap SA:%{public}d selinux denied", systemAbilityId);
+                return nullptr;
+            }
             if (!isExist) {
                 HILOGD("%{public}s:SA:%{public}d is not exist", __func__, systemAbilityId);
                 usleep(SLEEP_ONE_MILLI_SECOND_TIME * SLEEP_INTERVAL_TIME);
                 continue;
             }
         } else {
-            svc = CheckSystemAbility(systemAbilityId, deviceId);
+            svc = CheckSystemAbility(systemAbilityId, deviceId, errCode);
+            if (errCode == ERR_PERMISSION_DENIED) {
+                HILOGE("GetSaWrap SA:%{public}d deviceId selinux denied", systemAbilityId);
+                return nullptr;
+            }
         }
 
         if (svc != nullptr) {
@@ -162,6 +207,13 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::GetSystemAbilityWrapper(int32_t s
 
 sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbilityWrapper(int32_t code, MessageParcel& data)
 {
+    int32_t errCode = ERR_NONE;
+    return CheckSystemAbilityWrapper(code, data, errCode);
+}
+
+sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbilityWrapper(int32_t code, MessageParcel& data,
+    int32_t& errCode)
+{
     auto remote = Remote();
     if (remote == nullptr) {
         HILOGI("CheckSaWrap remote is nullptr !");
@@ -171,6 +223,7 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbilityWrapper(int32_t
     MessageOption option;
     int32_t err = remote->SendRequest(code, data, reply, option);
     if (err != ERR_NONE) {
+        errCode = err;
         return nullptr;
     }
     return reply.ReadRemoteObject();
@@ -212,14 +265,20 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbilityTransaction(int
 
 sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
 {
+    int32_t errCode = ERR_NONE;
+    return CheckSystemAbility(systemAbilityId, deviceId, errCode);
+}
+
+sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t systemAbilityId, const std::string& deviceId,
+    int32_t& errCode)
+{
     if (!CheckInputSysAbilityId(systemAbilityId) || deviceId.empty()) {
         HILOGW("CheckSystemAbility:SA:%{public}d or deviceId is nullptr.", systemAbilityId);
         return nullptr;
     }
 
-    HILOGD("CheckSystemAbility: SA:%{public}d, deviceId is %{private}s", systemAbilityId,
-        deviceId.c_str());
-
+    HILOGD("CheckSystemAbility: SA:%{public}d.", systemAbilityId);
+    
     auto remote = Remote();
     if (remote == nullptr) {
         HILOGE("CheckSystemAbility remote is nullptr !");
@@ -242,10 +301,16 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t system
     }
 
     return CheckSystemAbilityWrapper(
-        static_cast<uint32_t>(SamgrInterfaceCode::CHECK_REMOTE_SYSTEM_ABILITY_TRANSACTION), data);
+        static_cast<uint32_t>(SamgrInterfaceCode::CHECK_REMOTE_SYSTEM_ABILITY_TRANSACTION), data, errCode);
 }
 
 sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t systemAbilityId, bool& isExist)
+{
+    int32_t errCode = ERR_NONE;
+    return CheckSystemAbility(systemAbilityId, isExist, errCode);
+}
+sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t systemAbilityId, bool& isExist,
+    int32_t& errCode)
 {
     HILOGD("%{public}s called, SA:%{public}d, isExist is %{public}d", __func__, systemAbilityId, isExist);
     if (!CheckInputSysAbilityId(systemAbilityId)) {
@@ -286,9 +351,15 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t system
     int32_t err = remote->SendRequest(
         static_cast<uint32_t>(SamgrInterfaceCode::CHECK_SYSTEM_ABILITY_IMMEDIATELY_TRANSACTION), data, reply, option);
     if (err != ERR_NONE) {
+        errCode = err;
         return nullptr;
     }
-    sptr<IRemoteObject> irsp(reply.ReadRemoteObject());
+
+    sptr<IRemoteObject> irsp = reply.ReadRemoteObject();
+    if (irsp == nullptr) {
+        HILOGW("CheckSystemAbility read remote object failed");
+        return nullptr;
+    }
 
     ret = reply.ReadBool(isExist);
     if (!ret) {

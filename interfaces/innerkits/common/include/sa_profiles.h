@@ -31,6 +31,7 @@ enum {
     PARAM,
     COMMON_EVENT,
     TIMED_EVENT,
+    UNREF_EVENT,
 };
 
 enum {
@@ -108,7 +109,9 @@ struct StartOnDemand {
 
 struct StopOnDemand {
     bool allowUpdate = false;
+    bool unrefUnload = false;
     int32_t delayTime = 20000;
+    int32_t unusedTimeout = -1;
     std::vector<OnDemandEvent> onDemandEvents;
 };
 
@@ -133,6 +136,18 @@ struct SaProfile {
     int32_t recycleStrategy = IMMEDIATELY;
     std::list<std::string> extension;
     bool cacheCommonEvent = false;
+};
+
+struct CommonSaProfile {
+    std::u16string process;
+    int32_t saId = 0;
+    bool moduleUpdate = false;
+    bool distributed = false;
+    bool cacheCommonEvent = false;
+    bool startAllowUpdate = false;
+    bool stopAllowUpdate = false;
+    int32_t recycleStrategy = IMMEDIATELY;
+    std::list<std::string> extension;
 };
 }
 #endif // SAMGR_INTERFACE_INNERKITS_COMMOM_INCLUDE_SAPROFILE_H

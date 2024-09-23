@@ -219,6 +219,25 @@ HWTEST_F(DeviceParamCollectTest, RemoveUnusedEvent002, TestSize.Level3)
 }
 
 /**
+ * @tc.name: RemoveUnusedEvent003
+ * @tc.desc: test RemoveUnusedEvent, with event.name in params_
+ * @tc.type: FUNC
+ * @tc.require: I7VZ98
+ */
+HWTEST_F(DeviceParamCollectTest, RemoveUnusedEvent003, TestSize.Level3)
+{
+    sptr<IReport> report;
+    std::shared_ptr<DeviceParamCollect> deviceParamCollect =
+        std::make_shared<DeviceParamCollect>(report);
+    OnDemandEvent event = {3, TEST_NAME, "true"};
+    deviceParamCollect->pendingParams_.insert(TEST_NAME);
+    deviceParamCollect->WatchParameters();
+    EXPECT_EQ(deviceParamCollect->params_.size(), 1);
+    deviceParamCollect->RemoveUnusedEvent(event);
+    EXPECT_EQ(deviceParamCollect->params_.size(), 0);
+}
+
+/**
  * @tc.name: CheckCondition001
  * @tc.desc: test CheckCondition, with condition
  * @tc.type: FUNC

@@ -21,6 +21,7 @@
 
 #include "sa_profiles.h"
 #include "system_ability_on_demand_event.h"
+#include "ffrt_handler.h"
 
 namespace OHOS {
 class SamgrUtil {
@@ -32,9 +33,9 @@ public:
     static bool IsSameEvent(const OnDemandEvent& event, std::list<OnDemandEvent>& enableOnceList);
     static std::string EventToStr(const OnDemandEvent& event);
     static std::string TransformDeviceId(const std::string& deviceId, int32_t type, bool isPrivate);
-    static bool CheckCallerProcess(const SaProfile& saProfile);
+    static bool CheckCallerProcess(const CommonSaProfile& saProfile);
     static bool CheckCallerProcess(const std::string& callProcess);
-    static bool CheckAllowUpdate(OnDemandPolicyType type, const SaProfile& saProfile);
+    static bool CheckAllowUpdate(OnDemandPolicyType type, const CommonSaProfile& saProfile);
     static void ConvertToOnDemandEvent(const SystemAbilityOnDemandEvent& from, OnDemandEvent& to);
     static void ConvertToSystemAbilityOnDemandEvent(const OnDemandEvent& from, SystemAbilityOnDemandEvent& to);
     static uint64_t GenerateFreKey(int32_t uid, int32_t saId);
@@ -42,6 +43,10 @@ public:
         const std::list<SaControlInfo>& saControlList);
     static void SetModuleUpdateParam(const std::string& key, const std::string& value);
     static void SendUpdateSaState(int32_t systemAbilityId, const std::string& updateSaState);
+    static void InvalidateSACache();
+    static void FilterCommonSaProfile(const SaProfile& oldProfile, CommonSaProfile& newProfile);
+private:
+    static std::shared_ptr<FFRTHandler> setParmHandler_;
 };
 } // namespace OHOS
 

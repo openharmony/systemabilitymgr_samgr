@@ -26,7 +26,6 @@
 #include "isystem_ability_status_change.h"
 #include "isystem_process_status_change.h"
 #include "refbase.h"
-#include "sam_log.h"
 #include "status_change_wrapper.h"
 #include "string_ex.h"
 #include "wrapper.rs.h"
@@ -34,13 +33,14 @@
 namespace OHOS {
 namespace SamgrRust {
 
+static constexpr size_t MAX_RUST_STR_LEN = 1024;
+
 rust::Vec<rust::String> ListSystemAbilities()
 {
     auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     auto res = rust::Vec<rust::String>();
 
     if (sysm == nullptr) {
-        HILOGE("rust side get SystemAbilityManager failed");
         return res;
     }
 
@@ -57,7 +57,6 @@ rust::Vec<rust::String> ListSystemAbilitiesWithDumpFlag(unsigned int dumpFlags)
     auto res = rust::Vec<rust::String>();
 
     if (sysm == nullptr) {
-        HILOGE("rust side get SystemAbilityManager failed");
         return res;
     }
 
@@ -73,7 +72,6 @@ std::unique_ptr<SptrIRemoteObject> LoadSystemAbility(int32_t systemAbilityId, in
 {
     auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (sysm == nullptr) {
-        HILOGE("rust side get SystemAbilityManager failed");
         return nullptr;
     }
 
@@ -88,7 +86,6 @@ int32_t LoadSystemAbilityWithCallback(int32_t systemAbilityId, rust::Fn<void()> 
 {
     auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (sysm == nullptr) {
-        HILOGE("rust side get SystemAbilityManager failed");
         return -1;
     }
     auto callback = sptr<LoadCallbackWrapper>::MakeSptr(on_success, on_fail);
@@ -108,7 +105,6 @@ std::unique_ptr<SptrIRemoteObject> GetSystemAbility(int32_t systemAbilityId)
 {
     auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (sysm == nullptr) {
-        HILOGE("rust side get SystemAbilityManager failed");
         return nullptr;
     }
 
@@ -123,7 +119,6 @@ std::unique_ptr<SptrIRemoteObject> CheckSystemAbility(int32_t systemAbilityId)
 {
     auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (sysm == nullptr) {
-        HILOGE("rust side get SystemAbilityManager failed");
         return nullptr;
     }
 
@@ -138,7 +133,6 @@ int32_t RemoveSystemAbility(int32_t systemAbilityId)
 {
     auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (sysm == nullptr) {
-        HILOGE("rust side get SystemAbilityManager failed");
         return -1;
     }
     return sysm->RemoveSystemAbility(systemAbilityId);
@@ -148,7 +142,6 @@ std::unique_ptr<SptrIRemoteObject> GetSystemAbilityWithDeviceId(int32_t systemAb
 {
     auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (sysm == nullptr) {
-        HILOGE("rust side get SystemAbilityManager failed");
         return nullptr;
     }
     auto ability = sysm->GetSystemAbility(systemAbilityId, deviceId);
@@ -162,7 +155,6 @@ std::unique_ptr<SptrIRemoteObject> CheckSystemAbilityWithDeviceId(int32_t system
 {
     auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (sysm == nullptr) {
-        HILOGE("rust side get SystemAbilityManager failed");
         return nullptr;
     }
     auto ability = sysm->CheckSystemAbility(systemAbilityId, deviceId);
@@ -178,7 +170,6 @@ std::unique_ptr<UnSubscribeSystemAbilityHandler> SubscribeSystemAbility(int32_t 
 {
     auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (sysm == nullptr) {
-        HILOGE("rust side get SystemAbilityManager failed");
         return nullptr;
     }
 
@@ -189,9 +180,12 @@ std::unique_ptr<UnSubscribeSystemAbilityHandler> SubscribeSystemAbility(int32_t 
 
 int32_t AddOnDemandSystemAbilityInfo(int32_t systemAbilityId, const rust::str localAbilityManagerName)
 {
+    if (localAbilityManagerName.length() > MAX_RUST_STR_LEN) {
+        return -1;
+    }
+
     auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (sysm == nullptr) {
-        HILOGE("rust side get SystemAbilityManager failed");
         return -1;
     }
     std::u16string s = Str8ToStr16(std::string(localAbilityManagerName));
@@ -202,7 +196,6 @@ int32_t UnloadSystemAbility(int32_t systemAbilityId)
 {
     auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (sysm == nullptr) {
-        HILOGE("rust side get SystemAbilityManager failed");
         return -1;
     }
     return sysm->UnloadSystemAbility(systemAbilityId);
@@ -212,7 +205,6 @@ int32_t CancelUnloadSystemAbility(int32_t systemAbilityId)
 {
     auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (sysm == nullptr) {
-        HILOGE("rust side get SystemAbilityManager failed");
         return -1;
     }
     return sysm->CancelUnloadSystemAbility(systemAbilityId);
@@ -222,7 +214,6 @@ int32_t UnloadAllIdleSystemAbility()
 {
     auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (sysm == nullptr) {
-        HILOGE("rust side get SystemAbilityManager failed");
         return -1;
     }
     return sysm->UnloadAllIdleSystemAbility();
@@ -232,7 +223,6 @@ int32_t AddSystemAbility(int32_t systemAbilityId, rust::Box<AbilityStub> ability
 {
     auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (sysm == nullptr) {
-        HILOGE("rust side get SystemAbilityManager failed");
         return -1;
     }
     auto capability_u16 = Str8ToStr16(std::string(config.capability));
@@ -249,7 +239,6 @@ SystemProcessInfo GetSystemProcessInfo(int32_t systemAbilityId)
     auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     OHOS::SystemProcessInfo info;
     if (sysm == nullptr) {
-        HILOGE("rust side get SystemAbilityManager failed");
         return SystemProcessInfo{
             .processName = info.processName.data(),
             .pid = info.pid,
@@ -270,7 +259,6 @@ rust::Vec<SystemProcessInfo> GetRunningSystemProcess()
 
     auto res = rust::Vec<SystemProcessInfo>();
     if (sysm == nullptr) {
-        HILOGE("rust side get SystemAbilityManager failed");
         return res;
     }
 
@@ -286,7 +274,7 @@ rust::Vec<SystemProcessInfo> GetRunningSystemProcess()
     return res;
 }
 
-int32_t GetCommonEventExtraDataIdlist(int32_t saId, rust::Vec<int64_t>& extraDataIdList, const std::string& eventName)
+int32_t GetCommonEventExtraDataIdlist(int32_t saId, rust::Vec<int64_t> &extraDataIdList, const std::string &eventName)
 {
     auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (sysm == nullptr) {
@@ -310,7 +298,6 @@ std::unique_ptr<UnSubscribeSystemProcessHandler> SubscribeSystemProcess(
 {
     auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (sysm == nullptr) {
-        HILOGE("rust side get SystemAbilityManager failed");
         return nullptr;
     }
     sptr<ISystemProcessStatusChange> listener = new SystemProcessStatusChangeWrapper(nullptr, onStart_, onStop_);
@@ -322,7 +309,6 @@ int32_t GetOnDemandReasonExtraData(int64_t extraDataId, MessageParcel &parcel)
 {
     auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (sysm == nullptr) {
-        HILOGE("rust side get SystemAbilityManager failed");
         return -1;
     }
     return sysm->GetOnDemandReasonExtraData(extraDataId, parcel);
@@ -332,7 +318,6 @@ int32_t SendStrategy(int32_t type, rust::Vec<int32_t> systemAbilityIds, int32_t 
 {
     auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     if (sysm == nullptr) {
-        HILOGE("rust side get SystemAbilityManager failed");
         return -1;
     }
     auto v = std::vector<int32_t>();

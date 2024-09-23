@@ -149,27 +149,6 @@ void FuzzSystemAbilityManager(const uint8_t* rawData, size_t size)
     HILOGI("samgrFuzz:OnRemoteRequest end,CleanFfrt");
     manager->CleanFfrt();
 }
-
-void FuzzSamgrHisysevent(const uint8_t* rawData, size_t size)
-{
-    int32_t coverData = static_cast<int32_t>(Convert2Uint32(rawData));
-    int32_t saId = coverData;
-    int32_t keyStage = coverData;
-    ReportSaUnLoadDuration(saId, keyStage, DURATION);
-    ReportSaLoadDuration(saId, keyStage, DURATION);
-
-    int32_t pid = coverData;
-    int32_t uid = coverData;
-    ReportProcessStartFail("", pid, uid, "");
-    ReportProcessStopFail("", pid, uid, "");
-
-    ReportAddSystemAbilityFailed(saId, "");
-
-    int32_t count = coverData;
-
-    ReportGetSAFrequency(static_cast<uint32_t>(uid), static_cast<uint32_t>(saId), count);
-    WatchDogSendEvent(pid, static_cast<uint32_t>(uid), "", "");
-}
 }
 }
 
@@ -180,7 +159,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
         return 0;
     }
 
-    OHOS::Samgr::FuzzSamgrHisysevent(data, size);
     OHOS::Samgr::FuzzSystemAbilityManager(data, size);
     
     return 0;

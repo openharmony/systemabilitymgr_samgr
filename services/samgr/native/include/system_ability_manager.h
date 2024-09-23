@@ -62,7 +62,7 @@ struct SAListener {
         :listener(lst), callingPid(cpid), state(sta) {}
 };
 
-class SystemAbilityManager : public DynamicCache<int32_t, sptr<IRemoteObject>>, public SystemAbilityManagerStub {
+class SystemAbilityManager : public DynamicCache, public SystemAbilityManagerStub {
 public:
     virtual ~SystemAbilityManager();
     static sptr<SystemAbilityManager> GetInstance();
@@ -168,6 +168,7 @@ public:
     int32_t SendStrategy(int32_t type, std::vector<int32_t>& systemAbilityIds,
         int32_t level, std::string& action) override;
     bool CheckSaIsImmediatelyRecycle(int32_t systemAbilityId);
+    bool IsDistributedSystemAbility(int32_t systemAbilityId);
     int32_t GetRunningSaExtensionInfoList(const std::string& extension,
         std::vector<SaExtensionInfo>& infoList) override;
     int32_t GetExtensionSaIds(const std::string& extension, std::vector<int32_t>& saIds) override;
@@ -176,6 +177,7 @@ public:
         const std::string& eventName = "") override;
     sptr<IRemoteObject> GetSystemProcess(const std::u16string& procName);
     bool IsModuleUpdate(int32_t systemAbilityId);
+    void RemoveWhiteCommonEvent();
 private:
     enum class AbilityState {
         INIT,
@@ -196,13 +198,14 @@ private:
     void DoInsertSaData(const std::u16string& name, const sptr<IRemoteObject>& ability, const SAExtraProp& extraProp);
     int32_t StartOnDemandAbility(int32_t systemAbilityId, bool& isExist);
     int32_t StartOnDemandAbilityLocked(int32_t systemAbilityId, bool& isExist);
+    void RefreshListenerState(int32_t systemAbilityId);
     int32_t AddSystemAbility(const std::u16string& name, const sptr<IRemoteObject>& ability,
         const SAExtraProp& extraProp);
     int32_t FindSystemAbilityNotify(int32_t systemAbilityId, int32_t code);
     int32_t FindSystemAbilityNotify(int32_t systemAbilityId, const std::string& deviceId, int32_t code);
 
     void InitSaProfile();
-    bool GetSaProfile(int32_t saId, SaProfile& saProfile);
+    bool GetSaProfile(int32_t saId, CommonSaProfile& saProfile);
     void CheckListenerNotify(int32_t systemAbilityId, const sptr<ISystemAbilityStatusChange>& listener);
     void NotifySystemAbilityChanged(int32_t systemAbilityId, const std::string& deviceId, int32_t code,
         const sptr<ISystemAbilityStatusChange>& listener);
@@ -222,6 +225,7 @@ private:
     void StartOnDemandAbility(const std::u16string& name, int32_t systemAbilityId);
     void StartOnDemandAbilityLocked(const std::u16string& name, int32_t systemAbilityId);
     int32_t StartOnDemandAbilityInner(const std::u16string& name, int32_t systemAbilityId, AbilityItem& abilityItem);
+    bool IsInitBootFinished();
     int32_t StartDynamicSystemProcess(const std::u16string& name, int32_t systemAbilityId, const OnDemandEvent& event);
     bool StopOnDemandAbility(const std::u16string& name, int32_t systemAbilityId, const OnDemandEvent& event);
     bool StopOnDemandAbilityInner(const std::u16string& name, int32_t systemAbilityId, const OnDemandEvent& event);
@@ -289,7 +293,7 @@ private:
 
     std::shared_ptr<FFRTHandler> workHandler_;
 
-    std::map<int32_t, SaProfile> saProfileMap_;
+    std::map<int32_t, CommonSaProfile> saProfileMap_;
     std::set<int32_t> onDemandSaIdsSet_;
     std::mutex saProfileMapLock_;
     std::mutex loadRemoteLock_;

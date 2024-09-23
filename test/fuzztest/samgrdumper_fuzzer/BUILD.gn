@@ -1,0 +1,113 @@
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+#####################hydra-fuzz###################
+import("//build/config/features.gni")
+import("//build/ohos.gni")
+import("//build/test.gni")
+import("../../../services/samgr/var.gni")
+module_output_path = "samgr/samgr"
+samgr_dir = "../../.."
+samgr_services_dir = "${samgr_dir}/services/samgr/native"
+
+config("sam_fuzz_test_config") {
+  include_dirs = [
+    "${samgr_dir}/services/dfx/include",
+    "${samgr_dir}/services/lsamgr/include",
+    "${samgr_dir}/services/samgr/native/test/unittest/include",
+  ]
+}
+
+##############################fuzztest##########################################
+ohos_fuzztest("SamgrDumperFuzzTest") {
+  module_out_path = module_output_path
+
+  fuzz_config_file = "${samgr_dir}/test/fuzztest/samgrdumper_fuzzer"
+
+  configs = [
+    ":sam_fuzz_test_config",
+    "${samgr_dir}/services/samgr/native:sam_config",
+    "${samgr_dir}/test/resource:coverage_flags",
+  ]
+
+  cflags = [
+    "-g",
+    "-O0",
+    "-Wno-unused-variable",
+    "-fno-omit-frame-pointer",
+  ]
+  sources = [
+    "${samgr_dir}/services/dfx/source/hisysevent_adapter.cpp",
+    "${samgr_dir}/utils/native/source/tools.cpp",
+    "${samgr_services_dir}/source/ability_death_recipient.cpp",
+    "${samgr_services_dir}/source/collect/device_param_collect.cpp",
+    "${samgr_services_dir}/source/collect/device_status_collect_manager.cpp",
+    "${samgr_services_dir}/source/collect/device_timed_collect.cpp",
+    "${samgr_services_dir}/source/collect/icollect_plugin.cpp",
+    "${samgr_services_dir}/source/ffrt_handler.cpp",
+    "${samgr_services_dir}/source/memory_guard.cpp",
+    "${samgr_services_dir}/source/rpc_callback_imp.cpp",
+    "${samgr_services_dir}/source/samgr_time_handler.cpp",
+    "${samgr_services_dir}/source/schedule/system_ability_event_handler.cpp",
+    "${samgr_services_dir}/source/schedule/system_ability_state_machine.cpp",
+    "${samgr_services_dir}/source/schedule/system_ability_state_scheduler.cpp",
+    "${samgr_services_dir}/source/system_ability_manager.cpp",
+    "${samgr_services_dir}/source/system_ability_manager_dumper.cpp",
+    "${samgr_services_dir}/source/system_ability_manager_stub.cpp",
+    "${samgr_services_dir}/source/system_ability_manager_util.cpp",
+    "${samgr_services_dir}/test/unittest/src/mock_permission.cpp",
+    "samgrdumper_fuzzer.cpp",
+  ]
+  deps = []
+
+  external_deps = [
+    "access_token:libaccesstoken_sdk",
+    "access_token:libnativetoken_shared",
+    "access_token:libtokensetproc_shared",
+    "c_utils:utils",
+    "eventhandler:libeventhandler",
+    "ffrt:libffrt",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
+    "init:libbeget_proxy",
+    "init:libbegetutil",
+    "ipc:ipc_core",
+    "ipc:libdbinder",
+    "safwk:system_ability_fwk",
+    "samgr:samgr_common",
+    "samgr:samgr_proxy",
+  ]
+  defines = []
+  if (hicollie_able) {
+    external_deps += [ "hicollie:libhicollie" ]
+    defines += [ "HICOLLIE_ENABLE" ]
+  }
+
+  if (support_device_manager) {
+    sources +=
+        [ "${samgr_services_dir}/source/collect/device_networking_collect.cpp" ]
+    external_deps += [ "device_manager:devicemanagersdk" ]
+    defines += [ "SUPPORT_DEVICE_MANAGER" ]
+  }
+}
+
+group("fuzztest") {
+  testonly = true
+  deps = []
+
+  deps += [
+    # deps file
+    ":SamgrDumperFuzzTest",
+  ]
+}
