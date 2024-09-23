@@ -1,6 +1,18 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #-*- coding: utf-8 -*-
-# Copyright(c) 2024, Huawei Technologies Co., HUTAF xDeivce
+
+# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import json
 import os
@@ -28,7 +40,7 @@ def read_json_files_in_directory(path, type_device):
                     f.write(data)
 
 
-path = "testcases"
+json_path = "testcases"
 
 all_types = ["phone", "car", "tv", "watch", "tablet", "2in1"]
 all_types_name = ["phone", "car", "tv", "watch", "tablet", "pc"]
@@ -46,5 +58,5 @@ if type_number not in numbers:
     print("Input error, please execute again")
 else:
     type_device = all_types[type_number - 1]
-    read_json_files_in_directory(path, type_device)
+    read_json_files_in_directory(json_path, type_device)
     print("Select Test " + all_types_name[type_number - 1] + " successfully!")

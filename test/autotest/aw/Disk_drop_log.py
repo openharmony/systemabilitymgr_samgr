@@ -1,5 +1,5 @@
 #!/usr/bin/env python
-#-*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 # Copyright(c) 2024, Huawei Technologies Co., HUTAF xDeivce
 
 import os
@@ -30,17 +30,17 @@ def count_keys_disk_dropping_logs(path, keys) -> int:
     @param keys: Keywords to be queried
     @return: The number of times the keyword to be queried appears
     """
-    listCount = [0]
+    list_count = [0]
     dirs = os.listdir(path)
     for file in dirs:
         if file.endswith(".txt"):
             with open(f"{path}/{file}", "r", encoding="utf-8", errors="ignore") as read_file:
                 count = read_file.read().count(keys)
-                listCount.append(count)
-    return sum(listCount)
+                list_count.append(count)
+    return sum(list_count)
 
 
-def check_disk_dropping_logs(path,keys) -> bool:
+def check_disk_dropping_logs(path, keys) -> bool:
     """
     @func judge whether a certain keyword exists
     @param path: log path
@@ -48,15 +48,15 @@ def check_disk_dropping_logs(path,keys) -> bool:
     @return: whether a certain keyword exists
     """
 
-    flag=False
-    dirs=os.listdir(path)
+    flag = False
+    dirs = os.listdir(path)
     for file in dirs:
         if file.endswith(".txt"):
-            with open(f"{path}/{file}","r",encoding="utf-8",errors="ignore") as read_file:
+            with open(f"{path}/{file}", "r", encoding="utf-8", errors="ignore") as read_file:
                 for line in read_file.readlines():
-                    result=line.find(keys)
-                    if result!=-1:
-                        flag=True
+                    result = line.find(keys)
+                    if result != -1:
+                        flag = True
                         break
             if flag:
                 break
