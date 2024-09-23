@@ -1075,9 +1075,11 @@ bool SystemAbilityManagerStub::CanRequest()
 {
     auto tid = IPCSkeleton::GetCallingTokenID();
     AccessToken::ATokenTypeEnum tokenType = AccessToken::AccessTokenKit::GetTokenTypeFlag(tid);
-    HILOGD("CanRequest tid:%{private}u, tokenType:%{public}d",
-        tid, tokenType);
-    return (tokenType == AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+    if (tokenType != AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
+        KHILOGE("CanRequest tid:%{public}u, tokenType:%{public}d", tid, tokenType);
+        return false;
+    }
+    return true;
 }
 
 bool SystemAbilityManagerStub::CheckPermission(const std::string& permission)
