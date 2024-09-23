@@ -1070,8 +1070,10 @@ bool SystemAbilityManagerStub::CanRequest()
 {
     auto accessTokenId = IPCSkeleton::GetCallingTokenID();
     AccessToken::ATokenTypeEnum tokenType = AccessToken::AccessTokenKit::GetTokenTypeFlag(accessTokenId);
-    HILOGD("CanRequest tokenId:%{private}u, tokenType:%{public}d",
+    if (tokenType != AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
+        KHILOGE("CanRequest tokenId:%{public}u, tokenType:%{public}d",
         accessTokenId, tokenType);
+    }
     return (tokenType == AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
 }
 
