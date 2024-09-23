@@ -1078,9 +1078,8 @@ bool SystemAbilityManagerStub::CanRequest()
     if (tokenType != AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
         KHILOGE("CanRequest tid:%{public}u, tokenType:%{public}d", tid, tokenType);
         return false;
-    } else {
-        return true;
     }
+    return true;
 }
 
 bool SystemAbilityManagerStub::CheckPermission(const std::string& permission)
