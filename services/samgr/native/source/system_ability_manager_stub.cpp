@@ -1077,8 +1077,8 @@ bool SystemAbilityManagerStub::CanRequest()
     AccessToken::ATokenTypeEnum tokenType = AccessToken::AccessTokenKit::GetTokenTypeFlag(tid);
     if (tokenType != AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
         KHILOGE("CanRequest tid:%{public}u, tokenType:%{public}d", tid, tokenType);
-    }
-    return (tokenType == AccessToken::ATokenTypeEnum::TOKEN_NATIVE);
+        return false;
+    } else return true;
 }
 
 bool SystemAbilityManagerStub::CheckPermission(const std::string& permission)
