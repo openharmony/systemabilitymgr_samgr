@@ -1,0 +1,28 @@
+{
+  "process": "listen_test",
+  "systemability": [
+    {
+      "name": 1494,
+      "libpath": "liblisten_test.z.so",
+      "run-on-create": false,
+      "distributed": true,
+      "dump_level": 1,
+      "start-on-demand": {
+        "settingswitch": [
+          {
+            "name": "bluetooth_status",
+            "value": "on"
+          }
+        ]
+      },
+      "stop-on-demand": {
+        "settingswitch": [
+          {
+            "name": "bluetooth_status",
+            "value": "off"
+          }
+        ]
+      }
+    }
+  ]
+}

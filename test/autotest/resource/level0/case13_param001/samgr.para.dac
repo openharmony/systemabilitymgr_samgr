@@ -11,8 +11,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-persist.samgr.perf.ondemand = false
+bootevent.samgr.ready = samgr:samgr:0775:bool
 
-persist.samgr.cache.sa = 0
+persist.samgr.perf.ondemand = samgr:samgr:0775:bool
+persist.samgr.deviceparam = samgr:samgr:0775:bool
 
-persist.samgr.moduleupdate.start = false
