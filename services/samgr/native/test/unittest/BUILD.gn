@@ -327,7 +327,7 @@ ohos_unittest("SystemAbilityMgrDeviceNetworkingTest") {
     "hitrace:hitrace_meter",
     "init:libbeget_proxy",
     "init:libbegetutil",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "ipc:libdbinder",
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
@@ -480,7 +480,6 @@ ohos_unittest("SystemAbilityMgrProxyTest") {
     "googletest:gtest_main",
     "hilog:libhilog",
     "init:libbegetutil",
-    "ipc:ipc_core",
     "ipc:ipc_single",
     "json:nlohmann_json_static",
   ]
@@ -513,7 +512,7 @@ ohos_unittest("LocalAbilityManagerProxyTest") {
     "c_utils:utils",
     "googletest:gtest_main",
     "hilog:libhilog",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "json:nlohmann_json_static",
   ]
 }
@@ -580,7 +579,7 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
     "hitrace:hitrace_meter",
     "init:libbeget_proxy",
     "init:libbegetutil",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "ipc:libdbinder",
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
@@ -642,7 +641,7 @@ ohos_unittest("SystemAbilityMgrDumperTest") {
     "hitrace:hitrace_meter",
     "init:libbeget_proxy",
     "init:libbegetutil",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "ipc:libdbinder",
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
@@ -673,7 +672,7 @@ ohos_executable("manual_ondemand") {
     "hilog:libhilog",
     "init:libbeget_proxy",
     "init:libbegetutil",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
   ]
@@ -705,7 +704,7 @@ ohos_executable("ondemand") {
     "hilog:libhilog",
     "init:libbeget_proxy",
     "init:libbegetutil",
-    "ipc:ipc_core",
+    "ipc:ipc_single",
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
   ]
