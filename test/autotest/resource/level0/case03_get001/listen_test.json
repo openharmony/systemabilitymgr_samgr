@@ -1,0 +1,31 @@
+{
+  "process": "listen_test",
+  "systemability": [
+    {
+      "name": 1494,
+      "libpath": "liblisten_test.z.so",
+      "run-on-create": false,
+      "auto-restart": true,
+      "distributed": true,
+      "dump_level": 1,
+      "start-on-demand": {
+        "allow-update": true,
+        "deviceonline": [
+          {
+            "name": "deviceonline",
+            "value": "on"
+          }
+        ]
+      },
+      "stop-on-demand": {
+        "allow-update": true,
+        "deviceonline": [
+          {
+            "name": "deviceonline",
+            "value": "off"
+          }
+        ]
+      }
+    }
+  ]
+}

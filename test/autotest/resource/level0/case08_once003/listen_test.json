@@ -1,0 +1,29 @@
+{
+  "process": "listen_test",
+  "systemability": [
+    {
+      "name": 1494,
+      "libpath": "liblisten_test.z.so",
+      "run-on-create": false,
+      "distributed": true,
+      "dump_level": 1,
+      "start-on-demand": {
+        "param": [
+          {
+            "name": "persist.samgr.deviceparam",
+            "value": "true"
+          }
+        ]
+      },
+      "stop-on-demand": {
+        "param": [
+          {
+            "name": "persist.samgr.deviceparam",
+            "value": "false",
+            "enable-once": true
+          }
+        ]
+      }
+    }
+  ]
+}
