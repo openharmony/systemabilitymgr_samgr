@@ -542,7 +542,9 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy006, TestSize.Level3)
     saProfile.startOnDemand.onDemandEvents = onDemandEvents;
     SamgrUtil::FilterCommonSaProfile(saProfile,  saMgr->saProfileMap_[1]);
     sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
-    collectManager->onDemandSaProfiles_.emplace_back(saProfile);
+    std::list<SaProfile> saProfiles;
+    saProfiles.emplace_back(saProfile);
+    collectManager->FilterOnDemandSaProfiles(saProfiles);
     saMgr->collectManager_ = collectManager;
     std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
     int32_t ret = saMgr->GetOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);

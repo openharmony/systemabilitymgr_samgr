@@ -138,7 +138,9 @@ HWTEST_F(DeviceStatusCollectManagerTest, GetSaControlListByEvent001, TestSize.Le
     OnDemandEvent event2 = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "off" };
     saProfile.startOnDemand.onDemandEvents.emplace_back(event1);
     saProfile.stopOnDemand.onDemandEvents.emplace_back(event2);
-    collect->onDemandSaProfiles_.emplace_back(saProfile);
+    std::list<SaProfile> saProfiles;
+    saProfiles.emplace_back(saProfile);
+    collect->FilterOnDemandSaProfiles(saProfiles);
     collect->GetSaControlListByEvent(event, saControlList);
     EXPECT_EQ(false, saControlList.empty());
     saControlList.clear();
@@ -177,8 +179,10 @@ HWTEST_F(DeviceStatusCollectManagerTest, SortSaControlListByLoadPriority001, Tes
     saProfile1.startOnDemand.onDemandEvents.emplace_back(event1);
     SaProfile saProfile2;
     saProfile2.startOnDemand.onDemandEvents.emplace_back(event2);
-    collect->onDemandSaProfiles_.emplace_back(saProfile1);
-    collect->onDemandSaProfiles_.emplace_back(saProfile2);
+    std::list<SaProfile> saProfiles;
+    saProfiles.emplace_back(saProfile1);
+    saProfiles.emplace_back(saProfile2);
+    collect->FilterOnDemandSaProfiles(saProfiles);
 
     std::list<SaControlInfo> saControlList;
     collect->GetSaControlListByEvent(event, saControlList);
@@ -511,7 +515,8 @@ HWTEST_F(DeviceStatusCollectManagerTest, ReportEvent003, TestSize.Level3)
     OnDemandEvent event2 = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "off" };
     saProfile.startOnDemand.onDemandEvents.emplace_back(event1);
     saProfile.stopOnDemand.onDemandEvents.emplace_back(event2);
-    collect->onDemandSaProfiles_.emplace_back(saProfile);
+    saProfiles.emplace_back(saProfile);
+    collect->FilterOnDemandSaProfiles(saProfiles);
     collect->ReportEvent(event);
     EXPECT_EQ(true, collect->collectHandler_ != nullptr);
     PostTask(collect->collectHandler_);
@@ -611,8 +616,8 @@ HWTEST_F(DeviceStatusCollectManagerTest, GetOnDemandEvents003, TestSize.Level3)
     int32_t systemAbilityId = 123;
     OnDemandPolicyType type = OnDemandPolicyType::STOP_POLICY;
     OnDemandEvent onDemandEvent = {SETTING_SWITCH, WIFI_NAME, "on"};
-    SaProfile saprofile = {u"test", systemAbilityId};
-    collect->onDemandSaProfiles_.push_back(saprofile);
+    CollMgrSaProfile collMgrSaProfile = {systemAbilityId};
+    collect->onDemandSaProfiles_.push_back(collMgrSaProfile);
     std::vector<OnDemandEvent> events {onDemandEvent};
     int32_t ret = collect->GetOnDemandEvents(systemAbilityId, type, events);
     EXPECT_EQ(ret, ERR_OK);
@@ -631,8 +636,8 @@ HWTEST_F(DeviceStatusCollectManagerTest, GetOnDemandEvents004, TestSize.Level3)
     int32_t systemAbilityId = 123;
     OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
     OnDemandEvent onDemandEvent = {SETTING_SWITCH, WIFI_NAME, "on"};
-    SaProfile saprofile = {u"test", systemAbilityId};
-    collect->onDemandSaProfiles_.push_back(saprofile);
+    CollMgrSaProfile collMgrSaProfile = {systemAbilityId};
+    collect->onDemandSaProfiles_.push_back(collMgrSaProfile);
     std::vector<OnDemandEvent> events {onDemandEvent};
     int32_t ret = collect->GetOnDemandEvents(systemAbilityId, type, events);
     EXPECT_EQ(ret, ERR_OK);
@@ -703,8 +708,10 @@ HWTEST_F(DeviceStatusCollectManagerTest, UpdateOnDemandEvents003, TestSize.Level
     int32_t systemAbilityId = 123;
     OnDemandPolicyType type = OnDemandPolicyType::STOP_POLICY;
     OnDemandEvent onDemandEvent = {SETTING_SWITCH, WIFI_NAME, "on"};
-    SaProfile saprofile = {u"test", systemAbilityId};
-    collect->onDemandSaProfiles_.push_back(saprofile);
+    SaProfile saProfile = {u"test", systemAbilityId};
+    std::list<SaProfile> saProfiles;
+    saProfiles.emplace_back(saProfile);
+    collect->FilterOnDemandSaProfiles(saProfiles);
     std::vector<OnDemandEvent> events {onDemandEvent};
     int32_t ret = collect->UpdateOnDemandEvents(systemAbilityId, type, events);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
@@ -1007,7 +1014,9 @@ HWTEST_F(DeviceStatusCollectManagerTest, CheckEventUsedLocked001, TestSize.Level
     OnDemandEvent event2 = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "off" };
     saProfile.startOnDemand.onDemandEvents.emplace_back(event1);
     saProfile.stopOnDemand.onDemandEvents.emplace_back(event2);
-    collect->onDemandSaProfiles_.emplace_back(saProfile);
+    std::list<SaProfile> saProfiles;
+    saProfiles.emplace_back(saProfile);
+    collect->FilterOnDemandSaProfiles(saProfiles);
     bool ret = collect->CheckEventUsedLocked(event1);
     EXPECT_EQ(ret, true);
 }

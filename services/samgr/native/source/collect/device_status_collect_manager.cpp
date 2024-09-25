@@ -50,7 +50,7 @@ void DeviceStatusCollectManager::Init(const std::list<SaProfile>& saProfiles)
 #endif
 #ifdef SUPPORT_COMMON_EVENT
     sptr<ICollectPlugin> eventStatuscollect = new CommonEventCollect(this);
-    eventStatuscollect->Init(onDemandSaProfiles_);
+    eventStatuscollect->Init(saProfiles);
     collectPluginMap_[COMMON_EVENT] = eventStatuscollect;
 #endif
 #ifdef SUPPORT_SWITCH_COLLECT
@@ -59,7 +59,7 @@ void DeviceStatusCollectManager::Init(const std::list<SaProfile>& saProfiles)
     collectPluginMap_[SETTING_SWITCH] = deviceSwitchCollect;
 #endif
     sptr<ICollectPlugin> timedCollect = new DeviceTimedCollect(this);
-    timedCollect->Init(onDemandSaProfiles_);
+    timedCollect->Init(saProfiles);
     collectPluginMap_[TIMED_EVENT] = timedCollect;
     sptr<ICollectPlugin> refCountCollect = new RefCountCollect(this);
     refCountCollect->Init(saProfiles);
@@ -83,7 +83,14 @@ void DeviceStatusCollectManager::FilterOnDemandSaProfiles(const std::list<SaProf
         if (saProfile.startOnDemand.onDemandEvents.empty() && saProfile.stopOnDemand.onDemandEvents.empty()) {
             continue;
         }
-        onDemandSaProfiles_.emplace_back(saProfile);
+        CollMgrSaProfile collMgrSaProfile;
+        collMgrSaProfile.saId = saProfile.saId;
+        collMgrSaProfile.startOnDemandEvents.assign(saProfile.startOnDemand.onDemandEvents.begin(),
+            saProfile.startOnDemand.onDemandEvents.end());
+        collMgrSaProfile.stopOnDemandEvents.assign(saProfile.stopOnDemand.onDemandEvents.begin(),
+            saProfile.stopOnDemand.onDemandEvents.end());
+        collMgrSaProfile.cacheCommonEvent = saProfile.cacheCommonEvent;
+        onDemandSaProfiles_.push_back(collMgrSaProfile);
     }
 }
 
@@ -125,8 +132,8 @@ void DeviceStatusCollectManager::GetSaControlListByEvent(const OnDemandEvent& ev
     std::shared_lock<std::shared_mutex> readLock(saProfilesLock_);
     for (auto& profile : onDemandSaProfiles_) {
         // start on demand
-        for (auto iterStart = profile.startOnDemand.onDemandEvents.begin();
-            iterStart != profile.startOnDemand.onDemandEvents.end(); iterStart++) {
+        for (auto iterStart = profile.startOnDemandEvents.begin();
+            iterStart != profile.startOnDemandEvents.end(); iterStart++) {
             if (IsSameEvent(event, *iterStart) && CheckConditions(*iterStart) &&
                 CheckExtraMessages(event, *iterStart)) {
                 // maybe the process is being killed, let samgr make decisions.
@@ -137,8 +144,8 @@ void DeviceStatusCollectManager::GetSaControlListByEvent(const OnDemandEvent& ev
             }
         }
         // stop on demand
-        for (auto iterStop = profile.stopOnDemand.onDemandEvents.begin();
-            iterStop != profile.stopOnDemand.onDemandEvents.end(); iterStop++) {
+        for (auto iterStop = profile.stopOnDemandEvents.begin();
+            iterStop != profile.stopOnDemandEvents.end(); iterStop++) {
             if (IsSameEvent(event, *iterStop) && CheckConditions(*iterStop) &&
                 CheckExtraMessages(event, *iterStop)) {
                 // maybe the process is starting, let samgr make decisions.
@@ -423,9 +430,9 @@ int32_t DeviceStatusCollectManager::GetOnDemandEvents(int32_t systemAbilityId, O
         return ERR_INVALID_VALUE;
     }
     if (type == OnDemandPolicyType::START_POLICY) {
-        events = (*iter).startOnDemand.onDemandEvents;
+        events = (*iter).startOnDemandEvents;
     } else if (type == OnDemandPolicyType::STOP_POLICY) {
-        events = (*iter).stopOnDemand.onDemandEvents;
+        events = (*iter).stopOnDemandEvents;
     } else {
         HILOGE("GetOnDemandEvents invalid policy types");
         return ERR_INVALID_VALUE;
@@ -464,15 +471,15 @@ bool DeviceStatusCollectManager::CheckEventUsedLocked(const OnDemandEvent& event
 {
     for (auto& profile : onDemandSaProfiles_) {
         // start on demand
-        for (auto iterStart = profile.startOnDemand.onDemandEvents.begin();
-            iterStart != profile.startOnDemand.onDemandEvents.end(); iterStart++) {
+        for (auto iterStart = profile.startOnDemandEvents.begin();
+            iterStart != profile.startOnDemandEvents.end(); iterStart++) {
             if (IsSameEventName(event, *iterStart)) {
                 return true;
             }
         }
         // stop on demand
-        for (auto iterStop = profile.stopOnDemand.onDemandEvents.begin();
-            iterStop != profile.stopOnDemand.onDemandEvents.end(); iterStop++) {
+        for (auto iterStop = profile.stopOnDemandEvents.begin();
+            iterStop != profile.stopOnDemandEvents.end(); iterStop++) {
             if (IsSameEventName(event, *iterStop)) {
                 return true;
             }
@@ -569,11 +576,11 @@ int32_t DeviceStatusCollectManager::UpdateOnDemandEvents(int32_t systemAbilityId
             return ERR_INVALID_VALUE;
         }
         if (type == OnDemandPolicyType::START_POLICY) {
-            oldEvents = (*iter).startOnDemand.onDemandEvents;
-            (*iter).startOnDemand.onDemandEvents = events;
+            oldEvents = (*iter).startOnDemandEvents;
+            (*iter).startOnDemandEvents = events;
         } else if (type == OnDemandPolicyType::STOP_POLICY) {
-            oldEvents = (*iter).stopOnDemand.onDemandEvents;
-            (*iter).stopOnDemand.onDemandEvents = events;
+            oldEvents = (*iter).stopOnDemandEvents;
+            (*iter).stopOnDemandEvents = events;
         } else {
             HILOGE("UpdateOnDemandEvents policy types");
             return ERR_INVALID_VALUE;
