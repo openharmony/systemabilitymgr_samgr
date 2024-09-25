@@ -114,39 +114,6 @@ void SystemAbilityManager::Init()
     SetKey(DYNAMIC_CACHE_PARAM);
 }
 
-void SystemAbilityManager::RemoveWhiteCommonEvent()
-{
-    if (collectManager_ != nullptr) {
-        collectManager_->RemoveWhiteCommonEvent();
-    }
-}
-
-void SystemAbilityManager::CleanFfrt()
-{
-    if (workHandler_ != nullptr) {
-        workHandler_->CleanFfrt();
-    }
-    if (collectManager_ != nullptr) {
-        collectManager_->CleanFfrt();
-    }
-    if (abilityStateScheduler_ != nullptr) {
-        abilityStateScheduler_->CleanFfrt();
-    }
-}
-
-void SystemAbilityManager::SetFfrt()
-{
-    if (workHandler_ != nullptr) {
-        workHandler_->SetFfrt("workHandler");
-    }
-    if (collectManager_ != nullptr) {
-        collectManager_->SetFfrt();
-    }
-    if (abilityStateScheduler_ != nullptr) {
-        abilityStateScheduler_->SetFfrt();
-    }
-}
-
 bool SystemAbilityManager::IpcStatSamgrProc(int32_t fd, int32_t cmd)
 {
     bool ret = false;
@@ -370,18 +337,6 @@ void SystemAbilityManager::DoLoadForPerf()
             LoadSystemAbility(said, callback);
         }
     }
-}
-
-bool SystemAbilityManager::GetSaProfile(int32_t saId, CommonSaProfile& saProfile)
-{
-    lock_guard<mutex> autoLock(saProfileMapLock_);
-    auto iter = saProfileMap_.find(saId);
-    if (iter == saProfileMap_.end()) {
-        return false;
-    } else {
-        saProfile = iter->second;
-    }
-    return true;
 }
 
 int32_t SystemAbilityManager::GetOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
@@ -1199,17 +1154,6 @@ int32_t SystemAbilityManager::GetSystemProcessInfo(int32_t systemAbilityId, Syst
     return abilityStateScheduler_->GetSystemProcessInfo(systemAbilityId, systemProcessInfo);
 }
 
-bool SystemAbilityManager::IsDistributedSystemAbility(int32_t systemAbilityId)
-{
-    CommonSaProfile saProfile;
-    bool ret = GetSaProfile(systemAbilityId, saProfile);
-    if (!ret) {
-        HILOGE("IsDistributedSa SA:%{public}d no Profile!", systemAbilityId);
-        return false;
-    }
-    return saProfile.distributed;
-}
-
 int32_t SystemAbilityManager::GetRunningSystemProcess(std::list<SystemProcessInfo>& systemProcessInfos)
 {
     if (abilityStateScheduler_ == nullptr) {
@@ -1289,17 +1233,6 @@ void SystemAbilityManager::SendSystemAbilityRemovedMsg(int32_t systemAbilityId)
     }
 }
 
-bool SystemAbilityManager::IsModuleUpdate(int32_t systemAbilityId)
-{
-    CommonSaProfile saProfile;
-    bool ret = GetSaProfile(systemAbilityId, saProfile);
-    if (!ret) {
-        HILOGE("IsModuleUpdate SA:%{public}d not exist!", systemAbilityId);
-        return false;
-    }
-    return saProfile.moduleUpdate;
-}
-
 void SystemAbilityManager::SendCheckLoadedMsg(int32_t systemAbilityId, const std::u16string& name,
     const std::string& srcDeviceId, const sptr<ISystemAbilityLoadCallback>& callback)
 {
@@ -1376,16 +1309,6 @@ void SystemAbilityManager::CleanCallbackForLoadFailed(int32_t systemAbilityId, c
         HILOGI("CleanCallback startingAbilityMap remove SA:%{public}d.", systemAbilityId);
         startingAbilityMap_.erase(iter);
     }
-}
-
-bool SystemAbilityManager::IsCacheCommonEvent(int32_t systemAbilityId)
-{
-    CommonSaProfile saProfile;
-    if (!GetSaProfile(systemAbilityId, saProfile)) {
-        HILOGD("SA:%{public}d no profile!", systemAbilityId);
-        return false;
-    }
-    return saProfile.cacheCommonEvent;
 }
 
 void SystemAbilityManager::RemoveCheckLoadedMsg(int32_t systemAbilityId)
@@ -1705,17 +1628,6 @@ int32_t SystemAbilityManager::UnloadSystemAbility(int32_t systemAbilityId)
     std::shared_ptr<UnloadRequestInfo> unloadRequestInfo =
         std::make_shared<UnloadRequestInfo>(onDemandEvent, systemAbilityId, callingPid);
     return abilityStateScheduler_->HandleUnloadAbilityEvent(unloadRequestInfo);
-}
-
-bool SystemAbilityManager::CheckSaIsImmediatelyRecycle(int32_t systemAbilityId)
-{
-    CommonSaProfile saProfile;
-    bool ret = GetSaProfile(systemAbilityId, saProfile);
-    if (!ret) {
-        HILOGE("UnloadSystemAbility SA:%{public}d not supported!", systemAbilityId);
-        return ERR_INVALID_VALUE;
-    }
-    return saProfile.recycleStrategy == IMMEDIATELY;
 }
 
 int32_t SystemAbilityManager::CancelUnloadSystemAbility(int32_t systemAbilityId)

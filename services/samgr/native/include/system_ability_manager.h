@@ -116,8 +116,31 @@ public:
         return std::string();
     }
     void Init();
-    void CleanFfrt();
-    void SetFfrt();
+    void CleanFfrt()
+    {
+        if (workHandler_ != nullptr) {
+            workHandler_->CleanFfrt();
+        }
+        if (collectManager_ != nullptr) {
+            collectManager_->CleanFfrt();
+        }
+        if (abilityStateScheduler_ != nullptr) {
+            abilityStateScheduler_->CleanFfrt();
+        }
+    }
+
+    void SetFfrt()
+    {
+        if (workHandler_ != nullptr) {
+            workHandler_->SetFfrt("workHandler");
+        }
+        if (collectManager_ != nullptr) {
+            collectManager_->SetFfrt();
+        }
+        if (abilityStateScheduler_ != nullptr) {
+            abilityStateScheduler_->SetFfrt();
+        }
+    }
     int32_t Dump(int32_t fd, const std::vector<std::u16string>& args) override;
     void AddSamgrToAbilityMap();
 
@@ -167,8 +190,26 @@ public:
     int32_t GetOnDemandSystemAbilityIds(std::vector<int32_t>& systemAbilityIds) override;
     int32_t SendStrategy(int32_t type, std::vector<int32_t>& systemAbilityIds,
         int32_t level, std::string& action) override;
-    bool CheckSaIsImmediatelyRecycle(int32_t systemAbilityId);
-    bool IsDistributedSystemAbility(int32_t systemAbilityId);
+    bool CheckSaIsImmediatelyRecycle(int32_t systemAbilityId)
+    {
+        CommonSaProfile saProfile;
+        bool ret = GetSaProfile(systemAbilityId, saProfile);
+        if (!ret) {
+            HILOGE("UnloadSystemAbility SA:%{public}d not supported!", systemAbilityId);
+            return ERR_INVALID_VALUE;
+        }
+        return saProfile.recycleStrategy == IMMEDIATELY;
+    }
+    bool IsDistributedSystemAbility(int32_t systemAbilityId)
+    {
+        CommonSaProfile saProfile;
+        bool ret = GetSaProfile(systemAbilityId, saProfile);
+        if (!ret) {
+            HILOGE("IsDistributedSa SA:%{public}d no Profile!", systemAbilityId);
+            return false;
+        }
+        return saProfile.distributed;
+    }
     int32_t GetRunningSaExtensionInfoList(const std::string& extension,
         std::vector<SaExtensionInfo>& infoList) override;
     int32_t GetExtensionSaIds(const std::string& extension, std::vector<int32_t>& saIds) override;
@@ -176,8 +217,22 @@ public:
     int32_t GetCommonEventExtraDataIdlist(int32_t saId, std::vector<int64_t>& extraDataIdList,
         const std::string& eventName = "") override;
     sptr<IRemoteObject> GetSystemProcess(const std::u16string& procName);
-    bool IsModuleUpdate(int32_t systemAbilityId);
-    void RemoveWhiteCommonEvent();
+    bool IsModuleUpdate(int32_t systemAbilityId)
+    {
+        CommonSaProfile saProfile;
+        bool ret = GetSaProfile(systemAbilityId, saProfile);
+        if (!ret) {
+            HILOGE("IsModuleUpdate SA:%{public}d not exist!", systemAbilityId);
+            return false;
+        }
+        return saProfile.moduleUpdate;
+    }
+    void RemoveWhiteCommonEvent()
+    {
+        if (collectManager_ != nullptr) {
+            collectManager_->RemoveWhiteCommonEvent();
+        }
+    }
 private:
     enum class AbilityState {
         INIT,
@@ -205,7 +260,17 @@ private:
     int32_t FindSystemAbilityNotify(int32_t systemAbilityId, const std::string& deviceId, int32_t code);
 
     void InitSaProfile();
-    bool GetSaProfile(int32_t saId, CommonSaProfile& saProfile);
+    bool GetSaProfile(int32_t saId, CommonSaProfile& saProfile)
+    {
+        lock_guard<mutex> autoLock(saProfileMapLock_);
+        auto iter = saProfileMap_.find(saId);
+        if (iter == saProfileMap_.end()) {
+            return false;
+        } else {
+            saProfile = iter->second;
+        }
+        return true;
+    }
     void CheckListenerNotify(int32_t systemAbilityId, const sptr<ISystemAbilityStatusChange>& listener);
     void NotifySystemAbilityChanged(int32_t systemAbilityId, const std::string& deviceId, int32_t code,
         const sptr<ISystemAbilityStatusChange>& listener);
@@ -232,7 +297,15 @@ private:
     void RemoveStartingAbilityCallback(CallbackList& callbackList, const sptr<IRemoteObject>& remoteObject);
     void RemoveStartingAbilityCallbackForDevice(AbilityItem& abilityItem, const sptr<IRemoteObject>& remoteObject);
     void RemoveStartingAbilityCallbackLocked(std::pair<sptr<ISystemAbilityLoadCallback>, int32_t>& itemPair);
-    bool IsCacheCommonEvent(int32_t systemAbilityId);
+    bool IsCacheCommonEvent(int32_t systemAbilityId)
+    {
+        CommonSaProfile saProfile;
+        if (!GetSaProfile(systemAbilityId, saProfile)) {
+            HILOGD("SA:%{public}d no profile!", systemAbilityId);
+            return false;
+        }
+        return saProfile.cacheCommonEvent;
+    }
     void SendCheckLoadedMsg(int32_t systemAbilityId, const std::u16string& name, const std::string& srcDeviceId,
         const sptr<ISystemAbilityLoadCallback>& callback);
     void RemoveCheckLoadedMsg(int32_t systemAbilityId);
