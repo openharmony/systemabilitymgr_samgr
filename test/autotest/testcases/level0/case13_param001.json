@@ -1,0 +1,15 @@
+{
+  "description": "The attribute transformation plugin is functioning properly",
+  "environment": [
+    {
+      "type": "device",
+      "label": "phone"
+    }
+  ],
+  "driver": {
+    "type": "DeviceTest",
+    "py_file": [
+      "testcases/level0/case13_param001.py"
+    ]
+  }
+}
