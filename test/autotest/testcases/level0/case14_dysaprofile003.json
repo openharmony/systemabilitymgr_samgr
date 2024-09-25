@@ -1,0 +1,15 @@
+{
+  "description": "Dynamically update and load configuration files",
+  "environment": [
+    {
+      "type": "device",
+      "label": "phone"
+    }
+  ],
+  "driver": {
+    "type": "DeviceTest",
+    "py_file": [
+      "testcases/level0/case14_dysaprofile003.py"
+    ]
+  }
+}

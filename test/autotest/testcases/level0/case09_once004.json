@@ -1,0 +1,15 @@
+{
+  "description": "Only effective once for normal use (broadcast)",
+  "environment": [
+    {
+      "type": "device",
+      "label": "phone"
+    }
+  ],
+  "driver": {
+    "type": "DeviceTest",
+    "py_file": [
+      "testcases/level0/case09_once004.py"
+    ]
+  }
+}
