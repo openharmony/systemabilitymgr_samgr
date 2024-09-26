@@ -855,7 +855,7 @@ void SystemAbilityManager::CheckListenerNotify(int32_t systemAbilityId,
             if (itemListener.state == ListenerState::INIT) {
                 HILOGI("NotifySaChanged add SA:%{public}d,cnt:%{public}d,callpid:%{public}d",
                     systemAbilityId, subscribeCountMap_[callingPid], callingPid);
-                NotifySystemAbilityChangedBySync(systemAbilityId, listener);
+                NotifySystemAbilityAddedBySync(systemAbilityId, listener);
                 itemListener.state = ListenerState::NOTIFIED;
             } else {
                 HILOGI("Subscribe Listener has been notified,SA:%{public}d,callpid:%{public}d",
