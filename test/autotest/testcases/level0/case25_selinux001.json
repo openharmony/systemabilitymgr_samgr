@@ -1,0 +1,15 @@
+{
+  "description": "System normal startup configuration Samgr Selina policy",
+  "environment": [
+    {
+      "type": "device",
+      "label": "phone"
+    }
+  ],
+  "driver": {
+    "type": "DeviceTest",
+    "py_file": [
+      "testcases/level0/case25_selinux001.py"
+    ]
+  }
+}

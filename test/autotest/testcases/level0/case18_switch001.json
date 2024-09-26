@@ -1,0 +1,15 @@
+{
+  "description": "The WiFi switch plugin is functioning properly",
+  "environment": [
+    {
+      "type": "device",
+      "label": "phone"
+    }
+  ],
+  "driver": {
+    "type": "DeviceTest",
+    "py_file": [
+      "testcases/level0/case18_switch001.py"
+    ]
+  }
+}

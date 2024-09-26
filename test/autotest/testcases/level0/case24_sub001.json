@@ -1,0 +1,15 @@
+{
+  "description": "Subscription function verification",
+  "environment": [
+    {
+      "type": "device",
+      "label": "phone"
+    }
+  ],
+  "driver": {
+    "type": "DeviceTest",
+    "py_file": [
+      "testcases/level0/case24_sub001.py"
+    ]
+  }
+}

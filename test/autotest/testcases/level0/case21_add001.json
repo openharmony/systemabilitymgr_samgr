@@ -1,0 +1,15 @@
+{
+  "description": "Non native process add intercepted",
+  "environment": [
+    {
+      "type": "device",
+      "label": "phone"
+    }
+  ],
+  "driver": {
+    "type": "DeviceTest",
+    "py_file": [
+      "testcases/level0/case21_add001.py"
+    ]
+  }
+}
