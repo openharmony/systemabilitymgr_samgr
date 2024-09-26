@@ -1,0 +1,15 @@
+{
+  "description": "SA process creates and destroys relevant information",
+  "environment": [
+    {
+      "type": "device",
+      "label": "phone"
+    }
+  ],
+  "driver": {
+    "type": "DeviceTest",
+    "py_file": [
+      "testcases/level0/case22_process001.py"
+    ]
+  }
+}
