@@ -1530,6 +1530,7 @@ int32_t SystemAbilityManager::DoLoadSystemAbility(int32_t systemAbilityId, const
 {
     sptr<IRemoteObject> targetObject = CheckSystemAbility(systemAbilityId);
     if (targetObject != nullptr) {
+        HILOGI("DoLoadSystemAbility notify SA:%{public}d callpid:%{public}d!", systemAbilityId, callingPid);
         SendLoadedSystemAbilityMsg(systemAbilityId, targetObject, callback);
         return ERR_OK;
     }
