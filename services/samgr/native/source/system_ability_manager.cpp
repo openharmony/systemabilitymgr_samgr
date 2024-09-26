@@ -823,7 +823,7 @@ vector<u16string> SystemAbilityManager::ListSystemAbilities(uint32_t dumpFlags)
     return list;
 }
 
-void SystemAbilityManager::NotifySystemAbilityChangedBySync(int32_t systemAbilityId,
+void SystemAbilityManager::NotifySystemAbilityAddedBySync(int32_t systemAbilityId,
     const sptr<ISystemAbilityStatusChange>& listener)
 {
     if (workHandler_ == nullptr) {
