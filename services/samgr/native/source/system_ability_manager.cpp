@@ -823,6 +823,23 @@ vector<u16string> SystemAbilityManager::ListSystemAbilities(uint32_t dumpFlags)
     return list;
 }
 
+void SystemAbilityManager::NotifySystemAbilityAddedBySync(int32_t systemAbilityId,
+    const sptr<ISystemAbilityStatusChange>& listener)
+{
+    if (workHandler_ == nullptr) {
+        HILOGE("SubscribeSystemAbility workHandler is nullptr");
+        return;
+    } else {
+        auto listenerNotifyTask = [systemAbilityId, listener, this]() {
+            NotifySystemAbilityChanged(systemAbilityId, "",
+                static_cast<uint32_t>(SamgrInterfaceCode::ADD_SYSTEM_ABILITY_TRANSACTION), listener);
+        };
+        if (!workHandler_->PostTask(listenerNotifyTask)) {
+            HILOGE("Send listenerNotifyMsg PostTask fail");
+        }
+    }
+}
+
 void SystemAbilityManager::CheckListenerNotify(int32_t systemAbilityId,
     const sptr<ISystemAbilityStatusChange>& listener)
 {
@@ -838,8 +855,7 @@ void SystemAbilityManager::CheckListenerNotify(int32_t systemAbilityId,
             if (itemListener.state == ListenerState::INIT) {
                 HILOGI("NotifySaChanged add SA:%{public}d,cnt:%{public}d,callpid:%{public}d",
                     systemAbilityId, subscribeCountMap_[callingPid], callingPid);
-                NotifySystemAbilityChanged(systemAbilityId, "",
-                    static_cast<uint32_t>(SamgrInterfaceCode::ADD_SYSTEM_ABILITY_TRANSACTION), listener);
+                NotifySystemAbilityAddedBySync(systemAbilityId, listener);
                 itemListener.state = ListenerState::NOTIFIED;
             } else {
                 HILOGI("Subscribe Listener has been notified,SA:%{public}d,callpid:%{public}d",
@@ -1294,7 +1310,16 @@ void SystemAbilityManager::CleanCallbackForLoadFailed(int32_t systemAbilityId, c
     auto& abilityItem = iter->second;
     for (auto& callbackItem : abilityItem.callbackMap[srcDeviceId]) {
         if (callback->AsObject() == callbackItem.first->AsObject()) {
-            NotifySystemAbilityLoadFail(systemAbilityId, callbackItem.first);
+            if (workHandler_ == nullptr) {
+                HILOGE("CleanCallbackForLoadFailed workHandler is nullptr");
+                return;
+            }
+            auto listenerNotifyTask = [systemAbilityId, callbackItem, this]() {
+                NotifySystemAbilityLoadFail(systemAbilityId, callbackItem.first);
+            };
+            if (!workHandler_->PostTask(listenerNotifyTask)) {
+                HILOGE("Send NotifySaLoadFailMsg PostTask fail");
+            }
             RemoveStartingAbilityCallbackLocked(callbackItem);
             abilityItem.callbackMap[srcDeviceId].remove(callbackItem);
             break;
@@ -1506,7 +1531,7 @@ int32_t SystemAbilityManager::DoLoadSystemAbility(int32_t systemAbilityId, const
     sptr<IRemoteObject> targetObject = CheckSystemAbility(systemAbilityId);
     if (targetObject != nullptr) {
         HILOGI("DoLoadSystemAbility notify SA:%{public}d callpid:%{public}d!", systemAbilityId, callingPid);
-        NotifySystemAbilityLoaded(systemAbilityId, targetObject, callback);
+        SendLoadedSystemAbilityMsg(systemAbilityId, targetObject, callback);
         return ERR_OK;
     }
     int32_t result = ERR_INVALID_VALUE;

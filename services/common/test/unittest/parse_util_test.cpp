@@ -1358,7 +1358,7 @@ HWTEST_F(ParseUtilTest, ParseSystemAbilityGetExtension003, TestSize.Level3)
  * @tc.desc: GetOndemandPriorityPara
  * @tc.type: FUNC
  */
-HWTEST_F(ParseUtilTest, GetOndemandPriorityPara005, TestSize.Level3)
+HWTEST_F(ParseUtilTest, GetOndemandPriorityPara001, TestSize.Level3)
 {
     DTEST_LOG << " GetOndemandPriorityPara001 BEGIN" << std::endl;
     std::string loadPriority = "HighPriority";

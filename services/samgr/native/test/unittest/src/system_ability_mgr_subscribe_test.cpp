@@ -87,6 +87,7 @@ HWTEST_F(SystemAbilityMgrTest, UnSubscribeSystemAbility001, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, ReportSubscribeOverflow001, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
     ASSERT_TRUE(saMgr != nullptr);
     std::vector<sptr<SaStatusChangeMock>> tmpCallbak;
     sptr<SaStatusChangeMock> callback = nullptr;
