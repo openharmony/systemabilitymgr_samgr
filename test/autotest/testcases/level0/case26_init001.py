@@ -16,7 +16,7 @@
 
 import time
 from devicetest.core.test_case import TestCase, CheckPoint
-from hypium import *
+from hypium import UiDriver
 from hypium.action.host import host
 import subprocess
 import shlex
@@ -45,7 +45,7 @@ class case26_init001(TestCase):
         self.sn = self.device1.device_sn
 
     def setup(self):
-        pass
+        self.log.info("case26_init001 start")
 
     def test_step(self):
         driver = self.driver

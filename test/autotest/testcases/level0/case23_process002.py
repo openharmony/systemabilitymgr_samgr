@@ -15,12 +15,9 @@
 # limitations under the License.
 
 from devicetest.core.test_case import TestCase, CheckPoint
-from devicetest.utils.file_util import get_resource_path
-from hypium import *
-
-sa_ondemand_path = get_resource_path(
-    "resource/soResource/ondemand",
-    isdir=None)
+from hypium import UiDriver
+from tools.get_source_path import get_source_path
+from tools.push_remove_source import remove_source
 
 
 class case23_process002(TestCase):
@@ -35,7 +32,7 @@ class case23_process002(TestCase):
         self.sn = self.device1.device_sn
 
     def setup(self):
-        pass
+        self.log.info("case23_process002 start")
 
     def test_step(self):
         driver = self.driver
@@ -51,6 +48,8 @@ class case23_process002(TestCase):
         assert count == 1
 
     def teardown(self):
-        driver = self.driver
-        driver.Storage.remove_file("/system/bin/ondemand")
+        need_source = {"cfg": False, "fwk": False, "listen_test": False, "audio_ability": False, "ondemand": True,
+                       "proxy": False, "para": False}
+        source_path = get_source_path(need_source=need_source, casename="level0/case22_process001")
+        remove_source(source_path=source_path, driver=self.driver, sn=self.sn)
         self.log.info("case23_process002 down")
