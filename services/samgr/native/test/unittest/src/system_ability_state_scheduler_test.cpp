@@ -44,6 +44,19 @@ constexpr int32_t ONCE_DELAY_TIME = 10 * 1000; //ms
 constexpr int32_t MAX_DURATION = 11 * 60 * 1000; // ms
 const std::string SA_TAG_DEVICE_ON_LINE = "deviceonline";
 }
+
+void SystemProcessStatusChange::OnSystemProcessStarted(SystemProcessInfo& systemProcessInfo)
+{
+    std::cout << "OnSystemProcessStarted, processName: " << systemProcessInfo.processName << " pid:"
+        << systemProcessInfo.pid << " uid:" << systemProcessInfo.uid << std::endl;
+}
+
+void SystemProcessStatusChange::OnSystemProcessStopped(SystemProcessInfo& systemProcessInfo)
+{
+    std::cout << "OnSystemProcessStopped, processName: " << systemProcessInfo.processName << " pid:"
+        << systemProcessInfo.pid << " uid:" << systemProcessInfo.uid << std::endl;
+}
+
 void SystemAbilityStateSchedulerTest::SetUpTestCase()
 {
     DTEST_LOG << "SetUpTestCase" << std::endl;
@@ -63,6 +76,7 @@ void SystemAbilityStateSchedulerTest::TearDown()
 {
     DTEST_LOG << "TearDown" << std::endl;
 }
+
 /**
  * @tc.name: GetSystemAbilityContext001
  * @tc.desc: test GetSystemAbilityContext with empty abilityContextMap_

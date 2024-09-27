@@ -13,8 +13,7 @@
  * limitations under the License.
  */
 
-#include "gtest/gtest.h"
-#include "system_process_status_change_stub.h"
+#include "system_ability_state_scheduler_test.h"
 #include "samgr_err_code.h"
 #include "ability_death_recipient.h"
 #include "datetime_ex.h"
@@ -42,48 +41,7 @@ const std::u16string process_invalid = u"test_invalid";
 const std::string LOCAL_DEVICE = "local";
 }
 
-class SystemAbilityStateSchedulerProcTest : public testing::Test {
-public:
-    static void SetUpTestCase();
-    static void TearDownTestCase();
-    void SetUp();
-    void TearDown();
-};
-
-class SystemProcessNewStatusChange : public SystemProcessStatusChangeStub {
-public:
-    void OnSystemProcessStarted(SystemProcessInfo& systemProcessInfo) override;
-    void OnSystemProcessStopped(SystemProcessInfo& systemProcessInfo) override;
-};
-void SystemProcessNewStatusChange::OnSystemProcessStarted(SystemProcessInfo& systemProcessInfo)
-{
-    std::cout << "OnSystemProcessStarted, processName: " << systemProcessInfo.processName << " pid:"
-        << systemProcessInfo.pid << " uid:" << systemProcessInfo.uid << std::endl;
-}
-void SystemProcessNewStatusChange::OnSystemProcessStopped(SystemProcessInfo& systemProcessInfo)
-{
-    std::cout << "OnSystemProcessStopped, processName: " << systemProcessInfo.processName << " pid:"
-        << systemProcessInfo.pid << " uid:" << systemProcessInfo.uid << std::endl;
-}
-
-void SystemAbilityStateSchedulerProcTest::SetUpTestCase()
-{
-    DTEST_LOG << "SetUpTestCase" << std::endl;
-}
-void SystemAbilityStateSchedulerProcTest::TearDownTestCase()
-{
-    DTEST_LOG << "TearDownTestCase" << std::endl;
-}
-void SystemAbilityStateSchedulerProcTest::SetUp()
-{
-    DTEST_LOG << "SetUp" << std::endl;
-}
-void SystemAbilityStateSchedulerProcTest::TearDown()
-{
-    DTEST_LOG << "TearDown" << std::endl;
-}
-
-HWTEST_F(SystemAbilityStateSchedulerProcTest, KillSystemProcessLocked002, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, KillSystemProcessLocked002, TestSize.Level3)
 {
     cout << "begin KillSystemProcessLocked002 "<< endl;
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
@@ -102,7 +60,7 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, KillSystemProcessLocked002, TestSi
  * @tc.type: FUNC
  * @tc.require: I70I3W
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, CanRestartProcessLocked001, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, CanRestartProcessLocked001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -112,14 +70,13 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, CanRestartProcessLocked001, TestSi
     EXPECT_EQ(ret, true);
 }
 
-
 /**
  * @tc.name: CanRestartProcessLocked002
  * @tc.desc: test CanRestartProcessLocked, with enableRestart is false
  * @tc.type: FUNC
  * @tc.require: I736XA
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, CanRestartProcessLocked002, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, CanRestartProcessLocked002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -135,7 +92,7 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, CanRestartProcessLocked002, TestSi
  * @tc.type: FUNC
  * @tc.require: I736XA
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, CanRestartProcessLocked003, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, CanRestartProcessLocked003, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -155,7 +112,7 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, CanRestartProcessLocked003, TestSi
  * @tc.type: FUNC
  * @tc.require: I736XA
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, CanRestartProcessLocked004, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, CanRestartProcessLocked004, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -175,7 +132,7 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, CanRestartProcessLocked004, TestSi
  * @tc.type: FUNC
  * @tc.require: I736XA
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, CanRestartProcessLocked005, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, CanRestartProcessLocked005, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -195,7 +152,7 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, CanRestartProcessLocked005, TestSi
  * @tc.type: FUNC
  * @tc.require: I7VEPG
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, GetProcessInfo001, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, GetProcessInfo001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -211,7 +168,7 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, GetProcessInfo001, TestSize.Level3
  * @tc.type: FUNC
  * @tc.require: I7VEPG
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, GetProcessInfo002, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, GetProcessInfo002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -232,7 +189,7 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, GetProcessInfo002, TestSize.Level3
  * @tc.type: FUNC
  * @tc.require: I6FDNZ
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, InitSteteContext001, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, InitSteteContext001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -249,7 +206,7 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, InitSteteContext001, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require: I6FDNZ
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, InitSteteContext002, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, InitSteteContext002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -268,7 +225,7 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, InitSteteContext002, TestSize.Leve
  * @tc.type: FUNC
  * @tc.require: I6FDNZ
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, GetSystemProcessContext001, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemProcessContext001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -286,7 +243,7 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, GetSystemProcessContext001, TestSi
  * @tc.type: FUNC
  * @tc.require: I6FDNZ
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, GetSystemProcessContext002, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemProcessContext002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -305,7 +262,7 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, GetSystemProcessContext002, TestSi
  * @tc.type: FUNC
  * @tc.require: I6FDNZ
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, GetSystemProcessContext003, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemProcessContext003, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -324,7 +281,7 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, GetSystemProcessContext003, TestSi
  * @tc.type: FUNC
  * @tc.require: I6LQ18
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, HandleLoadAbilityEventLocked002, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, HandleLoadAbilityEventLocked002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -351,7 +308,7 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, HandleLoadAbilityEventLocked002, T
  * @tc.type: FUNC
  * @tc.require: I6FDNZ
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, SendProcessStateEvent001, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, SendProcessStateEvent001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -372,7 +329,7 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, SendProcessStateEvent001, TestSize
  * @tc.type: FUNC
  * @tc.require: I6FDNZ
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, TryKillSystemProcess002, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, TryKillSystemProcess002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -389,7 +346,7 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, TryKillSystemProcess002, TestSize.
  * @tc.type: FUNC
  * @tc.require: I6FDNZ
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, TryKillSystemProcess003, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, TryKillSystemProcess003, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -408,7 +365,7 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, TryKillSystemProcess003, TestSize.
  * @tc.type: FUNC
  * @tc.require: I6FDNZ
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, CanKillSystemProcess001, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, CanKillSystemProcess001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -426,7 +383,7 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, CanKillSystemProcess001, TestSize.
  * @tc.type: FUNC
  * @tc.require: I6FDNZ
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, CanKillSystemProcess002, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, CanKillSystemProcess002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -445,7 +402,7 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, CanKillSystemProcess002, TestSize.
  * @tc.type: FUNC
  * @tc.require: I6OU0A
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, OnProcessStartedLocked001, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, OnProcessStartedLocked001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -463,7 +420,7 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, OnProcessStartedLocked001, TestSiz
  * @tc.type: FUNC
  * @tc.require: I6OU0A
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, OnProcessStartedLocked002, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, OnProcessStartedLocked002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -482,13 +439,13 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, OnProcessStartedLocked002, TestSiz
  * @tc.type: FUNC
  * @tc.require: I6OU0A
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, OnProcessStartedLocked003, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, OnProcessStartedLocked003, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
-    sptr<ISystemProcessStatusChange> listener = new SystemProcessNewStatusChange();
+    sptr<ISystemProcessStatusChange> listener = new SystemProcessStatusChange();
     systemAbilityStateScheduler->processListeners_.push_back(listener);
     std::shared_ptr<SystemProcessContext> systemProcessContext = std::make_shared<SystemProcessContext>();
     systemAbilityStateScheduler->processContextMap_.clear();
@@ -503,7 +460,7 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, OnProcessStartedLocked003, TestSiz
  * @tc.type: FUNC
  * @tc.require: I6FDNZ
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, OnProcessNotStartedLocked001, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, OnProcessNotStartedLocked001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -521,7 +478,7 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, OnProcessNotStartedLocked001, Test
  * @tc.type: FUNC
  * @tc.require: I6FDNZ
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, OnProcessNotStartedLocked002, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, OnProcessNotStartedLocked002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -543,7 +500,7 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, OnProcessNotStartedLocked002, Test
  * @tc.type: FUNC
  * @tc.require: I7VQQG
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, GetSystemProcessInfo003, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemProcessInfo003, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -565,7 +522,7 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, GetSystemProcessInfo003, TestSize.
  * @tc.type: FUNC
  * @tc.require: I6LQ18
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, GetRunningSystemProcess001, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, GetRunningSystemProcess001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -582,7 +539,7 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, GetRunningSystemProcess001, TestSi
  * @tc.type: FUNC
  * @tc.require: I6FDNZ
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, GetRunningSystemProcess002, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, GetRunningSystemProcess002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -601,7 +558,7 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, GetRunningSystemProcess002, TestSi
  * @tc.type: FUNC
  * @tc.require: I6LQ18
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, GetRunningSystemProcess003, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, GetRunningSystemProcess003, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -620,7 +577,7 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, GetRunningSystemProcess003, TestSi
  * @tc.type: FUNC
  * @tc.require: I6OU0A
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, ProcessEvent001, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, ProcessEvent001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -644,7 +601,7 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, ProcessEvent001, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6OU0A
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, ProcessEvent002, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, ProcessEvent002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler = nullptr;
     std::shared_ptr<SystemAbilityStateScheduler::UnloadEventHandler> unloadEventHandler =
@@ -665,7 +622,7 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, ProcessEvent002, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6OU0A
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, ProcessEvent003, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, ProcessEvent003, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -689,7 +646,7 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, ProcessEvent003, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I7VQQG
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, GetSystemProcessInfo001, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemProcessInfo001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -705,7 +662,7 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, GetSystemProcessInfo001, TestSize.
  * @tc.type: FUNC
  * @tc.require: I7VQQG
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, GetSystemProcessInfo002, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemProcessInfo002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -725,11 +682,11 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, GetSystemProcessInfo002, TestSize.
  * @tc.type: FUNC
  * @tc.require: I6FDNZ
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, SubscribeSystemProcess001, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, SubscribeSystemProcess001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
-    sptr<SystemProcessNewStatusChange> listener = new SystemProcessNewStatusChange();
+    sptr<SystemProcessStatusChange> listener = new SystemProcessStatusChange();
     systemAbilityStateScheduler->processListenerDeath_ =
         sptr<IRemoteObject::DeathRecipient>(new SystemProcessListenerDeathRecipient());
     systemAbilityStateScheduler->processListeners_.clear();
@@ -743,11 +700,11 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, SubscribeSystemProcess001, TestSiz
  * @tc.type: FUNC
  * @tc.require: I6FDNZ
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, SubscribeSystemProcess002, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, SubscribeSystemProcess002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
-    sptr<SystemProcessNewStatusChange> listener = new SystemProcessNewStatusChange();
+    sptr<SystemProcessStatusChange> listener = new SystemProcessStatusChange();
     systemAbilityStateScheduler->processListenerDeath_ =
         sptr<IRemoteObject::DeathRecipient>(new SystemProcessListenerDeathRecipient());
     systemAbilityStateScheduler->processListeners_.clear();
@@ -762,11 +719,11 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, SubscribeSystemProcess002, TestSiz
  * @tc.type: FUNC
  * @tc.require: I6LQ18
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, SubscribeSystemProcess003, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, SubscribeSystemProcess003, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
-    sptr<SystemProcessNewStatusChange> listener = new SystemProcessNewStatusChange();
+    sptr<SystemProcessStatusChange> listener = new SystemProcessStatusChange();
     systemAbilityStateScheduler->processListenerDeath_ = nullptr;
     systemAbilityStateScheduler->processListeners_.clear();
     systemAbilityStateScheduler->processListeners_.push_back(listener);
@@ -780,11 +737,11 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, SubscribeSystemProcess003, TestSiz
  * @tc.type: FUNC
  * @tc.require: I6FDNZ
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, UnSubscribeSystemProcess001, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, UnSubscribeSystemProcess001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
-    sptr<SystemProcessNewStatusChange> listener = new SystemProcessNewStatusChange();
+    sptr<SystemProcessStatusChange> listener = new SystemProcessStatusChange();
     systemAbilityStateScheduler->processListenerDeath_ =
         sptr<IRemoteObject::DeathRecipient>(new SystemProcessListenerDeathRecipient());
     systemAbilityStateScheduler->processListeners_.clear();
@@ -799,11 +756,11 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, UnSubscribeSystemProcess001, TestS
  * @tc.type: FUNC
  * @tc.require: I6FDNZ
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, UnSubscribeSystemProcess002, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, UnSubscribeSystemProcess002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
-    sptr<SystemProcessNewStatusChange> listener = new SystemProcessNewStatusChange();
+    sptr<SystemProcessStatusChange> listener = new SystemProcessStatusChange();
     systemAbilityStateScheduler->processListenerDeath_ =
         sptr<IRemoteObject::DeathRecipient>(new SystemProcessListenerDeathRecipient());
     systemAbilityStateScheduler->processListeners_.clear();
@@ -817,11 +774,11 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, UnSubscribeSystemProcess002, TestS
  * @tc.type: FUNC
  * @tc.require: I6LQ18
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, UnSubscribeSystemProcess003, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, UnSubscribeSystemProcess003, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
-    sptr<SystemProcessNewStatusChange> listener = new SystemProcessNewStatusChange();
+    sptr<SystemProcessStatusChange> listener = new SystemProcessStatusChange();
     systemAbilityStateScheduler->processListenerDeath_ = nullptr;
     systemAbilityStateScheduler->processListeners_.clear();
     systemAbilityStateScheduler->processListeners_.push_back(listener);
@@ -835,7 +792,7 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, UnSubscribeSystemProcess003, TestS
  * @tc.type: FUNC
  * @tc.require: I6FDNZ
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, ProcessDelayUnloadEvent001, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, ProcessDelayUnloadEvent001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -853,7 +810,7 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, ProcessDelayUnloadEvent001, TestSi
  * @tc.type: FUNC
  * @tc.require: I6FDNZ
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, ProcessDelayUnloadEvent002, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, ProcessDelayUnloadEvent002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -877,7 +834,7 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, ProcessDelayUnloadEvent002, TestSi
  * @tc.type: FUNC
  * @tc.require: I6LQ18
  */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, ProcessDelayUnloadEvent003, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, ProcessDelayUnloadEvent003, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
