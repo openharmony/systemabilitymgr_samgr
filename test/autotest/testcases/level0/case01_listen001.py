@@ -15,7 +15,7 @@
 # limitations under the License.
 
 from devicetest.core.test_case import TestCase, CheckPoint, get_report_dir
-from hypium import *
+from hypium import UiDriver
 import time
 from hypium.action.os_hypium.device_logger import DeviceLogger
 from hypium.action.host import host
@@ -33,6 +33,7 @@ class case01_listen001(TestCase):
         self.sn = self.device1.device_sn
 
     def setup(self):
+        self.log.info("case01_listen001 start")
         host.shell("hdc -t {} shell rm -r /data/log/hilog".format(self.sn))
         host.shell("hdc -t {} shell hilog -d /system/bin/samgr".format(self.sn))
 

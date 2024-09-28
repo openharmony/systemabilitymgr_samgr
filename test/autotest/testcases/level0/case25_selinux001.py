@@ -16,10 +16,9 @@
 
 import os.path
 from devicetest.core.test_case import TestCase, CheckPoint
-from hypium import *
+from hypium import UiDriver
 from hypium.action.host import host
-
-import aw.Disk_drop_log
+import tools.disk_drop_log
 
 
 class case25_selinux001(TestCase):
@@ -34,16 +33,16 @@ class case25_selinux001(TestCase):
         self.sn = self.device1.device_sn
 
     def setup(self):
-        driver = self.driver
+        self.log.info("case25_selinux001 start")
         host.shell("hdc -t {} shell rm -r /data/log/hilog".format(self.sn))
         host.shell("hdc -t {} shell hilog -d /system/bin/samgr".format(self.sn))
-        driver.System.reboot()
+        self.driver.System.reboot()
 
     def test_step(self):
         log_revice_path = os.path.join(self.get_case_report_path(), "disk_drop")
-        aw.Disk_drop_log.pulling_disk_dropping_logs(log_revice_path, self.sn)
-        aw.Disk_drop_log.parse_disk_dropping_logs(log_revice_path)
-        result = aw.Disk_drop_log.check_disk_dropping_logs(log_revice_path, "scontext=u:r:samgr:s0")
+        tools.disk_drop_log.pulling_disk_dropping_logs(log_revice_path, self.sn)
+        tools.disk_drop_log.parse_disk_dropping_logs(log_revice_path)
+        result = tools.disk_drop_log.check_disk_dropping_logs(log_revice_path, "scontext=u:r:samgr:s0")
         CheckPoint("The log does not contain 'scontext=u:r:samgr:s0'")
         assert result is False
 

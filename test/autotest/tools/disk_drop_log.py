@@ -21,8 +21,8 @@ from hypium.action.host import host
 def pulling_disk_dropping_logs(path, sn):
     """
     @func: Pull and drop logs to disk
-    @param path: Path of log disk storage
-    @param sn: device SN
+    @param: path: Path of log disk storage
+    @param: sn: device SN
     """
     host.shell(f"hdc -t {sn}  file recv data/log/hilog/ {path}")
 
@@ -37,7 +37,7 @@ def parse_disk_dropping_logs(path):
 
 def count_keys_disk_dropping_logs(path, keys) -> int:
     """
-    @func count the number of occurrences of shutdown words in the log disk
+    @func: count the number of occurrences of shutdown words in the log disk
     @param path: log download path
     @param keys: Keywords to be queried
     @return: The number of times the keyword to be queried appears
@@ -54,7 +54,7 @@ def count_keys_disk_dropping_logs(path, keys) -> int:
 
 def check_disk_dropping_logs(path, keys) -> bool:
     """
-    @func judge whether a certain keyword exists
+    @func: judge whether a certain keyword exists
     @param path: log path
     @param keys: Keywords to be queried
     @return: whether a certain keyword exists

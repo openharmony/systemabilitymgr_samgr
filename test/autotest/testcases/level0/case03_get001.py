@@ -15,25 +15,9 @@
 # limitations under the License.
 
 from devicetest.core.test_case import TestCase, CheckPoint
-from devicetest.utils.file_util import get_resource_path
-from hypium import *
-from hypium.action.host import host
-
-sa_listen_cfg_path = get_resource_path(
-    "resource/level0/case03_get001/listen_test.cfg",
-    isdir=None)
-sa_listen_json_path = get_resource_path(
-    "resource/level0/case03_get001/listen_test.json",
-    isdir=None)
-sa_lib_listen_test_path = get_resource_path(
-    "resource/soResource/liblisten_test.z.so",
-    isdir=None)
-sa_ondemand_path = get_resource_path(
-    "resource/soResource/ondemand",
-    isdir=None)
-sa_proxy_path = get_resource_path(
-    "resource/soResource/libtest_sa_proxy_cache.z.so",
-    isdir=None)
+from hypium import UiDriver
+from tools.get_source_path import get_source_path
+from tools.push_remove_source import push_source
 
 
 class case03_get001(TestCase):
@@ -46,23 +30,14 @@ class case03_get001(TestCase):
         ]
         self.driver = UiDriver(self.device1)
         self.sn = self.device1.device_sn
+        self.source_path = {}
 
     def setup(self):
-        driver = self.driver
-        host.shell("hdc -t {} shell kill -9 `pidof listen_test`".format(self.sn))
-        host.shell("hdc -t {} target mount".format(self.sn))
-        host.shell("hdc -t {} shell rm -r /data/log/hilog".format(self.sn))
-        driver.Storage.push_file(local_path=sa_lib_listen_test_path, device_path="/system/lib/")
-        host.shell("hdc -t {} shell chmod 644 /system/lib/liblisten_test.z.so".format(self.sn))
-        driver.Storage.push_file(local_path=sa_proxy_path, device_path="/system/lib/")
-        host.shell("hdc -t {} shell chmod 644 /system/lib/libtest_sa_proxy.z.so".format(self.sn))
-        driver.Storage.push_file(local_path=sa_listen_cfg_path, device_path="/system/etc/init")
-        host.shell("hdc -t {} shell chmod 644 /system/etc/init/listen_test.cfg".format(self.sn))
-        driver.Storage.push_file(local_path=sa_listen_json_path, device_path="/system/profile/")
-        host.shell("hdc -t {} shell chmod 644 /system/profile/listen_test.json".format(self.sn))
-        driver.Storage.push_file(local_path=sa_ondemand_path, device_path="/system/bin/")
-        host.shell("hdc -t {} shell chmod 755 /system/bin/ondemand".format(self.sn))
-        driver.System.reboot()
+        self.log.info("case03_get001 start")
+        need_source = {"cfg": True, "fwk": False, "listen_test": True, "audio_ability": False, "ondemand": True,
+                       "proxy": True, "para": False}
+        self.source_path = get_source_path(need_source=need_source, casename="level0/case03_get001")
+        push_source(source_path=self.source_path, driver=self.driver, sn=self.sn)
 
     def test_step(self):
         driver = self.driver

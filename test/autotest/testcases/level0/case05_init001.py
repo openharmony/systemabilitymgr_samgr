@@ -15,7 +15,7 @@
 # limitations under the License.
 
 from devicetest.core.test_case import TestCase, CheckPoint
-from hypium import *
+from hypium import UiDriver
 from hypium.action.host import host
 
 
@@ -31,6 +31,7 @@ class case05_init001(TestCase):
         self.sn = self.device1.device_sn
 
     def setup(self):
+        self.log.info("case05_init001 start")
         host.shell("hdc -t {} shell rm -r /data/log/hilog".format(self.sn))
 
     def test_step(self):
