@@ -30,6 +30,9 @@ void FuzzAddSystemAbility(const uint8_t *data, size_t size)
     auto systemAbilityId = FuzzTestUtils::BuildInt32FromData(data, size);
     auto isDistributed = FuzzTestUtils::BuildBoolFromData(data, size);
     sptr<IRemoteObject> saObj = new(std::nothrow) MockSystemAbilityStatusChange();
+    if (saObj == nullptr) {
+        return;
+    }
     MessageParcel parcelData;
     parcelData.WriteInterfaceToken(SAMGR_INTERFACE_TOKEN);
     parcelData.WriteInt32(systemAbilityId);

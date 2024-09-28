@@ -28,6 +28,9 @@ const std::u16string SAMGR_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 void FuzzAddSystemProcess(const uint8_t *data, size_t size)
 {
     sptr<IRemoteObject> procObj = new(std::nothrow) MockSystemAbilityStatusChange();
+    if (procObj == nullptr) {
+        return;
+    }
     MessageParcel parcelData;
     parcelData.WriteInterfaceToken(SAMGR_INTERFACE_TOKEN);
     std::u16string procName = Str8ToStr16(FuzzTestUtils::BuildStringFromData(data, size));
