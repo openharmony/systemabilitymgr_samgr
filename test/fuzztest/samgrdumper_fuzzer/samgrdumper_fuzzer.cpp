@@ -58,7 +58,7 @@ void SamgrDumperFuzzTest(const uint8_t* data, size_t size)
     }
     std::string result;
     std::shared_ptr<SystemAbilityStateScheduler> scheduler = std::make_shared<SystemAbilityStateScheduler>();
-    int32_t fd = BuildInt32FromData(data, size);
+    int32_t fd = -1;
     SystemAbilityManagerDumper::FfrtDumpProc(scheduler, fd, args);
     SystemAbilityManagerDumper::Dump(scheduler, args, result);
     int32_t cmd = -1;
@@ -74,7 +74,8 @@ void SamgrDumperFuzzTest(const uint8_t* data, size_t size)
     int32_t pid = BuildInt32FromData(data, size);
     SystemAbilityManagerDumper::DumpFfrtInfoByProcName(pid, Str8ToStr16(processName), result);
 
-    sptr<SystemAbilityManager> manager = SystemAbilityManager::GetInstance();
+    std::shared_ptr<SystemAbilityManager> manager = std::make_shared<SystemAbilityManager>();
+    manager->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
     manager->Dump(fd, argsWithStr16);
     manager->IpcDumpProc(fd, args);
     manager->IpcDumpAllProcess(fd, cmd);

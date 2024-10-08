@@ -27,6 +27,9 @@ const std::u16string SAMGR_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 void FuzzLoadSystemAbility(const uint8_t *data, size_t size)
 {
     sptr<MockSystemAbilityLoadCallback> saLoadCb = new(std::nothrow) MockSystemAbilityLoadCallback();
+    if (saLoadCb == nullptr) {
+        return;
+    }
     MessageParcel parcelData;
     parcelData.WriteInterfaceToken(SAMGR_INTERFACE_TOKEN);
     int32_t systemAbilityId = FuzzTestUtils::BuildInt32FromData(data, size);
