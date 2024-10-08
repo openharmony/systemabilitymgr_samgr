@@ -923,6 +923,7 @@ void SystemAbilityStateScheduler::OnProcessNotStartedLocked(const std::u16string
     }
     NotifyProcessStopped(processContext);
     RemoveUnloadTimeoutTask(processContext);
+    SystemAbilityManager::GetInstance()->RemoveOnDemandSaInDiedProc(processContext);
     
     std::list<std::shared_ptr<SystemAbilityContext>> abnormallyDiedAbilityList;
     GetAbnormallyDiedAbilityLocked(processContext, abnormallyDiedAbilityList);
