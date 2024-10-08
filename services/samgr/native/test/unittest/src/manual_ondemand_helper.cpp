@@ -1248,12 +1248,10 @@ static void CreateOnDemandStartPolicy(SystemAbilityOnDemandEvent& event)
         cin >> timeEventId;
         event.eventId = OnDemandEventId::TIMED_EVENT;
         if (timeEventId == static_cast<int32_t>(TimeEventId::LOOP_EVENT)) {
-            event.name = "loopevent"; 
-        }
-        else if (timeEventId == static_cast<int32_t>(TimeEventId::AWAKE_LOOP_EVENT)) {
+            event.name = "loopevent";
+        } else if (timeEventId == static_cast<int32_t>(TimeEventId::AWAKE_LOOP_EVENT)) {
             event.name = "awakeloopevent";
-        }
-        else if (timeEventId == static_cast<int32_t>(TimeEventId::ORDER_TIMED_EVENT)) {
+        } else if (timeEventId == static_cast<int32_t>(TimeEventId::ORDER_TIMED_EVENT)) {
             event.name = "timedevent";
         }
         cout << "please input the duration";
@@ -1290,12 +1288,10 @@ static void CreateOnDemandStopPolicy(SystemAbilityOnDemandEvent& event)
         cin >> timeEventId;
         event.eventId = OnDemandEventId::TIMED_EVENT;
         if (timeEventId == static_cast<int32_t>(TimeEventId::LOOP_EVENT)) {
-            event.name = "loopevent"; 
-        }
-        else if (timeEventId == static_cast<int32_t>(TimeEventId::AWAKE_LOOP_EVENT)) {
+            event.name = "loopevent";
+        } else if (timeEventId == static_cast<int32_t>(TimeEventId::AWAKE_LOOP_EVENT)) {
             event.name = "awakeloopevent";
-        }
-        else if (timeEventId == static_cast<int32_t>(TimeEventId::ORDER_TIMED_EVENT)) {
+        } else if (timeEventId == static_cast<int32_t>(TimeEventId::ORDER_TIMED_EVENT)) {
             event.name = "timedevent";
         }
         cout << "please input the duration";
