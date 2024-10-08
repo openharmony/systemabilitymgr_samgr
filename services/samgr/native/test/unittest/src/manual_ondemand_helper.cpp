@@ -1243,9 +1243,23 @@ static void CreateOnDemandStartPolicy(SystemAbilityOnDemandEvent& event)
         event.name = "usual.event.SCREEN_ON";
         event.value = "";
     } else if (eventId == static_cast<int32_t>(OnDemandEventId::TIMED_EVENT)) {
+        cout << "please input timeEventId(1,2,3) 1:loopevent 2:awakeloopevent 3: timedevent" << endl;
+        int timeEventId = 1;
+        cin >> timeEventId;
         event.eventId = OnDemandEventId::TIMED_EVENT;
-        event.name = "loopevent";
-        event.value = "60";
+        if (timeEventId == static_cast<int32_t>(TimeEventId::LOOP_EVENT)) {
+            event.name = "loopevent"; 
+        }
+        else if (timeEventId == static_cast<int32_t>(TimeEventId::AWAKE_LOOP_EVENT)) {
+            event.name = "awakeloopevent";
+        }
+        else if (timeEventId == static_cast<int32_t>(TimeEventId::ORDER_TIMED_EVENT)) {
+            event.name = "timedevent";
+        }
+        cout << "please input the duration";
+        string duration = "60";
+        cin >> duration;
+        event.value = duration;
     }
 }
 
@@ -1271,9 +1285,23 @@ static void CreateOnDemandStopPolicy(SystemAbilityOnDemandEvent& event)
         event.name = "usual.event.SCREEN_OFF";
         event.value = "";
     } else if (eventId == static_cast<int32_t>(OnDemandEventId::TIMED_EVENT)) {
+        cout << "please input timeEventId(1,2,3) 1:loopevent 2:awakeloopevent 3: timedevent" << endl;
+        int timeEventId = 1;
+        cin >> timeEventId;
         event.eventId = OnDemandEventId::TIMED_EVENT;
-        event.name = "loopevent";
-        event.value = "70";
+        if (timeEventId == static_cast<int32_t>(TimeEventId::LOOP_EVENT)) {
+            event.name = "loopevent"; 
+        }
+        else if (timeEventId == static_cast<int32_t>(TimeEventId::AWAKE_LOOP_EVENT)) {
+            event.name = "awakeloopevent";
+        }
+        else if (timeEventId == static_cast<int32_t>(TimeEventId::ORDER_TIMED_EVENT)) {
+            event.name = "timedevent";
+        }
+        cout << "please input the duration";
+        string duration = "70";
+        cin >> duration;
+        event.value = duration;
     }
 }
 
