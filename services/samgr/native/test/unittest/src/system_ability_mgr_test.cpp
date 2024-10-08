@@ -1465,6 +1465,8 @@ HWTEST_F(SystemAbilityMgrTest, RemoveSystemAbility006, TestSize.Level0)
 HWTEST_F(SystemAbilityMgrTest, RemoveSystemAbility007, TestSize.Level0)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
     saMgr->abilityStateScheduler_ = systemAbilityStateScheduler;
