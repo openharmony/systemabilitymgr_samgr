@@ -29,7 +29,6 @@
 
 namespace OHOS {
 using namespace std;
-template <class Query, class Result>
 class DynamicCache : public IRemoteObject::DeathRecipient {
 public:
     void OnRemoteDied(const wptr<IRemoteObject>& remote) override
@@ -37,7 +36,7 @@ public:
         HILOGD("DynamicCache OnRemoteDied called");
         ClearCache();
     }
-    Result QueryResult(Query query, int32_t code)
+    sptr<IRemoteObject> QueryResult(int32_t querySaId, int32_t code)
     {
         int32_t waterLineLength = 128;
         char waterLine[128] = {0};
@@ -45,15 +44,13 @@ public:
         GetParameter(key_.c_str(), defaultValue.c_str(), waterLine, waterLineLength);
         {
             std::lock_guard<std::mutex> autoLock(queryCacheLock_);
-            if (localPara_.count(key_) != 0 && cacheMap_.count(query) != 0 &&
-                defaultValue != string(waterLine) && string(waterLine) == localPara_[key_] &&
-                !cacheMap_[query]->IsObjectDead()) {
+            if (CanUseCache(querySaId, waterLine, defaultValue)) {
                 HILOGD("DynamicCache QueryResult Return Cache");
-                return cacheMap_[query];
+                return lastQuerySaProxy_;
             }
         }
         HILOGD("DynamicCache QueryResult Recompute");
-        Result res = Recompute(query, code);
+        sptr<IRemoteObject> res = Recompute(querySaId, code);
         if (res == nullptr) {
             return nullptr;
         }
@@ -61,22 +58,29 @@ public:
         {
             std::lock_guard<std::mutex> autoLock(queryCacheLock_);
             localPara_[key_] = waterLine;
-            cacheMap_[query] = res;
+            lastQuerySaId_ = querySaId;
+            lastQuerySaProxy_ = res;
         }
         return res;
+    }
+
+    bool CanUseCache(int32_t querySaId, char* waterLine, string defaultValue)
+    {
+        return localPara_.count(key_) != 0 && lastQuerySaId_ == querySaId &&
+            defaultValue != string(waterLine) && string(waterLine) == localPara_[key_] &&
+            lastQuerySaProxy_ != nullptr && !lastQuerySaProxy_->IsObjectDead();
     }
 
     __attribute__((no_sanitize("cfi")))
     void ClearCache()
     {
         std::lock_guard<std::mutex> autoLock(queryCacheLock_);
-        for (auto &it : cacheMap_) {
-            if (it.second != nullptr) {
-                HILOGD("DynamicCache RemoveDeathRecipient");
-                it.second->RemoveDeathRecipient(this);
-            }
+        if (lastQuerySaProxy_ != nullptr) {
+            HILOGD("DynamicCache RemoveDeathRecipient");
+            lastQuerySaProxy_->RemoveDeathRecipient(this);
         }
-        cacheMap_.clear();
+        lastQuerySaId_ = -1;
+        lastQuerySaProxy_ = nullptr;
     }
 
     bool InvalidateCache()
@@ -103,18 +107,20 @@ public:
         return true;
     }
 
-    virtual Result Recompute(Query query, int32_t code)
+    virtual sptr<IRemoteObject> Recompute(int32_t querySaId, int32_t code)
     {
-        if (cacheMap_.count(query) == 0) {
+        std::lock_guard<std::mutex> autoLock(queryCacheLock_);
+        if (lastQuerySaId_ != querySaId) {
             return nullptr;
         }
-        return cacheMap_[query];
+        return lastQuerySaProxy_;
     }
 private:
+    std::mutex queryCacheLock_;
     map<string, string> localPara_;
     string key_;
-    map<Query, Result> cacheMap_;
-    std::mutex queryCacheLock_;
+    int32_t lastQuerySaId_;
+    sptr<IRemoteObject> lastQuerySaProxy_;
 };
 }
 #endif /* DYNAMIC_CACHE_H */

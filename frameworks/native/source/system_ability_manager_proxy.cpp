@@ -51,9 +51,9 @@ public:
     void OnLoadSystemAbilitySuccess(int32_t systemAbilityId,
         const sptr<IRemoteObject> &remoteObject) override;
     void OnLoadSystemAbilityFail(int32_t systemAbilityId) override;
+    std::mutex callbackLock_;
     std::condition_variable cv_;
     sptr<IRemoteObject> loadproxy_;
-    std::mutex callbackLock_;
 };
 
 static void* g_selfSoHandle = nullptr;

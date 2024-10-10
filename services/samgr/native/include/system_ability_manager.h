@@ -62,7 +62,7 @@ struct SAListener {
         :listener(lst), callingPid(cpid), state(sta) {}
 };
 
-class SystemAbilityManager : public DynamicCache<int32_t, sptr<IRemoteObject>>, public SystemAbilityManagerStub {
+class SystemAbilityManager : public DynamicCache, public SystemAbilityManagerStub {
 public:
     virtual ~SystemAbilityManager();
     static sptr<SystemAbilityManager> GetInstance();
