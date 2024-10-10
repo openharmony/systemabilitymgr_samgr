@@ -30,6 +30,8 @@
 #include "system_ability_manager_util.h"
 #include "test_log.h"
 #define private public
+#include "ipc_skeleton.h"
+#include "accesstoken_kit.h"
 #include "system_ability_manager.h"
 #ifdef SUPPORT_COMMON_EVENT
 #include "common_event_collect.h"
@@ -2112,6 +2114,7 @@ HWTEST_F(SystemAbilityMgrTest, OndemandLoadForPerf001, TestSize.Level3)
 {
     DTEST_LOG << " OndemandLoadForPerf001 " << std::endl;
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->SetFfrt();
     saMgr->OndemandLoadForPerf();
     saMgr->Init();
     saMgr->OndemandLoadForPerf();
@@ -2537,6 +2540,33 @@ HWTEST_F(SystemAbilityMgrTest, CancelUnloadSystemAbility005, TestSize.Level3)
 }
 
 /**
+ * @tc.name: CancelUnloadSystemAbility006
+ * @tc.desc: test CancelUnloadSystemAbility, abilityStateScheduler_ is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6J4T7
+ */
+HWTEST_F(SystemAbilityMgrTest, CancelUnloadSystemAbility006, TestSize.Level3)
+{
+    DTEST_LOG << " CancelUnloadSystemAbility006 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    
+    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    Security::AccessToken::NativeTokenInfo nativeTokenInfo;
+    int32_t result = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
+    EXPECT_TRUE(result == ERR_OK);
+    SaProfile saProfile;
+    saProfile.saId = TEST_OVERFLOW_SAID;
+    saProfile.process = Str8ToStr16(nativeTokenInfo.processName);
+    saMgr->saProfileMap_[TEST_OVERFLOW_SAID] = saProfile;
+    std::shared_ptr<SystemAbilityStateScheduler> saScheduler = saMgr->abilityStateScheduler_;
+    saMgr->abilityStateScheduler_ = nullptr;
+    int32_t ret = saMgr->CancelUnloadSystemAbility(TEST_OVERFLOW_SAID);
+    saMgr->abilityStateScheduler_ = saScheduler;
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    saMgr->saProfileMap_.erase(TEST_OVERFLOW_SAID);
+}
+
+/**
  * @tc.name: IdleSystemAbility001
  * @tc.desc: test IdleSystemAbility, said is invalid
  * @tc.type: FUNC
@@ -2573,6 +2603,27 @@ HWTEST_F(SystemAbilityMgrTest, IdleSystemAbility002, TestSize.Level3)
 }
 
 /**
+ * @tc.name: IdleSystemAbility003
+ * @tc.desc: test IdleSystemAbility, return false
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+HWTEST_F(SystemAbilityMgrTest, IdleSystemAbility003, TestSize.Level3)
+{
+    DTEST_LOG << " IdleSystemAbility003 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
+    SAInfo saInfo;
+    saInfo.remoteObj = testAbility;
+    saMgr->abilityMap_[TEST_OVERFLOW_SAID] = saInfo;
+    nlohmann::json idleReason;
+    int32_t delayTime = 0;
+    bool ret = saMgr->IdleSystemAbility(TEST_OVERFLOW_SAID, u"test", idleReason, delayTime);
+    EXPECT_FALSE(ret);
+    saMgr->abilityMap_.erase(TEST_OVERFLOW_SAID);
+}
+
+/**
  * @tc.name: ActiveSystemAbility001
  * @tc.desc: test ActiveSystemAbility001, said is invalid
  * @tc.type: FUNC
@@ -2605,6 +2656,28 @@ HWTEST_F(SystemAbilityMgrTest, ActiveSystemAbility002, TestSize.Level3)
     bool ret = saMgr->ActiveSystemAbility(systemAbilityId, procName, activeReason);
     EXPECT_FALSE(ret);
 }
+
+
+/**
+ * @tc.name: ActiveSystemAbility003
+ * @tc.desc: test ActiveSystemAbility, return false
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+HWTEST_F(SystemAbilityMgrTest, ActiveSystemAbility003, TestSize.Level3)
+{
+    DTEST_LOG << " ActiveSystemAbility003 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
+    SAInfo saInfo;
+    saInfo.remoteObj = testAbility;
+    saMgr->abilityMap_[TEST_OVERFLOW_SAID] = saInfo;
+    nlohmann::json activeReason;
+    bool ret = saMgr->ActiveSystemAbility(TEST_OVERFLOW_SAID, u"test", activeReason);
+    EXPECT_FALSE(ret);
+    saMgr->abilityMap_.erase(TEST_OVERFLOW_SAID);
+}
+
 /**
  * @tc.name: watchdoginit001
  * @tc.desc: test watchdoginit, waitState is not WAITTING
@@ -2830,8 +2903,52 @@ HWTEST_F(SystemAbilityMgrTest, DoLoadOnDemandAbility001, TestSize.Level0)
     saMgr->AddSystemAbility(DISTRIBUTED_SCHED_TEST_TT_ID, testAbility, saExtraProp);
     bool isExist = true;
     bool result = saMgr->DoLoadOnDemandAbility(DISTRIBUTED_SCHED_TEST_TT_ID, isExist);
-    saMgr->RemoveSystemAbility(DISTRIBUTED_SCHED_TEST_TT_ID);
     EXPECT_EQ(result, true);
+    SaProfile saProfile = {u"test", DISTRIBUTED_SCHED_TEST_TT_ID};
+    saProfile.cacheCommonEvent = true;
+    saMgr->saProfileMap_[DISTRIBUTED_SCHED_TEST_TT_ID] = saProfile;
+    int32_t ret = saMgr->RemoveSystemAbility(DISTRIBUTED_SCHED_TEST_TT_ID);
+    EXPECT_EQ(ret, ERR_OK);
+    saMgr->saProfileMap_.erase(DISTRIBUTED_SCHED_TEST_TT_ID);
+}
+
+/**
+ * @tc.name: RemoveSystemAbility006
+ * @tc.desc: test RemoveSystemAbility, ERR_INVALID_VALUE.
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, RemoveSystemAbility006, TestSize.Level0)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<IRemoteObject> testAbility = new TestTransactionService();
+    ISystemAbilityManager::SAExtraProp saExtraProp;
+    saMgr->AddSystemAbility(DISTRIBUTED_SCHED_TEST_TT_ID, testAbility, saExtraProp);
+    std::shared_ptr<SystemAbilityStateScheduler> saScheduler = saMgr->abilityStateScheduler_;
+    saMgr->abilityStateScheduler_ = nullptr;
+    int32_t ret = saMgr->RemoveSystemAbility(testAbility);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    saMgr->abilityStateScheduler_ = saScheduler;
+}
+
+/**
+ * @tc.name: RemoveSystemAbility007
+ * @tc.desc: test RemoveSystemAbility, ERR_OK.
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, RemoveSystemAbility007, TestSize.Level0)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<IRemoteObject> testAbility = new TestTransactionService();
+    ISystemAbilityManager::SAExtraProp saExtraProp;
+    saMgr->AddSystemAbility(DISTRIBUTED_SCHED_TEST_TT_ID, testAbility, saExtraProp);
+    SaProfile saProfile = {u"test", DISTRIBUTED_SCHED_TEST_TT_ID};
+    saProfile.cacheCommonEvent = true;
+    saMgr->saProfileMap_[DISTRIBUTED_SCHED_TEST_TT_ID] = saProfile;
+    int32_t ret = saMgr->RemoveSystemAbility(testAbility);
+    EXPECT_EQ(ret, ERR_OK);
+    saMgr->saProfileMap_.erase(DISTRIBUTED_SCHED_TEST_TT_ID);
 }
 
 /**
@@ -2871,6 +2988,22 @@ HWTEST_F(SystemAbilityMgrTest, RemoveSystemProcess001, TestSize.Level3)
     };
     saMgr->RemoveStartingAbilityCallbackForDevice(
         mockAbilityItem1, testAbility);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: RemoveSystemProcess002
+ * @tc.desc: test RemoveSystemProcess, abilityStateScheduler_ is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+HWTEST_F(SystemAbilityMgrTest, RemoveSystemProcess002, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<IRemoteObject> testAbility = new TestTransactionService();
+    saMgr->abilityStateScheduler_ = nullptr;
+    saMgr->systemProcessMap_[u"test"] = testAbility;
+    int32_t result = saMgr->RemoveSystemProcess(testAbility);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
 }
 
