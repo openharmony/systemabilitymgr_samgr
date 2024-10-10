@@ -104,7 +104,7 @@ ohos_executable("samgr") {
       "init:libbegetutil",
       "ipc:ipc_core",
       "ipc:libdbinder",
-      "safwk:system_ability_fwk",
+      "safwk:system_ability_ondemand_reason",
     ]
 
     if (build_selinux) {
