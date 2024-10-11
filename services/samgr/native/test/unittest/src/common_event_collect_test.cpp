@@ -267,7 +267,7 @@ HWTEST_F(CommonEventCollectTest, AddCollectEvent001, TestSize.Level3)
 {
     DTEST_LOG << "AddCollectEvent001 begin" << std::endl;
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
-    OnDemandEvent event = {COMMON_EVENT, "TEST", "TEST"};;
+    OnDemandEvent event = {COMMON_EVENT, "TEST", "TEST"};
     int32_t ret = commonEventCollect->AddCollectEvent(event);
     EXPECT_EQ(ret, ERR_OK);
     ret = commonEventCollect->AddCollectEvent(event);
