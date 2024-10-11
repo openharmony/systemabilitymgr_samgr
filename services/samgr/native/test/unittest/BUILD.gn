@@ -223,6 +223,13 @@ ohos_unittest("SystemAbilityMgrCollectTest") {
     defines += [ "HICOLLIE_ENABLE" ]
   }
 
+  if (preferences_enable) {
+    external_deps += [ "preferences:native_preferences" ]
+    sources +=
+        [ "${samgr_services_dir}/source/collect/device_timed_collect_tool.cpp" ]
+    defines += [ "PREFERENCES_ENABLE" ]
+  }
+
   if (support_common_event) {
     sources += [
       "${samgr_services_dir}/source/collect/common_event_collect.cpp",

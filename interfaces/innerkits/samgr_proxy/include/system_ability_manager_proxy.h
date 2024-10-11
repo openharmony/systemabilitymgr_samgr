@@ -25,7 +25,7 @@
 
 namespace OHOS {
 class SystemAbilityManagerProxy :
-    public DynamicCache<int32_t, sptr<IRemoteObject>>, public IRemoteProxy<ISystemAbilityManager> {
+    public DynamicCache, public IRemoteProxy<ISystemAbilityManager> {
 public:
     explicit SystemAbilityManagerProxy(const sptr<IRemoteObject>& impl)
         : IRemoteProxy<ISystemAbilityManager>(impl) {}

@@ -13,6 +13,10 @@
 
 domain: SAMGR
 
+SA_MAIN_EXIT:
+  __BASE: {type: FAULT, level: CRITICAL, desc: sa main abnormal exit}
+  REASON: {type: STRING, desc: sa main abnormal exit reason}
+
 PROCESS_STOP_DURATION:
   __BASE: {type: BEHAVIOR, level: MINOR, desc: ondemand process stop time cost}
   PROCESS_NAME: {type: STRING, desc: process name}
