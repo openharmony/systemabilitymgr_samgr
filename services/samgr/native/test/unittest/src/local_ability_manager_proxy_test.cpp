@@ -290,6 +290,8 @@ HWTEST_F(LocalAbilityManagerProxyTest, SendStrategyToSA001, TestSize.Level3)
     std::string action;
     bool ret = localAbility->SendStrategyToSA(type, TEST_SAID_INVAILD, level, action);
     EXPECT_FALSE(ret);
+    ret = localAbility->SendStrategyToSA(type, 1, level, action);
+    EXPECT_TRUE(ret);
 }
 
 /**

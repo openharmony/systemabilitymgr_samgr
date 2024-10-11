@@ -233,7 +233,7 @@ void DeviceStatusCollectManager::UnInit()
 void DeviceStatusCollectManager::CleanFfrt()
 {
     for (auto& iter : collectPluginMap_) {
-        if (iter.first == DEVICE_ONLINE || iter.first == COMMON_EVENT) {
+        if ((iter.first == DEVICE_ONLINE || iter.first == COMMON_EVENT) && (iter.second != nullptr)) {
             iter.second->CleanFfrt();
         }
     }
@@ -245,7 +245,7 @@ void DeviceStatusCollectManager::CleanFfrt()
 void DeviceStatusCollectManager::SetFfrt()
 {
     for (auto& iter : collectPluginMap_) {
-        if (iter.first == DEVICE_ONLINE || iter.first == COMMON_EVENT) {
+        if ((iter.first == DEVICE_ONLINE || iter.first == COMMON_EVENT) && (iter.second != nullptr)) {
             iter.second->SetFfrt();
         }
     }

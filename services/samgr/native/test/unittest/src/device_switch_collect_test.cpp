@@ -102,8 +102,19 @@ HWTEST_F(DeviceSwitchCollectTest, CheckSwitchEvent001, TestSize.Level3)
         new DeviceSwitchCollect(collect);
     int32_t result = deviceSwitchCollect->CheckSwitchEvent(onDemandEvent);
     EXPECT_EQ(result, ERR_OK);
-}
 
+    onDemandEvent.name = BLUETOOTH_NAME;
+    result = deviceSwitchCollect->CheckSwitchEvent(onDemandEvent);
+    EXPECT_EQ(result, ERR_OK);
+
+    onDemandEvent.name = INVALID_ACTION;
+    result = deviceSwitchCollect->CheckSwitchEvent(onDemandEvent);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+
+    onDemandEvent.eventId = TIMED_EVENT;
+    result = deviceSwitchCollect->CheckSwitchEvent(onDemandEvent);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
 
 /**
  * @tc.name: DeviceSwitchCollectInit001
@@ -118,6 +129,7 @@ HWTEST_F(DeviceSwitchCollectTest, DeviceSwitchCollectInit001, TestSize.Level3)
     SaProfile saProfile;
     OnDemandEvent onDemandEvent = {SETTING_SWITCH, WIFI_NAME, "on"};
     saProfile.startOnDemand.onDemandEvents.emplace_back(onDemandEvent);
+    saProfile.stopOnDemand.onDemandEvents.emplace_back(onDemandEvent);
     saProfiles.emplace_back(saProfile);
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
@@ -158,6 +170,26 @@ HWTEST_F(DeviceSwitchCollectTest, CollectSubscribeSwitchEvent002, TestSize.Level
     deviceSwitchCollect->InitCommonEventSubscriber();
     deviceSwitchCollect->switchEventSubscriber_->isListenSwitchEvent_ = true;
     int32_t ret = deviceSwitchCollect->SubscribeSwitchEvent();
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: CollectSubscribeSwitchEvent003
+ * @tc.desc: test SubscribeCommonEventService
+ * @tc.type: FUNC
+ * @tc.require: I7RSCL
+ */
+HWTEST_F(DeviceSwitchCollectTest, CollectSubscribeSwitchEvent003, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceSwitchCollect> deviceSwitchCollect =
+        new DeviceSwitchCollect(collect);
+    deviceSwitchCollect->InitCommonEventSubscriber();
+    deviceSwitchCollect->switchEventSubscriber_->isListenSwitchEvent_ = false;
+    int32_t ret = deviceSwitchCollect->SubscribeSwitchEvent();
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(deviceSwitchCollect->switchEventSubscriber_->isListenSwitchEvent_, true);
+    ret = deviceSwitchCollect->switchEventSubscriber_->UnSubscribeSwitchEvent();
     EXPECT_EQ(ret, ERR_OK);
 }
 
@@ -321,6 +353,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnAddSystemAbility001, TestSize.Level3)
     std::shared_ptr<EventFwk::CommonEventSubscriber> switchEventSubscriber
         = std::make_shared<SwitchEventSubscriber>(info, deviceSwitchCollect);
     deviceSwitchCollect->cesStateListener_->OnAddSystemAbility(INVALID_SAID, DEVICE_ID);
+    deviceSwitchCollect->cesStateListener_->OnRemoveSystemAbility(INVALID_SAID, "");
     EXPECT_NE(deviceSwitchCollect->cesStateListener_, nullptr);
 }
 

@@ -340,11 +340,34 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy006, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, UpdateOnDemandPolicy001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    int32_t systemAbilityId = 0;
     OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
+    SystemAbilityOnDemandEvent event = {OnDemandEventId::COMMON_EVENT, "TEST", "TEST"};
     std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
-    int32_t ret = saMgr->UpdateOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
-    EXPECT_EQ(ERR_INVALID_VALUE, ret);
+    abilityOnDemandEvents.emplace_back(event);
+    SaProfile saProfile = {u"test", TEST_OVERFLOW_SAID};
+    saMgr->saProfileMap_[TEST_OVERFLOW_SAID] = saProfile;
+    int32_t ret = saMgr->UpdateOnDemandPolicy(TEST_OVERFLOW_SAID, type, abilityOnDemandEvents);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+
+    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    Security::AccessToken::NativeTokenInfo nativeTokenInfo;
+    int32_t result = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
+    EXPECT_TRUE(result == ERR_OK);
+    saMgr->saProfileMap_[TEST_OVERFLOW_SAID].process = Str8ToStr16(nativeTokenInfo.processName);
+    saMgr->saProfileMap_[TEST_OVERFLOW_SAID].startOnDemand.allowUpdate = false;
+    ret = saMgr->UpdateOnDemandPolicy(TEST_OVERFLOW_SAID, type, abilityOnDemandEvents);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+
+    saMgr->saProfileMap_[TEST_OVERFLOW_SAID].startOnDemand.allowUpdate = true;
+    sptr<DeviceStatusCollectManager> collectMgr = saMgr->collectManager_;
+    saMgr->collectManager_ = nullptr;
+    ret = saMgr->UpdateOnDemandPolicy(TEST_OVERFLOW_SAID, type, abilityOnDemandEvents);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+
+    saMgr->collectManager_ = collectMgr;
+    ret = saMgr->UpdateOnDemandPolicy(TEST_OVERFLOW_SAID, type, abilityOnDemandEvents);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    saMgr->saProfileMap_.erase(TEST_OVERFLOW_SAID);
 }
 
 /**
@@ -358,7 +381,13 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandReasonExtraData001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     MessageParcel messageParcel;
+    sptr<DeviceStatusCollectManager> collectMgr = saMgr->collectManager_;
+    saMgr->collectManager_ = nullptr;
     int32_t ret = saMgr->GetOnDemandReasonExtraData(ONDEMAND_EXTRA_DATA_ID, messageParcel);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    
+    saMgr->collectManager_ = collectMgr;
+    ret = saMgr->GetOnDemandReasonExtraData(ONDEMAND_EXTRA_DATA_ID, messageParcel);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
 
@@ -415,6 +444,16 @@ HWTEST_F(SystemAbilityMgrTest, GetSystemAbilityWithDevice001, TestSize.Level3)
     std::string deviceId = "";
     auto ability = saMgr->GetSystemAbility(TEST_EXCEPTION_LOW_SA_ID, deviceId);
     EXPECT_EQ(ability, nullptr);
+
+    SaProfile saProfile = {u"test", TEST_OVERFLOW_SAID};
+    saMgr->saProfileMap_[TEST_OVERFLOW_SAID] = saProfile;
+    ability = saMgr->GetSystemAbility(TEST_OVERFLOW_SAID, deviceId);
+    EXPECT_EQ(ability, nullptr);
+
+    saMgr->saProfileMap_[TEST_OVERFLOW_SAID].distributed = true;
+    ability = saMgr->GetSystemAbility(TEST_OVERFLOW_SAID, deviceId);
+    EXPECT_EQ(ability, nullptr);
+    saMgr->saProfileMap_.erase(TEST_OVERFLOW_SAID);
 }
 
 /**
@@ -630,13 +669,10 @@ HWTEST_F(SystemAbilityMgrTest, Dump003, TestSize.Level3)
     SamMockPermission::MockProcess("hidumper_service");
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     vector<std::u16string> args;
-    vector<std::string> argsWithStr8;
-    args.push_back(u"test_name");
-    argsWithStr8.push_back("--ipc");
-    argsWithStr8.push_back("all");
-    int ret = true;
+    args.push_back(u"--ipc");
+    args.push_back(u"all");
     int32_t result = saMgr->Dump(1, args);
-    EXPECT_TRUE(ret);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
 }
 
 /**
@@ -651,34 +687,10 @@ HWTEST_F(SystemAbilityMgrTest, Dump004, TestSize.Level3)
     SamMockPermission::MockProcess("hidumper_service");
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     vector<std::u16string> args;
-    vector<std::string> argsWithStr8;
-    args.push_back(u"test_name");
-    argsWithStr8.push_back("--ipc");
-    argsWithStr8.push_back("samgr");
-    int ret = true;
+    args.push_back(u"--ffrt");
+    args.push_back(u"99999");
     int32_t result = saMgr->Dump(1, args);
-    EXPECT_TRUE(ret);
-}
-
-/**
- * @tc.name: Dump005
- * @tc.desc: call Dump.
- * @tc.type: FUNC
- * @tc.require: I7VEPG
- */
-
-HWTEST_F(SystemAbilityMgrTest, Dump005, TestSize.Level3)
-{
-    SamMockPermission::MockProcess("hidumper_service");
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    vector<std::u16string> args;
-    vector<std::string> argsWithStr8;
-    args.push_back(u"test_name");
-    argsWithStr8.push_back("--ipc");
-    argsWithStr8.push_back("abc");
-    int ret = true;
-    int32_t result = saMgr->Dump(1, args);
-    EXPECT_TRUE(ret);
+    EXPECT_EQ(result, ERR_OK);
 }
 
 /**
@@ -744,6 +756,19 @@ HWTEST_F(SystemAbilityMgrTest, GetCommonEventExtraIdList001, TestSize.Level3)
 }
 
 /**
+ * @tc.name: RemoveWhiteCommonEvent001
+ * @tc.desc: test RemoveWhiteCommonEvent
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrTest, RemoveWhiteCommonEvent001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->RemoveWhiteCommonEvent();
+    EXPECT_TRUE(saMgr->collectManager_ != nullptr);
+}
+
+/**
  * @tc.name: CleanFfrt001
  * @tc.desc: test CleanFfrt, workHandler_ true.
  * @tc.type: FUNC
@@ -799,42 +824,10 @@ HWTEST_F(SystemAbilityMgrTest, CleanFfrt003, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, SetFfrt001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    std::shared_ptr<FFRTHandler> workHandler_ = make_shared<FFRTHandler>("workHandler");
-    int ret = true;
+    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
     saMgr->SetFfrt();
-    EXPECT_EQ(ret, true);
-}
-
-/**
- * @tc.name: SetFfrt002
- * @tc.desc: test SetFfrt, collectManager_  true.
- * @tc.type: FUNC
- * @tc.require: I6NKWX
- */
-HWTEST_F(SystemAbilityMgrTest, SetFfrt002, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    sptr<DeviceStatusCollectManager> collectManager_ =
-        sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
-    int ret = true;
-    saMgr->SetFfrt();
-    EXPECT_EQ(ret, true);
-}
-
-/**
- * @tc.name: SetFfrt003
- * @tc.desc: test SetFfrt, abilityStateScheduler_  true.
- * @tc.type: FUNC
- * @tc.require: I6NKWX
- */
-HWTEST_F(SystemAbilityMgrTest, SetFfrt003, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler_ =
-        std::make_shared<SystemAbilityStateScheduler>();
-    int ret = true;
-    saMgr->SetFfrt();
-    EXPECT_EQ(ret, true);
+    EXPECT_NE(saMgr->collectManager_, nullptr);
+    EXPECT_NE(saMgr->abilityStateScheduler_, nullptr);
 }
 
 /**
@@ -1070,11 +1063,17 @@ HWTEST_F(SystemAbilityMgrTest, GetSystemProcessInfo003, TestSize.Level1)
 HWTEST_F(SystemAbilityMgrTest, LoadSystemAbilityFromRpc009, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    int32_t systemAbilityId = 0;
     const std::string srcDeviceId;
-    const sptr<ISystemAbilityLoadCallback> callback;
-    int32_t ret = saMgr->LoadSystemAbilityFromRpc(srcDeviceId, systemAbilityId, callback);
+    SaProfile saProfile = {u"test", TEST_OVERFLOW_SAID};
+    saProfile.distributed = true;
+    saMgr->saProfileMap_[TEST_OVERFLOW_SAID] = saProfile;
+    sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
+    std::shared_ptr<SystemAbilityStateScheduler> saScheduler = saMgr->abilityStateScheduler_;
+    saMgr->abilityStateScheduler_ = nullptr;
+    int32_t ret = saMgr->LoadSystemAbilityFromRpc(srcDeviceId, TEST_OVERFLOW_SAID, callback);
     EXPECT_FALSE(ret);
+    saMgr->abilityStateScheduler_ = saScheduler;
+    saMgr->saProfileMap_.erase(TEST_OVERFLOW_SAID);
 }
 
 /**
@@ -1311,6 +1310,44 @@ HWTEST_F(SystemAbilityMgrTest, IpcDumpProc002, TestSize.Level2)
 }
 
 /**
+ * @tc.name: IpcDumpProc003
+ * @tc.desc: test IpcDumpProc.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, IpcDumpProc003, TestSize.Level2)
+{
+    SamMockPermission::MockProcess("hidumper_service");
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t cmd = -1;
+    int32_t fd = 1;
+    std::vector<std::string> args;
+    args.push_back("test");
+    args.push_back("samgr");
+    args.push_back("--start-stat");
+    int ret = saMgr->IpcDumpProc(fd, args);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: IpcDumpProc004
+ * @tc.desc: test IpcDumpProc.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, IpcDumpProc004, TestSize.Level2)
+{
+    SamMockPermission::MockProcess("hidumper_service");
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t cmd = -1;
+    int32_t fd = 1;
+    std::vector<std::string> args;
+    args.push_back("test");
+    args.push_back("all");
+    args.push_back("--start-stat");
+    int ret = saMgr->IpcDumpProc(fd, args);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
  * @tc.name: IpcStatSamgrProc001
  * @tc.desc: test IpcStatSamgrProc.
  * @tc.type: FUNC
@@ -1372,7 +1409,7 @@ HWTEST_F(SystemAbilityMgrTest, IpcDumpAllProcess001, TestSize.Level2)
 HWTEST_F(SystemAbilityMgrTest, IpcDumpSamgrProcess001, TestSize.Level2)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    int32_t cmd = IPC_STAT_CMD_START;
+    int32_t cmd = 4;
     int32_t fd = 1;
     bool ret = true;
     saMgr->IpcDumpSamgrProcess(fd, cmd);
