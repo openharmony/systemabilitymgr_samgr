@@ -336,13 +336,13 @@ int64_t CommonEventCollect::SaveOnDemandReasonExtraData(const EventFwk::CommonEv
     wantMap[UID] = std::to_string(uid);
     wantMap[NET_TYPE] = std::to_string(netType);
     wantMap[BUNDLE_NAME] = want.GetBundle();
+    std::lock_guard<std::mutex> autoLock(extraDataLock_);
     for (auto key : extraDataKey_[want.GetAction()]) {
         wantMap[key] = GetParamFromWant(key, want);
     }
     wantMap[COMMON_EVENT_ACTION_NAME] = want.GetAction();
     OnDemandReasonExtraData extraData(data.GetCode(), data.GetData(), wantMap);
 
-    std::lock_guard<std::mutex> autoLock(extraDataLock_);
     int64_t extraDataId = GenerateExtraDataIdLocked();
     extraDatas_[extraDataId] = extraData;
     HILOGI("CommonEventCollect save extraData %{public}d", static_cast<int32_t>(extraDataId));
