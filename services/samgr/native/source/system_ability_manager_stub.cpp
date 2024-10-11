@@ -50,8 +50,8 @@ namespace {
         int64_t begin = OHOS::GetTickCount();
         auto callingSid = OHOS::IPCSkeleton::GetCallingSid();
         auto ret = selinuxChecker_->GetServiceCheck(callingSid, std::to_string(said)) == 0;
-        HILOG_SE_DEBUG(LOG_CORE, "[Performance] GetServiceCheck SA : %{public}d spend %{public}" PRId64 " ms",
-            said, OHOS::GetTickCount() - begin);
+        HILOG_SE_DEBUG(LOG_CORE, "GetServiceCheck callingSid:%{public}s,SA:%{public}d,ret:%{public}s,spend:%{public}"
+            PRId64 "ms", callingSid.c_str(), said, ret == true ? "suc" : "fail", OHOS::GetTickCount() - begin);
         return  ret;
 #else
         return true; // if not support selinux, not check selinux permission
@@ -64,8 +64,8 @@ namespace {
         int64_t begin = OHOS::GetTickCount();
         auto callingSid = OHOS::IPCSkeleton::GetCallingSid();
         auto ret = selinuxChecker_->AddServiceCheck(callingSid, std::to_string(said)) == 0;
-        HILOG_SE_DEBUG(LOG_CORE, "[Performance] AddServiceCheck SA : %{public}d spend %{public}" PRId64 " ms",
-            said, OHOS::GetTickCount() - begin);
+        HILOG_SE_DEBUG(LOG_CORE, "AddServiceCheck callingSid:%{public}s,SA:%{public}d,ret:%{public}s,spend:%{public}"
+            PRId64 "ms", callingSid.c_str(), said, ret == true ? "suc" : "fail", OHOS::GetTickCount() - begin);
         return ret;
 #else
         return true; // if not support selinux, not check selinux permission
@@ -78,8 +78,9 @@ namespace {
         int64_t begin = OHOS::GetTickCount();
         auto callingSid = OHOS::IPCSkeleton::GetCallingSid();
         auto ret = selinuxChecker_->GetRemoteServiceCheck(callingSid, std::to_string(said)) == 0;
-        HILOG_SE_DEBUG(LOG_CORE, "[Performance] GetRemoteServiceCheck SA : %{public}d spend %{public}" PRId64 " ms",
-            said, OHOS::GetTickCount() - begin);
+        HILOG_SE_DEBUG(LOG_CORE, "GetRemoteServiceCheck callingSid:%{public}s,SA:%{public}d,"
+            "ret:%{public}s,spend:%{public}" PRId64 "ms", callingSid.c_str(), said,
+            ret == true ? "suc" : "fail", OHOS::GetTickCount() - begin);
         return ret;
 #else
         return true; // if not support selinux, not check selinux permission
@@ -92,8 +93,8 @@ namespace {
         int64_t begin = OHOS::GetTickCount();
         auto callingSid = OHOS::IPCSkeleton::GetCallingSid();
         auto ret = selinuxChecker_->ListServiceCheck(callingSid) == 0;
-        HILOG_SE_DEBUG(LOG_CORE, "[Performance] ListServiceCheck spend %{public}" PRId64 " ms",
-            OHOS::GetTickCount() - begin);
+        HILOG_SE_DEBUG(LOG_CORE, "ListServiceCheck callingSid:%{public}s,ret:%{public}s,spend:%{public}"
+            PRId64 "ms", callingSid.c_str(), ret == true ? "suc" : "fail", OHOS::GetTickCount() - begin);
         return ret;
 #else
         return true; // if not support selinux, not check selinux permission
