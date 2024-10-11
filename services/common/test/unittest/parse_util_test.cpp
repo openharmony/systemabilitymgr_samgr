@@ -732,7 +732,6 @@ HWTEST_F(ParseUtilTest, GetOnDemandConditionsFromJson004, TestSize.Level3)
     DTEST_LOG << " GetOnDemandConditionsFromJson004 END" << std::endl;
 }
 
-
 /**
  * @tc.name: GetOnDemandExtraMessagesFromJson001
  * @tc.desc: parse OnDemandExtraMessages, ExtraMessages is empty.
@@ -791,7 +790,6 @@ HWTEST_F(ParseUtilTest, GetOnDemandExtraMessagesFromJson003, TestSize.Level3)
     EXPECT_EQ(out.size(), 0);
     DTEST_LOG << " GetOnDemandExtraMessagesFromJson003 END" << std::endl;
 }
-
 
 /**
  * @tc.name: ParseJsonFile001
@@ -1344,5 +1342,26 @@ HWTEST_F(ParseUtilTest, ParseSystemAbilityGetExtension003, TestSize.Level3)
     DTEST_LOG << " ParseSystemAbilityGetExtension003 END" << std::endl;
 }
 
+/**
+ * @tc.name: GetOndemandPriorityPara001
+ * @tc.desc: GetOndemandPriorityPara
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseUtilTest, GetOndemandPriorityPara001, TestSize.Level3)
+{
+    DTEST_LOG << " GetOndemandPriorityPara001 BEGIN" << std::endl;
+
+    std::string loadPriority = "HighPriority";
+    uint32_t ret = parser_->GetOndemandPriorityPara(loadPriority);
+    EXPECT_EQ(ret, static_cast<uint32_t>(HIGH_PRIORITY));
+
+    loadPriority = "MediumPriority";
+    ret = parser_->GetOndemandPriorityPara(loadPriority);
+    EXPECT_EQ(ret, static_cast<uint32_t>(MEDIUM_PRIORITY));
+
+    loadPriority = "NEW_TEST";
+    ret = parser_->GetOndemandPriorityPara(loadPriority);
+    EXPECT_EQ(ret, static_cast<uint32_t>(LOW_PRIORITY));
+}
 } // namespace SAMGR
 } // namespace OHOS

@@ -18,6 +18,7 @@
     *ReportGetSAFrequency*;
     *WatchDogSendEvent*;
     *SamgrXCollie*;
+    *ReportSaMainExit*;
     *ReportSaUnLoadFail*;
     *ReportSaLoadDuration*;
     *ReportSaUnLoadDuration*;

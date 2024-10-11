@@ -16,8 +16,8 @@
 #ifndef UTILS_SYSTEM_ABILITY_DEFINITION_H
 #define UTILS_SYSTEM_ABILITY_DEFINITION_H
 
-#include<map>
-#include<string>
+#include <map>
+#include <string>
 
 namespace OHOS {
 /*

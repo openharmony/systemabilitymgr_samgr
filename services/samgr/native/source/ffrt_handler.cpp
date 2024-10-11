@@ -56,7 +56,6 @@ void FFRTHandler::SetFfrt(const std::string& name)
 
 bool FFRTHandler::PostTask(std::function<void()> func)
 {
-    std::unique_lock<std::shared_mutex> lock(mutex_);
     task_handle handler = queue_->submit_h(func);
     if (handler == nullptr) {
         HILOGE("FFRTHandler post task failed");
@@ -71,7 +70,6 @@ bool FFRTHandler::PostTask(std::function<void()> func, uint64_t delayTime)
         HILOGE("invalid delay time");
         return false;
     }
-    std::unique_lock<std::shared_mutex> lock(mutex_);
     task_handle handler = queue_->submit_h(func, task_attr().delay(delayTime * CONVERSION_FACTOR));
     if (handler == nullptr) {
         HILOGE("FFRTHandler post task failed");
