@@ -14,14 +14,14 @@
 domain: SAMGR
 
 PROCESS_STOP_DURATION:
-  __BASE: {type: BEHAVIOR, level: MINOR, desc: ondemand process stop time cost}
+  __BASE: {type: BEHAVIOR, level: CRITICAL, desc: ondemand process stop time cost}
   PROCESS_NAME: {type: STRING, desc: process name}
   PID: {type: INT32, desc: caller pid}
   UID: {type: INT32, desc: caller uid}
   DURATION: {type: INT64, desc: process stop time cost}
 
 PROCESS_START_DURATION:
-  __BASE: {type: BEHAVIOR, level: MINOR, desc: ondemand process start time cost}
+  __BASE: {type: BEHAVIOR, level: CRITICAL, desc: ondemand process start time cost}
   PROCESS_NAME: {type: STRING, desc: process name}
   PID: {type: INT32, desc: caller pid}
   UID: {type: INT32, desc: caller uid}
@@ -41,14 +41,18 @@ PROCESS_START_FAIL:
   UID: {type: INT32, desc: caller uid}
   REASON: {type: STRING, desc: process start fail reason}
 
+SA_CRASH:
+  __BASE: {type: FAULT, level: CRITICAL, desc: sa crash}
+  SAID: {type: INT32, desc: system ability id}
+
 SA_LOAD_DURATION:
-  __BASE: {type: BEHAVIOR, level: MINOR, desc: samgr sa load time cost}
+  __BASE: {type: BEHAVIOR, level: CRITICAL, desc: samgr sa load time cost}
   SAID: {type: INT32, desc: system ability id}
   KEY_STAGE: {type: INT32, desc: load sa key stage}
   DURATION: {type: INT64, desc: time cost}
 
 SA_UNLOAD_DURATION:
-  __BASE: {type: BEHAVIOR, level: MINOR, desc: samgr sa unload time cost}
+  __BASE: {type: BEHAVIOR, level: CRITICAL, desc: samgr sa unload time cost}
   SAID: {type: INT32, desc: system ability id}
   KEY_STAGE: {type: INT32, desc: unload sa key stage}
   DURATION: {type: INT64, desc: time cost}
@@ -56,25 +60,33 @@ SA_UNLOAD_DURATION:
 SA_UNLOAD_FAIL:
   __BASE: {type: FAULT, level: CRITICAL, desc: samgr sa unload failed event}
   SAID: {type: INT32, desc: system ability id}
+  PID: {type: INT32, desc: caller pid}
+  UID: {type: INT32, desc: caller uid}
   REASON: {type: STRING, desc: fail reason}
 
 ONDEMAND_SA_LOAD_FAIL:
   __BASE: {type: FAULT, level: CRITICAL, desc: samgr sa load failed event}
   SAID: {type: INT32, desc: system ability id}
+  PID: {type: INT32, desc: caller pid}
+  UID: {type: INT32, desc: caller uid}
   REASON: {type: STRING, desc: fail reason}
 
 ONDEMAND_SA_LOAD:
-  __BASE: {type: BEHAVIOR, level: MINOR, desc: samgr sa load event}
+  __BASE: {type: BEHAVIOR, level: CRITICAL, desc: samgr sa load event}
   SAID: {type: INT32, desc: system ability id}
+  PID: {type: INT32, desc: caller pid}
+  UID: {type: INT32, desc: caller uid}
   EVENT: {type: INT32, desc: load event id}
 
 ONDEMAND_SA_UNLOAD:
-  __BASE: {type: BEHAVIOR, level: MINOR, desc: samgr sa unload event}
+  __BASE: {type: BEHAVIOR, level: CRITICAL, desc: samgr sa unload event}
   SAID: {type: INT32, desc: system ability id}
+  PID: {type: INT32, desc: caller pid}
+  UID: {type: INT32, desc: caller uid}
   EVENT: {type: INT32, desc: unload event id}
 
 GETSA_FREQUENCY:
-  __BASE: {type: STATISTIC, level: MINOR, desc: get system ability times event}
+  __BASE: {type: STATISTIC, level: CRITICAL, desc: get system ability times event}
   CALLER_UID: {type: UINT32, desc: caller uid}
   SAID: {type: UINT32, desc: system ability id}
   COUNT: {type: INT32, desc: the caller process get sa count}
@@ -82,6 +94,8 @@ GETSA_FREQUENCY:
 ADD_SYSTEMABILITY_FAIL:
   __BASE: {type: FAULT, level: CRITICAL, desc: add system ability failed event}
   SAID: {type: INT32, desc: system ability id}
+  PID: {type: INT32, desc: caller pid}
+  UID: {type: INT32, desc: caller uid}
   FILE_NAME: {type: STRING, desc: file name}
 
 SERVICE_BLOCK:
