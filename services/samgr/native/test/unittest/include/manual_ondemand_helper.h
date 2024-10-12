@@ -21,6 +21,13 @@
 #include "system_process_status_change_stub.h"
 
 namespace OHOS {
+
+enum class TimeEventId {
+    LOOP_EVENT = 1,
+    AWAKE_LOOP_EVENT = 2,
+    ORDER_TIMED_EVENT = 3
+};
+    
 class OnDemandHelper {
 public:
     ~OnDemandHelper() = default;
