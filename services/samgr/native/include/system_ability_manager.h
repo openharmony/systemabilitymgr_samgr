@@ -233,6 +233,7 @@ public:
             collectManager_->RemoveWhiteCommonEvent();
         }
     }
+    void RemoveOnDemandSaInDiedProc(std::shared_ptr<SystemProcessContext>& processContext);
 private:
     enum class AbilityState {
         INIT,

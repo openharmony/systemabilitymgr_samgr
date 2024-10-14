@@ -654,6 +654,16 @@ int32_t SystemAbilityManager::AddOnDemandSystemAbilityInfo(int32_t systemAbility
     return ERR_OK;
 }
 
+void SystemAbilityManager::RemoveOnDemandSaInDiedProc(std::shared_ptr<SystemProcessContext>& processContext)
+{
+    lock_guard<mutex> autoLock(onDemandLock_);
+    for (auto& saId : processContext->saList) {
+        onDemandAbilityMap_.erase(saId);
+    }
+    HILOGI("remove onDemandSA. proc:%{public}s, size:%{public}zu", Str16ToStr8(processContext->processName).c_str(),
+        onDemandAbilityMap_.size());
+}
+
 int32_t SystemAbilityManager::StartOnDemandAbility(int32_t systemAbilityId, bool& isExist)
 {
     lock_guard<mutex> onDemandAbilityLock(onDemandLock_);
