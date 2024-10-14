@@ -96,7 +96,6 @@ ohos_unittest("SystemAbilityMgrTest") {
   deps = [
     ":samgr_proxy_tdd",
     "${samgr_dir}/interfaces/innerkits/common:samgr_common",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -106,6 +105,7 @@ ohos_unittest("SystemAbilityMgrTest") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
@@ -192,7 +192,6 @@ ohos_unittest("SystemAbilityMgrCollectTest") {
   deps = [
     ":samgr_proxy_tdd",
     "${samgr_dir}/interfaces/innerkits/common:samgr_common",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -202,6 +201,7 @@ ohos_unittest("SystemAbilityMgrCollectTest") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
@@ -306,7 +306,6 @@ ohos_unittest("SystemAbilityMgrDeviceNetworkingTest") {
   deps = [
     ":samgr_proxy_tdd",
     "${samgr_dir}/interfaces/innerkits/common:samgr_common",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -316,6 +315,7 @@ ohos_unittest("SystemAbilityMgrDeviceNetworkingTest") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
@@ -390,7 +390,6 @@ ohos_unittest("SystemAbilityMgrStubTest") {
   deps = [
     ":samgr_proxy_tdd",
     "${samgr_dir}/interfaces/innerkits/common:samgr_common",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -400,6 +399,7 @@ ohos_unittest("SystemAbilityMgrStubTest") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
@@ -463,7 +463,6 @@ ohos_unittest("SystemAbilityMgrProxyTest") {
   deps = [
     ":samgr_proxy_tdd",
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/dynamic_cache:dynamic_cache",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -557,7 +556,6 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
   deps = [
     ":samgr_proxy_tdd",
     "${samgr_dir}/interfaces/innerkits/common:samgr_common",
-    "//third_party/googletest:gtest_main",
   ]
 
   external_deps = [
@@ -567,6 +565,7 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
     "c_utils:utils",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
+    "googletest:gtest_main",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
     "hitrace:hitrace_meter",
@@ -620,10 +619,7 @@ ohos_unittest("SystemAbilityMgrDumperTest") {
     cflags = [ "-DBINDER_IPC_32BIT" ]
   }
 
-  deps = [
-    ":samgr_proxy_tdd",
-    "//third_party/googletest:gtest_main",
-  ]
+  deps = [ ":samgr_proxy_tdd" ]
 
   external_deps = [
     "access_token:libaccesstoken_sdk",
@@ -805,7 +801,10 @@ ohos_rust_unittest("rust_samgr_test_client") {
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/rust:samgr_rust",
     "//foundation/systemabilitymgr/samgr/services/samgr/native/test/unittest/rust/service:test_access_token",
   ]
-  external_deps = [ "hilog:hilog_rust" ]
+  external_deps = [
+    "hilog:hilog_rust",
+    "ipc:ipc_rust",
+  ]
 
   subsystem_name = "systemabilitymgr"
   part_name = "samgr"
