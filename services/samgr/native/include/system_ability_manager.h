@@ -234,6 +234,7 @@ public:
         }
     }
     void RemoveOnDemandSaInDiedProc(std::shared_ptr<SystemProcessContext>& processContext);
+    void InitDbinderService();
 private:
     enum class AbilityState {
         INIT,
@@ -335,6 +336,7 @@ private:
     void IpcDumpSamgrProcess(int32_t fd, int32_t cmd);
     void IpcDumpSingleProcess(int32_t fd, int32_t cmd, const std::string processName);
     int32_t IpcDumpProc(int32_t fd, const std::vector<std::string>& args);
+    void RegisterDistribute(int32_t said, bool isDistributed);
 
     std::u16string deviceName_;
     static sptr<SystemAbilityManager> instance;
@@ -347,6 +349,10 @@ private:
     sptr<DBinderService> dBinderService_;
     sptr<DeviceStatusCollectManager> collectManager_;
     std::shared_ptr<RpcSystemAbilityCallback> rpcCallbackImp_;
+
+    std::shared_mutex dBinderServiceLock_;
+    std::list<int32_t> distributedSaList_;
+    bool isDbinderServiceInit_ = false;
 
     // must hold abilityMapLock_ never access other locks
     std::shared_mutex abilityMapLock_;
