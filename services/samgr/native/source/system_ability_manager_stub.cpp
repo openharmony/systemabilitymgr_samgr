@@ -212,7 +212,8 @@ int32_t SystemAbilityManagerStub::ListSystemAbilityInner(MessageParcel& data, Me
     }
 
     if (!CheckListSAPermission()) {
-        HILOGE("ListSystemAbilityInner selinux permission denied!");
+        HILOGE("ListSystemAbilityInner selinux permission denied! callSid:%{public}s",
+            OHOS::IPCSkeleton::GetCallingSid().c_str());
         return ERR_PERMISSION_DENIED;
     }
 
@@ -325,7 +326,8 @@ int32_t SystemAbilityManagerStub::CheckRemtSystemAbilityInner(MessageParcel& dat
     }
 
     if (!CheckGetRemoteSAPermission(systemAbilityId)) {
-        HILOGE("CheckRemtSystemAbilityInner selinux permission denied!, SA:%{public}d", systemAbilityId);
+        HILOGE("CheckRemtSystemAbilityInner selinux permission denied! SA:%{public}d,callSid:%{public}s",
+            systemAbilityId, OHOS::IPCSkeleton::GetCallingSid().c_str());
         return ERR_PERMISSION_DENIED;
     }
 
@@ -367,7 +369,8 @@ int32_t SystemAbilityManagerStub::AddOndemandSystemAbilityInner(MessageParcel& d
     }
 
     if (!CheckAddOrRemovePermission(systemAbilityId)) {
-        HILOGE("AddOndemandSystemAbilityInner selinux permission denied! SA : %{public}d", systemAbilityId);
+        HILOGE("AddOndemandSystemAbilityInner selinux permission denied! SA:%{public}d,callSid:%{public}s",
+            systemAbilityId, OHOS::IPCSkeleton::GetCallingSid().c_str());
         return ERR_PERMISSION_DENIED;
     }
 
@@ -402,7 +405,8 @@ int32_t SystemAbilityManagerStub::CheckSystemAbilityImmeInner(MessageParcel& dat
     }
 
     if (!CheckGetSAPermission(systemAbilityId)) {
-        HILOGD("CheckSystemAbilityImmeInner selinux permission denied! SA : %{public}d", systemAbilityId);
+        HILOGD("CheckSystemAbilityImmeInner selinux permission denied! SA:%{public}d,callSid:%{public}s",
+            systemAbilityId, OHOS::IPCSkeleton::GetCallingSid().c_str());
         return ERR_PERMISSION_DENIED;
     }
 
@@ -475,7 +479,8 @@ int32_t SystemAbilityManagerStub::AddSystemAbilityInner(MessageParcel& data, Mes
     }
 
     if (!CheckAddOrRemovePermission(systemAbilityId)) {
-        KHILOGE("AddSystemAbilityInner selinux permission denied! SA : %{public}d", systemAbilityId);
+        KHILOGE("AddSystemAbilityInner selinux permission denied! SA:%{public}d,callSid:%{public}s",
+            systemAbilityId, OHOS::IPCSkeleton::GetCallingSid().c_str());
         return ERR_PERMISSION_DENIED;
     }
 
@@ -512,7 +517,8 @@ int32_t SystemAbilityManagerStub::GetSystemAbilityInner(MessageParcel& data, Mes
     }
 
     if (!CheckGetSAPermission(systemAbilityId)) {
-        HILOGE("GetSystemAbilityInner selinux permission denied! SA : %{public}d", systemAbilityId);
+        HILOGE("GetSystemAbilityInner selinux permission denied! SA:%{public}d,callSid:%{public}s",
+            systemAbilityId, OHOS::IPCSkeleton::GetCallingSid().c_str());
         return ERR_PERMISSION_DENIED;
     }
     sptr<IRemoteObject> remoteObject = GetSystemAbility(systemAbilityId);
@@ -541,7 +547,8 @@ int32_t SystemAbilityManagerStub::CheckSystemAbilityInner(MessageParcel& data, M
     }
 
     if (!CheckGetSAPermission(systemAbilityId)) {
-        HILOGD("CheckSystemAbilityInner selinux permission denied! SA : %{public}d", systemAbilityId);
+        HILOGD("CheckSystemAbilityInner selinux permission denied! SA:%{public}d,callSid:%{public}s",
+            systemAbilityId, OHOS::IPCSkeleton::GetCallingSid().c_str());
         return ERR_PERMISSION_DENIED;
     }
     sptr<IRemoteObject> remoteObject = CheckSystemAbility(systemAbilityId);
@@ -574,7 +581,8 @@ int32_t SystemAbilityManagerStub::RemoveSystemAbilityInner(MessageParcel& data, 
     }
 
     if (!CheckAddOrRemovePermission(systemAbilityId)) {
-        HILOGE("RemoveSystemAbilityInner selinux permission denied!SA : %{public}d", systemAbilityId);
+        HILOGE("RemoveSystemAbilityInner selinux permission denied! SA:%{public}d,callSid:%{public}s",
+            systemAbilityId, OHOS::IPCSkeleton::GetCallingSid().c_str());
         return ERR_PERMISSION_DENIED;
     }
 
@@ -636,7 +644,8 @@ int32_t SystemAbilityManagerStub::LoadSystemAbilityInner(MessageParcel& data, Me
         }
 
         if (!CheckGetSAPermission(systemAbilityId)) {
-            HILOGE("LoadSystemAbilityInner selinux permission denied!SA : %{public}d", systemAbilityId);
+            HILOGE("LoadSystemAbilityInner selinux permission denied!SA:%{public}d,callSid:%{public}s",
+                systemAbilityId, OHOS::IPCSkeleton::GetCallingSid().c_str());
             return ERR_PERMISSION_DENIED;
         }
 
@@ -690,7 +699,8 @@ int32_t SystemAbilityManagerStub::LoadRemoteSystemAbilityInner(MessageParcel& da
         }
 
         if (!CheckGetRemoteSAPermission(systemAbilityId)) {
-            HILOGE("LoadRemoteSystemAbilityInner selinux permission denied!SA : %{public}d", systemAbilityId);
+            HILOGE("LoadRemoteSystemAbilityInner selinux permission denied! SA:%{public}d,callSid:%{public}s",
+            systemAbilityId, OHOS::IPCSkeleton::GetCallingSid().c_str());
             return ERR_PERMISSION_DENIED;
         }
 
