@@ -627,7 +627,6 @@ int32_t SystemAbilityManagerStub::LoadSystemAbilityInner(MessageParcel& data, Me
 {
     int32_t systemAbilityId = -1;
     bool ret = false;
-    sptr<IRemoteObject> remoteObject = nullptr;
     sptr<ISystemAbilityLoadCallback> callback = nullptr;
     {
         SamgrXCollie samgrXCollie("samgrStub--loadSa_readData");
@@ -649,7 +648,7 @@ int32_t SystemAbilityManagerStub::LoadSystemAbilityInner(MessageParcel& data, Me
             return ERR_PERMISSION_DENIED;
         }
 
-        remoteObject = data.ReadRemoteObject();
+        sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
         if (remoteObject == nullptr) {
             HILOGW("LoadSystemAbilityInner read callback failed!");
             return ERR_INVALID_VALUE;
@@ -700,7 +699,7 @@ int32_t SystemAbilityManagerStub::LoadRemoteSystemAbilityInner(MessageParcel& da
 
         if (!CheckGetRemoteSAPermission(systemAbilityId)) {
             HILOGE("LoadRemoteSystemAbilityInner selinux permission denied! SA:%{public}d,callSid:%{public}s",
-            systemAbilityId, OHOS::IPCSkeleton::GetCallingSid().c_str());
+                systemAbilityId, OHOS::IPCSkeleton::GetCallingSid().c_str());
             return ERR_PERMISSION_DENIED;
         }
 
