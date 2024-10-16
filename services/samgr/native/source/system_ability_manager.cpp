@@ -837,7 +837,7 @@ void SystemAbilityManager::NotifySystemAbilityAddedBySync(int32_t systemAbilityI
     const sptr<ISystemAbilityStatusChange>& listener)
 {
     if (workHandler_ == nullptr) {
-        HILOGE("SubscribeSystemAbility workHandler is nullptr");
+        HILOGE("NotifySystemAbilityAddedBySync workHandler is nullptr");
         return;
     } else {
         auto listenerNotifyTask = [systemAbilityId, listener, this]() {
@@ -845,7 +845,7 @@ void SystemAbilityManager::NotifySystemAbilityAddedBySync(int32_t systemAbilityI
                 static_cast<uint32_t>(SamgrInterfaceCode::ADD_SYSTEM_ABILITY_TRANSACTION), listener);
         };
         if (!workHandler_->PostTask(listenerNotifyTask)) {
-            HILOGE("Send listenerNotifyMsg PostTask fail");
+            HILOGE("NotifySystemAbilityAddedBySync PostTask fail SA:%{public}d", systemAbilityId);
         }
     }
 }

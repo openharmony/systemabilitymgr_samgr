@@ -213,7 +213,7 @@ void DeviceTimedCollect::PostNonPersistenceLoopTaskLocked(int32_t interval)
             ReportEventByTimeInfo(interval, false);
             PostDelayTaskByTimeInfo(nonPersitenceLoopTasks_[interval], interval, interval);
         } else {
-            HILOGD("DeviceTimedCollect interval %{public}d has been remove", interval);
+            HILOGI("DeviceTimedCollect interval %{public}d has been remove", interval);
         }
     };
     PostDelayTaskByTimeInfo(nonPersitenceLoopTasks_[interval], interval, interval);
@@ -400,7 +400,7 @@ void DeviceTimedCollect::RemoveTimesInfo(const OnDemandEvent& onDemandEvent, int
     if (!timeInfos_[interval].normal && !timeInfos_[interval].awake) {
         timeInfos_.erase(interval);
     }
-    HILOGD("RemoveTimesInfo : %{public}d : %{public}d , %{public}d", interval,
+    HILOGI("RemoveTimesInfo : %{public}d : %{public}d , %{public}d", interval,
         timeInfos_[interval].normal, timeInfos_[interval].awake);
 }
 
