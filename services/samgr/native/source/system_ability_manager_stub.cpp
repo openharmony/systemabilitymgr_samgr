@@ -653,7 +653,8 @@ int32_t SystemAbilityManagerStub::LoadSystemAbilityInner(MessageParcel& data, Me
 
     int32_t result = LoadSystemAbility(systemAbilityId, callback);
     if (result != ERR_OK) {
-        ReportSamgrSaLoadFail(systemAbilityId, "interface load err:" + ToString(result));
+        ReportSamgrSaLoadFail(systemAbilityId, IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(),
+            "interface load err:" + ToString(result));
         HILOGE("loadSaInner fail ret:%{public}d", result);
     }
     HILOGD("LoadSystemAbilityInner result is %{public}d", result);
@@ -741,7 +742,8 @@ int32_t SystemAbilityManagerStub::UnloadSystemAbilityInner(MessageParcel& data, 
 
     int32_t result = UnloadSystemAbility(systemAbilityId);
     if (result != ERR_OK) {
-        ReportSaUnLoadFail(systemAbilityId, "interface unload err:" + ToString(result));
+        ReportSaUnLoadFail(systemAbilityId, IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(),
+            "interface unload err:" + ToString(result));
         HILOGE("unloadSa fail ret:%{public}d", result);
     }
     HILOGD("UnloadSystemAbilityInner result is %{public}d", result);
