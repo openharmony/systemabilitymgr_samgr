@@ -268,9 +268,6 @@ public:
 private:
     sptr<IRemoteObject> GetSystemAbilityWrapper(int32_t systemAbilityId, const std::string& deviceId = "");
     sptr<IRemoteObject> CheckSystemAbilityWrapper(int32_t code, MessageParcel& data);
-    sptr<IRemoteObject> CheckSystemAbilityWrapper(int32_t code, MessageParcel& data, int32_t& errCode);
-    sptr<IRemoteObject> CheckSystemAbility(int32_t systemAbilityId, const std::string& deviceId, int32_t& errCode);
-    sptr<IRemoteObject> CheckSystemAbility(int32_t systemAbilityId, bool& isExist, int32_t& errCode);
     int32_t MarshalSAExtraProp(const SAExtraProp& extraProp, MessageParcel& data) const;
     int32_t AddSystemAbilityWrapper(int32_t code, MessageParcel& data);
     int32_t RemoveSystemAbilityWrapper(int32_t code, MessageParcel& data);

@@ -176,24 +176,15 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::GetSystemAbilityWrapper(int32_t s
     HILOGD("GetSaWrap:Waiting for SA:%{public}d, ", systemAbilityId);
     do {
         sptr<IRemoteObject> svc;
-        int32_t errCode = ERR_NONE;
         if (deviceId.empty()) {
-            svc = CheckSystemAbility(systemAbilityId, isExist, errCode);
-            if (errCode == ERR_PERMISSION_DENIED) {
-                HILOGE("GetSaWrap SA:%{public}d selinux denied", systemAbilityId);
-                return nullptr;
-            }
+            svc = CheckSystemAbility(systemAbilityId, isExist);
             if (!isExist) {
                 HILOGD("%{public}s:SA:%{public}d is not exist", __func__, systemAbilityId);
                 usleep(SLEEP_ONE_MILLI_SECOND_TIME * SLEEP_INTERVAL_TIME);
                 continue;
             }
         } else {
-            svc = CheckSystemAbility(systemAbilityId, deviceId, errCode);
-            if (errCode == ERR_PERMISSION_DENIED) {
-                HILOGE("GetSaWrap SA:%{public}d deviceId selinux denied", systemAbilityId);
-                return nullptr;
-            }
+            svc = CheckSystemAbility(systemAbilityId, deviceId);
         }
 
         if (svc != nullptr) {
@@ -207,13 +198,6 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::GetSystemAbilityWrapper(int32_t s
 
 sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbilityWrapper(int32_t code, MessageParcel& data)
 {
-    int32_t errCode = ERR_NONE;
-    return CheckSystemAbilityWrapper(code, data, errCode);
-}
-
-sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbilityWrapper(int32_t code, MessageParcel& data,
-    int32_t& errCode)
-{
     auto remote = Remote();
     if (remote == nullptr) {
         HILOGI("CheckSaWrap remote is nullptr !");
@@ -223,7 +207,6 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbilityWrapper(int32_t
     MessageOption option;
     int32_t err = remote->SendRequest(code, data, reply, option);
     if (err != ERR_NONE) {
-        errCode = err;
         return nullptr;
     }
     return reply.ReadRemoteObject();
@@ -265,13 +248,6 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbilityTransaction(int
 
 sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
 {
-    int32_t errCode = ERR_NONE;
-    return CheckSystemAbility(systemAbilityId, deviceId, errCode);
-}
-
-sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t systemAbilityId, const std::string& deviceId,
-    int32_t& errCode)
-{
     if (!CheckInputSysAbilityId(systemAbilityId) || deviceId.empty()) {
         HILOGW("CheckSystemAbility:SA:%{public}d or deviceId is nullptr.", systemAbilityId);
         return nullptr;
@@ -301,16 +277,10 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t system
     }
 
     return CheckSystemAbilityWrapper(
-        static_cast<uint32_t>(SamgrInterfaceCode::CHECK_REMOTE_SYSTEM_ABILITY_TRANSACTION), data, errCode);
+        static_cast<uint32_t>(SamgrInterfaceCode::CHECK_REMOTE_SYSTEM_ABILITY_TRANSACTION), data);
 }
 
 sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t systemAbilityId, bool& isExist)
-{
-    int32_t errCode = ERR_NONE;
-    return CheckSystemAbility(systemAbilityId, isExist, errCode);
-}
-sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t systemAbilityId, bool& isExist,
-    int32_t& errCode)
 {
     HILOGD("%{public}s called, SA:%{public}d, isExist is %{public}d", __func__, systemAbilityId, isExist);
     if (!CheckInputSysAbilityId(systemAbilityId)) {
@@ -351,7 +321,6 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t system
     int32_t err = remote->SendRequest(
         static_cast<uint32_t>(SamgrInterfaceCode::CHECK_SYSTEM_ABILITY_IMMEDIATELY_TRANSACTION), data, reply, option);
     if (err != ERR_NONE) {
-        errCode = err;
         return nullptr;
     }
 
