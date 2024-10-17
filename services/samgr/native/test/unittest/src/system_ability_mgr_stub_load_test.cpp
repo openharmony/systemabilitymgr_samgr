@@ -67,6 +67,7 @@ HWTEST_F(SystemAbilityMgrStubTest, SubscribeSystemProcessInner001, TestSize.Leve
 {
     DTEST_LOG << "SubscribeSystemProcessInner001" << std::endl;
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
     MessageParcel data;
     MessageParcel reply;
     int32_t ret = saMgr->SubscribeSystemProcessInner(data, reply);
@@ -98,11 +99,11 @@ HWTEST_F(SystemAbilityMgrStubTest, SubsSystemAbilityInner003, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrStubTest, SubsSystemAbilityInner004, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
     sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
     SAInfo saInfo;
     saMgr->abilityMap_[SAID] = saInfo;
     saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
-    EXPECT_TRUE(saMgr != nullptr);
     MessageParcel data;
     MessageParcel reply;
     data.WriteInt32(SAID);
