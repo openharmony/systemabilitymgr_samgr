@@ -39,7 +39,7 @@ namespace OHOS {
 namespace {
 const int32_t MAX_TIMEOUT = 4;
 const int32_t MIN_TIMEOUT = 0;
-const int32_t RETRY_TIME_OUT_NUMBER = 5;
+const int32_t RETRY_TIME_OUT_NUMBER = 6;
 const int32_t SLEEP_INTERVAL_TIME = 200;
 const int32_t GET_SYSTEM_ABILITY_CODE = 1;
 const int32_t CHECK_SYSTEM_ABILITY_CODE = 2;
@@ -185,8 +185,6 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::GetSystemAbilityWrapper(int32_t s
             }
             if (!isExist) {
                 HILOGD("%{public}s:SA:%{public}d is not exist", __func__, systemAbilityId);
-                usleep(SLEEP_ONE_MILLI_SECOND_TIME * SLEEP_INTERVAL_TIME);
-                continue;
             }
         } else {
             svc = CheckSystemAbility(systemAbilityId, deviceId, errCode);
@@ -199,7 +197,9 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::GetSystemAbilityWrapper(int32_t s
         if (svc != nullptr) {
             return svc;
         }
-        usleep(SLEEP_ONE_MILLI_SECOND_TIME * SLEEP_INTERVAL_TIME);
+        if (timeout > 0) {
+            usleep(SLEEP_ONE_MILLI_SECOND_TIME * SLEEP_INTERVAL_TIME);
+        }
     } while (timeout--);
     HILOGE("GetSaWrap SA:%{public}d not start", systemAbilityId);
     return nullptr;
