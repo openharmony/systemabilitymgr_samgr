@@ -65,10 +65,10 @@ HWTEST_F(SystemAbilityMgrStubTest, UnSubsSystemAbilityInner003, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrStubTest, UnSubsSystemAbilityInner004, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
     sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
     SAInfo saInfo;
     saMgr->abilityMap_[SAID] = saInfo;
-    EXPECT_TRUE(saMgr != nullptr);
     MessageParcel data;
     MessageParcel reply;
     data.WriteInt32(SAID);
@@ -103,6 +103,7 @@ HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbilityInner003, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbility001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
     int32_t res = saMgr->RemoveSystemAbility(INVALID_SAID);
     EXPECT_EQ(res, ERR_INVALID_VALUE);
 }
@@ -110,6 +111,7 @@ HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbility001, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbility002, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
     int32_t res = saMgr->RemoveSystemAbility(SAID);
     EXPECT_EQ(res, ERR_INVALID_VALUE);
 }
@@ -117,6 +119,7 @@ HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbility002, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbility003, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
     SAInfo saInfo;
     saInfo.remoteObj = nullptr;
     saMgr->abilityMap_[SAID] = saInfo;
@@ -127,6 +130,7 @@ HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbility003, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbility004, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
     SAInfo saInfo;
     saInfo.remoteObj = saMgr;
     saMgr->abilityMap_[SAID] = saInfo;
@@ -139,6 +143,7 @@ HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbility004, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbility005, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
     int32_t res = saMgr->RemoveSystemAbility(nullptr);
     EXPECT_EQ(res, ERR_INVALID_VALUE);
 }
@@ -146,6 +151,7 @@ HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbility005, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbility006, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
     SAInfo saInfo;
     saInfo.remoteObj = saMgr;
     saMgr->abilityMap_[SAID] = saInfo;
@@ -157,6 +163,7 @@ HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbility006, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbility007, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
     SAInfo saInfo;
     saInfo.remoteObj = saMgr;
     uint32_t saId = 0;
@@ -169,6 +176,7 @@ HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbility007, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemAbility001, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
     sptr<SaStatusChangeMock> listener(new SaStatusChangeMock());
     int32_t res = saMgr->UnSubscribeSystemAbility(INVALID_SAID, listener);
     u16string name = u"device_saname";
@@ -179,6 +187,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemAbility001, TestSize.Level1)
 HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemAbility002, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
     sptr<SaStatusChangeMock> listener(nullptr);
     int32_t res = saMgr->UnSubscribeSystemAbility(SAID, listener);
     u16string name = u"deviceSaname";
@@ -191,6 +200,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemAbility002, TestSize.Level1)
 HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemAbility003, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
     sptr<SaStatusChangeMock> listener(nullptr);
     int32_t res = saMgr->UnSubscribeSystemAbility(INVALID_SAID, listener);
     string deviceId = "device";
@@ -201,6 +211,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemAbility003, TestSize.Level1)
 HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemAbility004, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
     sptr<SaStatusChangeMock> listener(new SaStatusChangeMock());
     saMgr->listenerMap_[SAID].push_back({listener, SAID});
     saMgr->abilityStatusDeath_ = nullptr;
@@ -216,6 +227,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemAbility004, TestSize.Level1)
 HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemAbility005, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
     sptr<SaStatusChangeMock> listener(new SaStatusChangeMock());
     saMgr->listenerMap_[SAID].push_back({listener, SAID});
     saMgr->abilityStatusDeath_ = nullptr;
@@ -228,6 +240,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemAbility005, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemProcess001, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
     saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
     sptr<IRemoteObject> testAbility(nullptr);
     int32_t res = saMgr->RemoveSystemProcess(testAbility);
@@ -250,6 +263,7 @@ HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemProcess001, TestSize.Level1)
 HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemProcess002, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
     sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
     u16string procName = u"proname";
     int32_t res = saMgr->AddSystemProcess(procName, testAbility);
@@ -269,6 +283,7 @@ HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemProcess002, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemProcess003, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
     sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
     saMgr->systemProcessMap_.clear();
     int32_t res = saMgr->RemoveSystemProcess(testAbility);
@@ -415,9 +430,9 @@ HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility005, TestSize.Level3)
 {
     SamMockPermission::MockProcess("memmgrservice");
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
     saMgr->abilityStateScheduler_->processContextMap_.clear();
     saMgr->abilityStateScheduler_->abilityContextMap_.clear();
-    EXPECT_TRUE(saMgr != nullptr);
     CommonSaProfile saProfile;
     saProfile.process = u"memmgrservice";
     saMgr->saProfileMap_[SAID] = saProfile;
@@ -435,6 +450,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemProcessInner002, TestSize.Le
 {
     DTEST_LOG << "UnSubscribeSystemProcessInner002" << std::endl;
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
     MessageParcel data;
     data.WriteRemoteObject(nullptr);
     MessageParcel reply;
@@ -442,16 +458,11 @@ HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemProcessInner002, TestSize.Le
     EXPECT_EQ(ret, ERR_NULL_OBJECT);
 }
 
-/**
- * @tc.name: Test UnSubscribeSystemProcessInner003
- * @tc.desc: UnSubscribeSystemProcessInner003
- * @tc.type: FUNC
- * @tc.require: I6H10P
- */
 HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemProcessInner003, TestSize.Level3)
 {
     DTEST_LOG << "UnSubscribeSystemProcessInner003" << std::endl;
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
     MessageParcel data;
     sptr<IRemoteObject> ptr = new SystemProcessStatusChange();
     data.WriteRemoteObject(ptr);
@@ -460,12 +471,6 @@ HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemProcessInner003, TestSize.Le
     EXPECT_EQ(ret, ERR_OK);
 }
 
-/**
- * @tc.name: UnloadSystemAbilityInner003
- * @tc.desc: call UnloadSystemAbility
- * @tc.type: FUNC
- * @tc.require: I6AJ3S
- */
 HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbilityInner003, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
