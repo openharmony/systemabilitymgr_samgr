@@ -630,4 +630,46 @@ HWTEST_F(DeviceTimedCollectTest, ObtainLong001, TestSize.Level3)
     EXPECT_EQ(ret, 0);
 #endif
 }
+
+#ifdef PREFERENCES_ENABLE
+HWTEST_F(DeviceTimedCollectTest, ProcessPersistenceTimedTask001, TestSize.Level3)
+{
+    sptr<IReport> report;
+    std::shared_ptr<DeviceTimedCollect> deviceTimedCollect = std::make_shared<DeviceTimedCollect>(report);
+    deviceTimedCollect->preferencesUtil_ = PreferencesUtil::GetInstance();
+    int64_t disTime = 0;
+    std::string strTime = "IntervalTime";
+    deviceTimedCollect->ProcessPersistenceTimedTask(disTime, strTime);
+    EXPECT_EQ(disTime, 0);
+
+    disTime = 5;
+    deviceTimedCollect->ProcessPersistenceTimedTask(disTime, strTime);
+    EXPECT_NE(disTime, 0);
+}
+#endif
+
+#ifdef PREFERENCES_ENABLE
+HWTEST_F(DeviceTimedCollectTest, PostPersistenceDelayTask001, TestSize.Level3)
+{
+    sptr<IReport> report;
+    std::shared_ptr<DeviceTimedCollect> deviceTimedCollect = std::make_shared<DeviceTimedCollect>(report);
+    deviceTimedCollect->preferencesUtil_ = PreferencesUtil::GetInstance();
+    int32_t interval = 1;
+    int32_t disTime = 1;
+    
+    std::function<void()> postTask = [] () {};
+    deviceTimedCollect->PostPersistenceDelayTask(postTask, interval, disTime);
+    EXPECT_EQ(disTime, 1);
+}
+#endif
+
+HWTEST_F(DeviceTimedCollectTest, PostNonPersistenceTimedTaskLocked001, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    std::shared_ptr<DeviceTimedCollect> deviceTimedCollect = std::make_shared<DeviceTimedCollect>(collect);
+    std::string strTime = "timedevent";
+    int64_t timeGap = 0;
+    deviceTimedCollect->PostNonPersistenceTimedTaskLocked(strTime, timeGap);
+    EXPECT_EQ(timeGap, 0);
+}
 }
