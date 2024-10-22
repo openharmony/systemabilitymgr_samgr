@@ -801,6 +801,18 @@ int32_t SystemAbilityStateScheduler::KillSystemProcessLocked(
     return result;
 }
 
+void SystemAbilityStateScheduler::KillProcessByProcessNameLocked(const std::u16string& processName)
+{
+    std::shared_ptr<SystemProcessContext> processContext;
+    if (!GetSystemProcessContext(processName, processContext)) {
+        HILOGE("Scheduler:proc %{public}s context not exist", Str16ToStr8(processName).c_str());
+        return;
+    }
+    if (CanKillSystemProcessLocked(processContext)) {
+        KillSystemProcessLocked(processContext);
+    }
+}
+
 bool SystemAbilityStateScheduler::CanRestartProcessLocked(const std::shared_ptr<SystemProcessContext>& processContext)
 {
     if (!processContext->enableRestart) {
