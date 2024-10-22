@@ -1459,9 +1459,13 @@ int32_t SystemAbilityManagerProxy::GetExtensionRunningSaList(const std::string& 
     if (ret != ERR_OK) {
         return ret;
     }
-    int32_t size;
+    int32_t size = 0;
     if (!reply.ReadInt32(size)) {
         HILOGW("%{public}s read reply failed", __func__);
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (size > LAST_SYS_ABILITY_ID) {
+        HILOGW("get ExtensionRunningSa size failed, size:%{public}d.", size);
         return ERR_FLATTEN_OBJECT;
     }
     for (int32_t i = 0; i < size; ++i) {
@@ -1490,6 +1494,10 @@ int32_t SystemAbilityManagerProxy::GetRunningSaExtensionInfoList(const std::stri
     int32_t size = 0;
     if (!reply.ReadInt32(size)) {
         HILOGW("get SaExtInfoList read reply size failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (size > LAST_SYS_ABILITY_ID) {
+        HILOGW("get RunningSaExtensionInfo size failed, size:%{public}d.", size);
         return ERR_FLATTEN_OBJECT;
     }
     for (int32_t i = 0; i < size; ++i) {
