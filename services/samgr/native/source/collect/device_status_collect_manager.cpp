@@ -543,30 +543,28 @@ int32_t DeviceStatusCollectManager::UpdateOnDemandEvents(int32_t systemAbilityId
 {
     HILOGI("UpdateOnDemandEvents begin saId:%{public}d, type:%{public}d", systemAbilityId, type);
     std::vector<OnDemandEvent> oldEvents;
-    {
-        std::unique_lock<std::shared_mutex> writeLock(saProfilesLock_);
-        auto iter = std::find_if(onDemandSaProfiles_.begin(), onDemandSaProfiles_.end(),
-        [systemAbilityId](auto saProfile) {
-            return saProfile.saId == systemAbilityId;
-        });
-        if (iter == onDemandSaProfiles_.end()) {
-            HILOGI("UpdateOnDemandEvents invalid saId:%{public}d", systemAbilityId);
-            return ERR_INVALID_VALUE;
-        }
-        if (AddCollectEvents(events) != ERR_OK) {
-            HILOGI("AddCollectEvents failed saId:%{public}d", systemAbilityId);
-            return ERR_INVALID_VALUE;
-        }
-        if (type == OnDemandPolicyType::START_POLICY) {
-            oldEvents = (*iter).startOnDemand.onDemandEvents;
-            (*iter).startOnDemand.onDemandEvents = events;
-        } else if (type == OnDemandPolicyType::STOP_POLICY) {
-            oldEvents = (*iter).stopOnDemand.onDemandEvents;
-            (*iter).stopOnDemand.onDemandEvents = events;
-        } else {
-            HILOGE("UpdateOnDemandEvents policy types");
-            return ERR_INVALID_VALUE;
-        }
+    std::unique_lock<std::shared_mutex> writeLock(saProfilesLock_);
+    auto iter = std::find_if(onDemandSaProfiles_.begin(), onDemandSaProfiles_.end(),
+    [systemAbilityId](auto saProfile) {
+        return saProfile.saId == systemAbilityId;
+    });
+    if (iter == onDemandSaProfiles_.end()) {
+        HILOGI("UpdateOnDemandEvents invalid saId:%{public}d", systemAbilityId);
+        return ERR_INVALID_VALUE;
+    }
+    if (AddCollectEvents(events) != ERR_OK) {
+        HILOGI("AddCollectEvents failed saId:%{public}d", systemAbilityId);
+        return ERR_INVALID_VALUE;
+    }
+    if (type == OnDemandPolicyType::START_POLICY) {
+        oldEvents = (*iter).startOnDemand.onDemandEvents;
+        (*iter).startOnDemand.onDemandEvents = events;
+    } else if (type == OnDemandPolicyType::STOP_POLICY) {
+        oldEvents = (*iter).stopOnDemand.onDemandEvents;
+        (*iter).stopOnDemand.onDemandEvents = events;
+    } else {
+        HILOGE("UpdateOnDemandEvents policy types");
+        return ERR_INVALID_VALUE;
     }
     PersistOnDemandEvent(systemAbilityId, type, events);
     if (RemoveUnusedEventsLocked(oldEvents) != ERR_OK) {
