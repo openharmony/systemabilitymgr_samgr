@@ -1456,6 +1456,16 @@ bool SystemAbilityManager::IsInitBootFinished()
     return initTime != DEFAULT_BOOT_INIT_TIME;
 }
 
+bool SystemAbilityManager::IsProcessStopped(const std::u16string&name)
+{
+    int ret = ServiceWaitForStatus(Str16ToStr8(name).c_str(), ServiceStatus::SERVICE_STOPPED, 1);
+    if (ret != 0) {
+        HILOGE("ServiceWaitForStatus proc:%{public}s timeout", Str16ToStr8(name).c_str());
+            return false;
+    }
+    return true;
+}
+
 int32_t SystemAbilityManager::StartDynamicSystemProcess(const std::u16string& name,
     int32_t systemAbilityId, const OnDemandEvent& event)
 {
@@ -1464,10 +1474,9 @@ int32_t SystemAbilityManager::StartDynamicSystemProcess(const std::u16string& na
     auto extraArgv = eventStr.c_str();
     if (abilityStateScheduler_ && !abilityStateScheduler_->IsSystemProcessNeverStartedLocked(name)) {
         // Waiting for the init subsystem to perceive process death
-        int ret = ServiceWaitForStatus(Str16ToStr8(name).c_str(), ServiceStatus::SERVICE_STOPPED, 1);
-        if (ret != 0) {
-            HILOGE("ServiceWaitForStatus proc:%{public}s,SA:%{public}d timeout",
-                Str16ToStr8(name).c_str(), systemAbilityId);
+        if (!IsProcessStopped(name)) {
+            abilityStateScheduler_->KillProcessByProcessNameLocked(name);
+            IsProcessStopped(name);
         }
     }
     int64_t begin = GetTickCount();

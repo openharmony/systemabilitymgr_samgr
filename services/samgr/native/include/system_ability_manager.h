@@ -337,6 +337,7 @@ private:
     void IpcDumpSingleProcess(int32_t fd, int32_t cmd, const std::string processName);
     int32_t IpcDumpProc(int32_t fd, const std::vector<std::string>& args);
     void RegisterDistribute(int32_t said, bool isDistributed);
+    bool IsProcessStopped(const std::u16string& name);
 
     std::u16string deviceName_;
     static sptr<SystemAbilityManager> instance;
