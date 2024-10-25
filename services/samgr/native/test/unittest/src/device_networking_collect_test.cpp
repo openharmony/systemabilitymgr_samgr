@@ -31,8 +31,10 @@ using namespace OHOS;
 
 namespace OHOS {
 namespace {
+constexpr uint32_t INIT_EVENT = 10;
 constexpr uint32_t DM_DIED_EVENT = 11;
 constexpr int32_t MAX_WAIT_TIME = 1000;
+constexpr uint32_t DELAY_TIME = 100;
 }
 
 bool DeviceNetworkingCollectTest::isCaseDone_ = false;
@@ -642,5 +644,59 @@ HWTEST_F(DeviceNetworkingCollectTest, OnDeviceOffline003, TestSize.Level3)
     EXPECT_NE(collect, nullptr);
     networkingCollect->workHandler_->CleanFfrt();
     DTEST_LOG << " OnDeviceOffline003 END" << std::endl;
+}
+
+HWTEST_F(DeviceNetworkingCollectTest, ProcessEvent002, TestSize.Level3)
+{
+    DTEST_LOG << " ProcessEvent002 BEGIN" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
+    networkingCollect->workHandler_ = std::make_shared<WorkHandler>(nullptr);
+    EXPECT_TRUE(collect != nullptr);
+    EXPECT_TRUE(networkingCollect != nullptr);
+    networkingCollect->workHandler_->collect_ = nullptr;
+    networkingCollect->workHandler_->ProcessEvent(DM_DIED_EVENT);
+    EXPECT_EQ(nullptr, networkingCollect->workHandler_->collect_);
+    networkingCollect->workHandler_->collect_ = networkingCollect;
+    networkingCollect->workHandler_->ProcessEvent(DM_DIED_EVENT + 1);
+    EXPECT_NE(nullptr, networkingCollect->workHandler_->collect_);
+    networkingCollect->workHandler_->handler_ = nullptr;
+    networkingCollect->workHandler_->ProcessEvent(DM_DIED_EVENT);
+    EXPECT_EQ(nullptr, networkingCollect->workHandler_->handler_);
+    networkingCollect->workHandler_->handler_ = std::make_shared<FFRTHandler>("WorkHandler");
+    networkingCollect->workHandler_->ProcessEvent(DM_DIED_EVENT);
+    EXPECT_NE(nullptr, networkingCollect->workHandler_->handler_);
+    DTEST_LOG << " ProcessEvent002 END" << std::endl;
+}
+
+HWTEST_F(DeviceNetworkingCollectTest, SendEvent001, TestSize.Level3)
+{
+    DTEST_LOG << " SendEvent001 BEGIN" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
+    networkingCollect->workHandler_ = std::make_shared<WorkHandler>(networkingCollect);
+    EXPECT_TRUE(collect != nullptr);
+    EXPECT_TRUE(networkingCollect != nullptr);
+    std::function<void()> callback = [] () {};
+    sptr<ICollectPlugin> collectOne = new DeviceNetworkingCollect(nullptr);
+    collectOne->PostTask(callback);
+    networkingCollect->workHandler_->handler_ = std::make_shared<FFRTHandler>("WorkHandler");
+    bool bRet = networkingCollect->workHandler_->SendEvent(DM_DIED_EVENT);
+    EXPECT_EQ(true, bRet);
+    DTEST_LOG << " SendEvent001 END" << std::endl;
+}
+
+HWTEST_F(DeviceNetworkingCollectTest, SendEvent002, TestSize.Level3)
+{
+    DTEST_LOG << " SendEvent002 BEGIN" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
+    networkingCollect->workHandler_ = std::make_shared<WorkHandler>(networkingCollect);
+    EXPECT_TRUE(collect != nullptr);
+    EXPECT_TRUE(networkingCollect != nullptr);
+    networkingCollect->workHandler_->handler_ = std::make_shared<FFRTHandler>("WorkHandler");
+    bool bRet = networkingCollect->workHandler_->SendEvent(DM_DIED_EVENT, DELAY_TIME);
+    EXPECT_EQ(true, bRet);
+    DTEST_LOG << " SendEvent002 END" << std::endl;
 }
 } // namespace OHOS
