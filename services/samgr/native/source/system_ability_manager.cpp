@@ -816,15 +816,10 @@ int32_t SystemAbilityManager::RemoveSystemAbility(const sptr<IRemoteObject>& abi
         for (auto iter = abilityMap_.begin(); iter != abilityMap_.end(); ++iter) {
             if (iter->second.remoteObj == ability) {
                 saId = iter->first;
-                SystemAbilityInvalidateCache(saId);
                 (void)abilityMap_.erase(iter);
                 if (abilityDeath_ != nullptr) {
                     ability->RemoveDeathRecipient(abilityDeath_);
                 }
-                if (IsCacheCommonEvent(saId) && collectManager_ != nullptr) {
-                    collectManager_->ClearSaExtraDataId(saId);
-                }
-                ReportSaCrash(saId);
                 KHILOGI("%{public}s called, SA:%{public}d removed, size:%{public}zu", __func__, saId,
                     abilityMap_.size());
                 break;
@@ -833,6 +828,11 @@ int32_t SystemAbilityManager::RemoveSystemAbility(const sptr<IRemoteObject>& abi
     }
 
     if (saId != 0) {
+        SystemAbilityInvalidateCache(saId);
+        if (IsCacheCommonEvent(saId) && collectManager_ != nullptr) {
+            collectManager_->ClearSaExtraDataId(saId);
+        }
+        ReportSaCrash(saId);
         if (abilityStateScheduler_ == nullptr) {
             HILOGE("abilityStateScheduler is nullptr");
             return ERR_INVALID_VALUE;
@@ -2125,6 +2125,12 @@ int32_t SystemAbilityManager::GetRunningSaExtensionInfoList(const std::string& e
             auto obj = GetSystemProcess(value.process);
             if (obj == nullptr) {
                 HILOGD("get SaExtInfoList sa not load,ext:%{public}s SA:%{public}d", extension.c_str(), saId);
+                continue;
+            }
+            shared_lock<shared_mutex> readLock(abilityMapLock_);
+            auto iter = abilityMap_.find(saId);
+            if (iter == abilityMap_.end() || iter->second.remoteObj == nullptr) {
+                HILOGD("getRunningSaExtInfoList SA:%{public}d not load,ext:%{public}s", saId, extension.c_str());
                 continue;
             }
             SaExtensionInfo tmp{saId, obj};
