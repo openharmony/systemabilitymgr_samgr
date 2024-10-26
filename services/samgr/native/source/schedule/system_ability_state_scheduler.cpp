@@ -182,32 +182,27 @@ void SystemAbilityStateScheduler::UpdateLimitDelayUnloadTime(int32_t systemAbili
         return;
     }
     auto UpdateDelayUnloadTimeTask = [systemAbilityId, this]() {
-        UpdateLimitDelayUnloadTimeTask(systemAbilityId);
+        std::shared_ptr<SystemAbilityContext> abilityContext;
+        if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
+            return;
+        }
+        std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
+        if (abilityContext->lastStartTime != 0) {
+            int64_t begin = abilityContext->lastStartTime;
+            int64_t end = GetTickCount();
+            if (end - begin <= MAX_DURATION) {
+                int64_t onceDelayTime = abilityContext->delayUnloadTime;
+                onceDelayTime += ONCE_DELAY_TIME;
+                abilityContext->delayUnloadTime = LimitDelayUnloadTime(onceDelayTime);
+                HILOGI("DelayUnloadTime is %{public}d, SA:%{public}d", abilityContext->delayUnloadTime, systemAbilityId);
+            }
+        }
+        abilityContext->lastStartTime = GetTickCount();
     };
     bool ret = processHandler_->PostTask(UpdateDelayUnloadTimeTask);
     if (!ret) {
         HILOGW("UpdateLimitDelayUnloadTime PostTask fail");
     }
-}
-
-void SystemAbilityStateScheduler::UpdateLimitDelayUnloadTimeTask(int32_t systemAbilityId)
-{
-    std::shared_ptr<SystemAbilityContext> abilityContext;
-    if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
-        return;
-    }
-    std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
-    if (abilityContext->lastStartTime != 0) {
-        int64_t begin = abilityContext->lastStartTime;
-        int64_t end = GetTickCount();
-        if (end - begin <= MAX_DURATION) {
-            int64_t onceDelayTime = abilityContext->delayUnloadTime;
-            onceDelayTime += ONCE_DELAY_TIME;
-            abilityContext->delayUnloadTime = LimitDelayUnloadTime(onceDelayTime);
-            HILOGI("DelayUnloadTime is %{public}d, SA:%{public}d", abilityContext->delayUnloadTime, systemAbilityId);
-        }
-    }
-    abilityContext->lastStartTime = GetTickCount();
 }
 
 bool SystemAbilityStateScheduler::GetSystemProcessContext(const std::u16string& processName,
