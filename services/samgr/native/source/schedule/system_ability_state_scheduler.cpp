@@ -177,6 +177,21 @@ bool SystemAbilityStateScheduler::GetSystemAbilityContext(int32_t systemAbilityI
 
 void SystemAbilityStateScheduler::UpdateLimitDelayUnloadTime(int32_t systemAbilityId)
 {
+    if (processHandler_ == nullptr) {
+        HILOGE("UpdateLimitDelayUnloadTime process handler not init");
+        return;
+    }
+    auto UpdateDelayUnloadTimeTask = [systemAbilityId, this]() {
+        UpdateLimitDelayUnloadTimeTask(systemAbilityId);
+    };
+    bool ret = processHandler_->PostTask(UpdateDelayUnloadTimeTask);
+    if (!ret) {
+        HILOGW("UpdateLimitDelayUnloadTime PostTask fail");
+    }
+}
+
+void SystemAbilityStateScheduler::UpdateLimitDelayUnloadTimeTask(int32_t systemAbilityId)
+{
     std::shared_ptr<SystemAbilityContext> abilityContext;
     if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
         return;
