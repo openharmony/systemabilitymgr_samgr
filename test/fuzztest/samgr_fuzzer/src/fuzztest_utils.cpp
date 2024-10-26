@@ -105,20 +105,16 @@ void FuzzTestUtils::FuzzTestRemoteRequest(const uint8_t *rawData, size_t size, u
         HILOGI("TestRequest=%{public}u:Init AddDeviceManager", code);
         AddDeviceManager();
         sleep(INIT_TIME);
-        if (!IsDmReady()) {
-            HILOGE("TestRequest=%{public}u:Init CleanFfrt", code);
-            manager->CleanFfrt();
-            return;
-        }
     } else {
-        HILOGI("TestRequest=%{public}u:AddDeviceManager", code);
-        AddDeviceManager();
-        if (!IsDmReady()) {
-            HILOGE("TestRequest=%{public}u:dm no ready,return", code);
-            return;
-        }
         HILOGI("TestRequest=%{public}u:SetFfrt", code);
         manager->SetFfrt();
+        HILOGI("TestRequest=%{public}u:AddDeviceManager", code);
+        AddDeviceManager();
+    }
+    if (!IsDmReady()) {
+        HILOGE("TestRequest=%{public}u:dm no ready,return", code);
+        manager->CleanFfrt();
+        return;
     }
     int32_t ret = manager->OnRemoteRequest(code, data, reply, option);
     HILOGI("TestRequest=%{public}u: ret=%{public}u", code, ret);
@@ -138,20 +134,16 @@ void FuzzTestUtils::FuzzTestRemoteRequest(MessageParcel& data, uint32_t code)
         HILOGI("FuzzTestRequest=%{public}u:Init AddDeviceManager", code);
         AddDeviceManager();
         sleep(INIT_TIME);
-        if (!IsDmReady()) {
-            HILOGE("FuzzTestRequest=%{public}u:Init CleanFfrt", code);
-            manager->CleanFfrt();
-            return;
-        }
     } else {
-        HILOGI("FuzzTestRequest=%{public}u:AddDeviceManager", code);
-        AddDeviceManager();
-        if (!IsDmReady()) {
-            HILOGE("FuzzTestRequest=%{public}u:dm no ready,return", code);
-            return;
-        }
         HILOGI("FuzzTestRequest=%{public}u:SetFfrt", code);
         manager->SetFfrt();
+        HILOGI("FuzzTestRequest=%{public}u:AddDeviceManager", code);
+        AddDeviceManager();
+    }
+    if (!IsDmReady()) {
+        HILOGE("FuzzTestRequest=%{public}u:dm no ready,return", code);
+        manager->CleanFfrt();
+        return;
     }
     int32_t ret = manager->OnRemoteRequest(code, data, reply, option);
     HILOGI("FuzzTestRequest=%{public}u: ret=%{public}u", code, ret);
