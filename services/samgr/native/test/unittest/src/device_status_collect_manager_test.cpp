@@ -1033,4 +1033,14 @@ HWTEST_F(DeviceStatusCollectManagerTest, CheckEventUsedLocked002, TestSize.Level
     bool ret = collect->CheckEventUsedLocked(event1);
     EXPECT_EQ(ret, false);
 }
+
+HWTEST_F(DeviceStatusCollectManagerTest, GetSaControlListByPersistEventd001, TestSize.Level3)
+{
+    DTEST_LOG << " GetSaControlListByPersistEventd001 BEGIN" << std::endl;
+    std::list<SaControlInfo> saControlList;
+    OnDemandEvent event = { SETTING_SWITCH, WIFI_NAME, "+start#1494#" };
+    collect->GetSaControlListByPersistEvent(event, saControlList);
+    EXPECT_FALSE(saControlList.empty());
+    DTEST_LOG << " GetSaControlListByPersistEventd001 BEGIN" << std::endl;
+}
 } // namespace OHOS

@@ -133,6 +133,7 @@ HWTEST_F(RefCountCollectTest, OnStart001, TestSize.Level1)
  */
 HWTEST_F(RefCountCollectTest, OnStart002, TestSize.Level1)
 {
+    collect->residentSaList_.clear();
     collect->unrefUnloadSaList_.push_back(1);
     auto ret = collect->OnStart();
     EXPECT_EQ(ret, ERR_OK);

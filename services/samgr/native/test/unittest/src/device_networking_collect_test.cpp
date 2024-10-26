@@ -194,6 +194,7 @@ HWTEST_F(DeviceNetworkingCollectTest, OnDeviceOnline001, TestSize.Level3)
     networkingCollect->stateCallback_->OnDeviceOnline(dmDeviceInfo);
     EXPECT_EQ(true, networkingCollect->IsOnline());
     networkingCollect->stateCallback_->OnDeviceOnline(dmDeviceInfo);
+    networkingCollect->ReportMissedEvents();
     networkingCollect->stateCallback_->collect_ = nullptr;
     networkingCollect->ClearDeviceOnlineSet();
     networkingCollect->stateCallback_->OnDeviceOnline(dmDeviceInfo);
@@ -488,6 +489,7 @@ HWTEST_F(DeviceNetworkingCollectTest, ReportMissedEvents001, TestSize.Level3)
         [&] () { return isCaseDone_; });
     isCaseDone_ = false;
     networkingCollect->ReportMissedEvents();
+    networkingCollect->stateCallback_ = std::make_shared<DeviceStateCallback>(networkingCollect);
     networkingCollect->stateCallback_->deviceOnlineSet_.emplace("1");
     networkingCollect->ReportMissedEvents();
     networkingCollect->workHandler_->CleanFfrt();
@@ -683,6 +685,10 @@ HWTEST_F(DeviceNetworkingCollectTest, SendEvent001, TestSize.Level3)
     networkingCollect->workHandler_->handler_ = std::make_shared<FFRTHandler>("WorkHandler");
     bool bRet = networkingCollect->workHandler_->SendEvent(DM_DIED_EVENT);
     EXPECT_EQ(true, bRet);
+
+    sptr<ICollectPlugin> collectPlugin = networkingCollect;
+    collectPlugin->PostTask(callback);
+    EXPECT_NE(nullptr, networkingCollect->workHandler_->handler_);
     DTEST_LOG << " SendEvent001 END" << std::endl;
 }
 
