@@ -82,7 +82,7 @@ HWTEST_F(DeviceSwitchCollectTest, InitCommonEventSubscriber001, TestSize.Level3)
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     deviceSwitchCollect->InitCommonEventSubscriber();
-    EXPECT_NE(deviceSwitchCollect->cesStateListener_, nullptr);
+    EXPECT_NE(deviceSwitchCollect->switchEventSubscriber_, nullptr);
 }
 
 /**
@@ -280,24 +280,6 @@ HWTEST_F(DeviceSwitchCollectTest, OnStop003, TestSize.Level3)
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     deviceSwitchCollect->InitCommonEventSubscriber();
-    deviceSwitchCollect->cesStateListener_ = nullptr;
-    int32_t ret = deviceSwitchCollect->OnStop();
-    EXPECT_EQ(ret, ERR_OK);
-}
-
-/**
- * @tc.name: OnStop004
- * @tc.desc: test OnStop with both cesStateListener_ and switchEventSubscriber_ are not nullptr
- * @tc.type: FUNC
- * @tc.require: I7RSCL
- */
-
-HWTEST_F(DeviceSwitchCollectTest, OnStop004, TestSize.Level3)
-{
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
-    sptr<DeviceSwitchCollect> deviceSwitchCollect =
-        new DeviceSwitchCollect(collect);
-    deviceSwitchCollect->InitCommonEventSubscriber();
     int32_t ret = deviceSwitchCollect->OnStop();
     EXPECT_EQ(ret, ERR_OK);
 }
@@ -336,29 +318,6 @@ HWTEST_F(DeviceSwitchCollectTest, AddCollectEvent002, TestSize.Level3)
     SystemAbilityManager::GetInstance()->subscribeCountMap_.clear();
     int32_t ret = deviceSwitchCollect->AddCollectEvent(onDemandEvent);
     EXPECT_EQ(ret, ERR_OK);
-}
-
-/**
- * @tc.name: OnAddSystemAbility001
- * @tc.desc: test OnAddSystemAbility with said is not COMMON_EVENT_SERVICE_ID
- * @tc.type: FUNC
- * @tc.require: I7RSCL
- */
-
-HWTEST_F(DeviceSwitchCollectTest, OnAddSystemAbility001, TestSize.Level3)
-{
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
-    sptr<DeviceSwitchCollect> deviceSwitchCollect =
-        new DeviceSwitchCollect(collect);
-    deviceSwitchCollect->InitCommonEventSubscriber();
-    EventFwk::MatchingSkills skill = EventFwk::MatchingSkills();
-    skill.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_WIFI_POWER_STATE);
-    EventFwk::CommonEventSubscribeInfo info(skill);
-    std::shared_ptr<EventFwk::CommonEventSubscriber> switchEventSubscriber
-        = std::make_shared<SwitchEventSubscriber>(info, deviceSwitchCollect);
-    deviceSwitchCollect->cesStateListener_->OnAddSystemAbility(INVALID_SAID, DEVICE_ID);
-    deviceSwitchCollect->cesStateListener_->OnRemoveSystemAbility(INVALID_SAID, "");
-    EXPECT_NE(deviceSwitchCollect->cesStateListener_, nullptr);
 }
 
 /**
