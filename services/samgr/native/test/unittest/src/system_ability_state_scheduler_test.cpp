@@ -1633,7 +1633,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, UpdateLimitDelayUnloadTime002, TestSiz
 }
 
 /**
- * @tc.name: UpdateLimitDelayUnloadTime002
+ * @tc.name: UpdateLimitDelayUnloadTime003
  * @tc.desc: test UpdateLimitDelayUnloadTime with duation greater than duration
  * @tc.type: FUNC
  * @tc.require: I6FDNZ
@@ -1654,6 +1654,24 @@ HWTEST_F(SystemAbilityStateSchedulerTest, UpdateLimitDelayUnloadTime003, TestSiz
     int32_t delaytime = abilityContext->delayUnloadTime;
     systemAbilityStateScheduler->UpdateLimitDelayUnloadTime(said);
     EXPECT_EQ(delaytime, abilityContext->delayUnloadTime);
+}
+
+/**
+ * @tc.name: UpdateLimitDelayUnloadTime004
+ * @tc.desc: test processHandler_ is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6FDNZ
+ */
+HWTEST_F(SystemAbilityStateSchedulerTest, UpdateLimitDelayUnloadTime004, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::shared_ptr<SystemAbilityContext> abilityContext = std::make_shared<SystemAbilityContext>();
+    abilityContext->systemAbilityId = 401;
+    abilityContext->lastStartTime = 0;
+    systemAbilityStateScheduler->processHandler_ = nullptr;
+    systemAbilityStateScheduler->UpdateLimitDelayUnloadTime(abilityContext->systemAbilityId);
+    EXPECT_EQ(abilityContext->lastStartTime, 0);
 }
 
 /**
