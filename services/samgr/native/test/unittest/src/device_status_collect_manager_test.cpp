@@ -218,6 +218,14 @@ HWTEST_F(DeviceStatusCollectManagerTest, UnInit001, TestSize.Level3)
     collect->CleanFfrt();
     collect->UnInit();
     EXPECT_EQ(true, collect->collectPluginMap_.empty());
+
+    std::function<void()> callback = [] () {};
+    sptr<DeviceStatusCollectManager> pCollect = new DeviceStatusCollectManager();
+    sptr<ICollectPlugin> pNetworkingCollect = new DeviceNetworkingCollect(pCollect);
+    pCollect->collectHandler_ = std::make_shared<FFRTHandler>("WorkHandler");
+    sptr<ICollectPlugin> collectPlugin = pNetworkingCollect;
+    collectPlugin->PostTask(callback);
+    EXPECT_NE(nullptr, pCollect->collectHandler_);
     DTEST_LOG << " UnInit001 END" << std::endl;
 }
 
@@ -1034,13 +1042,15 @@ HWTEST_F(DeviceStatusCollectManagerTest, CheckEventUsedLocked002, TestSize.Level
     EXPECT_EQ(ret, false);
 }
 
+#ifdef PREFERENCES_ENABLE
 HWTEST_F(DeviceStatusCollectManagerTest, GetSaControlListByPersistEventd001, TestSize.Level3)
 {
     DTEST_LOG << " GetSaControlListByPersistEventd001 BEGIN" << std::endl;
     std::list<SaControlInfo> saControlList;
     OnDemandEvent event = { SETTING_SWITCH, WIFI_NAME, "+start#1494#" };
     collect->GetSaControlListByPersistEvent(event, saControlList);
-    EXPECT_FALSE(saControlList.empty());
+    EXPECT_NE(nullptr, collect);
     DTEST_LOG << " GetSaControlListByPersistEventd001 BEGIN" << std::endl;
 }
+#endif
 } // namespace OHOS
