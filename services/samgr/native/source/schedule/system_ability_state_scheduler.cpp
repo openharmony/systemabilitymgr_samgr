@@ -195,7 +195,7 @@ void SystemAbilityStateScheduler::UpdateLimitDelayUnloadTime(int32_t systemAbili
                 onceDelayTime += ONCE_DELAY_TIME;
                 abilityContext->delayUnloadTime = LimitDelayUnloadTime(onceDelayTime);
                 HILOGI("DelayUnloadTime is %{public}d, SA:%{public}d",
-                abilityContext->delayUnloadTime, systemAbilityId);
+                    abilityContext->delayUnloadTime, systemAbilityId);
             }
         }
         abilityContext->lastStartTime = GetTickCount();
