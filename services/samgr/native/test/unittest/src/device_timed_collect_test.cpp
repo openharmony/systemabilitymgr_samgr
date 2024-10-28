@@ -764,10 +764,11 @@ HWTEST_F(DeviceTimedCollectTest, PostNonPersistenceLoopTaskLocked001, TestSize.L
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect = std::make_shared<DeviceTimedCollect>(collect);
     int32_t interVal = 65;
-    deviceTimedCollect->PostNonPersistenceLoopTaskLocked(interVal);
-    EXPECT_TRUE(deviceTimedCollect->nonPersitenceLoopTasks_.empty());
-    
     deviceTimedCollect->nonPersitenceLoopTasks_[interVal] = [interVal] () {};
+    deviceTimedCollect->PostNonPersistenceLoopTaskLocked(interVal);
+    EXPECT_FALSE(deviceTimedCollect->nonPersitenceLoopTasks_.empty());
+    
+    deviceTimedCollect->nonPersitenceLoopTasks_.clear();
     deviceTimedCollect->nonPersitenceLoopEventSet_.insert(interVal);
     deviceTimedCollect->PostNonPersistenceLoopTaskLocked(interVal);
     EXPECT_FALSE(deviceTimedCollect->nonPersitenceLoopTasks_.empty());
