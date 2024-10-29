@@ -67,7 +67,6 @@ private:
     void InitCommonEventSubscriber();
     int32_t CheckSwitchEvent(const OnDemandEvent& onDemandEvent);
     std::shared_ptr<SwitchEventSubscriber> switchEventSubscriber_;
-    sptr<CesStateListener> cesStateListener_;
     std::atomic<bool> needListenSwitchEvent_ {false};
 };
 } // namespace OHOS
