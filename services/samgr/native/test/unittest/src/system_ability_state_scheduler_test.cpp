@@ -1591,29 +1591,29 @@ HWTEST_F(SystemAbilityStateSchedulerTest, LimitDelayUnloadTime002, TestSize.Leve
 }
 
 /**
- * @tc.name: UpdateLimitDelayUnloadTime001
- * @tc.desc: test UpdateLimitDelayUnloadTime with saId invalid
+ * @tc.name: UpdateLimitDelayUnloadTimeTask001
+ * @tc.desc: test UpdateLimitDelayUnloadTimeTask with saId invalid
  * @tc.type: FUNC
  * @tc.require: I6FDNZ
  */
-HWTEST_F(SystemAbilityStateSchedulerTest, UpdateLimitDelayUnloadTime001, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, UpdateLimitDelayUnloadTimeTask001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
     std::shared_ptr<SystemAbilityContext> abilityContext = std::make_shared<SystemAbilityContext>();
     abilityContext->systemAbilityId = -1;
     abilityContext->lastStartTime = 0;
-    systemAbilityStateScheduler->UpdateLimitDelayUnloadTime(abilityContext->systemAbilityId);
+    systemAbilityStateScheduler->UpdateLimitDelayUnloadTimeTask(abilityContext->systemAbilityId);
     EXPECT_EQ(abilityContext->lastStartTime, 0);
 }
 
 /**
- * @tc.name: UpdateLimitDelayUnloadTime002
- * @tc.desc: test UpdateLimitDelayUnloadTime with lastStartTime not equal to 0
+ * @tc.name: UpdateLimitDelayUnloadTimeTask002
+ * @tc.desc: test UpdateLimitDelayUnloadTimeTask with lastStartTime not equal to 0
  * @tc.type: FUNC
  * @tc.require: I6FDNZ
  */
-HWTEST_F(SystemAbilityStateSchedulerTest, UpdateLimitDelayUnloadTime002, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, UpdateLimitDelayUnloadTimeTask002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -1627,18 +1627,18 @@ HWTEST_F(SystemAbilityStateSchedulerTest, UpdateLimitDelayUnloadTime002, TestSiz
     systemAbilityStateScheduler->abilityContextMap_[said] = abilityContext;
     abilityContext->lastStartTime = GetTickCount();
     int32_t delaytime = abilityContext->delayUnloadTime;
-    systemAbilityStateScheduler->UpdateLimitDelayUnloadTime(said);
+    systemAbilityStateScheduler->UpdateLimitDelayUnloadTimeTask(said);
     delaytime += ONCE_DELAY_TIME;
     EXPECT_EQ(delaytime, abilityContext->delayUnloadTime);
 }
 
 /**
- * @tc.name: UpdateLimitDelayUnloadTime003
- * @tc.desc: test UpdateLimitDelayUnloadTime with duation greater than duration
+ * @tc.name: UpdateLimitDelayUnloadTimeTask003
+ * @tc.desc: test UpdateLimitDelayUnloadTimeTask with duation greater than duration
  * @tc.type: FUNC
  * @tc.require: I6FDNZ
  */
-HWTEST_F(SystemAbilityStateSchedulerTest, UpdateLimitDelayUnloadTime003, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, UpdateLimitDelayUnloadTimeTask003, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -1652,26 +1652,8 @@ HWTEST_F(SystemAbilityStateSchedulerTest, UpdateLimitDelayUnloadTime003, TestSiz
     systemAbilityStateScheduler->abilityContextMap_[said] = abilityContext;
     abilityContext->lastStartTime = GetTickCount() - MAX_DURATION;
     int32_t delaytime = abilityContext->delayUnloadTime;
-    systemAbilityStateScheduler->UpdateLimitDelayUnloadTime(said);
+    systemAbilityStateScheduler->UpdateLimitDelayUnloadTimeTask(said);
     EXPECT_EQ(delaytime, abilityContext->delayUnloadTime);
-}
-
-/**
- * @tc.name: UpdateLimitDelayUnloadTime004
- * @tc.desc: test processHandler_ is nullptr
- * @tc.type: FUNC
- * @tc.require: I6FDNZ
- */
-HWTEST_F(SystemAbilityStateSchedulerTest, UpdateLimitDelayUnloadTime004, TestSize.Level3)
-{
-    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>();
-    std::shared_ptr<SystemAbilityContext> abilityContext = std::make_shared<SystemAbilityContext>();
-    abilityContext->systemAbilityId = 401;
-    abilityContext->lastStartTime = 0;
-    systemAbilityStateScheduler->processHandler_ = nullptr;
-    systemAbilityStateScheduler->UpdateLimitDelayUnloadTime(abilityContext->systemAbilityId);
-    EXPECT_EQ(abilityContext->lastStartTime, 0);
 }
 
 /**
