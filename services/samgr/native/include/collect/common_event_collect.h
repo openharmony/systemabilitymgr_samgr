@@ -58,7 +58,7 @@ public:
     int GetSaExtraDataIdList(int32_t saId, std::vector<int64_t>& extraDataIdList,
         const std::string& eventName = "") override;
     void RemoveWhiteCommonEvent() override;
-    void StartReclaimIpcThreadWork(std::string& eventName);
+    void StartReclaimIpcThreadWork(const EventFwk::CommonEventData& data);
 private:
     int64_t GenerateExtraDataIdLocked();
     bool AddCommonEventName(const std::string& eventName);

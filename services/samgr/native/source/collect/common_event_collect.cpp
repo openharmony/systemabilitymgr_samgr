@@ -45,6 +45,8 @@ constexpr const char* UID = "uid";
 constexpr const char* NET_TYPE = "NetType";
 constexpr const char* BUNDLE_NAME = "bundleName";
 constexpr const char* COMMON_EVENT_ACTION_NAME = "common_event_action_name";
+constexpr const char* COMMON_RECENT_EVENT = "RECENT_EVENT";
+constexpr const char* COMMON_RECENT_CLEAR_ALL = "RECENT_CLEAR_ALL";
 }
 
 CommonEventCollect::CommonEventCollect(const sptr<IReport>& report)
@@ -134,6 +136,7 @@ void CommonEventCollect::Init(const std::list<SaProfile>& onDemandSaProfiles)
         commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_POWER_CONNECTED);
         commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_POWER_DISCONNECTED);
         commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED);
+        commonEventNames_.insert(COMMON_RECENT_EVENT);
     }
 
     for (auto& profile : onDemandSaProfiles) {
@@ -506,8 +509,14 @@ int32_t CommonEventCollect::RemoveUnusedEvent(const OnDemandEvent& event)
     return ERR_OK;
 }
 
-void CommonEventCollect::StartReclaimIpcThreadWork(std::string& eventName)
+void CommonEventCollect::StartReclaimIpcThreadWork(const EventFwk::CommonEventData& data)
 {
+    std::string eventName = data.GetWant().GetAction();
+    std::string eventType = data.GetData();
+    if (eventName == COMMON_RECENT_EVENT && eventType == COMMON_RECENT_CLEAR_ALL) {
+        IPCSkeleton::TriggerSystemIPCThreadReclaim();
+        return;
+    }
     if (eventName == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON) {
         if (workHandler_ == nullptr) {
             HILOGE("SendKernalReclaimIpcThread workHandler_ is nullptr");
@@ -521,7 +530,9 @@ void CommonEventCollect::StartReclaimIpcThreadWork(std::string& eventName)
             HILOGE("SendKernalReclaimIpcThread workHandler_ is nullptr");
             return;
         }
-        auto task = std::bind(&CommonEventCollect::SendKernalReclaimIpcThread, this);
+        auto task = [this] {
+            this->SendKernalReclaimIpcThread();
+        };
         workHandler_->PostTask(task, TRIGGER_THREAD_RECLAIM, TRIGGER_THREAD_RECLAIM_DELAY_TIME);
     }
 }
@@ -647,6 +658,6 @@ void CommonEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData& data
     collect->SaveOnDemandConditionExtraData(data);
     OnDemandEvent event = {COMMON_EVENT, action, std::to_string(code), extraDataId};
     collect->ReportEvent(event);
-    collect->StartReclaimIpcThreadWork(action);
+    collect->StartReclaimIpcThreadWork(data);
 }
 } // namespace OHOS
