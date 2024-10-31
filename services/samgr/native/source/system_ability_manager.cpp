@@ -63,6 +63,7 @@ constexpr const char* IPC_STAT_DUMP_PREFIX = "--ipc";
 constexpr const char* ONDEMAND_PERF_PARAM = "persist.samgr.perf.ondemand";
 constexpr const char* ONDEMAND_WORKER = "OndemandLoader";
 constexpr const char* ARGS_FFRT_PARAM = "--ffrt";
+constexpr const char* ARGS_LISTENER_PARAM = "--listener";
 constexpr const char* BOOT_INIT_TIME_PARAM = "ohos.boot.time.init";
 constexpr const char* DEFAULT_BOOT_INIT_TIME = "0";
 
@@ -76,22 +77,11 @@ constexpr int32_t MEDIA_ANALYSIS_SERVICE_SA = 10120;
 constexpr int64_t ONDEMAND_PERF_DELAY_TIME = 60 * 1000; // ms
 constexpr int64_t CHECK_LOADED_DELAY_TIME = 4 * 1000; // ms
 constexpr int32_t SOFTBUS_SERVER_SA_ID = 4700;
-constexpr int32_t FFRT_DUMP_INDEX = 0;
+constexpr int32_t FIRST_DUMP_INDEX = 0;
 }
 
 std::mutex SystemAbilityManager::instanceLock;
 sptr<SystemAbilityManager> SystemAbilityManager::instance;
-
-SystemAbilityManager::SystemAbilityManager()
-{
-}
-
-SystemAbilityManager::~SystemAbilityManager()
-{
-    if (reportEventTimer_ != nullptr) {
-        reportEventTimer_->Shutdown();
-    }
-}
 
 void SystemAbilityManager::RegisterDistribute(int32_t systemAbilityId, bool isDistributed)
 {
@@ -238,16 +228,32 @@ int32_t SystemAbilityManager::IpcDumpProc(int32_t fd, const std::vector<std::str
     return ERR_OK;
 }
 
+void SystemAbilityManager::ConvertDumpListener(std::vector<std::pair<int32_t, std::list<int32_t>>>& dumpListeners)
+{
+    lock_guard<mutex> autoLock(listenerMapLock_);
+    for (auto iter : listenerMap_) {
+        std::list<int32_t> tmp;
+        for (auto listener : iter.second) {
+            tmp.push_back(listener.callingPid);
+        }
+        dumpListeners.push_back({iter.first, tmp});
+    }
+}
+
 int32_t SystemAbilityManager::Dump(int32_t fd, const std::vector<std::u16string>& args)
 {
     std::vector<std::string> argsWithStr8;
     for (const auto& arg : args) {
         argsWithStr8.emplace_back(Str16ToStr8(arg));
     }
-    if ((argsWithStr8.size() > 0) && (argsWithStr8[FFRT_DUMP_INDEX] == ARGS_FFRT_PARAM)) {
+    if ((argsWithStr8.size() > 0) && (argsWithStr8[FIRST_DUMP_INDEX] == ARGS_FFRT_PARAM)) {
         return SystemAbilityManagerDumper::FfrtDumpProc(abilityStateScheduler_, fd, argsWithStr8);
     }
-
+    if ((argsWithStr8.size() > 0) && (argsWithStr8[FIRST_DUMP_INDEX] == ARGS_LISTENER_PARAM)) {
+        std::vector<std::pair<int32_t, std::list<int32_t>>> dumpListeners;
+        ConvertDumpListener(dumpListeners);
+        return SystemAbilityManagerDumper::ListenerDumpProc(dumpListeners, fd, argsWithStr8);
+    }
     if ((argsWithStr8.size() > 0) && (argsWithStr8[IPC_STAT_PREFIX_INDEX] == IPC_STAT_DUMP_PREFIX)) {
         return IpcDumpProc(fd, argsWithStr8);
     } else {
@@ -282,15 +288,6 @@ void SystemAbilityManager::StartDfxTimer()
     uint32_t timerId = reportEventTimer_->Register([this] {this->ReportGetSAPeriodically();},
         REPORT_GET_SA_INTERVAL);
     HILOGI("StartDfxTimer timerId : %{public}u!", timerId);
-}
-
-sptr<SystemAbilityManager> SystemAbilityManager::GetInstance()
-{
-    std::lock_guard<std::mutex> autoLock(instanceLock);
-    if (instance == nullptr) {
-        instance = new SystemAbilityManager;
-    }
-    return instance;
 }
 
 void SystemAbilityManager::InitSaProfile()
@@ -596,12 +593,6 @@ int32_t SystemAbilityManager::FindSystemAbilityNotify(int32_t systemAbilityId, c
     return ERR_OK;
 }
 
-void SystemAbilityManager::StartOnDemandAbility(const std::u16string& procName, int32_t systemAbilityId)
-{
-    lock_guard<mutex> autoLock(onDemandLock_);
-    StartOnDemandAbilityLocked(procName, systemAbilityId);
-}
-
 void SystemAbilityManager::StartOnDemandAbilityLocked(const std::u16string& procName, int32_t systemAbilityId)
 {
     auto iter = startingAbilityMap_.find(systemAbilityId);
@@ -632,13 +623,6 @@ int32_t SystemAbilityManager::StartOnDemandAbilityInner(const std::u16string& pr
     procObject->StartAbility(systemAbilityId, eventStr);
     abilityItem.state = AbilityState::STARTING;
     return ERR_OK;
-}
-
-bool SystemAbilityManager::StopOnDemandAbility(const std::u16string& procName,
-    int32_t systemAbilityId, const OnDemandEvent& event)
-{
-    lock_guard<mutex> autoLock(onDemandLock_);
-    return StopOnDemandAbilityInner(procName, systemAbilityId, event);
 }
 
 bool SystemAbilityManager::StopOnDemandAbilityInner(const std::u16string& procName,
@@ -703,12 +687,6 @@ void SystemAbilityManager::RemoveOnDemandSaInDiedProc(std::shared_ptr<SystemProc
     }
     HILOGI("remove onDemandSA. proc:%{public}s, size:%{public}zu", Str16ToStr8(processContext->processName).c_str(),
         onDemandAbilityMap_.size());
-}
-
-int32_t SystemAbilityManager::StartOnDemandAbility(int32_t systemAbilityId, bool& isExist)
-{
-    lock_guard<mutex> onDemandAbilityLock(onDemandLock_);
-    return StartOnDemandAbilityLocked(systemAbilityId, isExist);
 }
 
 int32_t SystemAbilityManager::StartOnDemandAbilityLocked(int32_t systemAbilityId, bool& isExist)
@@ -2155,4 +2133,5 @@ int32_t SystemAbilityManager::GetCommonEventExtraDataIdlist(int32_t saId, std::v
     }
     return collectManager_->GetSaExtraDataIdList(saId, extraDataIdList, eventName);
 }
+
 } // namespace OHOS
