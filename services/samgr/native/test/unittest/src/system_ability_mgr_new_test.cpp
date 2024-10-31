@@ -878,6 +878,7 @@ HWTEST_F(SystemAbilityMgrTest, GetRunningSaExtensionInfoList002, TestSize.Level3
     SaProfileStore(saMgr, saProfileMapTmp, maxLoop);
     SaProfileExtensionTestPrevSet(saMgr, maxLoop);
     ProcMapObjTestPrevSet(saMgr, maxLoop);
+    SaAbilityMapObjTestPrevSet(saMgr, maxLoop);
 
     MessageParcel data;
     MessageParcel reply;
