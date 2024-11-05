@@ -64,8 +64,20 @@ struct SAListener {
 
 class SystemAbilityManager : public DynamicCache, public SystemAbilityManagerStub {
 public:
-    virtual ~SystemAbilityManager();
-    static sptr<SystemAbilityManager> GetInstance();
+    virtual ~SystemAbilityManager()
+    {
+        if (reportEventTimer_ != nullptr) {
+            reportEventTimer_->Shutdown();
+        }
+    }
+    static sptr<SystemAbilityManager> GetInstance()
+    {
+        std::lock_guard<std::mutex> autoLock(instanceLock);
+        if (instance == nullptr) {
+            instance = new SystemAbilityManager;
+        }
+        return instance;
+    }
 
     int32_t RemoveSystemAbility(const sptr<IRemoteObject>& ability);
     std::vector<std::u16string> ListSystemAbilities(uint32_t dumpFlags) override;
@@ -233,6 +245,8 @@ public:
             collectManager_->RemoveWhiteCommonEvent();
         }
     }
+    void RemoveOnDemandSaInDiedProc(std::shared_ptr<SystemProcessContext>& processContext);
+    void InitDbinderService();
 private:
     enum class AbilityState {
         INIT,
@@ -248,10 +262,14 @@ private:
         OnDemandEvent event;
     };
 
-    SystemAbilityManager();
+    SystemAbilityManager() {}
     std::string EventToJson(const OnDemandEvent& event);
     void DoInsertSaData(const std::u16string& name, const sptr<IRemoteObject>& ability, const SAExtraProp& extraProp);
-    int32_t StartOnDemandAbility(int32_t systemAbilityId, bool& isExist);
+    int32_t StartOnDemandAbility(int32_t systemAbilityId, bool& isExist)
+    {
+        lock_guard<mutex> onDemandAbilityLock(onDemandLock_);
+        return StartOnDemandAbilityLocked(systemAbilityId, isExist);
+    }
     int32_t StartOnDemandAbilityLocked(int32_t systemAbilityId, bool& isExist);
     void RefreshListenerState(int32_t systemAbilityId);
     int32_t AddSystemAbility(const std::u16string& name, const sptr<IRemoteObject>& ability,
@@ -288,12 +306,20 @@ private:
     int32_t StartingSystemProcess(const std::u16string& name, int32_t systemAbilityId, const OnDemandEvent& event);
     int32_t StartingSystemProcessLocked(const std::u16string& name, int32_t systemAbilityId,
         const OnDemandEvent& event);
-    void StartOnDemandAbility(const std::u16string& name, int32_t systemAbilityId);
+    void StartOnDemandAbility(const std::u16string& name, int32_t systemAbilityId)
+    {
+        lock_guard<mutex> autoLock(onDemandLock_);
+        StartOnDemandAbilityLocked(name, systemAbilityId);
+    }
     void StartOnDemandAbilityLocked(const std::u16string& name, int32_t systemAbilityId);
     int32_t StartOnDemandAbilityInner(const std::u16string& name, int32_t systemAbilityId, AbilityItem& abilityItem);
     bool IsInitBootFinished();
     int32_t StartDynamicSystemProcess(const std::u16string& name, int32_t systemAbilityId, const OnDemandEvent& event);
-    bool StopOnDemandAbility(const std::u16string& name, int32_t systemAbilityId, const OnDemandEvent& event);
+    bool StopOnDemandAbility(const std::u16string& name, int32_t systemAbilityId, const OnDemandEvent& event)
+    {
+        lock_guard<mutex> autoLock(onDemandLock_);
+        return StopOnDemandAbilityInner(name, systemAbilityId, event);
+    }
     bool StopOnDemandAbilityInner(const std::u16string& name, int32_t systemAbilityId, const OnDemandEvent& event);
     void RemoveStartingAbilityCallback(CallbackList& callbackList, const sptr<IRemoteObject>& remoteObject);
     void RemoveStartingAbilityCallbackForDevice(AbilityItem& abilityItem, const sptr<IRemoteObject>& remoteObject);
@@ -334,6 +360,9 @@ private:
     void IpcDumpSamgrProcess(int32_t fd, int32_t cmd);
     void IpcDumpSingleProcess(int32_t fd, int32_t cmd, const std::string processName);
     int32_t IpcDumpProc(int32_t fd, const std::vector<std::string>& args);
+    void RegisterDistribute(int32_t said, bool isDistributed);
+    bool IsProcessStopped(const std::u16string& name);
+    void ConvertDumpListener(std::vector<std::pair<int32_t, std::list<int32_t>>>& dumpListeners);
 
     std::u16string deviceName_;
     static sptr<SystemAbilityManager> instance;
@@ -346,6 +375,10 @@ private:
     sptr<DBinderService> dBinderService_;
     sptr<DeviceStatusCollectManager> collectManager_;
     std::shared_ptr<RpcSystemAbilityCallback> rpcCallbackImp_;
+
+    std::shared_mutex dBinderServiceLock_;
+    std::list<int32_t> distributedSaList_;
+    bool isDbinderServiceInit_ = false;
 
     // must hold abilityMapLock_ never access other locks
     std::shared_mutex abilityMapLock_;

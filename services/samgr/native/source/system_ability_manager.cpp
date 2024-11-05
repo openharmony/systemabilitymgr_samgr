@@ -63,6 +63,7 @@ constexpr const char* IPC_STAT_DUMP_PREFIX = "--ipc";
 constexpr const char* ONDEMAND_PERF_PARAM = "persist.samgr.perf.ondemand";
 constexpr const char* ONDEMAND_WORKER = "OndemandLoader";
 constexpr const char* ARGS_FFRT_PARAM = "--ffrt";
+constexpr const char* ARGS_LISTENER_PARAM = "--listener";
 constexpr const char* BOOT_INIT_TIME_PARAM = "ohos.boot.time.init";
 constexpr const char* DEFAULT_BOOT_INIT_TIME = "0";
 
@@ -76,21 +77,52 @@ constexpr int32_t MEDIA_ANALYSIS_SERVICE_SA = 10120;
 constexpr int64_t ONDEMAND_PERF_DELAY_TIME = 60 * 1000; // ms
 constexpr int64_t CHECK_LOADED_DELAY_TIME = 4 * 1000; // ms
 constexpr int32_t SOFTBUS_SERVER_SA_ID = 4700;
-constexpr int32_t FFRT_DUMP_INDEX = 0;
+constexpr int32_t FIRST_DUMP_INDEX = 0;
 }
 
 std::mutex SystemAbilityManager::instanceLock;
 sptr<SystemAbilityManager> SystemAbilityManager::instance;
 
-SystemAbilityManager::SystemAbilityManager()
+void SystemAbilityManager::RegisterDistribute(int32_t systemAbilityId, bool isDistributed)
 {
-    dBinderService_ = DBinderService::GetInstance();
+    if (isDistributed) {
+        std::shared_lock<std::shared_mutex> readLock(dBinderServiceLock_);
+        if (dBinderService_ != nullptr) {
+            u16string strName = Str8ToStr16(to_string(systemAbilityId));
+            dBinderService_->RegisterRemoteProxy(strName, systemAbilityId);
+            HILOGI("AddSystemAbility RegisterRemoteProxy, SA:%{public}d", systemAbilityId);
+        }
+    }
+    if (systemAbilityId == SOFTBUS_SERVER_SA_ID) {
+        std::shared_lock<std::shared_mutex> readLock(dBinderServiceLock_);
+        if (dBinderService_ != nullptr && rpcCallbackImp_ != nullptr) {
+            bool ret = dBinderService_->StartDBinderService(rpcCallbackImp_);
+            HILOGI("start result is %{public}s", ret ? "succeed" : "fail");
+        }
+    }
 }
 
-SystemAbilityManager::~SystemAbilityManager()
+void SystemAbilityManager::InitDbinderService()
 {
-    if (reportEventTimer_ != nullptr) {
-        reportEventTimer_->Shutdown();
+    std::unique_lock<std::shared_mutex> writeLock(dBinderServiceLock_);
+    if (!isDbinderServiceInit_) {
+        dBinderService_ = DBinderService::GetInstance();
+        rpcCallbackImp_ = make_shared<RpcCallbackImp>();
+        if (dBinderService_ != nullptr) {
+            for (auto said : distributedSaList_) {
+                u16string strName = Str8ToStr16(to_string(said));
+                dBinderService_->RegisterRemoteProxy(strName, said);
+                HILOGI("AddSystemAbility RegisterRemoteProxy, SA:%{public}d", said);
+            }
+            std::list<int32_t>().swap(distributedSaList_);
+        }
+        isDbinderServiceInit_ = true;
+    }
+    if (CheckSystemAbility(SOFTBUS_SERVER_SA_ID) != nullptr) {
+        if (dBinderService_ != nullptr && rpcCallbackImp_ != nullptr) {
+            bool ret = dBinderService_->StartDBinderService(rpcCallbackImp_);
+            HILOGI("start result is %{public}s", ret ? "succeed" : "fail");
+        }
     }
 }
 
@@ -102,7 +134,6 @@ void SystemAbilityManager::Init()
     abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityCallbackDeathRecipient());
     remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
 
-    rpcCallbackImp_ = make_shared<RpcCallbackImp>();
     if (workHandler_ == nullptr) {
         workHandler_ = make_shared<FFRTHandler>("workHandler");
     }
@@ -197,16 +228,32 @@ int32_t SystemAbilityManager::IpcDumpProc(int32_t fd, const std::vector<std::str
     return ERR_OK;
 }
 
+void SystemAbilityManager::ConvertDumpListener(std::vector<std::pair<int32_t, std::list<int32_t>>>& dumpListeners)
+{
+    lock_guard<mutex> autoLock(listenerMapLock_);
+    for (auto iter : listenerMap_) {
+        std::list<int32_t> tmp;
+        for (auto listener : iter.second) {
+            tmp.push_back(listener.callingPid);
+        }
+        dumpListeners.push_back({iter.first, tmp});
+    }
+}
+
 int32_t SystemAbilityManager::Dump(int32_t fd, const std::vector<std::u16string>& args)
 {
     std::vector<std::string> argsWithStr8;
     for (const auto& arg : args) {
         argsWithStr8.emplace_back(Str16ToStr8(arg));
     }
-    if ((argsWithStr8.size() > 0) && (argsWithStr8[FFRT_DUMP_INDEX] == ARGS_FFRT_PARAM)) {
+    if ((argsWithStr8.size() > 0) && (argsWithStr8[FIRST_DUMP_INDEX] == ARGS_FFRT_PARAM)) {
         return SystemAbilityManagerDumper::FfrtDumpProc(abilityStateScheduler_, fd, argsWithStr8);
     }
-
+    if ((argsWithStr8.size() > 0) && (argsWithStr8[FIRST_DUMP_INDEX] == ARGS_LISTENER_PARAM)) {
+        std::vector<std::pair<int32_t, std::list<int32_t>>> dumpListeners;
+        ConvertDumpListener(dumpListeners);
+        return SystemAbilityManagerDumper::ListenerDumpProc(dumpListeners, fd, argsWithStr8);
+    }
     if ((argsWithStr8.size() > 0) && (argsWithStr8[IPC_STAT_PREFIX_INDEX] == IPC_STAT_DUMP_PREFIX)) {
         return IpcDumpProc(fd, argsWithStr8);
     } else {
@@ -241,15 +288,6 @@ void SystemAbilityManager::StartDfxTimer()
     uint32_t timerId = reportEventTimer_->Register([this] {this->ReportGetSAPeriodically();},
         REPORT_GET_SA_INTERVAL);
     HILOGI("StartDfxTimer timerId : %{public}u!", timerId);
-}
-
-sptr<SystemAbilityManager> SystemAbilityManager::GetInstance()
-{
-    std::lock_guard<std::mutex> autoLock(instanceLock);
-    if (instance == nullptr) {
-        instance = new SystemAbilityManager;
-    }
-    return instance;
 }
 
 void SystemAbilityManager::InitSaProfile()
@@ -555,12 +593,6 @@ int32_t SystemAbilityManager::FindSystemAbilityNotify(int32_t systemAbilityId, c
     return ERR_OK;
 }
 
-void SystemAbilityManager::StartOnDemandAbility(const std::u16string& procName, int32_t systemAbilityId)
-{
-    lock_guard<mutex> autoLock(onDemandLock_);
-    StartOnDemandAbilityLocked(procName, systemAbilityId);
-}
-
 void SystemAbilityManager::StartOnDemandAbilityLocked(const std::u16string& procName, int32_t systemAbilityId)
 {
     auto iter = startingAbilityMap_.find(systemAbilityId);
@@ -591,13 +623,6 @@ int32_t SystemAbilityManager::StartOnDemandAbilityInner(const std::u16string& pr
     procObject->StartAbility(systemAbilityId, eventStr);
     abilityItem.state = AbilityState::STARTING;
     return ERR_OK;
-}
-
-bool SystemAbilityManager::StopOnDemandAbility(const std::u16string& procName,
-    int32_t systemAbilityId, const OnDemandEvent& event)
-{
-    lock_guard<mutex> autoLock(onDemandLock_);
-    return StopOnDemandAbilityInner(procName, systemAbilityId, event);
 }
 
 bool SystemAbilityManager::StopOnDemandAbilityInner(const std::u16string& procName,
@@ -654,10 +679,14 @@ int32_t SystemAbilityManager::AddOnDemandSystemAbilityInfo(int32_t systemAbility
     return ERR_OK;
 }
 
-int32_t SystemAbilityManager::StartOnDemandAbility(int32_t systemAbilityId, bool& isExist)
+void SystemAbilityManager::RemoveOnDemandSaInDiedProc(std::shared_ptr<SystemProcessContext>& processContext)
 {
-    lock_guard<mutex> onDemandAbilityLock(onDemandLock_);
-    return StartOnDemandAbilityLocked(systemAbilityId, isExist);
+    lock_guard<mutex> autoLock(onDemandLock_);
+    for (auto& saId : processContext->saList) {
+        onDemandAbilityMap_.erase(saId);
+    }
+    HILOGI("remove onDemandSA. proc:%{public}s, size:%{public}zu", Str16ToStr8(processContext->processName).c_str(),
+        onDemandAbilityMap_.size());
 }
 
 int32_t SystemAbilityManager::StartOnDemandAbilityLocked(int32_t systemAbilityId, bool& isExist)
@@ -765,15 +794,10 @@ int32_t SystemAbilityManager::RemoveSystemAbility(const sptr<IRemoteObject>& abi
         for (auto iter = abilityMap_.begin(); iter != abilityMap_.end(); ++iter) {
             if (iter->second.remoteObj == ability) {
                 saId = iter->first;
-                SystemAbilityInvalidateCache(saId);
                 (void)abilityMap_.erase(iter);
                 if (abilityDeath_ != nullptr) {
                     ability->RemoveDeathRecipient(abilityDeath_);
                 }
-                if (IsCacheCommonEvent(saId) && collectManager_ != nullptr) {
-                    collectManager_->ClearSaExtraDataId(saId);
-                }
-                ReportSaCrash(saId);
                 KHILOGI("%{public}s called, SA:%{public}d removed, size:%{public}zu", __func__, saId,
                     abilityMap_.size());
                 break;
@@ -782,6 +806,11 @@ int32_t SystemAbilityManager::RemoveSystemAbility(const sptr<IRemoteObject>& abi
     }
 
     if (saId != 0) {
+        SystemAbilityInvalidateCache(saId);
+        if (IsCacheCommonEvent(saId) && collectManager_ != nullptr) {
+            collectManager_->ClearSaExtraDataId(saId);
+        }
+        ReportSaCrash(saId);
         if (abilityStateScheduler_ == nullptr) {
             HILOGE("abilityStateScheduler is nullptr");
             return ERR_INVALID_VALUE;
@@ -827,7 +856,7 @@ void SystemAbilityManager::NotifySystemAbilityAddedBySync(int32_t systemAbilityI
     const sptr<ISystemAbilityStatusChange>& listener)
 {
     if (workHandler_ == nullptr) {
-        HILOGE("SubscribeSystemAbility workHandler is nullptr");
+        HILOGE("NotifySystemAbilityAddedBySync workHandler is nullptr");
         return;
     } else {
         auto listenerNotifyTask = [systemAbilityId, listener, this]() {
@@ -835,7 +864,7 @@ void SystemAbilityManager::NotifySystemAbilityAddedBySync(int32_t systemAbilityI
                 static_cast<uint32_t>(SamgrInterfaceCode::ADD_SYSTEM_ABILITY_TRANSACTION), listener);
         };
         if (!workHandler_->PostTask(listenerNotifyTask)) {
-            HILOGE("Send listenerNotifyMsg PostTask fail");
+            HILOGE("NotifySystemAbilityAddedBySync PostTask fail SA:%{public}d", systemAbilityId);
         }
     }
 }
@@ -969,6 +998,7 @@ void SystemAbilityManager::NotifyRemoteSaDied(const std::u16string& name)
     std::u16string saName;
     std::string deviceId;
     SamgrUtil::ParseRemoteSaName(name, deviceId, saName);
+    std::shared_lock<std::shared_mutex> readLock(dBinderServiceLock_);
     if (dBinderService_ != nullptr) {
         std::string nodeId = SamgrUtil::TransformDeviceId(deviceId, NODE_ID, false);
         dBinderService_->NoticeServiceDie(saName, nodeId);
@@ -979,6 +1009,7 @@ void SystemAbilityManager::NotifyRemoteSaDied(const std::u16string& name)
 
 void SystemAbilityManager::NotifyRemoteDeviceOffline(const std::string& deviceId)
 {
+    std::shared_lock<std::shared_mutex> readLock(dBinderServiceLock_);
     if (dBinderService_ != nullptr) {
         dBinderService_->NoticeDeviceDie(deviceId);
         HILOGI("NotifyRemoteDeviceOffline, deviceId:%{public}s", AnonymizeDeviceId(deviceId).c_str());
@@ -1025,17 +1056,6 @@ int32_t SystemAbilityManager::AddSystemAbility(int32_t systemAbilityId, const sp
     RemoveCheckLoadedMsg(systemAbilityId);
     if (abilityDeath_ != nullptr) {
         ability->AddDeathRecipient(abilityDeath_);
-    }
-    u16string strName = Str8ToStr16(to_string(systemAbilityId));
-    if (extraProp.isDistributed && dBinderService_ != nullptr) {
-        dBinderService_->RegisterRemoteProxy(strName, systemAbilityId);
-        HILOGI("AddSystemAbility RegisterRemoteProxy, SA:%{public}d", systemAbilityId);
-    }
-    if (systemAbilityId == SOFTBUS_SERVER_SA_ID) {
-        if (dBinderService_ != nullptr && rpcCallbackImp_ != nullptr) {
-            bool ret = dBinderService_->StartDBinderService(rpcCallbackImp_);
-            HILOGI("start result is %{public}s", ret ? "succeed" : "fail");
-        }
     }
     if (abilityStateScheduler_ == nullptr) {
         HILOGE("abilityStateScheduler is nullptr");
@@ -1414,6 +1434,16 @@ bool SystemAbilityManager::IsInitBootFinished()
     return initTime != DEFAULT_BOOT_INIT_TIME;
 }
 
+bool SystemAbilityManager::IsProcessStopped(const std::u16string&name)
+{
+    int ret = ServiceWaitForStatus(Str16ToStr8(name).c_str(), ServiceStatus::SERVICE_STOPPED, 1);
+    if (ret != 0) {
+        HILOGE("ServiceWaitForStatus proc:%{public}s timeout", Str16ToStr8(name).c_str());
+            return false;
+    }
+    return true;
+}
+
 int32_t SystemAbilityManager::StartDynamicSystemProcess(const std::u16string& name,
     int32_t systemAbilityId, const OnDemandEvent& event)
 {
@@ -1422,10 +1452,9 @@ int32_t SystemAbilityManager::StartDynamicSystemProcess(const std::u16string& na
     auto extraArgv = eventStr.c_str();
     if (abilityStateScheduler_ && !abilityStateScheduler_->IsSystemProcessNeverStartedLocked(name)) {
         // Waiting for the init subsystem to perceive process death
-        int ret = ServiceWaitForStatus(Str16ToStr8(name).c_str(), ServiceStatus::SERVICE_STOPPED, 1);
-        if (ret != 0) {
-            HILOGE("ServiceWaitForStatus proc:%{public}s,SA:%{public}d timeout",
-                Str16ToStr8(name).c_str(), systemAbilityId);
+        if (!IsProcessStopped(name)) {
+            abilityStateScheduler_->KillProcessByProcessNameLocked(name);
+            IsProcessStopped(name);
         }
     }
     int64_t begin = GetTickCount();
@@ -1830,6 +1859,7 @@ sptr<DBinderServiceStub> SystemAbilityManager::DoMakeRemoteBinder(int32_t system
     DeviceIdToNetworkId(networkId);
 #endif
     sptr<DBinderServiceStub> remoteBinder = nullptr;
+    std::shared_lock<std::shared_mutex> readLock(dBinderServiceLock_);
     if (dBinderService_ != nullptr) {
         string strName = to_string(systemAbilityId);
         {
@@ -1851,6 +1881,7 @@ void SystemAbilityManager::NotifyRpcLoadCompleted(const std::string& srcDeviceId
         return;
     }
     auto notifyTask = [srcDeviceId, systemAbilityId, remoteObject, this]() {
+        std::shared_lock<std::shared_mutex> readLock(dBinderServiceLock_);
         if (dBinderService_ != nullptr) {
             SamgrXCollie samgrXCollie("samgr--LoadSystemAbilityComplete_" + ToString(systemAbilityId));
             dBinderService_->LoadSystemAbilityComplete(srcDeviceId, systemAbilityId, remoteObject);
@@ -2074,6 +2105,12 @@ int32_t SystemAbilityManager::GetRunningSaExtensionInfoList(const std::string& e
                 HILOGD("get SaExtInfoList sa not load,ext:%{public}s SA:%{public}d", extension.c_str(), saId);
                 continue;
             }
+            shared_lock<shared_mutex> readLock(abilityMapLock_);
+            auto iter = abilityMap_.find(saId);
+            if (iter == abilityMap_.end() || iter->second.remoteObj == nullptr) {
+                HILOGD("getRunningSaExtInfoList SA:%{public}d not load,ext:%{public}s", saId, extension.c_str());
+                continue;
+            }
             SaExtensionInfo tmp{saId, obj};
             infoList.emplace_back(tmp);
             HILOGD("get SaExtInfoList suc,ext:%{public}s,SA:%{public}d,proc:%{public}s",
@@ -2096,4 +2133,5 @@ int32_t SystemAbilityManager::GetCommonEventExtraDataIdlist(int32_t saId, std::v
     }
     return collectManager_->GetSaExtraDataIdList(saId, extraDataIdList, eventName);
 }
+
 } // namespace OHOS

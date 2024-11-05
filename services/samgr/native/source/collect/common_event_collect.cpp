@@ -21,6 +21,7 @@
 #include "system_ability_manager_util.h"
 #include "common_event_manager.h"
 #include "common_event_support.h"
+#include "ipc_skeleton.h"
 #include "matching_skills.h"
 #include "parse_util.h"
 #include "want.h"
@@ -38,10 +39,14 @@ constexpr uint32_t REMOVE_EXTRA_DATA_EVENT = 12;
 constexpr uint32_t REMOVE_EXTRA_DATA_DELAY_TIME = 300000;
 constexpr int64_t MAX_EXTRA_DATA_ID = 1000000000;
 constexpr int32_t COMMON_EVENT_SERVICE_ID = 3299;
+constexpr int32_t TRIGGER_THREAD_RECLAIM_DELAY_TIME = 130 * 1000;
+constexpr const char* TRIGGER_THREAD_RECLAIM = "TRIGGER_THREAD_RECLAIM";
 constexpr const char* UID = "uid";
 constexpr const char* NET_TYPE = "NetType";
 constexpr const char* BUNDLE_NAME = "bundleName";
 constexpr const char* COMMON_EVENT_ACTION_NAME = "common_event_action_name";
+constexpr const char* COMMON_RECENT_EVENT = "RECENT_EVENT";
+constexpr const char* COMMON_RECENT_CLEAR_ALL = "RECENT_CLEAR_ALL";
 }
 
 CommonEventCollect::CommonEventCollect(const sptr<IReport>& report)
@@ -131,6 +136,7 @@ void CommonEventCollect::Init(const std::list<SaProfile>& onDemandSaProfiles)
         commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_POWER_CONNECTED);
         commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_POWER_DISCONNECTED);
         commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED);
+        commonEventNames_.insert(COMMON_RECENT_EVENT);
     }
 
     for (auto& profile : onDemandSaProfiles) {
@@ -503,6 +509,72 @@ int32_t CommonEventCollect::RemoveUnusedEvent(const OnDemandEvent& event)
     return ERR_OK;
 }
 
+void CommonEventCollect::StartReclaimIpcThreadWork(const EventFwk::CommonEventData& data)
+{
+    std::string eventName = data.GetWant().GetAction();
+    std::string eventType = data.GetData();
+    if (eventName == COMMON_RECENT_EVENT && eventType == COMMON_RECENT_CLEAR_ALL) {
+        IPCSkeleton::TriggerSystemIPCThreadReclaim();
+        return;
+    }
+    if (eventName == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON) {
+        if (workHandler_ == nullptr) {
+            HILOGE("SendKernalReclaimIpcThread workHandler_ is nullptr");
+            return;
+        }
+        workHandler_->RemoveTask(TRIGGER_THREAD_RECLAIM);
+        return;
+    }
+    if (eventName == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF) {
+        if (workHandler_ == nullptr) {
+            HILOGE("SendKernalReclaimIpcThread workHandler_ is nullptr");
+            return;
+        }
+        auto task = [this] {
+            this->SendKernalReclaimIpcThread();
+        };
+        workHandler_->PostTask(task, TRIGGER_THREAD_RECLAIM, TRIGGER_THREAD_RECLAIM_DELAY_TIME);
+    }
+}
+
+void CommonEventCollect::SendKernalReclaimIpcThread()
+{
+    if (workHandler_ == nullptr) {
+        HILOGE("SendKernalReclaimIpcThread workHandler_ is nullptr");
+    } else {
+        workHandler_->DelTask(TRIGGER_THREAD_RECLAIM);
+    }
+    HILOGI("TriggerThreadReclaim");
+    IPCSkeleton::TriggerSystemIPCThreadReclaim();
+}
+
+bool CommonHandler::PostTask(std::function<void()> func, const std::string& name, uint64_t delayTime)
+{
+    if (handler_ == nullptr) {
+        HILOGE("CommonEventCollect PostTask handler is null!");
+        return false;
+    }
+    return handler_->PostTask(func, name, delayTime);
+}
+
+void CommonHandler::RemoveTask(const std::string& name)
+{
+    if (handler_ == nullptr) {
+        HILOGE("CommonEventCollect RemoveTask handler is null!");
+        return;
+    }
+    handler_->RemoveTask(name);
+}
+
+void CommonHandler::DelTask(const std::string& name)
+{
+    if (handler_ == nullptr) {
+        HILOGE("CommonEventCollect DelTask handler is null!");
+        return;
+    }
+    handler_->DelTask(name);
+}
+
 void CommonHandler::CleanFfrt()
 {
     if (handler_ != nullptr) {
@@ -586,5 +658,6 @@ void CommonEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData& data
     collect->SaveOnDemandConditionExtraData(data);
     OnDemandEvent event = {COMMON_EVENT, action, std::to_string(code), extraDataId};
     collect->ReportEvent(event);
+    collect->StartReclaimIpcThreadWork(data);
 }
 } // namespace OHOS

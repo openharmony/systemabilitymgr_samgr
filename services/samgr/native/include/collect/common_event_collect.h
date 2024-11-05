@@ -58,11 +58,13 @@ public:
     int GetSaExtraDataIdList(int32_t saId, std::vector<int64_t>& extraDataIdList,
         const std::string& eventName = "") override;
     void RemoveWhiteCommonEvent() override;
+    void StartReclaimIpcThreadWork(const EventFwk::CommonEventData& data);
 private:
     int64_t GenerateExtraDataIdLocked();
     bool AddCommonEventName(const std::string& eventName);
     void AddSkillsEvent(EventFwk::MatchingSkills& skill);
     void CleanFailedEventLocked(const std::string& eventName);
+    void SendKernalReclaimIpcThread();
     std::mutex commomEventLock_;
     std::mutex commonEventSubscriberLock_;
     sptr<IRemoteObject::DeathRecipient> commonEventDeath_;
@@ -78,6 +80,7 @@ private:
     std::map<int64_t, OnDemandReasonExtraData> extraDatas_;
     std::mutex saExtraDataIdLock_;
     std::map<int32_t, std::list<int64_t>> saExtraDataIdMap_;
+    std::atomic<bool> isAwakeNotified_ {false};
 };
 
 class CommonEventListener : public SystemAbilityStatusChangeStub {
@@ -100,6 +103,9 @@ class CommonHandler {
         bool SendEvent(uint32_t eventId, int64_t extraDataId, uint64_t delayTime);
         void CleanFfrt();
         void SetFfrt();
+        bool PostTask(std::function<void()> func, const std::string& name, uint64_t delayTime);
+        void RemoveTask(const std::string& name);
+        void DelTask(const std::string& name);
         
     private:
         wptr<CommonEventCollect> commonCollect_;

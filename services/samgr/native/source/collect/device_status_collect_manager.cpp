@@ -457,7 +457,7 @@ int32_t DeviceStatusCollectManager::RemoveUnusedEventsLocked(const std::vector<O
         }
         bool eventUsed = CheckEventUsedLocked(event);
         if (!eventUsed) {
-            HILOGI("CheckEventUsedLocked name: %{public}s", event.name.c_str());
+            HILOGI("CheckEventUsedLocked name:%{public}s,value:%{public}s", event.name.c_str(), event.value.c_str());
             int32_t ret = collectPluginMap_[event.eventId]->RemoveUnusedEvent(event);
             if (ret != ERR_OK) {
                 HILOGE("Remove event failed, eventId: %{public}d", event.eventId);
@@ -559,32 +559,30 @@ void DeviceStatusCollectManager::StringToTypeAndSaid(const std::string& eventStr
 int32_t DeviceStatusCollectManager::UpdateOnDemandEvents(int32_t systemAbilityId, OnDemandPolicyType type,
     const std::vector<OnDemandEvent>& events)
 {
-    HILOGI("UpdateOnDemandEvents begin");
+    HILOGI("UpdateOnDemandEvents begin saId:%{public}d, type:%{public}d", systemAbilityId, type);
     std::vector<OnDemandEvent> oldEvents;
-    {
-        std::unique_lock<std::shared_mutex> writeLock(saProfilesLock_);
-        auto iter = std::find_if(onDemandSaProfiles_.begin(), onDemandSaProfiles_.end(),
-        [systemAbilityId](auto saProfile) {
-            return saProfile.saId == systemAbilityId;
-        });
-        if (iter == onDemandSaProfiles_.end()) {
-            HILOGI("UpdateOnDemandEvents invalid saId:%{public}d", systemAbilityId);
-            return ERR_INVALID_VALUE;
-        }
-        if (AddCollectEvents(events) != ERR_OK) {
-            HILOGI("AddCollectEvents failed saId:%{public}d", systemAbilityId);
-            return ERR_INVALID_VALUE;
-        }
-        if (type == OnDemandPolicyType::START_POLICY) {
-            oldEvents = (*iter).startOnDemandEvents;
-            (*iter).startOnDemandEvents = events;
-        } else if (type == OnDemandPolicyType::STOP_POLICY) {
-            oldEvents = (*iter).stopOnDemandEvents;
-            (*iter).stopOnDemandEvents = events;
-        } else {
-            HILOGE("UpdateOnDemandEvents policy types");
-            return ERR_INVALID_VALUE;
-        }
+    std::unique_lock<std::shared_mutex> writeLock(saProfilesLock_);
+    auto iter = std::find_if(onDemandSaProfiles_.begin(), onDemandSaProfiles_.end(),
+    [systemAbilityId](auto saProfile) {
+        return saProfile.saId == systemAbilityId;
+    });
+    if (iter == onDemandSaProfiles_.end()) {
+        HILOGI("UpdateOnDemandEvents invalid saId:%{public}d", systemAbilityId);
+        return ERR_INVALID_VALUE;
+    }
+    if (AddCollectEvents(events) != ERR_OK) {
+        HILOGI("AddCollectEvents failed saId:%{public}d", systemAbilityId);
+        return ERR_INVALID_VALUE;
+    }
+    if (type == OnDemandPolicyType::START_POLICY) {
+        oldEvents = (*iter).startOnDemandEvents;
+        (*iter).startOnDemandEvents = events;
+    } else if (type == OnDemandPolicyType::STOP_POLICY) {
+        oldEvents = (*iter).stopOnDemandEvents;
+        (*iter).stopOnDemandEvents = events;
+    } else {
+        HILOGE("UpdateOnDemandEvents policy types");
+        return ERR_INVALID_VALUE;
     }
     PersistOnDemandEvent(systemAbilityId, type, events);
     if (RemoveUnusedEventsLocked(oldEvents) != ERR_OK) {

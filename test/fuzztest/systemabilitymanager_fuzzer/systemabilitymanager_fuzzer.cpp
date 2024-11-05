@@ -129,20 +129,16 @@ void FuzzSystemAbilityManager(const uint8_t* rawData, size_t size)
         HILOGI("samgrFuzz:Init AddDeviceManager");
         AddDeviceManager();
         sleep(INIT_TIME);
-        if (!IsDmReady()) {
-            HILOGE("samgrFuzz:Init CleanFfrt");
-            manager->CleanFfrt();
-            return;
-        }
     } else {
-        HILOGI("samgrFuzz:AddDeviceManager");
-        AddDeviceManager();
-        if (!IsDmReady()) {
-            HILOGE("samgrFuzz:dm no ready,return");
-            return;
-        }
         HILOGI("samgrFuzz:SetFfrt");
         manager->SetFfrt();
+        HILOGI("samgrFuzz:AddDeviceManager");
+        AddDeviceManager();
+    }
+    if (!IsDmReady()) {
+        HILOGE("samgrFuzz:dm no ready,return");
+        manager->CleanFfrt();
+        return;
     }
     HILOGI("samgrFuzz:code=%{public}u", code % MAX_CALL_TRANSACTION);
     manager->OnRemoteRequest(code % MAX_CALL_TRANSACTION, data, reply, option);

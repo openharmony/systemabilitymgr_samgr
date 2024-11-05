@@ -193,6 +193,7 @@ void DeviceInitCallBack::OnRemoteDied()
 void DeviceStateCallback::OnDeviceOnline(const DmDeviceInfo& deviceInfo)
 {
     HILOGI("DeviceNetworkingCollect OnDeviceOnline size %{public}zu", deviceOnlineSet_.size());
+    SystemAbilityManager::GetInstance()->InitDbinderService();
     {
         lock_guard<mutex> autoLock(deviceOnlineLock_);
         deviceOnlineSet_.emplace(deviceInfo.networkId);

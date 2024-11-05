@@ -54,12 +54,16 @@ public:
         if (res == nullptr) {
             return nullptr;
         }
-        res->AddDeathRecipient(this);
         {
             std::lock_guard<std::mutex> autoLock(queryCacheLock_);
             localPara_[key_] = waterLine;
+            if (lastQuerySaProxy_ != nullptr) {
+                HILOGD("DynamicCache RemoveDeathRecipient");
+                lastQuerySaProxy_->RemoveDeathRecipient(this);
+            }
             lastQuerySaId_ = querySaId;
             lastQuerySaProxy_ = res;
+            res->AddDeathRecipient(this);
         }
         return res;
     }

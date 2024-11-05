@@ -48,7 +48,6 @@ void DeviceSwitchCollect::InitCommonEventSubscriber()
     skill.AddEvent(EventFwk::CommonEventSupport::COMMON_EVENT_BLUETOOTH_HOST_STATE_UPDATE);
     EventFwk::CommonEventSubscribeInfo info(skill);
     switchEventSubscriber_ = std::make_shared<SwitchEventSubscriber>(info, this);
-    cesStateListener_ = new CesStateListener(this);
 }
 
 int32_t DeviceSwitchCollect::SubscribeSwitchEvent()
@@ -97,16 +96,14 @@ int32_t DeviceSwitchCollect::OnStart()
     if (!needListenSwitchEvent_) {
         return ERR_OK;
     }
+    sptr<CesStateListener> cesStateListener = new CesStateListener(this);
     return SystemAbilityManager::GetInstance()->SubscribeSystemAbility(COMMON_EVENT_SERVICE_ID,
-        cesStateListener_);
+        cesStateListener);
 }
 
 int32_t DeviceSwitchCollect::OnStop()
 {
     HILOGI("DeviceSwitchCollect OnStop called");
-    if (cesStateListener_ != nullptr) {
-        SystemAbilityManager::GetInstance()->UnSubscribeSystemAbility(COMMON_EVENT_SERVICE_ID, cesStateListener_);
-    }
     if (switchEventSubscriber_ != nullptr) {
         switchEventSubscriber_->UnSubscribeSwitchEvent();
     }

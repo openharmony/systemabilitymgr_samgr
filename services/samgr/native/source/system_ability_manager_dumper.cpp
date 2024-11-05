@@ -24,20 +24,22 @@
 #include "ipc_payload_statistics.h"
 #include "samgr_err_code.h"
 
+using namespace std;
 namespace OHOS {
 namespace {
 constexpr const char* HIDUMPER_PROCESS_NAME = "hidumper_service";
-constexpr const char* ARGS_QUERY_SA_STATE = "-sa";
-constexpr const char* ARGS_QUERY_PROCESS_STATE = "-p";
+constexpr const char* ARGS_QUERY_SA = "-sa";
+constexpr const char* ARGS_QUERY_PROCESS = "-p";
 constexpr const char* ARGS_QUERY_SA_IN_CURRENT_STATE = "-sm";
 constexpr const char* ARGS_HELP = "-h";
-constexpr const char* ARGS_QUERY_ALL_SA_STATE = "-l";
+constexpr const char* ARGS_QUERY_ALL = "-l";
 constexpr const char* ARGS_FFRT_SEPARATOR = "|";
 constexpr size_t MIN_ARGS_SIZE = 1;
 constexpr size_t MAX_ARGS_SIZE = 2;
 constexpr int32_t FFRT_DUMP_PROC_LEN = 2;
 constexpr int32_t FFRT_DUMP_PIDS_INDEX = 1;
 constexpr int FFRT_BUFFER_SIZE = 512 * 1024;
+constexpr int LISTENER_BASE_INDEX = 1;
 
 constexpr const char* IPC_STAT_STR_START = "--start-stat";
 constexpr const char* IPC_STAT_STR_STOP = "--stop-stat";
@@ -46,6 +48,201 @@ constexpr const char* IPC_STAT_STR_ALL = "all";
 constexpr const char* IPC_STAT_STR_SAMGR = "samgr";
 constexpr const char* IPC_DUMP_SUCCESS = " success\n";
 constexpr const char* IPC_DUMP_FAIL = " fail\n";
+
+}
+
+void SystemAbilityManagerDumper::ShowListenerHelp(string& result)
+{
+    result.append("SystemAbilityManager Listener Dump options:\n")
+        .append("  [-h] [cmd]...\n")
+        .append("cmd maybe one of:\n")
+        .append("  -sa [said]: query sa listener infos.\n")
+        .append("  -p [pid]: query process listener infos.\n")
+        .append("  -l [-sa | -p]: query all sa listener infos by [sa | process].\n");
+}
+
+int32_t SystemAbilityManagerDumper::ListenerDumpProc(vector<pair<int32_t, list<int32_t>>>& listeners,
+    int32_t fd, const vector<string>& args)
+{
+    if (!CanDump()) {
+        HILOGE("Dump failed, not allowed");
+        return ERR_PERMISSION_DENIED;
+    }
+    string result;
+    GetListenerDumpProc(listeners, args, result);
+    return SaveDumpResultToFd(fd, result);
+}
+
+void SystemAbilityManagerDumper::GetListenerDumpProc(vector<pair<int32_t, list<int32_t>>>& listeners,
+    const vector<string>& args, string& result)
+{
+    if (args.size() == MIN_ARGS_SIZE + 1) {
+        // -h
+        if (args[LISTENER_BASE_INDEX] == ARGS_HELP) {
+            ShowListenerHelp(result);
+            return;
+        }
+    } else if (args.size() == MAX_ARGS_SIZE + 1) {
+        // -l
+        if (args[LISTENER_BASE_INDEX] == ARGS_QUERY_ALL) {
+            // -sa
+            if (args[LISTENER_BASE_INDEX + 1] == ARGS_QUERY_SA) {
+                ShowAllBySA(listeners, result);
+                return;
+            }
+            // -p
+            if (args[LISTENER_BASE_INDEX + 1] == ARGS_QUERY_PROCESS) {
+                ShowAllByCallingPid(listeners, result);
+                return;
+            }
+        }
+        // -sa said
+        if (args[LISTENER_BASE_INDEX] == ARGS_QUERY_SA) {
+            int said = atoi(args[LISTENER_BASE_INDEX + 1].c_str());
+            ShowCallingPidBySA(listeners, said, result);
+            return;
+        }
+        // -p pid
+        if (args[LISTENER_BASE_INDEX] == ARGS_QUERY_PROCESS) {
+            int callingPid = atoi(args[LISTENER_BASE_INDEX + 1].c_str());
+            ShowSAByCallingPid(listeners, callingPid, result);
+            return;
+        }
+    }
+    IllegalInput(result);
+}
+
+void SystemAbilityManagerDumper::ShowAllBySA(vector<pair<int32_t, list<int32_t>>>& listeners,
+    string& result)
+{
+    result += "********************************ShowAllBySA********************************";
+    int32_t totalSum = 0;
+    for (auto iter : listeners) {
+        if (iter.second.size() == 0) {
+            continue;
+        }
+        result += "\n\n--------------------------------SA:";
+        result += to_string(iter.first);
+        result += ", SubCnt:";
+        result += to_string(iter.second.size());
+        result += "--------------------------------";
+        totalSum += iter.second.size();
+        map<int32_t, int32_t> pidCnt;
+        for (auto callingPid : iter.second) {
+            pidCnt[callingPid]++;
+        }
+        for (auto iter : pidCnt) {
+            result += "\ncallingPid:";
+            result += to_string(iter.first);
+            result += ", cnt:";
+            result += to_string(iter.second);
+        }
+    }
+    result += "\n--------------------------------TotalCnt:";
+    result += to_string(totalSum);
+    result += "--------------------------------";
+    result += "\n***************************************************************************\n";
+}
+
+void SystemAbilityManagerDumper::ShowAllByCallingPid(vector<pair<int32_t, list<int32_t>>>& listeners,
+    string& result)
+{
+    result += "********************************ShowAllByCallingPid********************************";
+    map<int32_t, list<int32_t>> subscribeMap;
+    int32_t totalSum = 0;
+    for (auto iter : listeners) {
+        int32_t said = iter.first;
+        for (auto callingPid : iter.second) {
+            subscribeMap[callingPid].push_back(said);
+        }
+    }
+    vector<pair<int32_t, list<int32_t>>> vec(subscribeMap.begin(), subscribeMap.end());
+    auto cmp = [](const pair<int32_t, list<int32_t>>& p1, const pair<int32_t, list<int32_t>>& p2) {
+        return p1.second.size() > p2.second.size();
+    };
+    sort(vec.begin(), vec.end(), cmp);
+    for (auto iter : vec) {
+        result += "\n\n--------------------------------CallingPid:";
+        result += to_string(iter.first);
+        result += ", SubCnt:";
+        result += to_string(iter.second.size());
+        result += "--------------------------------";
+        totalSum += iter.second.size();
+        map<int32_t, int32_t> saCnt;
+        for (auto said : iter.second) {
+            saCnt[said]++;
+        }
+        for (auto iter : saCnt) {
+            result += "\nSA:";
+            result += to_string(iter.first);
+            result += ", cnt:";
+            result += to_string(iter.second);
+        }
+    }
+    result += "\n--------------------------------TotalCnt:";
+    result += to_string(totalSum);
+    result += "--------------------------------";
+    result += "\n***********************************************************************************\n";
+}
+
+void SystemAbilityManagerDumper::ShowCallingPidBySA(vector<pair<int32_t, list<int32_t>>>& listeners,
+    int32_t said, string& result)
+{
+    result += "********************************ShowCallingPidBySA********************************";
+    result += "\n--------------------------------SA:";
+    result += to_string(said);
+    result += "--------------------------------";
+    map<int32_t, int32_t> pidCnt;
+    for (auto iter : listeners) {
+        if (iter.first == said) {
+            for (auto callingPid : iter.second) {
+                pidCnt[callingPid]++;
+            }
+            break;
+        }
+    }
+    int32_t totalSum = 0;
+    for (auto iter : pidCnt) {
+        result += "\ncallingPid:";
+        result += to_string(iter.first);
+        result += ", cnt:";
+        result += to_string(iter.second);
+        totalSum += iter.second;
+    }
+    result += "\n--------------------------------TotalCnt:";
+    result += to_string(totalSum);
+    result += "--------------------------------";
+    result += "\n**********************************************************************************\n";
+}
+
+void SystemAbilityManagerDumper::ShowSAByCallingPid(vector<pair<int32_t, list<int32_t>>>& listeners,
+    int32_t callingPid, string& result)
+{
+    result += "********************************ShowSAByCallingPid********************************";
+    result += "\n--------------------------------CallingPid:";
+    result += to_string(callingPid);
+    result += "--------------------------------";
+    int32_t totalSum = 0;
+    map<int32_t, int32_t> saCnt;
+    for (auto iter : listeners) {
+        int32_t said = iter.first;
+        for (auto pid : iter.second) {
+            if (pid == callingPid) {
+                saCnt[said]++;
+                ++totalSum;
+            }
+        }
+    }
+    for (auto iter : saCnt) {
+        result += "\nSA:";
+        result += to_string(iter.first);
+        result += ", cnt:";
+        result += to_string(iter.second);
+    }
+    result += "\n--------------------------------TotalCnt:";
+    result += to_string(totalSum);
+    result += "--------------------------------";
+    result += "\n**********************************************************************************\n";
 }
 
 int32_t SystemAbilityManagerDumper::FfrtDumpProc(std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler,
@@ -266,7 +463,7 @@ bool SystemAbilityManagerDumper::Dump(std::shared_ptr<SystemAbilityStateSchedule
     }
     if (args.size() == MIN_ARGS_SIZE) {
         // -l
-        if (args[0] == ARGS_QUERY_ALL_SA_STATE) {
+        if (args[0] == ARGS_QUERY_ALL) {
             ShowAllSystemAbilityInfo(abilityStateScheduler, result);
             return true;
         }
@@ -278,13 +475,13 @@ bool SystemAbilityManagerDumper::Dump(std::shared_ptr<SystemAbilityStateSchedule
     }
     if (args.size() == MAX_ARGS_SIZE) {
         // -sa said
-        if (args[0] == ARGS_QUERY_SA_STATE) {
+        if (args[0] == ARGS_QUERY_SA) {
             int said = atoi(args[1].c_str());
             ShowSystemAbilityInfo(said, abilityStateScheduler, result);
             return true;
         }
         // -p processname
-        if (args[0] == ARGS_QUERY_PROCESS_STATE) {
+        if (args[0] == ARGS_QUERY_PROCESS) {
             ShowProcessInfo(args[1], abilityStateScheduler, result);
             return true;
         }

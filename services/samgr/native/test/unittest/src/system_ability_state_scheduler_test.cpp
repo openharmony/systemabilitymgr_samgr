@@ -1297,6 +1297,8 @@ HWTEST_F(SystemAbilityStateSchedulerTest, CheckStartEnableOnce002, TestSize.Leve
     DTEST_LOG << " CheckStartEnableOnce002 " << std::endl;
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
+    std::string strEvent = event.ToString();
+    EXPECT_FALSE(strEvent.empty());
     SaControlInfo saControl = { START_ON_DEMAND, TEST_SYSTEM_ABILITY1, true};
     sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
@@ -1317,6 +1319,8 @@ HWTEST_F(SystemAbilityStateSchedulerTest, CheckStartEnableOnce003, TestSize.Leve
     DTEST_LOG << " CheckStartEnableOnce003 " << std::endl;
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
+    std::string strEvent = event.ToString();
+    EXPECT_FALSE(strEvent.empty());
     SaControlInfo saControl = { START_ON_DEMAND, TEST_SYSTEM_ABILITY1, true};
     sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
@@ -1447,6 +1451,8 @@ HWTEST_F(SystemAbilityStateSchedulerTest, CheckStopEnableOnce001, TestSize.Level
     DTEST_LOG << " CheckStopEnableOnce001 " << std::endl;
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "off" };
+    std::string strEvent = event.ToString();
+    EXPECT_FALSE(strEvent.empty());
     SaControlInfo saControl = { STOP_ON_DEMAND, TEST_SYSTEM_ABILITY1};
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -1466,6 +1472,8 @@ HWTEST_F(SystemAbilityStateSchedulerTest, CheckStopEnableOnce002, TestSize.Level
     DTEST_LOG << " CheckStopEnableOnce002 " << std::endl;
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "off" };
+    std::string strEvent = event.ToString();
+    EXPECT_FALSE(strEvent.empty());
     SaControlInfo saControl = { STOP_ON_DEMAND, TEST_SYSTEM_ABILITY1, true};
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -1485,6 +1493,8 @@ HWTEST_F(SystemAbilityStateSchedulerTest, CheckStopEnableOnce003, TestSize.Level
     DTEST_LOG << " CheckStopEnableOnce003 " << std::endl;
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "off" };
+    std::string strEvent = event.ToString();
+    EXPECT_FALSE(strEvent.empty());
     SaControlInfo saControl = { STOP_ON_DEMAND, TEST_SYSTEM_ABILITY1, true};
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
