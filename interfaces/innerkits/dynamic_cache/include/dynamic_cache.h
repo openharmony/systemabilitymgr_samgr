@@ -45,7 +45,7 @@ public:
         {
             std::lock_guard<std::mutex> autoLock(queryCacheLock_);
             if (CanUseCache(querySaId, waterLine, defaultValue)) {
-                HILOGD("DynamicCache QueryResult Return Cache");
+                HILOGD("DynamicCache QueryResult Return Cache %{public}d", querySaId);
                 return lastQuerySaProxy_;
             }
         }
