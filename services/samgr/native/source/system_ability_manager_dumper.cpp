@@ -116,7 +116,7 @@ void SystemAbilityManagerDumper::ShowAllBySA(vector<pair<int32_t, list<int32_t>>
     string& result)
 {
     result += "********************************ShowAllBySA********************************";
-    int32_t totalSum = 0;
+    size_t totalSum = 0;
     for (auto iter : listeners) {
         if (iter.second.size() == 0) {
             continue;
@@ -149,7 +149,7 @@ void SystemAbilityManagerDumper::ShowAllByCallingPid(vector<pair<int32_t, list<i
 {
     result += "********************************ShowAllByCallingPid********************************";
     map<int32_t, list<int32_t>> subscribeMap;
-    int32_t totalSum = 0;
+    size_t totalSum = 0;
     for (auto iter : listeners) {
         int32_t said = iter.first;
         for (auto callingPid : iter.second) {
