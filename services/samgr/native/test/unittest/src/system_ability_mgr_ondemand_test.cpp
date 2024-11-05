@@ -410,6 +410,7 @@ HWTEST_F(SystemAbilityMgrTest, DoLoadOnDemandAbility001, TestSize.Level0)
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     sptr<IRemoteObject> testAbility = new TestTransactionService();
     ISystemAbilityManager::SAExtraProp saExtraProp;
+    saMgr->abilityStateScheduler_->processHandler_ = nullptr;
     saMgr->AddSystemAbility(DISTRIBUTED_SCHED_TEST_TT_ID, testAbility, saExtraProp);
     bool isExist = true;
     bool result = saMgr->DoLoadOnDemandAbility(DISTRIBUTED_SCHED_TEST_TT_ID, isExist);
