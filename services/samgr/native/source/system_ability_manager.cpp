@@ -1094,6 +1094,7 @@ int32_t SystemAbilityManager::AddSystemAbility(int32_t systemAbilityId, const sp
         KHILOGI("insert %{public}d. size:%{public}zu", systemAbilityId, abilityMap_.size());
     }
     RemoveCheckLoadedMsg(systemAbilityId);
+    RegisterDistribute(systemAbilityId, extraProp.isDistributed);
     if (abilityDeath_ != nullptr) {
         ability->AddDeathRecipient(abilityDeath_);
     }
