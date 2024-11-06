@@ -143,6 +143,7 @@ void SystemAbilityManager::Init()
     reportEventTimer_ = std::make_unique<Utils::Timer>("DfxReporter");
     OndemandLoadForPerf();
     SetKey(DYNAMIC_CACHE_PARAM);
+    SamgrUtil::InvalidateSACache();
 }
 
 bool SystemAbilityManager::IpcStatSamgrProc(int32_t fd, int32_t cmd)
@@ -806,7 +807,6 @@ int32_t SystemAbilityManager::RemoveSystemAbility(const sptr<IRemoteObject>& abi
     }
 
     if (saId != 0) {
-        SystemAbilityInvalidateCache(saId);
         if (IsCacheCommonEvent(saId) && collectManager_ != nullptr) {
             collectManager_->ClearSaExtraDataId(saId);
         }
@@ -1045,6 +1045,7 @@ int32_t SystemAbilityManager::AddSystemAbility(int32_t systemAbilityId, const sp
         }
         SAInfo saInfo = { ability, extraProp.isDistributed, extraProp.capability, Str16ToStr8(extraProp.permission) };
         if (abilityMap_.count(systemAbilityId) > 0) {
+            SystemAbilityInvalidateCache(systemAbilityId);
             auto callingPid = IPCSkeleton::GetCallingPid();
             auto callingUid = IPCSkeleton::GetCallingUid();
             HILOGW("SA:%{public}d is being covered, callPid:%{public}d, callUid:%{public}d",
@@ -1063,7 +1064,6 @@ int32_t SystemAbilityManager::AddSystemAbility(int32_t systemAbilityId, const sp
         return ERR_INVALID_VALUE;
     }
     abilityStateScheduler_->UpdateLimitDelayUnloadTime(systemAbilityId);
-    SystemAbilityInvalidateCache(systemAbilityId);
     abilityStateScheduler_->SendAbilityStateEvent(systemAbilityId, AbilityStateEvent::ABILITY_LOAD_SUCCESS_EVENT);
     SendSystemAbilityAddedMsg(systemAbilityId, ability);
     return ERR_OK;
