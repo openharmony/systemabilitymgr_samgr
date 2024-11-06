@@ -807,6 +807,7 @@ int32_t SystemAbilityManager::RemoveSystemAbility(const sptr<IRemoteObject>& abi
     }
 
     if (saId != 0) {
+        SystemAbilityInvalidateCache(saId);
         if (IsCacheCommonEvent(saId) && collectManager_ != nullptr) {
             collectManager_->ClearSaExtraDataId(saId);
         }
