@@ -397,11 +397,11 @@ void DeviceTimedCollect::RemoveTimesInfo(const OnDemandEvent& onDemandEvent, int
     if (onDemandEvent.name == AWAKE_LOOP_EVENT) {
         timeInfos_[interval].awake = false;
     }
+    HILOGI("RemoveTimesInfo : %{public}d : %{public}d , %{public}d", interval,
+        timeInfos_[interval].normal, timeInfos_[interval].awake);
     if (!timeInfos_[interval].normal && !timeInfos_[interval].awake) {
         timeInfos_.erase(interval);
     }
-    HILOGI("RemoveTimesInfo : %{public}d : %{public}d , %{public}d", interval,
-        timeInfos_[interval].normal, timeInfos_[interval].awake);
 }
 
 void DeviceTimedCollect::RemoveNonPersistenceLoopTask(int32_t interval)
