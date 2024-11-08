@@ -91,6 +91,10 @@ void SystemAbilityManager::RegisterDistribute(int32_t systemAbilityId, bool isDi
             u16string strName = Str8ToStr16(to_string(systemAbilityId));
             dBinderService_->RegisterRemoteProxy(strName, systemAbilityId);
             HILOGI("AddSystemAbility RegisterRemoteProxy, SA:%{public}d", systemAbilityId);
+        } else {
+            if (!isDbinderServiceInit_) {
+                distributedSaList_.push_back(systemAbilityId);
+            }
         }
     }
     if (systemAbilityId == SOFTBUS_SERVER_SA_ID) {
