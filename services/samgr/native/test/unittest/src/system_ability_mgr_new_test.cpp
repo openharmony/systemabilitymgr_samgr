@@ -35,6 +35,7 @@
 #include "common_event_collect.h"
 #include "ipc_skeleton.h"
 #include "accesstoken_kit.h"
+#include "ability_death_recipient.h"
 #endif
 
 using namespace std;
@@ -137,6 +138,18 @@ void ProcMapObjTestPrevSet(sptr<SystemAbilityManager>& saMgr, int32_t maxLoop)
     }
     return;
 }
+
+void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
+{
+    saMgr->abilityDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityDeathRecipient());
+    saMgr->systemProcessDeath_ = sptr<IRemoteObject::DeathRecipient>(new SystemProcessDeathRecipient());
+    saMgr->abilityStatusDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityStatusDeathRecipient());
+    saMgr->abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityCallbackDeathRecipient());
+    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
+    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+}
 }
 
 /**
@@ -147,7 +160,7 @@ void ProcMapObjTestPrevSet(sptr<SystemAbilityManager>& saMgr, int32_t maxLoop)
  */
 HWTEST_F(SystemAbilityMgrTest, GetLocalNodeId001, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     string ret = saMgr->GetLocalNodeId();
     EXPECT_EQ(ret, "");
 }
@@ -160,10 +173,9 @@ HWTEST_F(SystemAbilityMgrTest, GetLocalNodeId001, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrTest, ReportGetSAPeriodically001, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     uint64_t pid_said = 123;
     int32_t count = 1;
-    saMgr->saFrequencyMap_.clear();
     saMgr->saFrequencyMap_[pid_said] = count;
     saMgr->ReportGetSAPeriodically();
     EXPECT_TRUE(saMgr->saFrequencyMap_.empty());
@@ -177,8 +189,8 @@ HWTEST_F(SystemAbilityMgrTest, ReportGetSAPeriodically001, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, StartDynamicSystemProcess001, TestSize.Level3)
 {
     cout << "begin StartDynamicSystemProcess001 "<< endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     std::u16string invalidProcess = u"1234567890123456789012345678901234567890123456789"
         "01234567890123456789012345678901234567890123456";
     OnDemandEvent event;
@@ -194,8 +206,8 @@ HWTEST_F(SystemAbilityMgrTest, StartDynamicSystemProcess001, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrTest, GetSystemAbilityWithDevice001, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     std::string deviceId = "";
     auto ability = saMgr->GetSystemAbility(TEST_EXCEPTION_LOW_SA_ID, deviceId);
     EXPECT_EQ(ability, nullptr);
@@ -208,7 +220,6 @@ HWTEST_F(SystemAbilityMgrTest, GetSystemAbilityWithDevice001, TestSize.Level3)
     saMgr->saProfileMap_[TEST_OVERFLOW_SAID].distributed = true;
     ability = saMgr->GetSystemAbility(TEST_OVERFLOW_SAID, deviceId);
     EXPECT_EQ(ability, nullptr);
-    saMgr->saProfileMap_.erase(TEST_OVERFLOW_SAID);
 }
 
 /**
@@ -218,8 +229,8 @@ HWTEST_F(SystemAbilityMgrTest, GetSystemAbilityWithDevice001, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrTest, GetSystemAbilityFromRemote001, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     auto ability = saMgr->GetSystemAbilityFromRemote(TEST_EXCEPTION_LOW_SA_ID);
     EXPECT_EQ(ability, nullptr);
 }
@@ -231,8 +242,8 @@ HWTEST_F(SystemAbilityMgrTest, GetSystemAbilityFromRemote001, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrTest, GetSystemAbilityFromRemote002, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     auto ability = saMgr->GetSystemAbilityFromRemote(TEST_SYSTEM_ABILITY1);
     EXPECT_EQ(ability, nullptr);
 }
@@ -244,11 +255,12 @@ HWTEST_F(SystemAbilityMgrTest, GetSystemAbilityFromRemote002, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrTest, GetSystemAbilityFromRemote003, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     SAInfo saInfo;
     saMgr->abilityMap_[1] = saInfo;
-    auto ability = saMgr->GetSystemAbilityFromRemote(1);
+    int systemAbilityId = 1;
+    auto ability = saMgr->GetSystemAbilityFromRemote(systemAbilityId);
     EXPECT_EQ(ability, nullptr);
 }
 
@@ -259,12 +271,13 @@ HWTEST_F(SystemAbilityMgrTest, GetSystemAbilityFromRemote003, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrTest, GetSystemAbilityFromRemote004, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     SAInfo saInfo;
     saInfo.isDistributed = true;
     saMgr->abilityMap_[1] = saInfo;
-    auto ability = saMgr->GetSystemAbilityFromRemote(1);
+    int systemAbilityId = 1;
+    auto ability = saMgr->GetSystemAbilityFromRemote(systemAbilityId);
     EXPECT_EQ(ability, nullptr);
 }
 
@@ -277,10 +290,9 @@ HWTEST_F(SystemAbilityMgrTest, GetSystemAbilityFromRemote004, TestSize.Level3)
 
 HWTEST_F(SystemAbilityMgrTest, GetDBinder001, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     sptr<DBinderService> result = saMgr->GetDBinder();
-    EXPECT_TRUE(saMgr != nullptr);
+    EXPECT_TRUE(result == nullptr);
 }
 
 /**
@@ -292,44 +304,42 @@ HWTEST_F(SystemAbilityMgrTest, GetDBinder001, TestSize.Level3)
 
 HWTEST_F(SystemAbilityMgrTest, NotifyRpcLoadCompleted001, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    saMgr->InitDbinderService();
     sptr<IRemoteObject> testAbility = new TestTransactionService();
     saMgr->workHandler_ = nullptr;
     saMgr->NotifyRpcLoadCompleted("", 1, testAbility);
-    EXPECT_TRUE(saMgr != nullptr);
 }
 
 /**
- * @tc.name: NotifyRpcLoadCompleted003
+ * @tc.name: NotifyRpcLoadCompleted002
  * @tc.desc: test NotifyRpcLoadCompleted, dBinderService_ is null
  * @tc.type: FUNC
  * @tc.require: I6MO6A
  */
 
-HWTEST_F(SystemAbilityMgrTest, NotifyRpcLoadCompleted003, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrTest, NotifyRpcLoadCompleted002, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     sptr<IRemoteObject> testAbility = new TestTransactionService();
-    saMgr->dBinderService_ = nullptr;
     saMgr->NotifyRpcLoadCompleted("", 1, testAbility);
-    EXPECT_TRUE(saMgr != nullptr);
 }
 
 /**
- * @tc.name: NotifyRpcLoadCompleted004
+ * @tc.name: NotifyRpcLoadCompleted003
  * @tc.desc: test NotifyRpcLoadCompleted
  * @tc.type: FUNC
  * @tc.require: I6MO6A
  */
-HWTEST_F(SystemAbilityMgrTest, NotifyRpcLoadCompleted004, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrTest, NotifyRpcLoadCompleted003, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    saMgr->InitDbinderService();
     sptr<IRemoteObject> testAbility = new TestTransactionService();
     saMgr->NotifyRpcLoadCompleted("", 1, testAbility);
-    EXPECT_TRUE(saMgr != nullptr);
 }
 
 /**
@@ -342,7 +352,8 @@ HWTEST_F(SystemAbilityMgrTest, NotifyRpcLoadCompleted004, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, Dump001, TestSize.Level3)
 {
     SamMockPermission::MockProcess("hidumper_service");
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
     vector<std::u16string> args;
     args.push_back(u"test_name");
     int32_t result = saMgr->Dump(1, args);
@@ -359,7 +370,8 @@ HWTEST_F(SystemAbilityMgrTest, Dump001, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, Dump002, TestSize.Level3)
 {
     SamMockPermission::MockProcess("hidumper_service");
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
     vector<std::u16string> args;
     vector<std::string> argsWithStr8;
     args.push_back(u"test_name");
@@ -378,7 +390,8 @@ HWTEST_F(SystemAbilityMgrTest, Dump002, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, Dump003, TestSize.Level3)
 {
     SamMockPermission::MockProcess("hidumper_service");
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
     vector<std::u16string> args;
     args.push_back(u"--ipc");
     args.push_back(u"all");
@@ -396,7 +409,8 @@ HWTEST_F(SystemAbilityMgrTest, Dump003, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, Dump004, TestSize.Level3)
 {
     SamMockPermission::MockProcess("hidumper_service");
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
     vector<std::u16string> args;
     args.push_back(u"--ffrt");
     args.push_back(u"99999");
@@ -413,7 +427,7 @@ HWTEST_F(SystemAbilityMgrTest, Dump004, TestSize.Level3)
 
 HWTEST_F(SystemAbilityMgrTest, AddSamgrToAbilityMap001, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     saMgr->AddSamgrToAbilityMap();
     vector<std::u16string> args;
     args.push_back(u"test_name");
@@ -429,13 +443,11 @@ HWTEST_F(SystemAbilityMgrTest, AddSamgrToAbilityMap001, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrTest, GetCommonEventExtraIdList001, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
-    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collectManager);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(saMgr->collectManager_);
     commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
-    collectManager->collectPluginMap_.clear();
-    collectManager->collectPluginMap_[COMMON_EVENT] = commonEventCollect;
-    saMgr->collectManager_ = collectManager;
+    saMgr->collectManager_->collectPluginMap_[COMMON_EVENT] = commonEventCollect;
 
     const int32_t maxLoop = 4;
     map<int32_t, CommonSaProfile> saProfileMapTmp;
@@ -468,8 +480,6 @@ HWTEST_F(SystemAbilityMgrTest, GetCommonEventExtraIdList001, TestSize.Level3)
     ret = saMgr->GetCommonEventExtraDataIdlist(SAID, extraDataIdList);
     EXPECT_EQ(ret, ERR_OK);
     EXPECT_EQ(extraDataIdList.size(), 0);
-
-    SaProfileRecover(saMgr, saProfileMapTmp, maxLoop);
 }
 
 /**
@@ -480,7 +490,8 @@ HWTEST_F(SystemAbilityMgrTest, GetCommonEventExtraIdList001, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrTest, RemoveWhiteCommonEvent001, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     saMgr->RemoveWhiteCommonEvent();
     EXPECT_TRUE(saMgr->collectManager_ != nullptr);
 }
@@ -493,8 +504,8 @@ HWTEST_F(SystemAbilityMgrTest, RemoveWhiteCommonEvent001, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrTest, CleanFfrt001, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    std::shared_ptr<FFRTHandler> workHandler_ = make_shared<FFRTHandler>("workHandler");
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
     int ret = true;
     saMgr->CleanFfrt();
     EXPECT_EQ(ret, true);
@@ -508,9 +519,8 @@ HWTEST_F(SystemAbilityMgrTest, CleanFfrt001, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrTest, CleanFfrt002, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    sptr<DeviceStatusCollectManager> collectManager_ =
-        sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
     int ret = true;
     saMgr->CleanFfrt();
     EXPECT_EQ(ret, true);
@@ -524,9 +534,8 @@ HWTEST_F(SystemAbilityMgrTest, CleanFfrt002, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrTest, CleanFfrt003, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler_ =
-        std::make_shared<SystemAbilityStateScheduler>();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
     int ret = true;
     saMgr->CleanFfrt();
     EXPECT_EQ(ret, true);
@@ -540,8 +549,8 @@ HWTEST_F(SystemAbilityMgrTest, CleanFfrt003, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrTest, SetFfrt001, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     saMgr->SetFfrt();
     EXPECT_NE(saMgr->collectManager_, nullptr);
     EXPECT_NE(saMgr->abilityStateScheduler_, nullptr);
@@ -555,8 +564,8 @@ HWTEST_F(SystemAbilityMgrTest, SetFfrt001, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, GetRunningSaExtensionInfoList001, TestSize.Level3)
 {
     DTEST_LOG << __func__ << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     const int32_t maxLoop = 4;
     map<int32_t, CommonSaProfile> saProfileMapTmp;
 
@@ -574,9 +583,6 @@ HWTEST_F(SystemAbilityMgrTest, GetRunningSaExtensionInfoList001, TestSize.Level3
     ret = reply.ReadInt32(size);
     EXPECT_EQ(ret, true);
     EXPECT_EQ(size, 0);
-
-    saMgr->abilityMap_.clear();
-    SaProfileRecover(saMgr, saProfileMapTmp, maxLoop);
 }
 
 /**
@@ -587,8 +593,8 @@ HWTEST_F(SystemAbilityMgrTest, GetRunningSaExtensionInfoList001, TestSize.Level3
 HWTEST_F(SystemAbilityMgrTest, GetRunningSaExtensionInfoList002, TestSize.Level3)
 {
     DTEST_LOG << __func__ << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     const int32_t maxLoop = 4;
     map<int32_t, CommonSaProfile> saProfileMapTmp;
 
@@ -617,9 +623,6 @@ HWTEST_F(SystemAbilityMgrTest, GetRunningSaExtensionInfoList002, TestSize.Level3
         sptr<IRemoteObject> obj = reply.ReadRemoteObject();
         EXPECT_NE(obj, nullptr);
     }
-
-    saMgr->abilityMap_.clear();
-    SaProfileRecover(saMgr, saProfileMapTmp, maxLoop);
 }
 
 /**
@@ -630,7 +633,7 @@ HWTEST_F(SystemAbilityMgrTest, GetRunningSaExtensionInfoList002, TestSize.Level3
  */
 HWTEST_F(SystemAbilityMgrTest, CheckSystemAbility006, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     int32_t systemAbilityId = -1;
     bool isExist;
     sptr<IRemoteObject> ret = saMgr->CheckSystemAbility(systemAbilityId, isExist);
@@ -645,7 +648,8 @@ HWTEST_F(SystemAbilityMgrTest, CheckSystemAbility006, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrTest, RemoveSystemAbility005, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     const sptr<IRemoteObject> ability = nullptr;
     int32_t ret = saMgr->RemoveSystemAbility(ability);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
@@ -659,9 +663,9 @@ HWTEST_F(SystemAbilityMgrTest, RemoveSystemAbility005, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrTest, NotifyRemoteSaDied002, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     const std::u16string name;
-    sptr<DBinderService> dBinderService_;
     int ret = true;
     saMgr->NotifyRemoteSaDied(name);
     EXPECT_EQ(ret, true);
@@ -674,7 +678,8 @@ HWTEST_F(SystemAbilityMgrTest, NotifyRemoteSaDied002, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrTest, AddSystemAbility006, TestSize.Level1)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     int32_t systemAbilityId = -1;
     const sptr<IRemoteObject> ability;
     const ISystemAbilityManager::SAExtraProp extraProp;
@@ -689,7 +694,8 @@ HWTEST_F(SystemAbilityMgrTest, AddSystemAbility006, TestSize.Level1)
  */
 HWTEST_F(SystemAbilityMgrTest, AddSystemAbility007, TestSize.Level1)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     int32_t systemAbilityId = -1;
     const sptr<IRemoteObject> ability;
     const ISystemAbilityManager::SAExtraProp extraProp;
@@ -705,7 +711,7 @@ HWTEST_F(SystemAbilityMgrTest, AddSystemAbility007, TestSize.Level1)
  */
 HWTEST_F(SystemAbilityMgrTest, GetSystemProcess001, TestSize.Level1)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     std::u16string procName;
     sptr<IRemoteObject> ret = saMgr->GetSystemProcess(procName);
     EXPECT_EQ(ret, nullptr);
@@ -718,8 +724,7 @@ HWTEST_F(SystemAbilityMgrTest, GetSystemProcess001, TestSize.Level1)
  */
 HWTEST_F(SystemAbilityMgrTest, GetSystemProcessInfo003, TestSize.Level1)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    saMgr->abilityStateScheduler_ = nullptr;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     int32_t systemAbilityId = 0;
     SystemProcessInfo systemProcessInfo;
     int32_t ret = saMgr->GetSystemProcessInfo(systemAbilityId, systemProcessInfo);
@@ -733,8 +738,7 @@ HWTEST_F(SystemAbilityMgrTest, GetSystemProcessInfo003, TestSize.Level1)
  */
 HWTEST_F(SystemAbilityMgrTest, IsModuleUpdate001, TestSize.Level2)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    saMgr->saProfileMap_.clear();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     bool ret = saMgr->IsModuleUpdate(SAID);
     EXPECT_FALSE(ret);
 }
@@ -746,8 +750,7 @@ HWTEST_F(SystemAbilityMgrTest, IsModuleUpdate001, TestSize.Level2)
  */
 HWTEST_F(SystemAbilityMgrTest, IsModuleUpdate002, TestSize.Level2)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    saMgr->saProfileMap_.clear();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     CommonSaProfile saprofile;
     saMgr->saProfileMap_[saprofile.saId] = saprofile;
     bool ret = saMgr->IsModuleUpdate(saprofile.saId);
@@ -761,8 +764,7 @@ HWTEST_F(SystemAbilityMgrTest, IsModuleUpdate002, TestSize.Level2)
  */
 HWTEST_F(SystemAbilityMgrTest, IsModuleUpdate003, TestSize.Level2)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    saMgr->saProfileMap_.clear();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     CommonSaProfile saprofile;
     saprofile.moduleUpdate = true;
     saMgr->saProfileMap_[saprofile.saId] = saprofile;
@@ -778,8 +780,8 @@ HWTEST_F(SystemAbilityMgrTest, IsModuleUpdate003, TestSize.Level2)
 HWTEST_F(SystemAbilityMgrTest, GetExtensionSaIdsInner001, TestSize.Level3)
 {
     DTEST_LOG << __func__ << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     int32_t result = saMgr->GetExtensionSaIdsInner(data, reply);
@@ -794,8 +796,8 @@ HWTEST_F(SystemAbilityMgrTest, GetExtensionSaIdsInner001, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, GetExtensionSaIdsInner002, TestSize.Level3)
 {
     DTEST_LOG << __func__ << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     data.WriteString("backup_test");
@@ -818,8 +820,8 @@ HWTEST_F(SystemAbilityMgrTest, GetExtensionSaIdsInner002, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, GetExtensionSaIdsInner003, TestSize.Level3)
 {
     DTEST_LOG << __func__ << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     const int32_t maxLoop = 4;
     map<int32_t, CommonSaProfile> saProfileMapTmp;
     SaProfileStore(saMgr, saProfileMapTmp, maxLoop);
@@ -840,8 +842,6 @@ HWTEST_F(SystemAbilityMgrTest, GetExtensionSaIdsInner003, TestSize.Level3)
     EXPECT_EQ(saIds[0], SAID);
     EXPECT_EQ(saIds[1], SAID + 2);
     EXPECT_EQ(saIds[2], SAID + 3);
-
-    SaProfileRecover(saMgr, saProfileMapTmp, maxLoop);
 }
 
 /**
@@ -852,8 +852,8 @@ HWTEST_F(SystemAbilityMgrTest, GetExtensionSaIdsInner003, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, GetExtensionRunningSaListInner001, TestSize.Level3)
 {
     DTEST_LOG << __func__ << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     int32_t result = saMgr->GetExtensionRunningSaListInner(data, reply);
@@ -868,8 +868,8 @@ HWTEST_F(SystemAbilityMgrTest, GetExtensionRunningSaListInner001, TestSize.Level
 HWTEST_F(SystemAbilityMgrTest, GetExtensionRunningSaListInner002, TestSize.Level3)
 {
     DTEST_LOG << __func__ << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     data.WriteString("backup_test");
@@ -892,8 +892,8 @@ HWTEST_F(SystemAbilityMgrTest, GetExtensionRunningSaListInner002, TestSize.Level
 HWTEST_F(SystemAbilityMgrTest, GetExtensionRunningSaListInner003, TestSize.Level3)
 {
     DTEST_LOG << __func__ << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     const int32_t maxLoop = 4;
     map<int32_t, CommonSaProfile> saProfileMapTmp;
 
@@ -917,9 +917,6 @@ HWTEST_F(SystemAbilityMgrTest, GetExtensionRunningSaListInner003, TestSize.Level
         sptr<IRemoteObject> obj = reply.ReadRemoteObject();
         EXPECT_NE(obj, nullptr);
     }
-
-    saMgr->abilityMap_.clear();
-    SaProfileRecover(saMgr, saProfileMapTmp, maxLoop);
 }
 
 /**
@@ -930,7 +927,7 @@ HWTEST_F(SystemAbilityMgrTest, GetExtensionRunningSaListInner003, TestSize.Level
 HWTEST_F(SystemAbilityMgrTest, IpcDumpProc001, TestSize.Level2)
 {
     SamMockPermission::MockProcess("hidumper_service");
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     int32_t cmd = -1;
     int32_t fd = 1;
     std::vector<std::string> args;
@@ -948,7 +945,7 @@ HWTEST_F(SystemAbilityMgrTest, IpcDumpProc001, TestSize.Level2)
 HWTEST_F(SystemAbilityMgrTest, IpcDumpProc002, TestSize.Level2)
 {
     SamMockPermission::MockProcess("hidumper_service");
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     int32_t cmd = -1;
     int32_t fd = 1;
     std::vector<std::string> args;
@@ -967,7 +964,7 @@ HWTEST_F(SystemAbilityMgrTest, IpcDumpProc002, TestSize.Level2)
 HWTEST_F(SystemAbilityMgrTest, IpcDumpProc003, TestSize.Level2)
 {
     SamMockPermission::MockProcess("hidumper_service");
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     int32_t cmd = -1;
     int32_t fd = 1;
     std::vector<std::string> args;
@@ -986,7 +983,7 @@ HWTEST_F(SystemAbilityMgrTest, IpcDumpProc003, TestSize.Level2)
 HWTEST_F(SystemAbilityMgrTest, IpcDumpProc004, TestSize.Level2)
 {
     SamMockPermission::MockProcess("hidumper_service");
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     int32_t cmd = -1;
     int32_t fd = 1;
     std::vector<std::string> args;
@@ -1004,7 +1001,7 @@ HWTEST_F(SystemAbilityMgrTest, IpcDumpProc004, TestSize.Level2)
  */
 HWTEST_F(SystemAbilityMgrTest, IpcStatSamgrProc001, TestSize.Level2)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     int32_t cmd = IPC_STAT_CMD_START - 1;
     int32_t fd = 1;
     bool ret = saMgr->IpcStatSamgrProc(fd, cmd);
@@ -1021,7 +1018,7 @@ HWTEST_F(SystemAbilityMgrTest, IpcStatSamgrProc001, TestSize.Level2)
  */
 HWTEST_F(SystemAbilityMgrTest, IpcStatSamgrProc002, TestSize.Level2)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     int32_t cmd = IPC_STAT_CMD_START;
     int32_t dmd = IPC_STAT_CMD_STOP;
     int32_t emd = IPC_STAT_CMD_GET;
@@ -1043,7 +1040,7 @@ HWTEST_F(SystemAbilityMgrTest, IpcStatSamgrProc002, TestSize.Level2)
  */
 HWTEST_F(SystemAbilityMgrTest, IpcDumpAllProcess001, TestSize.Level2)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     int32_t cmd = IPC_STAT_CMD_START;
     int32_t fd = 1;
     bool ret = true;
@@ -1058,7 +1055,7 @@ HWTEST_F(SystemAbilityMgrTest, IpcDumpAllProcess001, TestSize.Level2)
  */
 HWTEST_F(SystemAbilityMgrTest, IpcDumpSamgrProcess001, TestSize.Level2)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     int32_t cmd = 4;
     int32_t fd = 1;
     bool ret = true;
@@ -1073,7 +1070,7 @@ HWTEST_F(SystemAbilityMgrTest, IpcDumpSamgrProcess001, TestSize.Level2)
  */
 HWTEST_F(SystemAbilityMgrTest, IpcDumpSingleProcess001, TestSize.Level2)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     int32_t cmd = IPC_STAT_CMD_START;
     int32_t fd = 1;
     bool ret = true;
@@ -1093,14 +1090,13 @@ HWTEST_F(SystemAbilityMgrTest, IpcDumpSingleProcess001, TestSize.Level2)
  */
 HWTEST_F(SystemAbilityMgrTest, DoLoadForPerf001, TestSize.Level2)
 {
-    sptr<SystemAbilityManager> saMgr1 = new SystemAbilityManager;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
     CommonSaProfile saProfile;
     saProfile.process = u"memmgrservice";
-    saMgr1->saProfileMap_.clear();
-    saMgr1->saProfileMap_[-1] = saProfile;
-    saMgr1->abilityMap_.clear();
+    saMgr->saProfileMap_[-1] = saProfile;
     bool ret = true;
-    saMgr1->DoLoadForPerf();
+    saMgr->DoLoadForPerf();
     EXPECT_TRUE(ret);
 }
 /**
@@ -1111,13 +1107,12 @@ HWTEST_F(SystemAbilityMgrTest, DoLoadForPerf001, TestSize.Level2)
  */
 HWTEST_F(SystemAbilityMgrTest, IsDistributedSystemAbility001, TestSize.Level2)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     bool res = saMgr->IsDistributedSystemAbility(-1);
     EXPECT_FALSE(res);
     CommonSaProfile saProfile;
     saProfile.distributed = true;
     saProfile.process = u"memmgrservice";
-    saMgr->saProfileMap_.clear();
     saMgr->saProfileMap_[1] = saProfile;
     res = saMgr->IsDistributedSystemAbility(1);
     EXPECT_TRUE(res);
