@@ -233,18 +233,6 @@ int32_t SystemAbilityManager::IpcDumpProc(int32_t fd, const std::vector<std::str
     return ERR_OK;
 }
 
-void SystemAbilityManager::ConvertDumpListener(std::vector<std::pair<int32_t, std::list<int32_t>>>& dumpListeners)
-{
-    lock_guard<mutex> autoLock(listenerMapLock_);
-    for (auto iter : listenerMap_) {
-        std::list<int32_t> tmp;
-        for (auto listener : iter.second) {
-            tmp.push_back(listener.callingPid);
-        }
-        dumpListeners.push_back({iter.first, tmp});
-    }
-}
-
 int32_t SystemAbilityManager::Dump(int32_t fd, const std::vector<std::u16string>& args)
 {
     std::vector<std::string> argsWithStr8;
@@ -255,8 +243,11 @@ int32_t SystemAbilityManager::Dump(int32_t fd, const std::vector<std::u16string>
         return SystemAbilityManagerDumper::FfrtDumpProc(abilityStateScheduler_, fd, argsWithStr8);
     }
     if ((argsWithStr8.size() > 0) && (argsWithStr8[FIRST_DUMP_INDEX] == ARGS_LISTENER_PARAM)) {
-        std::vector<std::pair<int32_t, std::list<int32_t>>> dumpListeners;
-        ConvertDumpListener(dumpListeners);
+        std::map<int32_t, std::list<SAListener>> dumpListeners;
+        {
+            lock_guard<mutex> autoLock(listenerMapLock_);
+            dumpListeners = listenerMap_;
+        }
         return SystemAbilityManagerDumper::ListenerDumpProc(dumpListeners, fd, argsWithStr8);
     }
     if ((argsWithStr8.size() > 0) && (argsWithStr8[IPC_STAT_PREFIX_INDEX] == IPC_STAT_DUMP_PREFIX)) {

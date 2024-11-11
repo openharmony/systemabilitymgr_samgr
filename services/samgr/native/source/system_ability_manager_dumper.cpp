@@ -61,7 +61,7 @@ void SystemAbilityManagerDumper::ShowListenerHelp(string& result)
         .append("  -l [-sa | -p]: query all sa listener infos by [sa | process].\n");
 }
 
-int32_t SystemAbilityManagerDumper::ListenerDumpProc(vector<pair<int32_t, list<int32_t>>>& listeners,
+int32_t SystemAbilityManagerDumper::ListenerDumpProc(map<int32_t, list<SAListener>>& listeners,
     int32_t fd, const vector<string>& args)
 {
     if (!CanDump()) {
@@ -73,7 +73,7 @@ int32_t SystemAbilityManagerDumper::ListenerDumpProc(vector<pair<int32_t, list<i
     return SaveDumpResultToFd(fd, result);
 }
 
-void SystemAbilityManagerDumper::GetListenerDumpProc(vector<pair<int32_t, list<int32_t>>>& listeners,
+void SystemAbilityManagerDumper::GetListenerDumpProc(map<int32_t, list<SAListener>>& listeners,
     const vector<string>& args, string& result)
 {
     if (args.size() == MIN_ARGS_SIZE + 1) {
@@ -112,11 +112,11 @@ void SystemAbilityManagerDumper::GetListenerDumpProc(vector<pair<int32_t, list<i
     IllegalInput(result);
 }
 
-void SystemAbilityManagerDumper::ShowAllBySA(vector<pair<int32_t, list<int32_t>>>& listeners,
+void SystemAbilityManagerDumper::ShowAllBySA(map<int32_t, list<SAListener>>& listeners,
     string& result)
 {
     result += "********************************ShowAllBySA********************************";
-    size_t totalSum = 0;
+    set<sptr<IRemoteObject>> listenerSet;
     for (auto iter : listeners) {
         if (iter.second.size() == 0) {
             continue;
@@ -126,10 +126,10 @@ void SystemAbilityManagerDumper::ShowAllBySA(vector<pair<int32_t, list<int32_t>>
         result += ", SubCnt:";
         result += to_string(iter.second.size());
         result += "--------------------------------";
-        totalSum += iter.second.size();
         map<int32_t, int32_t> pidCnt;
-        for (auto callingPid : iter.second) {
-            pidCnt[callingPid]++;
+        for (auto saListener : iter.second) {
+            pidCnt[saListener.callingPid]++;
+            listenerSet.insert(saListener.listener->AsObject());
         }
         for (auto iter : pidCnt) {
             result += "\ncallingPid:";
@@ -138,39 +138,42 @@ void SystemAbilityManagerDumper::ShowAllBySA(vector<pair<int32_t, list<int32_t>>
             result += to_string(iter.second);
         }
     }
-    result += "\n--------------------------------TotalCnt:";
-    result += to_string(totalSum);
+    result += "\n--------------------------------TotalListenerCnt:";
+    result += to_string(listenerSet.size());
     result += "--------------------------------";
     result += "\n***************************************************************************\n";
 }
 
-void SystemAbilityManagerDumper::ShowAllByCallingPid(vector<pair<int32_t, list<int32_t>>>& listeners,
+void SystemAbilityManagerDumper::ShowAllByCallingPid(map<int32_t, list<SAListener>>& listeners,
     string& result)
 {
     result += "********************************ShowAllByCallingPid********************************";
-    map<int32_t, list<int32_t>> subscribeMap;
+    map<int32_t, list<pair<int32_t, sptr<ISystemAbilityStatusChange>>>> subscribeMap;
+    map<int32_t, set<sptr<IRemoteObject>>> pidListenerMap;
     size_t totalSum = 0;
     for (auto iter : listeners) {
         int32_t said = iter.first;
-        for (auto callingPid : iter.second) {
-            subscribeMap[callingPid].push_back(said);
+        for (auto saListener : iter.second) {
+            subscribeMap[saListener.callingPid].push_back({said, saListener.listener});
+            pidListenerMap[saListener.callingPid].insert(saListener.listener->AsObject());
         }
     }
-    vector<pair<int32_t, list<int32_t>>> vec(subscribeMap.begin(), subscribeMap.end());
-    auto cmp = [](const pair<int32_t, list<int32_t>>& p1, const pair<int32_t, list<int32_t>>& p2) {
+    vector<pair<int32_t, set<sptr<IRemoteObject>>>> vec(pidListenerMap.begin(), pidListenerMap.end());
+    auto cmp = [](const pair<int32_t, set<sptr<IRemoteObject>>>& p1,
+        const pair<int32_t, set<sptr<IRemoteObject>>>& p2) {
         return p1.second.size() > p2.second.size();
     };
     sort(vec.begin(), vec.end(), cmp);
     for (auto iter : vec) {
         result += "\n\n--------------------------------CallingPid:";
         result += to_string(iter.first);
-        result += ", SubCnt:";
+        result += ", ListenerCnt:";
         result += to_string(iter.second.size());
         result += "--------------------------------";
         totalSum += iter.second.size();
         map<int32_t, int32_t> saCnt;
-        for (auto said : iter.second) {
-            saCnt[said]++;
+        for (auto p : subscribeMap[iter.first]) {
+            saCnt[p.first]++;
         }
         for (auto iter : saCnt) {
             result += "\nSA:";
@@ -179,13 +182,13 @@ void SystemAbilityManagerDumper::ShowAllByCallingPid(vector<pair<int32_t, list<i
             result += to_string(iter.second);
         }
     }
-    result += "\n--------------------------------TotalCnt:";
+    result += "\n--------------------------------TotalListenerCnt:";
     result += to_string(totalSum);
     result += "--------------------------------";
     result += "\n***********************************************************************************\n";
 }
 
-void SystemAbilityManagerDumper::ShowCallingPidBySA(vector<pair<int32_t, list<int32_t>>>& listeners,
+void SystemAbilityManagerDumper::ShowCallingPidBySA(map<int32_t, list<SAListener>>& listeners,
     int32_t said, string& result)
 {
     result += "********************************ShowCallingPidBySA********************************";
@@ -195,8 +198,8 @@ void SystemAbilityManagerDumper::ShowCallingPidBySA(vector<pair<int32_t, list<in
     map<int32_t, int32_t> pidCnt;
     for (auto iter : listeners) {
         if (iter.first == said) {
-            for (auto callingPid : iter.second) {
-                pidCnt[callingPid]++;
+            for (auto saListener : iter.second) {
+                pidCnt[saListener.callingPid]++;
             }
             break;
         }
@@ -209,27 +212,27 @@ void SystemAbilityManagerDumper::ShowCallingPidBySA(vector<pair<int32_t, list<in
         result += to_string(iter.second);
         totalSum += iter.second;
     }
-    result += "\n--------------------------------TotalCnt:";
+    result += "\n--------------------------------TotalSubCnt:";
     result += to_string(totalSum);
     result += "--------------------------------";
     result += "\n**********************************************************************************\n";
 }
 
-void SystemAbilityManagerDumper::ShowSAByCallingPid(vector<pair<int32_t, list<int32_t>>>& listeners,
+void SystemAbilityManagerDumper::ShowSAByCallingPid(map<int32_t, list<SAListener>>& listeners,
     int32_t callingPid, string& result)
 {
     result += "********************************ShowSAByCallingPid********************************";
     result += "\n--------------------------------CallingPid:";
     result += to_string(callingPid);
     result += "--------------------------------";
-    int32_t totalSum = 0;
     map<int32_t, int32_t> saCnt;
+    set<sptr<IRemoteObject>> listenerSet;
     for (auto iter : listeners) {
         int32_t said = iter.first;
-        for (auto pid : iter.second) {
-            if (pid == callingPid) {
+        for (auto saListener : iter.second) {
+            if (saListener.callingPid == callingPid) {
                 saCnt[said]++;
-                ++totalSum;
+                listenerSet.insert(saListener.listener->AsObject());
             }
         }
     }
@@ -239,8 +242,8 @@ void SystemAbilityManagerDumper::ShowSAByCallingPid(vector<pair<int32_t, list<in
         result += ", cnt:";
         result += to_string(iter.second);
     }
-    result += "\n--------------------------------TotalCnt:";
-    result += to_string(totalSum);
+    result += "\n--------------------------------ListenerCnt:";
+    result += to_string(listenerSet.size());
     result += "--------------------------------";
     result += "\n**********************************************************************************\n";
 }

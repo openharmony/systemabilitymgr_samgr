@@ -20,6 +20,7 @@
 #include <vector>
 
 #include "schedule/system_ability_state_scheduler.h"
+#include "system_ability_manager.h"
 
 namespace OHOS {
 enum {
@@ -45,7 +46,7 @@ public:
         int32_t fd, const std::vector<std::string>& args);
     static bool GetFfrtDumpInfoProc(std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler,
         const std::vector<std::string>& args, std::string& result);
-    static int32_t ListenerDumpProc(std::vector<std::pair<int32_t, std::list<int32_t>>>& listeners,
+    static int32_t ListenerDumpProc(std::map<int32_t, std::list<SAListener>>& listeners,
         int32_t fd, const std::vector<std::string>& args);
 
 private:
@@ -65,14 +66,14 @@ private:
     static void DumpFfrtInfoByProcName(int32_t processId, const std::u16string processName, std::string& result);
     static int32_t SaveDumpResultToFd(int32_t fd, const std::string& result);
     static void GetSAMgrFfrtInfo(std::string& result);
-    static void GetListenerDumpProc(std::vector<std::pair<int32_t, std::list<int32_t>>>& listeners,
+    static void GetListenerDumpProc(std::map<int32_t, std::list<SAListener>>& listeners,
         const std::vector<std::string>& args, std::string& result);
-    static void ShowAllBySA(std::vector<std::pair<int32_t, std::list<int32_t>>>& listeners, std::string& result);
-    static void ShowAllByCallingPid(std::vector<std::pair<int32_t, std::list<int32_t>>>& listeners,
+    static void ShowAllBySA(std::map<int32_t, std::list<SAListener>>& listeners, std::string& result);
+    static void ShowAllByCallingPid(std::map<int32_t, std::list<SAListener>>& listeners,
         std::string& result);
-    static void ShowCallingPidBySA(std::vector<std::pair<int32_t, std::list<int32_t>>>& listeners,
+    static void ShowCallingPidBySA(std::map<int32_t, std::list<SAListener>>& listeners,
         int32_t said, std::string& result);
-    static void ShowSAByCallingPid(std::vector<std::pair<int32_t, std::list<int32_t>>>& listeners,
+    static void ShowSAByCallingPid(std::map<int32_t, std::list<SAListener>>& listeners,
         int32_t pid, std::string& result);
     static void ShowListenerHelp(std::string& result);
 };
