@@ -39,6 +39,8 @@ constexpr int32_t MAX_SUBSCRIBE_COUNT = 256;
 constexpr int32_t UNLOAD_TIMEOUT_TIME = 5 * 1000;
 constexpr const char* LOCAL_DEVICE = "local";
 constexpr int32_t MAX_DELAY_TIME = 5 * 60 * 1000;
+constexpr int32_t MAX_DURATION = 10 * 60 * 1000; // ms
+constexpr int32_t ONCE_DELAY_TIME = 10 * 1000; // ms
 constexpr const char* CANCEL_UNLOAD = "cancelUnload";
 constexpr const char* KEY_EVENT_ID = "eventId";
 constexpr const char* KEY_NAME = "name";
@@ -171,6 +173,42 @@ bool SystemAbilityStateScheduler::GetSystemAbilityContext(int32_t systemAbilityI
         return false;
     }
     return true;
+}
+
+void SystemAbilityStateScheduler::UpdateLimitDelayUnloadTime(int32_t systemAbilityId)
+{
+    if (processHandler_ == nullptr) {
+        HILOGE("UpdateLimitDelayUnloadTime process handler not init");
+        return;
+    }
+    auto UpdateDelayUnloadTimeTask = [systemAbilityId, this]() {
+        UpdateLimitDelayUnloadTimeTask(systemAbilityId);
+    };
+    bool ret = processHandler_->PostTask(UpdateDelayUnloadTimeTask);
+    if (!ret) {
+        HILOGW("UpdateLimitDelayUnloadTime PostTask fail");
+    }
+}
+
+void SystemAbilityStateScheduler::UpdateLimitDelayUnloadTimeTask(int32_t systemAbilityId)
+{
+    std::shared_ptr<SystemAbilityContext> abilityContext;
+    if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
+        return;
+    }
+    std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
+    if (abilityContext->lastStartTime != 0) {
+        int64_t begin = abilityContext->lastStartTime;
+        int64_t end = GetTickCount();
+        if (end - begin <= MAX_DURATION) {
+            int64_t onceDelayTime = abilityContext->delayUnloadTime;
+            onceDelayTime += ONCE_DELAY_TIME;
+            abilityContext->delayUnloadTime = LimitDelayUnloadTime(onceDelayTime);
+            HILOGI("DelayUnloadTime is %{public}d, SA:%{public}d",
+                abilityContext->delayUnloadTime, systemAbilityId);
+        }
+    }
+    abilityContext->lastStartTime = GetTickCount();
 }
 
 bool SystemAbilityStateScheduler::GetSystemProcessContext(const std::u16string& processName,
