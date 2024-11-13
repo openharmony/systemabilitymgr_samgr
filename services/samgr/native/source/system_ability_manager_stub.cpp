@@ -1086,7 +1086,7 @@ bool SystemAbilityManagerStub::CanRequest()
     auto tid = IPCSkeleton::GetCallingTokenID();
     AccessToken::ATokenTypeEnum tokenType = AccessToken::AccessTokenKit::GetTokenTypeFlag(tid);
     if (tokenType != AccessToken::ATokenTypeEnum::TOKEN_NATIVE) {
-        KHILOGE("CanRequest tkid:%{public}u, tokenType:%{public}d", tid, tokenType);
+        KHILOGE("CanRequest callingTkid:%{public}u, tokenType:%{public}d", tid, tokenType);
         return false;
     }
     return true;
