@@ -22,6 +22,7 @@
 #include "dynamic_cache.h"
 #include "if_system_ability_manager.h"
 #include "system_ability_on_demand_event.h"
+#include "system_ability_load_callback_stub.h"
 
 namespace OHOS {
 class SystemAbilityManagerProxy :
@@ -284,6 +285,16 @@ private:
     static inline BrokerDelegator<SystemAbilityManagerProxy> delegator_;
     std::set<int32_t> onDemandSystemAbilityIdsSet_;
     std::mutex onDemandSaLock_;
+};
+
+class SystemAbilityProxyCallback : public SystemAbilityLoadCallbackStub {
+public:
+    void OnLoadSystemAbilitySuccess(int32_t systemAbilityId,
+        const sptr<IRemoteObject> &remoteObject) override;
+    void OnLoadSystemAbilityFail(int32_t systemAbilityId) override;
+    std::mutex callbackLock_;
+    std::condition_variable cv_;
+    sptr<IRemoteObject> loadproxy_;
 };
 } // namespace OHOS
 

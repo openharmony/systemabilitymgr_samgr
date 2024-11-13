@@ -19,6 +19,7 @@
 #include "datetime_ex.h"
 #include "sa_status_change_mock.h"
 #include "test_log.h"
+#include "ipc_skeleton.h"
 
 #define private public
 #include "schedule/system_ability_state_scheduler.h"
@@ -152,6 +153,32 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemAbilityContext004, TestSize.L
     systemAbilityStateScheduler->abilityContextMap_[SAID] = systemAbilityContext;
     bool ret = systemAbilityStateScheduler->GetSystemAbilityContext(SAID, systemAbilityContext);
     EXPECT_TRUE(ret);
+
+    std::string strResult;
+    EXPECT_NE(nullptr, systemAbilityContext->ownProcessContext);
+    systemAbilityStateScheduler->GetProcessInfo(Str16ToStr8(systemAbilityContext->ownProcessContext->processName),
+        strResult);
+    EXPECT_FALSE(strResult.empty());
+    systemAbilityStateScheduler->NotifyProcessStarted(systemAbilityContext->ownProcessContext);
+    int32_t result = systemAbilityStateScheduler->PostTryUnloadAllAbilityTask(systemAbilityContext->ownProcessContext);
+    EXPECT_EQ(ERR_OK, result);
+
+    result = systemAbilityStateScheduler->DoUnloadSystemAbilityLocked(systemAbilityContext);
+    EXPECT_EQ(ERR_INVALID_VALUE, result);
+
+    OnDemandEvent event;
+    auto callingPid = IPCSkeleton::GetCallingPid();
+    systemAbilityContext->unloadRequest = std::make_shared<UnloadRequestInfo>(event, SAID, callingPid);
+    result = systemAbilityStateScheduler->DoUnloadSystemAbilityLocked(systemAbilityContext);
+    EXPECT_NE(ERR_OK, result);
+
+    systemAbilityStateScheduler->processContextMap_[u"samgrTest"] = nullptr;
+    systemAbilityStateScheduler->processContextMap_[u"samgr"] = systemAbilityContext->ownProcessContext;
+    result = systemAbilityStateScheduler->UnloadAllIdleSystemAbility();
+    EXPECT_EQ(ERR_OK, result);
+
+    systemAbilityStateScheduler->KillProcessByProcessNameLocked(systemAbilityContext->ownProcessContext->processName);
+    EXPECT_NE(nullptr, systemAbilityStateScheduler->unloadEventHandler_->handler_);
 }
 
 /**
@@ -1786,5 +1813,18 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetAllSystemAbilityInfoByState001, Tes
     string state = "LOADED";
     systemAbilityStateScheduler->GetAllSystemAbilityInfoByState(state, result);
     EXPECT_NE(result.size(), 0);
+}
+
+HWTEST_F(SystemAbilityStateSchedulerTest, SetFfrt001, TestSize.Level3)
+{
+    DTEST_LOG<<"SetFfrt001 BEGIN"<<std::endl;
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+    std::make_shared<SystemAbilityStateScheduler>();
+    systemAbilityStateScheduler->unloadEventHandler_ =
+        std::make_shared<SystemAbilityStateScheduler::UnloadEventHandler>(systemAbilityStateScheduler);
+    
+    systemAbilityStateScheduler->unloadEventHandler_->SetFfrt();
+    EXPECT_NE(nullptr, systemAbilityStateScheduler->unloadEventHandler_);
+    DTEST_LOG<<"SetFfrt001 END"<<std::endl;
 }
 }

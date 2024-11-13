@@ -22,6 +22,7 @@
 #include "sa_status_change_mock.h"
 #include "system_ability_load_callback_proxy.h"
 #include "system_ability_status_change_proxy.h"
+#include "system_ability_load_callback_stub.h"
 #include "string_ex.h"
 #include "test_log.h"
 
@@ -1249,5 +1250,13 @@ HWTEST_F(SystemAbilityMgrProxyTest, GetCommonEventExtraDataIdlist001, TestSize.L
     ret = samgrProxy->GetCommonEventExtraDataIdlist(1, idList, "test");
     EXPECT_EQ(ret, ERR_OK);
     EXPECT_EQ(idList.size(), 0);
+}
+
+HWTEST_F(SystemAbilityMgrProxyTest, OnLoadSystemAbilityFail005, TestSize.Level3)
+{
+    sptr<SystemAbilityProxyCallback> callback = new SystemAbilityProxyCallback();
+    EXPECT_TRUE(nullptr != callback);
+    callback->OnLoadSystemAbilityFail(-1);
+    EXPECT_EQ(nullptr, callback->loadproxy_);
 }
 }
