@@ -29,6 +29,7 @@
 #include "system_process_status_change_proxy.h"
 #include "system_ability_manager_util.h"
 #include "test_log.h"
+#include "ability_death_recipient.h"
 #define private public
 #include "ipc_skeleton.h"
 #include "accesstoken_kit.h"
@@ -1603,5 +1604,21 @@ HWTEST_F(SystemAbilityMgrTest, OnAbilityCallbackDied001, TestSize.Level3)
     InitSaMgr(saMgr);
     saMgr->OnAbilityCallbackDied(nullptr);
     EXPECT_TRUE(saMgr->startingAbilityMap_.empty());
+}
+
+HWTEST_F(SystemAbilityMgrTest, OnRemoteDied002, TestSize.Level3)
+{
+    DTEST_LOG<<"OnRemoteDied002 BEGIN";
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
+    
+    saMgr->abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityDeathRecipient());
+    EXPECT_NE(nullptr, saMgr->abilityCallbackDeath_);
+    saMgr->abilityCallbackDeath_->OnRemoteDied(nullptr);
+    
+    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
+    EXPECT_NE(nullptr, saMgr->remoteCallbackDeath_);
+    saMgr->remoteCallbackDeath_->OnRemoteDied(nullptr);
+    DTEST_LOG<<"OnRemoteDied002 END";
 }
 } // namespace OHOS

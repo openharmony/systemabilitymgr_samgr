@@ -46,15 +46,6 @@ const int32_t CHECK_SYSTEM_ABILITY_CODE = 2;
 const int32_t SLEEP_ONE_MILLI_SECOND_TIME = 1000;
 constexpr const char* PARAM_KEY = "persist.samgr.cache.sa";
 }
-class SystemAbilityProxyCallback : public SystemAbilityLoadCallbackStub {
-public:
-    void OnLoadSystemAbilitySuccess(int32_t systemAbilityId,
-        const sptr<IRemoteObject> &remoteObject) override;
-    void OnLoadSystemAbilityFail(int32_t systemAbilityId) override;
-    std::mutex callbackLock_;
-    std::condition_variable cv_;
-    sptr<IRemoteObject> loadproxy_;
-};
 
 static void* g_selfSoHandle = nullptr;
 

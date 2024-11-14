@@ -21,6 +21,8 @@ using namespace testing::ext;
 
 namespace OHOS {
 using namespace OHOS::Utils;
+constexpr int32_t REF_RESIDENT_TIMER_INTERVAL = 1000 * 60 * 10;
+constexpr int32_t REF_ONDEMAND_TIMER_INTERVAL = 1000 * 60 * 1;
 void RefCountCollectTest::SetUpTestCase()
 {
     DTEST_LOG << "SetUpTestCase" << std::endl;
@@ -167,4 +169,23 @@ HWTEST_F(RefCountCollectTest, OnStop001, TestSize.Level1)
     auto ret = collect->OnStop();
     EXPECT_EQ(ret, ERR_OK);
 }
+
+HWTEST_F(RefCountCollectTest, IdentifyUnrefOndemand001, TestSize.Level1)
+{
+    DTEST_LOG<<"IdentifyUnrefOndemand001 BEGIN"<<std::endl;
+    sptr<DeviceStatusCollectManager> manager = new DeviceStatusCollectManager();
+    std::shared_ptr<RefCountCollect> statuCollect = std::make_shared<RefCountCollect>(manager);
+    uint32_t timerId = 0;
+    statuCollect->timer_ = std::make_unique<Utils::Timer>("refCountCollectTimer");
+    statuCollect->timer_->Setup();
+    statuCollect->unrefUnloadSaList_.push_back(1);
+    timerId = statuCollect->timer_->Register(std::bind(&RefCountCollect::IdentifyUnrefOndemand, statuCollect),
+       REF_ONDEMAND_TIMER_INTERVAL);
+
+    EXPECT_NE(nullptr, statuCollect->timer_);
+    int32_t ret = statuCollect->OnStop();
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG<<"IdentifyUnrefOndemand001 END"<<std::endl;
+}
+
 } // namespace OHOS

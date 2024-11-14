@@ -828,4 +828,23 @@ HWTEST_F(CommonEventCollectTest, OnRemoveSystemAbility001, TestSize.Level3)
     EXPECT_NE(commonEventCollect, nullptr);
     DTEST_LOG << " OnRemoveSystemAbility001 END" << std::endl;
 }
+
+HWTEST_F(CommonEventCollectTest, StartReclaimIpcThreadWork001, TestSize.Level3)
+{
+    DTEST_LOG<<"StartReclaimIpcThreadWork001 BEGIN"<< std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
+    commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
+    EventFwk::CommonEventData eventData;
+    AAFwk::Want want;
+    std::string evtName = "RECENT_EVENT";
+    std::string eventType = "RECENT_CLEAR_ALL";
+    want.SetAction(evtName);
+    eventData.SetData(eventType);
+    eventData.SetWant(want);
+    
+    commonEventCollect->StartReclaimIpcThreadWork(eventData);
+    EXPECT_NE(nullptr, commonEventCollect->workHandler_);
+    DTEST_LOG<<"StartReclaimIpcThreadWork001 END"<< std::endl;
+}
 } // namespace OHOS
