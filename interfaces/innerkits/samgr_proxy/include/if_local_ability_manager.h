@@ -40,7 +40,7 @@ public:
         data_ = nullptr;
         reply_ = nullptr;
     };
-    ~SystemAbilityExtensionPara() {};
+    virtual ~SystemAbilityExtensionPara() {};
 
     MessageParcel *data_;
     MessageParcel *reply_;
