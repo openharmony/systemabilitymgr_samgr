@@ -66,6 +66,7 @@ ohos_fuzztest("SamgrDumperFuzzTest") {
     "${samgr_services_dir}/source/system_ability_manager_stub.cpp",
     "${samgr_services_dir}/source/system_ability_manager_util.cpp",
     "${samgr_services_dir}/test/unittest/src/mock_permission.cpp",
+    "${samgr_services_dir}/test/unittest/src/sa_status_change_mock.cpp",
     "samgrdumper_fuzzer.cpp",
   ]
   deps = []
