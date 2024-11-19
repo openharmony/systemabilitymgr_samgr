@@ -20,12 +20,33 @@
 #include "system_ability_manager_dumper.h"
 #include "schedule/system_ability_state_scheduler.h"
 #include "sam_mock_permission.h"
+#include "sa_status_change_mock.h"
+#include "securec.h"
 
 namespace OHOS {
 namespace Samgr {
 namespace {
     constexpr size_t THRESHOLD = 10;
     constexpr const char* HIDUMPER_PROCESS_NAME = "hidumper_service";
+    const uint8_t *g_baseFuzzData = nullptr;
+    size_t g_baseFuzzSize = 0;
+    size_t g_baseFuzzPos;
+    constexpr int32_t SAID = 1493;
+}
+
+template <class T> T GetData()
+{
+    T object{};
+    size_t objectSize = sizeof(object);
+    if (g_baseFuzzData == nullptr || objectSize > g_baseFuzzSize - g_baseFuzzPos) {
+        return object;
+    }
+    errno_t ret = memcpy_s(&object, objectSize, g_baseFuzzData + g_baseFuzzPos, objectSize);
+    if (ret != EOK) {
+        return {};
+    }
+    g_baseFuzzPos += objectSize;
+    return object;
 }
 
 int32_t BuildInt32FromData(const uint8_t* data, size_t size)
@@ -82,6 +103,52 @@ void SamgrDumperFuzzTest(const uint8_t* data, size_t size)
     manager->IpcDumpSamgrProcess(fd, cmd);
     manager->IpcDumpSingleProcess(fd, cmd, processName);
 }
+
+void FuzzListenerDumpProc(const uint8_t* data, size_t size)
+{
+    SamMockPermission::MockProcess(HIDUMPER_PROCESS_NAME);
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+    int32_t pid1 = GetData<int32_t>();
+    int32_t pid2 = GetData<int32_t>();
+    std::map<int32_t, std::list<SAListener>> dumpListeners;
+    std::list<SAListener> listeners;
+    sptr<SaStatusChangeMock> listener(new SaStatusChangeMock());
+    listeners.emplace_back(listener, pid1);
+    listeners.emplace_back(listener, pid2);
+    dumpListeners[SAID] = listeners;
+    int32_t fd = -1;
+    std::vector<std::string> args;
+    args.push_back("test");
+    args.push_back("-h");
+    SystemAbilityManagerDumper::ListenerDumpProc(dumpListeners, fd, args);
+    args.clear();
+
+    args.push_back("test");
+    args.push_back("-l");
+    args.push_back("-sa");
+    SystemAbilityManagerDumper::ListenerDumpProc(dumpListeners, fd, args);
+    args.clear();
+
+    args.push_back("test");
+    args.push_back("-l");
+    args.push_back("-p");
+    SystemAbilityManagerDumper::ListenerDumpProc(dumpListeners, fd, args);
+    args.clear();
+
+    args.push_back("test");
+    args.push_back("-sa");
+    args.push_back(ToString(SAID));
+    SystemAbilityManagerDumper::ListenerDumpProc(dumpListeners, fd, args);
+    args.clear();
+
+    args.push_back("test");
+    args.push_back("-p");
+    args.push_back(ToString(pid1));
+    SystemAbilityManagerDumper::ListenerDumpProc(dumpListeners, fd, args);
+    args.clear();
+}
 }
 }
 
@@ -93,7 +160,8 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     }
 
     OHOS::Samgr::SamgrDumperFuzzTest(data, size);
-    
+    OHOS::Samgr::FuzzListenerDumpProc(data, size);
+
     return 0;
 }
 
