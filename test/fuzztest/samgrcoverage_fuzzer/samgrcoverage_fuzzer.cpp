@@ -24,6 +24,7 @@
 #include "system_ability_manager.h"
 #include "iservice_registry.h"
 #include "hisysevent_adapter.h"
+#include "system_ability_manager_util.h"
 
 #include <cinttypes>
 #include <cstddef>
@@ -62,7 +63,7 @@ std::string BuildStringFromData(const uint8_t* data, size_t size)
 
 void FuzzOndemandLoad(const uint8_t* data, size_t size)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     if (saMgr == nullptr) {
         return;
     }
@@ -104,7 +105,7 @@ void FuzzOndemandLoad(const uint8_t* data, size_t size)
 
 void FuzzRemoveSystemProcess(const uint8_t* data, size_t size)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     if (saMgr == nullptr) {
         return;
     }
@@ -132,7 +133,7 @@ void FuzzRemoveSystemProcess(const uint8_t* data, size_t size)
 
 void FuzzNotifySystemAbilityLoaded(const uint8_t* data, size_t size)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     if (saMgr == nullptr) {
         return;
     }
@@ -140,7 +141,7 @@ void FuzzNotifySystemAbilityLoaded(const uint8_t* data, size_t size)
     sptr<IRemoteObject> remoteObject = new TestTransactionService();
     saMgr->NotifySystemAbilityLoaded(SAID, remoteObject, callback);
     string srcDeviceId = "srcDeviceId";
-    int32_t systemAbilityId = 401;
+    int32_t systemAbilityId = BuildInt32FromData(data, size);
     saMgr->LoadSystemAbilityFromRpc(srcDeviceId, systemAbilityId, callback);
     saMgr->CheckSaIsImmediatelyRecycle(systemAbilityId);
 
@@ -171,37 +172,46 @@ void FuzzNotifySystemAbilityLoaded(const uint8_t* data, size_t size)
 
 void FuzzGetAllOndemandSa(const uint8_t* data, size_t size)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     if (saMgr == nullptr) {
         return;
     }
+    int32_t saId = BuildInt32FromData(data, size);
+    CommonSaProfile saProfile;
+    saMgr->saProfileMap_[saId] = saProfile;
     saMgr->GetAllOndemandSa();
+    saMgr->saProfileMap_.erase(saId);
 }
 
 void FuzzReportGetSAPeriodically(const uint8_t* data, size_t size)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     if (saMgr == nullptr) {
         return;
     }
+    int32_t uid = BuildInt32FromData(data, size);
+    int32_t saId = BuildInt32FromData(data, size);
+    uint64_t key = SamgrUtil::GenerateFreKey(uid, saId);
+    saMgr->saFrequencyMap_[key] = BuildInt32FromData(data, size);
     saMgr->ReportGetSAPeriodically();
 }
 
 void FuzzNotifySystemAbilityChanged(const uint8_t* data, size_t size)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     if (saMgr == nullptr) {
         return;
     }
     sptr<SaStatusChangeMock> testAbility(new SaStatusChangeMock());
-    saMgr->NotifySystemAbilityChanged(SAID, "deviceId", 1, nullptr);
-    saMgr->NotifySystemAbilityChanged(SAID, "deviceId", ADD_SA_TRANSACTION, testAbility);
-    saMgr->NotifySystemAbilityChanged(SAID, "deviceId", REMOVE_SA_TRANSACTION, testAbility);
+    int32_t saId = BuildInt32FromData(data, size);
+    saMgr->NotifySystemAbilityChanged(saId, "deviceId", 1, nullptr);
+    saMgr->NotifySystemAbilityChanged(saId, "deviceId", ADD_SA_TRANSACTION, testAbility);
+    saMgr->NotifySystemAbilityChanged(saId, "deviceId", REMOVE_SA_TRANSACTION, testAbility);
 }
 
 void FuzzRemoveOnDemandSaInDiedProc(const uint8_t* data, size_t size)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     if (saMgr == nullptr) {
         return;
     }
@@ -213,7 +223,7 @@ void FuzzRemoveOnDemandSaInDiedProc(const uint8_t* data, size_t size)
 
 void FuzzDoLoadOnDemandAbility(const uint8_t* data, size_t size)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     if (saMgr == nullptr) {
         return;
     }
@@ -224,7 +234,7 @@ void FuzzDoLoadOnDemandAbility(const uint8_t* data, size_t size)
 
 void FuzzNotifySystemAbilityAddedBySync(const uint8_t* data, size_t size)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     if (saMgr == nullptr) {
         return;
     }
@@ -235,7 +245,7 @@ void FuzzNotifySystemAbilityAddedBySync(const uint8_t* data, size_t size)
 
 void FuzzSendLoadedSystemAbilityMsg(const uint8_t* data, size_t size)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     if (saMgr == nullptr) {
         return;
     }
@@ -247,7 +257,7 @@ void FuzzSendLoadedSystemAbilityMsg(const uint8_t* data, size_t size)
 
 void FuzzNotifySystemAbilityLoadFail(const uint8_t* data, size_t size)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     if (saMgr == nullptr) {
         return;
     }
@@ -258,7 +268,7 @@ void FuzzNotifySystemAbilityLoadFail(const uint8_t* data, size_t size)
 
 void FuzzStartingSystemProcessLocked(const uint8_t* data, size_t size)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     if (saMgr == nullptr) {
         return;
     }
@@ -269,7 +279,7 @@ void FuzzStartingSystemProcessLocked(const uint8_t* data, size_t size)
 
 void FuzzDoLoadSystemAbilityFromRpc(const uint8_t* data, size_t size)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     if (saMgr == nullptr) {
         return;
     }
@@ -281,7 +291,7 @@ void FuzzDoLoadSystemAbilityFromRpc(const uint8_t* data, size_t size)
 
 void FuzzDoUnloadSystemAbility(const uint8_t* data, size_t size)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     if (saMgr == nullptr) {
         return;
     }
@@ -292,7 +302,7 @@ void FuzzDoUnloadSystemAbility(const uint8_t* data, size_t size)
 
 void FuzzNotifyRpcLoadCompleted(const uint8_t* data, size_t size)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     if (saMgr == nullptr) {
         return;
     }
