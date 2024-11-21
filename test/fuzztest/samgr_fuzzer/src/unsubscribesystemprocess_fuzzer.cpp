@@ -35,6 +35,8 @@ void FuzzSubscribeSystemProcess(const uint8_t *data, size_t size)
     parcelData.WriteRemoteObject(listener);
     FuzzTestUtils::FuzzTestRemoteRequest(parcelData,
         static_cast<uint32_t>(SamgrInterfaceCode::SUBSCRIBE_SYSTEM_PROCESS_TRANSACTION));
+    FuzzTestUtils::FuzzTestRemoteRequest(data, size,
+        static_cast<uint32_t>(SamgrInterfaceCode::SUBSCRIBE_SYSTEM_PROCESS_TRANSACTION));
 }
 
 void FuzzUnSubscribeSystemProcess(const uint8_t *data, size_t size)
@@ -47,6 +49,8 @@ void FuzzUnSubscribeSystemProcess(const uint8_t *data, size_t size)
     parcelData.WriteInterfaceToken(SAMGR_INTERFACE_TOKEN);
     parcelData.WriteRemoteObject(listener);
     FuzzTestUtils::FuzzTestRemoteRequest(parcelData,
+        static_cast<uint32_t>(SamgrInterfaceCode::UNSUBSCRIBE_SYSTEM_PROCESS_TRANSACTION));
+    FuzzTestUtils::FuzzTestRemoteRequest(data, size,
         static_cast<uint32_t>(SamgrInterfaceCode::UNSUBSCRIBE_SYSTEM_PROCESS_TRANSACTION));
 }
 }
