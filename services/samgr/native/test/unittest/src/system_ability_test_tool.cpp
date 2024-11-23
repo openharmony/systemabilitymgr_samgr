@@ -23,7 +23,9 @@
 #include "itest_transaction_service.h"
 #include "nativetoken_kit.h"
 #include "sam_log.h"
+#ifdef SUPPORT_SOFTBUS
 #include "softbus_bus_center.h"
+#endif
 #include "string_ex.h"
 #include "system_ability_definition.h"
 #include "system_ability_load_callback_stub.h"
@@ -230,6 +232,7 @@ namespace {
         cout << "load system ability result : " << ((res == 0) ? "succeed" : "failed") << endl;
     }
 
+#ifdef SUPPORT_SOFTBUS
     static void DoGetDevice()
     {
         cout << "get remote deviceid" << endl;
@@ -246,6 +249,7 @@ namespace {
             info++;
         }
     }
+#endif
 
     static void DoSubscribe(int32_t said)
     {
@@ -341,10 +345,12 @@ static void DoDefault(char* argv[])
         DoRemove();
         return;
     }
+#ifdef SUPPORT_SOFTBUS
     if (strcmp(argv[1], "device") == 0) {
         DoGetDevice();
         return;
     }
+#endif
     cout << "DoDefault failed, get help with arg 'h'"<< endl;
 }
 

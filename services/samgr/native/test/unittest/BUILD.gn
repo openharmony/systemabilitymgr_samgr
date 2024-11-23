@@ -671,7 +671,6 @@ ohos_executable("manual_ondemand") {
     "access_token:libnativetoken_shared",
     "access_token:libtokensetproc_shared",
     "c_utils:utils",
-    "dsoftbus:softbus_client",
     "hilog:libhilog",
     "init:libbeget_proxy",
     "init:libbegetutil",
@@ -679,6 +678,11 @@ ohos_executable("manual_ondemand") {
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
   ]
+  defines = []
+  if (support_softbus) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+    defines += [ "SUPPORT_SOFTBUS" ]
+  }
   part_name = "samgr"
   subsystem_name = "systemabilitymgr"
 }
@@ -703,7 +707,6 @@ ohos_executable("ondemand") {
     "access_token:libnativetoken_shared",
     "access_token:libtokensetproc_shared",
     "c_utils:utils",
-    "dsoftbus:softbus_client",
     "hilog:libhilog",
     "init:libbeget_proxy",
     "init:libbegetutil",
@@ -711,6 +714,11 @@ ohos_executable("ondemand") {
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
   ]
+  defines = []
+  if (support_softbus) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+    defines += [ "SUPPORT_SOFTBUS" ]
+  }
   part_name = "samgr"
   subsystem_name = "systemabilitymgr"
 }
@@ -774,6 +782,11 @@ ohos_executable("TestTool") {
     defines += [ "HICOLLIE_ENABLE" ]
   }
 
+  if (support_softbus) {
+    external_deps += [ "dsoftbus:softbus_client" ]
+    defines += [ "SUPPORT_SOFTBUS" ]
+  }
+
   if (support_device_manager) {
     sources +=
         [ "${samgr_services_dir}/source/collect/device_networking_collect.cpp" ]
@@ -785,7 +798,6 @@ ohos_executable("TestTool") {
     "access_token:libnativetoken_shared",
     "access_token:libtokensetproc_shared",
     "c_utils:utils",
-    "dsoftbus:softbus_client",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "hisysevent:libhisysevent",

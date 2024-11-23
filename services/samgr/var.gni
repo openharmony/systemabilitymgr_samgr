@@ -17,6 +17,7 @@ declare_args() {
   ressched_able = true
   support_device_manager = false
   support_common_event = false
+  support_softbus = true
   if (!defined(global_parts_info) ||
       defined(global_parts_info.communication_bluetooth)) {
     bluetooth_part_enable = true
@@ -36,5 +37,9 @@ declare_args() {
   if (defined(global_parts_info) &&
       !defined(global_parts_info.distributeddatamgr_preferences)) {
     preferences_enable = false
+  }
+  if (defined(global_parts_info) &&
+      !defined(global_parts_info.communication_dsoftbus)) {
+    support_softbus = false
   }
 }
