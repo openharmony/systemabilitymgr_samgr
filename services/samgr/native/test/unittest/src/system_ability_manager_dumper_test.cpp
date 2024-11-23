@@ -14,6 +14,8 @@
  */
 
 #include "system_ability_manager_dumper_test.h"
+#include "system_ability_status_change_proxy.h"
+#include "ipc_skeleton.h"
 
 #include "test_log.h"
 #include <sam_mock_permission.h>
@@ -28,6 +30,15 @@ using namespace testing::ext;
 using namespace OHOS;
 
 namespace OHOS {
+namespace {
+const std::string strHidumperSerName = "hidumper";
+const std::string strArgsQuerySA = "-sa";
+const std::string strArgsQueryProcess = "-p";
+const std::string strArgsHelp = "-h";
+const std::string strArgsQueryAll = "-l";
+const std::string strIllegal = "The arguments are illegal and you can enter '-h' for help.\n";
+constexpr int LISTENER_BASE_INDEX = 1;
+}
 void SystemAbilityManagerDumperTest::SetUpTestCase()
 {
     DTEST_LOG << "SetUpTestCase" << std::endl;
@@ -1017,5 +1028,78 @@ HWTEST_F(SystemAbilityManagerDumperTest, SaveDumpResultToFd002, TestSize.Level1)
     std::string result = "";
     int32_t ret = SystemAbilityManagerDumper::SaveDumpResultToFd(fd, result);
     EXPECT_EQ(ret, ERR_OK);
+}
+
+HWTEST_F(SystemAbilityManagerDumperTest, ShowListenerHelp001, TestSize.Level1)
+{
+    DTEST_LOG<<"ShowListenerHelp001 BEGIN"<<std::endl;
+    std::string result;
+    SystemAbilityManagerDumper::ShowListenerHelp(result);
+    EXPECT_FALSE(result.empty());
+    
+    int32_t fd = 1;
+    std::vector<std::string> args;
+    std::map<int32_t, std::list<SAListener>> listeners;
+    int32_t ret = SystemAbilityManagerDumper::ListenerDumpProc(listeners, fd, args);
+    EXPECT_EQ(ERR_OK, ret);
+
+    SamMockPermission::MockProcess("hidumper_service");
+    ret = SystemAbilityManagerDumper::ListenerDumpProc(listeners, fd, args);
+    EXPECT_EQ(ERR_OK, ret);
+    DTEST_LOG<<"ShowListenerHelp001 END"<<std::endl;
+}
+
+HWTEST_F(SystemAbilityManagerDumperTest, GetListenerDumpProc001, TestSize.Level1)
+{
+    DTEST_LOG<<"GetListenerDumpProc001 BEGIN"<<std::endl;
+    std::string result;
+    std::vector<std::string> args;
+    args.push_back(strHidumperSerName);
+    std::map<int32_t, std::list<SAListener>> listeners;
+    sptr<ISystemAbilityStatusChange> lster = new SystemAbilityStatusChangeProxy(nullptr);
+    auto cPid = IPCSkeleton::GetCallingPid();
+    SAListener saLst(lster, cPid, ListenerState::INIT);
+    listeners[1].push_back(saLst);
+    SystemAbilityManagerDumper::GetListenerDumpProc(listeners, args, result);
+    EXPECT_EQ(strIllegal, result);
+    result.clear();
+    args.push_back(strArgsHelp);
+    SystemAbilityManagerDumper::GetListenerDumpProc(listeners, args, result);
+    EXPECT_FALSE(result.empty());
+    result.clear();
+    DTEST_LOG<<"GetListenerDumpProc001 END"<<std::endl;
+}
+
+HWTEST_F(SystemAbilityManagerDumperTest, GetListenerDumpProc002, TestSize.Level1)
+{
+    DTEST_LOG<<"GetListenerDumpProc002 BEGIN"<<std::endl;
+    std::string result;
+    std::vector<std::string> args;
+    args.push_back(strHidumperSerName);
+    std::map<int32_t, std::list<SAListener>> listeners;
+    sptr<ISystemAbilityStatusChange> lster = new SystemAbilityStatusChangeProxy(nullptr);
+    pid_t cPid = IPCSkeleton::GetCallingPid();
+    SAListener saLst(lster, cPid, ListenerState::INIT);
+    listeners[100].push_back(saLst);
+    args.push_back(strArgsQueryAll);
+    args.push_back(strArgsQuerySA);
+    SystemAbilityManagerDumper::GetListenerDumpProc(listeners, args, result);
+    EXPECT_FALSE(result.empty());
+    result.clear();
+    args[LISTENER_BASE_INDEX + 1] = strArgsQueryProcess;
+    SystemAbilityManagerDumper::GetListenerDumpProc(listeners, args, result);
+    EXPECT_FALSE(result.empty());
+    result.clear();
+    args[LISTENER_BASE_INDEX] = strArgsQuerySA;
+    args[LISTENER_BASE_INDEX + 1] = "100";
+    SystemAbilityManagerDumper::GetListenerDumpProc(listeners, args, result);
+    EXPECT_FALSE(result.empty());
+    result.clear();
+    args[LISTENER_BASE_INDEX] = strArgsQueryProcess;
+    args[LISTENER_BASE_INDEX + 1] = std::to_string(static_cast<int>(cPid));
+    SystemAbilityManagerDumper::GetListenerDumpProc(listeners, args, result);
+    EXPECT_FALSE(result.empty());
+    result.clear();
+    DTEST_LOG<<"GetListenerDumpProc002 END"<<std::endl;
 }
 }

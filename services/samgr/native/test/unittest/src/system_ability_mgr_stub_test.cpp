@@ -24,6 +24,7 @@
 #include "string_ex.h"
 #include "system_ability_definition.h"
 #include "test_log.h"
+#include "ability_death_recipient.h"
 
 #define private public
 #include "sa_status_change_mock.h"
@@ -43,6 +44,18 @@ constexpr uint32_t SAID = 1499;
 constexpr int64_t DEFAULT_EVENTID = 0;
 constexpr int32_t INVALID_SAID = -1;
 constexpr uint32_t INVALID_CODE = 50;
+
+void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
+{
+    saMgr->abilityDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityDeathRecipient());
+    saMgr->systemProcessDeath_ = sptr<IRemoteObject::DeathRecipient>(new SystemProcessDeathRecipient());
+    saMgr->abilityStatusDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityStatusDeathRecipient());
+    saMgr->abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityCallbackDeathRecipient());
+    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
+    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+}
 }
 
 void SystemProcessStatusChange::OnSystemProcessStarted(SystemProcessInfo& systemProcessInfo)
@@ -57,8 +70,8 @@ void SystemProcessStatusChange::OnSystemProcessStopped(SystemProcessInfo& system
 
 void SystemAbilityMgrStubTest::SetUpTestCase()
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     saMgr->abilityStateScheduler_->Init(saProfiles);
@@ -80,10 +93,9 @@ void SystemAbilityMgrStubTest::TearDown()
     DTEST_LOG << "TearDown" << std::endl;
 }
 
-void SystemAbilityMgrStubTest::AddSystemAbilityContext(int32_t systemAbilityId, const std::u16string& processName)
+void SystemAbilityMgrStubTest::AddSystemAbilityContext(int32_t systemAbilityId, const std::u16string& processName,
+    sptr<SystemAbilityManager>& saMgr)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
     EXPECT_TRUE(saMgr->abilityStateScheduler_ != nullptr);
     std::unique_lock<std::shared_mutex> processWriteLock(saMgr->abilityStateScheduler_->processMapLock_);
     if (saMgr->abilityStateScheduler_->processContextMap_.count(processName) == 0) {
@@ -109,8 +121,8 @@ void SystemAbilityMgrStubTest::AddSystemAbilityContext(int32_t systemAbilityId, 
 
 HWTEST_F(SystemAbilityMgrStubTest, OnRemoteRequest001, TestSize.Level4)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN);
     MessageParcel reply;
@@ -121,8 +133,8 @@ HWTEST_F(SystemAbilityMgrStubTest, OnRemoteRequest001, TestSize.Level4)
 
 HWTEST_F(SystemAbilityMgrStubTest, ListSystemAbilityInner001, TestSize.Level4)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     int32_t result = saMgr->ListSystemAbilityInner(data, reply);
@@ -131,8 +143,8 @@ HWTEST_F(SystemAbilityMgrStubTest, ListSystemAbilityInner001, TestSize.Level4)
 
 HWTEST_F(SystemAbilityMgrStubTest, SubsSystemAbilityInner001, TestSize.Level4)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     int32_t result = saMgr->SubsSystemAbilityInner(data, reply);
@@ -141,8 +153,8 @@ HWTEST_F(SystemAbilityMgrStubTest, SubsSystemAbilityInner001, TestSize.Level4)
 
 HWTEST_F(SystemAbilityMgrStubTest, UnSubsSystemAbilityInner001, TestSize.Level4)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     int32_t result = saMgr->UnSubsSystemAbilityInner(data, reply);
@@ -151,8 +163,8 @@ HWTEST_F(SystemAbilityMgrStubTest, UnSubsSystemAbilityInner001, TestSize.Level4)
 
 HWTEST_F(SystemAbilityMgrStubTest, CheckRemtSystemAbilityInner001, TestSize.Level4)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     int32_t result = saMgr->CheckRemtSystemAbilityInner(data, reply);
@@ -161,8 +173,8 @@ HWTEST_F(SystemAbilityMgrStubTest, CheckRemtSystemAbilityInner001, TestSize.Leve
 
 HWTEST_F(SystemAbilityMgrStubTest, AddOndemandSystemAbilityInner001, TestSize.Level4)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     int32_t result = saMgr->AddOndemandSystemAbilityInner(data, reply);
@@ -171,8 +183,8 @@ HWTEST_F(SystemAbilityMgrStubTest, AddOndemandSystemAbilityInner001, TestSize.Le
 
 HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbilityInner001, TestSize.Level4)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     int32_t result = saMgr->RemoveSystemAbilityInner(data, reply);
@@ -182,8 +194,8 @@ HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbilityInner001, TestSize.Level4)
 HWTEST_F(SystemAbilityMgrStubTest, GetSystemProcessInfoInner001, TestSize.Level3)
 {
     DTEST_LOG << "GetSystemProcessInfoInner001" << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    MessageParcel data;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);    MessageParcel data;
     MessageParcel reply;
     int32_t ret = saMgr->GetSystemProcessInfoInner(data, reply);
     EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
@@ -192,7 +204,8 @@ HWTEST_F(SystemAbilityMgrStubTest, GetSystemProcessInfoInner001, TestSize.Level3
 HWTEST_F(SystemAbilityMgrStubTest, GetRunningSystemProcessInner001, TestSize.Level3)
 {
     DTEST_LOG << "GetRunningSystemProcessInner001" << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     int32_t ret = saMgr->GetRunningSystemProcessInner(data, reply);
@@ -202,7 +215,8 @@ HWTEST_F(SystemAbilityMgrStubTest, GetRunningSystemProcessInner001, TestSize.Lev
 HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemProcessInner001, TestSize.Level3)
 {
     DTEST_LOG << "UnSubscribeSystemProcessInner001" << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     int32_t ret = saMgr->UnSubscribeSystemProcessInner(data, reply);
@@ -212,7 +226,8 @@ HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemProcessInner001, TestSize.Le
 HWTEST_F(SystemAbilityMgrStubTest, GetOnDemandPolicyInner001, TestSize.Level3)
 {
     DTEST_LOG << "GetOnDemandPolicyInner001" << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     int32_t ret = saMgr->GetOnDemandPolicyInner(data, reply);
@@ -228,7 +243,8 @@ HWTEST_F(SystemAbilityMgrStubTest, GetOnDemandPolicyInner001, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrStubTest, UpdateOnDemandPolicyInner001, TestSize.Level3)
 {
     DTEST_LOG << "UpdateOnDemandPolicyInner001" << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     int32_t ret = saMgr->UpdateOnDemandPolicyInner(data, reply);
@@ -243,7 +259,8 @@ HWTEST_F(SystemAbilityMgrStubTest, UpdateOnDemandPolicyInner001, TestSize.Level3
  */
 HWTEST_F(SystemAbilityMgrStubTest, GetOnDemandReasonExtraDataInner001, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     int32_t ret = saMgr->GetOnDemandReasonExtraDataInner(data, reply);
@@ -258,7 +275,8 @@ HWTEST_F(SystemAbilityMgrStubTest, GetOnDemandReasonExtraDataInner001, TestSize.
  */
 HWTEST_F(SystemAbilityMgrStubTest, GetExtensionSaIdsInner001, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     int32_t ret = saMgr->GetExtensionSaIdsInner(data, reply);
@@ -273,7 +291,8 @@ HWTEST_F(SystemAbilityMgrStubTest, GetExtensionSaIdsInner001, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrStubTest, GetExtensionRunningSaListInner001, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     int32_t ret = saMgr->GetExtensionRunningSaListInner(data, reply);
@@ -288,7 +307,8 @@ HWTEST_F(SystemAbilityMgrStubTest, GetExtensionRunningSaListInner001, TestSize.L
  */
 HWTEST_F(SystemAbilityMgrStubTest, GetCommonEventExtraDataIdlistInner001, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     int32_t ret = saMgr->GetCommonEventExtraDataIdlistInner(data, reply);
@@ -303,8 +323,8 @@ HWTEST_F(SystemAbilityMgrStubTest, GetCommonEventExtraDataIdlistInner001, TestSi
 HWTEST_F(SystemAbilityMgrStubTest, ListSystemAbilityInner002, TestSize.Level3)
 {
     SamMockPermission::MockPermission();
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     int32_t result = saMgr->ListSystemAbilityInner(data, reply);
@@ -318,8 +338,8 @@ HWTEST_F(SystemAbilityMgrStubTest, ListSystemAbilityInner002, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrStubTest, ListSystemAbilityInner003, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     int32_t invalidDump = 1;
@@ -335,7 +355,8 @@ HWTEST_F(SystemAbilityMgrStubTest, ListSystemAbilityInner003, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrStubTest, ListSystemAbilityInner004, TestSize.Level1)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     SAInfo saInfo;
     saMgr->abilityMap_[SAID] = saInfo;
     EXPECT_TRUE(saMgr != nullptr);
@@ -354,8 +375,8 @@ HWTEST_F(SystemAbilityMgrStubTest, ListSystemAbilityInner004, TestSize.Level1)
  */
 HWTEST_F(SystemAbilityMgrStubTest, CheckRemtSystemAbilityInner002, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     data.WriteInt32(INVALID_SAID);
@@ -370,8 +391,8 @@ HWTEST_F(SystemAbilityMgrStubTest, CheckRemtSystemAbilityInner002, TestSize.Leve
  */
 HWTEST_F(SystemAbilityMgrStubTest, CheckRemtSystemAbilityInner003, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     data.WriteInt32(SAID);
@@ -386,8 +407,8 @@ HWTEST_F(SystemAbilityMgrStubTest, CheckRemtSystemAbilityInner003, TestSize.Leve
  */
 HWTEST_F(SystemAbilityMgrStubTest, CheckRemtSystemAbilityInner004, TestSize.Level1)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     data.WriteInt32(SAID);
@@ -404,8 +425,8 @@ HWTEST_F(SystemAbilityMgrStubTest, CheckRemtSystemAbilityInner004, TestSize.Leve
  */
 HWTEST_F(SystemAbilityMgrStubTest, AddOndemandSystemAbilityInner002, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     data.WriteInt32(INVALID_SAID);
@@ -420,8 +441,8 @@ HWTEST_F(SystemAbilityMgrStubTest, AddOndemandSystemAbilityInner002, TestSize.Le
  */
 HWTEST_F(SystemAbilityMgrStubTest, AddOndemandSystemAbilityInner003, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     data.WriteInt32(SAID);
@@ -436,8 +457,8 @@ HWTEST_F(SystemAbilityMgrStubTest, AddOndemandSystemAbilityInner003, TestSize.Le
  */
 HWTEST_F(SystemAbilityMgrStubTest, AddOndemandSystemAbilityInner004, TestSize.Level1)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     data.WriteInt32(SAID);
@@ -454,8 +475,8 @@ HWTEST_F(SystemAbilityMgrStubTest, AddOndemandSystemAbilityInner004, TestSize.Le
  */
 HWTEST_F(SystemAbilityMgrStubTest, UnmarshalingSaExtraProp001, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     SystemAbilityManager::SAExtraProp extraProp;
     int32_t result = saMgr->UnmarshalingSaExtraProp(data, extraProp);
@@ -469,8 +490,8 @@ HWTEST_F(SystemAbilityMgrStubTest, UnmarshalingSaExtraProp001, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrStubTest, UnmarshalingSaExtraProp002, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     SystemAbilityManager::SAExtraProp extraProp;
     data.WriteBool(false);
@@ -485,8 +506,8 @@ HWTEST_F(SystemAbilityMgrStubTest, UnmarshalingSaExtraProp002, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrStubTest, CheckSystemAbilityImmeInner001, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     data.WriteInt32(INVALID_SAID);
@@ -501,8 +522,8 @@ HWTEST_F(SystemAbilityMgrStubTest, CheckSystemAbilityImmeInner001, TestSize.Leve
  */
 HWTEST_F(SystemAbilityMgrStubTest, CheckSystemAbilityImmeInner002, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     data.WriteInt32(SAID);
@@ -517,8 +538,8 @@ HWTEST_F(SystemAbilityMgrStubTest, CheckSystemAbilityImmeInner002, TestSize.Leve
  */
 HWTEST_F(SystemAbilityMgrStubTest, CheckSystemAbilityImmeInner003, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     data.WriteInt32(SAID);
@@ -534,8 +555,8 @@ HWTEST_F(SystemAbilityMgrStubTest, CheckSystemAbilityImmeInner003, TestSize.Leve
  */
 HWTEST_F(SystemAbilityMgrStubTest, GetSystemAbilityInner001, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     int32_t result = saMgr->GetSystemAbilityInner(data, reply);
@@ -549,8 +570,8 @@ HWTEST_F(SystemAbilityMgrStubTest, GetSystemAbilityInner001, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrStubTest, CheckSystemAbilityInner001, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     int32_t result = saMgr->CheckSystemAbilityInner(data, reply);
@@ -564,8 +585,8 @@ HWTEST_F(SystemAbilityMgrStubTest, CheckSystemAbilityInner001, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrStubTest, AddSystemAbilityInner002, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     data.WriteInt32(INVALID_SAID);
@@ -580,8 +601,8 @@ HWTEST_F(SystemAbilityMgrStubTest, AddSystemAbilityInner002, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrStubTest, AddSystemAbilityInner003, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     data.WriteInt32(SAID);
@@ -596,7 +617,8 @@ HWTEST_F(SystemAbilityMgrStubTest, AddSystemAbilityInner003, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrStubTest, AddSystemAbilityInner004, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
     EXPECT_TRUE(saMgr != nullptr);
     MessageParcel data;
@@ -614,7 +636,8 @@ HWTEST_F(SystemAbilityMgrStubTest, AddSystemAbilityInner004, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrStubTest, AddSystemAbilityInner005, TestSize.Level1)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
     EXPECT_TRUE(saMgr != nullptr);
     SystemAbilityManager::SAExtraProp extraProp;
@@ -643,7 +666,8 @@ HWTEST_F(SystemAbilityMgrStubTest, AddSystemAbilityInner005, TestSize.Level1)
 HWTEST_F(SystemAbilityMgrStubTest, GetSystemProcessInfoInner002, TestSize.Level3)
 {
     DTEST_LOG << "GetSystemProcessInfoInner002" << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     data.WriteInt32(INVALID_SAID);
@@ -660,7 +684,8 @@ HWTEST_F(SystemAbilityMgrStubTest, GetSystemProcessInfoInner002, TestSize.Level3
 HWTEST_F(SystemAbilityMgrStubTest, GetSystemProcessInfoInner003, TestSize.Level3)
 {
     DTEST_LOG << "GetSystemProcessInfoInner003" << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     int32_t systemAbilityId = -1;
@@ -675,8 +700,8 @@ HWTEST_F(SystemAbilityMgrStubTest, GetSystemProcessInfoInner003, TestSize.Level3
  */
 HWTEST_F(SystemAbilityMgrStubTest, AddSystemProcessInner002, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     int32_t result = saMgr->AddSystemProcessInner(data, reply);
@@ -690,8 +715,8 @@ HWTEST_F(SystemAbilityMgrStubTest, AddSystemProcessInner002, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrStubTest, AddSystemProcessInner003, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     std::u16string procName = u"test";
@@ -707,8 +732,8 @@ HWTEST_F(SystemAbilityMgrStubTest, AddSystemProcessInner003, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrStubTest, AddSystemProcessInner004, TestSize.Level1)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
     MessageParcel data;
     MessageParcel reply;
@@ -728,7 +753,8 @@ HWTEST_F(SystemAbilityMgrStubTest, AddSystemProcessInner004, TestSize.Level1)
 HWTEST_F(SystemAbilityMgrStubTest, GetRunningSystemProcessInner002, TestSize.Level3)
 {
     DTEST_LOG << "GetRunningSystemProcessInner002" << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     int32_t ret = saMgr->GetRunningSystemProcessInner(data, reply);
@@ -744,7 +770,8 @@ HWTEST_F(SystemAbilityMgrStubTest, GetRunningSystemProcessInner002, TestSize.Lev
 HWTEST_F(SystemAbilityMgrStubTest, SubscribeSystemProcessInner002, TestSize.Level3)
 {
     DTEST_LOG << "SubscribeSystemProcessInner002" << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     data.WriteRemoteObject(nullptr);
     MessageParcel reply;
@@ -761,7 +788,8 @@ HWTEST_F(SystemAbilityMgrStubTest, SubscribeSystemProcessInner002, TestSize.Leve
 HWTEST_F(SystemAbilityMgrStubTest, SubscribeSystemProcessInner003, TestSize.Level3)
 {
     DTEST_LOG << "SubscribeSystemProcessInner003" << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     sptr<IRemoteObject> ptr = new SystemProcessStatusChange();
     data.WriteRemoteObject(ptr);
@@ -777,8 +805,8 @@ HWTEST_F(SystemAbilityMgrStubTest, SubscribeSystemProcessInner003, TestSize.Leve
  */
 HWTEST_F(SystemAbilityMgrStubTest, SendStrategyInner001, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     int32_t result = saMgr->SendStrategyInner(data, reply);
