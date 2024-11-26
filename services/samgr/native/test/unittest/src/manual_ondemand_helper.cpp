@@ -29,7 +29,9 @@
 #include "isystem_ability_load_callback.h"
 #include "nativetoken_kit.h"
 #include "sam_mock_permission.h"
+#ifdef SUPPORT_SOFTBUS
 #include "softbus_bus_center.h"
+#endif
 #include "system_ability_ondemand_reason.h"
 #include "system_ability_definition.h"
 #include "token_setproc.h"
@@ -805,6 +807,7 @@ int32_t OnDemandHelper::UnloadAllIdleSystemAbility()
     return ERR_OK;
 }
 
+#ifdef SUPPORT_SOFTBUS
 void OnDemandHelper::GetDeviceList()
 {
     NodeBasicInfo *info = NULL;
@@ -836,6 +839,7 @@ std::string OnDemandHelper::GetFirstDevice()
     }
     return std::string(info->networkId);
 }
+#endif
 
 int32_t OnDemandHelper::LoadRemoteAbility(int32_t systemAbilityId, const std::string& deviceId,
     const sptr<ISystemAbilityLoadCallback>& callback)
@@ -1164,13 +1168,16 @@ static void TestSystemAbility(OHOS::OnDemandHelper& ondemandHelper)
     cout << "please input sa test case(get/load/unload/syncload/getinfo)" << endl;
     cin >> cmd;
     int32_t systemAbilityId = 0;
+#ifdef SUPPORT_SOFTBUS
     std::string deviceId = ondemandHelper.GetFirstDevice();
+#endif
     cout << "please input systemAbilityId for " << cmd << " operation" << endl;
     cin >> systemAbilityId;
     if (cmd == "get") {
         ondemandHelper.GetSystemAbility(systemAbilityId);
     } else if (cmd == "load") {
         ondemandHelper.OnDemandAbility(systemAbilityId);
+#ifdef SUPPORT_SOFTBUS
     } else if (cmd == "device") { // get remote networkid
         ondemandHelper.GetDeviceList();
     } else if (cmd == "loadrmt1") { // single thread with one device, one system ability, one callback
@@ -1194,6 +1201,7 @@ static void TestSystemAbility(OHOS::OnDemandHelper& ondemandHelper)
         ondemandHelper.LoadRemoteAbility(otherSystemAbilityId, otherDevice, nullptr);
     } else if (cmd == "loadmuti") {
         ondemandHelper.LoadRemoteAbilityPressure(systemAbilityId, deviceId);
+#endif
     } else if (cmd == "unload") {
         ondemandHelper.UnloadSystemAbility(systemAbilityId);
     } else if (cmd == "getinfo") {
@@ -1501,12 +1509,15 @@ static void TestGetExtension(OHOS::OnDemandHelper& ondemandHelper)
 
 static void TestCheckSystemAbility(OHOS::OnDemandHelper& ondemandHelper)
 {
+#ifdef SUPPORT_SOFTBUS
     std::string cmd = "";
     cout << "please input check case(local/remote)" << endl;
     cin >> cmd;
+#endif
     int32_t saId = 0;
-    cout << "please input systemAbilityId for " << cmd << " operation" << endl;
+    cout << "please input systemAbilityId" << endl;
     cin >> saId;
+#ifdef SUPPORT_SOFTBUS
     if (cmd == "local") {
         ondemandHelper.CheckSystemAbility(saId);
     } else if (cmd == "remote") {
@@ -1515,6 +1526,9 @@ static void TestCheckSystemAbility(OHOS::OnDemandHelper& ondemandHelper)
     } else {
         cout << "invalid input" << endl;
     }
+#else
+    ondemandHelper.CheckSystemAbility(saId);
+#endif
 }
 
 static void TestIntCommand(OHOS::OnDemandHelper& ondemandHelper, string& cmd)
