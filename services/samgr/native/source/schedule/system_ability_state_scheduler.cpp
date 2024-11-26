@@ -90,6 +90,13 @@ void SystemAbilityStateScheduler::SetFfrt()
     }
 }
 
+void SystemAbilityStateScheduler::CleanResource()
+{
+    std::unique_lock<std::shared_mutex> abiltyWriteLock(abiltyMapLock_);
+    HILOGI("Scheduler CleanResource");
+    abilityContextMap_.clear();
+}
+
 void SystemAbilityStateScheduler::InitStateContext(const std::list<SaProfile>& saProfiles)
 {
     for (auto& saProfile : saProfiles) {

@@ -182,6 +182,38 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemAbilityContext004, TestSize.L
 }
 
 /**
+ * @tc.name: GetSystemAbilityContext005
+ * @tc.desc: test GetSystemAbilityContext while cleaning up the systemAbilityContext map
+ * @tc.type: FUNC
+ * @tc.require: I6FDNZ
+ */
+HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemAbilityContext005, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    for (int i = 0; i < 100; i++) {
+        saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+        std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
+        saMgr->abilityStateScheduler_->abilityContextMap_[SAID] = systemAbilityContext;
+        auto getSystemAbilityContextTask = [saMgr] {
+            std::shared_ptr<SystemAbilityContext> abilityContext;
+            saMgr->abilityStateScheduler_->GetSystemAbilityContext(SAID, abilityContext);
+            if (abilityContext == nullptr) {
+                DTEST_LOG << "abilityContext not exist" << std::endl;
+            }
+        };
+        auto ClearSystemAbilityStateScheduler = [saMgr] {
+            saMgr->abilityStateScheduler_->CleanResource();
+        };
+        std::thread thread1(getSystemAbilityContextTask);
+        std::thread thread2(ClearSystemAbilityStateScheduler);
+        thread1.join();
+        thread2.join();
+    }
+    saMgr->abilityStateScheduler_.reset();
+    EXPECT_EQ(saMgr->abilityStateScheduler_, nullptr);
+}
+
+/**
  * @tc.name: IsSystemAbilityUnloading001
  * @tc.desc: test IsSystemAbilityUnloading with invalid systemAbilityID
  * @tc.type: FUNC
