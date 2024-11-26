@@ -35,10 +35,14 @@ class SystemAbilityStateScheduler : public SystemAbilityStateListener,
     public std::enable_shared_from_this<SystemAbilityStateScheduler> {
 public:
     SystemAbilityStateScheduler() = default;
-    virtual ~SystemAbilityStateScheduler() = default;
+    virtual ~SystemAbilityStateScheduler()
+    {
+        CleanResource();
+    }
     void Init(const std::list<SaProfile>& saProfiles);
     void CleanFfrt();
     void SetFfrt();
+    void CleanResource();
 
     int32_t HandleAbilityDiedEvent(int32_t systemAbilityId);
     int32_t HandleLoadAbilityEvent(const LoadRequestInfo& loadRequestInfo);
