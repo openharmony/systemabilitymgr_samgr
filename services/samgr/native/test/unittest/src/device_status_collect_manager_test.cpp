@@ -192,6 +192,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, SortSaControlListByLoadPriority001, Tes
     collect->SortSaControlListByLoadPriority(saControlList);
     EXPECT_EQ(1, saControlList.front().loadPriority);
     EXPECT_EQ(2, saControlList.back().loadPriority);
+    DTEST_LOG << " SaControlListByEvent001 END" << std::endl;
 }
 
 /**
@@ -236,6 +237,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, UnInit001, TestSize.Level3)
  */
 HWTEST_F(DeviceStatusCollectManagerTest, GetSaExtraDataIdList001, TestSize.Level3)
 {
+    DTEST_LOG << " GetSaExtraDataIdList001 BEGIN" << std::endl;
     OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
     std::list<SaControlInfo> saControlList;
     collect->SaveCacheCommonEventSaExtraId(event, saControlList);
@@ -251,6 +253,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, GetSaExtraDataIdList001, TestSize.Level
 
     ret = collect->GetSaExtraDataIdList(1, extraDataIdList, "");
     EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << " GetSaExtraDataIdList001 END" << std::endl;
 }
 
 /**
@@ -387,11 +390,13 @@ HWTEST_F(DeviceStatusCollectManagerTest, CheckExtraMessages001, TestSize.Level3)
  */
 HWTEST_F(DeviceStatusCollectManagerTest, CheckExtraMessages002, TestSize.Level3)
 {
+    DTEST_LOG << " CheckExtraMessages002 BEGIN" << std::endl;
     collect->collectPluginMap_.clear();
     OnDemandEvent event;
     event.eventId = COMMON_EVENT;
     int32_t ret = collect->CheckExtraMessages(event, event);
     EXPECT_EQ(ret, false);
+    DTEST_LOG << " CheckExtraMessages002 END" << std::endl;
 }
 
 /**
@@ -402,6 +407,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, CheckExtraMessages002, TestSize.Level3)
  */
 HWTEST_F(DeviceStatusCollectManagerTest, CheckExtraMessages003, TestSize.Level3)
 {
+    DTEST_LOG << " CheckExtraMessages003 BEGIN" << std::endl;
     collect->collectPluginMap_.clear();
     collect->collectPluginMap_[COMMON_EVENT] = nullptr;
     collect->RemoveWhiteCommonEvent();
@@ -409,6 +415,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, CheckExtraMessages003, TestSize.Level3)
     event.eventId = COMMON_EVENT;
     int32_t ret = collect->CheckExtraMessages(event, event);
     EXPECT_EQ(ret, false);
+    DTEST_LOG << " CheckExtraMessages003 END" << std::endl;
 }
 
 /**
@@ -734,10 +741,12 @@ HWTEST_F(DeviceStatusCollectManagerTest, UpdateOnDemandEvents003, TestSize.Level
  */
 HWTEST_F(DeviceStatusCollectManagerTest, GetOnDemandReasonExtraData001, TestSize.Level3)
 {
+    DTEST_LOG << "GetOnDemandReasonExtraData001 begin" << std::endl;
     collect->collectPluginMap_.clear();
     OnDemandReasonExtraData onDemandReasonExtraData;
     int32_t ret = collect->GetOnDemandReasonExtraData(EXTRA_ID, onDemandReasonExtraData);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "GetOnDemandReasonExtraData001 end" << std::endl;
 }
 
 /**
@@ -748,11 +757,13 @@ HWTEST_F(DeviceStatusCollectManagerTest, GetOnDemandReasonExtraData001, TestSize
  */
 HWTEST_F(DeviceStatusCollectManagerTest, GetOnDemandReasonExtraData002, TestSize.Level3)
 {
+    DTEST_LOG << "GetOnDemandReasonExtraData002 begin" << std::endl;
     collect->collectPluginMap_.clear();
     collect->collectPluginMap_[COMMON_EVENT] = nullptr;
     OnDemandReasonExtraData onDemandReasonExtraData;
     int32_t ret = collect->GetOnDemandReasonExtraData(EXTRA_ID, onDemandReasonExtraData);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "GetOnDemandReasonExtraData002 end" << std::endl;
 }
 
 /**
@@ -763,12 +774,14 @@ HWTEST_F(DeviceStatusCollectManagerTest, GetOnDemandReasonExtraData002, TestSize
  */
 HWTEST_F(DeviceStatusCollectManagerTest, GetOnDemandReasonExtraData003, TestSize.Level3)
 {
+    DTEST_LOG << "GetOnDemandReasonExtraData003 begin" << std::endl;
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
     collect->collectPluginMap_.clear();
     collect->collectPluginMap_[COMMON_EVENT] = commonEventCollect;
     OnDemandReasonExtraData onDemandReasonExtraData;
     int32_t ret = collect->GetOnDemandReasonExtraData(EXTRA_ID, onDemandReasonExtraData);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "GetOnDemandReasonExtraData003 end" << std::endl;
 }
 
 /**
@@ -779,6 +792,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, GetOnDemandReasonExtraData003, TestSize
  */
 HWTEST_F(DeviceStatusCollectManagerTest, GetOnDemandReasonExtraData004, TestSize.Level3)
 {
+    DTEST_LOG << "GetOnDemandReasonExtraData004 begin" << std::endl;
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
     commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
     EventFwk::CommonEventData eventData;
@@ -788,6 +802,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, GetOnDemandReasonExtraData004, TestSize
     OnDemandReasonExtraData onDemandReasonExtraData;
     int32_t ret = collect->GetOnDemandReasonExtraData(EXTRA_ID, onDemandReasonExtraData);
     EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "GetOnDemandReasonExtraData004 end" << std::endl;
 }
 
 /**
@@ -798,11 +813,13 @@ HWTEST_F(DeviceStatusCollectManagerTest, GetOnDemandReasonExtraData004, TestSize
  */
 HWTEST_F(DeviceStatusCollectManagerTest, AddCollectEvents004, TestSize.Level3)
 {
+    DTEST_LOG << "AddCollectEvents004 begin" << std::endl;
     collect->collectPluginMap_[SETTING_SWITCH] = nullptr;
     OnDemandEvent onDemandEvent = { SETTING_SWITCH, WIFI_NAME, "on" };
     std::vector<OnDemandEvent> events {onDemandEvent};
     int32_t ret = collect->AddCollectEvents(events);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "AddCollectEvents004 end" << std::endl;
 }
 
 /**
@@ -813,6 +830,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, AddCollectEvents004, TestSize.Level3)
  */
 HWTEST_F(DeviceStatusCollectManagerTest, AddCollectEvents005, TestSize.Level3)
 {
+    DTEST_LOG << "AddCollectEvents005 begin" << std::endl;
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     collect->collectPluginMap_[SETTING_SWITCH] = deviceSwitchCollect;
@@ -820,6 +838,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, AddCollectEvents005, TestSize.Level3)
     std::vector<OnDemandEvent> events {onDemandEvent};
     int32_t ret = collect->AddCollectEvents(events);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "AddCollectEvents005 end" << std::endl;
 }
 
 /**
@@ -830,9 +849,11 @@ HWTEST_F(DeviceStatusCollectManagerTest, AddCollectEvents005, TestSize.Level3)
  */
 HWTEST_F(DeviceStatusCollectManagerTest, RemoveUnusedEventsLocked001, TestSize.Level3)
 {
+    DTEST_LOG << "RemoveUnusedEventsLocked001 begin" << std::endl;
     std::vector<OnDemandEvent> events;
     int32_t ret = collect->RemoveUnusedEventsLocked(events);
     EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "RemoveUnusedEventsLocked001 end" << std::endl;
 }
 
 /**
@@ -843,10 +864,12 @@ HWTEST_F(DeviceStatusCollectManagerTest, RemoveUnusedEventsLocked001, TestSize.L
  */
 HWTEST_F(DeviceStatusCollectManagerTest, RemoveUnusedEventsLocked002, TestSize.Level3)
 {
+    DTEST_LOG << "RemoveUnusedEventsLocked002 begin" << std::endl;
     OnDemandEvent onDemandEvent = {-1, WIFI_NAME, "on"};
     std::vector<OnDemandEvent> events {onDemandEvent};
     int32_t ret = collect->RemoveUnusedEventsLocked(events);
     EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "RemoveUnusedEventsLocked002 end" << std::endl;
 }
 
 /**
@@ -857,11 +880,13 @@ HWTEST_F(DeviceStatusCollectManagerTest, RemoveUnusedEventsLocked002, TestSize.L
  */
 HWTEST_F(DeviceStatusCollectManagerTest, RemoveUnusedEventsLocked003, TestSize.Level3)
 {
+    DTEST_LOG << "RemoveUnusedEventsLocked003 begin" << std::endl;
     collect->collectPluginMap_[SETTING_SWITCH] = nullptr;
     OnDemandEvent onDemandEvent = { SETTING_SWITCH, WIFI_NAME, "on" };
     std::vector<OnDemandEvent> events {onDemandEvent};
     int32_t ret = collect->RemoveUnusedEventsLocked(events);
     EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "RemoveUnusedEventsLocked003 end" << std::endl;
 }
 
 /**
@@ -872,6 +897,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, RemoveUnusedEventsLocked003, TestSize.L
  */
 HWTEST_F(DeviceStatusCollectManagerTest, RemoveUnusedEventsLocked004, TestSize.Level3)
 {
+    DTEST_LOG << "RemoveUnusedEventsLocked004 begin" << std::endl;
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     collect->collectPluginMap_[SETTING_SWITCH] = deviceSwitchCollect;
@@ -879,6 +905,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, RemoveUnusedEventsLocked004, TestSize.L
     std::vector<OnDemandEvent> events {onDemandEvent};
     int32_t ret = collect->RemoveUnusedEventsLocked(events);
     EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "RemoveUnusedEventsLocked004 end" << std::endl;
 }
 
 /**
@@ -889,6 +916,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, RemoveUnusedEventsLocked004, TestSize.L
  */
 HWTEST_F(DeviceStatusCollectManagerTest, TypeAndSaidToString001, TestSize.Level3)
 {
+    DTEST_LOG << "TypeAndSaidToString001 begin" << std::endl;
     OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
     std::string str = collect->TypeAndSaidToString(type, 1);
     EXPECT_EQ(str, "start#1#");
@@ -896,6 +924,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, TypeAndSaidToString001, TestSize.Level3
     type = OnDemandPolicyType::STOP_POLICY;
     str = collect->TypeAndSaidToString(type, 1);
     EXPECT_EQ(str, "stop#1#");
+    DTEST_LOG << "TypeAndSaidToString001 end" << std::endl;
 }
 
 /**
@@ -906,6 +935,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, TypeAndSaidToString001, TestSize.Level3
  */
 HWTEST_F(DeviceStatusCollectManagerTest, StringToTypeAndSaid001, TestSize.Level3)
 {
+    DTEST_LOG << "StringToTypeAndSaid001 begin" << std::endl;
     OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
     int32_t said = 0;
     collect->StringToTypeAndSaid("start#1#", type, said);
@@ -924,6 +954,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, StringToTypeAndSaid001, TestSize.Level3
     said = 0;
     collect->StringToTypeAndSaid("start#", type, said);
     EXPECT_EQ(said, 0);
+    DTEST_LOG << "StringToTypeAndSaid001 end" << std::endl;
 }
 
 /**
@@ -934,6 +965,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, StringToTypeAndSaid001, TestSize.Level3
  */
 HWTEST_F(DeviceStatusCollectManagerTest, NeedPersistOnDemandEvent001, TestSize.Level3)
 {
+    DTEST_LOG << "NeedPersistOnDemandEvent001 begin" << std::endl;
     OnDemandEvent onDemandEvent = { SETTING_SWITCH, "test", "on" };
     bool ret = collect->NeedPersistOnDemandEvent(onDemandEvent);
     EXPECT_EQ(ret, false);
@@ -952,6 +984,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, NeedPersistOnDemandEvent001, TestSize.L
     onDemandEvent.persistence = true;
     ret = collect->NeedPersistOnDemandEvent(onDemandEvent);
     EXPECT_EQ(ret, true);
+    DTEST_LOG << "NeedPersistOnDemandEvent001 end" << std::endl;
 }
 
 /**
@@ -962,10 +995,12 @@ HWTEST_F(DeviceStatusCollectManagerTest, NeedPersistOnDemandEvent001, TestSize.L
  */
 HWTEST_F(DeviceStatusCollectManagerTest, IsSameEventName001, TestSize.Level3)
 {
+    DTEST_LOG << "IsSameEventName001 begin" << std::endl;
     OnDemandEvent event1 = { SETTING_SWITCH, "test", "on" };
     OnDemandEvent event2 = { SETTING_SWITCH, "test", "off" };
     bool ret = collect->IsSameEventName(event1, event2);
     EXPECT_EQ(ret, true);
+    DTEST_LOG << "IsSameEventName001 end" << std::endl;
 }
 
 /**
@@ -976,10 +1011,12 @@ HWTEST_F(DeviceStatusCollectManagerTest, IsSameEventName001, TestSize.Level3)
  */
 HWTEST_F(DeviceStatusCollectManagerTest, IsSameEventName002, TestSize.Level3)
 {
+    DTEST_LOG << "IsSameEventName002 begin" << std::endl;
     OnDemandEvent event1 = { SETTING_SWITCH, "test", "on" };
     OnDemandEvent event2 = { SETTING_SWITCH, "test1", "off" };
     bool ret = collect->IsSameEventName(event1, event2);
     EXPECT_EQ(ret, false);
+    DTEST_LOG << "IsSameEventName002 end" << std::endl;
 }
 
 /**
@@ -990,10 +1027,12 @@ HWTEST_F(DeviceStatusCollectManagerTest, IsSameEventName002, TestSize.Level3)
  */
 HWTEST_F(DeviceStatusCollectManagerTest, IsSameEventName003, TestSize.Level3)
 {
+    DTEST_LOG << "IsSameEventName003 begin" << std::endl;
     OnDemandEvent event1 = { TIMED_EVENT, "loopevent", "60" };
     OnDemandEvent event2 = { TIMED_EVENT, "loopevent", "60" };
     bool ret = collect->IsSameEventName(event1, event2);
     EXPECT_EQ(ret, true);
+    DTEST_LOG << "IsSameEventName003 end" << std::endl;
 }
 
 /**
@@ -1004,10 +1043,12 @@ HWTEST_F(DeviceStatusCollectManagerTest, IsSameEventName003, TestSize.Level3)
  */
 HWTEST_F(DeviceStatusCollectManagerTest, IsSameEventName004, TestSize.Level3)
 {
+    DTEST_LOG << "IsSameEventName004 begin" << std::endl;
     OnDemandEvent event1 = { TIMED_EVENT, "loopevent", "60" };
     OnDemandEvent event2 = { TIMED_EVENT, "loopevent", "30" };
     bool ret = collect->IsSameEventName(event1, event2);
     EXPECT_EQ(ret, false);
+    DTEST_LOG << "IsSameEventName004 end" << std::endl;
 }
 
 /**
@@ -1017,6 +1058,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, IsSameEventName004, TestSize.Level3)
  */
 HWTEST_F(DeviceStatusCollectManagerTest, CheckEventUsedLocked001, TestSize.Level3)
 {
+    DTEST_LOG << "CheckEventUsedLocked001 begin" << std::endl;
     SaProfile saProfile;
     OnDemandEvent event1 = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
     OnDemandEvent event2 = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "off" };
@@ -1027,6 +1069,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, CheckEventUsedLocked001, TestSize.Level
     collect->FilterOnDemandSaProfiles(saProfiles);
     bool ret = collect->CheckEventUsedLocked(event1);
     EXPECT_EQ(ret, true);
+    DTEST_LOG << "CheckEventUsedLocked001 end" << std::endl;
 }
 
 /**
@@ -1036,10 +1079,12 @@ HWTEST_F(DeviceStatusCollectManagerTest, CheckEventUsedLocked001, TestSize.Level
  */
 HWTEST_F(DeviceStatusCollectManagerTest, CheckEventUsedLocked002, TestSize.Level3)
 {
+    DTEST_LOG << "CheckEventUsedLocked002 begin" << std::endl;
     collect->onDemandSaProfiles_.clear();
     OnDemandEvent event1 = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
     bool ret = collect->CheckEventUsedLocked(event1);
     EXPECT_EQ(ret, false);
+    DTEST_LOG << "CheckEventUsedLocked001 end" << std::endl;
 }
 
 #ifdef PREFERENCES_ENABLE
