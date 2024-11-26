@@ -78,7 +78,7 @@ void DeviceSwitchCollectTest::TearDown()
 
 HWTEST_F(DeviceSwitchCollectTest, InitCommonEventSubscriber001, TestSize.Level3)
 {
-    DTEST_LOG << "InitCommonEventSubscriber001 begin" << std::endl;    InitSaMgr(saMgr);
+    DTEST_LOG << "InitCommonEventSubscriber001 begin" << std::endl;    
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
