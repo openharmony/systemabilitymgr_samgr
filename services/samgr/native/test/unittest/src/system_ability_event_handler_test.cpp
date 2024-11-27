@@ -81,6 +81,7 @@ void SystemAbilityEventHandlerTest::TearDown()
 
 HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityEventLocked001, TestSize.Level3)
 {
+    DTEST_LOG << "HandleAbilityEventLocked001 begin" << std::endl;
     std::shared_ptr<StateListener> stateListener =
         std::make_shared<StateListener>();
     std::shared_ptr<SystemAbilityStateMachine> systemAbilityStateMachine =
@@ -90,6 +91,7 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityEventLocked001, TestSize.Le
     int32_t ret = systemAbilityEventHandler->HandleAbilityEventLocked(nullptr,
         AbilityStateEvent::ABILITY_LOAD_SUCCESS_EVENT);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "HandleAbilityEventLocked001 end" << std::endl;
 }
 
 /**
@@ -101,6 +103,7 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityEventLocked001, TestSize.Le
 
 HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityEventLocked002, TestSize.Level3)
 {
+    DTEST_LOG << "HandleAbilityEventLocked002 begin" << std::endl;
     std::shared_ptr<StateListener> stateListener =
         std::make_shared<StateListener>();
     std::shared_ptr<SystemAbilityStateMachine> systemAbilityStateMachine =
@@ -115,6 +118,7 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityEventLocked002, TestSize.Le
     int32_t ret = systemAbilityEventHandler->HandleAbilityEventLocked(systemAbilityContext,
         AbilityStateEvent::ABILITY_LOAD_FAILED_EVENT);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "HandleAbilityEventLocked002 end" << std::endl;
 }
 
 /**
@@ -126,6 +130,7 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityEventLocked002, TestSize.Le
 
 HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityEventLocked003, TestSize.Level3)
 {
+    DTEST_LOG << "HandleAbilityEventLocked003 begin" << std::endl;
     std::shared_ptr<StateListener> stateListener =
         std::make_shared<StateListener>();
     std::shared_ptr<SystemAbilityStateMachine> systemAbilityStateMachine =
@@ -138,6 +143,7 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityEventLocked003, TestSize.Le
     int32_t ret = systemAbilityEventHandler->HandleAbilityEventLocked(systemAbilityContext,
         AbilityStateEvent::ABILITY_LOAD_FAILED_EVENT);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "HandleAbilityEventLocked003 end" << std::endl;
 }
 
 /**
@@ -149,6 +155,7 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityEventLocked003, TestSize.Le
 
 HWTEST_F(SystemAbilityEventHandlerTest, HandleProcessEventLocked001, TestSize.Level3)
 {
+    DTEST_LOG << "HandleProcessEventLocked001 begin" << std::endl;
     ProcessInfo processInfo;
     ProcessStateEvent event = ProcessStateEvent::PROCESS_STARTED_EVENT;
     std::shared_ptr<StateListener> stateListener =
@@ -160,6 +167,7 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleProcessEventLocked001, TestSize.Le
     int32_t ret = systemAbilityEventHandler->HandleProcessEventLocked(nullptr,
         processInfo, event);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "HandleProcessEventLocked001 end" << std::endl;
 }
 
 /**
@@ -171,6 +179,7 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleProcessEventLocked001, TestSize.Le
 
 HWTEST_F(SystemAbilityEventHandlerTest, HandleProcessEventLocked002, TestSize.Level3)
 {
+    DTEST_LOG << "HandleProcessEventLocked002 begin" << std::endl;
     ProcessInfo processInfo;
     ProcessStateEvent event = ProcessStateEvent::PROCESS_STARTED_EVENT;
     std::shared_ptr<StateListener> stateListener =
@@ -187,6 +196,7 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleProcessEventLocked002, TestSize.Le
     int32_t ret = systemAbilityEventHandler->HandleProcessEventLocked(systemProcessContext,
         processInfo, event);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "HandleProcessEventLocked002 end" << std::endl;
 }
 
 /**
@@ -198,6 +208,7 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleProcessEventLocked002, TestSize.Le
 
 HWTEST_F(SystemAbilityEventHandlerTest, HandleProcessEventLocked003, TestSize.Level3)
 {
+    DTEST_LOG << "HandleProcessEventLocked003 begin" << std::endl;
     ProcessInfo processInfo;
     ProcessStateEvent event = ProcessStateEvent::PROCESS_STARTED_EVENT;
     std::shared_ptr<StateListener> stateListener =
@@ -212,6 +223,7 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleProcessEventLocked003, TestSize.Le
     int32_t ret = systemAbilityEventHandler->HandleProcessEventLocked(systemProcessContext,
         processInfo, event);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "HandleProcessEventLocked003 end" << std::endl;
 }
 
 /**
@@ -223,6 +235,7 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleProcessEventLocked003, TestSize.Le
 
 HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityLoadFailedEventLocked001, TestSize.Level3)
 {
+    DTEST_LOG << "HandleAbilityLoadFailedEventLocked001 begin" << std::endl;
     std::shared_ptr<StateListener> stateListener =
         std::make_shared<StateListener>();
     std::shared_ptr<SystemAbilityStateMachine> systemAbilityStateMachine =
@@ -235,6 +248,7 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityLoadFailedEventLocked001, T
     systemAbilityStateMachine->abilityStateHandlerMap_.clear();
     int32_t ret = systemAbilityEventHandler->HandleAbilityLoadFailedEventLocked(systemAbilityContext);
     EXPECT_EQ(ret, INVALID_SA_NEXT_STATE);
+    DTEST_LOG << "HandleAbilityLoadFailedEventLocked001 end" << std::endl;
 }
 
 /**
@@ -246,6 +260,7 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityLoadFailedEventLocked001, T
 
 HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityLoadFailedEventLocked002, TestSize.Level3)
 {
+    DTEST_LOG << "HandleAbilityLoadFailedEventLocked002 begin" << std::endl;
     std::shared_ptr<StateListener> stateListener =
         std::make_shared<StateListener>();
     std::shared_ptr<SystemAbilityStateMachine> systemAbilityStateMachine =
@@ -256,6 +271,7 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityLoadFailedEventLocked002, T
         std::make_shared<SystemAbilityContext>();
     int32_t ret = systemAbilityEventHandler->HandleAbilityLoadFailedEventLocked(systemAbilityContext);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "HandleAbilityLoadFailedEventLocked002 end" << std::endl;
 }
 
 /**
@@ -267,6 +283,7 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityLoadFailedEventLocked002, T
 
 HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityLoadFailedEventLocked003, TestSize.Level3)
 {
+    DTEST_LOG << "HandleAbilityLoadFailedEventLocked003 begin" << std::endl;
     std::shared_ptr<StateListener> stateListener =
         std::make_shared<StateListener>();
     std::shared_ptr<SystemAbilityStateMachine> systemAbilityStateMachine =
@@ -278,6 +295,7 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityLoadFailedEventLocked003, T
     systemAbilityContext->pendingEvent = PendingEvent::UNLOAD_ABILITY_EVENT;
     int32_t ret = systemAbilityEventHandler->HandleAbilityLoadFailedEventLocked(systemAbilityContext);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "HandleAbilityLoadFailedEventLocked003 end" << std::endl;
 }
 
 /**
@@ -289,6 +307,7 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityLoadFailedEventLocked003, T
 
 HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityLoadSuccessEventLocked001, TestSize.Level3)
 {
+    DTEST_LOG << "HandleAbilityLoadSuccessEventLocked001 begin" << std::endl;
     std::shared_ptr<StateListener> stateListener =
         std::make_shared<StateListener>();
     std::shared_ptr<SystemAbilityStateMachine> systemAbilityStateMachine =
@@ -300,6 +319,7 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityLoadSuccessEventLocked001, 
     systemAbilityContext->state = SystemAbilityState::LOADED;
     int32_t ret = systemAbilityEventHandler->HandleAbilityLoadSuccessEventLocked(systemAbilityContext);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "HandleAbilityLoadSuccessEventLocked001 end" << std::endl;
 }
 
 /**
@@ -311,6 +331,7 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityLoadSuccessEventLocked001, 
 
 HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityUnLoadSuccessEventLocked001, TestSize.Level3)
 {
+    DTEST_LOG << "HandleAbilityUnLoadSuccessEventLocked001 begin" << std::endl;
     std::shared_ptr<StateListener> stateListener =
         std::make_shared<StateListener>();
     std::shared_ptr<SystemAbilityStateMachine> systemAbilityStateMachine =
@@ -323,6 +344,7 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityUnLoadSuccessEventLocked001
     systemAbilityStateMachine->abilityStateHandlerMap_.clear();
     int32_t ret = systemAbilityEventHandler->HandleAbilityUnLoadSuccessEventLocked(systemAbilityContext);
     EXPECT_EQ(ret, INVALID_SA_NEXT_STATE);
+    DTEST_LOG << "HandleAbilityUnLoadSuccessEventLocked001 end" << std::endl;
 }
 
 /**
@@ -334,6 +356,7 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityUnLoadSuccessEventLocked001
 
 HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityUnLoadSuccessEventLocked002, TestSize.Level3)
 {
+    DTEST_LOG << "HandleAbilityUnLoadSuccessEventLocked002 begin" << std::endl;
     std::shared_ptr<StateListener> stateListener =
         std::make_shared<StateListener>();
     std::shared_ptr<SystemAbilityStateMachine> systemAbilityStateMachine =
@@ -347,6 +370,7 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityUnLoadSuccessEventLocked002
     systemAbilityStateMachine->abilityStateHandlerMap_.clear();
     int32_t ret = systemAbilityEventHandler->HandleAbilityUnLoadSuccessEventLocked(systemAbilityContext);
     EXPECT_EQ(ret, INVALID_SA_NEXT_STATE);
+    DTEST_LOG << "HandleAbilityUnLoadSuccessEventLocked002 end" << std::endl;
 }
 
 /**
@@ -358,6 +382,7 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleAbilityUnLoadSuccessEventLocked002
 
 HWTEST_F(SystemAbilityEventHandlerTest, HandleProcessStartedEventLocked001, TestSize.Level3)
 {
+    DTEST_LOG << "HandleProcessStartedEventLocked001 begin" << std::endl;
     ProcessInfo processInfo;
     std::shared_ptr<StateListener> stateListener =
         std::make_shared<StateListener>();
@@ -370,6 +395,7 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleProcessStartedEventLocked001, Test
     systemProcessContext->state = SystemProcessState::STARTED;
     int32_t ret = systemAbilityEventHandler->HandleProcessStartedEventLocked(systemProcessContext, processInfo);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "HandleProcessStartedEventLocked001 end" << std::endl;
 }
 
 /**
@@ -381,6 +407,7 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleProcessStartedEventLocked001, Test
 
 HWTEST_F(SystemAbilityEventHandlerTest, HandleProcessStoppedEventLocked001, TestSize.Level3)
 {
+    DTEST_LOG << "HandleProcessStoppedEventLocked001 begin" << std::endl;
     ProcessInfo processInfo;
     std::shared_ptr<StateListener> stateListener =
         std::make_shared<StateListener>();
@@ -393,6 +420,7 @@ HWTEST_F(SystemAbilityEventHandlerTest, HandleProcessStoppedEventLocked001, Test
     systemProcessContext->state = SystemProcessState::NOT_STARTED;
     int32_t ret = systemAbilityEventHandler->HandleProcessStoppedEventLocked(systemProcessContext, processInfo);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "HandleProcessStoppedEventLocked001 end" << std::endl;
 }
 
 }
