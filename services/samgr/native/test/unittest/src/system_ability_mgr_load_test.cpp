@@ -64,6 +64,8 @@ void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
     saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
     saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
     saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+}
+}
 
 /**
  * @tc.name: LoadSystemAbility001
