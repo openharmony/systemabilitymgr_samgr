@@ -44,6 +44,7 @@ using namespace testing::ext;
 using namespace OHOS;
 
 namespace OHOS {
+const int32_t softBusServerSaID = 4700;
 namespace system {
     /*
     * Returns true if the system parameter `key` has the value "1", "y", "yes", "on", or "true",
@@ -1122,5 +1123,19 @@ HWTEST_F(SystemAbilityMgrTest, IsDistributedSystemAbility001, TestSize.Level2)
     saMgr->saProfileMap_[2] = saProfile;
     res = saMgr->IsDistributedSystemAbility(2);
     EXPECT_FALSE(res);
+}
+
+HWTEST_F(SystemAbilityMgrTest, RegisterDistribute001, TestSize.Level2)
+{
+    DTEST_LOG<<"RegisterDistribute001 BEGIN"<<std::endl;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager();
+    EXPECT_FALSE(saMgr == nullptr);
+    saMgr->Init();
+    saMgr->isDbinderServiceInit_ = false;
+    saMgr->distributedSaList_.push_back(softBusServerSaID);
+    saMgr->InitDbinderService();
+    saMgr->RegisterDistribute(softBusServerSaID, true);
+    EXPECT_FALSE(saMgr->dBinderService_ = nullptr);
+    DTEST_LOG<<"RegisterDistribute001 END"<<std::endl;
 }
 } // namespace OHOS

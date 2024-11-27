@@ -613,6 +613,7 @@ ohos_unittest("SystemAbilityMgrDumperTest") {
     "${samgr_services_dir}/source/system_ability_manager_dumper.cpp",
     "${samgr_services_dir}/source/system_ability_manager_stub.cpp",
     "${samgr_services_dir}/source/system_ability_manager_util.cpp",
+    "${samgr_services_dir}/source/system_ability_status_change_proxy.cpp",
     "${samgr_services_dir}/test/unittest/src/mock_accesstoken_kit.cpp",
     "${samgr_services_dir}/test/unittest/src/mock_permission.cpp",
     "${samgr_services_dir}/test/unittest/src/system_ability_manager_dumper_test.cpp",
