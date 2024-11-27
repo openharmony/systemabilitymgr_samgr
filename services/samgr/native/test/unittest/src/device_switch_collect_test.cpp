@@ -78,11 +78,13 @@ void DeviceSwitchCollectTest::TearDown()
 
 HWTEST_F(DeviceSwitchCollectTest, InitCommonEventSubscriber001, TestSize.Level3)
 {
+    DTEST_LOG << "InitCommonEventSubscriber001 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     deviceSwitchCollect->InitCommonEventSubscriber();
     EXPECT_NE(deviceSwitchCollect->switchEventSubscriber_, nullptr);
+    DTEST_LOG << "InitCommonEventSubscriber001 end" << std::endl;
 }
 
 /**
@@ -94,6 +96,7 @@ HWTEST_F(DeviceSwitchCollectTest, InitCommonEventSubscriber001, TestSize.Level3)
 
 HWTEST_F(DeviceSwitchCollectTest, CheckSwitchEvent001, TestSize.Level3)
 {
+    DTEST_LOG << "CheckSwitchEvent001 begin" << std::endl;
     OnDemandEvent onDemandEvent;
     onDemandEvent.eventId = SETTING_SWITCH;
     onDemandEvent.name = WIFI_NAME;
@@ -114,6 +117,7 @@ HWTEST_F(DeviceSwitchCollectTest, CheckSwitchEvent001, TestSize.Level3)
     onDemandEvent.eventId = TIMED_EVENT;
     result = deviceSwitchCollect->CheckSwitchEvent(onDemandEvent);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
+    DTEST_LOG << "CheckSwitchEvent001 end" << std::endl;
 }
 
 /**
@@ -125,6 +129,7 @@ HWTEST_F(DeviceSwitchCollectTest, CheckSwitchEvent001, TestSize.Level3)
 
 HWTEST_F(DeviceSwitchCollectTest, DeviceSwitchCollectInit001, TestSize.Level3)
 {
+    DTEST_LOG << "DeviceSwitchCollectInit001 begin" << std::endl;
     std::list<SaProfile> saProfiles;
     SaProfile saProfile;
     OnDemandEvent onDemandEvent = {SETTING_SWITCH, WIFI_NAME, "on"};
@@ -136,6 +141,7 @@ HWTEST_F(DeviceSwitchCollectTest, DeviceSwitchCollectInit001, TestSize.Level3)
         new DeviceSwitchCollect(collect);
     deviceSwitchCollect->Init(saProfiles);
     EXPECT_TRUE(deviceSwitchCollect->needListenSwitchEvent_);
+    DTEST_LOG << "DeviceSwitchCollectInit001 end" << std::endl;
 }
 
 /**
@@ -147,12 +153,14 @@ HWTEST_F(DeviceSwitchCollectTest, DeviceSwitchCollectInit001, TestSize.Level3)
 
 HWTEST_F(DeviceSwitchCollectTest, CollectSubscribeSwitchEvent001, TestSize.Level3)
 {
+    DTEST_LOG << "CollectSubscribeSwitchEvent001 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     deviceSwitchCollect->switchEventSubscriber_ = nullptr;
     int32_t ret = deviceSwitchCollect->SubscribeSwitchEvent();
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "CollectSubscribeSwitchEvent001 end" << std::endl;
 }
 
 /**
@@ -164,6 +172,7 @@ HWTEST_F(DeviceSwitchCollectTest, CollectSubscribeSwitchEvent001, TestSize.Level
 
 HWTEST_F(DeviceSwitchCollectTest, CollectSubscribeSwitchEvent002, TestSize.Level3)
 {
+    DTEST_LOG << "CollectSubscribeSwitchEvent002 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
@@ -171,6 +180,7 @@ HWTEST_F(DeviceSwitchCollectTest, CollectSubscribeSwitchEvent002, TestSize.Level
     deviceSwitchCollect->switchEventSubscriber_->isListenSwitchEvent_ = true;
     int32_t ret = deviceSwitchCollect->SubscribeSwitchEvent();
     EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "CollectSubscribeSwitchEvent002 end" << std::endl;
 }
 
 /**
@@ -181,6 +191,7 @@ HWTEST_F(DeviceSwitchCollectTest, CollectSubscribeSwitchEvent002, TestSize.Level
  */
 HWTEST_F(DeviceSwitchCollectTest, CollectSubscribeSwitchEvent003, TestSize.Level3)
 {
+    DTEST_LOG << "CollectSubscribeSwitchEvent003 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
@@ -191,6 +202,7 @@ HWTEST_F(DeviceSwitchCollectTest, CollectSubscribeSwitchEvent003, TestSize.Level
     EXPECT_EQ(deviceSwitchCollect->switchEventSubscriber_->isListenSwitchEvent_, true);
     ret = deviceSwitchCollect->switchEventSubscriber_->UnSubscribeSwitchEvent();
     EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "CollectSubscribeSwitchEvent003 end" << std::endl;
 }
 
 /**
@@ -202,6 +214,7 @@ HWTEST_F(DeviceSwitchCollectTest, CollectSubscribeSwitchEvent003, TestSize.Level
 
 HWTEST_F(DeviceSwitchCollectTest, OnStart001, TestSize.Level3)
 {
+    DTEST_LOG << "OnStart001 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
@@ -210,6 +223,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnStart001, TestSize.Level3)
     deviceSwitchCollect->needListenSwitchEvent_ = false;
     int32_t ret = deviceSwitchCollect->OnStart();
     EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "OnStart001 end" << std::endl;
 }
 
 /**
@@ -221,6 +235,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnStart001, TestSize.Level3)
 
 HWTEST_F(DeviceSwitchCollectTest, OnStart002, TestSize.Level3)
 {
+    DTEST_LOG << "OnStart002 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
@@ -231,6 +246,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnStart002, TestSize.Level3)
     saMgr->subscribeCountMap_.clear();
     int32_t ret = deviceSwitchCollect->OnStart();
     EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "OnStart002 end" << std::endl;
 }
 
 /**
@@ -242,11 +258,13 @@ HWTEST_F(DeviceSwitchCollectTest, OnStart002, TestSize.Level3)
 
 HWTEST_F(DeviceSwitchCollectTest, OnStop001, TestSize.Level3)
 {
+    DTEST_LOG << "OnStop001 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     int32_t ret = deviceSwitchCollect->OnStop();
     EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "OnStop001 end" << std::endl;
 }
 
 /**
@@ -258,6 +276,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnStop001, TestSize.Level3)
 
 HWTEST_F(DeviceSwitchCollectTest, OnStop002, TestSize.Level3)
 {
+    DTEST_LOG << "OnStop002 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
@@ -265,6 +284,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnStop002, TestSize.Level3)
     deviceSwitchCollect->switchEventSubscriber_ = nullptr;
     int32_t ret = deviceSwitchCollect->OnStop();
     EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "OnStop002 end" << std::endl;
 }
 
 /**
@@ -276,12 +296,14 @@ HWTEST_F(DeviceSwitchCollectTest, OnStop002, TestSize.Level3)
 
 HWTEST_F(DeviceSwitchCollectTest, OnStop003, TestSize.Level3)
 {
+    DTEST_LOG << "OnStop003 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     deviceSwitchCollect->InitCommonEventSubscriber();
     int32_t ret = deviceSwitchCollect->OnStop();
     EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "OnStop003 end" << std::endl;
 }
 
 /**
@@ -293,12 +315,14 @@ HWTEST_F(DeviceSwitchCollectTest, OnStop003, TestSize.Level3)
 
 HWTEST_F(DeviceSwitchCollectTest, AddCollectEvent001, TestSize.Level3)
 {
+    DTEST_LOG << "AddCollectEvent001 begin" << std::endl;
     OnDemandEvent onDemandEvent;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     int32_t ret = deviceSwitchCollect->AddCollectEvent(onDemandEvent);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "AddCollectEvent001 end" << std::endl;
 }
 
 /**
@@ -310,6 +334,7 @@ HWTEST_F(DeviceSwitchCollectTest, AddCollectEvent001, TestSize.Level3)
 
 HWTEST_F(DeviceSwitchCollectTest, AddCollectEvent002, TestSize.Level3)
 {
+    DTEST_LOG << "AddCollectEvent002 begin" << std::endl;
     OnDemandEvent onDemandEvent = {SETTING_SWITCH, WIFI_NAME, "on"};
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
@@ -318,6 +343,7 @@ HWTEST_F(DeviceSwitchCollectTest, AddCollectEvent002, TestSize.Level3)
     SystemAbilityManager::GetInstance()->subscribeCountMap_.clear();
     int32_t ret = deviceSwitchCollect->AddCollectEvent(onDemandEvent);
     EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "AddCollectEvent002 end" << std::endl;
 }
 
 /**
@@ -329,10 +355,12 @@ HWTEST_F(DeviceSwitchCollectTest, AddCollectEvent002, TestSize.Level3)
 
 HWTEST_F(DeviceSwitchCollectTest, OnAddSystemAbility002, TestSize.Level3)
 {
+    DTEST_LOG << "OnAddSystemAbility002 begin" << std::endl;
     sptr<CesStateListener> cesStateListener = new CesStateListener(nullptr);
     cesStateListener->OnAddSystemAbility(COMMON_EVENT_ID, DEVICE_ID);
     auto deviceSwitchCollect = cesStateListener->deviceSwitchCollect_.promote();
     EXPECT_EQ(deviceSwitchCollect, nullptr);
+    DTEST_LOG << "OnAddSystemAbility002 end" << std::endl;
 }
 
 /**
@@ -344,6 +372,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnAddSystemAbility002, TestSize.Level3)
 
 HWTEST_F(DeviceSwitchCollectTest, SubscribeSwitchEvent001, TestSize.Level3)
 {
+    DTEST_LOG << "SubscribeSwitchEvent001 begin" << std::endl;
     std::list<SaProfile> saProfiles;
     SaProfile saProfile;
     OnDemandEvent onDemandEvent = {SETTING_SWITCH, WIFI_NAME, "on"};
@@ -355,6 +384,7 @@ HWTEST_F(DeviceSwitchCollectTest, SubscribeSwitchEvent001, TestSize.Level3)
     deviceSwitchCollect->Init(saProfiles);
     deviceSwitchCollect->switchEventSubscriber_->SubscribeSwitchEvent();
     EXPECT_NE(deviceSwitchCollect->switchEventSubscriber_, nullptr);
+    DTEST_LOG << "SubscribeSwitchEvent001 end" << std::endl;
 }
 
 /**
@@ -366,6 +396,7 @@ HWTEST_F(DeviceSwitchCollectTest, SubscribeSwitchEvent001, TestSize.Level3)
 
 HWTEST_F(DeviceSwitchCollectTest, UnSubscribeSwitchEvent001, TestSize.Level3)
 {
+    DTEST_LOG << "UnSubscribeSwitchEvent001 begin" << std::endl;
     std::list<SaProfile> saProfiles;
     SaProfile saProfile;
     OnDemandEvent onDemandEvent = {SETTING_SWITCH, WIFI_NAME, "on"};
@@ -377,6 +408,7 @@ HWTEST_F(DeviceSwitchCollectTest, UnSubscribeSwitchEvent001, TestSize.Level3)
     deviceSwitchCollect->Init(saProfiles);
     deviceSwitchCollect->switchEventSubscriber_->SubscribeSwitchEvent();
     EXPECT_NE(deviceSwitchCollect->switchEventSubscriber_, nullptr);
+    DTEST_LOG << "UnSubscribeSwitchEvent001 end" << std::endl;
 }
 
 /**
@@ -388,6 +420,7 @@ HWTEST_F(DeviceSwitchCollectTest, UnSubscribeSwitchEvent001, TestSize.Level3)
 
 HWTEST_F(DeviceSwitchCollectTest, ReportEvent001, TestSize.Level3)
 {
+    DTEST_LOG << "ReportEvent001 begin" << std::endl;
     OnDemandEvent onDemandEvent = {SETTING_SWITCH, WIFI_NAME, "on"};
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
@@ -395,6 +428,7 @@ HWTEST_F(DeviceSwitchCollectTest, ReportEvent001, TestSize.Level3)
     deviceSwitchCollect->InitCommonEventSubscriber();
     deviceSwitchCollect->switchEventSubscriber_->ReportEvent(onDemandEvent);
     EXPECT_NE(deviceSwitchCollect->switchEventSubscriber_->deviceSwitchCollect_, nullptr);
+    DTEST_LOG << "ReportEvent001 end" << std::endl;
 }
 
 /**
@@ -406,6 +440,7 @@ HWTEST_F(DeviceSwitchCollectTest, ReportEvent001, TestSize.Level3)
 
 HWTEST_F(DeviceSwitchCollectTest, OnReceiveWifiEvent001, TestSize.Level3)
 {
+    DTEST_LOG << "OnReceiveWifiEvent001 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
@@ -417,6 +452,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnReceiveWifiEvent001, TestSize.Level3)
     data.SetCode(WIFI_ON);
     deviceSwitchCollect->switchEventSubscriber_->OnReceiveWifiEvent(data);
     EXPECT_NE(deviceSwitchCollect->switchEventSubscriber_->deviceSwitchCollect_, nullptr);
+    DTEST_LOG << "OnReceiveWifiEvent001 end" << std::endl;
 }
 
 /**
@@ -428,6 +464,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnReceiveWifiEvent001, TestSize.Level3)
 
 HWTEST_F(DeviceSwitchCollectTest, OnReceiveWifiEvent002, TestSize.Level3)
 {
+    DTEST_LOG << "OnReceiveWifiEvent002 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
@@ -439,6 +476,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnReceiveWifiEvent002, TestSize.Level3)
     data.SetCode(WIFI_OFF);
     deviceSwitchCollect->switchEventSubscriber_->OnReceiveWifiEvent(data);
     EXPECT_NE(deviceSwitchCollect->switchEventSubscriber_->deviceSwitchCollect_, nullptr);
+    DTEST_LOG << "OnReceiveWifiEvent002 end" << std::endl;
 }
 
 /**
@@ -450,6 +488,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnReceiveWifiEvent002, TestSize.Level3)
 
 HWTEST_F(DeviceSwitchCollectTest, OnReceiveWifiEvent003, TestSize.Level3)
 {
+    DTEST_LOG << "OnReceiveWifiEvent003 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
@@ -461,6 +500,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnReceiveWifiEvent003, TestSize.Level3)
     data.SetCode(WIFI_OFF);
     deviceSwitchCollect->switchEventSubscriber_->OnReceiveWifiEvent(data);
     EXPECT_NE(deviceSwitchCollect->switchEventSubscriber_->deviceSwitchCollect_, nullptr);
+    DTEST_LOG << "OnReceiveWifiEvent003 end" << std::endl;
 }
 
 /**
@@ -472,6 +512,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnReceiveWifiEvent003, TestSize.Level3)
 
 HWTEST_F(DeviceSwitchCollectTest, OnReceiveBluetoothEvent001, TestSize.Level3)
 {
+    DTEST_LOG << "OnReceiveBluetoothEvent001 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
@@ -483,6 +524,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnReceiveBluetoothEvent001, TestSize.Level3)
     data.SetCode(BLUETOOTH_STATE_TURN_ON);
     deviceSwitchCollect->switchEventSubscriber_->OnReceiveBluetoothEvent(data);
     EXPECT_NE(deviceSwitchCollect->switchEventSubscriber_->deviceSwitchCollect_, nullptr);
+    DTEST_LOG << "OnReceiveBluetoothEvent001 end" << std::endl;
 }
 
 /**
@@ -494,6 +536,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnReceiveBluetoothEvent001, TestSize.Level3)
 
 HWTEST_F(DeviceSwitchCollectTest, OnReceiveBluetoothEvent002, TestSize.Level3)
 {
+    DTEST_LOG << "OnReceiveBluetoothEvent002 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
@@ -505,6 +548,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnReceiveBluetoothEvent002, TestSize.Level3)
     data.SetCode(BLUETOOTH_STATE_TURN_OFF);
     deviceSwitchCollect->switchEventSubscriber_->OnReceiveBluetoothEvent(data);
     EXPECT_NE(deviceSwitchCollect->switchEventSubscriber_->deviceSwitchCollect_, nullptr);
+    DTEST_LOG << "OnReceiveBluetoothEvent002 end" << std::endl;
 }
 
 /**
@@ -516,6 +560,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnReceiveBluetoothEvent002, TestSize.Level3)
 
 HWTEST_F(DeviceSwitchCollectTest, OnReceiveBluetoothEvent003, TestSize.Level3)
 {
+    DTEST_LOG << "OnReceiveBluetoothEvent003 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
@@ -527,6 +572,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnReceiveBluetoothEvent003, TestSize.Level3)
     data.SetCode(BLUETOOTH_STATE_TURN_ON);
     deviceSwitchCollect->switchEventSubscriber_->OnReceiveBluetoothEvent(data);
     EXPECT_NE(deviceSwitchCollect->switchEventSubscriber_->deviceSwitchCollect_, nullptr);
+    DTEST_LOG << "OnReceiveBluetoothEvent003 end" << std::endl;
 }
 
 /**
@@ -538,6 +584,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnReceiveBluetoothEvent003, TestSize.Level3)
 
 HWTEST_F(DeviceSwitchCollectTest, OnReceiveEvent001, TestSize.Level3)
 {
+    DTEST_LOG << "OnReceiveEvent001 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
@@ -549,6 +596,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnReceiveEvent001, TestSize.Level3)
     data.SetCode(WIFI_ON);
     deviceSwitchCollect->switchEventSubscriber_->OnReceiveEvent(data);
     EXPECT_NE(deviceSwitchCollect->switchEventSubscriber_->deviceSwitchCollect_, nullptr);
+    DTEST_LOG << "OnReceiveEvent001 end" << std::endl;
 }
 
 /**
@@ -560,6 +608,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnReceiveEvent001, TestSize.Level3)
 
 HWTEST_F(DeviceSwitchCollectTest, OnReceiveEvent002, TestSize.Level3)
 {
+    DTEST_LOG << "OnReceiveEvent002 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
@@ -571,6 +620,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnReceiveEvent002, TestSize.Level3)
     data.SetCode(BLUETOOTH_STATE_TURN_ON);
     deviceSwitchCollect->switchEventSubscriber_->OnReceiveEvent(data);
     EXPECT_NE(deviceSwitchCollect->switchEventSubscriber_->deviceSwitchCollect_, nullptr);
+    DTEST_LOG << "OnReceiveEvent002 end" << std::endl;
 }
 
 /**
@@ -582,6 +632,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnReceiveEvent002, TestSize.Level3)
 
 HWTEST_F(DeviceSwitchCollectTest, OnReceiveEvent003, TestSize.Level3)
 {
+    DTEST_LOG << "OnReceiveEvent003 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
@@ -593,5 +644,6 @@ HWTEST_F(DeviceSwitchCollectTest, OnReceiveEvent003, TestSize.Level3)
     data.SetCode(BLUETOOTH_STATE_TURN_ON);
     deviceSwitchCollect->switchEventSubscriber_->OnReceiveEvent(data);
     EXPECT_NE(deviceSwitchCollect->switchEventSubscriber_->deviceSwitchCollect_, nullptr);
+    DTEST_LOG << "OnReceiveEvent003 end" << std::endl;
 }
 }
