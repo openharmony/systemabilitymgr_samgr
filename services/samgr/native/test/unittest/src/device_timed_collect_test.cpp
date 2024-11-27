@@ -61,6 +61,7 @@ void DeviceTimedCollectTest::TearDown()
  */
 HWTEST_F(DeviceTimedCollectTest, Init001, TestSize.Level3)
 {
+    DTEST_LOG << "Init001 begin" << std::endl;
     std::list<SaProfile> saProfiles;
     SaProfile saProfile;
     OnDemandEvent onDemandEvent = {TIMED_EVENT, "loopevent", "40"};
@@ -71,6 +72,7 @@ HWTEST_F(DeviceTimedCollectTest, Init001, TestSize.Level3)
         std::make_shared<DeviceTimedCollect>(collect);
     deviceTimedCollect->Init(saProfiles);
     EXPECT_EQ(deviceTimedCollect->nonPersitenceLoopEventSet_.size(), 1);
+    DTEST_LOG << "Init001 end" << std::endl;
 }
 
 /**
@@ -80,6 +82,7 @@ HWTEST_F(DeviceTimedCollectTest, Init001, TestSize.Level3)
  */
 HWTEST_F(DeviceTimedCollectTest, Init002, TestSize.Level3)
 {
+    DTEST_LOG << "Init002 begin" << std::endl;
     std::list<SaProfile> saProfiles;
     SaProfile saProfile;
     OnDemandEvent onDemandEvent = {TIMED_EVENT, "mockevent", "40"};
@@ -90,6 +93,7 @@ HWTEST_F(DeviceTimedCollectTest, Init002, TestSize.Level3)
         std::make_shared<DeviceTimedCollect>(collect);
     deviceTimedCollect->Init(saProfiles);
     EXPECT_EQ(deviceTimedCollect->nonPersitenceLoopEventSet_.size(), 0);
+    DTEST_LOG << "Init002 end" << std::endl;
 }
 
 /**
@@ -99,6 +103,7 @@ HWTEST_F(DeviceTimedCollectTest, Init002, TestSize.Level3)
  */
 HWTEST_F(DeviceTimedCollectTest, Init003, TestSize.Level3)
 {
+    DTEST_LOG << "Init003 begin" << std::endl;
     std::list<SaProfile> saProfiles;
     SaProfile saProfile;
     OnDemandEvent onDemandEvent = {TIMED_EVENT, "loopevent", "40"};
@@ -109,6 +114,7 @@ HWTEST_F(DeviceTimedCollectTest, Init003, TestSize.Level3)
         std::make_shared<DeviceTimedCollect>(collect);
     deviceTimedCollect->Init(saProfiles);
     EXPECT_EQ(deviceTimedCollect->nonPersitenceLoopEventSet_.size(), 1);
+    DTEST_LOG << "Init003 end" << std::endl;
 }
 
 /**
@@ -118,6 +124,7 @@ HWTEST_F(DeviceTimedCollectTest, Init003, TestSize.Level3)
  */
 HWTEST_F(DeviceTimedCollectTest, Init004, TestSize.Level3)
 {
+    DTEST_LOG << "Init004 begin" << std::endl;
     std::list<SaProfile> saProfiles;
     SaProfile saProfile;
     OnDemandEvent onDemandEvent = {TIMED_EVENT, "mockevent", "40"};
@@ -128,6 +135,7 @@ HWTEST_F(DeviceTimedCollectTest, Init004, TestSize.Level3)
         std::make_shared<DeviceTimedCollect>(collect);
     deviceTimedCollect->Init(saProfiles);
     EXPECT_EQ(deviceTimedCollect->nonPersitenceLoopEventSet_.size(), 0);
+    DTEST_LOG << "Init004 end" << std::endl;
 }
 
 /**
@@ -137,6 +145,7 @@ HWTEST_F(DeviceTimedCollectTest, Init004, TestSize.Level3)
  */
 HWTEST_F(DeviceTimedCollectTest, Init005, TestSize.Level3)
 {
+    DTEST_LOG << "Init005 begin" << std::endl;
     std::list<SaProfile> saProfiles;
     SaProfile saProfile;
     OnDemandEvent onDemandEvent = {TIMED_EVENT, "loopevent", "20"};
@@ -147,6 +156,7 @@ HWTEST_F(DeviceTimedCollectTest, Init005, TestSize.Level3)
         std::make_shared<DeviceTimedCollect>(collect);
     deviceTimedCollect->Init(saProfiles);
     EXPECT_EQ(deviceTimedCollect->nonPersitenceLoopEventSet_.size(), 0);
+    DTEST_LOG << "Init005 end" << std::endl;
 }
 
 /**
@@ -156,6 +166,7 @@ HWTEST_F(DeviceTimedCollectTest, Init005, TestSize.Level3)
  */
 HWTEST_F(DeviceTimedCollectTest, Init006, TestSize.Level3)
 {
+    DTEST_LOG << "Init006 begin" << std::endl;
     std::list<SaProfile> saProfiles;
     SaProfile saProfile;
     OnDemandEvent onDemandEvent = {TIMED_EVENT, "loopevent", "20"};
@@ -166,6 +177,7 @@ HWTEST_F(DeviceTimedCollectTest, Init006, TestSize.Level3)
         std::make_shared<DeviceTimedCollect>(collect);
     deviceTimedCollect->Init(saProfiles);
     EXPECT_EQ(deviceTimedCollect->nonPersitenceLoopEventSet_.size(), 0);
+    DTEST_LOG << "Init006 end" << std::endl;
 }
 
 /**
@@ -175,6 +187,7 @@ HWTEST_F(DeviceTimedCollectTest, Init006, TestSize.Level3)
  */
 HWTEST_F(DeviceTimedCollectTest, Init007, TestSize.Level3)
 {
+    DTEST_LOG << "Init007 begin" << std::endl;
     std::list<SaProfile> saProfiles;
     SaProfile saProfile;
     OnDemandEvent onDemandEvent = {TIMED_EVENT, "loopevent", "invalid"};
@@ -185,6 +198,7 @@ HWTEST_F(DeviceTimedCollectTest, Init007, TestSize.Level3)
         std::make_shared<DeviceTimedCollect>(collect);
     deviceTimedCollect->Init(saProfiles);
     EXPECT_EQ(deviceTimedCollect->nonPersitenceLoopEventSet_.size(), 0);
+    DTEST_LOG << "Init007 end" << std::endl;
 }
 
 /**
@@ -194,6 +208,7 @@ HWTEST_F(DeviceTimedCollectTest, Init007, TestSize.Level3)
  */
 HWTEST_F(DeviceTimedCollectTest, Init008, TestSize.Level3)
 {
+    DTEST_LOG << "Init008 begin" << std::endl;
     std::list<SaProfile> saProfiles;
     SaProfile saProfile;
     OnDemandEvent onDemandEvent = {TIMED_EVENT, "loopevent", "3600"};
@@ -213,6 +228,7 @@ HWTEST_F(DeviceTimedCollectTest, Init008, TestSize.Level3)
     deviceTimedCollect->Init(saProfiles);
     EXPECT_EQ(deviceTimedCollect->nonPersitenceLoopEventSet_.size(), 2);
     deviceTimedCollect->timeInfos_.clear();
+    DTEST_LOG << "Init008 end" << std::endl;
 }
 
 /**
@@ -222,6 +238,7 @@ HWTEST_F(DeviceTimedCollectTest, Init008, TestSize.Level3)
  */
 HWTEST_F(DeviceTimedCollectTest, OnStart001, TestSize.Level3)
 {
+    DTEST_LOG << "OnStart001 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(collect);
@@ -229,6 +246,7 @@ HWTEST_F(DeviceTimedCollectTest, OnStart001, TestSize.Level3)
     deviceTimedCollect->OnStart();
     EXPECT_NE(collect, nullptr);
     deviceTimedCollect->timeInfos_.clear();
+    DTEST_LOG << "OnStart001 end" << std::endl;
 }
 
 /**
@@ -238,6 +256,7 @@ HWTEST_F(DeviceTimedCollectTest, OnStart001, TestSize.Level3)
  */
 HWTEST_F(DeviceTimedCollectTest, OnStart002, TestSize.Level3)
 {
+    DTEST_LOG << "OnStart002 begin" << std::endl;
 #ifdef PREFERENCES_ENABLE
     std::shared_ptr<PreferencesUtil> preferencesUtil_ = PreferencesUtil::GetInstance();
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
@@ -257,6 +276,7 @@ HWTEST_F(DeviceTimedCollectTest, OnStart002, TestSize.Level3)
     preferencesUtil_->IsExist("2017-9-1-16:59:10");
     deviceTimedCollect->timeInfos_.clear();
 #endif
+    DTEST_LOG << "OnStart002 end" << std::endl;
 }
 
 /**
@@ -267,6 +287,7 @@ HWTEST_F(DeviceTimedCollectTest, OnStart002, TestSize.Level3)
  */
 HWTEST_F(DeviceTimedCollectTest, ReportEventByTimeInfo001, TestSize.Level3)
 {
+    DTEST_LOG << "ReportEventByTimeInfo001 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = nullptr;
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(collect);
@@ -276,6 +297,7 @@ HWTEST_F(DeviceTimedCollectTest, ReportEventByTimeInfo001, TestSize.Level3)
     deviceTimedCollect->timeInfos_[3600] = info;
     deviceTimedCollect->ReportEventByTimeInfo(3600, false);
     EXPECT_EQ(collect, nullptr);
+    DTEST_LOG << "ReportEventByTimeInfo001 end" << std::endl;
 }
 
 /**
@@ -286,6 +308,7 @@ HWTEST_F(DeviceTimedCollectTest, ReportEventByTimeInfo001, TestSize.Level3)
  */
 HWTEST_F(DeviceTimedCollectTest, PostDelayTaskByTimeInfo001, TestSize.Level3)
 {
+    DTEST_LOG << "PostDelayTaskByTimeInfo001 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = nullptr;
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(collect);
@@ -296,6 +319,7 @@ HWTEST_F(DeviceTimedCollectTest, PostDelayTaskByTimeInfo001, TestSize.Level3)
     deviceTimedCollect->PostDelayTaskByTimeInfo(deviceTimedCollect->nonPersitenceLoopTasks_[0], 3600, 3600);
     EXPECT_EQ(collect, nullptr);
     deviceTimedCollect->timeInfos_.clear();
+    DTEST_LOG << "PostDelayTaskByTimeInfo001 end" << std::endl;
 }
 
 /**
@@ -306,12 +330,14 @@ HWTEST_F(DeviceTimedCollectTest, PostDelayTaskByTimeInfo001, TestSize.Level3)
  */
 HWTEST_F(DeviceTimedCollectTest, ReportEvent001, TestSize.Level3)
 {
+    DTEST_LOG << "ReportEvent001 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = nullptr;
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(collect);
     OnDemandEvent event;
     deviceTimedCollect->ReportEvent(event);
     EXPECT_EQ(collect, nullptr);
+    DTEST_LOG << "ReportEvent001 end" << std::endl;
 }
 
 /**
@@ -322,11 +348,13 @@ HWTEST_F(DeviceTimedCollectTest, ReportEvent001, TestSize.Level3)
  */
 HWTEST_F(DeviceTimedCollectTest, PostDelayTask001, TestSize.Level3)
 {
+    DTEST_LOG << "PostDelayTask001 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = nullptr;
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(collect);
     deviceTimedCollect->PostDelayTask(deviceTimedCollect->nonPersitenceLoopTasks_[0], 0);
     EXPECT_EQ(collect, nullptr);
+    DTEST_LOG << "PostDelayTask001 end" << std::endl;
 }
 
 /**
@@ -337,6 +365,7 @@ HWTEST_F(DeviceTimedCollectTest, PostDelayTask001, TestSize.Level3)
  */
 HWTEST_F(DeviceTimedCollectTest, PostDelayTask002, TestSize.Level3)
 {
+    DTEST_LOG << "PostDelayTask002 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     collect->collectHandler_ = std::make_shared<FFRTHandler>("collect");
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
@@ -344,6 +373,7 @@ HWTEST_F(DeviceTimedCollectTest, PostDelayTask002, TestSize.Level3)
     deviceTimedCollect->nonPersitenceLoopTasks_[0] = [] () {};
     deviceTimedCollect->PostDelayTask(deviceTimedCollect->nonPersitenceLoopTasks_[0], 0);
     EXPECT_NE(collect, nullptr);
+    DTEST_LOG << "PostDelayTask002 end" << std::endl;
 }
 
 /**
@@ -372,12 +402,14 @@ HWTEST_F(DeviceTimedCollectTest, AddCollectEvent001, TestSize.Level3)
  */
 HWTEST_F(DeviceTimedCollectTest, AddCollectEvent002, TestSize.Level3)
 {
+    DTEST_LOG << "AddCollectEvent002 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(collect);
     OnDemandEvent event = {TIMED_EVENT, "mockevent", "10"};
     int32_t ret = deviceTimedCollect->AddCollectEvent(event);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "AddCollectEvent002 end" << std::endl;
 }
 
 /**
@@ -388,12 +420,14 @@ HWTEST_F(DeviceTimedCollectTest, AddCollectEvent002, TestSize.Level3)
  */
 HWTEST_F(DeviceTimedCollectTest, AddCollectEvent003, TestSize.Level3)
 {
+    DTEST_LOG << "AddCollectEvent003 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(collect);
     OnDemandEvent event = {TIMED_EVENT, "loopevent", "10"};
     int32_t ret = deviceTimedCollect->AddCollectEvent(event);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "AddCollectEvent003 end" << std::endl;
 }
 
 /**
@@ -404,12 +438,14 @@ HWTEST_F(DeviceTimedCollectTest, AddCollectEvent003, TestSize.Level3)
  */
 HWTEST_F(DeviceTimedCollectTest, AddCollectEvent004, TestSize.Level3)
 {
+    DTEST_LOG << "AddCollectEvent004 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(collect);
     OnDemandEvent event = {TIMED_EVENT, "order_timed_event", "10", -1, true};
     int32_t ret = deviceTimedCollect->AddCollectEvent(event);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "AddCollectEvent004 end" << std::endl;
 }
 
 /**
@@ -420,12 +456,14 @@ HWTEST_F(DeviceTimedCollectTest, AddCollectEvent004, TestSize.Level3)
  */
 HWTEST_F(DeviceTimedCollectTest, AddCollectEvent005, TestSize.Level3)
 {
+    DTEST_LOG << "AddCollectEvent005 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(collect);
     OnDemandEvent event = {TIMED_EVENT, "order_timed_event", "10"};
     int32_t ret = deviceTimedCollect->AddCollectEvent(event);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "AddCollectEvent005 end" << std::endl;
 }
 
 /**
@@ -436,12 +474,14 @@ HWTEST_F(DeviceTimedCollectTest, AddCollectEvent005, TestSize.Level3)
  */
 HWTEST_F(DeviceTimedCollectTest, AddCollectEvent006, TestSize.Level3)
 {
+    DTEST_LOG << "AddCollectEvent006 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(collect);
     OnDemandEvent event = {TIMED_EVENT, "mockevent", "10", -1, true};
     int32_t ret = deviceTimedCollect->AddCollectEvent(event);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "AddCollectEvent006 end" << std::endl;
 }
 
 /**
@@ -451,6 +491,7 @@ HWTEST_F(DeviceTimedCollectTest, AddCollectEvent006, TestSize.Level3)
  */
 HWTEST_F(DeviceTimedCollectTest, AddCollectEvent007, TestSize.Level3)
 {
+    DTEST_LOG << "AddCollectEvent007 begin" << std::endl;
 #ifdef PREFERENCES_ENABLE
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
@@ -472,6 +513,7 @@ HWTEST_F(DeviceTimedCollectTest, AddCollectEvent007, TestSize.Level3)
     EXPECT_EQ(ret, ERR_OK);
     deviceTimedCollect->timeInfos_.clear();
 #endif
+    DTEST_LOG << "AddCollectEvent007 end" << std::endl;
 }
 
 /**
@@ -482,11 +524,13 @@ HWTEST_F(DeviceTimedCollectTest, AddCollectEvent007, TestSize.Level3)
  */
 HWTEST_F(DeviceTimedCollectTest, OnStop001, TestSize.Level3)
 {
+    DTEST_LOG << "OnStop001 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(collect);
     int32_t ret = deviceTimedCollect->OnStop();
     EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "OnStop001 end" << std::endl;
 }
 
 /**
@@ -497,12 +541,14 @@ HWTEST_F(DeviceTimedCollectTest, OnStop001, TestSize.Level3)
  */
 HWTEST_F(DeviceTimedCollectTest, RemoveUnusedEvent001, TestSize.Level3)
 {
+    DTEST_LOG << "RemoveUnusedEvent001 begin" << std::endl;
     sptr<IReport> report;
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(report);
     OnDemandEvent event = {TIMED_EVENT, "invalid", "10"};
     int32_t ret = deviceTimedCollect->RemoveUnusedEvent(event);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "RemoveUnusedEvent001 end" << std::endl;
 }
 
 /**
@@ -513,6 +559,7 @@ HWTEST_F(DeviceTimedCollectTest, RemoveUnusedEvent001, TestSize.Level3)
  */
 HWTEST_F(DeviceTimedCollectTest, RemoveUnusedEvent002, TestSize.Level3)
 {
+    DTEST_LOG << "RemoveUnusedEvent002 begin" << std::endl;
     sptr<IReport> report;
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(report);
@@ -520,6 +567,7 @@ HWTEST_F(DeviceTimedCollectTest, RemoveUnusedEvent002, TestSize.Level3)
     deviceTimedCollect->nonPersitenceLoopEventSet_.clear();
     int32_t ret = deviceTimedCollect->RemoveUnusedEvent(event);
     EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "RemoveUnusedEvent002 end" << std::endl;
 }
 
 /**
@@ -530,6 +578,7 @@ HWTEST_F(DeviceTimedCollectTest, RemoveUnusedEvent002, TestSize.Level3)
  */
 HWTEST_F(DeviceTimedCollectTest, RemoveUnusedEvent003, TestSize.Level3)
 {
+    DTEST_LOG << "RemoveUnusedEvent003 begin" << std::endl;
     sptr<IReport> report;
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(report);
@@ -537,6 +586,7 @@ HWTEST_F(DeviceTimedCollectTest, RemoveUnusedEvent003, TestSize.Level3)
     deviceTimedCollect->nonPersitenceLoopEventSet_.insert(10);
     int32_t ret = deviceTimedCollect->RemoveUnusedEvent(event);
     EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "RemoveUnusedEvent003 end" << std::endl;
 }
 
 /**
@@ -547,6 +597,7 @@ HWTEST_F(DeviceTimedCollectTest, RemoveUnusedEvent003, TestSize.Level3)
  */
 HWTEST_F(DeviceTimedCollectTest, RemoveUnusedEvent004, TestSize.Level3)
 {
+    DTEST_LOG << "RemoveUnusedEvent004 begin" << std::endl;
     sptr<IReport> report;
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(report);
@@ -554,6 +605,7 @@ HWTEST_F(DeviceTimedCollectTest, RemoveUnusedEvent004, TestSize.Level3)
     deviceTimedCollect->nonPersitenceLoopEventSet_.insert(10);
     int32_t ret = deviceTimedCollect->RemoveUnusedEvent(event);
     EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << "RemoveUnusedEvent004 end" << std::endl;
 }
 
 /**
@@ -564,6 +616,7 @@ HWTEST_F(DeviceTimedCollectTest, RemoveUnusedEvent004, TestSize.Level3)
  */
 HWTEST_F(DeviceTimedCollectTest, RemoveUnusedEvent005, TestSize.Level3)
 {
+    DTEST_LOG << "RemoveUnusedEvent005 begin" << std::endl;
     sptr<IReport> report;
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(report);
@@ -576,6 +629,7 @@ HWTEST_F(DeviceTimedCollectTest, RemoveUnusedEvent005, TestSize.Level3)
     ret = deviceTimedCollect->RemoveUnusedEvent(event2);
     EXPECT_EQ(ret, ERR_OK);
     deviceTimedCollect->timeInfos_.clear();
+    DTEST_LOG << "RemoveUnusedEvent005 end" << std::endl;
 }
 
 /**
@@ -586,6 +640,7 @@ HWTEST_F(DeviceTimedCollectTest, RemoveUnusedEvent005, TestSize.Level3)
  */
 HWTEST_F(DeviceTimedCollectTest, SaveInner001, TestSize.Level3)
 {
+    DTEST_LOG << "SaveInner001 begin" << std::endl;
 #ifdef PREFERENCES_ENABLE
     std::shared_ptr<PreferencesUtil> preferencesUtil_ = PreferencesUtil::GetInstance();
     const std::string key;
@@ -594,6 +649,7 @@ HWTEST_F(DeviceTimedCollectTest, SaveInner001, TestSize.Level3)
     bool ret = preferencesUtil_->SaveInner(preferencesUtil_->ptr_, key, value);
     EXPECT_EQ(ret, false);
 #endif
+    DTEST_LOG << "SaveInner001 end" << std::endl;
 }
 
 /**
@@ -604,6 +660,7 @@ HWTEST_F(DeviceTimedCollectTest, SaveInner001, TestSize.Level3)
  */
 HWTEST_F(DeviceTimedCollectTest, SaveInner002, TestSize.Level3)
 {
+    DTEST_LOG << "SaveInner002 begin" << std::endl;
 #ifdef PREFERENCES_ENABLE
     std::shared_ptr<PreferencesUtil> preferencesUtil_ = PreferencesUtil::GetInstance();
     const std::string key;
@@ -612,6 +669,7 @@ HWTEST_F(DeviceTimedCollectTest, SaveInner002, TestSize.Level3)
     bool ret = preferencesUtil_->SaveInner(preferencesUtil_->ptr_, key, value);
     EXPECT_EQ(ret, false);
 #endif
+    DTEST_LOG << "SaveInner002 end" << std::endl;
 }
 
 /**
@@ -622,6 +680,7 @@ HWTEST_F(DeviceTimedCollectTest, SaveInner002, TestSize.Level3)
  */
 HWTEST_F(DeviceTimedCollectTest, ObtainLong001, TestSize.Level3)
 {
+    DTEST_LOG << "ObtainLong001 begin" << std::endl;
 #ifdef PREFERENCES_ENABLE
     std::shared_ptr<PreferencesUtil> preferencesUtil_ = PreferencesUtil::GetInstance();
     const std::string key;
@@ -629,11 +688,13 @@ HWTEST_F(DeviceTimedCollectTest, ObtainLong001, TestSize.Level3)
     int64_t ret = preferencesUtil_->ObtainLong(key, defValue);
     EXPECT_EQ(ret, 0);
 #endif
+    DTEST_LOG << "ObtainLong001 end" << std::endl;
 }
 
 #ifdef PREFERENCES_ENABLE
 HWTEST_F(DeviceTimedCollectTest, ProcessPersistenceTimedTask001, TestSize.Level3)
 {
+    DTEST_LOG << "ProcessPersistenceTimedTask001 begin" << std::endl;
     sptr<IReport> report;
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect = std::make_shared<DeviceTimedCollect>(report);
     deviceTimedCollect->preferencesUtil_ = PreferencesUtil::GetInstance();
@@ -645,12 +706,14 @@ HWTEST_F(DeviceTimedCollectTest, ProcessPersistenceTimedTask001, TestSize.Level3
     disTime = 5;
     deviceTimedCollect->ProcessPersistenceTimedTask(disTime, strTime);
     EXPECT_NE(disTime, 0);
+    DTEST_LOG << "ProcessPersistenceTimedTask001 end" << std::endl;
 }
 #endif
 
 #ifdef PREFERENCES_ENABLE
 HWTEST_F(DeviceTimedCollectTest, PostPersistenceDelayTask001, TestSize.Level3)
 {
+    DTEST_LOG << "PostPersistenceDelayTask001 begin" << std::endl;
     sptr<IReport> report;
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect = std::make_shared<DeviceTimedCollect>(report);
     deviceTimedCollect->preferencesUtil_ = PreferencesUtil::GetInstance();
@@ -660,17 +723,20 @@ HWTEST_F(DeviceTimedCollectTest, PostPersistenceDelayTask001, TestSize.Level3)
     std::function<void()> postTask = [] () {};
     deviceTimedCollect->PostPersistenceDelayTask(postTask, interval, disTime);
     EXPECT_EQ(disTime, 1);
+    DTEST_LOG << "PostPersistenceDelayTask001 end" << std::endl;
 }
 #endif
 
 HWTEST_F(DeviceTimedCollectTest, PostNonPersistenceTimedTaskLocked001, TestSize.Level3)
 {
+    DTEST_LOG << "PostNonPersistenceTimedTaskLocked001 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect = std::make_shared<DeviceTimedCollect>(collect);
     std::string strTime = "timedevent";
     int64_t timeGap = 0;
     deviceTimedCollect->PostNonPersistenceTimedTaskLocked(strTime, timeGap);
     EXPECT_EQ(timeGap, 0);
+    DTEST_LOG << "PostNonPersistenceTimedTaskLocked001 end" << std::endl;
 }
 
 #ifdef PREFERENCES_ENABLE
