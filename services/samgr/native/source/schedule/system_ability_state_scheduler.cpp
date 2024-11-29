@@ -278,8 +278,8 @@ int32_t SystemAbilityStateScheduler::HandleLoadAbilityEvent(const LoadRequestInf
     if (!GetSystemAbilityContext(loadRequestInfo.systemAbilityId, abilityContext)) {
         return GET_SA_CONTEXT_FAIL;
     }
-    HILOGI("Scheduler SA:%{public}d load event start,callpid:%{public}d,evtid:%{public}d,"
-        "ProcSta:%{public}d,SASta:%{public}d", loadRequestInfo.systemAbilityId, loadRequestInfo.callingPid,
+    HILOGI("Scheduler SA:%{public}d load start %{public}d,%{public}d_"
+        "%{public}d_%{public}d", loadRequestInfo.systemAbilityId, loadRequestInfo.callingPid,
         loadRequestInfo.loadEvent.eventId, abilityContext->ownProcessContext->state, abilityContext->state);
     std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
     int32_t result = HandleLoadAbilityEventLocked(abilityContext, loadRequestInfo);
@@ -339,8 +339,8 @@ int32_t SystemAbilityStateScheduler::HandleUnloadAbilityEvent(
     if (!GetSystemAbilityContext(unloadRequestInfo->systemAbilityId, abilityContext)) {
         return GET_SA_CONTEXT_FAIL;
     }
-    HILOGI("Scheduler SA:%{public}d handle unload start callPid:%{public}d,evtId:%{public}d,"
-        "ProcSta:%{public}d,SASta:%{public}d", unloadRequestInfo->systemAbilityId, unloadRequestInfo->callingPid,
+    HILOGI("Scheduler SA:%{public}d unload start %{public}d,%{public}d_"
+        "%{public}d_%{public}d", unloadRequestInfo->systemAbilityId, unloadRequestInfo->callingPid,
         unloadRequestInfo->unloadEvent.eventId, abilityContext->ownProcessContext->state, abilityContext->state);
     std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
     int32_t result = HandleUnloadAbilityEventLocked(abilityContext, unloadRequestInfo);
@@ -817,8 +817,8 @@ int32_t SystemAbilityStateScheduler::KillSystemProcessLocked(
     }
     ReportProcessStopDuration(Str16ToStr8(processContext->processName), processContext->pid,
         processContext->uid, duration);
-    KHILOGI("Scheduler proc:%{public}s kill proc,pid:%{public}d,uid:%{public}d,ret:%{public}d,"
-        "spend %{public}" PRId64 "ms", Str16ToStr8(processContext->processName).c_str(), processContext->pid,
+    KHILOGI("Scheduler proc:%{public}s kill pid:%{public}d,%{public}d_%{public}d_"
+        "%{public}" PRId64 "ms", Str16ToStr8(processContext->processName).c_str(), processContext->pid,
         processContext->uid, result, duration);
     return result;
 }
