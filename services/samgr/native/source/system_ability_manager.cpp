@@ -826,7 +826,7 @@ int32_t SystemAbilityManager::RemoveDiedSystemAbility(int32_t systemAbilityId)
         }
         (void)abilityMap_.erase(itSystemAbility);
         ReportSaCrash(systemAbilityId);
-        KHILOGI("rm DeadSaById:%{public}d_%{public}zu", systemAbilityId, abilityMap_.size());
+        KHILOGI("rm DeadObj SA:%{public}d_%{public}zu", systemAbilityId, abilityMap_.size());
     }
     SendSystemAbilityRemovedMsg(systemAbilityId);
     return ERR_OK;
@@ -914,7 +914,7 @@ int32_t SystemAbilityManager::SubscribeSystemAbility(int32_t systemAbilityId,
             ret = listener->AsObject()->AddDeathRecipient(abilityStatusDeath_);
             listeners.emplace_back(listener, callingPid);
         }
-        HILOGI("SubscribeSA:%{public}d,%{public}d_%{public}zu_%{public}d",
+        HILOGI("SubscribeSA:%{public}d,%{public}d_%{public}zu_%{public}d%{public}s",
             systemAbilityId, callingPid, listeners.size(), count, ret ? "" : ",AddDeath fail");
     }
     CheckListenerNotify(systemAbilityId, listener);
