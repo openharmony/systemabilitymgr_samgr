@@ -560,7 +560,7 @@ void SystemAbilityManager::NotifySystemAbilityChanged(int32_t systemAbilityId, c
 int32_t SystemAbilityManager::FindSystemAbilityNotify(int32_t systemAbilityId, const std::string& deviceId,
     int32_t code)
 {
-    HILOGI("FindSaNotify:%{public}d,%{public}d_%{public}zu", systemAbilityId, code, listenerMap_.size());
+    HILOGI("FindSaNotify SA:%{public}d,%{public}d_%{public}zu", systemAbilityId, code, listenerMap_.size());
     lock_guard<mutex> autoLock(listenerMapLock_);
     auto iter = listenerMap_.find(systemAbilityId);
     if (iter == listenerMap_.end()) {
@@ -1040,7 +1040,7 @@ int32_t SystemAbilityManager::AddSystemAbility(int32_t systemAbilityId, const sp
                 systemAbilityId, callingPid, callingUid);
         }
         abilityMap_[systemAbilityId] = std::move(saInfo);
-        KHILOGI("insert %{public}d_%{public}zu", systemAbilityId, abilityMap_.size());
+        KHILOGI("insert SA:%{public}d_%{public}zu", systemAbilityId, abilityMap_.size());
     }
     RemoveCheckLoadedMsg(systemAbilityId);
     RegisterDistribute(systemAbilityId, extraProp.isDistributed);
@@ -1568,7 +1568,7 @@ int32_t SystemAbilityManager::DoLoadSystemAbility(int32_t systemAbilityId, const
             ret = callback->AsObject()->AddDeathRecipient(abilityCallbackDeath_);
         }
         ReportSamgrSaLoad(systemAbilityId, IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), event.eventId);
-        HILOGI("DoLoadSA:%{public}d,%{public}d_%{public}zu_%{public}d%{public}s", systemAbilityId, callingPid,
+        HILOGI("DoLoadSA:%{public}d,%{public}zu_%{public}d%{public}s", systemAbilityId,
             abilityItem.callbackMap[LOCAL_DEVICE].size(), count, ret ? "" : ",AddDeath fail");
     }
     result = StartingSystemProcess(procName, systemAbilityId, event);
