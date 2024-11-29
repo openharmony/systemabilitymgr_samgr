@@ -293,7 +293,15 @@ void WorkHandler::ProcessEvent(uint32_t eventId)
     }
     if (!collect_->AddDeviceChangeListener()) {
         HILOGW("AddDeviceChangeListener retry");
-        auto task = [this] {this->ProcessEvent(INIT_EVENT);};
+        auto weak = weak_from_this();
+        auto task = [weak] {
+            auto strong = weak.lock();
+            if (!strong) {
+                HILOGW("WorkHandler::ProcessEvent is null");
+                return;
+            }
+            strong->ProcessEvent(INIT_EVENT);
+        };
         if (handler_ == nullptr) {
             HILOGE("NetworkingCollect ProcessEvent handler is null!");
             return;
@@ -308,7 +316,15 @@ bool WorkHandler::SendEvent(uint32_t eventId)
         HILOGE("NetworkingCollect SendEvent handler is null!");
         return false;
     }
-    auto task = [this, eventId] {this->ProcessEvent(eventId);};
+    auto weak = weak_from_this();
+    auto task = [weak, eventId] {
+        auto strong = weak.lock();
+        if (!strong) {
+            HILOGW("WorkHandler::SendEvent is null");
+            return;
+        }
+        strong->ProcessEvent(eventId);
+    };
     return handler_->PostTask(task);
 }
 
@@ -318,7 +334,15 @@ bool WorkHandler::SendEvent(uint32_t eventId, uint64_t delayTime)
         HILOGE("NetworkingCollect SendEvent handler is null!");
         return false;
     }
-    auto task = [this, eventId] {this->ProcessEvent(eventId);};
+    auto weak = weak_from_this();
+    auto task = [weak, eventId] {
+        auto strong = weak.lock();
+        if (!strong) {
+            HILOGW("WorkHandler::SendEvent delay is null");
+            return;
+        }
+        strong->ProcessEvent(eventId);
+    };
     return handler_->PostTask(task, delayTime);
 }
 }  // namespace OHOS
