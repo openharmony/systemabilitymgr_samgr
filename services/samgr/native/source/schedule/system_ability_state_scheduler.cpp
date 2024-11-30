@@ -664,7 +664,7 @@ int32_t SystemAbilityStateScheduler::PostUnloadTimeoutTask(const std::shared_ptr
         if (!strong) {
             HILOGW("SystemAbilityStateScheduler is null");
             return;
-        }        
+        }
         std::string name = KEY_UNLOAD_TIMEOUT + Str16ToStr8(processContext->processName);
         if (strong->processHandler_ != nullptr) {
             HILOGD("TimeoutTask deltask proc:%{public}s", name.c_str());
@@ -705,7 +705,7 @@ int32_t SystemAbilityStateScheduler::PostTryKillProcessTask(
         if (!strong) {
             HILOGW("SystemAbilityStateScheduler is null");
             return;
-        }        
+        }
         int32_t ret = strong->TryKillSystemProcess(processContext);
         if (ret != ERR_OK) {
             HILOGE("Scheduler proc:%{public}s kill proc fail",
@@ -1434,7 +1434,7 @@ bool SystemAbilityStateScheduler::UnloadEventHandler::SendEvent(uint32_t eventId
         if (!strong) {
             HILOGW("SystemAbilityStateScheduler is null");
             return;
-        }        
+        }
         strong->ProcessEvent(eventId);
     };
     return handler_->PostTask(task, std::to_string(eventId), delayTime);
