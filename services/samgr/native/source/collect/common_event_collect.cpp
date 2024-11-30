@@ -345,7 +345,7 @@ int64_t CommonEventCollect::SaveOnDemandReasonExtraData(const EventFwk::CommonEv
 
     int64_t extraDataId = GenerateExtraDataIdLocked();
     extraDatas_[extraDataId] = extraData;
-    HILOGI("CommonEventCollect save extraData %{public}d,n:%{public}zu",
+    HILOGD("CommonEventCollect save extraData %{public}d,n:%{public}zu",
         static_cast<int32_t>(extraDataId), extraDatas_.size());
     if (workHandler_ == nullptr) {
         HILOGI("CommonEventCollect workHandler is nullptr");
@@ -653,8 +653,7 @@ void CommonEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData& data
     }
     collect->SaveAction(action);
     int64_t extraDataId = collect->SaveOnDemandReasonExtraData(data);
-    HILOGI("OnReceiveEvent get action: %{public}s code: %{public}d, extraDataId %{public}d",
-        action.c_str(), code, static_cast<int32_t>(extraDataId));
+    HILOGI("RecvEvent:%{public}s,%{public}d_%{public}d", action.c_str(), code, static_cast<int32_t>(extraDataId));
     collect->SaveOnDemandConditionExtraData(data);
     OnDemandEvent event = {COMMON_EVENT, action, std::to_string(code), extraDataId};
     collect->ReportEvent(event);

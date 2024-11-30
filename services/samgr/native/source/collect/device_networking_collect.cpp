@@ -125,7 +125,7 @@ bool DeviceNetworkingCollect::ReportMissedEvents()
 
 bool DeviceNetworkingCollect::AddDeviceChangeListener()
 {
-    HILOGI("AddDeviceChangeListener called");
+    HILOGI("AddDMListener called");
     if (IsDmReady()) {
         int32_t ret = DeviceManager::GetInstance().InitDeviceManager(PKG_NAME, initCallback_);
         if (ret != ERR_OK) {
@@ -142,7 +142,7 @@ bool DeviceNetworkingCollect::AddDeviceChangeListener()
             HILOGE("RegisterDevStateCallback error");
             return false;
         }
-        HILOGI("AddDeviceChangeListener success");
+        HILOGI("AddDMListener success");
         return true;
     }
     return false;
