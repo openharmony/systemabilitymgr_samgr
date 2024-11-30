@@ -292,7 +292,7 @@ void WorkHandler::ProcessEvent(uint32_t eventId)
         return;
     }
     if (!collect_->AddDeviceChangeListener()) {
-        HILOGW("AddDeviceChangeListener retry");
+        HILOGW("AddDMListener retry");
         auto weak = weak_from_this();
         auto task = [weak] {
             auto strong = weak.lock();
