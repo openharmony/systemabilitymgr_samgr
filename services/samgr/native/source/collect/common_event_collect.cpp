@@ -40,7 +40,8 @@ constexpr uint32_t REMOVE_EXTRA_DATA_DELAY_TIME = 300000;
 constexpr int64_t MAX_EXTRA_DATA_ID = 1000000000;
 constexpr int32_t COMMON_EVENT_SERVICE_ID = 3299;
 constexpr int32_t TRIGGER_THREAD_RECLAIM_DELAY_TIME = 130 * 1000;
-constexpr const char* TRIGGER_THREAD_RECLAIM = "TRIGGER_THREAD_RECLAIM";
+constexpr const char* SCREEN_TRIGGER_THREAD_RECLAIM = "SCREEN_TRIGGER_THREAD_RECLAIM";
+constexpr const char* CLEAR_TRIGGER_THREAD_RECLAIM = "CLEAR_TRIGGER_THREAD_RECLAIM";
 constexpr const char* UID = "uid";
 constexpr const char* NET_TYPE = "NetType";
 constexpr const char* BUNDLE_NAME = "bundleName";
@@ -511,40 +512,43 @@ int32_t CommonEventCollect::RemoveUnusedEvent(const OnDemandEvent& event)
 
 void CommonEventCollect::StartReclaimIpcThreadWork(const EventFwk::CommonEventData& data)
 {
+    const char* triggerEvent = nullptr;
+    const char* cancelEvent = nullptr;
     std::string eventName = data.GetWant().GetAction();
     std::string eventType = data.GetData();
-    if (eventName == COMMON_RECENT_EVENT && eventType == COMMON_RECENT_CLEAR_ALL) {
-        IPCSkeleton::TriggerSystemIPCThreadReclaim();
+
+    if (workHandler_ == nullptr) {
+        HILOGE("StartReclaimIpcThreadWork workHandler_ is nullptr");
         return;
     }
-    if (eventName == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON) {
-        if (workHandler_ == nullptr) {
-            HILOGE("SendKernalReclaimIpcThread workHandler_ is nullptr");
-            return;
-        }
-        workHandler_->RemoveTask(TRIGGER_THREAD_RECLAIM);
-        return;
-    }
+
     if (eventName == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF) {
-        if (workHandler_ == nullptr) {
-            HILOGE("SendKernalReclaimIpcThread workHandler_ is nullptr");
-            return;
-        }
-        auto task = [this] {
-            this->SendKernalReclaimIpcThread();
+        triggerEvent = SCREEN_TRIGGER_THREAD_RECLAIM;
+    } else if (eventName == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON) {
+        cancelEvent = SCREEN_TRIGGER_THREAD_RECLAIM;
+    } else if (eventName == COMMON_RECENT_EVENT && eventType == COMMON_RECENT_CLEAR_ALL) {
+        triggerEvent = CLEAR_TRIGGER_THREAD_RECLAIM;
+    }
+
+    if (triggerEvent != nullptr) {
+        auto task = [this, triggerEvent]() {
+            this->SendKernalReclaimIpcThread(triggerEvent);
         };
-        workHandler_->PostTask(task, TRIGGER_THREAD_RECLAIM, TRIGGER_THREAD_RECLAIM_DELAY_TIME);
+        workHandler_->PostTask(task, triggerEvent, TRIGGER_THREAD_RECLAIM_DELAY_TIME);
+    }
+
+    if (cancelEvent != nullptr) {
+        workHandler_->RemoveTask(cancelEvent);
     }
 }
 
-void CommonEventCollect::SendKernalReclaimIpcThread()
+void CommonEventCollect::SendKernalReclaimIpcThread(const char* triggerEvent)
 {
-    if (workHandler_ == nullptr) {
-        HILOGE("SendKernalReclaimIpcThread workHandler_ is nullptr");
-    } else {
-        workHandler_->DelTask(TRIGGER_THREAD_RECLAIM);
+    if (workHandler_ != nullptr && triggerEvent != nullptr) {
+        workHandler_->DelTask(triggerEvent);
     }
-    HILOGI("TriggerThreadReclaim");
+
+    HILOGI("TriggerSystemIPCThreadReclaim");
     IPCSkeleton::TriggerSystemIPCThreadReclaim();
 }
 
