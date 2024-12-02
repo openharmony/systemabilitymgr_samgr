@@ -137,7 +137,7 @@ private:
     int32_t ActiveSystemAbilityLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext,
         const nlohmann::json& activeReason);
 
-    class UnloadEventHandler {
+    class UnloadEventHandler : public std::enable_shared_from_this<UnloadEventHandler> {
     public:
         UnloadEventHandler(const std::weak_ptr<SystemAbilityStateScheduler>& stateScheduler)
             : stateScheduler_(stateScheduler)

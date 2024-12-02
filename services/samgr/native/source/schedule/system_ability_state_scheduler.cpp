@@ -635,8 +635,14 @@ bool SystemAbilityStateScheduler::CheckSaIsImmediatelyRecycle(
 int32_t SystemAbilityStateScheduler::PostTryUnloadAllAbilityTask(
     const std::shared_ptr<SystemProcessContext>& processContext)
 {
-    bool result = processHandler_->PostTask([this, processContext] () {
-        int32_t ret = TryUnloadAllSystemAbility(processContext);
+    auto weak = weak_from_this();
+    bool result = processHandler_->PostTask([weak, processContext] () {
+        auto strong = weak.lock();
+        if (!strong) {
+            HILOGW("SystemAbilityStateScheduler is null");
+            return;
+        }
+        int32_t ret = strong->TryUnloadAllSystemAbility(processContext);
         if (ret != ERR_OK) {
             HILOGE("Scheduler proc:%{public}s unload all SA fail",
                 Str16ToStr8(processContext->processName).c_str());
@@ -652,11 +658,17 @@ int32_t SystemAbilityStateScheduler::PostTryUnloadAllAbilityTask(
 
 int32_t SystemAbilityStateScheduler::PostUnloadTimeoutTask(const std::shared_ptr<SystemProcessContext>& processContext)
 {
-    auto timeoutTask = [this, processContext] () {
+    auto weak = weak_from_this();
+    auto timeoutTask = [weak, processContext] () {
+        auto strong = weak.lock();
+        if (!strong) {
+            HILOGW("SystemAbilityStateScheduler is null");
+            return;
+        }
         std::string name = KEY_UNLOAD_TIMEOUT + Str16ToStr8(processContext->processName);
-        if (processHandler_ != nullptr) {
+        if (strong->processHandler_ != nullptr) {
             HILOGD("TimeoutTask deltask proc:%{public}s", name.c_str());
-            processHandler_->DelTask(name);
+            strong->processHandler_->DelTask(name);
         } else {
             HILOGE("TimeoutTask processHandler_ is null");
         }
@@ -664,7 +676,7 @@ int32_t SystemAbilityStateScheduler::PostUnloadTimeoutTask(const std::shared_ptr
         if (processContext->state == SystemProcessState::STOPPING) {
             HILOGW("Scheduler proc:%{public}s unload SA timeout",
                 Str16ToStr8(processContext->processName).c_str());
-            int32_t result = KillSystemProcessLocked(processContext);
+            int32_t result = strong->KillSystemProcessLocked(processContext);
             HILOGI("Scheduler proc:%{public}s kill proc timeout ret:%{public}d",
                 Str16ToStr8(processContext->processName).c_str(), result);
         }
@@ -687,8 +699,14 @@ void SystemAbilityStateScheduler::RemoveUnloadTimeoutTask(const std::shared_ptr<
 int32_t SystemAbilityStateScheduler::PostTryKillProcessTask(
     const std::shared_ptr<SystemProcessContext>& processContext)
 {
-    bool result = processHandler_->PostTask([this, processContext] () {
-        int32_t ret = TryKillSystemProcess(processContext);
+    auto weak = weak_from_this();
+    bool result = processHandler_->PostTask([weak, processContext] () {
+        auto strong = weak.lock();
+        if (!strong) {
+            HILOGW("SystemAbilityStateScheduler is null");
+            return;
+        }
+        int32_t ret = strong->TryKillSystemProcess(processContext);
         if (ret != ERR_OK) {
             HILOGE("Scheduler proc:%{public}s kill proc fail",
                 Str16ToStr8(processContext->processName).c_str());
@@ -1410,7 +1428,15 @@ bool SystemAbilityStateScheduler::UnloadEventHandler::SendEvent(uint32_t eventId
         HILOGE("SystemAbilityStateScheduler SendEvent handler is null!");
         return false;
     }
-    auto task = [this, eventId] {this->ProcessEvent(eventId);};
+    auto weak = weak_from_this();
+    auto task = [weak, eventId] {
+        auto strong = weak.lock();
+        if (!strong) {
+            HILOGW("SystemAbilityStateScheduler is null");
+            return;
+        }
+        strong->ProcessEvent(eventId);
+    };
     return handler_->PostTask(task, std::to_string(eventId), delayTime);
 }
 
