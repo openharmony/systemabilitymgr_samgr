@@ -156,7 +156,7 @@ void ParseUtil::OpenSo(SaProfile& saProfile)
         }
         int64_t duration = GetTickCount() - begin;
         ReportSaLoadDuration(saProfile.saId, SA_LOAD_OPENSO, duration);
-        KHILOGI("SA:%{public}d OpenSo spend %{public}" PRId64 "ms",
+        KHILOGI("SA:%{public}d OpenSo %{public}" PRId64 "ms",
             saProfile.saId, duration);
         if (handle == nullptr) {
             std::vector<string> libPathVec;

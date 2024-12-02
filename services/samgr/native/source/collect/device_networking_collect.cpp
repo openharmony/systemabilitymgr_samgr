@@ -125,7 +125,7 @@ bool DeviceNetworkingCollect::ReportMissedEvents()
 
 bool DeviceNetworkingCollect::AddDeviceChangeListener()
 {
-    HILOGI("AddDeviceChangeListener called");
+    HILOGI("AddDMListener called");
     if (IsDmReady()) {
         int32_t ret = DeviceManager::GetInstance().InitDeviceManager(PKG_NAME, initCallback_);
         if (ret != ERR_OK) {
@@ -142,7 +142,7 @@ bool DeviceNetworkingCollect::AddDeviceChangeListener()
             HILOGE("RegisterDevStateCallback error");
             return false;
         }
-        HILOGI("AddDeviceChangeListener success");
+        HILOGI("AddDMListener success");
         return true;
     }
     return false;
@@ -292,7 +292,7 @@ void WorkHandler::ProcessEvent(uint32_t eventId)
         return;
     }
     if (!collect_->AddDeviceChangeListener()) {
-        HILOGW("AddDeviceChangeListener retry");
+        HILOGW("AddDMListener retry");
         auto task = [this] {this->ProcessEvent(INIT_EVENT);};
         if (handler_ == nullptr) {
             HILOGE("NetworkingCollect ProcessEvent handler is null!");
