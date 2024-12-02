@@ -74,7 +74,7 @@ private:
     bool ReportMissedEvents();
 };
 
-class WorkHandler {
+class WorkHandler : public std::enable_shared_from_this<WorkHandler> {
     public:
         WorkHandler(const sptr<DeviceNetworkingCollect>& collect) : collect_(collect)
         {
