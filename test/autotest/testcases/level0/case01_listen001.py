@@ -45,9 +45,9 @@ class case01_listen001(TestCase):
         driver.System.execute_command("kill -9 `pidof distributeddata`")
         time.sleep(2)
         device_logger.stop_log()
-        CheckPoint("'AddProc:distributeddata和RemoveProc:distributeddata dead' is present in the logs")
+        CheckPoint("'AddProc:distributeddata and rm DeadProc:distributeddata' is present in the logs")
         device_logger.check_log("AddProc:distributeddata", EXCEPTION=True)
-        device_logger.check_log("RemoveProc:distributeddata dead", EXCEPTION=True)
+        device_logger.check_log("rm DeadProc:distributeddata", EXCEPTION=True)
 
     def teardown(self):
         self.log.info("case01_listen001 down")
