@@ -14,6 +14,7 @@
  */
 
 #include "system_ability_manager_dumper_test.h"
+#include "ability_death_recipient.h"
 #include "system_ability_status_change_proxy.h"
 #include "ipc_skeleton.h"
 
@@ -38,6 +39,17 @@ const std::string strArgsHelp = "-h";
 const std::string strArgsQueryAll = "-l";
 const std::string strIllegal = "The arguments are illegal and you can enter '-h' for help.\n";
 constexpr int LISTENER_BASE_INDEX = 1;
+}
+void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
+{
+    saMgr->abilityDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityDeathRecipient());
+    saMgr->systemProcessDeath_ = sptr<IRemoteObject::DeathRecipient>(new SystemProcessDeathRecipient());
+    saMgr->abilityStatusDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityStatusDeathRecipient());
+    saMgr->abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityCallbackDeathRecipient());
+    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
+    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
 }
 void SystemAbilityManagerDumperTest::SetUpTestCase()
 {
@@ -1070,7 +1082,9 @@ HWTEST_F(SystemAbilityManagerDumperTest, GetFfrtDumpInfoProc004, TestSize.Level2
     DTEST_LOG << "GetFfrtDumpInfoProc004 begin" << std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     saMgr->abilityStateScheduler_ = systemAbilityStateScheduler;
     std::vector<std::string> args;
     args.emplace_back("--ffrt");
@@ -1091,7 +1105,9 @@ HWTEST_F(SystemAbilityManagerDumperTest, GetFfrtDumpInfoProc005, TestSize.Level1
     DTEST_LOG << "GetFfrtDumpInfoProc005 begin" << std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     saMgr->abilityStateScheduler_ = systemAbilityStateScheduler;
 
     u16string procName = u"proTest";

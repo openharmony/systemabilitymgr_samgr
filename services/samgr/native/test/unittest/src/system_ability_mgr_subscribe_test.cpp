@@ -28,6 +28,7 @@
 #include "samgr_err_code.h"
 #include "system_process_status_change_proxy.h"
 #include "system_ability_manager_util.h"
+#include "ability_death_recipient.h"
 #include "test_log.h"
 #define private public
 #include "ipc_skeleton.h"
@@ -47,6 +48,18 @@ namespace {
 constexpr int32_t SAID = 1234;
 constexpr int32_t OVERFLOW_TIME = 257;
 constexpr int32_t TEST_OVERFLOW_SAID = 99999;
+
+void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
+{
+    saMgr->abilityDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityDeathRecipient());
+    saMgr->systemProcessDeath_ = sptr<IRemoteObject::DeathRecipient>(new SystemProcessDeathRecipient());
+    saMgr->abilityStatusDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityStatusDeathRecipient());
+    saMgr->abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityCallbackDeathRecipient());
+    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
+    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+}
 }
 
 /**
@@ -57,7 +70,9 @@ constexpr int32_t TEST_OVERFLOW_SAID = 99999;
  */
 HWTEST_F(SystemAbilityMgrTest, SubscribeSystemAbility001, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     int32_t systemAbilityId = -1;
     const sptr<ISystemAbilityStatusChange> listener;
     int32_t ret = saMgr->SubscribeSystemAbility(systemAbilityId, listener);
@@ -72,7 +87,9 @@ HWTEST_F(SystemAbilityMgrTest, SubscribeSystemAbility001, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrTest, UnSubscribeSystemAbility001, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     int32_t systemAbilityId = -1;
     const sptr<ISystemAbilityStatusChange> listener;
     int32_t ret = saMgr->UnSubscribeSystemAbility(systemAbilityId, listener);
@@ -86,7 +103,9 @@ HWTEST_F(SystemAbilityMgrTest, UnSubscribeSystemAbility001, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrTest, ReportSubscribeOverflow001, TestSize.Level1)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
     ASSERT_TRUE(saMgr != nullptr);
     std::vector<sptr<SaStatusChangeMock>> tmpCallbak;
@@ -108,7 +127,9 @@ HWTEST_F(SystemAbilityMgrTest, ReportSubscribeOverflow001, TestSize.Level1)
  */
 HWTEST_F(SystemAbilityMgrTest, UnSubscribeSystemAbilityDied001, TestSize.Level1)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     ASSERT_TRUE(saMgr != nullptr);
     sptr<SaStatusChangeMock> callback(new SaStatusChangeMock());
     saMgr->listenerMap_[SAID].push_back({callback, SAID});
@@ -126,7 +147,9 @@ HWTEST_F(SystemAbilityMgrTest, UnSubscribeSystemAbilityDied001, TestSize.Level1)
 HWTEST_F(SystemAbilityMgrTest, SubscribeSystemProcess001, TestSize.Level3)
 {
     DTEST_LOG << " SubscribeSystemProcess001 " << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     sptr<ISystemProcessStatusChange> systemProcessStatusChange = new SystemProcessStatusChange();
     saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
     int32_t ret = saMgr->SubscribeSystemProcess(systemProcessStatusChange);
@@ -142,7 +165,9 @@ HWTEST_F(SystemAbilityMgrTest, SubscribeSystemProcess001, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, SubscribeSystemProcess002, TestSize.Level3)
 {
     DTEST_LOG << " SubscribeSystemProcess002 " << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     saMgr->abilityStateScheduler_ = nullptr;
     sptr<ISystemProcessStatusChange> systemProcessStatusChange = new SystemProcessStatusChange();
     int32_t ret = saMgr->SubscribeSystemProcess(systemProcessStatusChange);
@@ -157,7 +182,9 @@ HWTEST_F(SystemAbilityMgrTest, SubscribeSystemProcess002, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrTest, SubscribeSystemProcess003, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     sptr<SystemProcessStatusChange> listener = new SystemProcessStatusChange();
     saMgr->abilityStateScheduler_ = nullptr;
     std::list<SystemProcessInfo> systemProcessInfos;
@@ -174,7 +201,8 @@ HWTEST_F(SystemAbilityMgrTest, SubscribeSystemProcess003, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, UnSubscribeSystemProcess001, TestSize.Level3)
 {
     DTEST_LOG << " UnSubscribeSystemProcess001" << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
     sptr<ISystemProcessStatusChange> systemProcessStatusChange = new SystemProcessStatusChange();
     int32_t ret = saMgr->UnSubscribeSystemProcess(systemProcessStatusChange);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
@@ -189,7 +217,9 @@ HWTEST_F(SystemAbilityMgrTest, UnSubscribeSystemProcess001, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, UnSubscribeSystemProcess002, TestSize.Level3)
 {
     DTEST_LOG << " UnSubscribeSystemProcess002" << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     sptr<ISystemProcessStatusChange> systemProcessStatusChange = new SystemProcessStatusChange();
     saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
     int32_t ret = saMgr->UnSubscribeSystemProcess(systemProcessStatusChange);
@@ -204,7 +234,9 @@ HWTEST_F(SystemAbilityMgrTest, UnSubscribeSystemProcess002, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrTest, UnSubscribeSystemProcess003, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     sptr<SystemProcessStatusChange> listener = new SystemProcessStatusChange();
     saMgr->abilityStateScheduler_ = nullptr;
     std::list<SystemProcessInfo> systemProcessInfos;
