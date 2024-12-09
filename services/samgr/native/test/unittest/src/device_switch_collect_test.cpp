@@ -22,6 +22,7 @@
 #include "icollect_plugin.h"
 #include "sa_profiles.h"
 #include "system_ability_definition.h"
+#include "ability_death_recipient.h"
 #include "test_log.h"
 #include "sam_log.h"
 
@@ -47,6 +48,18 @@ static const std::string DEVICE_ID = "local";
 static const std::string INVALID_ACTION = "test";
 static const std::string UNRELATED_NAME = "test";
 static const std::string WIFI_NAME = "wifi_status";
+
+void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
+{
+    saMgr->abilityDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityDeathRecipient());
+    saMgr->systemProcessDeath_ = sptr<IRemoteObject::DeathRecipient>(new SystemProcessDeathRecipient());
+    saMgr->abilityStatusDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityStatusDeathRecipient());
+    saMgr->abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityCallbackDeathRecipient());
+    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
+    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+}
 }
 
 void DeviceSwitchCollectTest::SetUpTestCase()
@@ -218,8 +231,9 @@ HWTEST_F(DeviceSwitchCollectTest, OnStart001, TestSize.Level3)
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     deviceSwitchCollect->needListenSwitchEvent_ = false;
     int32_t ret = deviceSwitchCollect->OnStart();
     EXPECT_EQ(ret, ERR_OK);
@@ -241,8 +255,9 @@ HWTEST_F(DeviceSwitchCollectTest, OnStart002, TestSize.Level3)
         new DeviceSwitchCollect(collect);
     deviceSwitchCollect->InitCommonEventSubscriber();
     deviceSwitchCollect->needListenSwitchEvent_ = true;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     saMgr->subscribeCountMap_.clear();
     int32_t ret = deviceSwitchCollect->OnStart();
     EXPECT_EQ(ret, ERR_OK);
@@ -340,7 +355,10 @@ HWTEST_F(DeviceSwitchCollectTest, AddCollectEvent002, TestSize.Level3)
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     deviceSwitchCollect->InitCommonEventSubscriber();
-    SystemAbilityManager::GetInstance()->subscribeCountMap_.clear();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
+    saMgr->subscribeCountMap_.clear();
     int32_t ret = deviceSwitchCollect->AddCollectEvent(onDemandEvent);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "AddCollectEvent002 end" << std::endl;

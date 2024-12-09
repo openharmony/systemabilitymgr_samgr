@@ -44,6 +44,18 @@ constexpr int32_t TEST_SYSTEM_ABILITY2 = 1492;
 constexpr int32_t ONCE_DELAY_TIME = 10 * 1000; //ms
 constexpr int32_t MAX_DURATION = 11 * 60 * 1000; // ms
 const std::string SA_TAG_DEVICE_ON_LINE = "deviceonline";
+
+void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
+{
+    saMgr->abilityDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityDeathRecipient());
+    saMgr->systemProcessDeath_ = sptr<IRemoteObject::DeathRecipient>(new SystemProcessDeathRecipient());
+    saMgr->abilityStatusDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityStatusDeathRecipient());
+    saMgr->abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityCallbackDeathRecipient());
+    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
+    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+}
 }
 
 void SystemProcessStatusChange::OnSystemProcessStarted(SystemProcessInfo& systemProcessInfo)
@@ -1331,7 +1343,9 @@ HWTEST_F(SystemAbilityStateSchedulerTest, OnAbilityUnloadableLocked002, TestSize
 HWTEST_F(SystemAbilityStateSchedulerTest, CheckStartEnableOnce001, TestSize.Level3)
 {
     DTEST_LOG << " CheckStartEnableOnce001 " << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     OnDemandEvent event1 = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
     OnDemandEvent event2 = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
     bool res = (event1 == event2);
@@ -1354,7 +1368,9 @@ HWTEST_F(SystemAbilityStateSchedulerTest, CheckStartEnableOnce001, TestSize.Leve
 HWTEST_F(SystemAbilityStateSchedulerTest, CheckStartEnableOnce002, TestSize.Level3)
 {
     DTEST_LOG << " CheckStartEnableOnce002 " << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
     std::string strEvent = event.ToString();
     EXPECT_FALSE(strEvent.empty());
@@ -1376,7 +1392,9 @@ HWTEST_F(SystemAbilityStateSchedulerTest, CheckStartEnableOnce002, TestSize.Leve
 HWTEST_F(SystemAbilityStateSchedulerTest, CheckStartEnableOnce003, TestSize.Level3)
 {
     DTEST_LOG << " CheckStartEnableOnce003 " << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
     std::string strEvent = event.ToString();
     EXPECT_FALSE(strEvent.empty());
@@ -1442,7 +1460,9 @@ HWTEST_F(SystemAbilityStateSchedulerTest, CheckStartEnableOnce005, TestSize.Leve
  */
 HWTEST_F(SystemAbilityStateSchedulerTest, CheckStartEnableOnce006, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
     OnDemandEvent onDemandEvent;
@@ -1463,7 +1483,9 @@ HWTEST_F(SystemAbilityStateSchedulerTest, CheckStartEnableOnce006, TestSize.Leve
  */
 HWTEST_F(SystemAbilityStateSchedulerTest, CheckStartEnableOnce007, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
     OnDemandEvent anotherOnDemandEvent;
@@ -1488,7 +1510,9 @@ HWTEST_F(SystemAbilityStateSchedulerTest, CheckStartEnableOnce007, TestSize.Leve
  */
 HWTEST_F(SystemAbilityStateSchedulerTest, CheckStartEnableOnce008, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
     OnDemandEvent onDemandEvent;
@@ -1508,7 +1532,9 @@ HWTEST_F(SystemAbilityStateSchedulerTest, CheckStartEnableOnce008, TestSize.Leve
 HWTEST_F(SystemAbilityStateSchedulerTest, CheckStopEnableOnce001, TestSize.Level3)
 {
     DTEST_LOG << " CheckStopEnableOnce001 " << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "off" };
     std::string strEvent = event.ToString();
     EXPECT_FALSE(strEvent.empty());
@@ -1529,7 +1555,9 @@ HWTEST_F(SystemAbilityStateSchedulerTest, CheckStopEnableOnce001, TestSize.Level
 HWTEST_F(SystemAbilityStateSchedulerTest, CheckStopEnableOnce002, TestSize.Level3)
 {
     DTEST_LOG << " CheckStopEnableOnce002 " << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "off" };
     std::string strEvent = event.ToString();
     EXPECT_FALSE(strEvent.empty());
@@ -1550,7 +1578,9 @@ HWTEST_F(SystemAbilityStateSchedulerTest, CheckStopEnableOnce002, TestSize.Level
 HWTEST_F(SystemAbilityStateSchedulerTest, CheckStopEnableOnce003, TestSize.Level3)
 {
     DTEST_LOG << " CheckStopEnableOnce003 " << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "off" };
     std::string strEvent = event.ToString();
     EXPECT_FALSE(strEvent.empty());

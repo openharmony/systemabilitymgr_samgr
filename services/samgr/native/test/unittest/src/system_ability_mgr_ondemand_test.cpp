@@ -28,6 +28,7 @@
 #include "samgr_err_code.h"
 #include "system_process_status_change_proxy.h"
 #include "system_ability_manager_util.h"
+#include "ability_death_recipient.h"
 #include "test_log.h"
 #define private public
 #include "ipc_skeleton.h"
@@ -53,6 +54,18 @@ constexpr int32_t ONDEMAND_SLEEP_TIME = 600 * 1000; // us
 constexpr int64_t ONDEMAND_EXTRA_DATA_ID = 1;
 
 const string ONDEMAND_PARAM = "persist.samgr.perf.ondemand";
+
+void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
+{
+    saMgr->abilityDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityDeathRecipient());
+    saMgr->systemProcessDeath_ = sptr<IRemoteObject::DeathRecipient>(new SystemProcessDeathRecipient());
+    saMgr->abilityStatusDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityStatusDeathRecipient());
+    saMgr->abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityCallbackDeathRecipient());
+    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
+    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+}
 }
 
 /**
@@ -98,8 +111,9 @@ HWTEST_F(SystemAbilityMgrTest, CheckOnDemandSystemAbility002, TestSize.Level1)
  */
 HWTEST_F(SystemAbilityMgrTest, StartOnDemandAbility001, TestSize.Level0)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     bool isExist = false;
     int32_t result = saMgr->StartOnDemandAbility(TEST_EXCEPTION_LOW_SA_ID, isExist);
     EXPECT_TRUE(result != ERR_NONE);
@@ -112,8 +126,9 @@ HWTEST_F(SystemAbilityMgrTest, StartOnDemandAbility001, TestSize.Level0)
  */
 HWTEST_F(SystemAbilityMgrTest, StartOnDemandAbility002, TestSize.Level0)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     bool isExist = false;
     int32_t result = saMgr->StartOnDemandAbility(TEST_EXCEPTION_HIGH_SA_ID, isExist);
     EXPECT_TRUE(result != ERR_NONE);
@@ -126,8 +141,9 @@ HWTEST_F(SystemAbilityMgrTest, StartOnDemandAbility002, TestSize.Level0)
  */
 HWTEST_F(SystemAbilityMgrTest, StartOnDemandAbility003, TestSize.Level0)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     bool isExist = false;
     int32_t result = saMgr->StartOnDemandAbility(DISTRIBUTED_SCHED_TEST_SO_ID, isExist);
     EXPECT_TRUE(result != ERR_NONE);
@@ -140,8 +156,9 @@ HWTEST_F(SystemAbilityMgrTest, StartOnDemandAbility003, TestSize.Level0)
  */
 HWTEST_F(SystemAbilityMgrTest, StartOnDemandAbility004, TestSize.Level0)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     bool isExist = false;
     int32_t result = saMgr->StartOnDemandAbility(DISTRIBUTED_SCHED_SA_ID, isExist);
     EXPECT_TRUE(result != ERR_NONE);
@@ -155,8 +172,9 @@ HWTEST_F(SystemAbilityMgrTest, StartOnDemandAbility004, TestSize.Level0)
 HWTEST_F(SystemAbilityMgrTest, StartOnDemandAbility005, TestSize.Level0)
 {
     DTEST_LOG << " StartOnDemandAbility005 " << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     bool isExist = false;
     int32_t result = saMgr->StartOnDemandAbility(TEST_EXCEPTION_LOW_SA_ID, isExist);
     EXPECT_TRUE(result != ERR_NONE);
@@ -169,8 +187,9 @@ HWTEST_F(SystemAbilityMgrTest, StartOnDemandAbility005, TestSize.Level0)
  */
 HWTEST_F(SystemAbilityMgrTest, AddOnDemandSystemAbilityInfo001, TestSize.Level0)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     int32_t result = saMgr->AddOnDemandSystemAbilityInfo(TEST_EXCEPTION_LOW_SA_ID, u"");
     EXPECT_TRUE(result != ERR_NONE);
 }
@@ -182,8 +201,9 @@ HWTEST_F(SystemAbilityMgrTest, AddOnDemandSystemAbilityInfo001, TestSize.Level0)
  */
 HWTEST_F(SystemAbilityMgrTest, AddOnDemandSystemAbilityInfo002, TestSize.Level0)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     int32_t result = saMgr->AddOnDemandSystemAbilityInfo(TEST_EXCEPTION_HIGH_SA_ID, u"");
     EXPECT_TRUE(result != ERR_NONE);
 }
@@ -195,8 +215,9 @@ HWTEST_F(SystemAbilityMgrTest, AddOnDemandSystemAbilityInfo002, TestSize.Level0)
  */
 HWTEST_F(SystemAbilityMgrTest, AddOnDemandSystemAbilityInfo003, TestSize.Level0)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     int32_t result = saMgr->AddOnDemandSystemAbilityInfo(DISTRIBUTED_SCHED_TEST_SO_ID, u"");
     EXPECT_TRUE(result != ERR_NONE);
 }
@@ -208,8 +229,9 @@ HWTEST_F(SystemAbilityMgrTest, AddOnDemandSystemAbilityInfo003, TestSize.Level0)
  */
 HWTEST_F(SystemAbilityMgrTest, AddOnDemandSystemAbilityInfo004, TestSize.Level0)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     int32_t result = saMgr->AddOnDemandSystemAbilityInfo(DISTRIBUTED_SCHED_TEST_SO_ID, u"fake_process_name");
     EXPECT_TRUE(result != ERR_NONE);
 }
@@ -222,7 +244,9 @@ HWTEST_F(SystemAbilityMgrTest, AddOnDemandSystemAbilityInfo004, TestSize.Level0)
  */
 HWTEST_F(SystemAbilityMgrTest, AddOnDemandSystemAbilityInfo005, TestSize.Level0)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     int32_t said = -1;
     int32_t result = saMgr->AddOnDemandSystemAbilityInfo(said, u"");
     EXPECT_EQ(result, ERR_INVALID_VALUE);
@@ -250,7 +274,9 @@ HWTEST_F(SystemAbilityMgrTest, GetParamDebug001, TestSize.Level1)
 HWTEST_F(SystemAbilityMgrTest, OndemandLoadForPerf001, TestSize.Level3)
 {
     DTEST_LOG << " OndemandLoadForPerf001 " << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     saMgr->SetFfrt();
     saMgr->OndemandLoadForPerf();
     saMgr->Init();
@@ -269,7 +295,9 @@ HWTEST_F(SystemAbilityMgrTest, OndemandLoadForPerf001, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, OndemandLoadForPerf002, TestSize.Level3)
 {
     DTEST_LOG << " OndemandLoadForPerf002 " << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     saMgr->workHandler_ = nullptr;
     saMgr->OndemandLoadForPerf();
     EXPECT_NE(saMgr, nullptr);
@@ -284,7 +312,9 @@ HWTEST_F(SystemAbilityMgrTest, OndemandLoadForPerf002, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, GetAllOndemandSa001, TestSize.Level3)
 {
     DTEST_LOG << " GetAllOndemandSa001 " << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     CommonSaProfile saProfile;
     saMgr->saProfileMap_[1] = saProfile;
     saMgr->GetAllOndemandSa();
@@ -302,7 +332,9 @@ HWTEST_F(SystemAbilityMgrTest, GetAllOndemandSa001, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, GetAllOndemandSa002, TestSize.Level3)
 {
     DTEST_LOG << " GetAllOndemandSa002 " << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     CommonSaProfile saProfile;
     saMgr->saProfileMap_[1] = saProfile;
     SAInfo saInfo;
@@ -322,7 +354,9 @@ HWTEST_F(SystemAbilityMgrTest, GetAllOndemandSa002, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrTest, GetAllOndemandSa003, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     saMgr->saProfileMap_.clear();
     auto ret = saMgr->GetAllOndemandSa();
     EXPECT_TRUE(ret.empty());
@@ -336,7 +370,9 @@ HWTEST_F(SystemAbilityMgrTest, GetAllOndemandSa003, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrTest, GetAllOndemandSa004, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     CommonSaProfile saProfile;
     saMgr->saProfileMap_.clear();
     saMgr->saProfileMap_[SAID] = saProfile;
@@ -353,7 +389,9 @@ HWTEST_F(SystemAbilityMgrTest, GetAllOndemandSa004, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, StopOnDemandAbilityInner001, TestSize.Level3)
 {
     DTEST_LOG << " StopOnDemandAbilityInner001 " << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     std::u16string procName = u"listen_test1";
     int32_t systemAbilityId = 1494;
     OnDemandEvent event;
@@ -374,7 +412,9 @@ HWTEST_F(SystemAbilityMgrTest, StopOnDemandAbilityInner001, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, StopOnDemandAbilityInner002, TestSize.Level3)
 {
     DTEST_LOG << " StopOnDemandAbilityInner002 " << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     std::u16string procName = u"foundation";
     int32_t systemAbilityId = 401;
     OnDemandEvent event;
@@ -391,7 +431,9 @@ HWTEST_F(SystemAbilityMgrTest, StopOnDemandAbilityInner002, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, StopOnDemandAbility001, TestSize.Level3)
 {
     DTEST_LOG << " StopOnDemandAbility001 " << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     std::u16string procName = u"";
     int32_t systemAbilityId = 1;
     OnDemandEvent event;
@@ -407,7 +449,9 @@ HWTEST_F(SystemAbilityMgrTest, StopOnDemandAbility001, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrTest, DoLoadOnDemandAbility001, TestSize.Level0)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     sptr<IRemoteObject> testAbility = new TestTransactionService();
     ISystemAbilityManager::SAExtraProp saExtraProp;
     saMgr->abilityStateScheduler_->processHandler_ = nullptr;
@@ -431,7 +475,9 @@ HWTEST_F(SystemAbilityMgrTest, DoLoadOnDemandAbility001, TestSize.Level0)
  */
 HWTEST_F(SystemAbilityMgrTest, StartOnDemandAbilityInner001, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     const std::u16string procName;
     int32_t systemAbilityId = 0;
     SystemAbilityManager::AbilityItem abilityItem;
@@ -447,7 +493,9 @@ HWTEST_F(SystemAbilityMgrTest, StartOnDemandAbilityInner001, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy001, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     int32_t systemAbilityId = 1;
     OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
     std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
@@ -462,7 +510,9 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy001, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy002, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     int32_t systemAbilityId = 1;
     OnDemandPolicyType type = OnDemandPolicyType::STOP_POLICY;
     std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
@@ -473,7 +523,9 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy002, TestSize.Level3)
 
 HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy003, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     int32_t systemAbilityId = 1;
     OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
     uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
@@ -490,7 +542,9 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy003, TestSize.Level3)
 
 HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy004, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     int32_t systemAbilityId = 1;
     OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
     uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
@@ -509,7 +563,9 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy004, TestSize.Level3)
 
 HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy005, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     int32_t systemAbilityId = 1;
     OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
     uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
@@ -528,7 +584,9 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy005, TestSize.Level3)
 
 HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy006, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     int32_t systemAbilityId = 1;
     OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
     uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
@@ -560,7 +618,9 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy006, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrTest, UpdateOnDemandPolicy001, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
     SystemAbilityOnDemandEvent event = {OnDemandEventId::COMMON_EVENT, "TEST", "TEST"};
     std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
@@ -600,7 +660,9 @@ HWTEST_F(SystemAbilityMgrTest, UpdateOnDemandPolicy001, TestSize.Level3)
 
 HWTEST_F(SystemAbilityMgrTest, GetOnDemandReasonExtraData001, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     MessageParcel messageParcel;
     sptr<DeviceStatusCollectManager> collectMgr = saMgr->collectManager_;
     saMgr->collectManager_ = nullptr;
@@ -621,7 +683,9 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandReasonExtraData001, TestSize.Level3)
 
 HWTEST_F(SystemAbilityMgrTest, GetOnDemandReasonExtraData002, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
     collectManager->collectPluginMap_.clear();
     saMgr->collectManager_ = collectManager;
@@ -639,7 +703,9 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandReasonExtraData002, TestSize.Level3)
 
 HWTEST_F(SystemAbilityMgrTest, GetOnDemandReasonExtraData003, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
     saMgr->collectManager_ = collectManager;
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collectManager);
@@ -664,7 +730,9 @@ HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent001, TestSize.Level3)
     DTEST_LOG << " ProcessOnDemandEvent001 " << std::endl;
     OnDemandEvent event;
     std::list<SaControlInfo> saControlList;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     saMgr->abilityStateScheduler_ = nullptr;
     saMgr->ProcessOnDemandEvent(event, saControlList);
     EXPECT_NE(saMgr, nullptr);
@@ -683,7 +751,9 @@ HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent002, TestSize.Level3)
     std::list<SaControlInfo> saControlList;
     SaControlInfo saControlInfo;
     saControlInfo.ondemandId = START_ON_DEMAND;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
     saMgr->ProcessOnDemandEvent(event, saControlList);
     EXPECT_NE(saMgr, nullptr);
@@ -702,7 +772,9 @@ HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent003, TestSize.Level3)
     std::list<SaControlInfo> saControlList;
     SaControlInfo saControlInfo;
     saControlInfo.ondemandId = STOP_ON_DEMAND;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     saMgr->ProcessOnDemandEvent(event, saControlList);
     EXPECT_NE(saMgr, nullptr);
 }
@@ -720,7 +792,9 @@ HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent004, TestSize.Level3)
     std::list<SaControlInfo> saControlList;
     SaControlInfo saControlInfo;
     saControlInfo.ondemandId = OTHER_ON_DEMAND;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     saMgr->ProcessOnDemandEvent(event, saControlList);
     EXPECT_NE(saMgr, nullptr);
 }
@@ -733,7 +807,9 @@ HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent004, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent005, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
     saMgr->abilityStateScheduler_ = systemAbilityStateScheduler;
@@ -759,7 +835,9 @@ HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent005, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent006, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
     saMgr->abilityStateScheduler_ = systemAbilityStateScheduler;
@@ -790,7 +868,9 @@ HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent007, TestSize.Level3)
     std::list<SaControlInfo> saControlList;
     SaControlInfo saControlInfo;
     saControlInfo.ondemandId = START_ON_DEMAND;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
     saMgr->ProcessOnDemandEvent(event, saControlList);
     EXPECT_NE(saMgr, nullptr);
@@ -805,7 +885,9 @@ HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent007, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, IdleSystemAbility001, TestSize.Level3)
 {
     DTEST_LOG << " IdleSystemAbility001 " << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     int32_t systemAbilityId = -1;
     std::u16string procName;
     nlohmann::json idleReason;
@@ -823,7 +905,9 @@ HWTEST_F(SystemAbilityMgrTest, IdleSystemAbility001, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, IdleSystemAbility002, TestSize.Level3)
 {
     DTEST_LOG << " IdleSystemAbility002 " << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     int32_t systemAbilityId = 401;
     std::u16string procName;
     nlohmann::json idleReason;
@@ -841,7 +925,9 @@ HWTEST_F(SystemAbilityMgrTest, IdleSystemAbility002, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, IdleSystemAbility003, TestSize.Level3)
 {
     DTEST_LOG << " IdleSystemAbility003 " << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
     SAInfo saInfo;
     saInfo.remoteObj = testAbility;
@@ -862,7 +948,9 @@ HWTEST_F(SystemAbilityMgrTest, IdleSystemAbility003, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, ActiveSystemAbility001, TestSize.Level3)
 {
     DTEST_LOG << " ActiveSystemAbility001 " << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     int32_t systemAbilityId = -1;
     std::u16string procName;
     nlohmann::json activeReason;
@@ -879,7 +967,9 @@ HWTEST_F(SystemAbilityMgrTest, ActiveSystemAbility001, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, ActiveSystemAbility002, TestSize.Level3)
 {
     DTEST_LOG << " ActiveSystemAbility002 " << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     int32_t systemAbilityId = 401;
     std::u16string procName;
     nlohmann::json activeReason;
@@ -897,7 +987,9 @@ HWTEST_F(SystemAbilityMgrTest, ActiveSystemAbility002, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, ActiveSystemAbility003, TestSize.Level3)
 {
     DTEST_LOG << " ActiveSystemAbility003 " << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
     SAInfo saInfo;
     saInfo.remoteObj = testAbility;

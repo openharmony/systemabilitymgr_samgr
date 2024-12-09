@@ -17,6 +17,7 @@
 #include "system_ability_manager.h"
 #include "system_ability_manager_util.h"
 #include "sam_mock_permission.h"
+#include "ability_death_recipient.h"
 #include "test_log.h"
 
 using namespace std;
@@ -27,6 +28,18 @@ using namespace OHOS;
 namespace OHOS {
 
 const std::u16string PROCESS_NAME = u"test_process_name";
+
+void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
+{
+    saMgr->abilityDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityDeathRecipient());
+    saMgr->systemProcessDeath_ = sptr<IRemoteObject::DeathRecipient>(new SystemProcessDeathRecipient());
+    saMgr->abilityStatusDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityStatusDeathRecipient());
+    saMgr->abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityCallbackDeathRecipient());
+    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
+    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+}
 
 void SamgrUtilTest::SetUpTestCase()
 {
@@ -340,7 +353,9 @@ HWTEST_F(SamgrUtilTest, SetModuleUpdateParam002, TestSize.Level3)
  */
 HWTEST_F(SamgrUtilTest, SendUpdateSaState001, TestSize.Level3)
 {
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
     saMgr->saProfileMap_.clear();
     CommonSaProfile saprofile;
     saprofile.moduleUpdate = true;
