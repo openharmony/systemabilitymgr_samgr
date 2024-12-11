@@ -207,6 +207,7 @@ enum {
     EVENT_MANAGER_SERVICE_ID                         = 3201,
     COMMON_EVENT_SERVICE_ABILITY_ID                  = 3202,
     ADVANCED_NOTIFICATION_SERVICE_ABILITY_ID         = 3203,
+    REMINDER_AGENT_SERVICE_ABILITY_ID                = 3204,
     COMMON_EVENT_SERVICE_ID                          = 3299,
     SUBSYS_POWERMNG_SYS_ABILITY_ID_BEGIN             = 3300,
     POWER_MANAGER_SERVICE_ID                         = 3301,
