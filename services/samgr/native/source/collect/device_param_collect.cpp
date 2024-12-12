@@ -87,7 +87,7 @@ void DeviceParamCollect::WatchParameters()
 {
     std::lock_guard<std::mutex> autoLock(paramLock_);
     for (auto param : pendingParams_) {
-        HILOGD("DeviceParamCollect watch param: %{puhlic}s", param.c_str());
+        HILOGD("DeviceParamCollect watch param: %{public}s", param.c_str());
         int32_t result = WatchParameter(param.c_str(), DeviceParamCallback, this);
         if (result != ERR_OK) {
             HILOGE("DeviceParamCollect watch events: %{public}s failed", param.c_str());
