@@ -182,24 +182,25 @@ bool CommonEventCollect::CreateCommonEventSubscriber()
 bool CommonEventCollect::CreateCommonEventSubscriberLocked()
 {
     int64_t begin = GetTickCount();
-    if (commonEventSubscriber_ != nullptr) {
+    EventFwk::MatchingSkills skill = EventFwk::MatchingSkills();
+    AddSkillsEvent(skill);
+    EventFwk::CommonEventSubscribeInfo info(skill);
+    std::shared_ptr<EventFwk::CommonEventSubscriber> comEvtScrb = commonEventSubscriber_;
+    commonEventSubscriber_ = std::make_shared<CommonEventSubscriber>(info, this);
+    bool ret = EventFwk::CommonEventManager::SubscribeCommonEvent(commonEventSubscriber_);
+    HILOGI("SubsComEvt %{public}" PRId64 "ms %{public}s", (GetTickCount() - begin), ret ? "suc" : "fail");
+    if (comEvtScrb != nullptr) {
         HILOGI("UnSubsComEvt start");
         {
             SamgrXCollie samgrXCollie("samgr--UnSubscribeCommonEvent");
-            bool isUnsubscribe = EventFwk::CommonEventManager::UnSubscribeCommonEvent(commonEventSubscriber_);
+            bool isUnsubscribe = EventFwk::CommonEventManager::UnSubscribeCommonEvent(comEvtScrb);
             if (!isUnsubscribe) {
                 HILOGE("CreateCommonEventSubscriberLocked isUnsubscribe failed!");
                 return false;
             }
         }
-        commonEventSubscriber_.reset();
+        comEvtScrb.reset();
     }
-    EventFwk::MatchingSkills skill = EventFwk::MatchingSkills();
-    AddSkillsEvent(skill);
-    EventFwk::CommonEventSubscribeInfo info(skill);
-    commonEventSubscriber_ = std::make_shared<CommonEventSubscriber>(info, this);
-    bool ret = EventFwk::CommonEventManager::SubscribeCommonEvent(commonEventSubscriber_);
-    HILOGI("SubsComEvt %{public}" PRId64 "ms %{public}s", (GetTickCount() - begin), ret ? "suc" : "fail");
     return ret;
 }
 
