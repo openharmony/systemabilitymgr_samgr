@@ -1044,6 +1044,7 @@ int32_t SystemAbilityManager::AddSystemAbility(int32_t systemAbilityId, const sp
             SystemAbilityInvalidateCache(systemAbilityId);
             auto callingPid = IPCSkeleton::GetCallingPid();
             auto callingUid = IPCSkeleton::GetCallingUid();
+            SendSystemAbilityRemovedMsg(systemAbilityId);
             HILOGW("SA:%{public}d is being covered, callPid:%{public}d, callUid:%{public}d",
                 systemAbilityId, callingPid, callingUid);
         }
