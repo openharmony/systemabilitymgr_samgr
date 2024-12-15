@@ -361,7 +361,6 @@ private:
     void IpcDumpSingleProcess(int32_t fd, int32_t cmd, const std::string processName);
     int32_t IpcDumpProc(int32_t fd, const std::vector<std::string>& args);
     void RegisterDistribute(int32_t said, bool isDistributed);
-    bool IsProcessStopped(const std::u16string& name);
     void ConvertDumpListener(std::vector<std::pair<int32_t, std::list<int32_t>>>& dumpListeners);
 
     std::u16string deviceName_;

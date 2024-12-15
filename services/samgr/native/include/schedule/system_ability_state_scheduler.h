@@ -71,7 +71,6 @@ public:
     int32_t CheckStopEnableOnce(const OnDemandEvent& event, const SaControlInfo& saControl);
     void UpdateLimitDelayUnloadTime(int32_t systemAbilityId);
     void UpdateLimitDelayUnloadTimeTask(int32_t systemAbilityId);
-    void KillProcessByProcessNameLocked(const std::u16string& processName);
 private:
     void InitStateContext(const std::list<SaProfile>& saProfiles);
 
