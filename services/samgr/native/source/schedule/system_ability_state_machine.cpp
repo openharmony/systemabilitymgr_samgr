@@ -62,7 +62,7 @@ int32_t SystemAbilityStateMachine::AbilityStateTransitionLocked(const std::share
         return ERR_OK;
     }
     if (!handler->CanEnter(currentState)) {
-        HILOGE("Scheduler SA:%{public}d can't transiton from state %{public}d to %{public}d",
+        HILOGE("Scheduler SA:%{public}d can't state %{public}d to %{public}d",
             context->systemAbilityId, currentState, nextState);
         return TRANSIT_SA_STATE_FAIL;
     }
@@ -71,7 +71,7 @@ int32_t SystemAbilityStateMachine::AbilityStateTransitionLocked(const std::share
         return UPDATE_STATE_COUNT_FAIL;
     }
     context->state = nextState;
-    HILOGD("Scheduler SA:%{public}d transiton from state %{public}d to %{public}d",
+    HILOGD("Scheduler SA:%{public}d state %{public}d to %{public}d",
         context->systemAbilityId, currentState, nextState);
     handler->OnEnter(context);
     return ERR_OK;
@@ -123,12 +123,12 @@ int32_t SystemAbilityStateMachine::ProcessStateTransitionLocked(const std::share
         return ERR_OK;
     }
     if (!handler->CanEnter(currentState)) {
-        HILOGI("Scheduler proc:%{public}s can't transiton from state %{public}d to %{public}d",
+        HILOGI("Scheduler proc:%{public}s can't state %{public}d to %{public}d",
             Str16ToStr8(context->processName).c_str(), currentState, nextState);
         return TRANSIT_PROC_STATE_FAIL;
     }
     context->state = nextState;
-    HILOGI("Scheduler proc:%{public}s transiton from state %{public}d to %{public}d",
+    HILOGI("Scheduler proc:%{public}s state %{public}d to %{public}d",
         Str16ToStr8(context->processName).c_str(), currentState, nextState);
     handler->OnEnter(context);
     return ERR_OK;
