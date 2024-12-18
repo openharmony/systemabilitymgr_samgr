@@ -15,6 +15,7 @@
 
 #include "addsystemability_fuzzer.h"
 
+#include <fuzzer/FuzzedDataProvider.h>
 #include "fuzztest_utils.h"
 #include "string_ex.h"
 #include "itest_transaction_service.h"
@@ -27,8 +28,9 @@ const std::u16string SAMGR_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 }
 void FuzzAddSystemAbility(const uint8_t *data, size_t size)
 {
-    auto systemAbilityId = FuzzTestUtils::BuildInt32FromData(data, size);
-    auto isDistributed = FuzzTestUtils::BuildBoolFromData(data, size);
+    FuzzedDataProvider fdp(data, size);
+    auto systemAbilityId = fdp.ConsumeIntegral<int32_t>();
+    auto isDistributed = fdp.ConsumeBool();
     sptr<IRemoteObject> saObj = new(std::nothrow) MockSystemAbilityStatusChange();
     if (saObj == nullptr) {
         return;
@@ -38,11 +40,11 @@ void FuzzAddSystemAbility(const uint8_t *data, size_t size)
     parcelData.WriteInt32(systemAbilityId);
     parcelData.WriteRemoteObject(saObj);
     parcelData.WriteBool(isDistributed);
-    auto dumpFlags = FuzzTestUtils::BuildInt32FromData(data, size);
+    auto dumpFlags = fdp.ConsumeIntegral<int32_t>();
     parcelData.WriteInt32(dumpFlags);
-    auto capability = Str8ToStr16(FuzzTestUtils::BuildStringFromData(data, size));
+    auto capability = u"";
     parcelData.WriteString16(capability);
-    auto permission = Str8ToStr16(FuzzTestUtils::BuildStringFromData(data, size));
+    auto permission = u"";
     parcelData.WriteString16(permission);
     FuzzTestUtils::FuzzTestRemoteRequest(parcelData,
         static_cast<uint32_t>(SamgrInterfaceCode::ADD_SYSTEM_ABILITY_TRANSACTION));

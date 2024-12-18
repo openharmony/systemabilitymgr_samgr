@@ -16,6 +16,7 @@
 #include "samgrcoverage_fuzzer.h"
 
 #define private public
+#include <fuzzer/FuzzedDataProvider.h>
 #include "if_system_ability_manager.h"
 #include "itest_transaction_service.h"
 #include "sa_status_change_mock.h"
@@ -40,25 +41,7 @@ namespace {
     constexpr int32_t SAID = 1493;
     constexpr int32_t ADD_SA_TRANSACTION = 3;
     constexpr int32_t REMOVE_SA_TRANSACTION = 4;
-    
-}
-
-int32_t BuildInt32FromData(const uint8_t* data, size_t size)
-{
-    if ((data == nullptr) || (size < sizeof(int32_t))) {
-        return 0;
-    }
-    int32_t int32Val = *reinterpret_cast<const int32_t *>(data);
-    return int32Val;
-}
-
-std::string BuildStringFromData(const uint8_t* data, size_t size)
-{
-    if ((data == nullptr) || (size == 0)) {
-        return "";
-    }
-    std::string strVal(reinterpret_cast<const char *>(data), size);
-    return strVal;
+    constexpr int32_t MAX_STRING_LENGTH = 30;
 }
 
 void FuzzOndemandLoad(const uint8_t* data, size_t size)
@@ -67,9 +50,10 @@ void FuzzOndemandLoad(const uint8_t* data, size_t size)
     if (saMgr == nullptr) {
         return;
     }
-    std::string procName = BuildStringFromData(data, size);
+    FuzzedDataProvider fdp(data, size);
+    int32_t saId = fdp.ConsumeIntegral<int32_t>();
+    std::string procName = fdp.ConsumeRandomLengthString(MAX_STRING_LENGTH);
     std::u16string procNameU16 = Str8ToStr16(procName);
-    int32_t saId = BuildInt32FromData(data, size);
     SystemAbilityManager::AbilityItem abilityItem;
     ISystemAbilityManager::SAExtraProp saExtraProp;
     bool isExist = false;
@@ -109,7 +93,8 @@ void FuzzRemoveSystemProcess(const uint8_t* data, size_t size)
     if (saMgr == nullptr) {
         return;
     }
-    std::string procName = BuildStringFromData(data, size);
+    FuzzedDataProvider fdp(data, size);
+    std::string procName = fdp.ConsumeRandomLengthString(MAX_STRING_LENGTH);
     std::u16string procNameU16 = Str8ToStr16(procName);
     sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
     saMgr->AddSystemProcess(procNameU16, testAbility);
@@ -141,7 +126,8 @@ void FuzzNotifySystemAbilityLoaded(const uint8_t* data, size_t size)
     sptr<IRemoteObject> remoteObject = new TestTransactionService();
     saMgr->NotifySystemAbilityLoaded(SAID, remoteObject, callback);
     string srcDeviceId = "srcDeviceId";
-    int32_t systemAbilityId = BuildInt32FromData(data, size);
+    FuzzedDataProvider fdp(data, size);
+    int32_t systemAbilityId = fdp.ConsumeIntegral<int32_t>();
     saMgr->LoadSystemAbilityFromRpc(srcDeviceId, systemAbilityId, callback);
     saMgr->CheckSaIsImmediatelyRecycle(systemAbilityId);
 
@@ -176,7 +162,8 @@ void FuzzGetAllOndemandSa(const uint8_t* data, size_t size)
     if (saMgr == nullptr) {
         return;
     }
-    int32_t saId = BuildInt32FromData(data, size);
+    FuzzedDataProvider fdp(data, size);
+    int32_t saId = fdp.ConsumeIntegral<int32_t>();
     CommonSaProfile saProfile;
     saMgr->saProfileMap_[saId] = saProfile;
     saMgr->GetAllOndemandSa();
@@ -189,10 +176,11 @@ void FuzzReportGetSAPeriodically(const uint8_t* data, size_t size)
     if (saMgr == nullptr) {
         return;
     }
-    int32_t uid = BuildInt32FromData(data, size);
-    int32_t saId = BuildInt32FromData(data, size);
+    FuzzedDataProvider fdp(data, size);
+    int32_t saId = fdp.ConsumeIntegral<int32_t>();
+    int32_t uid = fdp.ConsumeIntegral<int32_t>();
     uint64_t key = SamgrUtil::GenerateFreKey(uid, saId);
-    saMgr->saFrequencyMap_[key] = BuildInt32FromData(data, size);
+    saMgr->saFrequencyMap_[key] = fdp.ConsumeIntegral<int32_t>();
     saMgr->ReportGetSAPeriodically();
 }
 
@@ -203,7 +191,8 @@ void FuzzNotifySystemAbilityChanged(const uint8_t* data, size_t size)
         return;
     }
     sptr<SaStatusChangeMock> testAbility(new SaStatusChangeMock());
-    int32_t saId = BuildInt32FromData(data, size);
+    FuzzedDataProvider fdp(data, size);
+    int32_t saId = fdp.ConsumeIntegral<int32_t>();
     saMgr->NotifySystemAbilityChanged(saId, "deviceId", 1, nullptr);
     saMgr->NotifySystemAbilityChanged(saId, "deviceId", ADD_SA_TRANSACTION, testAbility);
     saMgr->NotifySystemAbilityChanged(saId, "deviceId", REMOVE_SA_TRANSACTION, testAbility);
@@ -215,7 +204,8 @@ void FuzzRemoveOnDemandSaInDiedProc(const uint8_t* data, size_t size)
     if (saMgr == nullptr) {
         return;
     }
-    int32_t saId = BuildInt32FromData(data, size);
+    FuzzedDataProvider fdp(data, size);
+    int32_t saId = fdp.ConsumeIntegral<int32_t>();
     auto processContext = std::make_shared<SystemProcessContext>();
     processContext->saList.push_back(saId);
     saMgr->RemoveOnDemandSaInDiedProc(processContext);
@@ -227,7 +217,8 @@ void FuzzDoLoadOnDemandAbility(const uint8_t* data, size_t size)
     if (saMgr == nullptr) {
         return;
     }
-    int32_t saId = BuildInt32FromData(data, size);
+    FuzzedDataProvider fdp(data, size);
+    int32_t saId = fdp.ConsumeIntegral<int32_t>();
     bool isExist = false;
     saMgr->DoLoadOnDemandAbility(saId, isExist);
 }
@@ -238,7 +229,8 @@ void FuzzNotifySystemAbilityAddedBySync(const uint8_t* data, size_t size)
     if (saMgr == nullptr) {
         return;
     }
-    int32_t saId = BuildInt32FromData(data, size);
+    FuzzedDataProvider fdp(data, size);
+    int32_t saId = fdp.ConsumeIntegral<int32_t>();
     sptr<ISystemAbilityStatusChange> listener;
     saMgr->NotifySystemAbilityAddedBySync(saId, listener);
 }
@@ -249,7 +241,8 @@ void FuzzSendLoadedSystemAbilityMsg(const uint8_t* data, size_t size)
     if (saMgr == nullptr) {
         return;
     }
-    int32_t saId = BuildInt32FromData(data, size);
+    FuzzedDataProvider fdp(data, size);
+    int32_t saId = fdp.ConsumeIntegral<int32_t>();
     sptr<IRemoteObject> testAbility(nullptr);
     sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
     saMgr->SendLoadedSystemAbilityMsg(saId, testAbility, callback);
@@ -261,7 +254,8 @@ void FuzzNotifySystemAbilityLoadFail(const uint8_t* data, size_t size)
     if (saMgr == nullptr) {
         return;
     }
-    int32_t saId = BuildInt32FromData(data, size);
+    FuzzedDataProvider fdp(data, size);
+    int32_t saId = fdp.ConsumeIntegral<int32_t>();
     sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
     saMgr->NotifySystemAbilityLoadFail(saId, callback);
 }
@@ -272,7 +266,8 @@ void FuzzStartingSystemProcessLocked(const uint8_t* data, size_t size)
     if (saMgr == nullptr) {
         return;
     }
-    int32_t saId = BuildInt32FromData(data, size);
+    FuzzedDataProvider fdp(data, size);
+    int32_t saId = fdp.ConsumeIntegral<int32_t>();
     OnDemandEvent event;
     saMgr->StartingSystemProcessLocked(u"procName", saId, event);
 }
@@ -283,7 +278,8 @@ void FuzzDoLoadSystemAbilityFromRpc(const uint8_t* data, size_t size)
     if (saMgr == nullptr) {
         return;
     }
-    int32_t saId = BuildInt32FromData(data, size);
+    FuzzedDataProvider fdp(data, size);
+    int32_t saId = fdp.ConsumeIntegral<int32_t>();
     sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
     OnDemandEvent event;
     saMgr->DoLoadSystemAbilityFromRpc("srcDeviceId", saId, u"procName", callback, event);
@@ -295,7 +291,8 @@ void FuzzDoUnloadSystemAbility(const uint8_t* data, size_t size)
     if (saMgr == nullptr) {
         return;
     }
-    int32_t saId = BuildInt32FromData(data, size);
+    FuzzedDataProvider fdp(data, size);
+    int32_t saId = fdp.ConsumeIntegral<int32_t>();
     OnDemandEvent event;
     saMgr->DoUnloadSystemAbility(saId, u"procName", event);
 }
@@ -306,7 +303,8 @@ void FuzzNotifyRpcLoadCompleted(const uint8_t* data, size_t size)
     if (saMgr == nullptr) {
         return;
     }
-    int32_t saId = BuildInt32FromData(data, size);
+    FuzzedDataProvider fdp(data, size);
+    int32_t saId = fdp.ConsumeIntegral<int32_t>();
     sptr<IRemoteObject> testAbility(nullptr);
     saMgr->NotifyRpcLoadCompleted("srcDeviceId", saId, testAbility);
 }
