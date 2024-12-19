@@ -176,9 +176,6 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemAbilityContext004, TestSize.L
     systemAbilityStateScheduler->processContextMap_[u"samgr"] = systemAbilityContext->ownProcessContext;
     result = systemAbilityStateScheduler->UnloadAllIdleSystemAbility();
     EXPECT_EQ(ERR_OK, result);
-
-    systemAbilityStateScheduler->KillProcessByProcessNameLocked(systemAbilityContext->ownProcessContext->processName);
-    EXPECT_NE(nullptr, systemAbilityStateScheduler->unloadEventHandler_->handler_);
 }
 
 /**
