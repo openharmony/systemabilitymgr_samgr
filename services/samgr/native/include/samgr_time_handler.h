@@ -54,7 +54,6 @@ private:
 
 private:
     int epollfd = -1;
-    std::atomic<bool> flag = false;
     ConcurrentMap <uint32_t, TaskType> timeFunc;
     static SamgrTimeHandler* volatile singleton;
     static Deletor deletor;

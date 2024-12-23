@@ -46,8 +46,6 @@ SamgrTimeHandler::SamgrTimeHandler()
     if (epollfd == -1) {
         HILOGE("SamgrTimeHandler epoll_create error");
     }
-    flag = false;
-    StartThread();
 }
 
 void SamgrTimeHandler::StartThread()
@@ -59,11 +57,9 @@ void SamgrTimeHandler::StartThread()
             int number = epoll_wait(this->epollfd, events, MAX_EVENT, -1);
             OnTime((*this), number, events);
         }
-        this->flag = false;
         HILOGI("SamgrTimeHandler thread end");
     };
     std::thread t(func);
-    this->flag = true;
     t.detach();
 }
 
@@ -141,8 +137,8 @@ bool SamgrTimeHandler::PostTask(TaskType func, uint64_t delayTime)
         ::close(timerfd);
         return false;
     }
-    timeFunc.EnsureInsert(timerfd, func);
-    if (!flag) {
+    auto isFirst = timeFunc.FirstInsert(timerfd, func);
+    if (isFirst) {
         StartThread();
     }
     return true;
