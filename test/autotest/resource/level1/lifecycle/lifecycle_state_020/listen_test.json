@@ -1,0 +1,35 @@
+{
+    "process": "listen_test",
+    "systemability": [
+        {
+            "name": 1494,
+            "libpath": "libmock_ondemand_ability_a.z.so",
+            "run-on-create": false,
+            "distributed": true,
+            "dump_level": 1,
+            "start-on-demand": {
+                "deviceonline": [
+                    {
+                        "name": "deviceonline",
+                        "value": "on"
+                    }
+                ]
+            },
+            "stop-on-demand": {
+                "deviceonline": [
+                    {
+                        "name": "deviceonline",
+                        "value": "off"
+                    }
+                ]
+           }
+        },
+        {
+            "name": 1497,
+            "libpath": "libtest_audio_ability.z.so",
+            "run-on-create": false,
+            "distributed": true,
+            "dump_level": 1
+        }
+    ]
+}
