@@ -1,3 +1,16 @@
 {
-    "description": "hypium自测试用例"
-}
+    "description": "hypium自测试用例",
+    "environment": [
+        {
+            "type": "device",
+            "label": "phone"
+        }
+    ],
+    "driver": {
+        "type": "DeviceTest",
+        "py_file": [
+            "testcases/level1/lifecycle/lifecycle_state_008.py"
+        ]
+    },
+    "kits":[]
+  }
