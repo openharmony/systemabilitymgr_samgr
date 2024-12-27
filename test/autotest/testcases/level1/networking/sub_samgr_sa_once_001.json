@@ -1,3 +1,20 @@
 {
-    "description": "hypium自测试用例"
-}
+    "description": "hypium自测试用例",
+    "environment": [
+        {
+            "type": "device",
+            "label": "phone"
+        },
+        {
+            "type": "device",
+            "label": "phone"
+        }
+    ],
+    "driver": {
+        "type": "DeviceTest",
+        "py_file": [
+            "testcases/level1/lifecycle/sub_samgr_sa_once_001.py"
+        ]
+    },
+    "kits":[]
+  }

@@ -15,7 +15,97 @@
 # limitations under the License.
 
 import os
+import time
+
+from devicetest.core.test_case import TestCase, get_report_dir
+from hypium import UiExplore
+from hypium.action.host import host
+
+from hypium.action.os_hypium.checker import Assert
+from hypium.action.os_hypium.device_logger import DeviceLogger, AsyncCommand
+from devicetest.utils.file.file_util import get_resource_path
 
 
+sa_lib_test_path = get_resource_path(
+    "resource/SO_RESOURCE/liblisten_test.z.so",
+    isdir=None)
+
+sa_lib_ability_c_path = get_resource_path(
+    "resource/SO_RESOURCE/libtest_audio_ability.z.so",
+    isdir=None)
+
+sa_proxy_path = get_resource_path(
+    "resource/SO_RESOURCE/libtest_sa_proxy_cache.z.so",
+    isdir=None)
+
+sa_listen_cfg_path = get_resource_path(
+    "resource/level/lifecycle_state_021/listen_test.cfg",
+    isdir=None)
+
+sa_listen_json_path = get_resource_path(
+    "resource/level/lifecycle_state_021/listen_test.json",
+    isdir=None)
+
+sa_ondemand_path = get_resource_path(
+    "resource/SO_RESOURCE/ondemand",
+    isdir=None)
+
+sa_tool_path = get_resource_path(
+    "resource/SO_RESOURCE/TestTool",
+    isdir=None)
 
 
+class LifeCycle_State_021(TestCase):
+
+    def __init__(self, controllers):
+        sele.TAG = self.__class__.__name__
+        TestCase.__init__(self, self.TAG, controllers)
+        self.tests = [
+            "test_step"
+        ]
+        self.driver = UiExplore(self.driver1)
+        self.sn = self.driver1.device_sn
+    
+    def setup(self):
+        driver = self.driver
+        host.shell("hdc -t {} shell kill -9 `pidof listen_test`".format(self.sn))
+        # host.shell("hdc -t {} target mount".format(self.sn))
+        # driver.Storage.push_file(local_path=sa_lib_test_path, device_path="/systemlib/lib/")
+        # host.shell("hdc -t {} shell chmod 644 /system/lib/lib/liblisten_test.z.so".format(self.sn))
+
+        # driver.Storage.push_file(local_path=sa_proxy_path, device_path="/systemlib/lib/")
+        # host.shell("hdc -t {} shell chmod 644 /system/lib/lib/libtest_sa_proxy_cache.z.so".format(self.sn))
+
+        # driver.Storage.push_file(local_path=sa_lib_ability_c_path, device_path="/systemlib/lib/")
+        # host.shell("hdc -t {} shell chmod 644 /system/lib/lib/libtest_audio_ability.z.so".format(self.sn))
+
+        # driver.Storage.push_file(local_path=sa_listen_cfg_path, device_path="/system/etc/init/")
+        # host.shell("hdc -t {} shell chmod 644 /system/etc/init/listen_test.cfg".format(self.sn))
+
+        # driver.Storage.push_file(local_path=sa_listen_json_path, device_path="/system/profile/")
+        # host.shell("hdc -t {} shell chmod 644 /system/profile/listen_test.json".format(self.sn))
+
+        # driver.Storage.push_file(local_path=sa_ondemand_path, device_path="/systemlib/bin/")
+        # host.shell("hdc -t {} shell chmod 755 /system/bin/ondemand".format(self.sn))
+
+        # driver.Storage.push_file(local_path=sa_tool_path, device_path="/systemlib/bin/")
+        # host.shell("hdc -t {} shell chmod 755 /system/bin/TestTool".format(self.sn))
+        # driver.System.reboot()
+
+    def test_step(self):
+        # 步骤 "ondemand test 21"命令，执行测试程序
+        # 预期结果
+        # 控制台打印: GetSystemAbility systemAbilityId:1494 faild
+        driver = self.driver
+        result = driver.System.execute_command("ondemand test 21")
+        assert "GetSystemAbility systemAbilityId:1494 faild" in result
+
+    def teardown(self):
+        self.driver.System.execute_command("kill -9 `pidof listen_test`")
+        #self.driver.Storage.remove_file("/system/lib/lib/liblisten_test.z.so")
+        #self.driver.Storage.remove_file("/system/lib/lib/libtest_sa_proxy_cache.z.so")
+        #self.driver.Storage.remove_file("/system/lib/lib/libtest_audio_ability.z.so")
+        #self.driver.Storage.remove_file("/system/etc/init/listen_test.cfg")
+        #self.driver.Storage.remove_file("/system/etc/init/listen_test.json")
+        #self.driver.Storage.remove_file("/system/bin/ondemand")
+        self.log.info("done")
