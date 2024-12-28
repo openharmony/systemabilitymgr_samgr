@@ -842,11 +842,11 @@ vector<u16string> SystemAbilityManager::ListSystemAbilities(uint32_t dumpFlags)
     return list;
 }
 
-void SystemAbilityManager::NotifySystemAbilityAddedBySync(int32_t systemAbilityId,
+void SystemAbilityManager::NotifySystemAbilityAddedByAsync(int32_t systemAbilityId,
     const sptr<ISystemAbilityStatusChange>& listener)
 {
     if (workHandler_ == nullptr) {
-        HILOGE("NotifySystemAbilityAddedBySync workHandler is nullptr");
+        HILOGE("NotifySystemAbilityAddedByAsync workHandler is nullptr");
         return;
     } else {
         auto listenerNotifyTask = [systemAbilityId, listener, this]() {
@@ -854,7 +854,7 @@ void SystemAbilityManager::NotifySystemAbilityAddedBySync(int32_t systemAbilityI
                 static_cast<uint32_t>(SamgrInterfaceCode::ADD_SYSTEM_ABILITY_TRANSACTION), listener);
         };
         if (!workHandler_->PostTask(listenerNotifyTask)) {
-            HILOGE("NotifySystemAbilityAddedBySync PostTask fail SA:%{public}d", systemAbilityId);
+            HILOGE("NotifySystemAbilityAddedByAsync PostTask fail SA:%{public}d", systemAbilityId);
         }
     }
 }
@@ -874,7 +874,7 @@ void SystemAbilityManager::CheckListenerNotify(int32_t systemAbilityId,
             if (itemListener.state == ListenerState::INIT) {
                 HILOGI("NotifyAddSA:%{public}d,%{public}d_%{public}d",
                     systemAbilityId, callingPid, subscribeCountMap_[callingPid]);
-                NotifySystemAbilityAddedBySync(systemAbilityId, listener);
+                NotifySystemAbilityAddedByAsync(systemAbilityId, listener);
                 itemListener.state = ListenerState::NOTIFIED;
             } else {
                 HILOGI("Subscribe Listener has been notified,SA:%{public}d,callpid:%{public}d",
