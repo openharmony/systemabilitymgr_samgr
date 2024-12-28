@@ -37,6 +37,7 @@ constexpr uint32_t INIT_EVENT = 10;
 constexpr uint32_t SUB_COMMON_EVENT = 11;
 constexpr uint32_t REMOVE_EXTRA_DATA_EVENT = 12;
 constexpr uint32_t REMOVE_EXTRA_DATA_DELAY_TIME = 300000;
+constexpr uint32_t UNSUB_DELAY_TIME = 10 * 1000;
 constexpr int64_t MAX_EXTRA_DATA_ID = 1000000000;
 constexpr int32_t COMMON_EVENT_SERVICE_ID = 3299;
 constexpr int32_t TRIGGER_THREAD_RECLAIM_DELAY_TIME = 130 * 1000;
@@ -67,12 +68,18 @@ void CommonEventCollect::CleanFfrt()
     if (workHandler_ != nullptr) {
         workHandler_->CleanFfrt();
     }
+    if (unsubHandler_ != nullptr) {
+        unsubHandler_->CleanFfrt();
+    }
 }
 
 void CommonEventCollect::SetFfrt()
 {
     if (workHandler_ != nullptr) {
         workHandler_->SetFfrt();
+    }
+    if (unsubHandler_ != nullptr) {
+        unsubHandler_->SetFfrt();
     }
 }
 
@@ -85,6 +92,7 @@ int32_t CommonEventCollect::OnStart()
     }
 
     workHandler_ = std::make_shared<CommonHandler>(this);
+    unsubHandler_ = std::make_shared<CommonHandler>(this);
     workHandler_->SendEvent(INIT_EVENT);
     return ERR_OK;
 }
@@ -93,6 +101,9 @@ int32_t CommonEventCollect::OnStop()
 {
     if (workHandler_ != nullptr) {
         workHandler_ = nullptr;
+    }
+    if (unsubHandler_ != nullptr) {
+        unsubHandler_ = nullptr;
     }
     return ERR_OK;
 }
@@ -190,16 +201,21 @@ bool CommonEventCollect::CreateCommonEventSubscriberLocked()
     bool ret = EventFwk::CommonEventManager::SubscribeCommonEvent(commonEventSubscriber_);
     HILOGI("SubsComEvt %{public}" PRId64 "ms %{public}s", (GetTickCount() - begin), ret ? "suc" : "fail");
     if (comEvtScrb != nullptr) {
-        HILOGI("UnSubsComEvt start");
-        {
-            SamgrXCollie samgrXCollie("samgr--UnSubscribeCommonEvent");
-            bool isUnsubscribe = EventFwk::CommonEventManager::UnSubscribeCommonEvent(comEvtScrb);
-            if (!isUnsubscribe) {
-                HILOGE("CreateCommonEventSubscriberLocked isUnsubscribe failed!");
-                return false;
+        auto unsubTask = [comEvtScrb]() {
+            HILOGI("UnSubsComEvt start");
+            {
+                SamgrXCollie samgrXCollie("samgr--UnSubscribeCommonEvent");
+                bool isUnsubscribe = EventFwk::CommonEventManager::UnSubscribeCommonEvent(comEvtScrb);
+                if (!isUnsubscribe) {
+                    HILOGE("CreateCommonEventSubscriberLocked isUnsubscribe failed!");
+                }
             }
+        };
+        if (unsubHandler_ != nullptr) {
+            unsubHandler_->PostTask(unsubTask, UNSUB_DELAY_TIME);
+        } else {
+            HILOGE("CreateCommonEventSubscriberLocked unsubHandler is null!");
         }
-        comEvtScrb.reset();
     }
     return ret;
 }
@@ -551,6 +567,15 @@ void CommonEventCollect::SendKernalReclaimIpcThread(const char* triggerEvent)
 
     HILOGI("TriggerSystemIPCThreadReclaim");
     IPCSkeleton::TriggerSystemIPCThreadReclaim();
+}
+
+bool CommonHandler::PostTask(std::function<void()> func, uint64_t delayTime)
+{
+    if (handler_ == nullptr) {
+        HILOGE("CommonEventCollect PostTask handler is null!");
+        return false;
+    }
+    return handler_->PostTask(func, delayTime);
 }
 
 bool CommonHandler::PostTask(std::function<void()> func, const std::string& name, uint64_t delayTime)
