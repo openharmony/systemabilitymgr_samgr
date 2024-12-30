@@ -32,7 +32,9 @@
 #include "test_log.h"
 #define private public
 #include "ipc_skeleton.h"
+#ifdef SUPPORT_ACCESS_TOKEN
 #include "accesstoken_kit.h"
+#endif
 #include "system_ability_manager.h"
 #ifdef SUPPORT_COMMON_EVENT
 #include "common_event_collect.h"
@@ -521,6 +523,7 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy002, TestSize.Level3)
     EXPECT_EQ(ERR_INVALID_VALUE, ret);
 }
 
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy003, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -539,7 +542,9 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy003, TestSize.Level3)
     int32_t ret = saMgr->GetOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
     EXPECT_EQ(ERR_PERMISSION_DENIED, ret);
 }
+#endif
 
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy004, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -560,7 +565,9 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy004, TestSize.Level3)
     int32_t ret = saMgr->GetOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
     EXPECT_EQ(ERR_INVALID_VALUE, ret);
 }
+#endif
 
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy005, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -581,7 +588,9 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy005, TestSize.Level3)
     int32_t ret = saMgr->GetOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
     EXPECT_EQ(ERR_INVALID_VALUE, ret);
 }
+#endif
 
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy006, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -609,6 +618,7 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy006, TestSize.Level3)
     int32_t ret = saMgr->GetOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
     EXPECT_EQ(ERR_OK, ret);
 }
+#endif
 
 /**
  * @tc.name: UpdateOnDemandPolicy001
@@ -616,6 +626,7 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy006, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6V4AX
  */
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityMgrTest, UpdateOnDemandPolicy001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -650,6 +661,7 @@ HWTEST_F(SystemAbilityMgrTest, UpdateOnDemandPolicy001, TestSize.Level3)
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     saMgr->saProfileMap_.erase(TEST_OVERFLOW_SAID);
 }
+#endif
 
 /**
  * @tc.name: GetOnDemandReasonExtraData001

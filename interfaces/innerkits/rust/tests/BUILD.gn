@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
+import("../../../../services/samgr/var.gni")
 
 rust_cxx("samgr_rust_test_gen") {
   sources = [ "mem.rs" ]
@@ -69,12 +70,18 @@ ohos_rust_systemtest("rust_samgr_sdv_test") {
     "//third_party/rust/crates/cxx:lib",
   ]
   external_deps = [
-    "access_token:libnativetoken_shared",
-    "access_token:libtokensetproc_shared",
     "hilog:hilog_rust",
     "ipc:ipc_rust",
     "safwk:system_ability_fwk_rust",
   ]
+  defines = []
+  if (samgr_support_access_token) {
+    external_deps += [
+      "access_token:libnativetoken",
+      "access_token:libtoken_setproc",
+    ]
+    defines += [ "SUPPORT_ACCESS_TOKEN" ]
+  }
 
   subsystem_name = "systemabilitymgr"
   part_name = "samgr"

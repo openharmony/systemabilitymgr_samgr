@@ -12,18 +12,22 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("../../../../../var.gni")
 
 ohos_rust_shared_library("test_access_token") {
   sources = [
     "src/access_token.rs",
     "src/lib.rs",
   ]
-
-  external_deps = [
-    "access_token:libnativetoken_shared",
-    "access_token:libtokensetproc_shared",
-  ]
-
+  external_deps = []
+  defines = []
+  if (samgr_support_access_token) {
+    external_deps += [
+      "access_token:libnativetoken_shared",
+      "access_token:libtokensetproc_shared",
+    ]
+    defines += [ "SUPPORT_ACCESS_TOKEN" ]
+  }
   crate_name = "test_access_token"
   crate_type = "dylib"
   subsystem_name = "systemabilitymgr"

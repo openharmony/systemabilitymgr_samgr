@@ -43,6 +43,7 @@ constexpr int64_t DEFAULT_EVENTID = 0;
 constexpr int32_t INVALID_SAID = -1;
 }
 
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityMgrStubTest, AddSystemAbilityInner001, TestSize.Level4)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
@@ -52,7 +53,9 @@ HWTEST_F(SystemAbilityMgrStubTest, AddSystemAbilityInner001, TestSize.Level4)
     int32_t result = saMgr->AddSystemAbilityInner(data, reply);
     EXPECT_EQ(result, ERR_PERMISSION_DENIED);
 }
+#endif
 
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityMgrStubTest, AddSystemProcessInner001, TestSize.Level4)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
@@ -62,7 +65,9 @@ HWTEST_F(SystemAbilityMgrStubTest, AddSystemProcessInner001, TestSize.Level4)
     int32_t result = saMgr->AddSystemProcessInner(data, reply);
     EXPECT_EQ(result, ERR_PERMISSION_DENIED);
 }
+#endif
 
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityMgrStubTest, SubscribeSystemProcessInner001, TestSize.Level3)
 {
     DTEST_LOG << "SubscribeSystemProcessInner001" << std::endl;
@@ -73,6 +78,7 @@ HWTEST_F(SystemAbilityMgrStubTest, SubscribeSystemProcessInner001, TestSize.Leve
     int32_t ret = saMgr->SubscribeSystemProcessInner(data, reply);
     EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
 }
+#endif
 
 HWTEST_F(SystemAbilityMgrStubTest, SubsSystemAbilityInner002, TestSize.Level3)
 {

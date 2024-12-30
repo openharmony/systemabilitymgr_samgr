@@ -21,7 +21,10 @@
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
 #include "itest_transaction_service.h"
+#ifdef SUPPORT_ACCESS_TOKEN
 #include "nativetoken_kit.h"
+#include "token_setproc.h"
+#endif
 #include "sam_log.h"
 #ifdef SUPPORT_SOFTBUS
 #include "softbus_bus_center.h"
@@ -30,7 +33,6 @@
 #include "system_ability_definition.h"
 #include "system_ability_load_callback_stub.h"
 #include "system_ability_status_change_stub.h"
-#include "token_setproc.h"
 
 #define private public
 #include "system_ability_manager.h"
@@ -281,6 +283,7 @@ namespace {
 
     static void MockProcess(const char* processName)
     {
+#ifdef SUPPORT_ACCESS_TOKEN
         uint64_t tokenId;
         NativeTokenInfoParams infoInstance = {
             .dcapsNum = 0,
@@ -294,6 +297,7 @@ namespace {
         };
         tokenId = GetAccessTokenId(&infoInstance);
         SetSelfTokenID(tokenId);
+#endif
     }
 
     static void DoSend(int32_t said, int32_t rssProcess)
@@ -415,6 +419,7 @@ static void DoRemote(char* argv[])
 
 int main(int argc, char* argv[])
 {
+#ifdef SUPPORT_ACCESS_TOKEN
     static const char *PERMS[] = {
         "ohos.permission.DISTRIBUTED_DATASYNC"
     };
@@ -431,6 +436,7 @@ int main(int argc, char* argv[])
     };
     tokenId = GetAccessTokenId(&infoInstance);
     SetSelfTokenID(tokenId);
+#endif
     if (argc == ARGC_DEFAULT_LENTH) {
         DoDefault(argv);
     } else if (argc == ARGC_EXTEND_LENTH) {
