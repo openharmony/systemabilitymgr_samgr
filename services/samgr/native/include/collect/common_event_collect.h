@@ -68,6 +68,7 @@ private:
     sptr<IRemoteObject::DeathRecipient> commonEventDeath_;
     std::set<std::string> commonEventNames_;
     std::shared_ptr<CommonHandler> workHandler_;
+    std::shared_ptr<CommonHandler> unsubHandler_;
     std::shared_ptr<EventFwk::CommonEventSubscriber> commonEventSubscriber_ = nullptr;
     std::mutex commonEventStateLock_;
     std::set<std::string> commonEventWhitelist;
@@ -101,6 +102,7 @@ class CommonHandler {
         bool SendEvent(uint32_t eventId, int64_t extraDataId, uint64_t delayTime);
         void CleanFfrt();
         void SetFfrt();
+        bool PostTask(std::function<void()> func, uint64_t delayTime);
         
     private:
         wptr<CommonEventCollect> commonCollect_;
