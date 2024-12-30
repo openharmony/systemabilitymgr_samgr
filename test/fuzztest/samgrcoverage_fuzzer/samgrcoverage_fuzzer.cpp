@@ -223,7 +223,7 @@ void FuzzDoLoadOnDemandAbility(const uint8_t* data, size_t size)
     saMgr->DoLoadOnDemandAbility(saId, isExist);
 }
 
-void FuzzNotifySystemAbilityAddedBySync(const uint8_t* data, size_t size)
+void FuzzNotifySystemAbilityAddedByAsync(const uint8_t* data, size_t size)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     if (saMgr == nullptr) {
@@ -232,7 +232,7 @@ void FuzzNotifySystemAbilityAddedBySync(const uint8_t* data, size_t size)
     FuzzedDataProvider fdp(data, size);
     int32_t saId = fdp.ConsumeIntegral<int32_t>();
     sptr<ISystemAbilityStatusChange> listener;
-    saMgr->NotifySystemAbilityAddedBySync(saId, listener);
+    saMgr->NotifySystemAbilityAddedByAsync(saId, listener);
 }
 
 void FuzzSendLoadedSystemAbilityMsg(const uint8_t* data, size_t size)
@@ -325,7 +325,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::Samgr::FuzzNotifySystemAbilityChanged(data, size);
     OHOS::Samgr::FuzzRemoveOnDemandSaInDiedProc(data, size);
     OHOS::Samgr::FuzzDoLoadOnDemandAbility(data, size);
-    OHOS::Samgr::FuzzNotifySystemAbilityAddedBySync(data, size);
+    OHOS::Samgr::FuzzNotifySystemAbilityAddedByAsync(data, size);
     OHOS::Samgr::FuzzSendLoadedSystemAbilityMsg(data, size);
     OHOS::Samgr::FuzzNotifySystemAbilityLoadFail(data, size);
     OHOS::Samgr::FuzzStartingSystemProcessLocked(data, size);
