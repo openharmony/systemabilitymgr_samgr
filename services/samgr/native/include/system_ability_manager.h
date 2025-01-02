@@ -210,6 +210,7 @@ private:
     void CheckListenerNotify(int32_t systemAbilityId, const sptr<ISystemAbilityStatusChange>& listener);
     void NotifySystemAbilityChanged(int32_t systemAbilityId, const std::string& deviceId, int32_t code,
         const sptr<ISystemAbilityStatusChange>& listener);
+    void NotifySystemAbilityAddedByAsync(int32_t systemAbilityId, const sptr<ISystemAbilityStatusChange>& listener);
     void UnSubscribeSystemAbilityLocked(std::list<SAListener>& listenerList,
         const sptr<IRemoteObject>& listener);
 
