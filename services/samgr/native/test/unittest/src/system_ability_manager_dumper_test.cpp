@@ -78,11 +78,13 @@ void SystemAbilityManagerDumperTest::TearDown()
  * @tc.require: I7VEPG
  */
 
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityManagerDumperTest, CanDump001, TestSize.Level3)
 {
     bool result = SystemAbilityManagerDumper::CanDump();
     EXPECT_FALSE(result);
 }
+#endif
 
 /**
  * @tc.name: FfrtDumpProc001
@@ -91,6 +93,7 @@ HWTEST_F(SystemAbilityManagerDumperTest, CanDump001, TestSize.Level3)
  * @tc.require: I9I86P
  */
 
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityManagerDumperTest, FfrtDumpProc001, TestSize.Level3)
 {
     DTEST_LOG << "FfrtDumpProc001 begin" << std::endl;
@@ -101,6 +104,7 @@ HWTEST_F(SystemAbilityManagerDumperTest, FfrtDumpProc001, TestSize.Level3)
     EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
     DTEST_LOG << "FfrtDumpProc001 end" << std::endl;
 }
+#endif
 
 /**
  * @tc.name: GetSAMgrFfrtInfo001
@@ -650,6 +654,7 @@ HWTEST_F(SystemAbilityManagerDumperTest, IpcDumpCmdParser006, TestSize.Level3)
  * @tc.require: I9DR69
  */
 
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityManagerDumperTest, IpcDumpCmdParser007, TestSize.Level3)
 {
     DTEST_LOG << "IpcDumpCmdParser007 begin" << std::endl;
@@ -664,6 +669,7 @@ HWTEST_F(SystemAbilityManagerDumperTest, IpcDumpCmdParser007, TestSize.Level3)
     EXPECT_FALSE(ret);
     DTEST_LOG << "IpcDumpCmdParser007 end" << std::endl;
 }
+#endif
 
 /**
  * @tc.name: IpcDumpCmdParser008
@@ -672,6 +678,7 @@ HWTEST_F(SystemAbilityManagerDumperTest, IpcDumpCmdParser007, TestSize.Level3)
  * @tc.require: I9DR69
  */
 
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityManagerDumperTest, IpcDumpCmdParser008, TestSize.Level3)
 {
     DTEST_LOG << "IpcDumpCmdParser008 begin" << std::endl;
@@ -686,6 +693,7 @@ HWTEST_F(SystemAbilityManagerDumperTest, IpcDumpCmdParser008, TestSize.Level3)
     EXPECT_FALSE(ret);
     DTEST_LOG << "IpcDumpCmdParser008 end" << std::endl;
 }
+#endif
 
 /**
  * @tc.name: IpcDumpCmdParser009
@@ -694,6 +702,7 @@ HWTEST_F(SystemAbilityManagerDumperTest, IpcDumpCmdParser008, TestSize.Level3)
  * @tc.require: I9DR69
  */
 
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityManagerDumperTest, IpcDumpCmdParser009, TestSize.Level3)
 {
     DTEST_LOG << "IpcDumpCmdParser009 begin" << std::endl;
@@ -708,6 +717,7 @@ HWTEST_F(SystemAbilityManagerDumperTest, IpcDumpCmdParser009, TestSize.Level3)
     EXPECT_FALSE(ret);
     DTEST_LOG << "IpcDumpCmdParser009 end" << std::endl;
 }
+#endif
 
 /**
  * @tc.name: IpcDumpCmdParser010

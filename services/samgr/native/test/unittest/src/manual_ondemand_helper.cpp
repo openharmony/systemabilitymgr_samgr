@@ -27,14 +27,16 @@
 #include "iremote_object.h"
 #include "iservice_registry.h"
 #include "isystem_ability_load_callback.h"
+#ifdef SUPPORT_ACCESS_TOKEN
 #include "nativetoken_kit.h"
+#include "token_setproc.h"
+#endif
 #include "sam_mock_permission.h"
 #ifdef SUPPORT_SOFTBUS
 #include "softbus_bus_center.h"
 #endif
 #include "system_ability_ondemand_reason.h"
 #include "system_ability_definition.h"
-#include "token_setproc.h"
 #include "parameter.h"
 #include "parameters.h"
 

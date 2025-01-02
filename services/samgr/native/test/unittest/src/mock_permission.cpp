@@ -15,12 +15,15 @@
 
 #include "sam_mock_permission.h"
 
+#ifdef SUPPORT_ACCESS_TOKEN
 #include "nativetoken_kit.h"
 #include "token_setproc.h"
+#endif
 
 namespace OHOS {
 void SamMockPermission::MockPermission()
 {
+#ifdef SUPPORT_ACCESS_TOKEN
     static const char *PERMS[] = {
         "ohos.permission.DISTRIBUTED_DATASYNC",
         "ohos.permission.ACCESS_EXT_SYSTEM_ABILITY"
@@ -38,10 +41,12 @@ void SamMockPermission::MockPermission()
     };
     tokenId = GetAccessTokenId(&infoInstance);
     SetSelfTokenID(tokenId);
+#endif
 }
 
 void SamMockPermission::MockProcess(const char* processName)
 {
+#ifdef SUPPORT_ACCESS_TOKEN
     static const char *PERMS[] = {
         "ohos.permission.DISTRIBUTED_DATASYNC"
     };
@@ -58,5 +63,6 @@ void SamMockPermission::MockProcess(const char* processName)
     };
     tokenId = GetAccessTokenId(&infoInstance);
     SetSelfTokenID(tokenId);
+#endif
 }
 }

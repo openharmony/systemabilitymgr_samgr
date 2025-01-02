@@ -32,7 +32,9 @@
 #include "ability_death_recipient.h"
 #define private public
 #include "ipc_skeleton.h"
+#ifdef SUPPORT_ACCESS_TOKEN
 #include "accesstoken_kit.h"
+#endif
 #include "system_ability_manager.h"
 #ifdef SUPPORT_COMMON_EVENT
 #include "common_event_collect.h"

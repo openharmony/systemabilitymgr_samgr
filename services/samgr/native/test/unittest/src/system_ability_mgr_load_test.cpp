@@ -31,7 +31,9 @@
 #include "test_log.h"
 #define private public
 #include "ipc_skeleton.h"
+#ifdef SUPPORT_ACCESS_TOKEN
 #include "accesstoken_kit.h"
+#endif
 #include "system_ability_manager.h"
 #ifdef SUPPORT_COMMON_EVENT
 #include "common_event_collect.h"
@@ -674,6 +676,7 @@ HWTEST_F(SystemAbilityMgrTest, UnloadSystemAbility001, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I5KMF7
  */
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityMgrTest, UnloadSystemAbility002, TestSize.Level3)
 {
     DTEST_LOG << "UnloadSystemAbility002 begin" << std::endl;
@@ -687,6 +690,7 @@ HWTEST_F(SystemAbilityMgrTest, UnloadSystemAbility002, TestSize.Level3)
     EXPECT_EQ(result, INVALID_CALL_PROC);
     DTEST_LOG << "UnloadSystemAbility002 end" << std::endl;
 }
+#endif
 
 /**
  * @tc.name: UnloadSystemAbility003
@@ -812,6 +816,7 @@ HWTEST_F(SystemAbilityMgrTest, CancelUnloadSystemAbility005, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6J4T7
  */
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityMgrTest, CancelUnloadSystemAbility006, TestSize.Level3)
 {
     DTEST_LOG << " CancelUnloadSystemAbility006 begin" << std::endl;
@@ -830,6 +835,7 @@ HWTEST_F(SystemAbilityMgrTest, CancelUnloadSystemAbility006, TestSize.Level3)
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     DTEST_LOG << "CancelUnloadSystemAbility006 end" << std::endl;
 }
+#endif
 
 /**
  * @tc.name: DoUnloadSystemAbility001
@@ -926,6 +932,7 @@ HWTEST_F(SystemAbilityMgrTest, UnloadAllIdleSystemAbility002, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6NKWX
  */
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityMgrTest, UnloadAllIdleSystemAbility003, TestSize.Level3)
 {
     DTEST_LOG << "UnloadAllIdleSystemAbility003 begin" << std::endl;
@@ -935,5 +942,6 @@ HWTEST_F(SystemAbilityMgrTest, UnloadAllIdleSystemAbility003, TestSize.Level3)
     EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
     DTEST_LOG << "UnloadAllIdleSystemAbility003 end" << std::endl;
 }
+#endif
 
 } // namespace OHOS

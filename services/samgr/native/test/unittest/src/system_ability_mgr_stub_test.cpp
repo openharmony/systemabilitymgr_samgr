@@ -119,6 +119,7 @@ HWTEST_F(SystemAbilityMgrStubTest, OnRemoteRequest001, TestSize.Level4)
     EXPECT_EQ(result, IPC_STUB_UNKNOW_TRANS_ERR);
 }
 
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityMgrStubTest, ListSystemAbilityInner001, TestSize.Level4)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
@@ -128,6 +129,7 @@ HWTEST_F(SystemAbilityMgrStubTest, ListSystemAbilityInner001, TestSize.Level4)
     int32_t result = saMgr->ListSystemAbilityInner(data, reply);
     EXPECT_EQ(result, ERR_PERMISSION_DENIED);
 }
+#endif
 
 HWTEST_F(SystemAbilityMgrStubTest, SubsSystemAbilityInner001, TestSize.Level4)
 {
@@ -149,6 +151,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnSubsSystemAbilityInner001, TestSize.Level4)
     EXPECT_EQ(result, ERR_NULL_OBJECT);
 }
 
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityMgrStubTest, CheckRemtSystemAbilityInner001, TestSize.Level4)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
@@ -158,7 +161,9 @@ HWTEST_F(SystemAbilityMgrStubTest, CheckRemtSystemAbilityInner001, TestSize.Leve
     int32_t result = saMgr->CheckRemtSystemAbilityInner(data, reply);
     EXPECT_EQ(result, ERR_PERMISSION_DENIED);
 }
+#endif
 
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityMgrStubTest, AddOndemandSystemAbilityInner001, TestSize.Level4)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
@@ -168,7 +173,9 @@ HWTEST_F(SystemAbilityMgrStubTest, AddOndemandSystemAbilityInner001, TestSize.Le
     int32_t result = saMgr->AddOndemandSystemAbilityInner(data, reply);
     EXPECT_EQ(result, ERR_PERMISSION_DENIED);
 }
+#endif
 
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbilityInner001, TestSize.Level4)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
@@ -178,7 +185,9 @@ HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbilityInner001, TestSize.Level4)
     int32_t result = saMgr->RemoveSystemAbilityInner(data, reply);
     EXPECT_EQ(result, ERR_PERMISSION_DENIED);
 }
+#endif
 
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityMgrStubTest, GetSystemProcessInfoInner001, TestSize.Level3)
 {
     DTEST_LOG << "GetSystemProcessInfoInner001" << std::endl;
@@ -188,7 +197,9 @@ HWTEST_F(SystemAbilityMgrStubTest, GetSystemProcessInfoInner001, TestSize.Level3
     int32_t ret = saMgr->GetSystemProcessInfoInner(data, reply);
     EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
 }
+#endif
 
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityMgrStubTest, GetRunningSystemProcessInner001, TestSize.Level3)
 {
     DTEST_LOG << "GetRunningSystemProcessInner001" << std::endl;
@@ -198,7 +209,9 @@ HWTEST_F(SystemAbilityMgrStubTest, GetRunningSystemProcessInner001, TestSize.Lev
     int32_t ret = saMgr->GetRunningSystemProcessInner(data, reply);
     EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
 }
+#endif
 
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemProcessInner001, TestSize.Level3)
 {
     DTEST_LOG << "UnSubscribeSystemProcessInner001" << std::endl;
@@ -208,7 +221,9 @@ HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemProcessInner001, TestSize.Le
     int32_t ret = saMgr->UnSubscribeSystemProcessInner(data, reply);
     EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
 }
+#endif
 
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityMgrStubTest, GetOnDemandPolicyInner001, TestSize.Level3)
 {
     DTEST_LOG << "GetOnDemandPolicyInner001" << std::endl;
@@ -218,6 +233,7 @@ HWTEST_F(SystemAbilityMgrStubTest, GetOnDemandPolicyInner001, TestSize.Level3)
     int32_t ret = saMgr->GetOnDemandPolicyInner(data, reply);
     EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
 }
+#endif
 
 /**
  * @tc.name: Test UpdateOnDemandPolicyInner001
@@ -225,6 +241,7 @@ HWTEST_F(SystemAbilityMgrStubTest, GetOnDemandPolicyInner001, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6T116
  */
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityMgrStubTest, UpdateOnDemandPolicyInner001, TestSize.Level3)
 {
     DTEST_LOG << "UpdateOnDemandPolicyInner001" << std::endl;
@@ -234,6 +251,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UpdateOnDemandPolicyInner001, TestSize.Level3
     int32_t ret = saMgr->UpdateOnDemandPolicyInner(data, reply);
     EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
 }
+#endif
 
 /**
  * @tc.name: GetOnDemandReasonExtraDataInner001
@@ -241,6 +259,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UpdateOnDemandPolicyInner001, TestSize.Level3
  * @tc.type: FUNC
  * @tc.require: I6XB42
  */
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityMgrStubTest, GetOnDemandReasonExtraDataInner001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
@@ -249,6 +268,7 @@ HWTEST_F(SystemAbilityMgrStubTest, GetOnDemandReasonExtraDataInner001, TestSize.
     int32_t ret = saMgr->GetOnDemandReasonExtraDataInner(data, reply);
     EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
 }
+#endif
 
 /**
  * @tc.name: GetExtensionSaIdsInner001
@@ -256,6 +276,7 @@ HWTEST_F(SystemAbilityMgrStubTest, GetOnDemandReasonExtraDataInner001, TestSize.
  * @tc.type: FUNC
  * @tc.require: I6XB42
  */
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityMgrStubTest, GetExtensionSaIdsInner001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
@@ -264,6 +285,7 @@ HWTEST_F(SystemAbilityMgrStubTest, GetExtensionSaIdsInner001, TestSize.Level3)
     int32_t ret = saMgr->GetExtensionSaIdsInner(data, reply);
     EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
 }
+#endif
 
 /**
  * @tc.name: GetExtensionRunningSaListInner001
@@ -271,6 +293,7 @@ HWTEST_F(SystemAbilityMgrStubTest, GetExtensionSaIdsInner001, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6XB42
  */
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityMgrStubTest, GetExtensionRunningSaListInner001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
@@ -279,6 +302,7 @@ HWTEST_F(SystemAbilityMgrStubTest, GetExtensionRunningSaListInner001, TestSize.L
     int32_t ret = saMgr->GetExtensionRunningSaListInner(data, reply);
     EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
 }
+#endif
 
 /**
  * @tc.name: GetCommonEventExtraDataIdlistInner001
@@ -286,6 +310,7 @@ HWTEST_F(SystemAbilityMgrStubTest, GetExtensionRunningSaListInner001, TestSize.L
  * @tc.type: FUNC
  * @tc.require: I6XB42
  */
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityMgrStubTest, GetCommonEventExtraDataIdlistInner001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
@@ -294,6 +319,7 @@ HWTEST_F(SystemAbilityMgrStubTest, GetCommonEventExtraDataIdlistInner001, TestSi
     int32_t ret = saMgr->GetCommonEventExtraDataIdlistInner(data, reply);
     EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
 }
+#endif
 
 /**
  * @tc.name: ListSystemAbilityInner002

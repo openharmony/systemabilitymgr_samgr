@@ -178,6 +178,7 @@ HWTEST_F(SamgrUtilTest, TransformDeviceId002, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6V4AX
  */
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SamgrUtilTest, CheckCallerProcess001, TestSize.Level3)
 {
     CommonSaProfile saProfile;
@@ -196,6 +197,7 @@ HWTEST_F(SamgrUtilTest, CheckCallerProcess001, TestSize.Level3)
     bool ret = SamgrUtil::CheckCallerProcess(saProfile);
     EXPECT_EQ(false, ret);
 }
+#endif
 
 /**
  * @tc.name: CheckCallerProcess002
@@ -203,6 +205,7 @@ HWTEST_F(SamgrUtilTest, CheckCallerProcess001, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6V4AX
  */
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SamgrUtilTest, CheckCallerProcess002, TestSize.Level3)
 {
     CommonSaProfile saProfile;
@@ -221,6 +224,7 @@ HWTEST_F(SamgrUtilTest, CheckCallerProcess002, TestSize.Level3)
     bool ret = SamgrUtil::CheckCallerProcess(saProfile);
     EXPECT_EQ(false, ret);
 }
+#endif
 
 /**
  * @tc.name: CheckAllowUpdate001

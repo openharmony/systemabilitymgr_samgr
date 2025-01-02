@@ -347,6 +347,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbilityInner001, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6AJ3S
  */
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbilityInner002, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
@@ -357,6 +358,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbilityInner002, TestSize.Level3)
     int32_t result = saMgr->UnloadSystemAbilityInner(data, reply);
     EXPECT_EQ(result, INVALID_CALL_PROC);
 }
+#endif
 
 /**
  * @tc.name: UnloadSystemAbility001
@@ -378,6 +380,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility001, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6AJ3S
  */
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility002, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
@@ -385,6 +388,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility002, TestSize.Level3)
     int32_t result = saMgr->UnloadSystemAbility(SAID);
     EXPECT_EQ(result, INVALID_CALL_PROC);
 }
+#endif
 
 /**
  * @tc.name: UnloadSystemAbility003
@@ -392,6 +396,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility002, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6AJ3S
  */
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility003, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
@@ -401,6 +406,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility003, TestSize.Level3)
     int32_t result = saMgr->UnloadSystemAbility(SAID);
     EXPECT_EQ(result, INVALID_CALL_PROC);
 }
+#endif
 
 /**
  * @tc.name: UnloadSystemAbility004
@@ -408,6 +414,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility003, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6AJ3S
  */
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility004, TestSize.Level3)
 {
     SamMockPermission::MockProcess("invalidProcess");
@@ -419,6 +426,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility004, TestSize.Level3)
     int32_t result = saMgr->UnloadSystemAbility(SAID);
     EXPECT_EQ(result, INVALID_CALL_PROC);
 }
+#endif
 
 /**
  * @tc.name: UnloadSystemAbility005

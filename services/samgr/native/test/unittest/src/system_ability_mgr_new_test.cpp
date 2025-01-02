@@ -34,7 +34,9 @@
 #ifdef SUPPORT_COMMON_EVENT
 #include "common_event_collect.h"
 #include "ipc_skeleton.h"
+#ifdef SUPPORT_ACCESS_TOKEN
 #include "accesstoken_kit.h"
+#endif
 #include "ability_death_recipient.h"
 #endif
 
@@ -1069,6 +1071,7 @@ HWTEST_F(SystemAbilityMgrTest, IpcDumpSamgrProcess001, TestSize.Level2)
  * @tc.desc: test IpcDumpSingleProcess.
  * @tc.type: FUNC
  */
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityMgrTest, IpcDumpSingleProcess001, TestSize.Level2)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -1082,6 +1085,7 @@ HWTEST_F(SystemAbilityMgrTest, IpcDumpSingleProcess001, TestSize.Level2)
     saMgr->IpcDumpSingleProcess(fd, cmd, nativeTokenInfo.processName);
     EXPECT_TRUE(ret);
 }
+#endif
 
 /**
  * @tc.name: Test DoLoadForPerf
