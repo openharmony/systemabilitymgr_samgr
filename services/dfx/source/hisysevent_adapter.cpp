@@ -56,8 +56,23 @@ constexpr const char* DURATION = "DURATION";
 constexpr const char* KEY_STAGE = "KEY_STAGE";
 }
 
+static bool IsInCrashWhiteList(int32_t saId)
+{
+    std::vector<int> whiteList = { 1205 };
+    for (auto sa : whiteList) {
+        if (saId == sa) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void ReportSaCrash(int32_t saId)
 {
+    if (IsInCrashWhiteList(saId)) {
+        HILOGD("report SA:%{public}d is in crash whitelist.", saId);
+        return;
+    }
     int ret = HiSysEventWrite(HiSysEvent::Domain::SAMGR,
         SA_CRASH,
         HiSysEvent::EventType::FAULT,
@@ -83,6 +98,9 @@ void ReportSaUnLoadFail(int32_t saId, int32_t pid, int32_t uid, const std::strin
 
 static void ReportSaDuration(const std::string& eventName, int32_t saId, int32_t keyStage, int64_t duration)
 {
+    if (duration <= 0) {
+        return;
+    }
     int ret = HiSysEventWrite(HiSysEvent::Domain::SAMGR,
         eventName,
         HiSysEvent::EventType::BEHAVIOR,
@@ -119,6 +137,9 @@ void ReportSaUnLoadDuration(int32_t saId, int32_t keyStage, int64_t duration)
 static void ReportProcessDuration(const std::string& eventName, const std::string& processName,
     int32_t pid, int32_t uid, int64_t duration)
 {
+    if (duration <= 0) {
+        return;
+    }
     int ret = HiSysEventWrite(HiSysEvent::Domain::SAMGR,
         eventName,
         HiSysEvent::EventType::BEHAVIOR,
@@ -210,8 +231,23 @@ void ReportSamgrSaUnload(int32_t said, int32_t pid, int32_t uid, int32_t eventId
     }
 }
 
+static bool IsOpenSoWhiteList(int32_t saId)
+{
+    std::vector<int> whiteList = { 4606 };
+    for (auto sa : whiteList) {
+        if (saId == sa) {
+            return true;
+        }
+    }
+    return false;
+}
+
 void ReportAddSystemAbilityFailed(int32_t said, int32_t pid, int32_t uid, const std::string& filaName)
 {
+    if (IsOpenSoWhiteList(said)) {
+        HILOGD("report SA:%{public}d is open so whitelist.", said);
+        return;
+    }
     int ret = HiSysEventWrite(HiSysEvent::Domain::SAMGR,
         ADD_SYSTEMABILITY_FAIL,
         HiSysEvent::EventType::FAULT,
