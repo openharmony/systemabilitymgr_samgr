@@ -494,6 +494,7 @@ HWTEST_F(SystemAbilityMgrStubTest, SubsSystemAbilityInner004, TestSize.Level1)
     sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
     SAInfo saInfo;
     saMgr->abilityMap_[SAID] = saInfo;
+    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
     EXPECT_TRUE(saMgr != nullptr);
     MessageParcel data;
     MessageParcel reply;
@@ -1937,6 +1938,7 @@ HWTEST_F(SystemAbilityMgrStubTest, AddSystemAbility004, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrStubTest, AddSystemAbility005, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
     sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
     SystemAbilityManager::SAExtraProp extraProp;
     saMgr->dBinderService_ = nullptr;
@@ -1960,6 +1962,7 @@ HWTEST_F(SystemAbilityMgrStubTest, AddSystemAbility005, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrStubTest, AddSystemAbility006, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
     sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
     SystemAbilityManager::SAExtraProp extraProp;
     saMgr->rpcCallbackImp_ = nullptr;
@@ -1984,6 +1987,7 @@ HWTEST_F(SystemAbilityMgrStubTest, AddSystemAbility006, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrStubTest, AddSystemProcess001, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
     sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
     u16string procName = u"";
     int32_t res = saMgr->AddSystemProcess(procName, testAbility);
@@ -2008,6 +2012,7 @@ HWTEST_F(SystemAbilityMgrStubTest, AddSystemProcess001, TestSize.Level1)
 HWTEST_F(SystemAbilityMgrStubTest, AddSystemProcess002, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
     sptr<IRemoteObject> testAbility(nullptr);
     u16string procName = u"proname";
     int32_t res = saMgr->AddSystemProcess(procName, testAbility);
@@ -2034,6 +2039,7 @@ HWTEST_F(SystemAbilityMgrStubTest, AddSystemProcess002, TestSize.Level1)
 HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemProcess001, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
     sptr<IRemoteObject> testAbility(nullptr);
     int32_t res = saMgr->RemoveSystemProcess(testAbility);
     saMgr->NotifySystemAbilityLoadFail(SAID, nullptr);
