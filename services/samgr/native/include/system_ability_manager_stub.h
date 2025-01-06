@@ -179,6 +179,11 @@ private:
     {
         return stub->GetCommonEventExtraDataIdlistInner(data, reply);
     }
+    static int32_t LocalGetLocalAbilityManagerProxy(SystemAbilityManagerStub* stub,
+        MessageParcel& data, MessageParcel& reply)
+    {
+        return stub->GetLocalAbilityManagerProxyInner(data, reply);
+    }
     int32_t ListSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t SubsSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t UnSubsSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
@@ -209,6 +214,7 @@ private:
     int32_t GetExtensionRunningSaListInner(MessageParcel& data, MessageParcel& reply);
     int32_t GetRunningSaExtensionInfoListInner(MessageParcel& data, MessageParcel& reply);
     int32_t GetCommonEventExtraDataIdlistInner(MessageParcel& data, MessageParcel& reply);
+    int32_t GetLocalAbilityManagerProxyInner(MessageParcel& data, MessageParcel& reply);
     static int32_t GetHapIdMultiuser(int32_t uid);
     void SetAbilityFuncMap();
     void SetProcessFuncMap();

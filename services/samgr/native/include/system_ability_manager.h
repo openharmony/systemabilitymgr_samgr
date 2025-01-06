@@ -231,7 +231,12 @@ public:
     sptr<IRemoteObject> GetSystemProcess(const std::u16string& procName);
     sptr<IRemoteObject> GetLocalAbilityManagerProxy(int32_t systemAbilityId) override
     {
-        return nullptr;
+        CommonSaProfile saProfile;
+        if (!GetSaProfile(systemAbilityId, saProfile)) {
+            HILOGD("SA:%{public}d no profile!", systemAbilityId);
+            return nullptr;
+        }
+        return GetSystemProcess(saProfile.process);
     }
     bool IsModuleUpdate(int32_t systemAbilityId)
     {

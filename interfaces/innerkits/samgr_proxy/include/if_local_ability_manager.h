@@ -69,6 +69,8 @@ public:
     virtual bool FfrtDumperProc(std::string& result) = 0;
     virtual int32_t SystemAbilityExtProc(const std::string& extension, int32_t said,
         SystemAbilityExtensionPara* callback, bool isAsync = false) = 0;
+    virtual int32_t ServiceControlCmd(int32_t fd, int32_t systemAbilityId,
+        const std::vector<std::u16string>& args) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ILocalAbilityManager");
 protected:
     static inline const std::u16string LOCAL_ABILITY_MANAGER_INTERFACE_TOKEN = u"ohos.localabilitymanager.accessToken";
