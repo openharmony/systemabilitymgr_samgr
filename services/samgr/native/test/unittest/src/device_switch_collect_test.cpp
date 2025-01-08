@@ -205,6 +205,8 @@ HWTEST_F(DeviceSwitchCollectTest, OnStart001, TestSize.Level3)
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
     deviceSwitchCollect->needListenSwitchEvent_ = false;
     int32_t ret = deviceSwitchCollect->OnStart();
     EXPECT_EQ(ret, ERR_OK);
@@ -224,7 +226,9 @@ HWTEST_F(DeviceSwitchCollectTest, OnStart002, TestSize.Level3)
         new DeviceSwitchCollect(collect);
     deviceSwitchCollect->InitCommonEventSubscriber();
     deviceSwitchCollect->needListenSwitchEvent_ = true;
-    SystemAbilityManager::GetInstance()->subscribeCountMap_.clear();
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    saMgr->subscribeCountMap_.clear();
     int32_t ret = deviceSwitchCollect->OnStart();
     EXPECT_EQ(ret, ERR_OK);
 }
