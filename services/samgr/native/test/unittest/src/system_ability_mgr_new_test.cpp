@@ -494,54 +494,17 @@ HWTEST_F(SystemAbilityMgrTest, GetCommonEventExtraIdList001, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrTest, RemoveWhiteCommonEvent001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    saMgr->CleanFfrt();
+    saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
+    saMgr->CleanFfrt();
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+    saMgr->CleanFfrt();
     InitSaMgr(saMgr);
+    const std::u16string name;
+    saMgr->NotifyRemoteSaDied(name);
     saMgr->RemoveWhiteCommonEvent();
     EXPECT_TRUE(saMgr->collectManager_ != nullptr);
-}
-
-/**
- * @tc.name: CleanFfrt001
- * @tc.desc: test CleanFfrt, workHandler_ true.
- * @tc.type: FUNC
- * @tc.require: I6NKWX
- */
-HWTEST_F(SystemAbilityMgrTest, CleanFfrt001, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
-    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
-    int ret = true;
-    saMgr->CleanFfrt();
-    EXPECT_EQ(ret, true);
-}
-
-/**
- * @tc.name: CleanFfrt002
- * @tc.desc: test CleanFfrt, collectManager_ true.
- * @tc.type: FUNC
- * @tc.require: I6NKWX
- */
-HWTEST_F(SystemAbilityMgrTest, CleanFfrt002, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
-    saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
-    int ret = true;
-    saMgr->CleanFfrt();
-    EXPECT_EQ(ret, true);
-}
-
-/**
- * @tc.name: CleanFfrt003
- * @tc.desc: test CleanFfrt, abilityStateScheduler_ true.
- * @tc.type: FUNC
- * @tc.require: I6NKWX
- */
-HWTEST_F(SystemAbilityMgrTest, CleanFfrt003, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
-    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
-    int ret = true;
-    saMgr->CleanFfrt();
-    EXPECT_EQ(ret, true);
 }
 
 /**
@@ -656,22 +619,6 @@ HWTEST_F(SystemAbilityMgrTest, RemoveSystemAbility005, TestSize.Level3)
     const sptr<IRemoteObject> ability = nullptr;
     int32_t ret = saMgr->RemoveSystemAbility(ability);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-}
-
-/**
- * @tc.name: NotifyRemoteSaDied002
- * @tc.desc: test NotifyRemoteSaDied, true.
- * @tc.type: FUNC
- * @tc.require: I6NKWX
- */
-HWTEST_F(SystemAbilityMgrTest, NotifyRemoteSaDied002, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
-    InitSaMgr(saMgr);
-    const std::u16string name;
-    int ret = true;
-    saMgr->NotifyRemoteSaDied(name);
-    EXPECT_EQ(ret, true);
 }
 
 /**
