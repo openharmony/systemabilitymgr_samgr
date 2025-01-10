@@ -62,6 +62,19 @@ public:
         return ret.second;
     }
 
+    bool FirstInsert(const K &key, const V &value)
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        auto isFirst = map_.empty();
+        auto ret = map_.insert(std::pair<K, V>(key, value));
+        // find key and cannot insert
+        if (!ret.second) {
+            map_.erase(ret.first);
+            map_.insert(std::pair<K, V>(key, value));
+        }
+        return isFirst;
+    }
+
     void EnsureInsert(const K &key, const V &value)
     {
         std::lock_guard<std::mutex> lock(mutex_);
