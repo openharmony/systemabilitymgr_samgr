@@ -181,10 +181,10 @@ void SystemAbilityStateScheduler::UpdateLimitDelayUnloadTime(int32_t systemAbili
         HILOGE("UpdateLimitDelayUnloadTime process handler not init");
         return;
     }
-    auto UpdateDelayUnloadTimeTask = [systemAbilityId, this]() {
+    auto updateDelayUnloadTimeTask = [systemAbilityId, this]() {
         UpdateLimitDelayUnloadTimeTask(systemAbilityId);
     };
-    bool ret = processHandler_->PostTask(UpdateDelayUnloadTimeTask);
+    bool ret = processHandler_->PostTask(updateDelayUnloadTimeTask);
     if (!ret) {
         HILOGW("UpdateLimitDelayUnloadTime PostTask fail");
     }
