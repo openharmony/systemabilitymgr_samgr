@@ -317,7 +317,7 @@ void SystemAbilityManager::InitSaProfile()
             onDemandSaIdsSet_.insert(saInfo.saId);
         }
     }
-    HILOGI("InitProfile spend %{public}" PRId64 "ms", GetTickCount() - begin);
+    KHILOGI("InitProfile spend %{public}" PRId64 "ms", GetTickCount() - begin);
 }
 
 void SystemAbilityManager::OndemandLoadForPerf()
@@ -1098,12 +1098,13 @@ int32_t SystemAbilityManager::AddSystemProcess(const u16string& procName,
     }
     HILOGI("AddProc:%{public}s,%{public}zu_%{public}" PRId64 "ms%{public}s", Str16ToStr8(procName).c_str(),
         systemProcessMap_.size(), duration, ret ? "" : ",AddDeath fail");
+    auto callingPid = IPCSkeleton::GetCallingPid();
+    auto callingUid = IPCSkeleton::GetCallingUid();
+    ReportProcessStartDuration(Str16ToStr8(procName), callingPid, callingUid, duration);
     if (abilityStateScheduler_ == nullptr) {
         HILOGE("abilityStateScheduler is nullptr");
         return ERR_INVALID_VALUE;
     }
-    auto callingPid = IPCSkeleton::GetCallingPid();
-    auto callingUid = IPCSkeleton::GetCallingUid();
     ProcessInfo processInfo = {procName, callingPid, callingUid};
     abilityStateScheduler_->SendProcessStateEvent(processInfo, ProcessStateEvent::PROCESS_STARTED_EVENT);
     return ERR_OK;
@@ -1448,7 +1449,6 @@ int32_t SystemAbilityManager::StartDynamicSystemProcess(const std::u16string& na
     if (result != 0) {
         ReportProcessStartFail(Str16ToStr8(name), callingPid, callingUid, "err:" + ToString(result));
     }
-    ReportProcessStartDuration(Str16ToStr8(name), callingPid, callingUid, duration);
     KHILOGI("Start dynamic proc:%{public}s,%{public}d,%{public}d_%{public}" PRId64 "ms",
         Str16ToStr8(name).c_str(), systemAbilityId, result, duration);
     return result;
