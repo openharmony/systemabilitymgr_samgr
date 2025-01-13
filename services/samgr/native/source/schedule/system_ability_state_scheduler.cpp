@@ -808,9 +808,10 @@ int32_t SystemAbilityStateScheduler::KillSystemProcessLocked(
     if (result != 0) {
         ReportProcessStopFail(Str16ToStr8(processContext->processName), processContext->pid, processContext->uid,
             "err:" + ToString(result));
+    } else {
+        ReportProcessStopDuration(Str16ToStr8(processContext->processName), processContext->pid,
+            processContext->uid, duration);
     }
-    ReportProcessStopDuration(Str16ToStr8(processContext->processName), processContext->pid,
-        processContext->uid, duration);
     KHILOGI("Scheduler proc:%{public}s kill pid:%{public}d,%{public}d_%{public}d_"
         "%{public}" PRId64 "ms", Str16ToStr8(processContext->processName).c_str(), processContext->pid,
         processContext->uid, result, duration);

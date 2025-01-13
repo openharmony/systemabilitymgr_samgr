@@ -155,7 +155,6 @@ void ParseUtil::OpenSo(SaProfile& saProfile)
             handle = dlopen(saProfile.libPath.c_str(), RTLD_NOW);
         }
         int64_t duration = GetTickCount() - begin;
-        ReportSaLoadDuration(saProfile.saId, SA_LOAD_OPENSO, duration);
         KHILOGI("SA:%{public}d OpenSo %{public}" PRId64 "ms",
             saProfile.saId, duration);
         if (handle == nullptr) {
@@ -169,6 +168,8 @@ void ParseUtil::OpenSo(SaProfile& saProfile)
             HILOGE("SA:%{public}d dlopen %{public}s failed with errno:%{public}s!",
                 saProfile.saId, fileName.c_str(), dlerror());
             return;
+        } else {
+            ReportSaLoadDuration(saProfile.saId, SA_LOAD_OPENSO, duration);
         }
         saProfile.handle = handle;
     } else {
