@@ -35,6 +35,36 @@ namespace SamgrRust {
 
 static constexpr size_t MAX_RUST_STR_LEN = 1024;
 
+static void* g_selfSoHandle = nullptr;
+
+extern "C" __attribute__((constructor)) void InitSamgrRust()
+{
+    if (g_selfSoHandle != nullptr) {
+        return;
+    }
+    Dl_info info;
+    int ret = dladdr(reinterpret_cast<void *>(InitSamgrRust), &info);
+    if (ret == 0) {
+        return;
+    }
+
+    char path[PATH_MAX] = {'\0'};
+    if (realpath(info.dli_fname, path) == nullptr) {
+        return;
+    }
+    std::vector<std::string> strVector;
+    SplitStr(path, "/", strVector);
+    auto vectorSize = strVector.size();
+    if (vectorSize == 0) {
+        return;
+    }
+    auto& fileName = strVector[vectorSize - 1];
+    g_selfSoHandle = dlopen(fileName.c_str(), RTLD_LAZY);
+    if (g_selfSoHandle == nullptr) {
+        return;
+    }
+}
+
 rust::Vec<rust::String> ListSystemAbilities()
 {
     auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
