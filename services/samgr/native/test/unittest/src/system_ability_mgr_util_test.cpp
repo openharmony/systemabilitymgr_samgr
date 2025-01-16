@@ -324,32 +324,6 @@ HWTEST_F(SamgrUtilTest, GetCacheCommonEventSa001, TestSize.Level3)
 }
 
 /**
- * @tc.name: SetModuleUpdateParam001
- * @tc.desc: test SetModuleUpdateParam with key and value is null
- * @tc.type: FUNC
- * @tc.require: I6V4AX
- */
-HWTEST_F(SamgrUtilTest, SetModuleUpdateParam001, TestSize.Level3)
-{
-    std::string key = "";
-    std::string value = "";
-    SamgrUtil::SetModuleUpdateParam(key, value);
-}
-
-/**
- * @tc.name: SetModuleUpdateParam002
- * @tc.desc: test SetModuleUpdateParam with key and value is not null
- * @tc.type: FUNC
- * @tc.require: I6V4AX
- */
-HWTEST_F(SamgrUtilTest, SetModuleUpdateParam002, TestSize.Level3)
-{
-    std::string key = "key";
-    std::string value = "value";
-    SamgrUtil::SetModuleUpdateParam(key, value);
-}
-
-/**
  * @tc.name: SendUpdateSaState001
  * @tc.desc: test SendUpdateSaState
  * @tc.type: FUNC
@@ -357,6 +331,12 @@ HWTEST_F(SamgrUtilTest, SetModuleUpdateParam002, TestSize.Level3)
  */
 HWTEST_F(SamgrUtilTest, SendUpdateSaState001, TestSize.Level3)
 {
+    std::string key = "";
+    std::string value = "";
+    SamgrUtil::SetModuleUpdateParam(key, value);
+    std::string key_a = "key";
+    std::string value_a = "value";
+    SamgrUtil::SetModuleUpdateParam(key_a, value_a);
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
     InitSaMgr(saMgr);
