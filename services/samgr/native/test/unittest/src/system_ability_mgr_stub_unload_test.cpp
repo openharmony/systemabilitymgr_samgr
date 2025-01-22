@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "system_ability_mgr_stub_test.h"
+#include "system_ability_mgr_stub_unload_test.h"
 #include "samgr_err_code.h"
 #include "ability_death_recipient.h"
 #include "itest_transaction_service.h"
@@ -40,7 +40,32 @@ constexpr uint32_t SAID = 1499;
 constexpr int32_t INVALID_SAID = -1;
 }
 
-HWTEST_F(SystemAbilityMgrStubTest, UnSubsSystemAbilityInner002, TestSize.Level3)
+void SystemAbilityMgrStubUnLoadTest::SetUpTestCase()
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+    std::list<SaProfile> saProfiles;
+    saMgr->abilityStateScheduler_->Init(saProfiles);
+    DTEST_LOG << "SetUpTestCase" << std::endl;
+}
+
+void SystemAbilityMgrStubUnLoadTest::TearDownTestCase()
+{
+    DTEST_LOG << "TearDownTestCase" << std::endl;
+}
+
+void SystemAbilityMgrStubUnLoadTest::SetUp()
+{
+    DTEST_LOG << "SetUp" << std::endl;
+}
+
+void SystemAbilityMgrStubUnLoadTest::TearDown()
+{
+    DTEST_LOG << "TearDown" << std::endl;
+}
+
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, UnSubsSystemAbilityInner002, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
@@ -51,7 +76,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnSubsSystemAbilityInner002, TestSize.Level3)
     EXPECT_EQ(result, ERR_NULL_OBJECT);
 }
 
-HWTEST_F(SystemAbilityMgrStubTest, UnSubsSystemAbilityInner003, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, UnSubsSystemAbilityInner003, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
@@ -62,7 +87,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnSubsSystemAbilityInner003, TestSize.Level3)
     EXPECT_EQ(result, ERR_NULL_OBJECT);
 }
 
-HWTEST_F(SystemAbilityMgrStubTest, UnSubsSystemAbilityInner004, TestSize.Level1)
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, UnSubsSystemAbilityInner004, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
@@ -77,7 +102,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnSubsSystemAbilityInner004, TestSize.Level1)
     EXPECT_EQ(result, ERR_OK);
 }
 
-HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbilityInner002, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, RemoveSystemAbilityInner002, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
@@ -88,7 +113,7 @@ HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbilityInner002, TestSize.Level3)
     EXPECT_EQ(result, ERR_NULL_OBJECT);
 }
 
-HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbilityInner003, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, RemoveSystemAbilityInner003, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
@@ -100,7 +125,7 @@ HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbilityInner003, TestSize.Level3)
     EXPECT_EQ(result, ERR_INVALID_VALUE);
 }
 
-HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbility001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, RemoveSystemAbility001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
@@ -108,7 +133,7 @@ HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbility001, TestSize.Level3)
     EXPECT_EQ(res, ERR_INVALID_VALUE);
 }
 
-HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbility002, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, RemoveSystemAbility002, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
@@ -116,7 +141,7 @@ HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbility002, TestSize.Level3)
     EXPECT_EQ(res, ERR_INVALID_VALUE);
 }
 
-HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbility003, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, RemoveSystemAbility003, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
@@ -127,7 +152,7 @@ HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbility003, TestSize.Level3)
     EXPECT_EQ(res, ERR_OK);
 }
 
-HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbility004, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, RemoveSystemAbility004, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
@@ -140,7 +165,7 @@ HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbility004, TestSize.Level3)
     EXPECT_EQ(res, ERR_OK);
 }
 
-HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbility005, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, RemoveSystemAbility005, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
@@ -148,7 +173,7 @@ HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbility005, TestSize.Level3)
     EXPECT_EQ(res, ERR_INVALID_VALUE);
 }
 
-HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbility006, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, RemoveSystemAbility006, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
@@ -160,7 +185,7 @@ HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbility006, TestSize.Level3)
     EXPECT_EQ(res, ERR_OK);
 }
 
-HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbility007, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, RemoveSystemAbility007, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
@@ -173,7 +198,7 @@ HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemAbility007, TestSize.Level3)
     EXPECT_EQ(res, ERR_OK);
 }
 
-HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemAbility001, TestSize.Level1)
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, UnSubscribeSystemAbility001, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
@@ -184,7 +209,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemAbility001, TestSize.Level1)
     EXPECT_EQ(res, ERR_INVALID_VALUE);
 }
 
-HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemAbility002, TestSize.Level1)
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, UnSubscribeSystemAbility002, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
@@ -197,7 +222,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemAbility002, TestSize.Level1)
     EXPECT_EQ(res, ERR_INVALID_VALUE);
 }
 
-HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemAbility003, TestSize.Level1)
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, UnSubscribeSystemAbility003, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
@@ -208,7 +233,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemAbility003, TestSize.Level1)
     EXPECT_EQ(res, ERR_INVALID_VALUE);
 }
 
-HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemAbility004, TestSize.Level1)
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, UnSubscribeSystemAbility004, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
@@ -224,7 +249,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemAbility004, TestSize.Level1)
     EXPECT_EQ(res, ERR_OK);
 }
 
-HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemAbility005, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, UnSubscribeSystemAbility005, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
@@ -237,7 +262,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemAbility005, TestSize.Level3)
     EXPECT_EQ(res, ERR_OK);
 }
 
-HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemProcess001, TestSize.Level1)
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, RemoveSystemProcess001, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
@@ -260,7 +285,7 @@ HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemProcess001, TestSize.Level1)
  * @tc.desc: test RemoveSystemProcess, return ERR_OK
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemProcess002, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, RemoveSystemProcess002, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
@@ -280,7 +305,7 @@ HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemProcess002, TestSize.Level3)
  * @tc.desc: test RemoveSystemProcess, return ERR_INVALID_VALUE
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemProcess003, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, RemoveSystemProcess003, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
@@ -295,7 +320,7 @@ HWTEST_F(SystemAbilityMgrStubTest, RemoveSystemProcess003, TestSize.Level3)
  * @tc.desc: test SystemAbilityStatusChangeStub::OnRemoveSystemAbilityInner001
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrStubTest, OnRemoveSystemAbilityInner001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, OnRemoveSystemAbilityInner001, TestSize.Level3)
 {
     sptr<SaStatusChangeMock> testAbility(new SaStatusChangeMock());
     EXPECT_TRUE(testAbility != nullptr);
@@ -311,7 +336,7 @@ HWTEST_F(SystemAbilityMgrStubTest, OnRemoveSystemAbilityInner001, TestSize.Level
  * @tc.desc: test SystemAbilityStatusChangeStub::OnRemoveSystemAbilityInner002
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrStubTest, OnRemoveSystemAbilityInner002, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, OnRemoveSystemAbilityInner002, TestSize.Level3)
 {
     sptr<SaStatusChangeMock> testAbility(new SaStatusChangeMock());
     EXPECT_TRUE(testAbility != nullptr);
@@ -330,7 +355,7 @@ HWTEST_F(SystemAbilityMgrStubTest, OnRemoveSystemAbilityInner002, TestSize.Level
  * @tc.type: FUNC
  * @tc.require: I6AJ3S
  */
-HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbilityInner001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, UnloadSystemAbilityInner001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
@@ -348,7 +373,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbilityInner001, TestSize.Level3)
  * @tc.require: I6AJ3S
  */
 #ifdef SUPPORT_ACCESS_TOKEN
-HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbilityInner002, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, UnloadSystemAbilityInner002, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
@@ -366,7 +391,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbilityInner002, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6AJ3S
  */
-HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, UnloadSystemAbility001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
@@ -381,7 +406,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility001, TestSize.Level3)
  * @tc.require: I6AJ3S
  */
 #ifdef SUPPORT_ACCESS_TOKEN
-HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility002, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, UnloadSystemAbility002, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
@@ -397,7 +422,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility002, TestSize.Level3)
  * @tc.require: I6AJ3S
  */
 #ifdef SUPPORT_ACCESS_TOKEN
-HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility003, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, UnloadSystemAbility003, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
@@ -415,7 +440,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility003, TestSize.Level3)
  * @tc.require: I6AJ3S
  */
 #ifdef SUPPORT_ACCESS_TOKEN
-HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility004, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, UnloadSystemAbility004, TestSize.Level3)
 {
     SamMockPermission::MockProcess("invalidProcess");
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
@@ -434,7 +459,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility004, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6AJ3S
  */
-HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility005, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, UnloadSystemAbility005, TestSize.Level3)
 {
     SamMockPermission::MockProcess("memmgrservice");
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
@@ -454,7 +479,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbility005, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6H10P
  */
-HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemProcessInner002, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, UnSubscribeSystemProcessInner002, TestSize.Level3)
 {
     DTEST_LOG << "UnSubscribeSystemProcessInner002" << std::endl;
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
@@ -466,7 +491,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemProcessInner002, TestSize.Le
     EXPECT_EQ(ret, ERR_NULL_OBJECT);
 }
 
-HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemProcessInner003, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, UnSubscribeSystemProcessInner003, TestSize.Level3)
 {
     DTEST_LOG << "UnSubscribeSystemProcessInner003" << std::endl;
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
@@ -479,7 +504,7 @@ HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemProcessInner003, TestSize.Le
     EXPECT_EQ(ret, ERR_OK);
 }
 
-HWTEST_F(SystemAbilityMgrStubTest, UnloadSystemAbilityInner003, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, UnloadSystemAbilityInner003, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);

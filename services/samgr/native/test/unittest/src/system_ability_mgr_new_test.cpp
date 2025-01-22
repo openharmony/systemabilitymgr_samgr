@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "system_ability_mgr_test.h"
+#include "system_ability_mgr_new_test.h"
 #include "samgr_err_code.h"
 #include "hisysevent_adapter.h"
 #include "if_system_ability_manager.h"
@@ -155,13 +155,36 @@ void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
 }
 }
 
+void SystemAbilityMgrNewTest::SetUpTestCase()
+{
+    DTEST_LOG << "SetUpTestCase" << std::endl;
+}
+
+void SystemAbilityMgrNewTest::TearDownTestCase()
+{
+    DTEST_LOG << "TearDownTestCase" << std::endl;
+}
+
+void SystemAbilityMgrNewTest::SetUp()
+{
+    SamMockPermission::MockPermission();
+    DTEST_LOG << "SetUp" << std::endl;
+}
+
+void SystemAbilityMgrNewTest::TearDown()
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->CleanFfrt();
+    DTEST_LOG << "TearDown" << std::endl;
+}
+
 /**
  * @tc.name: GetLocalNodeId001
  * @tc.desc: test GetLocalNodeId
  * @tc.type: FUNC
  * @tc.require: I6NKWX
  */
-HWTEST_F(SystemAbilityMgrTest, GetLocalNodeId001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrNewTest, GetLocalNodeId001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     string ret = saMgr->GetLocalNodeId();
@@ -174,7 +197,7 @@ HWTEST_F(SystemAbilityMgrTest, GetLocalNodeId001, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6NKWX
  */
-HWTEST_F(SystemAbilityMgrTest, ReportGetSAPeriodically001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrNewTest, ReportGetSAPeriodically001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     uint64_t pid_said = 123;
@@ -189,7 +212,7 @@ HWTEST_F(SystemAbilityMgrTest, ReportGetSAPeriodically001, TestSize.Level3)
  * @tc.desc: start invalid process, return fail.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, StartDynamicSystemProcess001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrNewTest, StartDynamicSystemProcess001, TestSize.Level3)
 {
     cout << "begin StartDynamicSystemProcess001 "<< endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -207,7 +230,7 @@ HWTEST_F(SystemAbilityMgrTest, StartDynamicSystemProcess001, TestSize.Level3)
  * @tc.desc: get invalid system ability.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, GetSystemAbilityWithDevice001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrNewTest, GetSystemAbilityWithDevice001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     InitSaMgr(saMgr);
@@ -230,7 +253,7 @@ HWTEST_F(SystemAbilityMgrTest, GetSystemAbilityWithDevice001, TestSize.Level3)
  * @tc.desc: get invalid system ability.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, GetSystemAbilityFromRemote001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrNewTest, GetSystemAbilityFromRemote001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     InitSaMgr(saMgr);
@@ -243,7 +266,7 @@ HWTEST_F(SystemAbilityMgrTest, GetSystemAbilityFromRemote001, TestSize.Level3)
  * @tc.desc: get not exist system ability.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, GetSystemAbilityFromRemote002, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrNewTest, GetSystemAbilityFromRemote002, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     InitSaMgr(saMgr);
@@ -256,7 +279,7 @@ HWTEST_F(SystemAbilityMgrTest, GetSystemAbilityFromRemote002, TestSize.Level3)
  * @tc.desc: get exist system ability.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, GetSystemAbilityFromRemote003, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrNewTest, GetSystemAbilityFromRemote003, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     InitSaMgr(saMgr);
@@ -272,7 +295,7 @@ HWTEST_F(SystemAbilityMgrTest, GetSystemAbilityFromRemote003, TestSize.Level3)
  * @tc.desc: get exist system ability, isDistributed is true.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, GetSystemAbilityFromRemote004, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrNewTest, GetSystemAbilityFromRemote004, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     InitSaMgr(saMgr);
@@ -291,7 +314,7 @@ HWTEST_F(SystemAbilityMgrTest, GetSystemAbilityFromRemote004, TestSize.Level3)
  * @tc.require: I7VEPG
  */
 
-HWTEST_F(SystemAbilityMgrTest, GetDBinder001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrNewTest, GetDBinder001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     sptr<DBinderService> result = saMgr->GetDBinder();
@@ -305,7 +328,7 @@ HWTEST_F(SystemAbilityMgrTest, GetDBinder001, TestSize.Level3)
  * @tc.require: I6MO6A
  */
 
-HWTEST_F(SystemAbilityMgrTest, NotifyRpcLoadCompleted001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrNewTest, NotifyRpcLoadCompleted001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     InitSaMgr(saMgr);
@@ -322,7 +345,7 @@ HWTEST_F(SystemAbilityMgrTest, NotifyRpcLoadCompleted001, TestSize.Level3)
  * @tc.require: I6MO6A
  */
 
-HWTEST_F(SystemAbilityMgrTest, NotifyRpcLoadCompleted002, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrNewTest, NotifyRpcLoadCompleted002, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     InitSaMgr(saMgr);
@@ -336,7 +359,7 @@ HWTEST_F(SystemAbilityMgrTest, NotifyRpcLoadCompleted002, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6MO6A
  */
-HWTEST_F(SystemAbilityMgrTest, NotifyRpcLoadCompleted003, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrNewTest, NotifyRpcLoadCompleted003, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     InitSaMgr(saMgr);
@@ -352,7 +375,7 @@ HWTEST_F(SystemAbilityMgrTest, NotifyRpcLoadCompleted003, TestSize.Level3)
  * @tc.require: I7VEPG
  */
 
-HWTEST_F(SystemAbilityMgrTest, Dump001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrNewTest, Dump001, TestSize.Level3)
 {
     SamMockPermission::MockProcess("hidumper_service");
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -370,7 +393,7 @@ HWTEST_F(SystemAbilityMgrTest, Dump001, TestSize.Level3)
  * @tc.require: I7VEPG
  */
 
-HWTEST_F(SystemAbilityMgrTest, Dump002, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrNewTest, Dump002, TestSize.Level3)
 {
     SamMockPermission::MockProcess("hidumper_service");
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -390,7 +413,7 @@ HWTEST_F(SystemAbilityMgrTest, Dump002, TestSize.Level3)
  * @tc.require: I7VEPG
  */
 
-HWTEST_F(SystemAbilityMgrTest, Dump003, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrNewTest, Dump003, TestSize.Level3)
 {
     SamMockPermission::MockProcess("hidumper_service");
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -409,7 +432,7 @@ HWTEST_F(SystemAbilityMgrTest, Dump003, TestSize.Level3)
  * @tc.require: I7VEPG
  */
 
-HWTEST_F(SystemAbilityMgrTest, Dump004, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrNewTest, Dump004, TestSize.Level3)
 {
     SamMockPermission::MockProcess("hidumper_service");
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -428,7 +451,7 @@ HWTEST_F(SystemAbilityMgrTest, Dump004, TestSize.Level3)
  * @tc.require: I7VEPG
  */
 
-HWTEST_F(SystemAbilityMgrTest, AddSamgrToAbilityMap001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrNewTest, AddSamgrToAbilityMap001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     saMgr->AddSamgrToAbilityMap();
@@ -444,7 +467,7 @@ HWTEST_F(SystemAbilityMgrTest, AddSamgrToAbilityMap001, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I7VEPG
  */
-HWTEST_F(SystemAbilityMgrTest, GetCommonEventExtraIdList001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrNewTest, GetCommonEventExtraIdList001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     InitSaMgr(saMgr);
@@ -491,7 +514,7 @@ HWTEST_F(SystemAbilityMgrTest, GetCommonEventExtraIdList001, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6NKWX
  */
-HWTEST_F(SystemAbilityMgrTest, RemoveWhiteCommonEvent001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrNewTest, RemoveWhiteCommonEvent001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
@@ -513,7 +536,7 @@ HWTEST_F(SystemAbilityMgrTest, RemoveWhiteCommonEvent001, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6NKWX
  */
-HWTEST_F(SystemAbilityMgrTest, SetFfrt001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrNewTest, SetFfrt001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     InitSaMgr(saMgr);
@@ -527,7 +550,7 @@ HWTEST_F(SystemAbilityMgrTest, SetFfrt001, TestSize.Level3)
  * @tc.desc: test GetRunningSaExtensionInfoList, not exist obj
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, GetRunningSaExtensionInfoList001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrNewTest, GetRunningSaExtensionInfoList001, TestSize.Level3)
 {
     DTEST_LOG << __func__ << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -556,7 +579,7 @@ HWTEST_F(SystemAbilityMgrTest, GetRunningSaExtensionInfoList001, TestSize.Level3
  * @tc.desc: test GetRunningSaExtensionInfoList, get extension success with restore!
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, GetRunningSaExtensionInfoList002, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrNewTest, GetRunningSaExtensionInfoList002, TestSize.Level3)
 {
     DTEST_LOG << __func__ << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -597,7 +620,7 @@ HWTEST_F(SystemAbilityMgrTest, GetRunningSaExtensionInfoList002, TestSize.Level3
  * @tc.type: FUNC
  * @tc.require: I6NKWX
  */
-HWTEST_F(SystemAbilityMgrTest, CheckSystemAbility006, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrNewTest, CheckSystemAbility006, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     int32_t systemAbilityId = -1;
@@ -612,7 +635,7 @@ HWTEST_F(SystemAbilityMgrTest, CheckSystemAbility006, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6NKWX
  */
-HWTEST_F(SystemAbilityMgrTest, RemoveSystemAbility005, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrNewTest, RemoveSystemAbility005, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     InitSaMgr(saMgr);
@@ -626,7 +649,7 @@ HWTEST_F(SystemAbilityMgrTest, RemoveSystemAbility005, TestSize.Level3)
  * @tc.desc: add system ability with empty capability.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, AddSystemAbility006, TestSize.Level1)
+HWTEST_F(SystemAbilityMgrNewTest, AddSystemAbility006, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     InitSaMgr(saMgr);
@@ -642,7 +665,7 @@ HWTEST_F(SystemAbilityMgrTest, AddSystemAbility006, TestSize.Level1)
  * @tc.desc: test AddSystemAbility.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, AddSystemAbility007, TestSize.Level1)
+HWTEST_F(SystemAbilityMgrNewTest, AddSystemAbility007, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     InitSaMgr(saMgr);
@@ -659,7 +682,7 @@ HWTEST_F(SystemAbilityMgrTest, AddSystemAbility007, TestSize.Level1)
  * @tc.desc: test GetSystemProcess.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, GetSystemProcess001, TestSize.Level1)
+HWTEST_F(SystemAbilityMgrNewTest, GetSystemProcess001, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     std::u16string procName;
@@ -672,7 +695,7 @@ HWTEST_F(SystemAbilityMgrTest, GetSystemProcess001, TestSize.Level1)
  * @tc.desc: test GetSystemProcessInfo.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, GetSystemProcessInfo003, TestSize.Level1)
+HWTEST_F(SystemAbilityMgrNewTest, GetSystemProcessInfo003, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     int32_t systemAbilityId = 0;
@@ -686,7 +709,7 @@ HWTEST_F(SystemAbilityMgrTest, GetSystemProcessInfo003, TestSize.Level1)
  * @tc.desc: test IsModuleUpdate with saprofile is not exist.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, IsModuleUpdate001, TestSize.Level2)
+HWTEST_F(SystemAbilityMgrNewTest, IsModuleUpdate001, TestSize.Level2)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     bool ret = saMgr->IsModuleUpdate(SAID);
@@ -698,7 +721,7 @@ HWTEST_F(SystemAbilityMgrTest, IsModuleUpdate001, TestSize.Level2)
  * @tc.desc: test IsModuleUpdate with default.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, IsModuleUpdate002, TestSize.Level2)
+HWTEST_F(SystemAbilityMgrNewTest, IsModuleUpdate002, TestSize.Level2)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     CommonSaProfile saprofile;
@@ -712,7 +735,7 @@ HWTEST_F(SystemAbilityMgrTest, IsModuleUpdate002, TestSize.Level2)
  * @tc.desc: test IsModuleUpdate with moduleUpdate is true.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, IsModuleUpdate003, TestSize.Level2)
+HWTEST_F(SystemAbilityMgrNewTest, IsModuleUpdate003, TestSize.Level2)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     CommonSaProfile saprofile;
@@ -727,7 +750,7 @@ HWTEST_F(SystemAbilityMgrTest, IsModuleUpdate003, TestSize.Level2)
  * @tc.desc: test GetExtensionSaIdsInner, read extension failed!
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, GetExtensionSaIdsInner001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrNewTest, GetExtensionSaIdsInner001, TestSize.Level3)
 {
     DTEST_LOG << __func__ << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -743,7 +766,7 @@ HWTEST_F(SystemAbilityMgrTest, GetExtensionSaIdsInner001, TestSize.Level3)
  * @tc.desc: test GetExtensionSaIdsInner, read null extension!
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, GetExtensionSaIdsInner002, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrNewTest, GetExtensionSaIdsInner002, TestSize.Level3)
 {
     DTEST_LOG << __func__ << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -767,7 +790,7 @@ HWTEST_F(SystemAbilityMgrTest, GetExtensionSaIdsInner002, TestSize.Level3)
  * @tc.desc: test GetExtensionSaIdsInner, get extension success with backup!
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, GetExtensionSaIdsInner003, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrNewTest, GetExtensionSaIdsInner003, TestSize.Level3)
 {
     DTEST_LOG << __func__ << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -799,7 +822,7 @@ HWTEST_F(SystemAbilityMgrTest, GetExtensionSaIdsInner003, TestSize.Level3)
  * @tc.desc: test GetExtensionRunningSaListInner, read extension failed!
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, GetExtensionRunningSaListInner001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrNewTest, GetExtensionRunningSaListInner001, TestSize.Level3)
 {
     DTEST_LOG << __func__ << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -815,7 +838,7 @@ HWTEST_F(SystemAbilityMgrTest, GetExtensionRunningSaListInner001, TestSize.Level
  * @tc.desc: test GetExtensionRunningSaListInner, read null extension!
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, GetExtensionRunningSaListInner002, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrNewTest, GetExtensionRunningSaListInner002, TestSize.Level3)
 {
     DTEST_LOG << __func__ << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -839,7 +862,7 @@ HWTEST_F(SystemAbilityMgrTest, GetExtensionRunningSaListInner002, TestSize.Level
  * @tc.desc: test GetExtensionRunningSaListInner, get extension success with restore!
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, GetExtensionRunningSaListInner003, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrNewTest, GetExtensionRunningSaListInner003, TestSize.Level3)
 {
     DTEST_LOG << __func__ << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -874,7 +897,7 @@ HWTEST_F(SystemAbilityMgrTest, GetExtensionRunningSaListInner003, TestSize.Level
  * @tc.desc: test IpcDumpProc.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, IpcDumpProc001, TestSize.Level2)
+HWTEST_F(SystemAbilityMgrNewTest, IpcDumpProc001, TestSize.Level2)
 {
     SamMockPermission::MockProcess("hidumper_service");
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -892,7 +915,7 @@ HWTEST_F(SystemAbilityMgrTest, IpcDumpProc001, TestSize.Level2)
  * @tc.desc: test IpcDumpProc.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, IpcDumpProc002, TestSize.Level2)
+HWTEST_F(SystemAbilityMgrNewTest, IpcDumpProc002, TestSize.Level2)
 {
     SamMockPermission::MockProcess("hidumper_service");
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -911,7 +934,7 @@ HWTEST_F(SystemAbilityMgrTest, IpcDumpProc002, TestSize.Level2)
  * @tc.desc: test IpcDumpProc.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, IpcDumpProc003, TestSize.Level2)
+HWTEST_F(SystemAbilityMgrNewTest, IpcDumpProc003, TestSize.Level2)
 {
     SamMockPermission::MockProcess("hidumper_service");
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -930,7 +953,7 @@ HWTEST_F(SystemAbilityMgrTest, IpcDumpProc003, TestSize.Level2)
  * @tc.desc: test IpcDumpProc.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, IpcDumpProc004, TestSize.Level2)
+HWTEST_F(SystemAbilityMgrNewTest, IpcDumpProc004, TestSize.Level2)
 {
     SamMockPermission::MockProcess("hidumper_service");
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -949,7 +972,7 @@ HWTEST_F(SystemAbilityMgrTest, IpcDumpProc004, TestSize.Level2)
  * @tc.desc: test IpcStatSamgrProc.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, IpcStatSamgrProc001, TestSize.Level2)
+HWTEST_F(SystemAbilityMgrNewTest, IpcStatSamgrProc001, TestSize.Level2)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     int32_t cmd = IPC_STAT_CMD_START - 1;
@@ -966,7 +989,7 @@ HWTEST_F(SystemAbilityMgrTest, IpcStatSamgrProc001, TestSize.Level2)
  * @tc.desc: test IpcStatSamgrProc.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, IpcStatSamgrProc002, TestSize.Level2)
+HWTEST_F(SystemAbilityMgrNewTest, IpcStatSamgrProc002, TestSize.Level2)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     int32_t cmd = IPC_STAT_CMD_START;
@@ -988,7 +1011,7 @@ HWTEST_F(SystemAbilityMgrTest, IpcStatSamgrProc002, TestSize.Level2)
  * @tc.desc: test IpcDumpAllProcess.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, IpcDumpAllProcess001, TestSize.Level2)
+HWTEST_F(SystemAbilityMgrNewTest, IpcDumpAllProcess001, TestSize.Level2)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     int32_t cmd = IPC_STAT_CMD_START;
@@ -1003,7 +1026,7 @@ HWTEST_F(SystemAbilityMgrTest, IpcDumpAllProcess001, TestSize.Level2)
  * @tc.desc: test IpcDumpSamgrProcess.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, IpcDumpSamgrProcess001, TestSize.Level2)
+HWTEST_F(SystemAbilityMgrNewTest, IpcDumpSamgrProcess001, TestSize.Level2)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     int32_t cmd = 4;
@@ -1019,7 +1042,7 @@ HWTEST_F(SystemAbilityMgrTest, IpcDumpSamgrProcess001, TestSize.Level2)
  * @tc.type: FUNC
  */
 #ifdef SUPPORT_ACCESS_TOKEN
-HWTEST_F(SystemAbilityMgrTest, IpcDumpSingleProcess001, TestSize.Level2)
+HWTEST_F(SystemAbilityMgrNewTest, IpcDumpSingleProcess001, TestSize.Level2)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     int32_t cmd = IPC_STAT_CMD_START;
@@ -1040,7 +1063,7 @@ HWTEST_F(SystemAbilityMgrTest, IpcDumpSingleProcess001, TestSize.Level2)
  * @tc.type: FUNC
  * @tc.require: I5KMF7
  */
-HWTEST_F(SystemAbilityMgrTest, DoLoadForPerf001, TestSize.Level2)
+HWTEST_F(SystemAbilityMgrNewTest, DoLoadForPerf001, TestSize.Level2)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
@@ -1057,7 +1080,7 @@ HWTEST_F(SystemAbilityMgrTest, DoLoadForPerf001, TestSize.Level2)
  * @tc.type: FUNC
  * @tc.require: I5KMF7
  */
-HWTEST_F(SystemAbilityMgrTest, IsDistributedSystemAbility001, TestSize.Level2)
+HWTEST_F(SystemAbilityMgrNewTest, IsDistributedSystemAbility001, TestSize.Level2)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     bool res = saMgr->IsDistributedSystemAbility(-1);
@@ -1076,7 +1099,7 @@ HWTEST_F(SystemAbilityMgrTest, IsDistributedSystemAbility001, TestSize.Level2)
     EXPECT_FALSE(res);
 }
 
-HWTEST_F(SystemAbilityMgrTest, RegisterDistribute001, TestSize.Level2)
+HWTEST_F(SystemAbilityMgrNewTest, RegisterDistribute001, TestSize.Level2)
 {
     DTEST_LOG<<"RegisterDistribute001 BEGIN"<<std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager();
