@@ -21,7 +21,6 @@ using namespace testing::ext;
 
 namespace OHOS {
 using namespace OHOS::Utils;
-constexpr int32_t REF_RESIDENT_TIMER_INTERVAL = 1000 * 60 * 10;
 constexpr int32_t REF_ONDEMAND_TIMER_INTERVAL = 1000 * 60 * 1;
 void RefCountCollectTest::SetUpTestCase()
 {

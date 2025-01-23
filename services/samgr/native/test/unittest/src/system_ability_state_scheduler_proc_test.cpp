@@ -586,11 +586,6 @@ HWTEST_F(SystemAbilityStateSchedulerTest, ProcessEvent001, TestSize.Level3)
     std::shared_ptr<SystemAbilityStateScheduler::UnloadEventHandler> unloadEventHandler =
         std::make_shared<SystemAbilityStateScheduler::UnloadEventHandler>(systemAbilityStateScheduler);
     AppExecFwk::InnerEvent *event = nullptr;
-    auto destructor = [](AppExecFwk::InnerEvent *event) {
-        if (event != nullptr) {
-            delete event;
-        }
-    };
     unloadEventHandler->ProcessEvent(0);
     EXPECT_EQ(event, nullptr);
 }
@@ -607,11 +602,6 @@ HWTEST_F(SystemAbilityStateSchedulerTest, ProcessEvent002, TestSize.Level3)
     std::shared_ptr<SystemAbilityStateScheduler::UnloadEventHandler> unloadEventHandler =
         std::make_shared<SystemAbilityStateScheduler::UnloadEventHandler>(systemAbilityStateScheduler);
     AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
-    auto destructor = [](AppExecFwk::InnerEvent *event) {
-        if (event != nullptr) {
-            delete event;
-        }
-    };
     unloadEventHandler->ProcessEvent(0);
     EXPECT_NE(event, nullptr);
 }
@@ -631,11 +621,6 @@ HWTEST_F(SystemAbilityStateSchedulerTest, ProcessEvent003, TestSize.Level3)
     std::shared_ptr<SystemAbilityStateScheduler::UnloadEventHandler> unloadEventHandler =
         std::make_shared<SystemAbilityStateScheduler::UnloadEventHandler>(systemAbilityStateScheduler);
     AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
-    auto destructor = [](AppExecFwk::InnerEvent *event) {
-        if (event != nullptr) {
-            delete event;
-        }
-    };
     unloadEventHandler->ProcessEvent(0);
     EXPECT_NE(event, nullptr);
 }
