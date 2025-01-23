@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "system_ability_mgr_test.h"
+#include "system_ability_mgr_subscribe_test.h"
 #include "hisysevent_adapter.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
@@ -64,13 +64,36 @@ void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
 }
 }
 
+void SystemAbilityMgrSubscribeTest::SetUpTestCase()
+{
+    DTEST_LOG << "SetUpTestCase" << std::endl;
+}
+
+void SystemAbilityMgrSubscribeTest::TearDownTestCase()
+{
+    DTEST_LOG << "TearDownTestCase" << std::endl;
+}
+
+void SystemAbilityMgrSubscribeTest::SetUp()
+{
+    SamMockPermission::MockPermission();
+    DTEST_LOG << "SetUp" << std::endl;
+}
+
+void SystemAbilityMgrSubscribeTest::TearDown()
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->CleanFfrt();
+    DTEST_LOG << "TearDown" << std::endl;
+}
+
 /**
  * @tc.name: SubscribeSystemAbility001
  * @tc.desc: test SubscribeSystemAbility, ERR_INVALID_VALUE.
  * @tc.type: FUNC
  * @tc.require: I6NKWX
  */
-HWTEST_F(SystemAbilityMgrTest, SubscribeSystemAbility001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrSubscribeTest, SubscribeSystemAbility001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
@@ -87,7 +110,7 @@ HWTEST_F(SystemAbilityMgrTest, SubscribeSystemAbility001, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6NKWX
  */
-HWTEST_F(SystemAbilityMgrTest, UnSubscribeSystemAbility001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrSubscribeTest, UnSubscribeSystemAbility001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
@@ -103,7 +126,7 @@ HWTEST_F(SystemAbilityMgrTest, UnSubscribeSystemAbility001, TestSize.Level3)
  * @tc.desc: ReportSubscribeOverflow001
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, ReportSubscribeOverflow001, TestSize.Level1)
+HWTEST_F(SystemAbilityMgrSubscribeTest, ReportSubscribeOverflow001, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
@@ -127,7 +150,7 @@ HWTEST_F(SystemAbilityMgrTest, ReportSubscribeOverflow001, TestSize.Level1)
  * @tc.desc: test UnSubscribeSystemAbility with OnRemoteDied
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, UnSubscribeSystemAbilityDied001, TestSize.Level1)
+HWTEST_F(SystemAbilityMgrSubscribeTest, UnSubscribeSystemAbilityDied001, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
@@ -146,7 +169,7 @@ HWTEST_F(SystemAbilityMgrTest, UnSubscribeSystemAbilityDied001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I6H10P
  */
-HWTEST_F(SystemAbilityMgrTest, SubscribeSystemProcess001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrSubscribeTest, SubscribeSystemProcess001, TestSize.Level3)
 {
     DTEST_LOG << " SubscribeSystemProcess001 " << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -164,7 +187,7 @@ HWTEST_F(SystemAbilityMgrTest, SubscribeSystemProcess001, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6H10P
  */
-HWTEST_F(SystemAbilityMgrTest, SubscribeSystemProcess002, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrSubscribeTest, SubscribeSystemProcess002, TestSize.Level3)
 {
     DTEST_LOG << " SubscribeSystemProcess002 " << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -182,7 +205,7 @@ HWTEST_F(SystemAbilityMgrTest, SubscribeSystemProcess002, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6NKWX
  */
-HWTEST_F(SystemAbilityMgrTest, SubscribeSystemProcess003, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrSubscribeTest, SubscribeSystemProcess003, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
@@ -200,7 +223,7 @@ HWTEST_F(SystemAbilityMgrTest, SubscribeSystemProcess003, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6H10P
  */
-HWTEST_F(SystemAbilityMgrTest, UnSubscribeSystemProcess001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrSubscribeTest, UnSubscribeSystemProcess001, TestSize.Level3)
 {
     DTEST_LOG << " UnSubscribeSystemProcess001" << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -216,7 +239,7 @@ HWTEST_F(SystemAbilityMgrTest, UnSubscribeSystemProcess001, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6H10P
  */
-HWTEST_F(SystemAbilityMgrTest, UnSubscribeSystemProcess002, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrSubscribeTest, UnSubscribeSystemProcess002, TestSize.Level3)
 {
     DTEST_LOG << " UnSubscribeSystemProcess002" << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -234,7 +257,7 @@ HWTEST_F(SystemAbilityMgrTest, UnSubscribeSystemProcess002, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6NKWX
  */
-HWTEST_F(SystemAbilityMgrTest, UnSubscribeSystemProcess003, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrSubscribeTest, UnSubscribeSystemProcess003, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
@@ -252,7 +275,7 @@ HWTEST_F(SystemAbilityMgrTest, UnSubscribeSystemProcess003, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6H10P
  */
-HWTEST_F(SystemAbilityMgrTest, OnSystemProcessStarted001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrSubscribeTest, OnSystemProcessStarted001, TestSize.Level3)
 {
     DTEST_LOG << " OnSystemProcessStarted001" << std::endl;
     sptr<ISystemProcessStatusChange> systemProcessStatusChange = new SystemProcessStatusChange();
@@ -267,7 +290,7 @@ HWTEST_F(SystemAbilityMgrTest, OnSystemProcessStarted001, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6H10P
  */
-HWTEST_F(SystemAbilityMgrTest, OnSystemProcessStopped001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrSubscribeTest, OnSystemProcessStopped001, TestSize.Level3)
 {
     DTEST_LOG << " OnSystemProcessStopped001" << std::endl;
     sptr<SystemProcessStatusChangeStub> systemProcessStatusChange = new SystemProcessStatusChange();
@@ -282,7 +305,7 @@ HWTEST_F(SystemAbilityMgrTest, OnSystemProcessStopped001, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6H10P
  */
-HWTEST_F(SystemAbilityMgrTest, SendRequestInner001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrSubscribeTest, SendRequestInner001, TestSize.Level3)
 {
     DTEST_LOG << " SendRequestInner001" << std::endl;
     sptr<SystemProcessStatusChangeStub> stub = new SystemProcessStatusChange();
@@ -299,7 +322,7 @@ HWTEST_F(SystemAbilityMgrTest, SendRequestInner001, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6H10P
  */
-HWTEST_F(SystemAbilityMgrTest, SendRequestInner002, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrSubscribeTest, SendRequestInner002, TestSize.Level3)
 {
     DTEST_LOG << " SendRequestInner002" << std::endl;
     sptr<SystemProcessStatusChangeStub> stub = new SystemProcessStatusChange();

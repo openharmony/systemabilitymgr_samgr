@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "system_ability_mgr_test.h"
+#include "system_ability_mgr_ondemand_test.h"
 #include "hisysevent_adapter.h"
 #include "if_system_ability_manager.h"
 #include "iservice_registry.h"
@@ -70,13 +70,36 @@ void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
 }
 }
 
+void SystemAbilityMgrOnDemandTest::SetUpTestCase()
+{
+    DTEST_LOG << "SetUpTestCase" << std::endl;
+}
+
+void SystemAbilityMgrOnDemandTest::TearDownTestCase()
+{
+    DTEST_LOG << "TearDownTestCase" << std::endl;
+}
+
+void SystemAbilityMgrOnDemandTest::SetUp()
+{
+    SamMockPermission::MockPermission();
+    DTEST_LOG << "SetUp" << std::endl;
+}
+
+void SystemAbilityMgrOnDemandTest::TearDown()
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->CleanFfrt();
+    DTEST_LOG << "TearDown" << std::endl;
+}
+
 /**
  * @tc.name: CheckOnDemandSystemAbility001
  * @tc.desc: check on demand system ability.
  * @tc.type: FUNC
  * @tc.require: I6MO6A
  */
-HWTEST_F(SystemAbilityMgrTest, CheckOnDemandSystemAbility001, TestSize.Level1)
+HWTEST_F(SystemAbilityMgrOnDemandTest, CheckOnDemandSystemAbility001, TestSize.Level1)
 {
     int32_t systemAbilityId = DISTRIBUTED_SCHED_TEST_TT_ID;
     sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -92,7 +115,7 @@ HWTEST_F(SystemAbilityMgrTest, CheckOnDemandSystemAbility001, TestSize.Level1)
  * @tc.desc: check on demand system ability.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, CheckOnDemandSystemAbility002, TestSize.Level1)
+HWTEST_F(SystemAbilityMgrOnDemandTest, CheckOnDemandSystemAbility002, TestSize.Level1)
 {
     sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     EXPECT_TRUE(sm != nullptr);
@@ -111,7 +134,7 @@ HWTEST_F(SystemAbilityMgrTest, CheckOnDemandSystemAbility002, TestSize.Level1)
  * @tc.desc: test StartOnDemandAbility, invalid systemAbilityId.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, StartOnDemandAbility001, TestSize.Level0)
+HWTEST_F(SystemAbilityMgrOnDemandTest, StartOnDemandAbility001, TestSize.Level0)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
@@ -126,7 +149,7 @@ HWTEST_F(SystemAbilityMgrTest, StartOnDemandAbility001, TestSize.Level0)
  * @tc.desc: test StartOnDemandAbility, invalid systemAbilityId.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, StartOnDemandAbility002, TestSize.Level0)
+HWTEST_F(SystemAbilityMgrOnDemandTest, StartOnDemandAbility002, TestSize.Level0)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
@@ -141,7 +164,7 @@ HWTEST_F(SystemAbilityMgrTest, StartOnDemandAbility002, TestSize.Level0)
  * @tc.desc: test StartOnDemandAbility, not exist systemAbilityId.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, StartOnDemandAbility003, TestSize.Level0)
+HWTEST_F(SystemAbilityMgrOnDemandTest, StartOnDemandAbility003, TestSize.Level0)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
@@ -156,7 +179,7 @@ HWTEST_F(SystemAbilityMgrTest, StartOnDemandAbility003, TestSize.Level0)
  * @tc.desc: test StartOnDemandAbility, not on-demand systemAbilityId.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, StartOnDemandAbility004, TestSize.Level0)
+HWTEST_F(SystemAbilityMgrOnDemandTest, StartOnDemandAbility004, TestSize.Level0)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
@@ -171,7 +194,7 @@ HWTEST_F(SystemAbilityMgrTest, StartOnDemandAbility004, TestSize.Level0)
  * @tc.desc: test StartOnDemandAbility, invalid systemAbilityId.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, StartOnDemandAbility005, TestSize.Level0)
+HWTEST_F(SystemAbilityMgrOnDemandTest, StartOnDemandAbility005, TestSize.Level0)
 {
     DTEST_LOG << " StartOnDemandAbility005 " << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -187,7 +210,7 @@ HWTEST_F(SystemAbilityMgrTest, StartOnDemandAbility005, TestSize.Level0)
  * @tc.desc: test AddOnDemandSystemAbilityInfo, invalid systemAbilityId.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, AddOnDemandSystemAbilityInfo001, TestSize.Level0)
+HWTEST_F(SystemAbilityMgrOnDemandTest, AddOnDemandSystemAbilityInfo001, TestSize.Level0)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
@@ -201,7 +224,7 @@ HWTEST_F(SystemAbilityMgrTest, AddOnDemandSystemAbilityInfo001, TestSize.Level0)
  * @tc.desc: test AddOnDemandSystemAbilityInfo, invalid systemAbilityId.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, AddOnDemandSystemAbilityInfo002, TestSize.Level0)
+HWTEST_F(SystemAbilityMgrOnDemandTest, AddOnDemandSystemAbilityInfo002, TestSize.Level0)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
@@ -215,7 +238,7 @@ HWTEST_F(SystemAbilityMgrTest, AddOnDemandSystemAbilityInfo002, TestSize.Level0)
  * @tc.desc: test AddOnDemandSystemAbilityInfo, invalid procName.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, AddOnDemandSystemAbilityInfo003, TestSize.Level0)
+HWTEST_F(SystemAbilityMgrOnDemandTest, AddOnDemandSystemAbilityInfo003, TestSize.Level0)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
@@ -229,7 +252,7 @@ HWTEST_F(SystemAbilityMgrTest, AddOnDemandSystemAbilityInfo003, TestSize.Level0)
  * @tc.desc: test AddOnDemandSystemAbilityInfo, procName not registered.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, AddOnDemandSystemAbilityInfo004, TestSize.Level0)
+HWTEST_F(SystemAbilityMgrOnDemandTest, AddOnDemandSystemAbilityInfo004, TestSize.Level0)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
@@ -244,7 +267,7 @@ HWTEST_F(SystemAbilityMgrTest, AddOnDemandSystemAbilityInfo004, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: I6MO6A
  */
-HWTEST_F(SystemAbilityMgrTest, AddOnDemandSystemAbilityInfo005, TestSize.Level0)
+HWTEST_F(SystemAbilityMgrOnDemandTest, AddOnDemandSystemAbilityInfo005, TestSize.Level0)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
@@ -260,7 +283,7 @@ HWTEST_F(SystemAbilityMgrTest, AddOnDemandSystemAbilityInfo005, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: I5KMF7
  */
-HWTEST_F(SystemAbilityMgrTest, GetParamDebug001, TestSize.Level1)
+HWTEST_F(SystemAbilityMgrOnDemandTest, GetParamDebug001, TestSize.Level1)
 {
     DTEST_LOG << " GetParamDebug001 " << std::endl;
     bool value = system::GetBoolParameter(ONDEMAND_PARAM, false);
@@ -273,7 +296,7 @@ HWTEST_F(SystemAbilityMgrTest, GetParamDebug001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5KMF7
  */
-HWTEST_F(SystemAbilityMgrTest, OndemandLoadForPerf001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrOnDemandTest, OndemandLoadForPerf001, TestSize.Level3)
 {
     DTEST_LOG << " OndemandLoadForPerf001 " << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -294,7 +317,7 @@ HWTEST_F(SystemAbilityMgrTest, OndemandLoadForPerf001, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6MO6A
  */
-HWTEST_F(SystemAbilityMgrTest, OndemandLoadForPerf002, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrOnDemandTest, OndemandLoadForPerf002, TestSize.Level3)
 {
     DTEST_LOG << " OndemandLoadForPerf002 " << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -311,7 +334,7 @@ HWTEST_F(SystemAbilityMgrTest, OndemandLoadForPerf002, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I5KMF7
  */
-HWTEST_F(SystemAbilityMgrTest, GetAllOndemandSa001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrOnDemandTest, GetAllOndemandSa001, TestSize.Level3)
 {
     DTEST_LOG << " GetAllOndemandSa001 " << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -331,7 +354,7 @@ HWTEST_F(SystemAbilityMgrTest, GetAllOndemandSa001, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I5KMF7
  */
-HWTEST_F(SystemAbilityMgrTest, GetAllOndemandSa002, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrOnDemandTest, GetAllOndemandSa002, TestSize.Level3)
 {
     DTEST_LOG << " GetAllOndemandSa002 " << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -354,7 +377,7 @@ HWTEST_F(SystemAbilityMgrTest, GetAllOndemandSa002, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6NKWX
  */
-HWTEST_F(SystemAbilityMgrTest, GetAllOndemandSa003, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrOnDemandTest, GetAllOndemandSa003, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
@@ -370,7 +393,7 @@ HWTEST_F(SystemAbilityMgrTest, GetAllOndemandSa003, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6NKWX
  */
-HWTEST_F(SystemAbilityMgrTest, GetAllOndemandSa004, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrOnDemandTest, GetAllOndemandSa004, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
@@ -388,7 +411,7 @@ HWTEST_F(SystemAbilityMgrTest, GetAllOndemandSa004, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6MO6A
  */
-HWTEST_F(SystemAbilityMgrTest, StopOnDemandAbilityInner001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrOnDemandTest, StopOnDemandAbilityInner001, TestSize.Level3)
 {
     DTEST_LOG << " StopOnDemandAbilityInner001 " << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -411,7 +434,7 @@ HWTEST_F(SystemAbilityMgrTest, StopOnDemandAbilityInner001, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6MO6A
  */
-HWTEST_F(SystemAbilityMgrTest, StopOnDemandAbilityInner002, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrOnDemandTest, StopOnDemandAbilityInner002, TestSize.Level3)
 {
     DTEST_LOG << " StopOnDemandAbilityInner002 " << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -430,7 +453,7 @@ HWTEST_F(SystemAbilityMgrTest, StopOnDemandAbilityInner002, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6MO6A
  */
-HWTEST_F(SystemAbilityMgrTest, StopOnDemandAbility001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrOnDemandTest, StopOnDemandAbility001, TestSize.Level3)
 {
     DTEST_LOG << " StopOnDemandAbility001 " << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -449,7 +472,7 @@ HWTEST_F(SystemAbilityMgrTest, StopOnDemandAbility001, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6MO6A
  */
-HWTEST_F(SystemAbilityMgrTest, DoLoadOnDemandAbility001, TestSize.Level0)
+HWTEST_F(SystemAbilityMgrOnDemandTest, DoLoadOnDemandAbility001, TestSize.Level0)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
@@ -475,7 +498,7 @@ HWTEST_F(SystemAbilityMgrTest, DoLoadOnDemandAbility001, TestSize.Level0)
  * @tc.type: FUNC
  * @tc.require: I6NKWX
  */
-HWTEST_F(SystemAbilityMgrTest, StartOnDemandAbilityInner001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrOnDemandTest, StartOnDemandAbilityInner001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
@@ -493,7 +516,7 @@ HWTEST_F(SystemAbilityMgrTest, StartOnDemandAbilityInner001, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6V4AX
  */
-HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrOnDemandTest, GetOnDemandPolicy001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
@@ -510,7 +533,7 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy001, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6V4AX
  */
-HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy002, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrOnDemandTest, GetOnDemandPolicy002, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
@@ -524,7 +547,7 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy002, TestSize.Level3)
 }
 
 #ifdef SUPPORT_ACCESS_TOKEN
-HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy003, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrOnDemandTest, GetOnDemandPolicy003, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
@@ -545,7 +568,7 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy003, TestSize.Level3)
 #endif
 
 #ifdef SUPPORT_ACCESS_TOKEN
-HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy004, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrOnDemandTest, GetOnDemandPolicy004, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
@@ -568,7 +591,7 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy004, TestSize.Level3)
 #endif
 
 #ifdef SUPPORT_ACCESS_TOKEN
-HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy005, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrOnDemandTest, GetOnDemandPolicy005, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
@@ -591,7 +614,7 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy005, TestSize.Level3)
 #endif
 
 #ifdef SUPPORT_ACCESS_TOKEN
-HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy006, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrOnDemandTest, GetOnDemandPolicy006, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
@@ -627,7 +650,7 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandPolicy006, TestSize.Level3)
  * @tc.require: I6V4AX
  */
 #ifdef SUPPORT_ACCESS_TOKEN
-HWTEST_F(SystemAbilityMgrTest, UpdateOnDemandPolicy001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrOnDemandTest, UpdateOnDemandPolicy001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
@@ -670,7 +693,7 @@ HWTEST_F(SystemAbilityMgrTest, UpdateOnDemandPolicy001, TestSize.Level3)
  * @tc.require: I6XB42
  */
 
-HWTEST_F(SystemAbilityMgrTest, GetOnDemandReasonExtraData001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrOnDemandTest, GetOnDemandReasonExtraData001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
@@ -693,7 +716,7 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandReasonExtraData001, TestSize.Level3)
  * @tc.require: I6XB42
  */
 
-HWTEST_F(SystemAbilityMgrTest, GetOnDemandReasonExtraData002, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrOnDemandTest, GetOnDemandReasonExtraData002, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
@@ -713,7 +736,7 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandReasonExtraData002, TestSize.Level3)
  * @tc.require: I6XB42
  */
 
-HWTEST_F(SystemAbilityMgrTest, GetOnDemandReasonExtraData003, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrOnDemandTest, GetOnDemandReasonExtraData003, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
@@ -737,7 +760,7 @@ HWTEST_F(SystemAbilityMgrTest, GetOnDemandReasonExtraData003, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6MO6A
  */
-HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrOnDemandTest, ProcessOnDemandEvent001, TestSize.Level3)
 {
     DTEST_LOG << " ProcessOnDemandEvent001 " << std::endl;
     OnDemandEvent event;
@@ -756,7 +779,7 @@ HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent001, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6MO6A
  */
-HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent002, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrOnDemandTest, ProcessOnDemandEvent002, TestSize.Level3)
 {
     DTEST_LOG << " ProcessOnDemandEvent002 " << std::endl;
     OnDemandEvent event;
@@ -777,7 +800,7 @@ HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent002, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6MO6A
  */
-HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent003, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrOnDemandTest, ProcessOnDemandEvent003, TestSize.Level3)
 {
     DTEST_LOG << " ProcessOnDemandEvent003 " << std::endl;
     OnDemandEvent event;
@@ -797,7 +820,7 @@ HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent003, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6MO6A
  */
-HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent004, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrOnDemandTest, ProcessOnDemandEvent004, TestSize.Level3)
 {
     DTEST_LOG << " ProcessOnDemandEvent003 " << std::endl;
     OnDemandEvent event;
@@ -817,7 +840,7 @@ HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent004, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6NKWX
  */
-HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent005, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrOnDemandTest, ProcessOnDemandEvent005, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
@@ -845,7 +868,7 @@ HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent005, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6NKWX
  */
-HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent006, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrOnDemandTest, ProcessOnDemandEvent006, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
@@ -873,7 +896,7 @@ HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent006, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6MO6A
  */
-HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent007, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrOnDemandTest, ProcessOnDemandEvent007, TestSize.Level3)
 {
     DTEST_LOG << " ProcessOnDemandEvent007 " << std::endl;
     OnDemandEvent event;
@@ -894,7 +917,7 @@ HWTEST_F(SystemAbilityMgrTest, ProcessOnDemandEvent007, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6J4T7
  */
-HWTEST_F(SystemAbilityMgrTest, IdleSystemAbility001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrOnDemandTest, IdleSystemAbility001, TestSize.Level3)
 {
     DTEST_LOG << " IdleSystemAbility001 " << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -914,7 +937,7 @@ HWTEST_F(SystemAbilityMgrTest, IdleSystemAbility001, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6MO6A
  */
-HWTEST_F(SystemAbilityMgrTest, IdleSystemAbility002, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrOnDemandTest, IdleSystemAbility002, TestSize.Level3)
 {
     DTEST_LOG << " IdleSystemAbility002 " << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -934,7 +957,7 @@ HWTEST_F(SystemAbilityMgrTest, IdleSystemAbility002, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6MO6A
  */
-HWTEST_F(SystemAbilityMgrTest, IdleSystemAbility003, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrOnDemandTest, IdleSystemAbility003, TestSize.Level3)
 {
     DTEST_LOG << " IdleSystemAbility003 " << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -957,7 +980,7 @@ HWTEST_F(SystemAbilityMgrTest, IdleSystemAbility003, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6J4T7
  */
-HWTEST_F(SystemAbilityMgrTest, ActiveSystemAbility001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrOnDemandTest, ActiveSystemAbility001, TestSize.Level3)
 {
     DTEST_LOG << " ActiveSystemAbility001 " << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -976,7 +999,7 @@ HWTEST_F(SystemAbilityMgrTest, ActiveSystemAbility001, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6MO6A
  */
-HWTEST_F(SystemAbilityMgrTest, ActiveSystemAbility002, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrOnDemandTest, ActiveSystemAbility002, TestSize.Level3)
 {
     DTEST_LOG << " ActiveSystemAbility002 " << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -996,7 +1019,7 @@ HWTEST_F(SystemAbilityMgrTest, ActiveSystemAbility002, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I6MO6A
  */
-HWTEST_F(SystemAbilityMgrTest, ActiveSystemAbility003, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrOnDemandTest, ActiveSystemAbility003, TestSize.Level3)
 {
     DTEST_LOG << " ActiveSystemAbility003 " << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
