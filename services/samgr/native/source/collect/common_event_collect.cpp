@@ -679,6 +679,7 @@ CommonEventSubscriber::CommonEventSubscriber(const EventFwk::CommonEventSubscrib
 
 void CommonEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData& data)
 {
+    SamgrXCollie samgrXCollie("samgr--OnReceiveEvent");
     std::string action = data.GetWant().GetAction();
     int32_t code = data.GetCode();
     auto collect = collect_.promote();
