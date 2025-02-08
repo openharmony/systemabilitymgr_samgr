@@ -31,7 +31,6 @@ using namespace OHOS;
 
 namespace OHOS {
 namespace {
-constexpr uint32_t INIT_EVENT = 10;
 constexpr uint32_t DM_DIED_EVENT = 11;
 constexpr int32_t MAX_WAIT_TIME = 1000;
 constexpr uint32_t DELAY_TIME = 100;

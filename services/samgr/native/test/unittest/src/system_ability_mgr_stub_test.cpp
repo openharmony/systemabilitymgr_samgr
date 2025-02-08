@@ -40,7 +40,6 @@ namespace {
 const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 const string DEFAULT_LOAD_NAME = "loadevent";
 constexpr uint32_t SAID = 1499;
-constexpr int64_t DEFAULT_EVENTID = 0;
 constexpr int32_t INVALID_SAID = -1;
 constexpr uint32_t INVALID_CODE = 50;
 }
@@ -689,7 +688,6 @@ HWTEST_F(SystemAbilityMgrStubTest, GetSystemProcessInfoInner003, TestSize.Level3
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     MessageParcel data;
     MessageParcel reply;
-    int32_t systemAbilityId = -1;
     int32_t ret = saMgr->GetSystemProcessInfoInner(data, reply);
     EXPECT_EQ(ret, ERR_NULL_OBJECT);
 }

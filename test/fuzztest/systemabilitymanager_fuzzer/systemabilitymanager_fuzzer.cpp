@@ -45,7 +45,6 @@ namespace {
     constexpr uint8_t SEAT_TWO = 2;
     constexpr uint8_t LIFT_OFFSET_TWO = 8;
     constexpr uint8_t SEAT_THREE = 3;
-    constexpr int64_t DURATION = 1;
     unsigned int g_dumpLevel = 0;
     const std::u16string SAMGR_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
     bool g_flag = false;

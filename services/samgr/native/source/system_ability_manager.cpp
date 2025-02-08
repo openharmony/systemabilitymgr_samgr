@@ -52,8 +52,9 @@ using namespace std;
 
 namespace OHOS {
 namespace {
-constexpr const char* START_SAID = "said";
+#ifdef SUPPORT_DEVICE_MANAGER
 constexpr const char* PKG_NAME = "Samgr_Networking";
+#endif
 constexpr const char* PREFIX = "/system/profile/";
 constexpr const char* LOCAL_DEVICE = "local";
 constexpr const char* ONDEMAND_PARAM = "persist.samgr.perf.ondemand";

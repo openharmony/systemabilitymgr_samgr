@@ -40,7 +40,6 @@ constexpr int32_t INVALID_DELAY_TIME = -1;
 constexpr int32_t MAX_DELAY_TIME_TEST = 5 * 60 * 1000;
 constexpr int32_t BEYOND_DELAY_TIME_TEST = 5 * 60 * 1000 + 1;
 constexpr int32_t TEST_SYSTEM_ABILITY1 = 1491;
-constexpr int32_t TEST_SYSTEM_ABILITY2 = 1492;
 constexpr int32_t ONCE_DELAY_TIME = 10 * 1000; //ms
 constexpr int32_t MAX_DURATION = 11 * 60 * 1000; // ms
 const std::string SA_TAG_DEVICE_ON_LINE = "deviceonline";
