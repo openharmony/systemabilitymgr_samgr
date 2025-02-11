@@ -255,6 +255,15 @@ public:
      * @return ERR_OK indicates that the list of hanlde that match extension success.
      */
     int32_t GetExtensionRunningSaList(const std::string& extension, std::vector<sptr<IRemoteObject>>& saList) override;
+
+    /**
+     * GetLocalAbilityManagerProxy, Return local ability manager proxy.
+     *
+     * @param systemAbilityId, need to obtain the said of sa.
+     * @return nullptr indicates acquistion failure.
+     */
+    sptr<IRemoteObject> GetLocalAbilityManagerProxy(int32_t systemAbilityId) override;
+
     int32_t GetRunningSaExtensionInfoList(const std::string& extension,
         std::vector<SaExtensionInfo>& infoList) override;
     int32_t GetCommonEventExtraDataIdlist(int32_t saId, std::vector<int64_t>& extraDataIdList,
