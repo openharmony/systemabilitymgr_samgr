@@ -568,9 +568,9 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, GetRunningSystemProcess002, TestSi
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
-    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler = nullptr;
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateSchedulers = nullptr;
     std::shared_ptr<SystemAbilityStateScheduler::UnloadEventHandler> unloadEventHandler =
-        std::make_shared<SystemAbilityStateScheduler::UnloadEventHandler>(systemAbilityStateScheduler);
+        std::make_shared<SystemAbilityStateScheduler::UnloadEventHandler>(systemAbilityStateSchedulers);
     unloadEventHandler->ProcessEvent(0);
     std::shared_ptr<SystemProcessContext> systemProcessContext = std::make_shared<SystemProcessContext>();
     std::list<SystemProcessInfo> systemProcessInfos;
