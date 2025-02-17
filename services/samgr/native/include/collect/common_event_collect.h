@@ -64,7 +64,7 @@ private:
     bool AddCommonEventName(const std::string& eventName);
     void AddSkillsEvent(EventFwk::MatchingSkills& skill);
     void CleanFailedEventLocked(const std::string& eventName);
-    void SendKernalReclaimIpcThread(const char* triggerEvent);
+    void SendKernalReclaimIpcThread();
     std::mutex commomEventLock_;
     std::mutex commonEventSubscriberLock_;
     sptr<IRemoteObject::DeathRecipient> commonEventDeath_;

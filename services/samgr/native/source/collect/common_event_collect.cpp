@@ -537,8 +537,6 @@ int32_t CommonEventCollect::RemoveUnusedEvent(const OnDemandEvent& event)
 
 void CommonEventCollect::StartReclaimIpcThreadWork(const EventFwk::CommonEventData& data)
 {
-    const char* triggerEvent = nullptr;
-    const char* cancelEvent = nullptr;
     std::string eventName = data.GetWant().GetAction();
     std::string eventType = data.GetData();
 
@@ -547,32 +545,16 @@ void CommonEventCollect::StartReclaimIpcThreadWork(const EventFwk::CommonEventDa
         return;
     }
 
-    if (eventName == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF) {
-        triggerEvent = SCREEN_TRIGGER_THREAD_RECLAIM;
-    } else if (eventName == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON) {
-        cancelEvent = SCREEN_TRIGGER_THREAD_RECLAIM;
-    } else if (eventName == COMMON_RECENT_EVENT && eventType == COMMON_RECENT_CLEAR_ALL) {
-        triggerEvent = CLEAR_TRIGGER_THREAD_RECLAIM;
-    }
-
-    if (triggerEvent != nullptr) {
-        auto task = [this, triggerEvent]() {
-            this->SendKernalReclaimIpcThread(triggerEvent);
+    if (eventName == COMMON_RECENT_EVENT && eventType == COMMON_RECENT_CLEAR_ALL) {
+        auto task = [this]() {
+            this->SendKernalReclaimIpcThread();
         };
-        workHandler_->PostTask(task, triggerEvent, TRIGGER_THREAD_RECLAIM_DELAY_TIME);
-    }
-
-    if (cancelEvent != nullptr) {
-        workHandler_->RemoveTask(cancelEvent);
+        workHandler_->PostTask(task, TRIGGER_THREAD_RECLAIM_DELAY_TIME);
     }
 }
 
-void CommonEventCollect::SendKernalReclaimIpcThread(const char* triggerEvent)
+void CommonEventCollect::SendKernalReclaimIpcThread()
 {
-    if (workHandler_ != nullptr && triggerEvent != nullptr) {
-        workHandler_->DelTask(triggerEvent);
-    }
-
     HILOGI("TriggerSystemIPCThreadReclaim");
     IPCSkeleton::TriggerSystemIPCThreadReclaim();
 }
