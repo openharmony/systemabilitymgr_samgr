@@ -392,14 +392,14 @@ void CommonEventCollect::RemoveOnDemandReasonExtraData(int64_t extraDataId)
         std::lock_guard<std::mutex> autoLock(extraDataLock_);
         extraDatas_.erase(extraDataId);
     }
-    HILOGI("CommonEventCollect remove extraData %{public}d", static_cast<int32_t>(extraDataId));
+    HILOGD("CommonEventCollect remove extraData %{public}d", static_cast<int32_t>(extraDataId));
     RemoveSaExtraDataId(extraDataId);
 }
 
 bool CommonEventCollect::GetOnDemandReasonExtraData(int64_t extraDataId, OnDemandReasonExtraData& extraData)
 {
     std::lock_guard<std::mutex> autoLock(extraDataLock_);
-    HILOGI("CommonEventCollect get extraData %{public}d", static_cast<int32_t>(extraDataId));
+    HILOGD("CommonEventCollect get extraData %{public}d", static_cast<int32_t>(extraDataId));
     if (extraDatas_.count(extraDataId) == 0) {
         return false;
     }
