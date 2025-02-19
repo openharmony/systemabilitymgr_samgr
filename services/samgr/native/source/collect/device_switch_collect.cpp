@@ -110,13 +110,20 @@ int32_t DeviceSwitchCollect::OnStop()
     return ERR_OK;
 }
 
-int32_t DeviceSwitchCollect::AddCollectEvent(const OnDemandEvent& event)
+int32_t DeviceSwitchCollect::AddCollectEvent(const std::vector<OnDemandEvent>& events)
 {
-    if (CheckSwitchEvent(event) != ERR_OK) {
-        HILOGE("DeviceSwitchCollect invalid event name %{public}s!", event.name.c_str());
-        return ERR_INVALID_VALUE;
+    for (auto& event : events) {
+        if (CheckSwitchEvent(event) != ERR_OK) {
+            HILOGE("DeviceSwitchCollect invalid event name %{public}s!", event.name.c_str());
+            return ERR_INVALID_VALUE;
+        }
+        auto ret = SubscribeSwitchEvent();
+        if (ret != ERR_OK) {
+            HILOGE("DeviceSwitchCollect SubscribeSwitchEvent err:%{public}d", ret);
+            return ret;
+        }
     }
-    return SubscribeSwitchEvent();
+    return ERR_OK;
 }
 
 void CesStateListener::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)

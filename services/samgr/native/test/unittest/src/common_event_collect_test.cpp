@@ -273,10 +273,14 @@ HWTEST_F(CommonEventCollectTest, AddCollectEvent001, TestSize.Level3)
 {
     DTEST_LOG << "AddCollectEvent001 begin" << std::endl;
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
-    OnDemandEvent event = {COMMON_EVENT, "TEST", "TEST"};;
-    int32_t ret = commonEventCollect->AddCollectEvent(event);
+    OnDemandEvent event = {COMMON_EVENT, "TEST", "TEST"};
+    OnDemandEvent event2 = {COMMON_EVENT, "TEST2", "TEST2"};
+    std::vector<OnDemandEvent> events;
+    events.emplace_back(event);
+    events.emplace_back(event2);
+    int32_t ret = commonEventCollect->AddCollectEvent(events);
     EXPECT_EQ(ret, ERR_OK);
-    ret = commonEventCollect->AddCollectEvent(event);
+    ret = commonEventCollect->AddCollectEvent(events);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "AddCollectEvent001 end" << std::endl;
 }
@@ -843,9 +847,12 @@ HWTEST_F(CommonEventCollectTest, CleanFailedEventLocked001, TestSize.Level3)
     std::shared_ptr<CommonEventSubscriber> commonEventStatusSubscriber
         = std::make_shared<CommonEventSubscriber>(info, commonEventCollect);
     commonEventCollect->commonEventSubscriber_ = commonEventStatusSubscriber;
-    commonEventCollect->CleanFailedEventLocked("test");
+    std::vector<std::string> eventNames;
+    eventNames.emplace_back("test");
+    eventNames.emplace_back("test2");
+    commonEventCollect->CleanFailedEventLocked(eventNames);
     commonEventCollect->commonEventSubscriber_ = nullptr;
-    commonEventCollect->CleanFailedEventLocked("test");
+    commonEventCollect->CleanFailedEventLocked(eventNames);
     EXPECT_NE(commonEventCollect, nullptr);
     DTEST_LOG << " CleanFailedEventLocked001 END" << std::endl;
 }

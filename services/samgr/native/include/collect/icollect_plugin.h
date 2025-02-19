@@ -57,7 +57,7 @@ public:
         return false;
     }
 
-    virtual int32_t AddCollectEvent(const OnDemandEvent& event)
+    virtual int32_t AddCollectEvent(const std::vector<OnDemandEvent>& events)
     {
         return ERR_OK;
     }

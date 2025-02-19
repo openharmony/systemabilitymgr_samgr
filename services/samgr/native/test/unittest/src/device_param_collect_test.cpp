@@ -180,7 +180,11 @@ HWTEST_F(DeviceParamCollectTest, AddCollectEvent001, TestSize.Level3)
     std::shared_ptr<DeviceParamCollect> deviceParamCollect =
         std::make_shared<DeviceParamCollect>(report);
     OnDemandEvent event;
-    int32_t ret = deviceParamCollect->AddCollectEvent(event);
+    OnDemandEvent event2;
+    std::vector<OnDemandEvent> events;
+    events.emplace_back(event);
+    events.emplace_back(event2);
+    int32_t ret = deviceParamCollect->AddCollectEvent(events);
     EXPECT_NE(ret, ERR_OK);
     DTEST_LOG << "AddCollectEvent001 end" << std::endl;
 }
@@ -277,10 +281,12 @@ HWTEST_F(DeviceParamCollectTest, AddCollectEvent002, TestSize.Level3)
     std::shared_ptr<DeviceParamCollect> deviceParamCollect =
         std::make_shared<DeviceParamCollect>(report);
     deviceParamCollect->params_.insert("test");
-    OnDemandEvent event;
-    event.eventId = PARAM;
-    event.name = "test";
-    int32_t ret = deviceParamCollect->AddCollectEvent(event);
+    OnDemandEvent event = {PARAM, "TEST", "TEST"};
+    OnDemandEvent event2 = {PARAM, "TEST2", "TEST2"};
+    std::vector<OnDemandEvent> events;
+    events.emplace_back(event);
+    events.emplace_back(event2);
+    int32_t ret = deviceParamCollect->AddCollectEvent(events);
     EXPECT_EQ(ret, ERR_OK);
 }
 }  // namespace OHOS

@@ -37,7 +37,7 @@ public:
     int32_t OnStart() override;
     int32_t OnStop() override;
     void Init(const std::list<SaProfile>& saProfiles) override;
-    int32_t AddCollectEvent(const OnDemandEvent& event) override;
+    int32_t AddCollectEvent(const std::vector<OnDemandEvent>& events) override;
     int32_t RemoveUnusedEvent(const OnDemandEvent& event) override;
 private:
     void SaveTimedEvent(const OnDemandEvent& onDemandEvent);
