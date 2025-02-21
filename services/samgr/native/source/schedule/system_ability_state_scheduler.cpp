@@ -295,6 +295,8 @@ int32_t SystemAbilityStateScheduler::HandleLoadAbilityEventLocked(
 {
     if (abilityContext->state ==SystemAbilityState::UNLOADING
         || abilityContext->ownProcessContext->state == SystemProcessState::STOPPING) {
+        HILOGW("Scheduler SA:%{public}d state %{public}d, proc state %{public}d",
+            abilityContext->systemAbilityId, abilityContext->state, abilityContext->ownProcessContext->state);
         return PendLoadEventLocked(abilityContext, loadRequestInfo);
     }
     nlohmann::json activeReason;
