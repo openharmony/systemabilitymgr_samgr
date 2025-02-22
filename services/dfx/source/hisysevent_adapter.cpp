@@ -54,15 +54,21 @@ constexpr const char* PID = "PID";
 constexpr const char* UID = "UID";
 constexpr const char* DURATION = "DURATION";
 constexpr const char* KEY_STAGE = "KEY_STAGE";
+constexpr int32_t CRASH_SA_MIN = 0x00010500; //66816
+constexpr int32_t CRASH_SA_MAX = 0x0001055f; //66911
 }
 
 static bool IsInCrashWhiteList(int32_t saId)
 {
-    std::vector<int> whiteList = { 1205 };
+    std::vector<int> whiteList = { 10, 1201, 1202, 1203, 1204, 1205, 1213, 1215, 5002, 5100, 5110, 9999, 65537, 65830,
+        65850, 66064, 66186, 69930, 131071, 345135 };
     for (auto sa : whiteList) {
         if (saId == sa) {
             return true;
         }
+    }
+    if (saId >= CRASH_SA_MIN && saId <= CRASH_SA_MAX) {
+        return true;
     }
     return false;
 }
