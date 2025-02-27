@@ -13,6 +13,7 @@
 
 import("//build/ohos.gni")
 import("//build/ohos_var.gni")
+import("../../../config.gni")
 
 config("samgr_proxy_config") {
   include_dirs = [ "include" ]
@@ -79,6 +80,9 @@ ohos_shared_library("samgr_proxy") {
       "json:nlohmann_json_static",
     ]
 
+    if (samgr_enable_extend_load_timeout) {
+      defines += [ "SAMGR_ENABLE_EXTEND_LOAD_TIMEOUT" ]
+    }
     part_name = "samgr"
   }
 

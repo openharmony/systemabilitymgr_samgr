@@ -37,7 +37,11 @@
 using namespace std;
 namespace OHOS {
 namespace {
+#ifdef SAMGR_ENABLE_EXTEND_LOAD_TIMEOUT
+const int32_t MAX_TIMEOUT = 12;
+#else
 const int32_t MAX_TIMEOUT = 4;
+#endif
 const int32_t MIN_TIMEOUT = 0;
 const int32_t RETRY_TIME_OUT_NUMBER = 6;
 const int32_t SLEEP_INTERVAL_TIME = 200;
