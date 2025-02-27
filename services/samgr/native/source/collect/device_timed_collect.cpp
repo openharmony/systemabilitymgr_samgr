@@ -325,47 +325,49 @@ void DeviceTimedCollect::PostNonPersistenceTimedTaskLocked(std::string timeStrin
     }
 }
 
-int32_t DeviceTimedCollect::AddCollectEvent(const OnDemandEvent& event)
+int32_t DeviceTimedCollect::AddCollectEvent(const std::vector<OnDemandEvent>& events)
 {
-    if (event.name != LOOP_EVENT && event.name != ORDER_TIMED_EVENT && event.name != AWAKE_LOOP_EVENT) {
-        HILOGE("DeviceTimedCollect invalid event name: %{public}s", event.name.c_str());
-        return ERR_INVALID_VALUE;
-    }
-    if (event.name == ORDER_TIMED_EVENT) {
-        int64_t timeGap = CalculateDelayTime(event.value);
-#ifdef PREFERENCES_ENABLE
-        if (event.persistence) {
-            std::lock_guard<std::mutex> autoLock(persitenceTimedEventSetLock_);
-            PostPersistenceTimedTaskLocked(event.value, timeGap);
-            return ERR_OK;
+    for (auto& event : events) {
+        if (event.name != LOOP_EVENT && event.name != ORDER_TIMED_EVENT && event.name != AWAKE_LOOP_EVENT) {
+            HILOGE("DeviceTimedCollect invalid event name: %{public}s", event.name.c_str());
+            return ERR_INVALID_VALUE;
         }
+        if (event.name == ORDER_TIMED_EVENT) {
+            int64_t timeGap = CalculateDelayTime(event.value);
+#ifdef PREFERENCES_ENABLE
+            if (event.persistence) {
+                std::lock_guard<std::mutex> autoLock(persitenceTimedEventSetLock_);
+                PostPersistenceTimedTaskLocked(event.value, timeGap);
+                continue;
+            }
 #endif
-        std::lock_guard<std::mutex> autoLock(nonPersitenceTimedEventSetLock);
-        PostNonPersistenceTimedTaskLocked(event.value, timeGap);
-        return ERR_OK;
+            std::lock_guard<std::mutex> autoLock(nonPersitenceTimedEventSetLock);
+            PostNonPersistenceTimedTaskLocked(event.value, timeGap);
+            continue;
+        }
+        if (event.persistence) {
+            HILOGE("invalid event persistence, loopevent is not support persistence");
+            return ERR_INVALID_VALUE;
+        }
+        int32_t interval = atoi(event.value.c_str());
+        if (interval < MIN_INTERVAL) {
+            HILOGE("DeviceTimedCollect invalid interval: %{public}d", interval);
+            return ERR_INVALID_VALUE;
+        }
+        if (interval < MIN_AWAKE_INTERVAL && event.name == AWAKE_LOOP_EVENT) {
+            HILOGE("DeviceTimedCollect awake clock invalid interval: %{public}d", interval);
+            return ERR_INVALID_VALUE;
+        }
+        SaveTimedInfos(event, interval);
+        std::lock_guard<std::mutex> autoLock(nonPersitenceLoopEventSetLock_);
+        auto iter = nonPersitenceLoopEventSet_.find(interval);
+        if (iter != nonPersitenceLoopEventSet_.end()) {
+            continue;
+        }
+        HILOGI("DeviceTimedCollect add collect events: %{public}d", interval);
+        nonPersitenceLoopEventSet_.insert(interval);
+        PostNonPersistenceLoopTaskLocked(interval);
     }
-    if (event.persistence) {
-        HILOGE("invalid event persistence, loopevent is not support persistence");
-        return ERR_INVALID_VALUE;
-    }
-    int32_t interval = atoi(event.value.c_str());
-    if (interval < MIN_INTERVAL) {
-        HILOGE("DeviceTimedCollect invalid interval: %{public}d", interval);
-        return ERR_INVALID_VALUE;
-    }
-    if (interval < MIN_AWAKE_INTERVAL && event.name == AWAKE_LOOP_EVENT) {
-        HILOGE("DeviceTimedCollect awake clock invalid interval: %{public}d", interval);
-        return ERR_INVALID_VALUE;
-    }
-    SaveTimedInfos(event, interval);
-    std::lock_guard<std::mutex> autoLock(nonPersitenceLoopEventSetLock_);
-    auto iter = nonPersitenceLoopEventSet_.find(interval);
-    if (iter != nonPersitenceLoopEventSet_.end()) {
-        return ERR_OK;
-    }
-    HILOGI("DeviceTimedCollect add collect events: %{public}d", interval);
-    nonPersitenceLoopEventSet_.insert(interval);
-    PostNonPersistenceLoopTaskLocked(interval);
     return ERR_OK;
 }
 

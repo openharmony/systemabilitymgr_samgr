@@ -172,16 +172,18 @@ void CommonEventCollect::AddSkillsEvent(EventFwk::MatchingSkills& skill)
     }
 }
 
-void CommonEventCollect::CleanFailedEventLocked(const std::string& eventName)
+void CommonEventCollect::CleanFailedEventLocked(const std::vector<std::string>& eventNames)
 {
     if (commonEventSubscriber_ == nullptr) {
         HILOGE("commonEventSubscriber_ is nullptr!");
         return;
     }
     EventFwk::MatchingSkills skill = commonEventSubscriber_->GetSubscribeInfo().GetMatchingSkills();
-    skill.RemoveEvent(eventName);
-    std::lock_guard<std::mutex> autoLock(commomEventLock_);
-    commonEventNames_.erase(eventName);
+    for (auto& eventName : eventNames) {
+        skill.RemoveEvent(eventName);
+        std::lock_guard<std::mutex> autoLock(commomEventLock_);
+        commonEventNames_.erase(eventName);
+    }
 }
 
 bool CommonEventCollect::CreateCommonEventSubscriber()
@@ -496,29 +498,33 @@ int32_t CommonEventCollect::GetSaExtraDataIdList(int32_t saId, std::vector<int64
     }
     return ERR_OK;
 }
-
-bool CommonEventCollect::AddCommonEventName(const std::string& eventName)
+std::vector<std::string> CommonEventCollect::AddCommonEventName(const std::vector<OnDemandEvent>& events)
 {
     std::lock_guard<std::mutex> autoLock(commomEventLock_);
-    auto iter = commonEventNames_.find(eventName);
-    if (iter != commonEventNames_.end()) {
-        return false;
+    std::vector<std::string> insertNames;
+    for (auto& event : events) {
+        auto iter = commonEventNames_.find(event.name);
+        if (iter != commonEventNames_.end()) {
+            continue;
+        }
+        HILOGI("CommonEventCollect add collect events: %{public}s", event.name.c_str());
+        commonEventNames_.insert(event.name);
+        insertNames.emplace_back(event.name);
     }
-    HILOGI("CommonEventCollect add collect events: %{public}s", eventName.c_str());
-    commonEventNames_.insert(eventName);
-    return true;
+    return insertNames;
 }
 
-int32_t CommonEventCollect::AddCollectEvent(const OnDemandEvent& event)
+int32_t CommonEventCollect::AddCollectEvent(const std::vector<OnDemandEvent>& events)
 {
     std::lock_guard<std::mutex> autoLock(commonEventSubscriberLock_);
-    bool isInsertEventName = AddCommonEventName(event.name);
+    auto insertNames = AddCommonEventName(events);
+    if (insertNames.empty()) {
+        return ERR_OK;
+    }
     if (!CreateCommonEventSubscriberLocked()) {
-        if (isInsertEventName) {
-            CleanFailedEventLocked(event.name);
-            CreateCommonEventSubscriberLocked();
-        }
-        HILOGE("AddCollectEvent CreateCommonEventSubscriber failed!");
+        HILOGE("AddCollectEvent CreateCommonEventSubscriber failed");
+        CleanFailedEventLocked(insertNames);
+        CreateCommonEventSubscriberLocked();
         return ERR_INVALID_VALUE;
     }
     return ERR_OK;

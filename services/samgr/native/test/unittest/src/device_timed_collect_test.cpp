@@ -389,7 +389,9 @@ HWTEST_F(DeviceTimedCollectTest, AddCollectEvent001, TestSize.Level3)
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(collect);
     OnDemandEvent event;
-    int32_t ret = deviceTimedCollect->AddCollectEvent(event);
+    std::vector<OnDemandEvent> events;
+    events.emplace_back(event);
+    int32_t ret = deviceTimedCollect->AddCollectEvent(events);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     DTEST_LOG << "AddCollectEvent001 end" << std::endl;
 }
@@ -407,7 +409,9 @@ HWTEST_F(DeviceTimedCollectTest, AddCollectEvent002, TestSize.Level3)
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(collect);
     OnDemandEvent event = {TIMED_EVENT, "mockevent", "10"};
-    int32_t ret = deviceTimedCollect->AddCollectEvent(event);
+    std::vector<OnDemandEvent> events;
+    events.emplace_back(event);
+    int32_t ret = deviceTimedCollect->AddCollectEvent(events);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     DTEST_LOG << "AddCollectEvent002 end" << std::endl;
 }
@@ -425,7 +429,9 @@ HWTEST_F(DeviceTimedCollectTest, AddCollectEvent003, TestSize.Level3)
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(collect);
     OnDemandEvent event = {TIMED_EVENT, "loopevent", "10"};
-    int32_t ret = deviceTimedCollect->AddCollectEvent(event);
+    std::vector<OnDemandEvent> events;
+    events.emplace_back(event);
+    int32_t ret = deviceTimedCollect->AddCollectEvent(events);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     DTEST_LOG << "AddCollectEvent003 end" << std::endl;
 }
@@ -443,7 +449,9 @@ HWTEST_F(DeviceTimedCollectTest, AddCollectEvent004, TestSize.Level3)
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(collect);
     OnDemandEvent event = {TIMED_EVENT, "order_timed_event", "10", -1, true};
-    int32_t ret = deviceTimedCollect->AddCollectEvent(event);
+    std::vector<OnDemandEvent> events;
+    events.emplace_back(event);
+    int32_t ret = deviceTimedCollect->AddCollectEvent(events);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     DTEST_LOG << "AddCollectEvent004 end" << std::endl;
 }
@@ -461,7 +469,9 @@ HWTEST_F(DeviceTimedCollectTest, AddCollectEvent005, TestSize.Level3)
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(collect);
     OnDemandEvent event = {TIMED_EVENT, "order_timed_event", "10"};
-    int32_t ret = deviceTimedCollect->AddCollectEvent(event);
+    std::vector<OnDemandEvent> events;
+    events.emplace_back(event);
+    int32_t ret = deviceTimedCollect->AddCollectEvent(events);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     DTEST_LOG << "AddCollectEvent005 end" << std::endl;
 }
@@ -479,7 +489,9 @@ HWTEST_F(DeviceTimedCollectTest, AddCollectEvent006, TestSize.Level3)
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(collect);
     OnDemandEvent event = {TIMED_EVENT, "mockevent", "10", -1, true};
-    int32_t ret = deviceTimedCollect->AddCollectEvent(event);
+    std::vector<OnDemandEvent> events;
+    events.emplace_back(event);
+    int32_t ret = deviceTimedCollect->AddCollectEvent(events);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     DTEST_LOG << "AddCollectEvent006 end" << std::endl;
 }
@@ -497,20 +509,27 @@ HWTEST_F(DeviceTimedCollectTest, AddCollectEvent007, TestSize.Level3)
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect =
         std::make_shared<DeviceTimedCollect>(collect);
     deviceTimedCollect->preferencesUtil_ = PreferencesUtil::GetInstance();
+    std::vector<OnDemandEvent> events;
     OnDemandEvent event = {TIMED_EVENT, "timedevent", "2017-9-1-16:59:10", -1, true};
-    int32_t ret = deviceTimedCollect->AddCollectEvent(event);
+    events.emplace_back(event);
+    int32_t ret = deviceTimedCollect->AddCollectEvent(events);
     EXPECT_EQ(ret, ERR_OK);
     OnDemandEvent event1 = {TIMED_EVENT, "timedevent", "2099-9-1-16:59:10", -1, true};
-    ret = deviceTimedCollect->AddCollectEvent(event1);
-    OnDemandEvent event2 = {TIMED_EVENT, "awakeloopevent", "100", -1, true};
-    ret = deviceTimedCollect->AddCollectEvent(event2);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    OnDemandEvent event3 = {TIMED_EVENT, "awakeloopevent", "100", -1, false};
-    ret = deviceTimedCollect->AddCollectEvent(event3);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    OnDemandEvent event4 = {TIMED_EVENT, "awakeloopevent", "3601", -1, false};
-    ret = deviceTimedCollect->AddCollectEvent(event4);
+    events.emplace_back(event1);
+    ret = deviceTimedCollect->AddCollectEvent(events);
     EXPECT_EQ(ret, ERR_OK);
+    OnDemandEvent event2 = {TIMED_EVENT, "awakeloopevent", "3601", -1, false};
+    events.emplace_back(event2);
+    ret = deviceTimedCollect->AddCollectEvent(events);
+    EXPECT_EQ(ret, ERR_OK);
+    OnDemandEvent event3 = {TIMED_EVENT, "awakeloopevent", "100", -1, true};
+    events.emplace_back(event3);
+    ret = deviceTimedCollect->AddCollectEvent(events);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    OnDemandEvent event4 = {TIMED_EVENT, "awakeloopevent", "100", -1, false};
+    events.emplace_back(event4);
+    ret = deviceTimedCollect->AddCollectEvent(events);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
     deviceTimedCollect->timeInfos_.clear();
 #endif
     DTEST_LOG << "AddCollectEvent007 end" << std::endl;

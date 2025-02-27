@@ -37,7 +37,7 @@ public:
     int32_t OnStop() override;
     void SaveAction(const std::string& action);
     bool CheckCondition(const OnDemandCondition& condition) override;
-    int32_t AddCollectEvent(const OnDemandEvent& event) override;
+    int32_t AddCollectEvent(const std::vector<OnDemandEvent>& events) override;
     int32_t RemoveUnusedEvent(const OnDemandEvent& event) override;
     void Init(const std::list<SaProfile>& saProfiles) override;
     int64_t SaveOnDemandReasonExtraData(const EventFwk::CommonEventData& data);
@@ -61,9 +61,9 @@ public:
     void StartReclaimIpcThreadWork(const EventFwk::CommonEventData& data);
 private:
     int64_t GenerateExtraDataIdLocked();
-    bool AddCommonEventName(const std::string& eventName);
+    std::vector<std::string> AddCommonEventName(const std::vector<OnDemandEvent>& events);
     void AddSkillsEvent(EventFwk::MatchingSkills& skill);
-    void CleanFailedEventLocked(const std::string& eventName);
+    void CleanFailedEventLocked(const std::vector<std::string>& eventNames);
     void SendKernalReclaimIpcThread();
     std::mutex commomEventLock_;
     std::mutex commonEventSubscriberLock_;

@@ -399,6 +399,7 @@ int32_t DeviceStatusCollectManager::AddCollectEvents(const std::vector<OnDemandE
     if (events.size() == 0) {
         return ERR_OK;
     }
+    std::map<int32_t, std::vector<OnDemandEvent>> eventMap;
     for (auto& event : events) {
         if (collectPluginMap_.count(event.eventId) == 0) {
             HILOGE("not support eventId: %{public}d", event.eventId);
@@ -408,9 +409,12 @@ int32_t DeviceStatusCollectManager::AddCollectEvents(const std::vector<OnDemandE
             HILOGE("not support eventId: %{public}d", event.eventId);
             return ERR_INVALID_VALUE;
         }
-        int32_t ret = collectPluginMap_[event.eventId]->AddCollectEvent(event);
+        eventMap[event.eventId].emplace_back(event);
+    }
+    for (const auto& iter : eventMap) {
+        int32_t ret = collectPluginMap_[iter.first]->AddCollectEvent(iter.second);
         if (ret != ERR_OK) {
-            HILOGE("add collect event failed, eventId: %{public}d", event.eventId);
+            HILOGE("add collect event failed, eventId: %{public}d", iter.first);
             return ret;
         }
     }

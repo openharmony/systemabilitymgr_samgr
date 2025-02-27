@@ -98,19 +98,23 @@ void DeviceParamCollect::WatchParameters()
     pendingParams_.clear();
 }
 
-int32_t DeviceParamCollect::AddCollectEvent(const OnDemandEvent& event)
+int32_t DeviceParamCollect::AddCollectEvent(const std::vector<OnDemandEvent>& events)
 {
     std::lock_guard<std::mutex> autoLock(paramLock_);
-    auto iter = params_.find(event.name);
-    if (iter != params_.end()) {
-        return ERR_OK;
-    }
-    HILOGI("DeviceParamCollect add collect events: %{public}s", event.name.c_str());
-    int32_t result = WatchParameter(event.name.c_str(), DeviceParamCallback, this);
-    if (result == ERR_OK) {
+    for (auto& event : events) {
+        auto iter = params_.find(event.name);
+        if (iter != params_.end()) {
+            continue;
+        }
+        int32_t result = WatchParameter(event.name.c_str(), DeviceParamCallback, this);
+        if (result != ERR_OK) {
+            HILOGE("DeviceParamCollect WatchParameter:%{public}s err:%{public}d", event.name.c_str(), result);
+            return result;
+        }
+        HILOGI("DeviceParamCollect add collect event: %{public}s", event.name.c_str());
         params_.insert(event.name);
     }
-    return result;
+    return ERR_OK;
 }
 
 int32_t DeviceParamCollect::RemoveUnusedEvent(const OnDemandEvent& event)

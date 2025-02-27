@@ -332,10 +332,14 @@ HWTEST_F(DeviceSwitchCollectTest, AddCollectEvent001, TestSize.Level3)
 {
     DTEST_LOG << "AddCollectEvent001 begin" << std::endl;
     OnDemandEvent onDemandEvent;
+    OnDemandEvent event2;
+    std::vector<OnDemandEvent> events;
+    events.emplace_back(onDemandEvent);
+    events.emplace_back(event2);
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
-    int32_t ret = deviceSwitchCollect->AddCollectEvent(onDemandEvent);
+    int32_t ret = deviceSwitchCollect->AddCollectEvent(events);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     DTEST_LOG << "AddCollectEvent001 end" << std::endl;
 }
@@ -351,6 +355,10 @@ HWTEST_F(DeviceSwitchCollectTest, AddCollectEvent002, TestSize.Level3)
 {
     DTEST_LOG << "AddCollectEvent002 begin" << std::endl;
     OnDemandEvent onDemandEvent = {SETTING_SWITCH, WIFI_NAME, "on"};
+    OnDemandEvent event2  = {SETTING_SWITCH, BLUETOOTH_NAME, "on"};
+    std::vector<OnDemandEvent> events;
+    events.emplace_back(onDemandEvent);
+    events.emplace_back(event2);
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
@@ -359,7 +367,7 @@ HWTEST_F(DeviceSwitchCollectTest, AddCollectEvent002, TestSize.Level3)
     EXPECT_NE(saMgr, nullptr);
     InitSaMgr(saMgr);
     saMgr->subscribeCountMap_.clear();
-    int32_t ret = deviceSwitchCollect->AddCollectEvent(onDemandEvent);
+    int32_t ret = deviceSwitchCollect->AddCollectEvent(events);
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "AddCollectEvent002 end" << std::endl;
 }
