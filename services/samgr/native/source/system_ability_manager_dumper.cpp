@@ -40,7 +40,18 @@ constexpr int32_t FFRT_DUMP_PROC_LEN = 2;
 constexpr int32_t FFRT_DUMP_PIDS_INDEX = 1;
 constexpr int FFRT_BUFFER_SIZE = 512 * 1024;
 constexpr int LISTENER_BASE_INDEX = 1;
-
+constexpr int32_t FFRT_METRIC_CMD_INDEX = 2;
+constexpr int32_t FFRT_DUMP_METRIC_LEN = 3;
+constexpr int32_t COLLECT_FFRT_METRIC_MAX_SIZE = 5000;
+constexpr int32_t FFRT_STAT_SIZE = sizeof(ffrt_stat);
+constexpr int32_t BUFFER_SIZE = FFRT_STAT_SIZE * COLLECT_FFRT_METRIC_MAX_SIZE;
+char* g_ffrtMetricBuffer = nullptr;
+bool g_collectEnable = false;
+std::mutex ffrtMetricLock_;
+constexpr int32_t DELAY_TIME = 60 * 1000;
+constexpr const char* FFRT_STAT_STR_START = "--start-stat";
+constexpr const char* FFRT_STAT_STR_STOP = "--stop-stat";
+constexpr const char* FFRT_STAT_STR_GET = "--stat";
 constexpr const char* IPC_STAT_STR_START = "--start-stat";
 constexpr const char* IPC_STAT_STR_STOP = "--stop-stat";
 constexpr const char* IPC_STAT_STR_GET = "--stat";
@@ -50,6 +61,8 @@ constexpr const char* IPC_DUMP_SUCCESS = " success\n";
 constexpr const char* IPC_DUMP_FAIL = " fail\n";
 
 }
+
+std::shared_ptr<FFRTHandler> SystemAbilityManagerDumper::handler_ = nullptr;
 
 void SystemAbilityManagerDumper::ShowListenerHelp(string& result)
 {
@@ -256,21 +269,245 @@ int32_t SystemAbilityManagerDumper::FfrtDumpProc(std::shared_ptr<SystemAbilitySt
         return ERR_PERMISSION_DENIED;
     }
     std::string result;
-    GetFfrtDumpInfoProc(abilityStateScheduler, args, result);
+    if (args.size() < FFRT_DUMP_PROC_LEN || args[FFRT_DUMP_PIDS_INDEX].empty()) {
+        HILOGE("FfrtDump param pid not exist");
+        IllegalInput(result);
+        return SaveDumpResultToFd(fd, result);
+    }
+    if (args.size() == FFRT_DUMP_PROC_LEN) {
+        GetFfrtDumpInfoProc(abilityStateScheduler, args, result);
+        return SaveDumpResultToFd(fd, result);
+    }
+    if (args.size() == FFRT_DUMP_METRIC_LEN) {
+        GetFfrtLoadMetrics(abilityStateScheduler, fd, args, result);
+        return SaveDumpResultToFd(fd, result);
+    }
+    IllegalInput(result);
     return SaveDumpResultToFd(fd, result);
+}
+
+void SystemAbilityManagerDumper::GetFfrtLoadMetrics(std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler,
+    int32_t fd, const std::vector<std::string>& args, std::string& result)
+{
+    std::string pidStr = args[FFRT_DUMP_PIDS_INDEX];
+    std::vector<int32_t> processIds;
+    FfrtDumpParser(processIds, pidStr);
+    if (processIds.empty()) {
+        HILOGE("FfrtDumpParser parse failed, illegal input processIdsStr %{public}s ", pidStr.c_str());
+        IllegalInput(result);
+        return;
+    }
+    int32_t cmd = -1;
+    if (!FfrtStatCmdParser(cmd, args)) {
+        IllegalInput(result);
+        return;
+    }
+    CollectFfrtMetricInfoInProcs(fd, processIds, abilityStateScheduler, cmd, result);
+}
+
+bool SystemAbilityManagerDumper::FfrtStatCmdParser(int32_t& cmd, const std::vector<std::string>& args)
+{
+    if (args[FFRT_METRIC_CMD_INDEX] == FFRT_STAT_STR_START) {
+        cmd = FFRT_STAT_CMD_START;
+    } else if (args[FFRT_METRIC_CMD_INDEX] == FFRT_STAT_STR_STOP) {
+        cmd = FFRT_STAT_CMD_STOP;
+    } else if (args[FFRT_METRIC_CMD_INDEX] == FFRT_STAT_STR_GET) {
+        cmd = FFRT_STAT_CMD_GET;
+    } else {
+        return false;
+    }
+    return true;
+}
+
+void SystemAbilityManagerDumper::CollectFfrtMetricInfoInProcs(int32_t fd, const std::vector<int32_t>& processIds,
+    std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler, int32_t cmd, std::string& result)
+{
+    for (const int32_t pid : processIds) {
+        if (pid == getpid()) {
+            CollectFfrtStatistics(cmd, result);
+            continue;
+        }
+        sptr<ILocalAbilityManager> obj = GetProcByProcessId(abilityStateScheduler, pid);
+        if (obj == nullptr) {
+            HILOGE("CollectFfrtMetricInfoInProcs GetSystemProcess failed");
+            result.append("process " + std::to_string(pid) + " not found!\n");
+            continue;
+        }
+        obj->FfrtStatCmdProc(fd, cmd);
+    }
+}
+
+bool SystemAbilityManagerDumper::StartFfrtStatistics(std::string& result)
+{
+    if (g_collectEnable) {
+        result.append("collect has been started\n");
+        return false;
+    }
+    ClearFfrtStatisticsBufferLocked();
+    g_ffrtMetricBuffer = new char[BUFFER_SIZE]();
+    auto ret = ffrt_dump(ffrt_dump_cmd_t::DUMP_START_STAT, g_ffrtMetricBuffer, BUFFER_SIZE);
+    if (ret != ERR_OK) {
+        ClearFfrtStatisticsBufferLocked();
+        result.append("collect start failed\n");
+        return false;
+    }
+    g_collectEnable = true;
+    result.append("collect start success\n");
+    if (handler_ == nullptr) {
+        handler_ = std::make_shared<FFRTHandler>("ffrtDumpHandler");
+    }
+    HILOGI("StartFfrtStatistics PostTask delayTime:%{public}dms", DELAY_TIME);
+    handler_->PostTask(ClearFfrtStatistics, "ClearFfrtStatistics", DELAY_TIME);
+    return true;
+}
+
+bool SystemAbilityManagerDumper::StopFfrtStatistics(std::string& result)
+{
+    if (!g_collectEnable) {
+        result.append("collect has not been started\n");
+        return false;
+    }
+    g_collectEnable = false;
+    auto ret = ffrt_dump(ffrt_dump_cmd_t::DUMP_STOP_STAT, g_ffrtMetricBuffer, BUFFER_SIZE);
+    if (ret != ERR_OK) {
+        ClearFfrtStatisticsBufferLocked();
+        result.append("collect stop failed\n");
+        return false;
+    }
+    result.append("collect stop success\n");
+    return true;
+}
+
+bool SystemAbilityManagerDumper::GetFfrtStatistics(std::string& result)
+{
+    if (g_collectEnable) {
+        result.append("collect has not been stopped\n");
+        return false;
+    }
+    if (g_ffrtMetricBuffer == nullptr) {
+        result.append("info not collected\n");
+        return false;
+    }
+    FfrtStatisticsParser(result);
+    ClearFfrtStatisticsBufferLocked();
+    handler_ = nullptr;
+    return true;
+}
+
+void SystemAbilityManagerDumper::FfrtStatisticsParser(std::string& result)
+{
+    ffrt_stat* currentStat = (ffrt_stat*)g_ffrtMetricBuffer;
+    char* lastStat = g_ffrtMetricBuffer + BUFFER_SIZE;
+    std::string taskInfo;
+    uint64_t maxTime = 0;
+    uint64_t minTime = std::numeric_limits<uint64_t>::max();
+    uint64_t sumTime = 0;
+    uint64_t avgTime = 0;
+    int count = 0;
+    while ((char*)currentStat < lastStat && std::strcmp(currentStat->taskName, "") != 0) {
+        if (currentStat->startTime > currentStat->endTime) {
+            currentStat = (ffrt_stat*)((char*)currentStat + FFRT_STAT_SIZE);
+            continue;
+        }
+        auto duration = currentStat->endTime - currentStat->startTime;
+        sumTime += duration;
+        maxTime = std::max(maxTime, duration);
+        minTime = std::min(minTime, duration);
+        ++count;
+        taskInfo.append(currentStat->taskName);
+        taskInfo.append(" " + ToString(currentStat->startTime));
+        taskInfo.append(" " + ToString(currentStat->endTime) + "\n");
+        currentStat = (ffrt_stat*)((char*)currentStat + FFRT_STAT_SIZE);
+    }
+    if (count == 0) {
+        minTime = 0;
+    } else {
+        avgTime = sumTime / count;
+    }
+    result.append("sumTime:" + ToString(sumTime) + " maxTime:" + ToString(maxTime));
+    result.append(" minTime:" + ToString(minTime) + " avgTime:" + ToString(avgTime));
+    result.append(" cntTime:" + ToString(count) + "\n");
+    result.append("-------------------------------------------------------------------------------------------\n");
+    result.append("taskName                                                        startTime(us)   endTime(us)\n");
+    result.append("-------------------------------------------------------------------------------------------\n");
+    result.append(taskInfo);
+    result.append("-------------------------------------------------------------------------------------------\n");
+}
+
+void SystemAbilityManagerDumper::ClearFfrtStatisticsBufferLocked()
+{
+    if (g_ffrtMetricBuffer != nullptr) {
+        delete[] g_ffrtMetricBuffer;
+        g_ffrtMetricBuffer = nullptr;
+        HILOGI("ClearFfrtStatisticsBuffer success");
+    }
+    if (handler_ != nullptr) {
+        handler_->RemoveTask("ClearFfrtStatistics");
+    }
+}
+
+void SystemAbilityManagerDumper::ClearFfrtStatistics()
+{
+    HILOGW("ClearFfrtStatistics start");
+    std::lock_guard<std::mutex> autoLock(ffrtMetricLock_);
+    if (g_collectEnable) {
+        auto ret = ffrt_dump(ffrt_dump_cmd_t::DUMP_STOP_STAT, g_ffrtMetricBuffer, BUFFER_SIZE);
+        if (ret != ERR_OK) {
+            HILOGE("ClearFfrtStatistics stop ffrt_dump err:%{public}d", ret);
+        }
+        g_collectEnable = false;
+    }
+    ClearFfrtStatisticsBufferLocked();
+}
+
+bool SystemAbilityManagerDumper::CollectFfrtStatistics(int32_t cmd, std::string& result)
+{
+    std::lock_guard<std::mutex> autoLock(ffrtMetricLock_);
+    result.append("pid:" + ToString(getpid()) + " ");
+    auto ret = false;
+    switch (cmd) {
+        case FFRT_STAT_CMD_START: {
+            ret = StartFfrtStatistics(result);
+            break;
+        }
+        case FFRT_STAT_CMD_STOP: {
+            ret = StopFfrtStatistics(result);
+            break;
+        }
+        case FFRT_STAT_CMD_GET: {
+            ret = GetFfrtStatistics(result);
+            break;
+        }
+        default:
+            break;
+    }
+    return ret;
+}
+
+sptr<ILocalAbilityManager> SystemAbilityManagerDumper::GetProcByProcessId(
+    std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler, int32_t processId)
+{
+    std::u16string processName;
+    int32_t queryResult = abilityStateScheduler->GetProcessNameByProcessId(processId, processName);
+    if (queryResult != ERR_OK) {
+        HILOGE("GetProcessNameByProcessId failed, pid %{public}d not exist", processId);
+        return nullptr;
+    }
+    sptr<ILocalAbilityManager> obj =
+        iface_cast<ILocalAbilityManager>(SystemAbilityManager::GetInstance()->GetSystemProcess(processName));
+    if (obj == nullptr) {
+        HILOGE("GetSystemProcess failed, pid:%{public}d processName:%{public}s not exist",
+            processId, Str16ToStr8(processName).c_str());
+    }
+    return obj;
 }
 
 bool SystemAbilityManagerDumper::GetFfrtDumpInfoProc(std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler,
     const std::vector<std::string>& args, std::string& result)
 {
-    if (args.size() < FFRT_DUMP_PROC_LEN || args[FFRT_DUMP_PIDS_INDEX].empty()) {
-        HILOGE("FfrtDump param pid not exist");
-        IllegalInput(result);
-        return false;
-    }
     std::string pidStr = args[FFRT_DUMP_PIDS_INDEX];
     std::vector<int32_t> processIds;
-    SystemAbilityManagerDumper::FfrtDumpParser(processIds, pidStr);
+    FfrtDumpParser(processIds, pidStr);
     if (processIds.empty()) {
         HILOGE("FfrtDumpParser parse failed, illegal input processIdsStr %{public}s ", pidStr.c_str());
         IllegalInput(result);
@@ -282,14 +519,7 @@ bool SystemAbilityManagerDumper::GetFfrtDumpInfoProc(std::shared_ptr<SystemAbili
             GetSAMgrFfrtInfo(result);
             continue;
         }
-        std::u16string processName;
-        int32_t queryResult = abilityStateScheduler->GetProcessNameByProcessId(pid, processName);
-        if (queryResult != ERR_OK) {
-            HILOGE("GetProcessNameByProcessId failed, pid %{public}d not exist", pid);
-            result.append("process " + std::to_string(pid) + " not found!\n");
-            continue;
-        }
-        DumpFfrtInfoByProcName(pid, processName, result);
+        DumpFfrtInfoInProc(abilityStateScheduler, pid, result);
     }
     return true;
 }
@@ -329,14 +559,12 @@ void SystemAbilityManagerDumper::GetSAMgrFfrtInfo(std::string& result)
     delete[] buffer;
 }
 
-void SystemAbilityManagerDumper::DumpFfrtInfoByProcName(int32_t pid, const std::u16string processName,
-    std::string& result)
+void SystemAbilityManagerDumper::DumpFfrtInfoInProc(
+    std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler, int32_t pid, std::string& result)
 {
-    sptr<ILocalAbilityManager> obj =
-        iface_cast<ILocalAbilityManager>(SystemAbilityManager::GetInstance()->GetSystemProcess(processName));
+    sptr<ILocalAbilityManager> obj = GetProcByProcessId(abilityStateScheduler, pid);
     if (obj == nullptr) {
-        HILOGE("GetSystemProcess failed, pid:%{public}d processName:%{public}s not exist",
-            pid, Str16ToStr8(processName).c_str());
+        HILOGE("DumpFfrtInfoInProc GetSystemProcess failed");
         result.append("process " + std::to_string(pid) + " not found!\n");
         return;
     }
@@ -517,7 +745,13 @@ void SystemAbilityManagerDumper::ShowHelp(std::string& result)
         .append("  -sa said: query sa state infos.\n")
         .append("  -p processname: query process state infos.\n")
         .append("  -sm state: query all sa based on state infos.\n")
-        .append("  -l: query all sa state infos.\n");
+        .append("  -l: query all sa state infos.\n")
+        .append("  --listener -h: help text for listener.\n")
+        .append("  --ffrt [pid1|pid2] --start-stat/--stop-stat/--stat: start/stop/get")
+        .append(" the FFRT load statistics of a process.\n")
+        .append("  --ffrt [pid1|pid2]: query the FFRT dump infos of a process.\n")
+        .append("  --ipc procname/all --start-stat/--stop-stat/--stat: start/stop/get")
+        .append(" the IPC load statistics of a process.\n");
 }
 
 void SystemAbilityManagerDumper::ShowAllSystemAbilityInfo(

@@ -38,6 +38,7 @@ public:
         const nlohmann::json& idleReason, int32_t& delayTime);
     bool SendStrategyToSA(int32_t type, int32_t systemAbilityId, int32_t level, std::string& action);
     bool IpcStatCmdProc(int32_t fd, int32_t cmd);
+    bool FfrtStatCmdProc(int32_t fd, int32_t cmd);
     bool FfrtDumperProc(std::string& ffrtDumperInfo);
     int32_t SystemAbilityExtProc(const std::string& extension, int32_t said,
         SystemAbilityExtensionPara* callback, bool isAsync = false);
