@@ -543,23 +543,39 @@ int32_t CommonEventCollect::RemoveUnusedEvent(const OnDemandEvent& event)
 
 void CommonEventCollect::StartReclaimIpcThreadWork(const EventFwk::CommonEventData& data)
 {
+    const char* triggerEvent = nullptr;
     std::string eventName = data.GetWant().GetAction();
     std::string eventType = data.GetData();
 
-    if (workHandler_ == nullptr) {
-        HILOGE("StartReclaimIpcThreadWork workHandler_ is nullptr");
-        return;
+    if (eventName == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF) {
+        triggerEvent = SCREEN_TRIGGER_THREAD_RECLAIM;
+        isCancel_ = false;
+    } else if (eventName == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON) {
+        isCancel_ = true;
+    } else if (eventName == COMMON_RECENT_EVENT && eventType == COMMON_RECENT_CLEAR_ALL) {
+        triggerEvent = CLEAR_TRIGGER_THREAD_RECLAIM;
+        isCancel_ = true;
+        SendKernalReclaimIpcThread(triggerEvent);
     }
 
-    if (eventName == COMMON_RECENT_EVENT && eventType == COMMON_RECENT_CLEAR_ALL) {
-        auto task = [this]() {
-            this->SendKernalReclaimIpcThread();
-        };
-        workHandler_->PostTask(task, TRIGGER_THREAD_RECLAIM_DELAY_TIME);
-    }
+    if (triggerEvent != nullptr && isTriggerTaskStart_.test_and_set(std::memory_order_acquire)) {
+        auto task = [this, triggerEvent]() {
+            for (int i = 0; i < TRIGGER_THREAD_RECLAIM_DELAY_TIME; i++) {
+                if (isCancel_) {
+                    isTriggerTaskStart_.clear();
+                    return;
+                }
+                std::this_thread::sleep_for(std::chrono::seconds(1));
+            }
+            this->SendKernalReclaimIpcThread(TriggerEvent);
+            isTriggerTaskStart_.clear();
+        }
+        std::thread reclaimThread(task);
+        reclaimThread.detach();
+    }    
 }
 
-void CommonEventCollect::SendKernalReclaimIpcThread()
+void CommonEventCollect::SendKernalReclaimIpcThread(const char* triggerEvent)
 {
     HILOGI("TriggerSystemIPCThreadReclaim");
     IPCSkeleton::TriggerSystemIPCThreadReclaim();
