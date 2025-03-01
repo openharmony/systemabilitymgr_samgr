@@ -568,14 +568,14 @@ void CommonEventCollect::SendKernalReclaimIpcThread()
     auto task = [this]() {
         for (int i = 0; i < TRIGGER_THREAD_RECLAIM_DELAY_TIME; i+= TRIGGER_THREAD_RECLAIM_DURATION_TIME) {
             if (isCancel_) {
-                isTriggerTaskStart_.clear();
+                isTriggerTaskStart_ = false;
                 return;
             }
             std::this_thread::sleep_for(std::chrono::seconds(TRIGGER_THREAD_RECLAIM_DURATION_TIME));
         }
         HILOGI("TriggerSystemIPCThreadReclaim");
         IPCSkeleton::TriggerSystemIPCThreadReclaim();
-        isTriggerTaskStart_.clear();
+        isTriggerTaskStart_ = false;
     };
     std::thread reclaimThread(task);
     reclaimThread.detach();
