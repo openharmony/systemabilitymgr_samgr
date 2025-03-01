@@ -576,7 +576,7 @@ void CommonEventCollect::SendKernalReclaimIpcThread()
         HILOGI("TriggerSystemIPCThreadReclaim");
         IPCSkeleton::TriggerSystemIPCThreadReclaim();
         isTriggerTaskStart_.clear();
-    }
+    };
     std::thread reclaimThread(task);
     reclaimThread.detach();
 }
