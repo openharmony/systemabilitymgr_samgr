@@ -82,7 +82,7 @@ private:
     std::mutex saExtraDataIdLock_;
     std::map<int32_t, std::list<int64_t>> saExtraDataIdMap_;
     std::atomic<bool> isAwakeNotified_ {false};
-    std::atomic_flag isTriggerTaskStart_ = ATOMIC_FLAG_INIT;
+    std::atomic<bool> isTriggerTaskStart_ {false};
     std::atomic<bool> isCancel_{false};
 };
 
