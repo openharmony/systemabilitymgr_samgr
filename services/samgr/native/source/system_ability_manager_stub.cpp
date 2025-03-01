@@ -105,7 +105,8 @@ namespace {
 using namespace OHOS::Security;
 namespace OHOS {
 namespace {
-constexpr const char *EXT_TRANSACTION_PERMISSION = "ohos.permission.ACCESS_EXT_SYSTEM_ABILITY";
+const std::string EXT_TRANSACTION_PERMISSION = "ohos.permission.ACCESS_EXT_SYSTEM_ABILITY";
+const std::string PERMISSION_SVC = "ohos.permission.CONTROL_SVC_CMD";
 }
 
 void SystemAbilityManagerStub::SetAbilityFuncMap()
@@ -178,6 +179,8 @@ SystemAbilityManagerStub::SystemAbilityManagerStub()
         SystemAbilityManagerStub::LocalGetRunningSaExtensionInfoList;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_COMMON_EVENT_EXTRA_ID_LIST_TRANSCATION)] =
         SystemAbilityManagerStub::LocalGetCommonEventExtraDataIdlist;
+    memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_LOCAL_ABILITY_MANAGER_PROXY_TRANSCATION)] =
+        SystemAbilityManagerStub::LocalGetLocalAbilityManagerProxy;
 }
 
 int32_t SystemAbilityManagerStub::OnRemoteRequest(uint32_t code,
@@ -1237,6 +1240,34 @@ int32_t SystemAbilityManagerStub::GetCommonEventExtraDataIdlistInner(MessageParc
     }
     if (!reply.WriteInt64Vector(extraDataIdList)) {
         HILOGW("getExtraIdList write idlist failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ERR_NONE;
+}
+
+int32_t SystemAbilityManagerStub::GetLocalAbilityManagerProxyInner(MessageParcel& data, MessageParcel& reply)
+{
+    if (!CheckPermission(PERMISSION_SVC)) {
+        HILOGE("GetLocalSystemAbilityProxyInner permission denied! CallSid:%{public}s",
+            OHOS::IPCSkeleton::GetCallingSid().c_str());
+        return ERR_PERMISSION_DENIED;
+    }
+
+    int32_t systemAbilityId = -1;
+    bool ret = data.ReadInt32(systemAbilityId);
+    if (!ret || !CheckInputSysAbilityId(systemAbilityId)) {
+        HILOGE("GetLocalSystemAbilityProxyInner get SAId failed.");
+        return ERR_NULL_OBJECT;
+    }
+
+    sptr<IRemoteObject> remoteObject = GetLocalAbilityManagerProxy(systemAbilityId);
+    if (remoteObject == nullptr) {
+        HILOGE("GetLocalSystemAbilityProxyInner SA:%{public}d GetLocalSystemAbilityProxy failed.", systemAbilityId);
+        return ERR_NULL_OBJECT;
+    }
+    ret = reply.WriteRemoteObject(remoteObject);
+    if (!ret) {
+        HILOGE("GetLocalSystemAbilityProxyInner SA:%{public}d write reply failed.", systemAbilityId);
         return ERR_FLATTEN_OBJECT;
     }
     return ERR_NONE;
