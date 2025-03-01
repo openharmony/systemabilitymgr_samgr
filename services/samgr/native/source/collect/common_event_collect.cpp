@@ -558,7 +558,7 @@ void CommonEventCollect::StartReclaimIpcThreadWork(const EventFwk::CommonEventDa
         IPCSkeleton::TriggerSystemIPCThreadReclaim();
     }
 
-    if (isTrigger && isTriggerTaskStart_.test_and_set(std::memory_order_acquire)) {
+    if (isTrigger && !isTriggerTaskStart_.exchange(true)) {
         SendKernalReclaimIpcThread();
     }
 }
