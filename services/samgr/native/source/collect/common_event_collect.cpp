@@ -41,8 +41,7 @@ constexpr uint32_t UNSUB_DELAY_TIME = 10 * 1000;
 constexpr int64_t MAX_EXTRA_DATA_ID = 1000000000;
 constexpr int32_t COMMON_EVENT_SERVICE_ID = 3299;
 constexpr int32_t TRIGGER_THREAD_RECLAIM_DELAY_TIME = 130 * 1000;
-constexpr const char* SCREEN_TRIGGER_THREAD_RECLAIM = "SCREEN_TRIGGER_THREAD_RECLAIM";
-constexpr const char* CLEAR_TRIGGER_THREAD_RECLAIM = "CLEAR_TRIGGER_THREAD_RECLAIM";
+constexpr int32_t TRIGGER_THREAD_RECLAIM_DURATION_TIME = 1;
 constexpr const char* UID = "uid";
 constexpr const char* NET_TYPE = "NetType";
 constexpr const char* BUNDLE_NAME = "bundleName";
@@ -543,42 +542,43 @@ int32_t CommonEventCollect::RemoveUnusedEvent(const OnDemandEvent& event)
 
 void CommonEventCollect::StartReclaimIpcThreadWork(const EventFwk::CommonEventData& data)
 {
-    const char* triggerEvent = nullptr;
+    bool isTriggerEvent = false;
     std::string eventName = data.GetWant().GetAction();
     std::string eventType = data.GetData();
 
     if (eventName == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF) {
-        triggerEvent = SCREEN_TRIGGER_THREAD_RECLAIM;
+        isTriggerEvent = true;
         isCancel_ = false;
     } else if (eventName == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON) {
         isCancel_ = true;
     } else if (eventName == COMMON_RECENT_EVENT && eventType == COMMON_RECENT_CLEAR_ALL) {
-        triggerEvent = CLEAR_TRIGGER_THREAD_RECLAIM;
+        isTriggerEvent = true;
         isCancel_ = true;
-        SendKernalReclaimIpcThread(triggerEvent);
+        HILOGI("TriggerSystemIPCThreadReclaim");
+        IPCSkeleton::TriggerSystemIPCThreadReclaim();
     }
 
-    if (triggerEvent != nullptr && isTriggerTaskStart_.test_and_set(std::memory_order_acquire)) {
-        auto task = [this, triggerEvent]() {
-            for (int i = 0; i < TRIGGER_THREAD_RECLAIM_DELAY_TIME; i++) {
-                if (isCancel_) {
-                    isTriggerTaskStart_.clear();
-                    return;
-                }
-                std::this_thread::sleep_for(std::chrono::seconds(1));
-            }
-            this->SendKernalReclaimIpcThread(TriggerEvent);
-            isTriggerTaskStart_.clear();
-        }
-        std::thread reclaimThread(task);
-        reclaimThread.detach();
-    }    
+    if (isTriggerEvent && isTriggerTaskStart_.test_and_set(std::memory_order_acquire)) {
+        SendKernalReclaimIpcThread();
+    }
 }
 
-void CommonEventCollect::SendKernalReclaimIpcThread(const char* triggerEvent)
+void CommonEventCollect::SendKernalReclaimIpcThread()
 {
-    HILOGI("TriggerSystemIPCThreadReclaim");
-    IPCSkeleton::TriggerSystemIPCThreadReclaim();
+    auto task = [this]() {
+        for (int i = 0; i < TRIGGER_THREAD_RECLAIM_DELAY_TIME; i++) {
+            if (isCancel_) {
+                isTriggerTaskStart_.clear();
+                return;
+            }
+            std::this_thread::sleep_for(std::chrono::seconds(TRIGGER_THREAD_RECLAIM_DURATION_TIME));
+        }
+        HILOGI("TriggerSystemIPCThreadReclaim");
+        IPCSkeleton::TriggerSystemIPCThreadReclaim();
+        isTriggerTaskStart_.clear();
+    }
+    std::thread reclaimThread(task);
+    reclaimThread.detach();
 }
 
 bool CommonHandler::PostTask(std::function<void()> func, uint64_t delayTime)
