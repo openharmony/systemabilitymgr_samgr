@@ -13,6 +13,7 @@
 
 import("//build/ohos.gni")
 import("//build/ohos_var.gni")
+import("../../../config.gni")
 import("../var.gni")
 
 config("distributed_store_config") {
@@ -142,6 +143,10 @@ ohos_executable("samgr") {
       sources += [ "//foundation/systemabilitymgr/samgr/services/samgr/native/source/collect/device_timed_collect_tool.cpp" ]
       external_deps += [ "preferences:native_preferences" ]
       defines += [ "PREFERENCES_ENABLE" ]
+    }
+
+    if (samgr_enable_extend_load_timeout) {
+      defines += [ "SAMGR_ENABLE_EXTEND_LOAD_TIMEOUT" ]
     }
     part_name = "samgr"
   }

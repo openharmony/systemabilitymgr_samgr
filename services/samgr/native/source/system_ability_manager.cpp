@@ -76,7 +76,11 @@ constexpr int32_t DEVICE_INFO_SERVICE_SA = 3902;
 constexpr int32_t HIDUMPER_SERVICE_SA = 1212;
 constexpr int32_t MEDIA_ANALYSIS_SERVICE_SA = 10120;
 constexpr int64_t ONDEMAND_PERF_DELAY_TIME = 60 * 1000; // ms
+#ifdef SAMGR_ENABLE_EXTEND_LOAD_TIMEOUT
+constexpr int64_t CHECK_LOADED_DELAY_TIME = 12 * 1000; // ms
+#else
 constexpr int64_t CHECK_LOADED_DELAY_TIME = 4 * 1000; // ms
+#endif
 constexpr int32_t SOFTBUS_SERVER_SA_ID = 4700;
 constexpr int32_t FIRST_DUMP_INDEX = 0;
 }
