@@ -42,6 +42,7 @@ public:
     bool FfrtDumperProc(std::string& ffrtDumperInfo);
     int32_t SystemAbilityExtProc(const std::string& extension, int32_t said,
         SystemAbilityExtensionPara* callback, bool isAsync = false);
+    int32_t ServiceControlCmd(int32_t fd, int32_t systemAbilityId, const std::vector<std::u16string>& args);
 private:
     static inline BrokerDelegator<LocalAbilityManagerProxy> delegator_;
     bool PrepareData(MessageParcel& data, int32_t said, const std::string& extension);

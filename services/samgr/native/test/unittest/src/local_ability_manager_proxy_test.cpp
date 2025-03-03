@@ -476,4 +476,42 @@ HWTEST_F(LocalAbilityManagerProxyTest, SystemAbilityExtProc004, TestSize.Level3)
     int32_t result = localAbility->SystemAbilityExtProc("OnBackup", TEST_SAID_INVAILD, &callback, true);
     EXPECT_EQ(result, INVALID_DATA);
 }
+
+/**
+ * @tc.name: ServiceControlCmd001
+ * @tc.desc: test ServiceControlCmd001
+ * @tc.type: FUNC
+ * @tc.require: I9IE98
+ */
+HWTEST_F(LocalAbilityManagerProxyTest, ServiceControlCmd001, TestSize.Level3)
+{
+    sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
+    sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
+    
+    int32_t fd = 1;
+    int32_t systemAbilityId = -1;
+    std::vector<std::u16string> args (1, Str8ToStr16(std::string("help")));
+
+    int32_t result = localAbility->ServiceControlCmd(fd, systemAbilityId, args);
+    EXPECT_EQ(result, INVALID_DATA);
+}
+
+/**
+ * @tc.name: ServiceControlCmd002
+ * @tc.desc: test ServiceControlCmd002
+ * @tc.type: FUNC
+ * @tc.require: I9IE98
+ */
+HWTEST_F(LocalAbilityManagerProxyTest, ServiceControlCmd002, TestSize.Level3)
+{
+    sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
+    sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
+    
+    int32_t fd = 1;
+    int32_t systemAbilityId = 1;
+    std::vector<std::u16string> args (1, Str8ToStr16(std::string("help")));
+
+    int32_t result = localAbility->ServiceControlCmd(fd, systemAbilityId, args);
+    EXPECT_EQ(result, NO_ERROR);
+}
 }

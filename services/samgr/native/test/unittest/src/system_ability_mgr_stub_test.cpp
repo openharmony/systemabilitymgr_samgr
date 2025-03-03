@@ -808,4 +808,51 @@ HWTEST_F(SystemAbilityMgrStubTest, SendStrategyInner001, TestSize.Level3)
     int32_t result = saMgr->SendStrategyInner(data, reply);
     EXPECT_EQ(result, ERR_FLATTEN_OBJECT);
 }
+
+/**
+ * @tc.name: GetLocalAbilityManagerProxyInner001
+ * @tc.desc: test GetLocalAbilityManagerProxyInner
+ * @tc.type: FUNC
+ * @tc.require: I6XB42
+ */
+HWTEST_F(SystemAbilityMgrStubTest, GetLocalAbilityManagerProxyInner001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = saMgr->GetLocalAbilityManagerProxyInner(data, reply);
+    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+}
+
+/**
+ * @tc.name: GetLocalAbilityManagerProxyInner002
+ * @tc.desc: test GetLocalAbilityManagerProxyInner
+ * @tc.type: FUNC
+ * @tc.require: I6XB42
+ */
+HWTEST_F(SystemAbilityMgrStubTest, GetLocalAbilityManagerProxyInner002, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_TRUE(data.WriteInt32(INVALID_SAID));
+    int32_t ret = saMgr->GetLocalAbilityManagerProxyInner(data, reply);
+    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+}
+
+/**
+ * @tc.name: GetLocalAbilityManagerProxyInner003
+ * @tc.desc: test GetLocalAbilityManagerProxyInner
+ * @tc.type: FUNC
+ * @tc.require: I6XB42
+ */
+HWTEST_F(SystemAbilityMgrStubTest, GetLocalAbilityManagerProxyInner003, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_TRUE(data.WriteInt32(SAID));
+    int32_t ret = saMgr->GetLocalAbilityManagerProxyInner(data, reply);
+    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+}
 }
