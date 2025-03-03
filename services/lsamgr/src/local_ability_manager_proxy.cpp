@@ -305,6 +305,48 @@ bool LocalAbilityManagerProxy::IpcStatCmdProc(int32_t fd, int32_t cmd)
     return result;
 }
 
+bool LocalAbilityManagerProxy::FfrtStatCmdProc(int32_t fd, int32_t cmd)
+{
+    sptr<IRemoteObject> iro = Remote();
+    if (iro == nullptr) {
+        HILOG_ERROR(LOG_CORE, "FfrtStatCmdProc Remote null");
+        return false;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(LOCAL_ABILITY_MANAGER_INTERFACE_TOKEN)) {
+        HILOG_WARN(LOG_CORE, "FfrtStatCmdProc interface token check failed");
+        return false;
+    }
+
+    if (!data.WriteFileDescriptor(fd)) {
+        HILOG_WARN(LOG_CORE, "FfrtStatCmdProc write fd failed");
+        return false;
+    }
+
+    if (!data.WriteInt32(cmd)) {
+        HILOG_WARN(LOG_CORE, "FfrtStatCmdProc write cmd faild");
+        return false;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t status = iro->SendRequest(
+        static_cast<uint32_t>(SafwkInterfaceCode::FFRT_STAT_CMD_TRANSACTION), data, reply, option);
+    if (status != NO_ERROR) {
+        HILOG_ERROR(LOG_CORE, "FfrtStatCmdProc SendRequest failed, return value : %{public}d", status);
+        return false;
+    }
+
+    bool result = false;
+    if (!reply.ReadBool(result)) {
+        HILOG_WARN(LOG_CORE, "FfrtStatCmdProc read bool faild");
+        return false;
+    }
+
+    return result;
+}
+
 bool LocalAbilityManagerProxy::FfrtDumperProc(std::string& ffrtDumperInfo)
 {
     sptr<IRemoteObject> iro = Remote();

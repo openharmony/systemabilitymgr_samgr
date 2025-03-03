@@ -295,6 +295,58 @@ HWTEST_F(LocalAbilityManagerProxyTest, SendStrategyToSA001, TestSize.Level3)
 }
 
 /**
+ * @tc.name: FfrtStatCmdProc001
+ * @tc.desc: test FfrtStatCmdProc001
+ * @tc.type: FUNC
+ * @tc.require: I9DR69
+ */
+HWTEST_F(LocalAbilityManagerProxyTest, FfrtStatCmdProc001, TestSize.Level3)
+{
+    sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
+    sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
+    int32_t fd = 0;
+    int32_t cmd = 0;
+    std::string action;
+    bool ret = localAbility->FfrtStatCmdProc(fd, cmd);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: FfrtStatCmdProc002
+ * @tc.desc: test FfrtStatCmdProc002 with fd invalid
+ * @tc.type: FUNC
+ * @tc.require: I9DR69
+ */
+HWTEST_F(LocalAbilityManagerProxyTest, FfrtStatCmdProc002, TestSize.Level3)
+{
+    sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
+    sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
+    int32_t fd = -1;
+    int32_t cmd = 0;
+    std::string action;
+    bool ret = localAbility->FfrtStatCmdProc(fd, cmd);
+    EXPECT_FALSE(ret);
+}
+
+
+/**
+ * @tc.name: FfrtStatCmdProc003
+ * @tc.desc: test FfrtStatCmdProc003 with cmd valid
+ * @tc.type: FUNC
+ * @tc.require: I9DR69
+ */
+HWTEST_F(LocalAbilityManagerProxyTest, FfrtStatCmdProc003, TestSize.Level3)
+{
+    sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
+    sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
+    int32_t fd = 0;
+    int32_t cmd = -1;
+    std::string action;
+    bool ret = localAbility->FfrtStatCmdProc(fd, cmd);
+    EXPECT_FALSE(ret);
+}
+
+/**
  * @tc.name: IpcStatCmdProc001
  * @tc.desc: test IpcStatCmdProc001 with fd valid and cmd valid
  * @tc.type: FUNC
