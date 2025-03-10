@@ -559,6 +559,7 @@ void CommonEventCollect::StartReclaimIpcThreadWork(const EventFwk::CommonEventDa
     }
 
     if (isTrigger && !isTriggerTaskStart_.exchange(true)) {
+        isCancel_ = false;
         SendKernalReclaimIpcThread();
     }
 }
