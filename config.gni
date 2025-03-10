@@ -12,6 +12,9 @@
 # limitations under the License.
 
 declare_args() {
+  # enable delay load dbinder service.
+  samgr_enable_delay_dbinder = true
+
   # enable extend load sa timeout.
   samgr_enable_extend_load_timeout = false
 }

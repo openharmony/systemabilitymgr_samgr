@@ -90,6 +90,7 @@ sptr<SystemAbilityManager> SystemAbilityManager::instance;
 
 void SystemAbilityManager::RegisterDistribute(int32_t systemAbilityId, bool isDistributed)
 {
+#ifdef SAMGR_ENABLE_DELAY_DBINDER
     if (isDistributed) {
         std::shared_lock<std::shared_mutex> readLock(dBinderServiceLock_);
         if (dBinderService_ != nullptr) {
@@ -109,8 +110,22 @@ void SystemAbilityManager::RegisterDistribute(int32_t systemAbilityId, bool isDi
             HILOGI("start result is %{public}s", ret ? "succeed" : "fail");
         }
     }
+#else
+    u16string strName = Str8ToStr16(to_string(systemAbilityId));
+    if (isDistributed && dBinderService_!= nullptr) {
+        dBinderService_->RegisterRemoteProxy(strName, systemAbilityId);
+        HILOGI("AddSystemAbility RegisterRemoteProxy, SA:%{public}d", systemAbilityId);
+    }
+    if (systemAbilityId == SOFTBUS_SERVER_SA_ID) {
+        if (dBinderService_!= nullptr && rpcCallbackImp_!= nullptr) {
+            bool ret = dBinderService_->StartDBinderService(rpcCallbackImp_);
+            HILOGI("start result is %{public}s", ret? "succeed" : "fail");
+        }
+    }
+#endif
 }
 
+#ifdef SAMGR_ENABLE_DELAY_DBINDER
 void SystemAbilityManager::InitDbinderService()
 {
     std::unique_lock<std::shared_mutex> writeLock(dBinderServiceLock_);
@@ -134,6 +149,7 @@ void SystemAbilityManager::InitDbinderService()
         }
     }
 }
+#endif
 
 void SystemAbilityManager::Init()
 {
@@ -142,6 +158,9 @@ void SystemAbilityManager::Init()
     abilityStatusDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityStatusDeathRecipient());
     abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityCallbackDeathRecipient());
     remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
+#ifndef SAMGR_ENABLE_DELAY_DBINDER
+    rpcCallbackImp_ = make_shared<RpcCallbackImp>();
+#endif
 
     if (workHandler_ == nullptr) {
         workHandler_ = make_shared<FFRTHandler>("workHandler");
@@ -990,7 +1009,9 @@ void SystemAbilityManager::NotifyRemoteSaDied(const std::u16string& name)
     std::u16string saName;
     std::string deviceId;
     SamgrUtil::ParseRemoteSaName(name, deviceId, saName);
+#ifdef SAMGR_ENABLE_DELAY_DBINDER
     std::shared_lock<std::shared_mutex> readLock(dBinderServiceLock_);
+#endif
     if (dBinderService_ != nullptr) {
         std::string nodeId = SamgrUtil::TransformDeviceId(deviceId, NODE_ID, false);
         dBinderService_->NoticeServiceDie(saName, nodeId);
@@ -1001,7 +1022,9 @@ void SystemAbilityManager::NotifyRemoteSaDied(const std::u16string& name)
 
 void SystemAbilityManager::NotifyRemoteDeviceOffline(const std::string& deviceId)
 {
+#ifdef SAMGR_ENABLE_DELAY_DBINDER
     std::shared_lock<std::shared_mutex> readLock(dBinderServiceLock_);
+#endif
     if (dBinderService_ != nullptr) {
         dBinderService_->NoticeDeviceDie(deviceId);
         HILOGI("NotifyRemoteDeviceOffline, deviceId:%{public}s", AnonymizeDeviceId(deviceId).c_str());
@@ -1834,7 +1857,9 @@ sptr<DBinderServiceStub> SystemAbilityManager::DoMakeRemoteBinder(int32_t system
     DeviceIdToNetworkId(networkId);
 #endif
     sptr<DBinderServiceStub> remoteBinder = nullptr;
+#ifdef SAMGR_ENABLE_DELAY_DBINDER
     std::shared_lock<std::shared_mutex> readLock(dBinderServiceLock_);
+#endif
     if (dBinderService_ != nullptr) {
         string strName = to_string(systemAbilityId);
         {
@@ -1856,7 +1881,9 @@ void SystemAbilityManager::NotifyRpcLoadCompleted(const std::string& srcDeviceId
         return;
     }
     auto notifyTask = [srcDeviceId, systemAbilityId, remoteObject, this]() {
+#ifdef SAMGR_ENABLE_DELAY_DBINDER
         std::shared_lock<std::shared_mutex> readLock(dBinderServiceLock_);
+#endif
         if (dBinderService_ != nullptr) {
             SamgrXCollie samgrXCollie("samgr--LoadSystemAbilityComplete_" + ToString(systemAbilityId));
             dBinderService_->LoadSystemAbilityComplete(srcDeviceId, systemAbilityId, remoteObject);

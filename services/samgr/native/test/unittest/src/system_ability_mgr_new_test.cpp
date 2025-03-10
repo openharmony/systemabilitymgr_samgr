@@ -332,7 +332,9 @@ HWTEST_F(SystemAbilityMgrNewTest, NotifyRpcLoadCompleted001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     InitSaMgr(saMgr);
+#ifdef SAMGR_ENABLE_DELAY_DBINDER
     saMgr->InitDbinderService();
+#endif
     sptr<IRemoteObject> testAbility = new TestTransactionService();
     saMgr->workHandler_ = nullptr;
     saMgr->NotifyRpcLoadCompleted("", 1, testAbility);
@@ -363,7 +365,9 @@ HWTEST_F(SystemAbilityMgrNewTest, NotifyRpcLoadCompleted003, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     InitSaMgr(saMgr);
+#ifdef SAMGR_ENABLE_DELAY_DBINDER
     saMgr->InitDbinderService();
+#endif
     sptr<IRemoteObject> testAbility = new TestTransactionService();
     saMgr->NotifyRpcLoadCompleted("", 1, testAbility);
 }
@@ -1099,6 +1103,7 @@ HWTEST_F(SystemAbilityMgrNewTest, IsDistributedSystemAbility001, TestSize.Level2
     EXPECT_FALSE(res);
 }
 
+#ifdef SAMGR_ENABLE_DELAY_DBINDER
 HWTEST_F(SystemAbilityMgrNewTest, RegisterDistribute001, TestSize.Level2)
 {
     DTEST_LOG<<"RegisterDistribute001 BEGIN"<<std::endl;
@@ -1112,4 +1117,6 @@ HWTEST_F(SystemAbilityMgrNewTest, RegisterDistribute001, TestSize.Level2)
     EXPECT_FALSE(saMgr->dBinderService_ = nullptr);
     DTEST_LOG<<"RegisterDistribute001 END"<<std::endl;
 }
+#endif
+
 } // namespace OHOS
