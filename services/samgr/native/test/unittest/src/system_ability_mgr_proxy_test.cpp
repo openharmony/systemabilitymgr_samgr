@@ -20,6 +20,7 @@
 #include "mock_iro_sendrequest.h"
 #include "sam_mock_permission.h"
 #include "sa_status_change_mock.h"
+#include "system_ability_manager_mock.h"
 #include "system_ability_load_callback_proxy.h"
 #include "system_ability_status_change_proxy.h"
 #include "system_ability_load_callback_stub.h"
@@ -1284,5 +1285,15 @@ HWTEST_F(SystemAbilityMgrProxyTest, GetLocalAbilityManagerProxy002, TestSize.Lev
 
     auto ret = samgrProxy->GetLocalAbilityManagerProxy(TEST_SAID_INVALID);
     EXPECT_TRUE(ret == nullptr);
+}
+
+HWTEST_F(SystemAbilityMgrProxyTest, GetLocalAbilityManagerProxy003, TestSize.Level3)
+{
+    DTEST_LOG << " GetLocalAbilityManagerProxy003 begin " << std::endl;
+    sptr<ISystemAbilityManager> samgrMock = new ISystemAbilityManagerMock;
+    EXPECT_TRUE(samgrMock != nullptr);
+    auto ret = samgrMock->GetLocalAbilityManagerProxy(TEST_SAID_INVALID);
+    EXPECT_TRUE(ret == nullptr);
+    DTEST_LOG << " GetLocalAbilityManagerProxy003 end " << std::endl;
 }
 }
