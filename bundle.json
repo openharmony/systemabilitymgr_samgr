@@ -16,7 +16,8 @@
         "subsystem": "systemabilitymgr",
         "features": [
             "samgr_feature_coverage",
-            "samgr_enable_extend_load_timeout"
+            "samgr_enable_extend_load_timeout",
+            "samgr_enable_delay_dbinder"
         ],
         "adapted_system_type": [
             "standard"

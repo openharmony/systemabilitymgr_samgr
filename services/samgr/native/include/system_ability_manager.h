@@ -255,7 +255,9 @@ public:
         }
     }
     void RemoveOnDemandSaInDiedProc(std::shared_ptr<SystemProcessContext>& processContext);
+#ifdef SAMGR_ENABLE_DELAY_DBINDER
     void InitDbinderService();
+#endif
 private:
     enum class AbilityState {
         INIT,
@@ -271,7 +273,12 @@ private:
         OnDemandEvent event;
     };
 
-    SystemAbilityManager() {}
+    SystemAbilityManager()
+    {
+#ifndef SAMGR_ENABLE_DELAY_DBINDER
+        dBinderService_ = DBinderService::GetInstance();
+#endif
+    }
     std::string EventToJson(const OnDemandEvent& event);
     void DoInsertSaData(const std::u16string& name, const sptr<IRemoteObject>& ability, const SAExtraProp& extraProp);
     int32_t StartOnDemandAbility(int32_t systemAbilityId, bool& isExist)
@@ -384,9 +391,11 @@ private:
     sptr<DeviceStatusCollectManager> collectManager_;
     std::shared_ptr<RpcSystemAbilityCallback> rpcCallbackImp_;
 
+#ifdef SAMGR_ENABLE_DELAY_DBINDER
     std::shared_mutex dBinderServiceLock_;
     std::list<int32_t> distributedSaList_;
     bool isDbinderServiceInit_ = false;
+#endif
 
     // must hold abilityMapLock_ never access other locks
     std::shared_mutex abilityMapLock_;

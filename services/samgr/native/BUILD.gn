@@ -148,6 +148,10 @@ ohos_executable("samgr") {
     if (samgr_enable_extend_load_timeout) {
       defines += [ "SAMGR_ENABLE_EXTEND_LOAD_TIMEOUT" ]
     }
+
+    if (samgr_enable_delay_dbinder) {
+      defines += [ "SAMGR_ENABLE_DELAY_DBINDER" ]
+    }
     part_name = "samgr"
   }
 

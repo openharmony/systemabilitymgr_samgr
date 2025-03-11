@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
+import("../../../../../config.gni")
 import("../../../var.gni")
 
 module_output_path = "samgr/samgr"
@@ -131,6 +132,10 @@ ohos_unittest("SystemAbilityMgrTest") {
   if (hicollie_able) {
     external_deps += [ "hicollie:libhicollie" ]
     defines += [ "HICOLLIE_ENABLE" ]
+  }
+
+  if (samgr_enable_delay_dbinder) {
+    defines += [ "SAMGR_ENABLE_DELAY_DBINDER" ]
   }
 
   if (support_common_event) {
