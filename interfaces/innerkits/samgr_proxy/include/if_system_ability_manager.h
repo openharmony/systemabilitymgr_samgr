@@ -297,7 +297,11 @@ public:
      * @param systemAbilityId, need to obtain the said of sa.
      * @return nullptr indicates acquistion failure.
      */
-    virtual sptr<IRemoteObject> GetLocalAbilityManagerProxy(int32_t systemAbilityId) = 0;
+    virtual sptr<IRemoteObject> GetLocalAbilityManagerProxy(int32_t systemAbilityId)
+    {
+        (void)systemAbilityId;
+        return nullptr;
+    }
 
     /**
      * GetRunningSaExtensionInfoList, Return list of started said and process hanlde that match extension.

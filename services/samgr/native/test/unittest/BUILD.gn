@@ -478,6 +478,7 @@ ohos_unittest("SystemAbilityMgrProxyTest") {
     "${samgr_services_dir}/test/unittest/src/mock_iro_sendrequest.cpp",
     "${samgr_services_dir}/test/unittest/src/mock_permission.cpp",
     "${samgr_services_dir}/test/unittest/src/sa_status_change_mock.cpp",
+    "${samgr_services_dir}/test/unittest/src/system_ability_manager_mock.cpp",
     "${samgr_services_dir}/test/unittest/src/system_ability_mgr_proxy_test.cpp",
     "//foundation/systemabilitymgr/samgr/frameworks/native/source/system_ability_manager_proxy.cpp",
     "//foundation/systemabilitymgr/samgr/frameworks/native/source/system_process_status_change_stub.cpp",
