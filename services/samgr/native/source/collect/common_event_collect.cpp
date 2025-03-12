@@ -553,13 +553,12 @@ void CommonEventCollect::StartReclaimIpcThreadWork(const EventFwk::CommonEventDa
         isCancel_ = true;
     } else if (eventName == COMMON_RECENT_EVENT && eventType == COMMON_RECENT_CLEAR_ALL) {
         isTrigger = true;
-        isCancel_ = true;
+        isCancel_ = false;
         HILOGI("TriggerSystemIPCThreadReclaim");
         IPCSkeleton::TriggerSystemIPCThreadReclaim();
     }
 
     if (isTrigger && !isTriggerTaskStart_.exchange(true)) {
-        isCancel_ = false;
         SendKernalReclaimIpcThread();
     }
 }
