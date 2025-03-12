@@ -98,6 +98,9 @@ private:
         int32_t pid, std::string& result);
     static void ShowListenerHelp(std::string& result);
     static std::shared_ptr<FFRTHandler> handler_;
+    static char* ffrtMetricBuffer;
+    static bool collectEnable;
+    static std::mutex ffrtMetricLock;
 };
 } // namespace OHOS
 #endif // SERVICES_SAMGR_NATIVE_INCLUDE_SYSTEM_ABILITY_MANAGER_DUMPER_H
