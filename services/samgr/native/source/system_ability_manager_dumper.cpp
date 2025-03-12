@@ -45,9 +45,6 @@ constexpr int32_t FFRT_DUMP_METRIC_LEN = 3;
 constexpr int32_t COLLECT_FFRT_METRIC_MAX_SIZE = 5000;
 constexpr int32_t FFRT_STAT_SIZE = sizeof(ffrt_stat);
 constexpr int32_t BUFFER_SIZE = FFRT_STAT_SIZE * COLLECT_FFRT_METRIC_MAX_SIZE;
-char* g_ffrtMetricBuffer = nullptr;
-bool g_collectEnable = false;
-std::mutex ffrtMetricLock_;
 constexpr int32_t DELAY_TIME = 60 * 1000;
 constexpr const char* FFRT_STAT_STR_START = "--start-stat";
 constexpr const char* FFRT_STAT_STR_STOP = "--stop-stat";
@@ -63,6 +60,9 @@ constexpr const char* IPC_DUMP_FAIL = " fail\n";
 }
 
 std::shared_ptr<FFRTHandler> SystemAbilityManagerDumper::handler_ = nullptr;
+char* SystemAbilityManagerDumper::ffrtMetricBuffer = nullptr;
+bool SystemAbilityManagerDumper::collectEnable = false;
+std::mutex SystemAbilityManagerDumper::ffrtMetricLock;
 
 void SystemAbilityManagerDumper::ShowListenerHelp(string& result)
 {
@@ -339,19 +339,19 @@ void SystemAbilityManagerDumper::CollectFfrtMetricInfoInProcs(int32_t fd, const 
 
 bool SystemAbilityManagerDumper::StartFfrtStatistics(std::string& result)
 {
-    if (g_collectEnable) {
+    if (collectEnable) {
         result.append("collect has been started\n");
         return false;
     }
     ClearFfrtStatisticsBufferLocked();
-    g_ffrtMetricBuffer = new char[BUFFER_SIZE]();
-    auto ret = ffrt_dump(ffrt_dump_cmd_t::DUMP_START_STAT, g_ffrtMetricBuffer, BUFFER_SIZE);
+    ffrtMetricBuffer = new char[BUFFER_SIZE]();
+    auto ret = ffrt_dump(ffrt_dump_cmd_t::DUMP_START_STAT, ffrtMetricBuffer, BUFFER_SIZE);
     if (ret != ERR_OK) {
         ClearFfrtStatisticsBufferLocked();
         result.append("collect start failed\n");
         return false;
     }
-    g_collectEnable = true;
+    collectEnable = true;
     result.append("collect start success\n");
     if (handler_ == nullptr) {
         handler_ = std::make_shared<FFRTHandler>("ffrtDumpHandler");
@@ -363,12 +363,12 @@ bool SystemAbilityManagerDumper::StartFfrtStatistics(std::string& result)
 
 bool SystemAbilityManagerDumper::StopFfrtStatistics(std::string& result)
 {
-    if (!g_collectEnable) {
+    if (!collectEnable) {
         result.append("collect has not been started\n");
         return false;
     }
-    g_collectEnable = false;
-    auto ret = ffrt_dump(ffrt_dump_cmd_t::DUMP_STOP_STAT, g_ffrtMetricBuffer, BUFFER_SIZE);
+    collectEnable = false;
+    auto ret = ffrt_dump(ffrt_dump_cmd_t::DUMP_STOP_STAT, ffrtMetricBuffer, BUFFER_SIZE);
     if (ret != ERR_OK) {
         ClearFfrtStatisticsBufferLocked();
         result.append("collect stop failed\n");
@@ -380,11 +380,11 @@ bool SystemAbilityManagerDumper::StopFfrtStatistics(std::string& result)
 
 bool SystemAbilityManagerDumper::GetFfrtStatistics(std::string& result)
 {
-    if (g_collectEnable) {
+    if (collectEnable) {
         result.append("collect has not been stopped\n");
         return false;
     }
-    if (g_ffrtMetricBuffer == nullptr) {
+    if (ffrtMetricBuffer == nullptr) {
         result.append("info not collected\n");
         return false;
     }
@@ -396,8 +396,8 @@ bool SystemAbilityManagerDumper::GetFfrtStatistics(std::string& result)
 
 void SystemAbilityManagerDumper::FfrtStatisticsParser(std::string& result)
 {
-    ffrt_stat* currentStat = (ffrt_stat*)g_ffrtMetricBuffer;
-    char* lastStat = g_ffrtMetricBuffer + BUFFER_SIZE;
+    ffrt_stat* currentStat = (ffrt_stat*)ffrtMetricBuffer;
+    char* lastStat = ffrtMetricBuffer + BUFFER_SIZE;
     std::string taskInfo;
     uint64_t maxTime = 0;
     uint64_t minTime = std::numeric_limits<uint64_t>::max();
@@ -436,9 +436,9 @@ void SystemAbilityManagerDumper::FfrtStatisticsParser(std::string& result)
 
 void SystemAbilityManagerDumper::ClearFfrtStatisticsBufferLocked()
 {
-    if (g_ffrtMetricBuffer != nullptr) {
-        delete[] g_ffrtMetricBuffer;
-        g_ffrtMetricBuffer = nullptr;
+    if (ffrtMetricBuffer != nullptr) {
+        delete[] ffrtMetricBuffer;
+        ffrtMetricBuffer = nullptr;
         HILOGI("ClearFfrtStatisticsBuffer success");
     }
     if (handler_ != nullptr) {
@@ -449,20 +449,20 @@ void SystemAbilityManagerDumper::ClearFfrtStatisticsBufferLocked()
 void SystemAbilityManagerDumper::ClearFfrtStatistics()
 {
     HILOGW("ClearFfrtStatistics start");
-    std::lock_guard<std::mutex> autoLock(ffrtMetricLock_);
-    if (g_collectEnable) {
-        auto ret = ffrt_dump(ffrt_dump_cmd_t::DUMP_STOP_STAT, g_ffrtMetricBuffer, BUFFER_SIZE);
+    std::lock_guard<std::mutex> autoLock(ffrtMetricLock);
+    if (collectEnable) {
+        auto ret = ffrt_dump(ffrt_dump_cmd_t::DUMP_STOP_STAT, ffrtMetricBuffer, BUFFER_SIZE);
         if (ret != ERR_OK) {
             HILOGE("ClearFfrtStatistics stop ffrt_dump err:%{public}d", ret);
         }
-        g_collectEnable = false;
+        collectEnable = false;
     }
     ClearFfrtStatisticsBufferLocked();
 }
 
 bool SystemAbilityManagerDumper::CollectFfrtStatistics(int32_t cmd, std::string& result)
 {
-    std::lock_guard<std::mutex> autoLock(ffrtMetricLock_);
+    std::lock_guard<std::mutex> autoLock(ffrtMetricLock);
     result.append("pid:" + ToString(getpid()) + " ");
     auto ret = false;
     switch (cmd) {

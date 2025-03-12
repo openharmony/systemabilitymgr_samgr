@@ -90,7 +90,6 @@ void SamgrDumperFuzzTest(const uint8_t* data, size_t size)
     SystemAbilityManagerDumper::GetSamgrIpcStatistics(result);
     SystemAbilityManagerDumper::StopSamgrIpcStatistics(result);
     SystemAbilityManagerDumper::StartSamgrIpcStatistics(result);
-    SystemAbilityManagerDumper::GetFfrtDumpInfoProc(scheduler, args, result);
     SystemAbilityManagerDumper::GetSAMgrFfrtInfo(result);
     int32_t pid = BuildInt32FromData(data, size);
     SystemAbilityManagerDumper::DumpFfrtInfoInProc(scheduler, pid, result);
