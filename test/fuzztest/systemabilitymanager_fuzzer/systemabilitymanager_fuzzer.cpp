@@ -15,6 +15,7 @@
 
 #include "systemabilitymanager_fuzzer.h"
 
+#include "datetime_ex.h"
 #include "if_system_ability_manager.h"
 #include "sam_mock_permission.h"
 #include "system_ability_manager.h"

@@ -69,7 +69,7 @@ ohos_fuzztest("SamgrDumperFuzzTest") {
     "${samgr_services_dir}/test/unittest/src/sa_status_change_mock.cpp",
     "samgrdumper_fuzzer.cpp",
   ]
-  deps = []
+  deps = ["//foundation/systemabilitymgr/samgr/interfaces/innerkits/dynamic_cache:dynamic_cache"]
 
   external_deps = [
     "access_token:libaccesstoken_sdk",

@@ -167,7 +167,7 @@ foreach(item, samgr_fuzztests) {
       "src/fuzztest_utils.cpp",
       item.source,
     ]
-    deps = []
+    deps = ["//foundation/systemabilitymgr/samgr/interfaces/innerkits/dynamic_cache:dynamic_cache"]
 
     external_deps = [
       "access_token:libaccesstoken_sdk",
