@@ -113,4 +113,3 @@ virtual sptr<IRemoteObject> DynamicCache::Recompute(int32_t querySaId, int32_t c
     return lastQuerySaProxy_;
 }
 } // namespace OHOS
-

@@ -21,7 +21,6 @@
 #include "iremote_object.h"
 
 namespace OHOS {
-using namespace std;
 class DynamicCache : public IRemoteObject::DeathRecipient {
 public:
     void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
@@ -33,8 +32,8 @@ public:
     virtual sptr<IRemoteObject> Recompute(int32_t querySaId, int32_t code);
 private:
     std::mutex queryCacheLock_;
-    map<string, string> localPara_;
-    string key_;
+    std::map<std::string, std::string> localPara_;
+    std::string key_;
     int32_t lastQuerySaId_;
     sptr<IRemoteObject> lastQuerySaProxy_;
 };
