@@ -69,7 +69,7 @@ ohos_fuzztest("SystemAbilityManagerFuzzTest") {
     "//foundation/systemabilitymgr/samgr/services/samgr/native/test/unittest/src/mock_permission.cpp",
     "systemabilitymanager_fuzzer.cpp",
   ]
-  deps = ["//foundation/systemabilitymgr/samgr/interfaces/innerkits/dynamic_cache:dynamic_cache"]
+  deps = [ "//foundation/systemabilitymgr/samgr/interfaces/innerkits/dynamic_cache:dynamic_cache" ]
 
   external_deps = [
     "access_token:libaccesstoken_sdk",
