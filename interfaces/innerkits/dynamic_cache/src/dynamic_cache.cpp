@@ -24,13 +24,13 @@
 using namespace std;
 namespace OHOS {
 
-void OnRemoteDied(const wptr<IRemoteObject>& remote)
+void DynamicCache::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
     HILOGD("DynamicCache OnRemoteDied called");
     ClearCache();
 }
 
-sptr<IRemoteObject> QueryResult(int32_t querySaId, int32_t code)
+sptr<IRemoteObject> DynamicCache::QueryResult(int32_t querySaId, int32_t code)
 {
     int32_t waterLineLength = 128;
     char waterLine[128] = {0};
@@ -62,7 +62,7 @@ sptr<IRemoteObject> QueryResult(int32_t querySaId, int32_t code)
     return res;
 }
 
-bool CanUseCache(int32_t querySaId, char* waterLine, string defaultValue)
+bool DynamicCache::CanUseCache(int32_t querySaId, char* waterLine, string defaultValue)
 {
     return localPara_.count(key_) != 0 && lastQuerySaId_ == querySaId &&
         defaultValue != string(waterLine) && string(waterLine) == localPara_[key_] &&
@@ -104,7 +104,7 @@ bool DynamicCache::SetKey(const string& key)
     return true;
 }
 
-virtual sptr<IRemoteObject> DynamicCache::Recompute(int32_t querySaId, int32_t code)
+sptr<IRemoteObject> DynamicCache::Recompute(int32_t querySaId, int32_t code)
 {
     std::lock_guard<std::mutex> autoLock(queryCacheLock_);
     if (lastQuerySaId_ != querySaId) {
