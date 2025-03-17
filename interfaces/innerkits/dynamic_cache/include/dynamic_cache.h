@@ -25,10 +25,10 @@ class DynamicCache : public IRemoteObject::DeathRecipient {
 public:
     void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
     sptr<IRemoteObject> QueryResult(int32_t querySaId, int32_t code);
-    bool CanUseCache(int32_t querySaId, char* waterLine, string defaultValue);
+    bool CanUseCache(int32_t querySaId, char* waterLine, std::string defaultValue);
     void ClearCache();
     bool InvalidateCache();
-    bool SetKey(const string& key);
+    bool SetKey(const std::string& key);
     virtual sptr<IRemoteObject> Recompute(int32_t querySaId, int32_t code);
 private:
     std::mutex queryCacheLock_;
