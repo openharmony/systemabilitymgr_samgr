@@ -18,9 +18,11 @@
 
 #include <map>
 #include <string>
+#include "datetime_ex.h"
 #include "iremote_object.h"
 
 namespace OHOS {
+using namespace std;
 class DynamicCache : public IRemoteObject::DeathRecipient {
 public:
     void OnRemoteDied(const wptr<IRemoteObject>& remote) override;

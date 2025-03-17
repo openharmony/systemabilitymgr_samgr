@@ -24,7 +24,7 @@
 using namespace std;
 namespace OHOS {
 
-void OnRemoteDied(const wptr<IRemoteObject>& remote) override
+void OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
     HILOGD("DynamicCache OnRemoteDied called");
     ClearCache();
