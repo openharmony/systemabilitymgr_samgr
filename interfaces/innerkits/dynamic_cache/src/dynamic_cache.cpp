@@ -103,13 +103,4 @@ bool DynamicCache::SetKey(const string& key)
     key_ = key;
     return true;
 }
-
-sptr<IRemoteObject> DynamicCache::Recompute(int32_t querySaId, int32_t code)
-{
-    std::lock_guard<std::mutex> autoLock(queryCacheLock_);
-    if (lastQuerySaId_ != querySaId) {
-        return nullptr;
-    }
-    return lastQuerySaProxy_;
-}
 } // namespace OHOS

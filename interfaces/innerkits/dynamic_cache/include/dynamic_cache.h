@@ -20,18 +20,44 @@
 #include <string>
 #include "datetime_ex.h"
 #include "iremote_object.h"
+#include "sam_log.h"
 
 namespace OHOS {
 using namespace std;
 class DynamicCache : public IRemoteObject::DeathRecipient {
 public:
-    void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
+
+    void OnRemoteDied(const wptr<IRemoteObject>& remote) override
+    {
+        HILOGD("DynamicCache OnRemoteDied called");
+        ClearCache();
+    }
+
     sptr<IRemoteObject> QueryResult(int32_t querySaId, int32_t code);
     bool CanUseCache(int32_t querySaId, char* waterLine, std::string defaultValue);
-    void ClearCache();
+
+    void __attribute__((no_sanitize("cfi"))) ClearCache()
+    {
+        std::lock_guard<std::mutex> autoLock(queryCacheLock_);
+        if (lastQuerySaProxy_ != nullptr) {
+            HILOGD("DynamicCache RemoveDeathRecipient");
+            lastQuerySaProxy_->RemoveDeathRecipient(this);
+        }
+        lastQuerySaId_ = -1;
+        lastQuerySaProxy_ = nullptr;
+    }
+    
     bool InvalidateCache();
     bool SetKey(const std::string& key);
-    virtual sptr<IRemoteObject> Recompute(int32_t querySaId, int32_t code);
+    virtual sptr<IRemoteObject> Recompute(int32_t querySaId, int32_t code)
+    {
+        std::lock_guard<std::mutex> autoLock(queryCacheLock_);
+        if (lastQuerySaId_ != querySaId) {
+            return nullptr;
+        }
+        return lastQuerySaProxy_;
+    }
+    
 private:
     std::mutex queryCacheLock_;
     std::map<std::string, std::string> localPara_;
