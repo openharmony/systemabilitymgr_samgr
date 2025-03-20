@@ -29,7 +29,6 @@ public:
 
     void OnRemoteDied(const wptr<IRemoteObject>& remote) override
     {
-        HILOGD("DynamicCache OnRemoteDied called");
         ClearCache();
     }
 
@@ -40,7 +39,6 @@ public:
     {
         std::lock_guard<std::mutex> autoLock(queryCacheLock_);
         if (lastQuerySaProxy_ != nullptr) {
-            HILOGD("DynamicCache RemoveDeathRecipient");
             lastQuerySaProxy_->RemoveDeathRecipient(this);
         }
         lastQuerySaId_ = -1;
