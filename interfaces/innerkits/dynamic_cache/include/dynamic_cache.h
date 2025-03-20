@@ -20,7 +20,6 @@
 #include <string>
 #include "datetime_ex.h"
 #include "iremote_object.h"
-#include "sam_log.h"
 
 namespace OHOS {
 using namespace std;
