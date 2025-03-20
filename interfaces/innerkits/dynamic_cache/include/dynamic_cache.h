@@ -18,7 +18,6 @@
 
 #include <map>
 #include <string>
-#include "datetime_ex.h"
 #include "iremote_object.h"
 
 namespace OHOS {
