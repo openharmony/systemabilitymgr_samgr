@@ -1098,6 +1098,7 @@ int32_t SystemAbilityManager::AddSystemAbility(int32_t systemAbilityId, const sp
         if (abilityMap_.count(systemAbilityId) > 0) {
             auto callingPid = IPCSkeleton::GetCallingPid();
             auto callingUid = IPCSkeleton::GetCallingUid();
+            SendSystemAbilityRemovedMsg(systemAbilityId);
             HILOGW("SA:%{public}d is being covered, callPid:%{public}d, callUid:%{public}d",
                 systemAbilityId, callingPid, callingUid);
         }
