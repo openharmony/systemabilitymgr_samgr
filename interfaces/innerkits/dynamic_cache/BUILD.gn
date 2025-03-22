@@ -20,7 +20,7 @@ config("dynamic_cache_config") {
   include_dirs = [ "include" ]
 }
 
-ohos_shared_library("dynamic_cache") {
+ohos_static_library("dynamic_cache") {
   sanitize = {
     cfi = true
     cfi_cross_dso = true
@@ -41,9 +41,6 @@ ohos_shared_library("dynamic_cache") {
       "ipc:ipc_core",
     ]
   }
-  innerapi_tags = [ "chipsetsdk_indirect" ]
-  install_images = [ system_base_dir ]
-  relative_install_dir = "chipset-pub-sdk"
   part_name = "samgr"
   subsystem_name = "systemabilitymgr"
 }
