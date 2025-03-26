@@ -1565,35 +1565,6 @@ int32_t SystemAbilityManagerProxy::GetCommonEventExtraDataIdlist(int32_t saId, s
 
 sptr<IRemoteObject> SystemAbilityManagerProxy::GetLocalAbilityManagerProxy(int32_t systemAbilityId)
 {
-    if (!CheckInputSysAbilityId(systemAbilityId)) {
-        HILOGW("GetLocalAbilityManagerProxy SA invalid:%{public}d!", systemAbilityId);
-        return nullptr;
-    }
-
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
-        HILOGE("GetLocalAbilityManagerProxy write token failed!");
-        return nullptr;
-    }
-    if (!data.WriteInt32(systemAbilityId)) {
-        HILOGE("GetLocalAbilityManagerProxy write said failed!");
-        return nullptr;
-    }
-
-    auto remote = Remote();
-    if (remote == nullptr) {
-        HILOGI("GetLocalAbilityManagerProxy remote is nullptr");
-        return nullptr;
-    }
-
-    MessageParcel reply;
-    MessageOption option;
-    int32_t err = remote->SendRequest(
-        static_cast<uint32_t>(SamgrInterfaceCode::GET_LOCAL_ABILITY_MANAGER_PROXY_TRANSCATION), data, reply, option);
-    if (err != ERR_NONE) {
-        HILOGE("GetLocalAbilityManagerProxy SendRequest error: %{public}d!", err);
-        return nullptr;
-    }
-    return reply.ReadRemoteObject();
+    return nullptr;
 }
 } // namespace OHOS

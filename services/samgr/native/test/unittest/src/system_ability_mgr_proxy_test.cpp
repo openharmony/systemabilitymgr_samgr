@@ -1260,40 +1260,4 @@ HWTEST_F(SystemAbilityMgrProxyTest, OnLoadSystemAbilityFail005, TestSize.Level3)
     callback->OnLoadSystemAbilityFail(-1);
     EXPECT_EQ(nullptr, callback->loadproxy_);
 }
-
-/**
- * @tc.name: GetLocalAbilityManagerProxy001
- * @tc.desc: test GetLocalAbilityManagerProxy
- * @tc.type: FUNC
- */
-HWTEST_F(SystemAbilityMgrProxyTest, GetLocalAbilityManagerProxy001, TestSize.Level3)
-{
-    sptr<ISystemAbilityManager> samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-
-    auto ret = samgrProxy->GetLocalAbilityManagerProxy(TEST_ID_NORANGE_SAID);
-    EXPECT_TRUE(ret == nullptr);
-}
-
-/**
- * @tc.name: GetLocalAbilityManagerProxy002
- * @tc.desc: test GetLocalAbilityManagerProxy
- * @tc.type: FUNC
- */
-HWTEST_F(SystemAbilityMgrProxyTest, GetLocalAbilityManagerProxy002, TestSize.Level3)
-{
-    sptr<ISystemAbilityManager> samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-
-    auto ret = samgrProxy->GetLocalAbilityManagerProxy(TEST_SAID_INVALID);
-    EXPECT_TRUE(ret == nullptr);
-}
-
-HWTEST_F(SystemAbilityMgrProxyTest, GetLocalAbilityManagerProxy003, TestSize.Level3)
-{
-    DTEST_LOG << " GetLocalAbilityManagerProxy003 begin " << std::endl;
-    sptr<ISystemAbilityManager> samgrMock = new ISystemAbilityManagerMock;
-    EXPECT_TRUE(samgrMock != nullptr);
-    auto ret = samgrMock->GetLocalAbilityManagerProxy(TEST_SAID_INVALID);
-    EXPECT_TRUE(ret == nullptr);
-    DTEST_LOG << " GetLocalAbilityManagerProxy003 end " << std::endl;
-}
 }
