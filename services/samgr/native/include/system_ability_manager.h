@@ -283,7 +283,7 @@ private:
     void DoInsertSaData(const std::u16string& name, const sptr<IRemoteObject>& ability, const SAExtraProp& extraProp);
     int32_t StartOnDemandAbility(int32_t systemAbilityId, bool& isExist)
     {
-        lock_guard<mutex> onDemandAbilityLock(onDemandLock_);
+        std::lock_guard<std::mutex> onDemandAbilityLock(onDemandLock_);
         return StartOnDemandAbilityLocked(systemAbilityId, isExist);
     }
     int32_t StartOnDemandAbilityLocked(int32_t systemAbilityId, bool& isExist);
@@ -296,7 +296,7 @@ private:
     void InitSaProfile();
     bool GetSaProfile(int32_t saId, CommonSaProfile& saProfile)
     {
-        lock_guard<mutex> autoLock(saProfileMapLock_);
+        std::lock_guard<std::mutex> autoLock(saProfileMapLock_);
         auto iter = saProfileMap_.find(saId);
         if (iter == saProfileMap_.end()) {
             return false;
@@ -324,7 +324,7 @@ private:
         const OnDemandEvent& event);
     void StartOnDemandAbility(const std::u16string& name, int32_t systemAbilityId)
     {
-        lock_guard<mutex> autoLock(onDemandLock_);
+        std::lock_guard<std::mutex> autoLock(onDemandLock_);
         StartOnDemandAbilityLocked(name, systemAbilityId);
     }
     void StartOnDemandAbilityLocked(const std::u16string& name, int32_t systemAbilityId);
@@ -333,7 +333,7 @@ private:
     int32_t StartDynamicSystemProcess(const std::u16string& name, int32_t systemAbilityId, const OnDemandEvent& event);
     bool StopOnDemandAbility(const std::u16string& name, int32_t systemAbilityId, const OnDemandEvent& event)
     {
-        lock_guard<mutex> autoLock(onDemandLock_);
+        std::lock_guard<std::mutex> autoLock(onDemandLock_);
         return StopOnDemandAbilityInner(name, systemAbilityId, event);
     }
     bool StopOnDemandAbilityInner(const std::u16string& name, int32_t systemAbilityId, const OnDemandEvent& event);

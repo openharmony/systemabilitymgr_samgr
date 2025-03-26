@@ -106,12 +106,12 @@ void FuzzRemoveSystemProcess(const uint8_t* data, size_t size)
     ++count;
     saMgr->UnSubscribeSystemAbility(callback->AsObject());
 
-    u16string name = u"test";
-    string srcDeviceId = "srcDeviceId";
+    std::u16string name = u"test";
+    std::string srcDeviceId = "srcDeviceId";
     saMgr->startingProcessMap_.clear();
     sptr<SystemAbilityLoadCallbackMock> callbackOne = new SystemAbilityLoadCallbackMock();
     SystemAbilityManager::AbilityItem abilityItem;
-    abilityItem.callbackMap[srcDeviceId].push_back(make_pair(callbackOne, SAID));
+    abilityItem.callbackMap[srcDeviceId].push_back(std::make_pair(callbackOne, SAID));
     saMgr->startingAbilityMap_[SAID] = abilityItem;
     saMgr->CleanCallbackForLoadFailed(SAID, name, srcDeviceId, callbackOne);
 }
@@ -125,7 +125,7 @@ void FuzzNotifySystemAbilityLoaded(const uint8_t* data, size_t size)
     sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
     sptr<IRemoteObject> remoteObject = new TestTransactionService();
     saMgr->NotifySystemAbilityLoaded(SAID, remoteObject, callback);
-    string srcDeviceId = "srcDeviceId";
+    std::string srcDeviceId = "srcDeviceId";
     FuzzedDataProvider fdp(data, size);
     int32_t systemAbilityId = fdp.ConsumeIntegral<int32_t>();
     saMgr->LoadSystemAbilityFromRpc(srcDeviceId, systemAbilityId, callback);
@@ -150,7 +150,7 @@ void FuzzNotifySystemAbilityLoaded(const uint8_t* data, size_t size)
     saMgr->OnRemoteCallbackDied(mockLoadCallback2->AsObject());
 
     sptr<SystemAbilityLoadCallbackMock> callback2 = new SystemAbilityLoadCallbackMock();
-    list<sptr<ISystemAbilityLoadCallback>> callbacks;
+    std::list<sptr<ISystemAbilityLoadCallback>> callbacks;
     callbacks.push_back(callback2);
     saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
     saMgr->RemoveRemoteCallbackLocked(callbacks, callback2);

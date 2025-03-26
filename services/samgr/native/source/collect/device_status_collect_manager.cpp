@@ -552,7 +552,7 @@ void DeviceStatusCollectManager::StringToTypeAndSaid(const std::string& eventStr
         HILOGW("StringToTypeAndSaid failed");
         return;
     }
-    if (pos == string::npos) {
+    if (pos == std::string::npos) {
         HILOGW("StringToSaid failed");
         return;
     }

@@ -1325,7 +1325,7 @@ int32_t SystemAbilityStateScheduler::CheckStartEnableOnce(const OnDemandEvent& e
 {
     int32_t result = ERR_INVALID_VALUE;
     if (saControl.enableOnce) {
-        lock_guard<mutex> autoLock(startEnableOnceLock_);
+        std::lock_guard<std::mutex> autoLock(startEnableOnceLock_);
         auto iter = startEnableOnceMap_.find(saControl.saId);
         if (iter != startEnableOnceMap_.end() && SamgrUtil::IsSameEvent(event, startEnableOnceMap_[saControl.saId])) {
             HILOGI("ondemand canceled for enable-once, ondemandId:%{public}d, SA:%{public}d",
@@ -1340,7 +1340,7 @@ int32_t SystemAbilityStateScheduler::CheckStartEnableOnce(const OnDemandEvent& e
     LoadRequestInfo loadRequestInfo = {LOCAL_DEVICE, callback, saControl.saId, callingPid, event};
     result = HandleLoadAbilityEvent(loadRequestInfo);
     if (saControl.enableOnce && result != ERR_OK) {
-        lock_guard<mutex> autoLock(startEnableOnceLock_);
+        std::lock_guard<std::mutex> autoLock(startEnableOnceLock_);
         auto& events = startEnableOnceMap_[saControl.saId];
         events.remove(event);
         if (events.empty()) {
@@ -1361,7 +1361,7 @@ int32_t SystemAbilityStateScheduler::CheckStopEnableOnce(const OnDemandEvent& ev
 {
     int32_t result = ERR_INVALID_VALUE;
     if (saControl.enableOnce) {
-        lock_guard<mutex> autoLock(stopEnableOnceLock_);
+        std::lock_guard<std::mutex> autoLock(stopEnableOnceLock_);
         auto iter = stopEnableOnceMap_.find(saControl.saId);
         if (iter != stopEnableOnceMap_.end() && SamgrUtil::IsSameEvent(event, stopEnableOnceMap_[saControl.saId])) {
             HILOGI("ondemand canceled for enable-once, ondemandId:%{public}d, SA:%{public}d",
@@ -1377,7 +1377,7 @@ int32_t SystemAbilityStateScheduler::CheckStopEnableOnce(const OnDemandEvent& ev
         std::make_shared<UnloadRequestInfo>(event, saControl.saId, callingPid);
     result = HandleUnloadAbilityEvent(unloadRequestInfo);
     if (saControl.enableOnce && result != ERR_OK) {
-        lock_guard<mutex> autoLock(stopEnableOnceLock_);
+        std::lock_guard<std::mutex> autoLock(stopEnableOnceLock_);
         auto& events = stopEnableOnceMap_[saControl.saId];
         events.remove(event);
         if (events.empty()) {

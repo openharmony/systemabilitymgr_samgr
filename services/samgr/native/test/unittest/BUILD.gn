@@ -156,6 +156,13 @@ ohos_unittest("SystemAbilityMgrTest") {
 }
 
 ohos_unittest("SystemAbilityMgrCollectTest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    cfi_no_nvcall = true
+    blocklist = "../../../../../cfi_blocklist.txt"
+  }
   module_out_path = module_output_path
 
   sources = [
@@ -282,6 +289,13 @@ ohos_unittest("SystemAbilityMgrCollectTest") {
 }
 
 ohos_unittest("SystemAbilityMgrDeviceNetworkingTest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    cfi_no_nvcall = true
+    blocklist = "../../../../../cfi_blocklist.txt"
+  }
   module_out_path = module_output_path
 
   sources = [
@@ -375,6 +389,13 @@ ohos_unittest("SystemAbilityMgrDeviceNetworkingTest") {
 }
 
 ohos_unittest("SystemAbilityMgrStubTest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    cfi_no_nvcall = true
+    blocklist = "../../../../../cfi_blocklist.txt"
+  }
   module_out_path = module_output_path
 
   sources = [
@@ -466,6 +487,13 @@ ohos_unittest("SystemAbilityMgrStubTest") {
 }
 
 ohos_unittest("SystemAbilityMgrProxyTest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    cfi_no_nvcall = true
+    blocklist = "../../../../../cfi_blocklist.txt"
+  }
   module_out_path = module_output_path
 
   sources = [
@@ -556,6 +584,13 @@ ohos_unittest("LocalAbilityManagerProxyTest") {
 }
 
 ohos_unittest("SystemAbilityStateSchedulerTest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    cfi_no_nvcall = true
+    blocklist = "../../../../../cfi_blocklist.txt"
+  }
   module_out_path = module_output_path
 
   sources = [
@@ -637,6 +672,13 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
 }
 
 ohos_unittest("SystemAbilityMgrDumperTest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    cfi_no_nvcall = true
+    blocklist = "../../../../../cfi_blocklist.txt"
+  }
   module_out_path = module_output_path
 
   sources = [
@@ -701,6 +743,13 @@ ohos_unittest("SystemAbilityMgrDumperTest") {
 }
 
 ohos_unittest("MockSystemAbilityManagerTest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    cfi_no_nvcall = true
+    blocklist = "../../../../../cfi_blocklist.txt"
+  }
   module_out_path = module_output_path
 
   sources = [
@@ -747,6 +796,13 @@ ohos_unittest("MockSystemAbilityManagerTest") {
 }
 
 ohos_executable("manual_ondemand") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    cfi_no_nvcall = true
+    blocklist = "../../../../../cfi_blocklist.txt"
+  }
   testonly = true
   sources = [
     "${samgr_services_dir}/test/unittest/src/mock_permission.cpp",
@@ -788,6 +844,13 @@ ohos_executable("manual_ondemand") {
 }
 
 ohos_executable("ondemand") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    cfi_no_nvcall = true
+    blocklist = "../../../../../cfi_blocklist.txt"
+  }
   testonly = true
   sources = [
     "${samgr_services_dir}/test/unittest/src/mock_permission.cpp",
@@ -829,6 +892,13 @@ ohos_executable("ondemand") {
 }
 
 ohos_executable("TestTool") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    cfi_no_nvcall = true
+    blocklist = "../../../../../cfi_blocklist.txt"
+  }
   testonly = true
 
   #module_out_path = module_output_path
@@ -925,6 +995,13 @@ ohos_executable("TestTool") {
 }
 
 ohos_static_library("samgr_proxy_tdd") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    cfi_no_nvcall = true
+    blocklist = "../../../../../cfi_blocklist.txt"
+  }
   defines = [ "SAMGR_PROXY" ]
   sources = [
     "//foundation/systemabilitymgr/samgr/frameworks/native/source/system_ability_load_callback_stub.cpp",

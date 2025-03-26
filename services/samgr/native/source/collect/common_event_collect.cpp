@@ -17,6 +17,7 @@
 
 #include "common_event_collect.h"
 
+#include "datetime_ex.h"
 #include "ability_death_recipient.h"
 #include "system_ability_manager_util.h"
 #include "common_event_manager.h"
