@@ -181,6 +181,7 @@ foreach(item, samgr_fuzztests) {
       "init:libbegetutil",
       "ipc:ipc_core",
       "ipc:libdbinder",
+      "json:nlohmann_json_static",
       "safwk:system_ability_fwk",
       "samgr:samgr_common",
       "samgr:samgr_proxy",

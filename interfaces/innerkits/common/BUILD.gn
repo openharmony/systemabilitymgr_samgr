@@ -79,7 +79,7 @@ ohos_shared_library("samgr_common") {
       external_deps += [ "hicollie:libhicollie" ]
       defines += [ "HICOLLIE_ENABLE" ]
     }
-    public_external_deps = [ "json:nlohmann_json_static" ]
+    external_deps += [ "json:nlohmann_json_static" ]
     part_name = "samgr"
   }
 

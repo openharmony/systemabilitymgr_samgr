@@ -83,6 +83,7 @@ ohos_fuzztest("SamgrDumperFuzzTest") {
     "init:libbegetutil",
     "ipc:ipc_single",
     "ipc:libdbinder",
+    "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
     "samgr:samgr_common",
     "samgr:samgr_proxy",
