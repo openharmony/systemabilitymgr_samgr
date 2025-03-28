@@ -85,6 +85,7 @@ ohos_fuzztest("SystemAbilityManagerFuzzTest") {
     "ipc:libdbinder",
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
+    "samgr:dynamic_cache",
     "samgr:samgr_common",
     "samgr:samgr_proxy",
   ]
