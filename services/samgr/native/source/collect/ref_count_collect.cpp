@@ -17,7 +17,7 @@
 
 namespace OHOS {
 namespace {
-constexpr int32_t REF_RESIDENT_TIMER_INTERVAL = 1000 * 60 * 10;
+constexpr int32_t REF_RESIDENT_TIMER_INTERVAL = 1000 * 60 * 60;
 constexpr int32_t REF_ONDEMAND_TIMER_INTERVAL = 1000 * 60 * 1;
 }
 
