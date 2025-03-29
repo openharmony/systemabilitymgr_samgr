@@ -443,46 +443,4 @@ bool LocalAbilityManagerProxy::PrepareData(MessageParcel& data, int32_t said, co
     }
     return true;
 }
-
-int32_t LocalAbilityManagerProxy::ServiceControlCmd(int32_t fd, int32_t systemAbilityId,
-    const std::vector<std::u16string>& args)
-{
-    if (systemAbilityId <= 0) {
-        HILOG_WARN(LOG_CORE, "ServiceControlCmd systemAbilityId invalid.");
-        return INVALID_DATA;
-    }
-
-    sptr<IRemoteObject> iro = Remote();
-    if (iro == nullptr) {
-        HILOG_ERROR(LOG_CORE, "ServiceControlCmd remote return null");
-        return OBJECT_NULL;
-    }
-
-    MessageParcel data;
-    if (!data.WriteInterfaceToken(LOCAL_ABILITY_MANAGER_INTERFACE_TOKEN)) {
-        HILOG_WARN(LOG_CORE, "ServiceControlCmd interface token check failed");
-        return INVALID_DATA;
-    }
-    if (!data.WriteInt32(systemAbilityId)) {
-        HILOG_WARN(LOG_CORE, "ServiceControlCmd write systemAbilityId failed");
-        return INVALID_DATA;
-    }
-    if (!data.WriteFileDescriptor(fd)) {
-        HILOG_WARN(LOG_CORE, "ServiceControlCmd write fd failed");
-        return INVALID_DATA;
-    }
-    if (!data.WriteString16Vector(args)) {
-        HILOG_WARN(LOG_CORE, "ServiceControlCmd write args failed");
-        return INVALID_DATA;
-    }
-
-    MessageParcel reply;
-    MessageOption option;
-    int32_t status = iro->SendRequest(
-        static_cast<uint32_t>(SafwkInterfaceCode::SERVICE_CONTROL_CMD_TRANSACTION), data, reply, option);
-    if (status != NO_ERROR) {
-        HILOG_ERROR(LOG_CORE, "ServiceControlCmd SendRequest failed, return value : %{public}d", status);
-    }
-    return status;
-}
 }

@@ -1623,47 +1623,4 @@ HWTEST_F(SystemAbilityMgrTest, OnRemoteDied002, TestSize.Level3)
     saMgr->remoteCallbackDeath_->OnRemoteDied(nullptr);
     DTEST_LOG<<"OnRemoteDied002 END";
 }
-
-/**
- * @tc.name: Test GetLocalAbilityManagerProxy001
- * @tc.desc: GetLocalAbilityManagerProxy001
- * @tc.type: FUNC
- * @tc.require: I7VQQG
- */
-HWTEST_F(SystemAbilityMgrTest, GetLocalAbilityManagerProxy001, TestSize.Level3)
-{
-    DTEST_LOG << "GetLocalAbilityManagerProxy001 BEGIN" << std::endl;
-
-    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
-    saMgr->saProfileMap_.clear();
-    auto ret = saMgr->GetLocalAbilityManagerProxy(SAID);
-    EXPECT_TRUE(ret == nullptr);
-    DTEST_LOG << "GetLocalAbilityManagerProxy001 END" << std::endl;
-}
-
-/**
- * @tc.name: Test GetLocalAbilityManagerProxy002
- * @tc.desc: GetLocalAbilityManagerProxy001
- * @tc.type: FUNC
- * @tc.require: I7VQQG
- */
-HWTEST_F(SystemAbilityMgrTest, GetLocalAbilityManagerProxy002, TestSize.Level3)
-{
-    DTEST_LOG << "GetLocalAbilityManagerProxy002 BEGIN" << std::endl;
-
-    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
-    CommonSaProfile saProfile;
-    saProfile.process = u"test";
-    saProfile.saId = SAID;
-    saMgr->saProfileMap_[SAID] = saProfile;
-
-    sptr<IRemoteObject> testAbility = new TestTransactionService();
-    EXPECT_FALSE(testAbility == nullptr);
-    saMgr->systemProcessMap_[u"test"] = testAbility;
-
-    auto ret = saMgr->GetLocalAbilityManagerProxy(SAID);
-    EXPECT_FALSE(ret == nullptr);
-
-    DTEST_LOG << "GetLocalAbilityManagerProxy002 END" << std::endl;
-}
 } // namespace OHOS
