@@ -67,6 +67,13 @@ std::string BuildStringFromData(const uint8_t* data, size_t size)
     return strVal;
 }
 
+void InitData(const uint8_t* data, size_t size)
+{
+    g_baseFuzzData = data;
+    g_baseFuzzSize = size;
+    g_baseFuzzPos = 0;
+}
+
 void SamgrDumperFuzzTest(const uint8_t* data, size_t size)
 {
     SamMockPermission::MockProcess(HIDUMPER_PROCESS_NAME);
@@ -103,12 +110,9 @@ void SamgrDumperFuzzTest(const uint8_t* data, size_t size)
     manager->IpcDumpSingleProcess(fd, cmd, processName);
 }
 
-void FuzzListenerDumpProc(const uint8_t* data, size_t size)
+void FuzzListenerDumpProc()
 {
     SamMockPermission::MockProcess(HIDUMPER_PROCESS_NAME);
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
     int32_t pid1 = GetData<int32_t>();
     int32_t pid2 = GetData<int32_t>();
     std::map<int32_t, std::list<SAListener>> dumpListeners;
@@ -149,11 +153,8 @@ void FuzzListenerDumpProc(const uint8_t* data, size_t size)
     args.clear();
 }
 
-void FuzzFfrtLoadMetrics(const uint8_t* data, size_t size)
+void FuzzFfrtLoadMetrics()
 {
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
     int32_t pid = GetData<int32_t>();
     std::shared_ptr<SystemAbilityStateScheduler> scheduler = std::make_shared<SystemAbilityStateScheduler>();
     int32_t fd = -1;
@@ -182,9 +183,10 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
         return 0;
     }
 
+    OHOS::Samgr::InitData(data, size);
     OHOS::Samgr::SamgrDumperFuzzTest(data, size);
-    OHOS::Samgr::FuzzListenerDumpProc(data, size);
-    OHOS::Samgr::FuzzFfrtLoadMetrics(data, size);
+    OHOS::Samgr::FuzzListenerDumpProc();
+    OHOS::Samgr::FuzzFfrtLoadMetrics();
 
     return 0;
 }
