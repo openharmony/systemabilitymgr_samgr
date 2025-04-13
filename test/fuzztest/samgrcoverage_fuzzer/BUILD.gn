@@ -79,6 +79,7 @@ ohos_fuzztest("SamgrCoverageFuzzTest") {
     "ffrt:libffrt",
     "hilog:libhilog",
     "hisysevent:libhisysevent",
+    "hisysevent:libhisysevent_easy",
     "hitrace:hitrace_meter",
     "init:libbeget_proxy",
     "init:libbegetutil",
