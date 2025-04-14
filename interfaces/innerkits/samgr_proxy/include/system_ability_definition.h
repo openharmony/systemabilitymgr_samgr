@@ -88,6 +88,7 @@ enum {
     BLUETOOTH_HOST_SYS_ABILITY_ID                    = 1130,
     NFC_MANAGER_SYS_ABILITY_ID                       = 1140,
     SE_MANAGER_SYS_ABILITY_ID                        = 1141,
+    NFC_TAG_SYS_ABILITY_ID                           = 1148,
     DISCOVER_SYS_ABILITY_ID                          = 1160,
     DNET_SYS_ABILITY_ID                              = 1170,
     NET_MANAGER_SYS_ABILITY_ID                       = 1150,
