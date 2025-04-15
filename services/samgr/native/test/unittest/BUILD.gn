@@ -731,6 +731,7 @@ ohos_unittest("SystemAbilityMgrDumperTest") {
     "ipc:libdbinder",
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
+    "samgr:dynamic_cache",
   ]
   defines = []
   if (samgr_support_access_token) {
@@ -784,6 +785,7 @@ ohos_unittest("MockSystemAbilityManagerTest") {
     "ipc:libdbinder",
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
+    "samgr:dynamic_cache",
   ]
   defines = []
   if (samgr_support_access_token) {
@@ -989,6 +991,7 @@ ohos_executable("TestTool") {
     "ipc:libdbinder",
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
+    "samgr:dynamic_cache",
   ]
   part_name = "samgr"
   subsystem_name = "systemabilitymgr"
