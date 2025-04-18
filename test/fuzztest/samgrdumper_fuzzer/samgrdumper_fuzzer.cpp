@@ -90,9 +90,10 @@ void SamgrDumperFuzzTest(const uint8_t* data, size_t size)
     SystemAbilityManagerDumper::GetSamgrIpcStatistics(result);
     SystemAbilityManagerDumper::StopSamgrIpcStatistics(result);
     SystemAbilityManagerDumper::StartSamgrIpcStatistics(result);
+    SystemAbilityManagerDumper::GetFfrtDumpInfoProc(scheduler, args, result);
     SystemAbilityManagerDumper::GetSAMgrFfrtInfo(result);
     int32_t pid = BuildInt32FromData(data, size);
-    SystemAbilityManagerDumper::DumpFfrtInfoInProc(scheduler, pid, result);
+    SystemAbilityManagerDumper::DumpFfrtInfoByProcName(pid, Str8ToStr16(processName), result);
 
     std::shared_ptr<SystemAbilityManager> manager = std::make_shared<SystemAbilityManager>();
     manager->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
@@ -148,30 +149,6 @@ void FuzzListenerDumpProc(const uint8_t* data, size_t size)
     SystemAbilityManagerDumper::ListenerDumpProc(dumpListeners, fd, args);
     args.clear();
 }
-
-void FuzzFfrtLoadMetrics(const uint8_t* data, size_t size)
-{
-    g_baseFuzzData = data;
-    g_baseFuzzSize = size;
-    g_baseFuzzPos = 0;
-    int32_t pid = GetData<int32_t>();
-    std::shared_ptr<SystemAbilityStateScheduler> scheduler = std::make_shared<SystemAbilityStateScheduler>();
-    int32_t fd = -1;
-    std::vector<std::string> args;
-    args.push_back("--ffrt");
-    args.push_back(ToString(pid));
-    args.push_back("--start-stat");
-    std::string result;
-    SystemAbilityManagerDumper::GetFfrtLoadMetrics(scheduler, fd, args, result);
-    SystemAbilityManagerDumper::ClearFfrtStatistics();
-    SystemAbilityManagerDumper::GetFfrtLoadMetrics(scheduler, fd, args, result);
-    args.pop_back();
-    args.push_back("--stop-stat");
-    SystemAbilityManagerDumper::GetFfrtLoadMetrics(scheduler, fd, args, result);
-    args.pop_back();
-    args.push_back("--stat");
-    SystemAbilityManagerDumper::GetFfrtLoadMetrics(scheduler, fd, args, result);
-}
 }
 }
 
@@ -184,7 +161,6 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
 
     OHOS::Samgr::SamgrDumperFuzzTest(data, size);
     OHOS::Samgr::FuzzListenerDumpProc(data, size);
-    OHOS::Samgr::FuzzFfrtLoadMetrics(data, size);
 
     return 0;
 }

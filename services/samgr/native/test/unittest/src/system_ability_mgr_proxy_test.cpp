@@ -20,7 +20,6 @@
 #include "mock_iro_sendrequest.h"
 #include "sam_mock_permission.h"
 #include "sa_status_change_mock.h"
-#include "system_ability_manager_mock.h"
 #include "system_ability_load_callback_proxy.h"
 #include "system_ability_status_change_proxy.h"
 #include "system_ability_load_callback_stub.h"

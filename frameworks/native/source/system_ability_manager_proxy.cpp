@@ -1562,9 +1562,4 @@ int32_t SystemAbilityManagerProxy::GetCommonEventExtraDataIdlist(int32_t saId, s
     }
     return ERR_OK;
 }
-
-sptr<IRemoteObject> SystemAbilityManagerProxy::GetLocalAbilityManagerProxy(int32_t systemAbilityId)
-{
-    return nullptr;
-}
 } // namespace OHOS

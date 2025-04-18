@@ -229,10 +229,6 @@ public:
     int32_t GetCommonEventExtraDataIdlist(int32_t saId, std::vector<int64_t>& extraDataIdList,
         const std::string& eventName = "") override;
     sptr<IRemoteObject> GetSystemProcess(const std::u16string& procName);
-    sptr<IRemoteObject> GetLocalAbilityManagerProxy(int32_t systemAbilityId) override
-    {
-        return nullptr;
-    }
     bool IsModuleUpdate(int32_t systemAbilityId)
     {
         CommonSaProfile saProfile;
