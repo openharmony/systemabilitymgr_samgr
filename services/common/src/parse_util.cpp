@@ -147,7 +147,7 @@ void ParseUtil::OpenSo(SaProfile& saProfile)
 {
     if (saProfile.handle == nullptr) {
         string dlopenTag = ToString(saProfile.saId) + "_DLOPEN";
-        HITRACE_METER_NAME(HITRACE_TAG_SAMGR, dlopenTag);
+        HitraceScopedEx samgrHitrace(HITRACE_LEVEL_INFO, HITRACE_TAG_SAMGR, dlopenTag.c_str());
         int64_t begin = GetTickCount();
         DlHandle handle = nullptr;
         if (saProfile.runOnCreate) {
