@@ -631,6 +631,8 @@ int32_t SystemAbilityManagerStub::LoadSystemAbilityInner(MessageParcel& data, Me
     int32_t systemAbilityId = -1;
     bool ret = false;
     sptr<ISystemAbilityLoadCallback> callback = nullptr;
+    std::string loadSystemAbilityTag = ToString(systemAbilityId) + "_LoadSystemAbility";
+    HitraceScopedEx samgrHitrace(HITRACE_LEVEL_INFO, HITRACE_TAG_SAMGR, loadSystemAbilityTag.c_str());
     {
         SamgrXCollie samgrXCollie("samgrStub--loadSa_readData");
         ret = data.ReadInt32(systemAbilityId);
@@ -638,8 +640,6 @@ int32_t SystemAbilityManagerStub::LoadSystemAbilityInner(MessageParcel& data, Me
             HILOGW("LoadSystemAbilityInner read SAId failed!");
             return ERR_INVALID_VALUE;
         }
-        std::string loadSystemAbilityTag = ToString(systemAbilityId) + "_LoadSystemAbility";
-        HITRACE_METER_NAME(HITRACE_TAG_SAMGR, loadSystemAbilityTag);
         if (!CheckInputSysAbilityId(systemAbilityId)) {
             HILOGW("LoadSystemAbilityInner check SAId failed!");
             return ERR_INVALID_VALUE;
