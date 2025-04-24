@@ -14,6 +14,9 @@
  */
 
 #include <cinttypes>
+#include <fstream>
+#include <sys/sysinfo.h>
+#include "securec.h"
 
 #include "common_event_collect.h"
 
@@ -43,6 +46,14 @@ constexpr int64_t MAX_EXTRA_DATA_ID = 1000000000;
 constexpr int32_t COMMON_EVENT_SERVICE_ID = 3299;
 constexpr int32_t TRIGGER_THREAD_RECLAIM_DELAY_TIME = 130;
 constexpr int32_t TRIGGER_THREAD_RECLAIM_DURATION_TIME = 2;
+constexpr int32_t CPU_STAT_MIN_FIELDS = 7;
+constexpr int32_t CPU_STAT_CHECK_INTERVAL = 5;
+constexpr int32_t CPU_LOAD_SHIFT = 16;
+constexpr int32_t CPU_LOAD_CHECK_INTERVAL = 300;
+constexpr float CPU_LOAD_INVALID = 0.0f;
+constexpr float CPU_LOAD_IDLE_THRESHOLD = 10.0f;
+constexpr float CPU_LOAD_PERCENT = 100.0f;
+constexpr const char* CPU_STAT_INFO = "/proc/stat";
 constexpr const char* UID = "uid";
 constexpr const char* NET_TYPE = "NetType";
 constexpr const char* BUNDLE_NAME = "bundleName";
@@ -94,6 +105,7 @@ int32_t CommonEventCollect::OnStart()
     workHandler_ = std::make_shared<CommonHandler>(this);
     unsubHandler_ = std::make_shared<CommonHandler>(this);
     workHandler_->SendEvent(INIT_EVENT);
+    StartMonitorThread();
     return ERR_OK;
 }
 
@@ -105,6 +117,7 @@ int32_t CommonEventCollect::OnStop()
     if (unsubHandler_ != nullptr) {
         unsubHandler_ = nullptr;
     }
+    StopMonitorThread();
     return ERR_OK;
 }
 
@@ -702,5 +715,129 @@ void CommonEventSubscriber::OnReceiveEvent(const EventFwk::CommonEventData& data
     OnDemandEvent event = {COMMON_EVENT, action, std::to_string(code), extraDataId};
     collect->ReportEvent(event);
     collect->StartReclaimIpcThreadWork(data);
+}
+
+bool CommonEventCollect::GetCpuTimes(const char* file, uint64_t& total, uint64_t& idle)
+{
+    if (file == nullptr) {
+        HILOGE("Invalid file name");
+        return false;
+    }
+
+    std::ifstream cpuStatFile(file);
+    if (!cpuStatFile.is_open()) {
+        HILOGE("Failed to open %{public}s", file);
+        return false;
+    }
+
+    std::string line;
+    if (!std::getline(cpuStatFile, line)) {
+        HILOGE("Failed to read %{public}s", file);
+        return false;
+    }
+
+    uint64_t user;
+    uint64_t nice;
+    uint64_t system;
+    uint64_t iowait;
+    uint64_t irq;
+    uint64_t softirq;
+    uint64_t steal;
+    uint64_t guest = 0;
+    uint64_t guestNice = 0;
+
+    int num = sscanf_s(line.c_str(), "cpu %" SCNu64 " %" SCNu64 " %" SCNu64 " %" SCNu64
+        " %" SCNu64 " %" SCNu64 " %" SCNu64 " %" SCNu64 " %" SCNu64 " %" SCNu64,
+        &user, &nice, &system, &idle, &iowait, &irq, &softirq, &steal, &guest, &guestNice);
+
+    if (num < CPU_STAT_MIN_FIELDS) {
+        HILOGE("Failed to parse %{public}s (got %{public}d fields)", file, num);
+        return false;
+    }
+
+    total = user + nice + system + idle + iowait + irq + softirq + steal;
+    if (num > CPU_STAT_MIN_FIELDS) {
+        total += guest + guestNice;
+    }
+
+    return true;
+}
+
+float CommonEventCollect::GetCpuUsage(const char* file, uint32_t interval)
+{
+    if (file == nullptr) {
+        HILOGE("Invalid file name");
+        return CPU_LOAD_INVALID;
+    }
+
+    if (interval <= 0) {
+        HILOGE("Invalid interval");
+        return CPU_LOAD_INVALID;
+    }
+
+    uint64_t totalPre = 0;
+    uint64_t idlePre = 0;
+    uint64_t total = 0;
+    uint64_t idle = 0;
+
+    if (!GetCpuTimes(file, totalPre, idlePre)) {
+        HILOGE("Failed to get pre CPU times");
+        return CPU_LOAD_INVALID;
+    }
+
+    std::this_thread::sleep_for(std::chrono::seconds(interval));
+    if (!GetCpuTimes(file, total, idle)) {
+        HILOGE("Failed to get CPU times");
+        return CPU_LOAD_INVALID;
+    }
+
+    uint64_t totalDelta = total - totalPre;
+    uint64_t idleDelta = idle - idlePre;
+    if (totalDelta == 0) {
+        return CPU_LOAD_INVALID;
+    }
+
+    float usage = static_cast<float>(totalDelta - idleDelta) / totalDelta;
+    return usage * CPU_LOAD_PERCENT;
+}
+
+void CommonEventCollect::MonitorCpuUsageThread()
+{
+    struct sysinfo info;
+    uint64_t coreNum = sysconf(_SC_NPROCESSORS_ONLN);
+    uint64_t baseLoad = coreNum << CPU_LOAD_SHIFT;
+    pthread_setname_np(pthread_self(), "OS_CPU_MONITOR");
+
+    while (keepRunning_) {
+        std::this_thread::sleep_for(std::chrono::seconds(CPU_LOAD_CHECK_INTERVAL - CPU_STAT_CHECK_INTERVAL));
+        float usage = GetCpuUsage(CPU_STAT_INFO, CPU_STAT_CHECK_INTERVAL);
+        if (sysinfo(&info) == 0) {
+            HILOGI("cpu usage: %{public}f 1min %{public}lu 5min %{public}lu", usage, info.loads[0], info.loads[1]);
+            if (info.loads[0] - baseLoad < (1 << CPU_LOAD_SHIFT) && // 1min avg load <= (logic core num + 1)
+                info.loads[0] < info.loads[1] && // 1min avg load less than 5min avg load
+                usage > CPU_LOAD_INVALID && // cpu usage > 0% and <= 10%
+                usage <= CPU_LOAD_IDLE_THRESHOLD) {
+                HILOGI("cpu idle TriggerSystemIPCThreadReclaim");
+                IPCSkeleton::TriggerSystemIPCThreadReclaim();
+            }
+        }
+    }
+}
+
+void CommonEventCollect::StartMonitorThread()
+{
+    keepRunning_ = true;
+    monitorThread_ = std::thread(&CommonEventCollect::MonitorCpuUsageThread, this);
+    monitorThread_.detach();
+}
+
+void CommonEventCollect::StopMonitorThread()
+{
+    if (keepRunning_) {
+        keepRunning_ = false;
+        if (monitorThread_.joinable()) {
+            monitorThread_.join();
+        }
+    }
 }
 } // namespace OHOS
