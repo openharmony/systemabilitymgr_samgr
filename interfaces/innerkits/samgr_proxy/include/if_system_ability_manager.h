@@ -292,18 +292,6 @@ public:
         std::vector<sptr<IRemoteObject>>& saList) = 0;
 
     /**
-     * GetLocalAbilityManagerProxy, Return local ability manager proxy.
-     *
-     * @param systemAbilityId, need to obtain the said of sa.
-     * @return nullptr indicates acquistion failure.
-     */
-    virtual sptr<IRemoteObject> GetLocalAbilityManagerProxy(int32_t systemAbilityId)
-    {
-        (void)systemAbilityId;
-        return nullptr;
-    }
-
-    /**
      * GetRunningSaExtensionInfoList, Return list of started said and process hanlde that match extension.
      *
      * @param extension, extension, match with profile extension.

@@ -17,7 +17,6 @@
 #include "ability_death_recipient.h"
 #include "system_ability_status_change_proxy.h"
 #include "ipc_skeleton.h"
-#include "ffrt_inner.h"
 
 #include "test_log.h"
 #include <sam_mock_permission.h>
@@ -106,284 +105,6 @@ HWTEST_F(SystemAbilityManagerDumperTest, FfrtDumpProc001, TestSize.Level3)
     DTEST_LOG << "FfrtDumpProc001 end" << std::endl;
 }
 #endif
-
-/**
- * @tc.name: FfrtDumpProc002
- * @tc.desc: FfrtDumpProc IllegalInput
- * @tc.type: FUNC
- * @tc.require: IBMM2R
- */
-#ifdef SUPPORT_ACCESS_TOKEN
-HWTEST_F(SystemAbilityManagerDumperTest, FfrtDumpProc002, TestSize.Level3)
-{
-    DTEST_LOG << "FfrtDumpProc002 begin" << std::endl;
-    SamMockPermission::MockProcess("hidumper_service");
-    std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>();
-    int32_t fd = -1;
-    std::vector<std::string> args;
-    auto ret = SystemAbilityManagerDumper::FfrtDumpProc(abilityStateScheduler, fd, args);
-    EXPECT_EQ(ret, SAVE_FD_FAIL);
-    args.emplace_back("--ffrt");
-    args.emplace_back("pid1");
-    args.emplace_back("pid2");
-    args.emplace_back("pid3");
-    ret = SystemAbilityManagerDumper::FfrtDumpProc(abilityStateScheduler, fd, args);
-    EXPECT_EQ(ret, SAVE_FD_FAIL);
-    DTEST_LOG << "FfrtDumpProc002 end" << std::endl;
-}
-#endif
-
-/**
- * @tc.name: FfrtDumpProc003
- * @tc.desc: FfrtDumpProc GetFfrtDumpInfoProc
- * @tc.type: FUNC
- * @tc.require: IBMM2R
- */
-#ifdef SUPPORT_ACCESS_TOKEN
-HWTEST_F(SystemAbilityManagerDumperTest, FfrtDumpProc003, TestSize.Level3)
-{
-    DTEST_LOG << "FfrtDumpProc003 begin" << std::endl;
-    SamMockPermission::MockProcess("hidumper_service");
-    std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>();
-    int32_t fd = -1;
-    std::vector<std::string> args;
-    args.emplace_back("--ffrt");
-    args.emplace_back("9999");
-    auto ret = SystemAbilityManagerDumper::FfrtDumpProc(abilityStateScheduler, fd, args);
-    EXPECT_EQ(ret, SAVE_FD_FAIL);
-    DTEST_LOG << "FfrtDumpProc003 end" << std::endl;
-}
-#endif
-
-/**
- * @tc.name: FfrtDumpProc004
- * @tc.desc: FfrtDumpProc GetFfrtLoadMetrics
- * @tc.type: FUNC
- * @tc.require: IBMM2R
- */
-#ifdef SUPPORT_ACCESS_TOKEN
-HWTEST_F(SystemAbilityManagerDumperTest, FfrtDumpProc004, TestSize.Level3)
-{
-    DTEST_LOG << "FfrtDumpProc004 begin" << std::endl;
-    SamMockPermission::MockProcess("hidumper_service");
-    std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>();
-    int32_t fd = -1;
-    std::vector<std::string> args;
-    args.emplace_back("--ffrt");
-    args.emplace_back("9999");
-    args.emplace_back("--stat");
-    auto ret = SystemAbilityManagerDumper::FfrtDumpProc(abilityStateScheduler, fd, args);
-    EXPECT_EQ(ret, SAVE_FD_FAIL);
-    DTEST_LOG << "FfrtDumpProc004 end" << std::endl;
-}
-#endif
-
-/**
- * @tc.name: GetFfrtLoadMetrics001
- * @tc.desc: GetFfrtLoadMetrics processIds empty
- * @tc.type: FUNC
- * @tc.require: IBMM2R
- */
-HWTEST_F(SystemAbilityManagerDumperTest, GetFfrtLoadMetrics001, TestSize.Level3)
-{
-    DTEST_LOG << "GetFfrtLoadMetrics001 begin" << std::endl;
-    std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>();
-    int32_t fd = -1;
-    std::vector<std::string> args;
-    args.emplace_back("--ffrt");
-    args.emplace_back("test");
-    std::string result;
-    SystemAbilityManagerDumper::GetFfrtLoadMetrics(abilityStateScheduler, fd, args, result);
-    EXPECT_NE(result.size(), 0);
-    DTEST_LOG << "GetFfrtLoadMetrics001 end" << std::endl;
-}
-
-/**
- * @tc.name: GetFfrtLoadMetrics002
- * @tc.desc: GetFfrtLoadMetrics cmd invalid
- * @tc.type: FUNC
- * @tc.require: IBMM2R
- */
-HWTEST_F(SystemAbilityManagerDumperTest, GetFfrtLoadMetrics002, TestSize.Level3)
-{
-    DTEST_LOG << "GetFfrtLoadMetrics002 begin" << std::endl;
-    std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>();
-    int32_t fd = -1;
-    std::vector<std::string> args;
-    args.emplace_back("--ffrt");
-    args.emplace_back("9999");
-    args.emplace_back("xxx");
-    std::string result;
-    SystemAbilityManagerDumper::GetFfrtLoadMetrics(abilityStateScheduler, fd, args, result);
-    EXPECT_NE(result.size(), 0);
-    DTEST_LOG << "GetFfrtLoadMetrics002 end" << std::endl;
-}
-
-/**
- * @tc.name: GetFfrtLoadMetrics003
- * @tc.desc: GetFfrtLoadMetrics cmd invalid
- * @tc.type: FUNC
- * @tc.require: IBMM2R
- */
-HWTEST_F(SystemAbilityManagerDumperTest, GetFfrtLoadMetrics003, TestSize.Level3)
-{
-    DTEST_LOG << "GetFfrtLoadMetrics003 begin" << std::endl;
-    std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>();
-    int32_t fd = -1;
-    std::vector<std::string> args;
-    args.emplace_back("--ffrt");
-    args.emplace_back("9999");
-    args.emplace_back("--stat");
-    std::string result;
-    SystemAbilityManagerDumper::GetFfrtLoadMetrics(abilityStateScheduler, fd, args, result);
-    EXPECT_NE(result.size(), 0);
-    DTEST_LOG << "GetFfrtLoadMetrics003 end" << std::endl;
-}
-
-/**
- * @tc.name: FfrtStatCmdParser001
- * @tc.desc: FfrtStatCmdParser
- * @tc.type: FUNC
- * @tc.require: IBMM2R
- */
-HWTEST_F(SystemAbilityManagerDumperTest, FfrtStatCmdParser001, TestSize.Level3)
-{
-    DTEST_LOG << "FfrtStatCmdParser001 begin" << std::endl;
-    int32_t cmd = -1;
-    std::vector<std::string> args;
-    args.emplace_back("--ffrt");
-    args.emplace_back("9999");
-    args.emplace_back("--start-stat");
-    SystemAbilityManagerDumper::FfrtStatCmdParser(cmd, args);
-    EXPECT_NE(cmd, -1);
-    DTEST_LOG << "FfrtStatCmdParser001 end" << std::endl;
-}
-
-/**
- * @tc.name: FfrtStatCmdParser002
- * @tc.desc: FfrtStatCmdParser
- * @tc.type: FUNC
- * @tc.require: IBMM2R
- */
-HWTEST_F(SystemAbilityManagerDumperTest, FfrtStatCmdParser002, TestSize.Level3)
-{
-    DTEST_LOG << "FfrtStatCmdParser002 begin" << std::endl;
-    int32_t cmd = -1;
-    std::vector<std::string> args;
-    args.emplace_back("--ffrt");
-    args.emplace_back("9999");
-    args.emplace_back("--stop-stat");
-    SystemAbilityManagerDumper::FfrtStatCmdParser(cmd, args);
-    EXPECT_NE(cmd, -1);
-    DTEST_LOG << "FfrtStatCmdParser002 end" << std::endl;
-}
-
-/**
- * @tc.name: FfrtStatCmdParser003
- * @tc.desc: FfrtStatCmdParser
- * @tc.type: FUNC
- * @tc.require: IBMM2R
- */
-HWTEST_F(SystemAbilityManagerDumperTest, FfrtStatCmdParser003, TestSize.Level3)
-{
-    DTEST_LOG << "FfrtStatCmdParser003 begin" << std::endl;
-    int32_t cmd = -1;
-    std::vector<std::string> args;
-    args.emplace_back("--ffrt");
-    args.emplace_back("9999");
-    args.emplace_back("--stat");
-    SystemAbilityManagerDumper::FfrtStatCmdParser(cmd, args);
-    EXPECT_NE(cmd, -1);
-    DTEST_LOG << "FfrtStatCmdParser003 end" << std::endl;
-}
-
-/**
- * @tc.name: FfrtStatCmdParser004
- * @tc.desc: FfrtStatCmdParser cmd invalid
- * @tc.type: FUNC
- * @tc.require: IBMM2R
- */
-HWTEST_F(SystemAbilityManagerDumperTest, FfrtStatCmdParser004, TestSize.Level3)
-{
-    DTEST_LOG << "FfrtStatCmdParser004 begin" << std::endl;
-    int32_t cmd = -1;
-    std::vector<std::string> args;
-    args.emplace_back("--ffrt");
-    args.emplace_back("9999");
-    args.emplace_back("xxxx");
-    SystemAbilityManagerDumper::FfrtStatCmdParser(cmd, args);
-    EXPECT_EQ(cmd, -1);
-    DTEST_LOG << "FfrtStatCmdParser004 end" << std::endl;
-}
-
-/**
- * @tc.name: CollectFfrtMetricInfoInProcs001
- * @tc.desc: CollectFfrtMetricInfoInProcs
- * @tc.type: FUNC
- * @tc.require: IBMM2R
- */
-HWTEST_F(SystemAbilityManagerDumperTest, CollectFfrtMetricInfoInProcs001, TestSize.Level3)
-{
-    DTEST_LOG << "CollectFfrtMetricInfoInProcs001 begin" << std::endl;
-    std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>();
-    int32_t fd = -1;
-    std::vector<int32_t> processIds;
-    processIds.emplace_back(getpid());
-    int32_t cmd = -1;
-    std::string result;
-    SystemAbilityManagerDumper::CollectFfrtMetricInfoInProcs(fd, processIds, abilityStateScheduler, cmd, result);
-    EXPECT_NE(result.size(), 0);
-    DTEST_LOG << "CollectFfrtMetricInfoInProcs001 end" << std::endl;
-}
-
-/**
- * @tc.name: CollectFfrtStatistics001
- * @tc.desc: CollectFfrtStatistics
- * @tc.type: FUNC
- * @tc.require: IBMM2R
- */
-HWTEST_F(SystemAbilityManagerDumperTest, CollectFfrtStatistics001, TestSize.Level3)
-{
-    DTEST_LOG << "CollectFfrtStatistics001 begin" << std::endl;
-    std::string result;
-    auto ret = SystemAbilityManagerDumper::CollectFfrtStatistics(FFRT_STAT_CMD_START, result);
-    SystemAbilityManagerDumper::ClearFfrtStatistics();
-    EXPECT_TRUE(ret);
-    ret = SystemAbilityManagerDumper::CollectFfrtStatistics(FFRT_STAT_CMD_GET, result);
-    EXPECT_FALSE(ret);
-    ret = SystemAbilityManagerDumper::CollectFfrtStatistics(FFRT_STAT_CMD_STOP, result);
-    EXPECT_FALSE(ret);
-    ret = SystemAbilityManagerDumper::CollectFfrtStatistics(FFRT_STAT_CMD_START, result);
-    EXPECT_TRUE(ret);
-    ret = SystemAbilityManagerDumper::CollectFfrtStatistics(FFRT_STAT_CMD_START, result);
-    EXPECT_FALSE(ret);
-    ret = SystemAbilityManagerDumper::CollectFfrtStatistics(FFRT_STAT_CMD_GET, result);
-    EXPECT_FALSE(ret);
-    auto testTask1 = [] () {
-        DTEST_LOG << "testTask1 end" << std::endl;
-    };
-    auto testTask2 = [] () {
-        DTEST_LOG << "testTask2 end" << std::endl;
-    };
-    SystemAbilityManagerDumper::handler_->PostTask(testTask1, "testTask1", 0);
-    SystemAbilityManagerDumper::handler_->PostTask(testTask2, "testTask2", 0);
-    usleep(10 * 1000);
-    ret = SystemAbilityManagerDumper::CollectFfrtStatistics(FFRT_STAT_CMD_STOP, result);
-    EXPECT_TRUE(ret);
-    ffrt_stat* currentStat = (ffrt_stat*)SystemAbilityManagerDumper::ffrtMetricBuffer;
-    ASSERT_FALSE(currentStat == nullptr);
-    currentStat->endTime = 0;
-    ret = SystemAbilityManagerDumper::CollectFfrtStatistics(FFRT_STAT_CMD_GET, result);
-    EXPECT_TRUE(ret);
-    DTEST_LOG << "CollectFfrtStatistics001 end" << std::endl;
-}
 
 /**
  * @tc.name: GetSAMgrFfrtInfo001
@@ -1314,7 +1035,6 @@ HWTEST_F(SystemAbilityManagerDumperTest, GetFfrtDumpInfoProc001, TestSize.Level2
         std::make_shared<SystemAbilityStateScheduler>();
     std::vector<std::string> args;
     args.emplace_back("--ffrt");
-    args.emplace_back("");
     std::string result;
     bool ret = SystemAbilityManagerDumper::GetFfrtDumpInfoProc(systemAbilityStateScheduler, args, result);
     EXPECT_EQ(ret, false);
@@ -1334,7 +1054,7 @@ HWTEST_F(SystemAbilityManagerDumperTest, GetFfrtDumpInfoProc002, TestSize.Level2
         std::make_shared<SystemAbilityStateScheduler>();
     std::vector<std::string> args;
     args.emplace_back("--ffrt");
-    args.emplace_back("12k");
+    args.emplace_back("");
     std::string result;
     bool ret = SystemAbilityManagerDumper::GetFfrtDumpInfoProc(systemAbilityStateScheduler, args, result);
     EXPECT_EQ(ret, false);
@@ -1352,6 +1072,26 @@ HWTEST_F(SystemAbilityManagerDumperTest, GetFfrtDumpInfoProc003, TestSize.Level2
     DTEST_LOG << "GetFfrtDumpInfoProc003 begin" << std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
+    std::vector<std::string> args;
+    args.emplace_back("--ffrt");
+    args.emplace_back("12k");
+    std::string result;
+    bool ret = SystemAbilityManagerDumper::GetFfrtDumpInfoProc(systemAbilityStateScheduler, args, result);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "GetFfrtDumpInfoProc003 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetFfrtDumpInfoProc004
+ * @tc.desc: test GetFfrtDumpInfoProc
+ * @tc.type: FUNC
+ * @tc.require: I6W28
+ */
+HWTEST_F(SystemAbilityManagerDumperTest, GetFfrtDumpInfoProc004, TestSize.Level2)
+{
+    DTEST_LOG << "GetFfrtDumpInfoProc004 begin" << std::endl;
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
     InitSaMgr(saMgr);
@@ -1362,17 +1102,17 @@ HWTEST_F(SystemAbilityManagerDumperTest, GetFfrtDumpInfoProc003, TestSize.Level2
     std::string result;
     bool ret = SystemAbilityManagerDumper::GetFfrtDumpInfoProc(systemAbilityStateScheduler, args, result);
     EXPECT_EQ(ret, true);
-    DTEST_LOG << "GetFfrtDumpInfoProc003 end" << std::endl;
+    DTEST_LOG << "GetFfrtDumpInfoProc004 end" << std::endl;
 }
 
 /**
- * @tc.name: GetFfrtDumpInfoProc004
+ * @tc.name: GetFfrtDumpInfoProc005
  * @tc.desc: test GetFfrtDumpInfoProc
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityManagerDumperTest, GetFfrtDumpInfoProc004, TestSize.Level1)
+HWTEST_F(SystemAbilityManagerDumperTest, GetFfrtDumpInfoProc005, TestSize.Level1)
 {
-    DTEST_LOG << "GetFfrtDumpInfoProc004 begin" << std::endl;
+    DTEST_LOG << "GetFfrtDumpInfoProc005 begin" << std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -1391,7 +1131,7 @@ HWTEST_F(SystemAbilityManagerDumperTest, GetFfrtDumpInfoProc004, TestSize.Level1
     std::string result;
     bool ret = SystemAbilityManagerDumper::GetFfrtDumpInfoProc(systemAbilityStateScheduler, args, result);
     EXPECT_EQ(ret, true);
-    DTEST_LOG << "GetFfrtDumpInfoProc004 end" << std::endl;
+    DTEST_LOG << "GetFfrtDumpInfoProc005 end" << std::endl;
 }
 
 /**

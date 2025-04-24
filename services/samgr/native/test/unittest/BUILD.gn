@@ -478,7 +478,6 @@ ohos_unittest("SystemAbilityMgrProxyTest") {
     "${samgr_services_dir}/test/unittest/src/mock_iro_sendrequest.cpp",
     "${samgr_services_dir}/test/unittest/src/mock_permission.cpp",
     "${samgr_services_dir}/test/unittest/src/sa_status_change_mock.cpp",
-    "${samgr_services_dir}/test/unittest/src/system_ability_manager_mock.cpp",
     "${samgr_services_dir}/test/unittest/src/system_ability_mgr_proxy_test.cpp",
     "//foundation/systemabilitymgr/samgr/frameworks/native/source/system_ability_manager_proxy.cpp",
     "//foundation/systemabilitymgr/samgr/frameworks/native/source/system_process_status_change_stub.cpp",
@@ -564,6 +563,7 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
     "${samgr_services_dir}/source/collect/icollect_plugin.cpp",
     "${samgr_services_dir}/source/ffrt_handler.cpp",
     "${samgr_services_dir}/source/memory_guard.cpp",
+    "${samgr_services_dir}/source/rpc_callback_imp.cpp",
     "${samgr_services_dir}/source/samgr_time_handler.cpp",
     "${samgr_services_dir}/source/schedule/system_ability_event_handler.cpp",
     "${samgr_services_dir}/source/schedule/system_ability_state_machine.cpp",
@@ -572,7 +572,9 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
     "${samgr_services_dir}/source/system_ability_manager_dumper.cpp",
     "${samgr_services_dir}/source/system_ability_manager_stub.cpp",
     "${samgr_services_dir}/source/system_ability_manager_util.cpp",
+    "${samgr_services_dir}/test/unittest/src/itest_transaction_service.cpp",
     "${samgr_services_dir}/test/unittest/src/mock_accesstoken_kit.cpp",
+    "${samgr_services_dir}/test/unittest/src/mock_permission.cpp",
     "${samgr_services_dir}/test/unittest/src/sa_status_change_mock.cpp",
     "${samgr_services_dir}/test/unittest/src/system_ability_event_handler_test.cpp",
     "${samgr_services_dir}/test/unittest/src/system_ability_state_machine_test.cpp",
@@ -665,52 +667,6 @@ ohos_unittest("SystemAbilityMgrDumperTest") {
     ":sam_test_config",
     "${samgr_dir}/services/samgr/native:sam_config",
     "//foundation/systemabilitymgr/samgr/test/resource:coverage_flags",
-  ]
-
-  if (target_cpu == "arm") {
-    cflags = [ "-DBINDER_IPC_32BIT" ]
-  }
-
-  deps = [ ":samgr_proxy_tdd" ]
-
-  external_deps = [
-    "access_token:libaccesstoken_sdk",
-    "c_utils:utils",
-    "ffrt:libffrt",
-    "googletest:gtest_main",
-    "hilog:libhilog",
-    "hisysevent:libhisysevent",
-    "hitrace:hitrace_meter",
-    "init:libbeget_proxy",
-    "init:libbegetutil",
-    "ipc:ipc_single",
-    "ipc:libdbinder",
-    "json:nlohmann_json_static",
-    "safwk:system_ability_fwk",
-  ]
-  defines = []
-  if (samgr_support_access_token) {
-    external_deps += [
-      "access_token:libnativetoken_shared",
-      "access_token:libtokensetproc_shared",
-    ]
-    defines += [ "SUPPORT_ACCESS_TOKEN" ]
-  }
-}
-
-ohos_unittest("MockSystemAbilityManagerTest") {
-  module_out_path = module_output_path
-
-  sources = [
-    "${samgr_services_dir}/source/ffrt_handler.cpp",
-    "${samgr_services_dir}/source/system_ability_manager_dumper.cpp",
-    "${samgr_services_dir}/test/unittest/src/mock_system_ability_manager_test.cpp",
-  ]
-
-  configs = [
-    ":sam_test_config",
-    "${samgr_dir}/services/samgr/native:sam_config",
-    "${samgr_dir}/test/resource:coverage_flags",
   ]
 
   if (target_cpu == "arm") {
@@ -979,7 +935,6 @@ group("unittest") {
   testonly = true
   deps = [
     ":LocalAbilityManagerProxyTest",
-    ":MockSystemAbilityManagerTest",
     ":SystemAbilityMgrCollectTest",
     ":SystemAbilityMgrDeviceNetworkingTest",
     ":SystemAbilityMgrDumperTest",

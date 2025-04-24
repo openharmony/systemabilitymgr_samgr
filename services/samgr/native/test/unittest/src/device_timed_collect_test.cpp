@@ -825,6 +825,7 @@ HWTEST_F(DeviceTimedCollectTest, ProcessPersistenceTimedTask002, TestSize.Level3
 }
 #endif
 
+#ifdef PREFERENCES_ENABLE
 HWTEST_F(DeviceTimedCollectTest, ProcessPersistenceLoopTask001, TestSize.Level3)
 {
     DTEST_LOG << " ProcessPersistenceLoopTask001 begin" << std::endl;
@@ -842,6 +843,7 @@ HWTEST_F(DeviceTimedCollectTest, ProcessPersistenceLoopTask001, TestSize.Level3)
     EXPECT_NE(0, disTime);
     DTEST_LOG << " ProcessPersistenceLoopTask001 end" << std::endl;
 }
+#endif
 
 HWTEST_F(DeviceTimedCollectTest, PostNonPersistenceLoopTaskLocked001, TestSize.Level3)
 {
