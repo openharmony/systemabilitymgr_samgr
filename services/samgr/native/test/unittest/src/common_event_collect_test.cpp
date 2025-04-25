@@ -18,6 +18,8 @@
 #include "sa_profiles.h"
 #include "string_ex.h"
 #include "test_log.h"
+#include <fstream>
+#include <string>
 
 #define private public
 #include "common_event_collect.h"
@@ -34,6 +36,7 @@ namespace OHOS {
 namespace {
 constexpr uint32_t COMMON_DIED_EVENT = 11;
 constexpr const char* COMMON_EVENT_ACTION_NAME = "common_event_action_name";
+constexpr const char* TEST_CPU_STAT_FILE = "test_cpu_stat";
 }
 
 
@@ -50,11 +53,14 @@ void CommonEventCollectTest::TearDownTestCase()
 void CommonEventCollectTest::SetUp()
 {
     DTEST_LOG << "SetUp" << std::endl;
+    std::ofstream outfile(TEST_CPU_STAT_FILE);
+    outfile.close();
 }
 
 void CommonEventCollectTest::TearDown()
 {
     DTEST_LOG << "TearDown" << std::endl;
+    remove(TEST_CPU_STAT_FILE);
 }
 
 /**
@@ -892,5 +898,113 @@ HWTEST_F(CommonEventCollectTest, StartReclaimIpcThreadWork001, TestSize.Level3)
     commonEventCollect->StartReclaimIpcThreadWork(eventData);
     EXPECT_NE(nullptr, commonEventCollect->workHandler_);
     DTEST_LOG<<"StartReclaimIpcThreadWork001 END"<< std::endl;
+}
+
+HWTEST_F(CommonEventCollectTest, GetCpuTimesWork001, TestSize.Level3) {
+    // Prepare test data
+    DTEST_LOG<<"GetCpuTimesWork001 BEGIN"<< std::endl;
+    std::ofstream outfile(TEST_CPU_STAT_FILE);
+    outfile << "cpu 1000 200 300 4000 500 0 0 0 0 0";
+    outfile.close();
+    uint64_t total = 0, idle = 0;
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
+    bool ret = commonEventCollect->GetCpuTimes(TEST_CPU_STAT_FILE, total, idle);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(idle, 4000);
+    EXPECT_EQ(total, 1000 + 200 + 300 + 4000 + 500);
+    DTEST_LOG<<"GetCpuTimesWork001 END"<< std::endl;
+}
+
+HWTEST_F(CommonEventCollectTest, GetCpuTimesWork002, TestSize.Level3) {
+    // Prepare test data with guest times
+    DTEST_LOG<<"GetCpuTimesWork002 BEGIN"<< std::endl;
+    std::ofstream outfile(TEST_CPU_STAT_FILE);
+    outfile << "cpu 1000 200 300 4000 500 0 0 0 100 50";
+    outfile.close();
+    uint64_t total = 0, idle = 0;
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
+    bool ret = commonEventCollect->GetCpuTimes(TEST_CPU_STAT_FILE, total, idle);
+    EXPECT_TRUE(ret);
+    EXPECT_EQ(idle, 4000);
+    EXPECT_EQ(total, 1000 + 200 + 300 + 4000 + 500 + 100 + 50);
+    DTEST_LOG<<"GetCpuTimesWork002 END"<< std::endl;
+}
+
+HWTEST_F(CommonEventCollectTest, GetCpuTimesWork003, TestSize.Level3) {
+    // Don't create the file to simulate open failure
+    DTEST_LOG<<"GetCpuTimesWork003 BEGIN"<< std::endl;
+    uint64_t total = 0, idle = 0;
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
+    bool ret = commonEventCollect->GetCpuTimes(TEST_CPU_STAT_FILE, total, idle);
+    EXPECT_FALSE(ret);
+    DTEST_LOG<<"GetCpuTimesWork003 END"<< std::endl;
+}
+
+HWTEST_F(CommonEventCollectTest, GetCpuTimesWork004, TestSize.Level3) {
+    // Create empty file to simulate read failure
+    DTEST_LOG<<"GetCpuTimesWork004 BEGIN"<< std::endl;
+    std::ofstream outfile(TEST_CPU_STAT_FILE);
+    outfile.close();
+    uint64_t total = 0, idle = 0;
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
+    bool ret = commonEventCollect->GetCpuTimes(TEST_CPU_STAT_FILE, total, idle);
+    EXPECT_FALSE(ret);
+    DTEST_LOG<<"GetCpuTimesWork004 END"<< std::endl;
+}
+
+HWTEST_F(CommonEventCollectTest, GetCpuTimesWork005, TestSize.Level3) {
+    // Prepare data with insufficient fields
+    DTEST_LOG<<"GetCpuTimesWork005 BEGIN"<< std::endl;
+    std::ofstream outfile(TEST_CPU_STAT_FILE);
+    outfile << "cpu 1000 200";  // Only 2 fields
+    outfile.close();
+    uint64_t total = 0, idle = 0;
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
+    bool ret = commonEventCollect->GetCpuTimes(TEST_CPU_STAT_FILE, total, idle);
+    EXPECT_FALSE(ret);
+    DTEST_LOG<<"GetCpuTimesWork005 END"<< std::endl;
+}
+
+HWTEST_F(CommonEventCollectTest, GetCpuTimesWork006, TestSize.Level3) {
+    // Prepare data with invalid file
+    DTEST_LOG<<"GetCpuTimesWork006 BEGIN"<< std::endl;
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
+    uint64_t total = 0, idle = 0;
+    bool ret = commonEventCollect->GetCpuTimes(nullptr, total, idle);
+    EXPECT_FALSE(ret);
+    DTEST_LOG<<"GetCpuTimesWork006 END"<< std::endl;
+}
+
+HWTEST_F(CommonEventCollectTest, GetCpuUsageWork001, TestSize.Level3) {
+    // Prepare data with insufficient fields
+    DTEST_LOG<<"GetCpuUsageWork001 BEGIN"<< std::endl;
+    std::ofstream outfile(TEST_CPU_STAT_FILE);
+    outfile << "cpu 1000 200";  // Only 2 fields
+    outfile.close();
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
+    float usage = commonEventCollect->GetCpuUsage(TEST_CPU_STAT_FILE, 5);
+    EXPECT_TRUE(usage == 0.0f);
+    DTEST_LOG<<"GetCpuUsageWork001 END"<< std::endl;
+}
+
+HWTEST_F(CommonEventCollectTest, GetCpuUsageWork002, TestSize.Level3) {
+    // Prepare data with invlaid file
+    DTEST_LOG<<"GetCpuUsageWork002 BEGIN"<< std::endl;
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
+    float usage = commonEventCollect->GetCpuUsage(nullptr, 5);
+    EXPECT_TRUE(usage == 0.0f);
+    DTEST_LOG<<"GetCpuUsageWork002 END"<< std::endl;
+}
+
+HWTEST_F(CommonEventCollectTest, GetCpuUsageWork003, TestSize.Level3) {
+    // Prepare data with invlaid file
+    DTEST_LOG<<"GetCpuUsageWork003 BEGIN"<< std::endl;
+    std::ofstream outfile(TEST_CPU_STAT_FILE);
+    outfile << "cpu 1000 200";  // Only 2 fields
+    outfile.close();
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
+    float usage = commonEventCollect->GetCpuUsage(TEST_CPU_STAT_FILE, 0);
+    EXPECT_TRUE(usage == 0.0f);
+    DTEST_LOG<<"GetCpuUsageWork003 END"<< std::endl;
 }
 } // namespace OHOS
