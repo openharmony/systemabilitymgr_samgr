@@ -116,6 +116,7 @@ ohos_unittest("SystemAbilityMgrTest") {
     "ipc:libdbinder",
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
+    "samgr:dynamic_cache",
   ]
   defines = []
   if (use_musl) {
@@ -234,6 +235,7 @@ ohos_unittest("SystemAbilityMgrCollectTest") {
     "ipc:libdbinder",
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
+    "samgr:dynamic_cache",
   ]
   defines = []
   if (use_musl) {
@@ -362,6 +364,7 @@ ohos_unittest("SystemAbilityMgrDeviceNetworkingTest") {
     "ipc:libdbinder",
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
+    "samgr:dynamic_cache",
   ]
   defines = []
   if (use_musl) {
@@ -462,6 +465,7 @@ ohos_unittest("SystemAbilityMgrStubTest") {
     "ipc:libdbinder",
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
+    "samgr:dynamic_cache",
   ]
   defines = []
   if (use_musl) {
@@ -662,6 +666,7 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
     "ipc:libdbinder",
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
+    "samgr:dynamic_cache",
   ]
   defines = []
   if (samgr_support_access_token) {
