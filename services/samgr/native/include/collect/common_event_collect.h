@@ -17,6 +17,7 @@
 
 #include <memory>
 #include <mutex>
+#include <thread>
 
 #include "common_event_subscriber.h"
 #include "ffrt_handler.h"
@@ -59,12 +60,18 @@ public:
         const std::string& eventName = "") override;
     void RemoveWhiteCommonEvent() override;
     void StartReclaimIpcThreadWork(const EventFwk::CommonEventData& data);
+    void StartMonitorThread();
+    void StopMonitorThread();
+
 private:
     int64_t GenerateExtraDataIdLocked();
     std::vector<std::string> AddCommonEventName(const std::vector<OnDemandEvent>& events);
     void AddSkillsEvent(EventFwk::MatchingSkills& skill);
     void CleanFailedEventLocked(const std::vector<std::string>& eventNames);
     void SendKernalReclaimIpcThread();
+    bool GetCpuTimes(const char* file, uint64_t& total, uint64_t& idle);
+    float GetCpuUsage(const char* file, uint32_t interval);
+    void MonitorCpuUsageThread();
     std::mutex commomEventLock_;
     std::mutex commonEventSubscriberLock_;
     sptr<IRemoteObject::DeathRecipient> commonEventDeath_;
@@ -84,6 +91,8 @@ private:
     std::atomic<bool> isAwakeNotified_ {false};
     std::atomic<bool> isTriggerTaskStart_ {false};
     std::atomic<bool> isCancel_{false};
+    std::atomic<bool> keepRunning_ {false};
+    std::thread monitorThread_;
 };
 
 class CommonEventListener : public SystemAbilityStatusChangeStub {
