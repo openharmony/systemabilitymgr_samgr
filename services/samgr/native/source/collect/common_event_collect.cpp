@@ -736,7 +736,15 @@ bool CommonEventCollect::GetCpuTimes(const char* file, uint64_t& total, uint64_t
         return false;
     }
 
-    uint64_t user, nice, system, iowait, irq, softirq, steal, guest = 0, guestNice = 0;
+    uint64_t user;
+    uint64_t nice;
+    uint64_t system;
+    uint64_t iowait;
+    uint64_t irq;
+    uint64_t softirq;
+    uint64_t steal;
+    uint64_t guest = 0;
+    uint64_t guestNice = 0;
     int num = sscanf_s(line.c_str(), "cpu %" SCNu64 " %" SCNu64 " %" SCNu64 " %" SCNu64
         " %" SCNu64 " %" SCNu64 " %" SCNu64 " %" SCNu64 " %" SCNu64 " %" SCNu64,
         &user, &nice, &system, &idle, &iowait, &irq, &softirq, &steal, &guest, &guestNice);
@@ -766,7 +774,10 @@ float CommonEventCollect::GetCpuUsage(const char* file, uint32_t interval)
         return CPU_LOAD_INVALID;
     }
 
-    uint64_t totalPre = 0, idlePre = 0, total = 0, idle = 0;
+    uint64_t totalPre = 0;
+    uint64_t idlePre = 0;
+    uint64_t total = 0;
+    uint64_t idle = 0;
     if (!GetCpuTimes(file, totalPre, idlePre)) {
         HILOGE("Failed to get pre CPU times");
         return CPU_LOAD_INVALID;
