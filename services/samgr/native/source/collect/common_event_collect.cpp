@@ -791,9 +791,10 @@ float CommonEventCollect::GetCpuUsage(const char* file, uint32_t interval)
         return CPU_LOAD_INVALID;
     }
 
-    uint64_t totalDelta = total - totalPre;
-    uint64_t idleDelta = idle - idlePre;
-    if (totalDelta == 0) {
+    constexpr uint64_t MAX = std::numeric_limits<uint64_t>::max();
+    uint64_t totalDelta = (total >= totalPre) ? (total - totalPre) : (MAX - totalPre + total);
+    uint64_t idleDelta = (idle >= idlePre) ? (idle - idlePre) : (MAX - idlePre + idle);
+    if (totalDelta == 0 || totalDelta < idleDelta) {
         return CPU_LOAD_INVALID;
     }
 
