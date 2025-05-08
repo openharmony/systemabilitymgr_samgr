@@ -14,6 +14,7 @@
  */
 
 #include "ref_count_collect.h"
+#include <securec.h>
 
 namespace OHOS {
 namespace {
@@ -116,7 +117,13 @@ void RefCountCollect::IdentifyUnrefResident()
         uint32_t refCount = saProxy->GetStrongRefCountForStub();
         HILOGD("resident SA:%{public}d, ref count:%{public}u", saId, refCount);
         if (refCount == 1) {
-            ReportSAIdle(saId, "ref count 1");
+            char reason[128] = {0};
+            errno_t res = snprintf_s(reason, sizeof(reason), sizeof(reason) - 1, "saId:%d REASON:ref count 1", saId);
+            if (res < 0) {
+                HILOGE("SA:%{public}d report SA_IDLE snprintf_s error:%{public}d", saId, res);
+                continue;
+            }
+            ReportSAIdle(reason);
             HILOGI("resident SA:%{public}d, ref count:1", saId);
         }
     }
