@@ -17,6 +17,7 @@
 #include "system_ability_manager.h"
 #include "system_ability_manager_util.h"
 #include "parameter.h"
+#include "parameters.h"
 #include "accesstoken_kit.h"
 #include "ipc_skeleton.h"
 #include "string_ex.h"
@@ -36,6 +37,8 @@ constexpr const char* EVENT_NAME = "name";
 constexpr const char* EVENT_VALUE = "value";
 constexpr const char* EVENT_EXTRA_DATA_ID = "extraDataId";
 constexpr const char* MODULE_UPDATE_PARAM = "persist.samgr.moduleupdate";
+constexpr const char* PENG_LAI_PARAM = "ohos.boot.minisys.mode";
+constexpr const char* PENG_LAI = "penglai";
 std::shared_ptr<FFRTHandler> SamgrUtil::setParmHandler_ = make_shared<FFRTHandler>("setParmHandler");
 
 bool SamgrUtil::IsNameInValid(const std::u16string& name)
@@ -229,5 +232,12 @@ void SamgrUtil::FilterCommonSaProfile(const SaProfile& oldProfile, CommonSaProfi
     newProfile.stopAllowUpdate = oldProfile.stopOnDemand.allowUpdate;
     newProfile.recycleStrategy = oldProfile.recycleStrategy;
     newProfile.extension.assign(oldProfile.extension.begin(), oldProfile.extension.end());
+}
+
+bool SamgrUtil::CheckPengLai()
+{
+    std::string defaultValue = "";
+    std::string paramValue = system::GetParameter(PENG_LAI_PARAM, defaultValue);
+    return paramValue == PENG_LAI;
 }
 }

@@ -45,6 +45,7 @@ public:
     static void SendUpdateSaState(int32_t systemAbilityId, const std::string& updateSaState);
     static void InvalidateSACache();
     static void FilterCommonSaProfile(const SaProfile& oldProfile, CommonSaProfile& newProfile);
+    static bool CheckPengLai();
 private:
     static std::shared_ptr<FFRTHandler> setParmHandler_;
 };
