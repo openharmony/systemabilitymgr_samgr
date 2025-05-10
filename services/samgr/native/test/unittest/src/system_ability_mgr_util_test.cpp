@@ -26,8 +26,16 @@ using namespace testing::ext;
 using namespace OHOS;
 
 namespace OHOS {
-
+// Mock the system::GetParameter function
+namespace system {
+    std::string mockValue;
+    std::string GetParameter(const std::string& key, const std::string& defaultValue) {
+        return mockValue;
+    }
+}
 const std::u16string PROCESS_NAME = u"test_process_name";
+constexpr const char* PENG_LAI_PARAM = "ohos.boot.minisys.mode";
+constexpr const char* PENG_LAI = "penglai";
 
 void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
 {
@@ -54,6 +62,7 @@ void SamgrUtilTest::TearDownTestCase()
 void SamgrUtilTest::SetUp()
 {
     SamMockPermission::MockPermission();
+    system::mockValue = "";
     DTEST_LOG << "SetUp" << std::endl;
 }
 
@@ -345,5 +354,38 @@ HWTEST_F(SamgrUtilTest, SendUpdateSaState001, TestSize.Level3)
     saprofile.moduleUpdate = true;
     saMgr->saProfileMap_[saprofile.saId] = saprofile;
     SamgrUtil::SendUpdateSaState(saprofile.saId, "test");
+}
+
+/**
+ * @tc.name: CheckPengLai001
+ * @tc.desc: test CheckPengLai
+ * @tc.type: FUNC
+ */
+HWTEST_F(SamgrUtilTest, CheckPengLai001, TestSize.Level3)
+{
+    system::mockValue = PENG_LAI;
+    EXPECT_TRUE(SamgrUtil::CheckPengLai());
+}
+
+/**
+ * @tc.name: CheckPengLai002
+ * @tc.desc: test CheckPengLai
+ * @tc.type: FUNC
+ */
+HWTEST_F(SamgrUtilTest, CheckPengLai002, TestSize.Level3)
+{
+    system::mockValue = "not_penglai";
+    EXPECT_FALSE(SamgrUtil::CheckPengLai());
+}
+
+/**
+ * @tc.name: CheckPengLai003
+ * @tc.desc: test CheckPengLai
+ * @tc.type: FUNC
+ */
+HWTEST_F(SamgrUtilTest, CheckPengLai003, TestSize.Level3)
+{
+    system::mockValue = "";
+    EXPECT_FALSE(SamgrUtil::CheckPengLai());
 }
 }
