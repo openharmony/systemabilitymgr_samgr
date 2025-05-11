@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 #include "hisysevent_adapter.h"
+#include "hisysevent_easy.h"
 
 #include <string>
 
@@ -293,15 +294,11 @@ void WatchDogSendEvent(int32_t pid, uint32_t uid, const std::string& sendMsg,
     }
 }
 
-void ReportSAIdle(int32_t said, const std::string& reason)
+void ReportSAIdle(const char* reason)
 {
-    int ret = HiSysEventWrite(HiSysEvent::Domain::SAMGR,
+    HiSysEventEasyWrite(HiSysEvent::Domain::SAMGR,
         SA_IDLE,
-        HiSysEvent::EventType::BEHAVIOR,
-        SAID, said,
-        REASON, reason);
-    if (ret != 0) {
-        HILOGE("hisysevent report sa idle failed! ret %{public}d.", ret);
-    }
+        HiSysEventEasyType::EASY_EVENT_TYPE_BEHAVIOR,
+        reason);
 }
 } // OHOS
