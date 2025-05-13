@@ -72,7 +72,6 @@
                             "isystem_ability_load_callback.h",
                             "isystem_ability_status_change.h",
                             "isystem_process_status_change.h",
-                            "safwk_ipc_interface_code.h",
                             "system_ability_definition.h",
                             "system_ability_manager_proxy.h",
                             "system_ability_load_callback_stub.h",
