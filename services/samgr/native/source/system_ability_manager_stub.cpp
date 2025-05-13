@@ -631,8 +631,6 @@ int32_t SystemAbilityManagerStub::LoadSystemAbilityInner(MessageParcel& data, Me
     int32_t systemAbilityId = -1;
     bool ret = false;
     sptr<ISystemAbilityLoadCallback> callback = nullptr;
-    std::string loadSystemAbilityTag = ToString(systemAbilityId) + "_LoadSystemAbility";
-    HitraceScopedEx samgrHitrace(HITRACE_LEVEL_INFO, HITRACE_TAG_SAMGR, loadSystemAbilityTag.c_str());
     {
         SamgrXCollie samgrXCollie("samgrStub--loadSa_readData");
         ret = data.ReadInt32(systemAbilityId);
@@ -663,6 +661,8 @@ int32_t SystemAbilityManagerStub::LoadSystemAbilityInner(MessageParcel& data, Me
         }
     }
 
+    std::string loadSystemAbilityTag = ToString(systemAbilityId) + "_LoadSystemAbility";
+    HitraceScopedEx samgrHitrace(HITRACE_LEVEL_INFO, HITRACE_TAG_SAMGR, loadSystemAbilityTag.c_str());
     int32_t result = LoadSystemAbility(systemAbilityId, callback);
     if (result != ERR_OK) {
         ReportSamgrSaLoadFail(systemAbilityId, IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(),
