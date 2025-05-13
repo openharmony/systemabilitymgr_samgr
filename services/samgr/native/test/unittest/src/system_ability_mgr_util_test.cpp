@@ -29,7 +29,8 @@ namespace OHOS {
 // Mock the system::GetParameter function
 namespace system {
     std::string mockValue;
-    std::string GetParameter(const std::string& key, const std::string& defaultValue) {
+    std::string GetParameter(const std::string& key, const std::string& defaultValue)
+    {
         return mockValue;
     }
 }
