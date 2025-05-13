@@ -34,7 +34,6 @@ namespace system {
     }
 }
 const std::u16string PROCESS_NAME = u"test_process_name";
-constexpr const char* PENG_LAI_PARAM = "ohos.boot.minisys.mode";
 constexpr const char* PENG_LAI = "penglai";
 
 void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
