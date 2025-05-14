@@ -29,12 +29,12 @@ namespace OHOS {
 // Mock the system::GetParameter function
 namespace system {
     std::string mockValue;
-    std::string GetParameter(const std::string& key, const std::string& defaultValue) {
+    std::string GetParameter(const std::string& key, const std::string& defaultValue)
+    {
         return mockValue;
     }
 }
 const std::u16string PROCESS_NAME = u"test_process_name";
-constexpr const char* PENG_LAI_PARAM = "ohos.boot.minisys.mode";
 constexpr const char* PENG_LAI = "penglai";
 
 void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
