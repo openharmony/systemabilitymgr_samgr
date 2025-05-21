@@ -319,7 +319,7 @@ void SystemAbilityManager::GetFilesByPriority(const std::string& path, std::vect
         HILOGI("GetFilesByPriority penglai!");
         GetDirFiles(PENGLAI_PATH, fileNames);
     } else {
-        std::map<std::string, std::string> fileNamesMap; 
+        std::map<std::string, std::string> fileNamesMap;
         CfgFiles* filePaths = GetCgfFiles(path.c_str());
         for (int i = 0; filePaths && i < MAX_CFG_POLICY_DIRS_CNT; i++) {
             if (filePaths->paths[i]) {
@@ -329,7 +329,7 @@ void SystemAbilityManager::GetFilesByPriority(const std::string& path, std::vect
                 for (const auto& file : files) {
                     HILOGD("GetFilesByPriority file : %{public}s!", file.c_str());
                     fileNamesMap[fs::path(file).filename().string()] = file;
-                }            
+                }
             }
         }
 
