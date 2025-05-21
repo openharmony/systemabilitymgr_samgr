@@ -97,6 +97,7 @@ ohos_executable("samgr") {
     external_deps = [
       "access_token:libaccesstoken_sdk",
       "c_utils:utils",
+      "config_policy:configpolicy_util_for_init_static",
       "ffrt:libffrt",
       "hilog:libhilog",
       "hisysevent:libhisysevent",

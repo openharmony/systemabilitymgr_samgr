@@ -46,7 +46,8 @@
                 "libxml2",
                 "preferences",
                 "safwk",
-                "selinux_adapter"
+                "selinux_adapter",
+                "config_policy"
             ]
         },
         "build": {

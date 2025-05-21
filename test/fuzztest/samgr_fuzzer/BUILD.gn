@@ -172,6 +172,7 @@ foreach(item, samgr_fuzztests) {
     external_deps = [
       "access_token:libaccesstoken_sdk",
       "c_utils:utils",
+      "config_policy:configpolicy_util_for_init_static",
       "eventhandler:libeventhandler",
       "ffrt:libffrt",
       "hilog:libhilog",
