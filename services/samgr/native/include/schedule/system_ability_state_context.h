@@ -76,6 +76,7 @@ struct SystemProcessContext {
     int32_t uid = -1;
     SystemProcessState state = SystemProcessState::NOT_STARTED;
     bool enableRestart = true;
+    int64_t lastStopTime = -1;
 };
 
 struct SystemAbilityContext {
@@ -87,6 +88,7 @@ struct SystemAbilityContext {
     int32_t systemAbilityId = -1;
     int32_t delayUnloadTime = 0;
     int64_t lastStartTime = 0;
+    int64_t lastDileTime = -1;
     SystemAbilityState state = SystemAbilityState::NOT_LOADED;
     PendingEvent pendingEvent = PendingEvent::NO_EVENT;
     bool isAutoRestart = false;

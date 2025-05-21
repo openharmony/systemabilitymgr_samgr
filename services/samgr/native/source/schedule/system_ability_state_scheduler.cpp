@@ -761,6 +761,33 @@ int32_t SystemAbilityStateScheduler::DoUnloadSystemAbilityLocked(
     return result;
 }
 
+int32_t SystemAbilityStateScheduler::UnloadProcess(const std::vector<std::u16string>& processList)
+{
+    HILOGI("Scheduler:UnloadProcess");
+    int32_t result = ERR_OK;
+    std::shared_lock<std::shared_mutex> readLock(processMapLock_);
+    for (auto it : processList) {
+        if (processContextMap_.count(it) != 0) {
+            auto& processContext = processContextMap_[it];
+            if (processContext == nullptr) {
+                continue;
+            }
+    
+            int32_t ret = ERR_OK;
+            std::lock_guard<std::mutex> autoLock(processContext->processLock);
+            if (CanUnloadAllSystemAbilityLocked(processContext)) {
+                ret = UnloadAllSystemAbilityLocked(processContext);
+            }
+            if (ret != ERR_OK) {
+                result = ret;
+                HILOGI("Scheduler proc:%{public}s unload fail",
+                    Str16ToStr8(processContext->processName).c_str());
+            }
+        }
+    }
+    return result;
+}
+
 int32_t SystemAbilityStateScheduler::UnloadAllIdleSystemAbility()
 {
     HILOGI("Scheduler:UnloadAllIdleSa");
@@ -1391,6 +1418,28 @@ int32_t SystemAbilityStateScheduler::CheckStopEnableOnce(const OnDemandEvent& ev
             "Ondemand unload err:" + ToString(result));
     }
     return result;
+}
+
+int64_t SystemAbilityStateScheduler::GetSystemAbilityIdleTime(int32_t systemAbilityId)
+{
+    std::shared_ptr<SystemAbilityContext> abilityContext;
+    if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
+        return -1;
+    }
+    return abilityContext->lastIdleTime;
+}
+
+bool GetLruIdleSystemAbilityInfo(int32_t systemAbilityId, std::u16string& processName, int64_t& lastStopTime,
+        int32_t& pid)
+{
+    std::shared_ptr<SystemAbilityContext> abilityContext;
+    if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
+        return false;
+    }
+    processName = abilityContext->ownProcessContext->processName;
+    pid = abilityContext->ownProcessContext->pid;
+    lastStopTime = abilityContext->ownProcessContext->lastStopTime;
+    return true;
 }
 
 void SystemAbilityStateScheduler::UnloadEventHandler::ProcessEvent(uint32_t eventId)

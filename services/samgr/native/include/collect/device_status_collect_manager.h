@@ -52,6 +52,7 @@ public:
         const std::string& eventName = "");
     int32_t IsExistInPluginMap(int32_t eventId);
     void RemoveWhiteCommonEvent();
+    const std::vector<int32_t>& GetLowMemPrepareList();
 private:
     bool NeedPersistOnDemandEvent(const OnDemandEvent& event);
     void PersistOnDemandEvent(int32_t systemAbilityId, OnDemandPolicyType type,

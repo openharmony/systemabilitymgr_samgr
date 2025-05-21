@@ -33,10 +33,12 @@ public:
     int32_t RemoveUnusedEvent(const OnDemandEvent& event) override;
     int32_t OnStart() override;
     int32_t OnStop() override;
+    const std::vector<int32_t>& GetLowMemPrepareList() override;
 private:
     std::mutex paramLock_;
     std::set<std::string> pendingParams_;
     std::set<std::string> params_;
+    std::vector<int32_t> lowMemPrepareList_;
 };
 
 class SystemAbilityStatusChange : public SystemAbilityStatusChangeStub {

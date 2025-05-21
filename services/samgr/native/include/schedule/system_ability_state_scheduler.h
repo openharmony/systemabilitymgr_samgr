@@ -50,6 +50,7 @@ public:
     int32_t HandleUnloadAbilityEvent(const std::shared_ptr<UnloadRequestInfo> unloadRequestInfo);
     int32_t HandleCancelUnloadAbilityEvent(int32_t systemAbilityId);
     int32_t UnloadAllIdleSystemAbility();
+    int32_t UnloadProcess(const std::vector<std::u16string>& processList);
     int32_t SendAbilityStateEvent(int32_t systemAbilityId, AbilityStateEvent event);
     int32_t SendProcessStateEvent(const ProcessInfo& processInfo, ProcessStateEvent event);
     bool IsSystemAbilityUnloading(int32_t systemAbilityId);
@@ -79,6 +80,9 @@ private:
         std::shared_ptr<SystemAbilityContext>& abilityContext);
     bool GetSystemProcessContext(const std::u16string& processName,
         std::shared_ptr<SystemProcessContext>& processContext);
+    int64_t GetSystemAbilityIdleTime(int32_t systemAbilityId);
+    bool GetLruIdleSystemAbilityInfo(int32_t systemAbilityId, std::u16string& processName, int64_t& lastStopTime,
+        int32_t& pid);
 
     int32_t HandleLoadAbilityEventLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext,
         const LoadRequestInfo& loadRequestInfo);

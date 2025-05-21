@@ -75,6 +75,11 @@ public:
     {
         return ERR_OK;
     }
+    virtual const std::vector<int32_t>& GetLowMemPrepareList()
+    {
+        std::vector<int32_t> res;
+        return res;
+    }
     void ReportEvent(const OnDemandEvent& event);
     void PostTask(std::function<void()> callback);
     void PostDelayTask(std::function<void()> callback, int32_t delayTime);

@@ -842,6 +842,111 @@ int32_t SystemAbilityManagerProxy::UnloadAllIdleSystemAbility()
     return ERR_OK;
 }
 
+int32_t SystemAbilityManagerProxy::UnloadProcess(const std::vector<std::u16string>& processList)
+{
+    HILOGI("UnloadProcess called");
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("UnloadProcess remote is nullptr");
+        return ERR_INVALID_OPERATION;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        HILOGE("UnloadProcess write interface token failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteString16Vector(processList)) {
+        HILOGW("UnloadProcess Write processList failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::UNLOAD_IDLE_PROCESS_BYLIST), data, reply, option);
+    if (err != ERR_NONE) {
+        HILOGE("UnloadProcess SendRequest error:%{public}d", err);
+        return err;
+    }
+    HILOGD("UnloadProcess SendRequest succeed");
+    return ERR_OK;
+}
+
+int32_t SystemAbilityManagerProxy::GetLruIdleSystempAbilityProc(std::vector<IdleProcessInfo>& procInfos)
+{
+    HILOGI("GetLruIdleSystempAbilityProc called");
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("GetLruIdleSystempAbilityProc remote is nullptr");
+        return ERR_INVALID_OPERATION;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        HILOGE("GetLruIdleSystempAbilityProc write interface token failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::GET_LRU_IDLE_SYSTEM_ABILITY_PROCESS_TRANSACTION), data, reply, option);
+    if (err != ERR_NONE) {
+        HILOGE("GetLruIdleSystempAbilityProc SendRequest error:%{public}d", err);
+        return err;
+    }
+    int32_t result = 0;
+    bool ret = reply.ReadInt32(result);
+    if (!ret) {
+        HILOGE("GetLruIdleSystempAbilityProc read resule failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (result != ERR_OK) {
+        HILOGE("GetLruIdleSystempAbilityProc failed: %{public}d!", result);
+        return result;
+    }
+    return ReadIdleProcessInfoFromParcel(reply, procInfos);
+}
+
+int32_t SystemAbilityManagerProxy::ReadIdleProcessInfoFromParcel(MessageParcel& reply,
+    std::vector<IdleProcessInfo>& procInfos)
+{
+    int32_t size = 0;
+    bool ret = replu.ReadInt32(size);
+    if (!ret) {
+        HILOGE("ReadIdleProcessInfoFromParcel read size failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    procInfos.clear();
+    if (size == 0) {
+        return ERR_OK;
+    }
+    if (static_cast<size_t>(size) > reply.GetReadableBytes() || size < 0) {
+        HILOGE("Failed to read proc list, size=%{public}d", size);
+        return ERR_FLATTEN_OBJECT;
+    }
+    for (int32_t i = 0; i < size; i++) {
+        IdleProcessInfo info;
+        ret = reply.ReadInt32(info.pid);
+        if (!ret) {
+            HILOGW("ReadIdleProcessInfoFromParcel Read pid failed!");
+            return ERR_FLATTEN_OBJECT;
+        }
+        ret = reply.ReadString16(info.processName);
+        if (!ret) {
+            HILOGW("ReadIdleProcessInfoFromParcel Read processName failed!");
+            return ERR_FLATTEN_OBJECT;
+        }
+        ret = reply.ReadInt64(info.lastIdleTime);
+        if (!ret) {
+            HILOGW("ReadIdleProcessInfoFromParcel Read uid failed!");
+            return ERR_FLATTEN_OBJECT;
+        }
+        procInfos.emplace_back(info);
+    }
+    return ERR_OK;
+}
+
 int32_t SystemAbilityManagerProxy::MarshalSAExtraProp(const SAExtraProp& extraProp, MessageParcel& data) const
 {
     if (!data.WriteBool(extraProp.isDistributed)) {
