@@ -245,7 +245,6 @@ void StartedStateHandler::OnEnter(const std::shared_ptr<SystemProcessContext>& c
         HILOGE("Scheduler:listener is null");
         return;
     }
-    context->lastStopTime = -1; //进程启动
     listener->OnProcessStartedLocked(context->processName);
 }
 
