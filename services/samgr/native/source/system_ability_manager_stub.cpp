@@ -784,6 +784,10 @@ int32_t SystemAbilityManagerStub::UnloadAllIdleSystemAbilityInner(MessageParcel&
 
 int32_t SystemAbilityManagerStub::UnloadProcessInner(MessageParcel& data, MessageParcel& reply)
 {
+    if (!SamgrUtil::CheckCallerProcess("memmgrservice")) {
+        HILOGE("UnloadProcessInner invalid caller process, only support for memmgrservice");
+        return ERR_PERMISSION_DENIED;
+    }
     std::vector<std::u16string> processList;
     if (!data.ReadString16Vector(&processList)) {
         HILOGE("UnloadProcessInner read processList fail");
@@ -796,6 +800,10 @@ int32_t SystemAbilityManagerStub::UnloadProcessInner(MessageParcel& data, Messag
 
 int32_t GetLruIdleSystemAbilityProcInner(MessageParcel& data, MessageParcel& reply)
 {
+    if (!SamgrUtil::CheckCallerProcess("memmgrservice")) {
+        HILOGE("GetLruIdleSystemAbilityProcInner invalid caller process, only support for memmgrservice");
+        return ERR_PERMISSION_DENIED;
+    }
     HILOGI("GetLruIdleSystemAbilityProcInner called");
     if (!CanRequest()) {
         HILOGE("GetLruIdleSystemAbilityProcInner PERMISSION DENIED!");

@@ -83,7 +83,7 @@ constexpr int64_t CHECK_LOADED_DELAY_TIME = 4 * 1000; // ms
 #endif
 constexpr int32_t SOFTBUS_SERVER_SA_ID = 4700;
 constexpr int32_t FIRST_DUMP_INDEX = 0;
-constexpr int64_t TWO_MINUTES_SECONDS = 120;
+constexpr int64_t TWO_MINUTES_SECONDS = 120 *1000; // ms
 }
 
 std::mutex SystemAbilityManager::instanceLock;
@@ -1741,10 +1741,6 @@ int32_t SystemAbilityManager::UnloadAllIdleSystemAbility()
 
 int32_t SystemAbilityManager::UnloadProcess(const std::vector<std::u16string>& processList)
 {
-    if (!SamgrUtil::CheckCallerProcess("memmgrservice")) {
-        HILOGE("UnloadProcess invalid caller process, only support for memmgrservice");
-        return ERR_PERMISSION_DENIED;
-    }
     if (abilityStateScheduler_ == nullptr) {
         HILOGE("abilityStateScheduler is nullptr");
         return ERR_INVALID_VALUE;
@@ -1754,17 +1750,13 @@ int32_t SystemAbilityManager::UnloadProcess(const std::vector<std::u16string>& p
 
 int32_t SystemAbilityManager::GetLruIdleSystemAbilityProc(std::vector<IdleProcessInfo>& processInfos)
 {
-    if (!SamgrUtil::CheckCallerProcess("memmgrservice")) {
-        HILOGE("GetLruIdleSystemAbilityProc invalid caller process, only support for memmgrservice");
-        return ERR_PERMISSION_DENIED;
-    }
     std::vector<int32_t> saIds = collectManager->GetLowMemPRepaerList();
     std::map<std::u16string, IdleProcessInfo> procInfos;
     std::set<std::u16string> activeProcess;
     for (const auto& saId : saIds) {
         IdleProcessInfo info;
-        int64_t lastStopTTime = -1;
-        if (!abilityStateScheduler_->GetLruIdleSystemabilityInfo(saId, info.processName, lastStopTTime, info.pid)) {
+        int64_t lastStopTime = -1;
+        if (!abilityStateScheduler_->GetLruIdleSystemabilityInfo(saId, info.processName, lastStopTime, info.pid)) {
             break;
         }
         info.lastIdleTime = abilityStateScheduler_->GetSystemAbilityIdleTime(saId);
@@ -1772,13 +1764,13 @@ int32_t SystemAbilityManager::GetLruIdleSystemAbilityProc(std::vector<IdleProces
             activeProcess.insert(info.processName);
             break;
         }
-        if (GetTickCount() - lastStopTTime < TWO_MINUTES_SECONDS) {
+        if (GetTickCount() - lastStopTime < TWO_MINUTES_SECONDS) {
             break;
         }
         auto procInfo = procInfos.find(info.processName);
         if (procInfo == procInfos.end()) {
             procInfos[info.processName] == info;
-        } else if (procInfos[info.processName].lastIdleTime > info.lastIdleTime) {
+        } else if (procInfos[info.processName].lastIdleTime < info.lastIdleTime) {
             procInfos[info.processName] == info;
         }
     }
