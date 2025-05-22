@@ -49,6 +49,14 @@ void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
     saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
 }
 
+void GetDirFiles(const char* path, std::vector<std::string>& files) {
+    files = mockDirFiles;
+}
+
+CfgFiles* GetCfgFiles(const char* path) {
+    return mockCfgFiles;
+}
+
 void SamgrUtilTest::SetUpTestCase()
 {
     DTEST_LOG << "SetUpTestCase" << std::endl;
@@ -63,6 +71,8 @@ void SamgrUtilTest::SetUp()
 {
     SamMockPermission::MockPermission();
     system::mockValue = "";
+    mockDirFiles.clear();
+    CfgFiles* mockCfgFiles = nullptr;
     DTEST_LOG << "SetUp" << std::endl;
 }
 
@@ -387,5 +397,83 @@ HWTEST_F(SamgrUtilTest, CheckPengLai003, TestSize.Level3)
 {
     system::mockValue = "";
     EXPECT_FALSE(SamgrUtil::CheckPengLai());
+}
+
+/**
+ * @tc.name: TestGetFilesByPriority001
+ * @tc.desc: test penglai mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityManagerUtilTest, TestGetFilesByPriorityPengLai) {
+    system::mockValue = PENG_LAI;
+    mockDirFiles = {"/sys_prod/profile/penglai/file1", "/sys_prod/profile/penglai/file2"};
+    
+    std::vector<std::string> result;
+    SystemAbilityManager::GetFilesByPriority("test_path", result);
+    
+    EXPECT_FALSE(result.empty());
+}
+
+/**
+ * @tc.name: TestGetFilesByPriority001
+ * @tc.desc: test empty paths
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityManagerUtilTest, TestGetFilesByPriority002) {
+    system::mockValue = "";
+    mockCfgFiles = new CfgFiles();
+    
+    std::vector<std::string> result;
+    SystemAbilityManager::GetFilesByPriority("test_path", result);
+    
+    ASSERT_TRUE(result.empty());
+    delete mockCfgFiles;
+}
+
+/**
+ * @tc.name: TestGetFilesByPriority001
+ * @tc.desc: test without Duplicate files
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityManagerUtilTest, TestGetFilesByPriority003) {
+    system::mockValue = "";
+    mockCfgFiles = new CfgFiles();
+    mockCfgFiles->paths[0] = "/path1/test_path";
+    mockCfgFiles->paths[1] = "/path2/test_path";
+    mockDirFiles = {"/path1/test_path/file1", "/path2/test_path/file2", "/path1/test_path/file3"};
+    
+    std::vector<std::string> result;
+    SystemAbilityManager::GetFilesByPriority("test_path", result);
+    
+    ASSERT_EQ(result.size(), 3);
+    // Should be sorted by filename
+    EXPECT_EQ(result[0], "/path1/test_path/file1");
+    EXPECT_EQ(result[1], "/path2/test_path/file2");
+    EXPECT_EQ(result[2], "/path1/test_path/file3");
+    
+    delete mockCfgFiles;
+}
+
+/**
+ * @tc.name: TestGetFilesByPriority001
+ * @tc.desc: test with Duplicate files
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityManagerUtilTest, TestGetFilesByPriorityNormalDuplicateFiles) {
+    system::mockValue = "";
+    mockCfgFiles = new CfgFiles();
+    mockCfgFiles->paths[0] = "/path1/test_path";
+    mockCfgFiles->paths[1] = "/path2/test_path";
+    mockDirFiles = {"/path1/test_path/file1", "/path2/test_path/file1", "/path1/test_path/file2"};
+    
+    std::vector<std::string> result;
+    SystemAbilityManager::GetFilesByPriority("test_path", result);
+    
+    ASSERT_EQ(result.size(), 2);
+    // Should deduplicate by filename (keep first occurrence)
+    EXPECT_EQ(result[0], "/path1/test_path/file1");
+    EXPECT_EQ(result[1], "/path1/test_path/file2");
+    
+    delete mockCfgFiles;
 }
 }

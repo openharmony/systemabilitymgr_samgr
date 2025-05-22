@@ -43,7 +43,6 @@
 #include "system_ability_manager_dumper.h"
 #include "tools.h"
 #include "samgr_xcollie.h"
-#include "config_policy_utils.h"
 
 #ifdef SUPPORT_DEVICE_MANAGER
 #include "device_manager.h"
@@ -59,7 +58,6 @@ constexpr const char* PKG_NAME = "Samgr_Networking";
 #endif
 constexpr const char* PREFIX = "profile";
 constexpr const char* SYSTEM_PREFIX = "/system/profile";
-constexpr const char* PENGLAI_PATH = "/sys_prod/profile/penglai";
 constexpr const char* LOCAL_DEVICE = "local";
 constexpr const char* ONDEMAND_PARAM = "persist.samgr.perf.ondemand";
 constexpr const char* DYNAMIC_CACHE_PARAM = "persist.samgr.cache.sa";
@@ -314,35 +312,6 @@ void SystemAbilityManager::StartDfxTimer()
     HILOGI("StartDfxTimer timerId : %{public}u!", timerId);
 }
 
-void SystemAbilityManager::GetFilesByPriority(const std::string& path, std::vector<std::string>& fileNames)
-{
-    if (SamgrUtil::CheckPengLai()) {
-        HILOGI("GetFilesByPriority penglai!");
-        GetDirFiles(PENGLAI_PATH, fileNames);
-    } else {
-        std::map<std::string, std::string> fileNamesMap;
-        CfgFiles* filePaths = GetCgfFiles(path.c_str());
-        for (int i = 0; filePaths && i < MAX_CFG_POLICY_DIRS_CNT; i++) {
-            if (filePaths->paths[i]) {
-                HILOGI("GetFilesByPriority filePaths : %{public}s!", filePaths->paths[i]);
-                std::vector<std::string> files;
-                GetDirFiles(filePaths->paths[i], files);
-                for (const auto& file : files) {
-                    HILOGD("GetFilesByPriority file : %{public}s!", file.c_str());
-                    fileNamesMap[fs::path(file).filename().string()] = file;
-                }
-            }
-        }
-
-        for (const auto& pair : fileNamesMap) {
-            HILOGD("GetFilesByPriority files : %{public}s!", pair.second.c_str());
-            fileNames.push_back(pair.second);
-        }
-
-        FreeCfgFiles(filePaths);
-    }
-}
-
 void SystemAbilityManager::InitSaProfile()
 {
     int64_t begin = GetTickCount();
@@ -350,9 +319,9 @@ void SystemAbilityManager::InitSaProfile()
     GetFilesByPriority(PREFIX, fileNames);
     auto parser = std::make_shared<ParseUtil>();
     for (const auto& file : fileNames) {
-        if (fs::path(file).parent_path().string() != SYSTEM_PREFIX) (
+        if (fs::path(file).parent_path().string() != SYSTEM_PREFIX) {
             HILOGI("InitSaProfile file : %{public}s!", file.c_str());
-        )
+        }
         if (file.empty() || file.find(".json") == std::string::npos ||
             file.find("_trust.json") != std::string::npos) {
             continue;
