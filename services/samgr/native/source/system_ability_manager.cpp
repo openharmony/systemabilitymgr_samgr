@@ -43,6 +43,7 @@
 #include "system_ability_manager_dumper.h"
 #include "tools.h"
 #include "samgr_xcollie.h"
+#include "config_policy_utils.h"
 
 #ifdef SUPPORT_DEVICE_MANAGER
 #include "device_manager.h"
