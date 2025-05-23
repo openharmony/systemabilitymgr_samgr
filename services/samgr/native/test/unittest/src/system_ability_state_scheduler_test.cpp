@@ -1886,6 +1886,12 @@ HWTEST_F(SystemAbilityStateSchedulerTest, SetFfrt001, TestSize.Level3)
     DTEST_LOG<<"SetFfrt001 END"<<std::endl;
 }
 
+/**
+ * @tc.name: GetSystemAbilityIdleTime001
+ * @tc.desc: test GetSystemAbilityIdleTime
+ * @tc.type: FUNC
+ * @tc.require: I7VEPG
+ */
 HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemAbilityIdleTime001, TestSize.Level3)
 {
     DTEST_LOG<<"GetSystemAbilityIdleTime001 BEGIN"<<std::endl;
@@ -1896,6 +1902,104 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemAbilityIdleTime001, TestSize.
     int64_t ret = systemAbilityStateScheduler->GetSystemAbilityIdleTime(invalidSaid);
     EXPECT_EQ(ret, -1);
     DTEST_LOG<<"GetSystemAbilityIdleTime001 END"<<std::endl;
+}
+
+/**
+ * @tc.name: GetSystemAbilityIdleTime002
+ * @tc.desc: test GetSystemAbilityIdleTime
+ * @tc.type: FUNC
+ * @tc.require: I7VEPG
+ */
+HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemAbilityIdleTime002, TestSize.Level3)
+{
+    DTEST_LOG<<"GetSystemAbilityIdleTime002 BEGIN"<<std::endl;
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+    std::make_shared<SystemAbilityStateScheduler>();
+    int said = 401;
+    
+    int64_t ret = systemAbilityStateScheduler->GetSystemAbilityIdleTime(said);
+    EXPECT_EQ(ret, -1);
+    DTEST_LOG<<"GetSystemAbilityIdleTime002 END"<<std::endl;
+}
+
+/**
+ * @tc.name: GetLruIdleSystemAbilityInfo001
+ * @tc.desc: test GetLruIdleSystemAbilityInfo
+ * @tc.type: FUNC
+ * @tc.require: I7VEPG
+ */
+HWTEST_F(SystemAbilityStateSchedulerTest, GetLruIdleSystemAbilityInfo001, TestSize.Level3)
+{
+    DTEST_LOG<<"GetSystemAbilityIdleTime002 BEGIN"<<std::endl;
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+    std::make_shared<SystemAbilityStateScheduler>();
+    int32_t invalidSaid = 101;
+    int64_t lastStopTime = -1;
+    std::u16string processName;
+    in32_t pid = -1;
+    
+    int64_t ret = systemAbilityStateScheduler->GetLruIdleSystemAbilityInfo(invalidSaid, processName, lastStopTime, pid);
+    EXPECT_NE(ret, 0);
+    DTEST_LOG<<"GetSystemAbilityIdleTime002 END"<<std::endl;
+}
+
+/**
+ * @tc.name: GetLruIdleSystemAbilityInfo002
+ * @tc.desc: test GetLruIdleSystemAbilityInfo
+ * @tc.type: FUNC
+ * @tc.require: I7VEPG
+ */
+HWTEST_F(SystemAbilityStateSchedulerTest, GetLruIdleSystemAbilityInfo002, TestSize.Level3)
+{
+    DTEST_LOG<<"GetSystemAbilityIdleTime002 BEGIN"<<std::endl;
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+    std::make_shared<SystemAbilityStateScheduler>();
+    int said = 401;
+    int64_t lastStopTime = -1;
+    std::u16string processName;
+    in32_t pid = -1;
+    
+    int64_t ret = systemAbilityStateScheduler->GetLruIdleSystemAbilityInfo(said, processName, lastStopTime, pid);
+    EXPECT_NE(lastStopTime, 0);
+    DTEST_LOG<<"GetSystemAbilityIdleTime002 END"<<std::endl;
+}
+
+/**
+ * @tc.name: UnloadProcess001
+ * @tc.desc: test UnloadProcess, invalid SA
+ * @tc.type: FUNC
+ * @tc.require: I6FDNZ
+ */
+HWTEST_F(SystemAbilityStateSchedulerTest, UnloadAllSystemAbilityLocked001, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::list<SaProfile> saProfiles;
+    systemAbilityStateScheduler->Init(saProfiles);
+    systemAbilityStateScheduler->processContextMap_.clear();
+    std::vector<std::u16string>& processList;
+    processList.push_back(u"test";)
+    int32_t ret = saMgr->UnloadProcess(processList);
+    EXPECT_EQ(ret, TRANSIT_PROC_STATE_FAIL);
+}
+
+/**
+ * @tc.name: UnloadProcess001
+ * @tc.desc: test UnloadProcess, invalid SA
+ * @tc.type: FUNC
+ * @tc.require: I6FDNZ
+ */
+HWTEST_F(SystemAbilityStateSchedulerTest, UnloadProcess001, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::list<SaProfile> saProfiles;
+    systemAbilityStateScheduler->Init(saProfiles);
+    systemAbilityStateScheduler->processContextMap_.clear();
+    std::vector<std::u16string>& processList;
+    processList.push_back(u"test";)
+    int32_t ret = saMgr->UnloadProcess(processList);
+    EXPECT_EQ(ret, ERR_OK);
 }
 
 

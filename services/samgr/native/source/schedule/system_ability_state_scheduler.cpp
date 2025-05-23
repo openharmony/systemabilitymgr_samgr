@@ -370,7 +370,7 @@ int32_t SystemAbilityStateScheduler::HandleUnloadAbilityEventLocked(
             break;
         case SystemAbilityState::LOADED:
             if (unloadRequestInfo->unloadEvent.eventId == INTERFACE_CALL ||
-                unloadRequestInfo->unloadEvent.name = PARAM_LOW_MEM_PREPARE_NAME) {
+                unloadRequestInfo->unloadEvent.name == PARAM_LOW_MEM_PREPARE_NAME) {
                 result = ProcessDelayUnloadEventLocked(abilityContext->systemAbilityId);
             } else {
                 result = SendDelayUnloadEventLocked(abilityContext->systemAbilityId, abilityContext->delayUnloadTime);

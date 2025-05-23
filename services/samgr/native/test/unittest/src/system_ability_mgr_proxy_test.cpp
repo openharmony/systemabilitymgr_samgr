@@ -1306,9 +1306,9 @@ HWTEST_F(SystemAbilityMgrProxyTest, UnloadProcess001, TestSize.Level1)
 {
     SamMockPermission::MockProcess("memmgrservice");
     sptr<ISystemAbilityManager> samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    std::vector<std::u16string>& processList;
-    processList.push_back(u"test";)
-    int32_t res = samgrProxy->UnloadProcess();
+    std::vector<std::u16string> processList;
+    processList.push_back(u"test");
+    int32_t res = samgrProxy->UnloadProcess(processList);
     EXPECT_EQ(res, ERR_OK);
 }
 
@@ -1322,7 +1322,7 @@ HWTEST_F(SystemAbilityMgrProxyTest, GetLruIdleSystemAbilityProc001, TestSize.Lev
 {
     SamMockPermission::MockProcess("memmgrservice");
     sptr<ISystemAbilityManager> samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    std::vector<IdleProcessInfo>& procInfos;
+    std::vector<IdleProcessInfo> procInfos;
     int32_t res = samgrProxy->GetLruIdleSystemAbilityProc(procInfos);
     EXPECT_EQ(res, ERR_OK);
 }
@@ -1335,7 +1335,7 @@ HWTEST_F(SystemAbilityMgrProxyTest, GetLruIdleSystemAbilityProc001, TestSize.Lev
 HWTEST_F(SystemAbilityMgrProxyTest, GetLruIdleSystemAbilityProc002, TestSize.Level1)
 {
     sptr<ISystemAbilityManager> samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    std::vector<IdleProcessInfo>& procInfos;
+    std::vector<IdleProcessInfo> procInfos;
     int32_t res = samgrProxy->GetLruIdleSystemAbilityProc(procInfos);
     EXPECT_NE(res, ERR_OK);
 }
