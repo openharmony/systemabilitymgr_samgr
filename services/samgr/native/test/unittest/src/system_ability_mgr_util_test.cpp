@@ -406,7 +406,8 @@ HWTEST_F(SamgrUtilTest, CheckPengLai003, TestSize.Level3)
  * @tc.desc: test penglai mode
  * @tc.type: FUNC
  */
-HWTEST_F(SamgrUtilTest, TestGetFilesByPriority001, TestSize.Level3) {
+HWTEST_F(SamgrUtilTest, TestGetFilesByPriority001, TestSize.Level3)
+{
     system::mockValue = PENG_LAI;
     mockDirFiles = {"/sys_prod/profile/penglai/file1", "/sys_prod/profile/penglai/file2"};
     
@@ -421,7 +422,8 @@ HWTEST_F(SamgrUtilTest, TestGetFilesByPriority001, TestSize.Level3) {
  * @tc.desc: test empty paths
  * @tc.type: FUNC
  */
-HWTEST_F(SamgrUtilTest, TestGetFilesByPriority002, TestSize.Level3) {
+HWTEST_F(SamgrUtilTest, TestGetFilesByPriority002, TestSize.Level3)
+{
     system::mockValue = "";
     mockCfgFiles = new CfgFiles();
     
@@ -437,7 +439,8 @@ HWTEST_F(SamgrUtilTest, TestGetFilesByPriority002, TestSize.Level3) {
  * @tc.desc: test without Duplicate files
  * @tc.type: FUNC
  */
-HWTEST_F(SamgrUtilTest, TestGetFilesByPriority003, TestSize.Level3) {
+HWTEST_F(SamgrUtilTest, TestGetFilesByPriority003, TestSize.Level3)
+{
     system::mockValue = "";
     mockCfgFiles = new CfgFiles();
     char path1[] = "/path1/test_path";
@@ -463,7 +466,8 @@ HWTEST_F(SamgrUtilTest, TestGetFilesByPriority003, TestSize.Level3) {
  * @tc.desc: test with Duplicate files
  * @tc.type: FUNC
  */
-HWTEST_F(SamgrUtilTest, TestGetFilesByPriority004, TestSize.Level3) {
+HWTEST_F(SamgrUtilTest, TestGetFilesByPriority004, TestSize.Level3)
+{
     system::mockValue = "";
     mockCfgFiles = new CfgFiles();
     char path1[] = "/path1/test_path";
