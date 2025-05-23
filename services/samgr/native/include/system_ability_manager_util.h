@@ -19,6 +19,8 @@
 #include <string>
 #include <list>
 
+#include "config_policy_utils.h"
+#include "directory_ex.h"
 #include "sa_profiles.h"
 #include "system_ability_on_demand_event.h"
 #include "ffrt_handler.h"

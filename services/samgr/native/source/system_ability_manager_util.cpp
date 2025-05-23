@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include "config_policy_utils.h"
-#include "directory_ex.h"
 #include "nlohmann/json.hpp"
 #include "system_ability_manager.h"
 #include "system_ability_manager_util.h"
@@ -25,7 +23,6 @@
 #include "string_ex.h"
 #include "tools.h"
 #include "sam_log.h"
-#include "config_policy_utils.h"
 
 namespace OHOS {
 namespace fs = std::filesystem;
@@ -246,7 +243,7 @@ bool SamgrUtil::CheckPengLai()
     return paramValue == PENG_LAI;
 }
 
-void SystemAbilityManager::GetFilesByPriority(const std::string& path, std::vector<std::string>& fileNames)
+void SamgrUtil::GetFilesByPriority(const std::string& path, std::vector<std::string>& fileNames)
 {
     if (SamgrUtil::CheckPengLai()) {
         HILOGI("GetFilesByPriority penglai!");

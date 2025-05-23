@@ -411,7 +411,7 @@ HWTEST_F(SamgrUtilTest, TestGetFilesByPriority001, TestSize.Level3) {
     mockDirFiles = {"/sys_prod/profile/penglai/file1", "/sys_prod/profile/penglai/file2"};
     
     std::vector<std::string> result;
-    SystemAbilityManager::GetFilesByPriority("test_path", result);
+    SamgrUtil::GetFilesByPriority("test_path", result);
     
     EXPECT_FALSE(result.empty());
 }
@@ -426,7 +426,7 @@ HWTEST_F(SamgrUtilTest, TestGetFilesByPriority002, TestSize.Level3) {
     mockCfgFiles = new CfgFiles();
     
     std::vector<std::string> result;
-    SystemAbilityManager::GetFilesByPriority("test_path", result);
+    SamgrUtil::GetFilesByPriority("test_path", result);
     
     ASSERT_TRUE(result.empty());
     delete mockCfgFiles;
@@ -447,7 +447,7 @@ HWTEST_F(SamgrUtilTest, TestGetFilesByPriority003, TestSize.Level3) {
     mockDirFiles = {"/path1/test_path/file1", "/path2/test_path/file2", "/path1/test_path/file3"};
     
     std::vector<std::string> result;
-    SystemAbilityManager::GetFilesByPriority("test_path", result);
+    SamgrUtil::GetFilesByPriority("test_path", result);
     
     ASSERT_EQ(result.size(), 3);
     // Should be sorted by filename
@@ -473,7 +473,7 @@ HWTEST_F(SamgrUtilTest, TestGetFilesByPriority004, TestSize.Level3) {
     mockDirFiles = {"/path1/test_path/file1", "/path2/test_path/file1", "/path1/test_path/file2"};
     
     std::vector<std::string> result;
-    SystemAbilityManager::GetFilesByPriority("test_path", result);
+    SamgrUtil::GetFilesByPriority("test_path", result);
     
     ASSERT_EQ(result.size(), 2);
     // Should deduplicate by filename (keep first occurrence)
