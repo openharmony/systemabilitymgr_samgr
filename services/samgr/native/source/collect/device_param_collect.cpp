@@ -26,7 +26,7 @@ using namespace std;
 namespace OHOS {
 namespace {
 constexpr int32_t PARAM_WATCHER_DISTRIBUTED_SERVICE_ID = 3901;
-constexpr std::string PARAM_LOW_MEM_PREPARE_NAME = "resrouceschedule.memmgr.low.memory.prepare";
+const std::string PARAM_LOW_MEM_PREPARE_NAME = "resourceschedule.memmgr.low.memory.prepare";
 }
 static void DeviceParamCallback(const char* key, const char* value, void* context)
 {
@@ -62,7 +62,7 @@ void DeviceParamCollect::Init(const std::list<SaProfile>& saProfiles)
         }
         for (auto onDemandEvent : saProfile.stopOnDemand.onDemandEvents) {
             if (onDemandEvent.eventId == PARAM) {
-                if (onDemandEvent.param == PARAM_LOW_MEM_PREPARE_NAME) {
+                if (onDemandEvent.name == PARAM_LOW_MEM_PREPARE_NAME) {
                     lowMemPrepareList_.push_back(saProfile.saId);
                 }
                 pendingParams_.insert(onDemandEvent.name);

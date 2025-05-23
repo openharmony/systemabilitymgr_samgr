@@ -967,4 +967,43 @@ HWTEST_F(SystemAbilityMgrLoadTest, UnloadAllIdleSystemAbility003, TestSize.Level
 }
 #endif
 
+/**
+ * @tc.name: UnloadProcess001
+ * @tc.desc: UnloadProcess
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrLoadTest, UnloadProcess001, TestSize.Level3)
+{
+    DTEST_LOG << "UnloadAllIdleSystemAbility002 begin" << std::endl;
+    SamMockPermission::MockProcess("memmgrservice");
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    std::vector<std::u16string>& processList;
+    processList.push_back(u"test";)
+    int32_t ret = saMgr->UnloadProcess(processList);
+    EXPECT_NE(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "UnloadAllIdleSystemAbility002 end" << std::endl;
+}
+
+/**
+ * @tc.name: UnloadProcess002
+ * @tc.desc: UnloadProcess abilityStateScheduler_ is null
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrLoadTest, UnloadProcess002, TestSize.Level3)
+{
+    DTEST_LOG << "UnloadProcess002 begin" << std::endl;
+    SamMockPermission::MockProcess("memmgrservice");
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    saMgr->abilityStateScheduler_ = nullptr;
+    std::vector<std::u16string>& processList;
+    processList.push_back(u"test";)
+    int32_t ret = saMgr->UnloadProcess(processList);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "UnloadProcess002 end" << std::endl;
+}
+
 } // namespace OHOS

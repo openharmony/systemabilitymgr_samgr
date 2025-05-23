@@ -1750,13 +1750,13 @@ int32_t SystemAbilityManager::UnloadProcess(const std::vector<std::u16string>& p
 
 int32_t SystemAbilityManager::GetLruIdleSystemAbilityProc(std::vector<IdleProcessInfo>& processInfos)
 {
-    std::vector<int32_t> saIds = collectManager->GetLowMemPRepaerList();
+    std::vector<int32_t> saIds = collectManager_->GetLowMemPrepareList();
     std::map<std::u16string, IdleProcessInfo> procInfos;
     std::set<std::u16string> activeProcess;
     for (const auto& saId : saIds) {
         IdleProcessInfo info;
         int64_t lastStopTime = -1;
-        if (!abilityStateScheduler_->GetLruIdleSystemabilityInfo(saId, info.processName, lastStopTime, info.pid)) {
+        if (!abilityStateScheduler_->GetLruIdleSystemAbilityInfo(saId, info.processName, lastStopTime, info.pid)) {
             break;
         }
         info.lastIdleTime = abilityStateScheduler_->GetSystemAbilityIdleTime(saId);
@@ -1769,13 +1769,13 @@ int32_t SystemAbilityManager::GetLruIdleSystemAbilityProc(std::vector<IdleProces
         }
         auto procInfo = procInfos.find(info.processName);
         if (procInfo == procInfos.end()) {
-            procInfos[info.processName] == info;
+            procInfos[info.processName] = info;
         } else if (procInfos[info.processName].lastIdleTime < info.lastIdleTime) {
-            procInfos[info.processName] == info;
+            procInfos[info.processName] = info;
         }
     }
     for (const auto& pair : procInfos) {
-        if (activeProcess.find[pair.first] == activeProcess.end()) {
+        if (activeProcess.find(pair.first) == activeProcess.end()) {
             processInfos.push_back(pair.second);
         }
     }

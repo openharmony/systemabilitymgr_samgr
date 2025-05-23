@@ -72,6 +72,9 @@ public:
     int32_t CheckStopEnableOnce(const OnDemandEvent& event, const SaControlInfo& saControl);
     void UpdateLimitDelayUnloadTime(int32_t systemAbilityId);
     void UpdateLimitDelayUnloadTimeTask(int32_t systemAbilityId);
+    int64_t GetSystemAbilityIdleTime(int32_t systemAbilityId);
+    bool GetLruIdleSystemAbilityInfo(int32_t systemAbilityId, std::u16string& processName, int64_t& lastStopTime,
+        int32_t& pid);
 private:
     void InitStateContext(const std::list<SaProfile>& saProfiles);
 
@@ -80,9 +83,6 @@ private:
         std::shared_ptr<SystemAbilityContext>& abilityContext);
     bool GetSystemProcessContext(const std::u16string& processName,
         std::shared_ptr<SystemProcessContext>& processContext);
-    int64_t GetSystemAbilityIdleTime(int32_t systemAbilityId);
-    bool GetLruIdleSystemAbilityInfo(int32_t systemAbilityId, std::u16string& processName, int64_t& lastStopTime,
-        int32_t& pid);
 
     int32_t HandleLoadAbilityEventLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext,
         const LoadRequestInfo& loadRequestInfo);

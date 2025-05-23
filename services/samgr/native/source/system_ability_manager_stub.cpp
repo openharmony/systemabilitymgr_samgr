@@ -798,7 +798,7 @@ int32_t SystemAbilityManagerStub::UnloadProcessInner(MessageParcel& data, Messag
     return result;
 }
 
-int32_t GetLruIdleSystemAbilityProcInner(MessageParcel& data, MessageParcel& reply)
+int32_t SystemAbilityManagerStub::GetLruIdleSystemAbilityProcInner(MessageParcel& data, MessageParcel& reply)
 {
     if (!SamgrUtil::CheckCallerProcess("memmgrservice")) {
         HILOGE("GetLruIdleSystemAbilityProcInner invalid caller process, only support for memmgrservice");
@@ -821,7 +821,7 @@ int32_t GetLruIdleSystemAbilityProcInner(MessageParcel& data, MessageParcel& rep
         return ERR_OK;
     }
     size_t size = infos.size();
-    bool ret = data.WriteInt32(size);
+    ret = data.WriteInt32(size);
     if (!ret) {
         HILOGE("GetLruIdleSystemAbilityProcInner write size failed!");
         return ERR_FLATTEN_OBJECT;

@@ -54,6 +54,7 @@ constexpr const char *PROCESS_STATE_ENUM_STR[] = {
     "NOT_STARTED", "STARTED", "STOPPING" };
 constexpr const char *PENDINGEVENT_ENUM_STR[] = {
     "NO_EVENT", "LOAD_ABILITY_EVENT", "UNLOAD_ABILITY_EVENT" };
+const std::string PARAM_LOW_MEM_PREPARE_NAME = "resourceschedule.memmgr.low.memory.prepare";
 }
 void SystemAbilityStateScheduler::Init(const std::list<SaProfile>& saProfiles)
 {
@@ -368,7 +369,8 @@ int32_t SystemAbilityStateScheduler::HandleUnloadAbilityEventLocked(
             result = PendUnloadEventLocked(abilityContext, unloadRequestInfo);
             break;
         case SystemAbilityState::LOADED:
-            if (unloadRequestInfo->unloadEvent.eventId == INTERFACE_CALL) {
+            if (unloadRequestInfo->unloadEvent.eventId == INTERFACE_CALL ||
+                unloadRequestInfo->unloadEvent.name = PARAM_LOW_MEM_PREPARE_NAME) {
                 result = ProcessDelayUnloadEventLocked(abilityContext->systemAbilityId);
             } else {
                 result = SendDelayUnloadEventLocked(abilityContext->systemAbilityId, abilityContext->delayUnloadTime);
@@ -1429,7 +1431,7 @@ int64_t SystemAbilityStateScheduler::GetSystemAbilityIdleTime(int32_t systemAbil
     return abilityContext->lastIdleTime;
 }
 
-bool GetLruIdleSystemAbilityInfo(int32_t systemAbilityId, std::u16string& processName, int64_t& lastStopTime,
+bool SystemAbilityStateScheduler::GetLruIdleSystemAbilityInfo(int32_t systemAbilityId, std::u16string& processName, int64_t& lastStopTime,
         int32_t& pid)
 {
     std::shared_ptr<SystemAbilityContext> abilityContext;

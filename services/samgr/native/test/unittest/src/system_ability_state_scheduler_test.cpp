@@ -1885,4 +1885,18 @@ HWTEST_F(SystemAbilityStateSchedulerTest, SetFfrt001, TestSize.Level3)
     EXPECT_NE(nullptr, systemAbilityStateScheduler->unloadEventHandler_);
     DTEST_LOG<<"SetFfrt001 END"<<std::endl;
 }
+
+HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemAbilityIdleTime001, TestSize.Level3)
+{
+    DTEST_LOG<<"GetSystemAbilityIdleTime001 BEGIN"<<std::endl;
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+    std::make_shared<SystemAbilityStateScheduler>();
+    int32_t invalidSaid = 101;
+    
+    int64_t ret = systemAbilityStateScheduler->GetSystemAbilityIdleTime(invalidSaid);
+    EXPECT_EQ(ret, -1);
+    DTEST_LOG<<"GetSystemAbilityIdleTime001 END"<<std::endl;
+}
+
+
 }

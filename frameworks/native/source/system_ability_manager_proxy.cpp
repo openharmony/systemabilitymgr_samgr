@@ -872,7 +872,7 @@ int32_t SystemAbilityManagerProxy::UnloadProcess(const std::vector<std::u16strin
     return ERR_OK;
 }
 
-int32_t SystemAbilityManagerProxy::GetLruIdleSystempAbilityProc(std::vector<IdleProcessInfo>& procInfos)
+int32_t SystemAbilityManagerProxy::GetLruIdleSystemAbilityProc(std::vector<IdleProcessInfo>& procInfos)
 {
     HILOGI("GetLruIdleSystempAbilityProc called");
     sptr<IRemoteObject> remote = Remote();
@@ -912,7 +912,7 @@ int32_t SystemAbilityManagerProxy::ReadIdleProcessInfoFromParcel(MessageParcel& 
     std::vector<IdleProcessInfo>& procInfos)
 {
     int32_t size = 0;
-    bool ret = replu.ReadInt32(size);
+    bool ret = reply.ReadInt32(size);
     if (!ret) {
         HILOGE("ReadIdleProcessInfoFromParcel read size failed");
         return ERR_FLATTEN_OBJECT;

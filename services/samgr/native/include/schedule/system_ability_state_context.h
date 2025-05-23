@@ -88,7 +88,7 @@ struct SystemAbilityContext {
     int32_t systemAbilityId = -1;
     int32_t delayUnloadTime = 0;
     int64_t lastStartTime = 0;
-    int64_t lastDileTime = -1;
+    int64_t lastIdleTime = -1;
     SystemAbilityState state = SystemAbilityState::NOT_LOADED;
     PendingEvent pendingEvent = PendingEvent::NO_EVENT;
     bool isAutoRestart = false;
