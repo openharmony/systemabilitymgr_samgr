@@ -1764,7 +1764,7 @@ int32_t SystemAbilityManager::GetLruIdleSystemAbilityProc(std::vector<IdleProces
             activeProcess.insert(info.processName);
             continue;
         }
-        if (GetTickCount() - lastStopTime < TWO_MINUTES_SECONDS || lastStopTime <= 0) {
+        if (lastStopTime != -1 && (GetTickCount() - lastStopTime < TWO_MINUTES_SECONDS)) {
             continue;
         }
         auto procInfo = procInfos.find(info.processName);

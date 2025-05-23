@@ -805,10 +805,6 @@ int32_t SystemAbilityManagerStub::GetLruIdleSystemAbilityProcInner(MessageParcel
         return ERR_PERMISSION_DENIED;
     }
     HILOGI("GetLruIdleSystemAbilityProcInner called");
-    if (!CanRequest()) {
-        HILOGE("GetLruIdleSystemAbilityProcInner PERMISSION DENIED!");
-        return ERR_PERMISSION_DENIED;
-    }
     std::vector<IdleProcessInfo> infos;
     int32_t result = GetLruIdleSystemAbilityProc(infos);
     bool ret = data.WriteInt32(result);

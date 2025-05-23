@@ -1428,6 +1428,7 @@ int64_t SystemAbilityStateScheduler::GetSystemAbilityIdleTime(int32_t systemAbil
     if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
         return -1;
     }
+    std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
     return abilityContext->lastIdleTime;
 }
 
@@ -1438,6 +1439,7 @@ bool SystemAbilityStateScheduler::GetLruIdleSystemAbilityInfo(int32_t systemAbil
     if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
         return false;
     }
+    std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
     processName = abilityContext->ownProcessContext->processName;
     pid = abilityContext->ownProcessContext->pid;
     lastStopTime = abilityContext->ownProcessContext->lastStopTime;

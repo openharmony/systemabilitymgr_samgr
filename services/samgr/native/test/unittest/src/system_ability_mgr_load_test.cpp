@@ -975,7 +975,7 @@ HWTEST_F(SystemAbilityMgrLoadTest, UnloadAllIdleSystemAbility003, TestSize.Level
  */
 HWTEST_F(SystemAbilityMgrLoadTest, UnloadProcess001, TestSize.Level3)
 {
-    DTEST_LOG << "UnloadAllIdleSystemAbility002 begin" << std::endl;
+    DTEST_LOG << "UnloadProcess001 begin" << std::endl;
     SamMockPermission::MockProcess("memmgrservice");
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     InitSaMgr(saMgr);
@@ -983,7 +983,7 @@ HWTEST_F(SystemAbilityMgrLoadTest, UnloadProcess001, TestSize.Level3)
     processList.push_back(u"test");
     int32_t ret = saMgr->UnloadProcess(processList);
     EXPECT_NE(ret, ERR_INVALID_VALUE);
-    DTEST_LOG << "UnloadAllIdleSystemAbility002 end" << std::endl;
+    DTEST_LOG << "UnloadProcess001 end" << std::endl;
 }
 
 /**
