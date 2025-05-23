@@ -293,7 +293,6 @@ private:
     int32_t FindSystemAbilityNotify(int32_t systemAbilityId, int32_t code);
     int32_t FindSystemAbilityNotify(int32_t systemAbilityId, const std::string& deviceId, int32_t code);
 
-    void GetFilesByPriority(const std::string& path, std::vector<std::string>& files);
     void InitSaProfile();
     bool GetSaProfile(int32_t saId, CommonSaProfile& saProfile)
     {

@@ -23,7 +23,6 @@
 #include "ability_death_recipient.h"
 #include "accesstoken_kit.h"
 #include "datetime_ex.h"
-#include "directory_ex.h"
 #include "errors.h"
 #include "file_ex.h"
 #include "hisysevent_adapter.h"
@@ -316,7 +315,7 @@ void SystemAbilityManager::InitSaProfile()
 {
     int64_t begin = GetTickCount();
     std::vector<std::string> fileNames;
-    GetFilesByPriority(PREFIX, fileNames);
+    SamgrUtil::GetFilesByPriority(PREFIX, fileNames);
     auto parser = std::make_shared<ParseUtil>();
     for (const auto& file : fileNames) {
         if (fs::path(file).parent_path().string() != SYSTEM_PREFIX) {
