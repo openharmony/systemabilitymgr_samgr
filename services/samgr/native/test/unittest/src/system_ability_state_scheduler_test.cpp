@@ -1936,7 +1936,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetLruIdleSystemAbilityInfo001, TestSi
     int32_t invalidSaid = 101;
     int64_t lastStopTime = -1;
     std::u16string processName;
-    in32_t pid = -1;
+    int32_t pid = -1;
     
     int64_t ret = systemAbilityStateScheduler->GetLruIdleSystemAbilityInfo(invalidSaid, processName, lastStopTime, pid);
     EXPECT_NE(ret, 0);
@@ -1957,30 +1957,11 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetLruIdleSystemAbilityInfo002, TestSi
     int said = 401;
     int64_t lastStopTime = -1;
     std::u16string processName;
-    in32_t pid = -1;
+    int32_t pid = -1;
     
     int64_t ret = systemAbilityStateScheduler->GetLruIdleSystemAbilityInfo(said, processName, lastStopTime, pid);
     EXPECT_NE(lastStopTime, 0);
     DTEST_LOG<<"GetSystemAbilityIdleTime002 END"<<std::endl;
-}
-
-/**
- * @tc.name: UnloadProcess001
- * @tc.desc: test UnloadProcess, invalid SA
- * @tc.type: FUNC
- * @tc.require: I6FDNZ
- */
-HWTEST_F(SystemAbilityStateSchedulerTest, UnloadAllSystemAbilityLocked001, TestSize.Level3)
-{
-    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>();
-    std::list<SaProfile> saProfiles;
-    systemAbilityStateScheduler->Init(saProfiles);
-    systemAbilityStateScheduler->processContextMap_.clear();
-    std::vector<std::u16string>& processList;
-    processList.push_back(u"test";)
-    int32_t ret = saMgr->UnloadProcess(processList);
-    EXPECT_EQ(ret, TRANSIT_PROC_STATE_FAIL);
 }
 
 /**
@@ -1996,11 +1977,10 @@ HWTEST_F(SystemAbilityStateSchedulerTest, UnloadProcess001, TestSize.Level3)
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     systemAbilityStateScheduler->processContextMap_.clear();
-    std::vector<std::u16string>& processList;
-    processList.push_back(u"test";)
-    int32_t ret = saMgr->UnloadProcess(processList);
-    EXPECT_EQ(ret, ERR_OK);
+    std::vector<std::u16string> processList;
+    processList.push_back(u"test");
+    int32_t ret = systemAbilityStateScheduler->UnloadProcess(processList);
+    EXPECT_EQ(ret, TRANSIT_PROC_STATE_FAIL);
 }
-
 
 }

@@ -1757,15 +1757,15 @@ int32_t SystemAbilityManager::GetLruIdleSystemAbilityProc(std::vector<IdleProces
         IdleProcessInfo info;
         int64_t lastStopTime = -1;
         if (!abilityStateScheduler_->GetLruIdleSystemAbilityInfo(saId, info.processName, lastStopTime, info.pid)) {
-            break;
+            continue;
         }
         info.lastIdleTime = abilityStateScheduler_->GetSystemAbilityIdleTime(saId);
         if (info.lastIdleTime < 0) {
             activeProcess.insert(info.processName);
-            break;
+            continue;
         }
-        if (GetTickCount() - lastStopTime < TWO_MINUTES_SECONDS) {
-            break;
+        if (GetTickCount() - lastStopTime < TWO_MINUTES_SECONDS || lastStopTime <= 0) {
+            continue;
         }
         auto procInfo = procInfos.find(info.processName);
         if (procInfo == procInfos.end()) {
