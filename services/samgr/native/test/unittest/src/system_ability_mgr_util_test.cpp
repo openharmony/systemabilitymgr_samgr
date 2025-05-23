@@ -36,6 +36,8 @@ namespace system {
 }
 const std::u16string PROCESS_NAME = u"test_process_name";
 constexpr const char* PENG_LAI = "penglai";
+std::vector<std::string> mockDirFiles;
+CfgFiles* mockCfgFiles = nullptr;
 
 void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
 {
@@ -72,7 +74,7 @@ void SamgrUtilTest::SetUp()
     SamMockPermission::MockPermission();
     system::mockValue = "";
     mockDirFiles.clear();
-    CfgFiles* mockCfgFiles = nullptr;
+    mockCfgFiles = nullptr;
     DTEST_LOG << "SetUp" << std::endl;
 }
 
@@ -438,8 +440,10 @@ HWTEST_F(SystemAbilityManagerUtilTest, TestGetFilesByPriority002) {
 HWTEST_F(SystemAbilityManagerUtilTest, TestGetFilesByPriority003) {
     system::mockValue = "";
     mockCfgFiles = new CfgFiles();
-    mockCfgFiles->paths[0] = "/path1/test_path";
-    mockCfgFiles->paths[1] = "/path2/test_path";
+    char path1[] = "/path1/test_path";
+    char path2[] = "/path2/test_path";
+    mockCfgFiles->paths[0] = path1;
+    mockCfgFiles->paths[1] = path2;
     mockDirFiles = {"/path1/test_path/file1", "/path2/test_path/file2", "/path1/test_path/file3"};
     
     std::vector<std::string> result;
@@ -462,8 +466,10 @@ HWTEST_F(SystemAbilityManagerUtilTest, TestGetFilesByPriority003) {
 HWTEST_F(SystemAbilityManagerUtilTest, TestGetFilesByPriorityNormalDuplicateFiles) {
     system::mockValue = "";
     mockCfgFiles = new CfgFiles();
-    mockCfgFiles->paths[0] = "/path1/test_path";
-    mockCfgFiles->paths[1] = "/path2/test_path";
+    char path1[] = "/path1/test_path";
+    char path2[] = "/path2/test_path";
+    mockCfgFiles->paths[0] = path1;
+    mockCfgFiles->paths[1] = path2;
     mockDirFiles = {"/path1/test_path/file1", "/path2/test_path/file1", "/path1/test_path/file2"};
     
     std::vector<std::string> result;
