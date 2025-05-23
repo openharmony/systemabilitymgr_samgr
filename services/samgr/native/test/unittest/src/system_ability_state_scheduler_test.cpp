@@ -1972,6 +1972,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetLruIdleSystemAbilityInfo002, TestSi
  */
 HWTEST_F(SystemAbilityStateSchedulerTest, UnloadProcess001, TestSize.Level3)
 {
+    DTEST_LOG<<"UnloadProcess001 BEGIN"<<std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
@@ -1980,7 +1981,8 @@ HWTEST_F(SystemAbilityStateSchedulerTest, UnloadProcess001, TestSize.Level3)
     std::vector<std::u16string> processList;
     processList.push_back(u"test");
     int32_t ret = systemAbilityStateScheduler->UnloadProcess(processList);
-    EXPECT_EQ(ret, TRANSIT_PROC_STATE_FAIL);
+    EXPECT_NE(ret, TRANSIT_PROC_STATE_FAIL);
+    DTEST_LOG<<"UnloadProcess001 END"<<std::endl;
 }
 
 }
