@@ -74,6 +74,7 @@ ohos_fuzztest("SamgrDumperFuzzTest") {
   external_deps = [
     "access_token:libaccesstoken_sdk",
     "c_utils:utils",
+    "config_policy:configpolicy_util",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "hilog:libhilog",

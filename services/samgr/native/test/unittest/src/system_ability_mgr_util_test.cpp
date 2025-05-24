@@ -37,6 +37,14 @@ namespace system {
 const std::u16string PROCESS_NAME = u"test_process_name";
 constexpr const char* PENG_LAI = "penglai";
 
+struct CfgFiles
+{
+    const char* paths[MAX_CFG_POLICY_DIRS_CNT];
+};
+
+CfgFiles* mockCfgFiles = nullptr;
+std::vector<std::string> mockDirFiles;
+
 void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
 {
     saMgr->abilityDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityDeathRecipient());
@@ -47,6 +55,16 @@ void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
     saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
     saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
     saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+}
+
+void GetDirFiles(const char* path, std::vector<std::string>& files)
+{
+    files = mockDirFiles;
+}
+
+CfgFiles* GetCfgFiles(const char* path)
+{
+    return mockCfgFiles;
 }
 
 void SamgrUtilTest::SetUpTestCase()
@@ -63,6 +81,8 @@ void SamgrUtilTest::SetUp()
 {
     SamMockPermission::MockPermission();
     system::mockValue = "";
+    mockDirFiles.clear();
+    mockCfgFiles = nullptr;
     DTEST_LOG << "SetUp" << std::endl;
 }
 
@@ -387,5 +407,39 @@ HWTEST_F(SamgrUtilTest, CheckPengLai003, TestSize.Level3)
 {
     system::mockValue = "";
     EXPECT_FALSE(SamgrUtil::CheckPengLai());
+}
+
+/**
+ * @tc.name: TestGetFilesByPriority001
+ * @tc.desc: test penglai mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SamgrUtilTest, TestGetFilesByPriority001, TestSize.Level3)
+{
+    system::mockValue = PENG_LAI;
+    mockDirFiles = {"/sys_prod/profile/penglai/file1", "/sys_prod/profile/penglai/file2"};
+    
+    std::vector<std::string> result;
+    SamgrUtil::GetFilesByPriority("test_path", result);
+    
+    ASSERT_TRUE(result.empty());
+    system::mockValue = "";
+}
+
+/**
+ * @tc.name: TestGetFilesByPriority002
+ * @tc.desc: test empty paths
+ * @tc.type: FUNC
+ */
+HWTEST_F(SamgrUtilTest, TestGetFilesByPriority002, TestSize.Level3)
+{
+    system::mockValue = "";
+    mockCfgFiles = new CfgFiles();
+    
+    std::vector<std::string> result;
+    SamgrUtil::GetFilesByPriority("test_path", result);
+    
+    ASSERT_TRUE(result.empty());
+    delete mockCfgFiles;
 }
 }

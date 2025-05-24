@@ -19,6 +19,8 @@
 #include <string>
 #include <list>
 
+#include "config_policy_utils.h"
+#include "directory_ex.h"
 #include "sa_profiles.h"
 #include "system_ability_on_demand_event.h"
 #include "ffrt_handler.h"
@@ -46,6 +48,7 @@ public:
     static void InvalidateSACache();
     static void FilterCommonSaProfile(const SaProfile& oldProfile, CommonSaProfile& newProfile);
     static bool CheckPengLai();
+    static void GetFilesByPriority(const std::string& path, std::vector<std::string>& files);
 private:
     static std::shared_ptr<FFRTHandler> setParmHandler_;
 };

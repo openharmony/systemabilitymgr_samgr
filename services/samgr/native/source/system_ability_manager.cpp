@@ -18,11 +18,11 @@
 #include <cinttypes>
 #include <thread>
 #include <unistd.h>
+#include <filesystem>
 
 #include "ability_death_recipient.h"
 #include "accesstoken_kit.h"
 #include "datetime_ex.h"
-#include "directory_ex.h"
 #include "errors.h"
 #include "file_ex.h"
 #include "hisysevent_adapter.h"
@@ -47,7 +47,7 @@
 #include "device_manager.h"
 using namespace OHOS::DistributedHardware;
 #endif
-
+namespace fs = std::filesystem;
 using namespace std;
 
 namespace OHOS {
@@ -55,7 +55,8 @@ namespace {
 #ifdef SUPPORT_DEVICE_MANAGER
 constexpr const char* PKG_NAME = "Samgr_Networking";
 #endif
-constexpr const char* PREFIX = "/system/profile/";
+constexpr const char* PREFIX = "profile";
+constexpr const char* SYSTEM_PREFIX = "/system/profile";
 constexpr const char* LOCAL_DEVICE = "local";
 constexpr const char* ONDEMAND_PARAM = "persist.samgr.perf.ondemand";
 constexpr const char* DYNAMIC_CACHE_PARAM = "persist.samgr.cache.sa";
@@ -315,9 +316,12 @@ void SystemAbilityManager::InitSaProfile()
 {
     int64_t begin = GetTickCount();
     std::vector<std::string> fileNames;
-    GetDirFiles(PREFIX, fileNames);
+    SamgrUtil::GetFilesByPriority(PREFIX, fileNames);
     auto parser = std::make_shared<ParseUtil>();
     for (const auto& file : fileNames) {
+        if (fs::path(file).parent_path().string() != SYSTEM_PREFIX) {
+            HILOGI("InitSaProfile file : %{public}s!", file.c_str());
+        }
         if (file.empty() || file.find(".json") == std::string::npos ||
             file.find("_trust.json") != std::string::npos) {
             continue;
@@ -338,7 +342,7 @@ void SystemAbilityManager::InitSaProfile()
     for (const auto& saInfo : saInfos) {
         SamgrUtil::FilterCommonSaProfile(saInfo, saProfileMap_[saInfo.saId]);
         if (!saInfo.runOnCreate) {
-            HILOGI("InitProfile saId %{public}d", saInfo.saId);
+            HILOGD("InitProfile saId %{public}d", saInfo.saId);
             onDemandSaIdsSet_.insert(saInfo.saId);
         }
     }

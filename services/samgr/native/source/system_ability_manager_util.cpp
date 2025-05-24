@@ -25,6 +25,7 @@
 #include "sam_log.h"
 
 namespace OHOS {
+namespace fs = std::filesystem;
 using namespace std;
 constexpr int32_t MAX_NAME_SIZE = 200;
 constexpr int32_t SPLIT_NAME_VECTOR_SIZE = 2;
@@ -39,6 +40,7 @@ constexpr const char* EVENT_EXTRA_DATA_ID = "extraDataId";
 constexpr const char* MODULE_UPDATE_PARAM = "persist.samgr.moduleupdate";
 constexpr const char* PENG_LAI_PARAM = "ohos.boot.minisys.mode";
 constexpr const char* PENG_LAI = "penglai";
+constexpr const char* PENGLAI_PATH = "/sys_prod/profile/penglai";
 std::shared_ptr<FFRTHandler> SamgrUtil::setParmHandler_ = make_shared<FFRTHandler>("setParmHandler");
 
 bool SamgrUtil::IsNameInValid(const std::u16string& name)
@@ -239,5 +241,34 @@ bool SamgrUtil::CheckPengLai()
     std::string defaultValue = "";
     std::string paramValue = system::GetParameter(PENG_LAI_PARAM, defaultValue);
     return paramValue == PENG_LAI;
+}
+
+void SamgrUtil::GetFilesByPriority(const std::string& path, std::vector<std::string>& fileNames)
+{
+    if (SamgrUtil::CheckPengLai()) {
+        HILOGI("GetFilesByPriority penglai!");
+        GetDirFiles(PENGLAI_PATH, fileNames);
+    } else {
+        std::map<std::string, std::string> fileNamesMap;
+        CfgFiles* filePaths = GetCfgFiles(path.c_str());
+        for (int i = 0; filePaths && i < MAX_CFG_POLICY_DIRS_CNT; i++) {
+            if (filePaths->paths[i] != nullptr) {
+                HILOGI("GetFilesByPriority filePaths : %{public}s!", filePaths->paths[i]);
+                std::vector<std::string> files;
+                GetDirFiles(filePaths->paths[i], files);
+                for (const auto& file : files) {
+                    HILOGD("GetFilesByPriority file : %{public}s!", file.c_str());
+                    fileNamesMap[fs::path(file).filename().string()] = file;
+                }
+            }
+        }
+
+        for (const auto& pair : fileNamesMap) {
+            HILOGD("GetFilesByPriority files : %{public}s!", pair.second.c_str());
+            fileNames.push_back(pair.second);
+        }
+
+        FreeCfgFiles(filePaths);
+    }
 }
 }
