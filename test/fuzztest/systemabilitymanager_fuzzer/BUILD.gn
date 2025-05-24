@@ -74,7 +74,7 @@ ohos_fuzztest("SystemAbilityManagerFuzzTest") {
   external_deps = [
     "access_token:libaccesstoken_sdk",
     "c_utils:utils",
-    "config_policy:configpolicy_util_for_init_static",
+    "config_policy:configpolicy_util",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "hilog:libhilog",

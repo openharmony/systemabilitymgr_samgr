@@ -103,7 +103,7 @@ ohos_unittest("SystemAbilityMgrTest") {
   external_deps = [
     "access_token:libaccesstoken_sdk",
     "c_utils:utils",
-    "config_policy:configpolicy_util_for_init_static",
+    "config_policy:configpolicy_util",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "googletest:gtest_main",
@@ -223,7 +223,7 @@ ohos_unittest("SystemAbilityMgrCollectTest") {
   external_deps = [
     "access_token:libaccesstoken_sdk",
     "c_utils:utils",
-    "config_policy:configpolicy_util_for_init_static",
+    "config_policy:configpolicy_util",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "googletest:gtest_main",
@@ -353,7 +353,7 @@ ohos_unittest("SystemAbilityMgrDeviceNetworkingTest") {
   external_deps = [
     "access_token:libaccesstoken_sdk",
     "c_utils:utils",
-    "config_policy:configpolicy_util_for_init_static",
+    "config_policy:configpolicy_util",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "googletest:gtest_main",
@@ -455,7 +455,7 @@ ohos_unittest("SystemAbilityMgrStubTest") {
   external_deps = [
     "access_token:libaccesstoken_sdk",
     "c_utils:utils",
-    "config_policy:configpolicy_util_for_init_static",
+    "config_policy:configpolicy_util",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "googletest:gtest_main",
@@ -657,7 +657,7 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
   external_deps = [
     "access_token:libaccesstoken_sdk",
     "c_utils:utils",
-    "config_policy:configpolicy_util_for_init_static",
+    "config_policy:configpolicy_util",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "googletest:gtest_main",
@@ -737,7 +737,7 @@ ohos_unittest("SystemAbilityMgrDumperTest") {
   external_deps = [
     "access_token:libaccesstoken_sdk",
     "c_utils:utils",
-    "config_policy:configpolicy_util_for_init_static",
+    "config_policy:configpolicy_util",
     "ffrt:libffrt",
     "googletest:gtest_main",
     "hilog:libhilog",
@@ -1001,7 +1001,7 @@ ohos_executable("TestTool") {
   external_deps += [
     "access_token:libaccesstoken_sdk",
     "c_utils:utils",
-    "config_policy:configpolicy_util_for_init_static",
+    "config_policy:configpolicy_util",
     "eventhandler:libeventhandler",
     "ffrt:libffrt",
     "hisysevent:libhisysevent",
