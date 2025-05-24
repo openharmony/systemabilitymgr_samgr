@@ -1930,7 +1930,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemAbilityIdleTime002, TestSize.
  */
 HWTEST_F(SystemAbilityStateSchedulerTest, GetLruIdleSystemAbilityInfo001, TestSize.Level3)
 {
-    DTEST_LOG<<"GetSystemAbilityIdleTime002 BEGIN"<<std::endl;
+    DTEST_LOG<<"GetLruIdleSystemAbilityInfo001 BEGIN"<<std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
     std::make_shared<SystemAbilityStateScheduler>();
     int32_t invalidSaid = 101;
@@ -1938,9 +1938,10 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetLruIdleSystemAbilityInfo001, TestSi
     std::u16string processName;
     int32_t pid = -1;
     
-    int64_t ret = systemAbilityStateScheduler->GetLruIdleSystemAbilityInfo(invalidSaid, processName, lastStopTime, pid);
-    EXPECT_NE(ret, 0);
-    DTEST_LOG<<"GetSystemAbilityIdleTime002 END"<<std::endl;
+    bool ret = systemAbilityStateScheduler->GetLruIdleSystemAbilityInfo(invalidSaid, processName, lastStopTime, pid);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG<<"GetLruIdleSystemAbilityInfo001 END"<<std::endl;
+    
 }
 
 /**
@@ -1951,7 +1952,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetLruIdleSystemAbilityInfo001, TestSi
  */
 HWTEST_F(SystemAbilityStateSchedulerTest, GetLruIdleSystemAbilityInfo002, TestSize.Level3)
 {
-    DTEST_LOG<<"GetSystemAbilityIdleTime002 BEGIN"<<std::endl;
+    DTEST_LOG<<"GetLruIdleSystemAbilityInfo002 BEGIN"<<std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
     std::make_shared<SystemAbilityStateScheduler>();
     int said = 401;
@@ -1959,9 +1960,9 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetLruIdleSystemAbilityInfo002, TestSi
     std::u16string processName;
     int32_t pid = -1;
     
-    int64_t ret = systemAbilityStateScheduler->GetLruIdleSystemAbilityInfo(said, processName, lastStopTime, pid);
+    bool ret = systemAbilityStateScheduler->GetLruIdleSystemAbilityInfo(said, processName, lastStopTime, pid);
     EXPECT_NE(lastStopTime, 0);
-    DTEST_LOG<<"GetSystemAbilityIdleTime002 END"<<std::endl;
+    DTEST_LOG<<"GetLruIdleSystemAbilityInfo002 END"<<std::endl;
 }
 
 /**

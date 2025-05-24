@@ -807,7 +807,7 @@ int32_t SystemAbilityManagerStub::GetLruIdleSystemAbilityProcInner(MessageParcel
     HILOGI("GetLruIdleSystemAbilityProcInner called");
     std::vector<IdleProcessInfo> infos;
     int32_t result = GetLruIdleSystemAbilityProc(infos);
-    bool ret = data.WriteInt32(result);
+    bool ret = reply.WriteInt32(result);
     if (!ret) {
         HILOGE("GetLruIdleSystemAbilityProcInner write reply failed!");
         return ERR_FLATTEN_OBJECT;
@@ -817,23 +817,23 @@ int32_t SystemAbilityManagerStub::GetLruIdleSystemAbilityProcInner(MessageParcel
         return ERR_OK;
     }
     size_t size = infos.size();
-    ret = data.WriteInt32(size);
+    ret = reply.WriteInt32(size);
     if (!ret) {
         HILOGE("GetLruIdleSystemAbilityProcInner write size failed!");
         return ERR_FLATTEN_OBJECT;
     }
     for (auto& systemAbilityProcInfo : infos) {
-        ret = data.WriteInt32(systemAbilityProcInfo.pid);
+        ret = reply.WriteInt32(systemAbilityProcInfo.pid);
         if (!ret) {
             HILOGE("GetLruIdleSystemAbilityProcInner write pid failed!");
             return ERR_FLATTEN_OBJECT;
         }
-        ret = data.WriteString16(systemAbilityProcInfo.processName);
+        ret = reply.WriteString16(systemAbilityProcInfo.processName);
         if (!ret) {
             HILOGE("GetLruIdleSystemAbilityProcInner write processName failed!");
             return ERR_FLATTEN_OBJECT;
         }
-        ret = data.WriteInt64(systemAbilityProcInfo.lastIdleTime);
+        ret = reply.WriteInt64(systemAbilityProcInfo.lastIdleTime);
         if (!ret) {
             HILOGE("GetLruIdleSystemAbilityProcInner write lastIdleTime failed!");
             return ERR_FLATTEN_OBJECT;
