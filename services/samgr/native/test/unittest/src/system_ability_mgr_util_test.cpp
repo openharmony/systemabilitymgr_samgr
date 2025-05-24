@@ -37,7 +37,8 @@ namespace system {
 const std::u16string PROCESS_NAME = u"test_process_name";
 constexpr const char* PENG_LAI = "penglai";
 
-struct CfgFiles {
+struct CfgFiles
+{
     const char* paths[MAX_CFG_POLICY_DIRS_CNT];
 };
 
@@ -56,11 +57,13 @@ void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
     saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
 }
 
-void GetDirFiles(const char* path, std::vector<std::string>& files) {
+void GetDirFiles(const char* path, std::vector<std::string>& files)
+{
     files = mockDirFiles;
 }
 
-CfgFiles* GetCfgFiles(const char* path) {
+CfgFiles* GetCfgFiles(const char* path)
+{
     return mockCfgFiles;
 }
 
@@ -439,57 +442,4 @@ HWTEST_F(SamgrUtilTest, TestGetFilesByPriority002, TestSize.Level3)
     ASSERT_TRUE(result.empty());
     delete mockCfgFiles;
 }
-
-/**
- * @tc.name: TestGetFilesByPriority003
- * @tc.desc: test without Duplicate files
- * @tc.type: FUNC
- */
-// HWTEST_F(SamgrUtilTest, TestGetFilesByPriority003, TestSize.Level3)
-//{
-//     system::mockValue = "";
-//     mockCfgFiles = new CfgFiles();
-//     char path1[] = "/path1/test_path";
-//     char path2[] = "/path2/test_path";
-//     mockCfgFiles->paths[0] = path1;
-//     mockCfgFiles->paths[1] = path2;
-//     mockDirFiles = {"/path1/test_path/file1", "/path2/test_path/file2", "/path1/test_path/file3"};
-    
-//     std::vector<std::string> result;
-//     SamgrUtil::GetFilesByPriority("test_path", result);
-    
-//     ASSERT_EQ(result.size(), 3);
-//     // Should be sorted by filename
-//     EXPECT_EQ(result[0], "/path1/test_path/file1");
-//     EXPECT_EQ(result[1], "/path2/test_path/file2");
-//     EXPECT_EQ(result[2], "/path1/test_path/file3");
-    
-//     delete mockCfgFiles;
-// }
-
-/**
- * @tc.name: TestGetFilesByPriority004
- * @tc.desc: test with Duplicate files
- * @tc.type: FUNC
- */
-// HWTEST_F(SamgrUtilTest, TestGetFilesByPriority004, TestSize.Level3)
-//{
-//     system::mockValue = "";
-//     mockCfgFiles = new CfgFiles();
-//     char path1[] = "/path1/test_path";
-//     char path2[] = "/path2/test_path";
-//     mockCfgFiles->paths[0] = path1;
-//     mockCfgFiles->paths[1] = path2;
-//     mockDirFiles = {"/path1/test_path/file1", "/path2/test_path/file1", "/path1/test_path/file2"};
-    
-//     std::vector<std::string> result;
-//     SamgrUtil::GetFilesByPriority("test_path", result);
-    
-//     ASSERT_EQ(result.size(), 2);
-//     // Should deduplicate by filename (keep first occurrence)
-//     EXPECT_EQ(result[0], "/path1/test_path/file1");
-//     EXPECT_EQ(result[1], "/path1/test_path/file2");
-    
-//     delete mockCfgFiles;
-// }
 }
