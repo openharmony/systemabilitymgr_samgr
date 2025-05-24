@@ -26,6 +26,7 @@ using namespace std;
 namespace OHOS {
 namespace {
 constexpr int32_t PARAM_WATCHER_DISTRIBUTED_SERVICE_ID = 3901;
+const std::string PARAM_LOW_MEM_PREPARE_NAME = "resourceschedule.memmgr.low.memory.prepare";
 }
 static void DeviceParamCallback(const char* key, const char* value, void* context)
 {
@@ -61,6 +62,9 @@ void DeviceParamCollect::Init(const std::list<SaProfile>& saProfiles)
         }
         for (auto onDemandEvent : saProfile.stopOnDemand.onDemandEvents) {
             if (onDemandEvent.eventId == PARAM) {
+                if (onDemandEvent.name == PARAM_LOW_MEM_PREPARE_NAME) {
+                    lowMemPrepareList_.push_back(saProfile.saId);
+                }
                 pendingParams_.insert(onDemandEvent.name);
             }
         }
@@ -131,6 +135,11 @@ int32_t DeviceParamCollect::RemoveUnusedEvent(const OnDemandEvent& event)
         params_.erase(iter);
     }
     return ERR_OK;
+}
+
+const std::vector<int32_t>& DeviceParamCollect::GetLowMemPrepareList()
+{
+    return lowMemPrepareList_;
 }
 
 void SystemAbilityStatusChange::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)

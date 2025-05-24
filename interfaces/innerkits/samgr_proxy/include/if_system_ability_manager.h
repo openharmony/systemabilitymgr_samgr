@@ -228,6 +228,31 @@ public:
     virtual int32_t UnloadAllIdleSystemAbility() = 0;
 
     /**
+     * UnloadProcess, unload process by process name list.
+     * only support for memmgrservice
+     *
+     * @return ERR_OK It means unload all process in list.
+     */
+    virtual int32_t UnloadProcess(const std::vector<std::u16string>& processList)
+    {
+        (void)processList;
+        return 0;
+    }
+
+/**
+     * GetSystemProcessInfo, Get process info by said.
+     * only support for memmgrservice
+     *
+     * @param processList, Issue a parameter and return it as a result.
+     * @return ERR_OK indicates that the get successfully.
+     */
+    virtual int32_t GetLruIdleSystemAbilityProc(std::vector<IdleProcessInfo>& processInfos)
+    {
+        (void)processInfos;
+        return 0;
+    }
+
+    /**
      * GetSystemProcessInfo, Get process info by said.
      *
      * @param systemAbilityId, Need the said of sa which wants to get process info.

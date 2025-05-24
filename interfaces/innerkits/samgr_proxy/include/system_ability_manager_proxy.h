@@ -194,6 +194,23 @@ public:
     int32_t UnloadAllIdleSystemAbility() override;
 
     /**
+     * UnloadProcess, unload process by process name list.
+     * only support for memmgrservice
+     *
+     * @return ERR_OK It means unload all process in list.
+     */
+    virtual int32_t UnloadProcess(const std::vector<std::u16string>& processList) override;
+
+    /**
+     * GetSystemProcessInfo, Get process info by said.
+     * only support for memmgrservice
+     *
+     * @param processList, Issue a parameter and return it as a result.
+     * @return ERR_OK indicates that the get successfully.
+     */
+    virtual int32_t GetLruIdleSystemAbilityProc(std::vector<IdleProcessInfo>& processInfos) override;
+
+    /**
      * GetSystemProcessInfo, Get process info by said.
      *
      * @param systemAbilityId, Need the said of sa which wants to get process info.
@@ -286,6 +303,7 @@ private:
     int32_t RemoveSystemAbilityWrapper(int32_t code, MessageParcel& data);
     int32_t ReadSystemProcessFromParcel(MessageParcel& reply, std::list<SystemProcessInfo>& systemProcessInfos);
     int32_t ReadProcessInfoFromParcel(MessageParcel& reply, SystemProcessInfo& systemProcessInfo);
+    int32_t ReadIdleProcessInfoFromParcel(MessageParcel& reply, std::vector<IdleProcessInfo>& procInfos);
     sptr<IRemoteObject> CheckSystemAbilityTransaction(int32_t systemAbilityId);
     bool IsOnDemandSystemAbility(int32_t systemAbilityId);
     int32_t ListExtensionSendReq(const std::string& extension,

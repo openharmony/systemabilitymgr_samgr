@@ -181,6 +181,10 @@ SystemAbilityManagerStub::SystemAbilityManagerStub()
         SystemAbilityManagerStub::LocalGetCommonEventExtraDataIdlist;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_LOCAL_ABILITY_MANAGER_PROXY_TRANSCATION)] =
         SystemAbilityManagerStub::LocalGetLocalAbilityManagerProxy;
+    memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::UNLOAD_IDLE_PROCESS_BYLIST)] =
+        SystemAbilityManagerStub::LocalUnloadProcess;
+    memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_LRU_IDLE_SYSTEM_ABILITY_PROCESS_TRANSACTION)] =
+        SystemAbilityManagerStub::LocalGetLruIdleSystemAbilityProc;
 }
 
 int32_t SystemAbilityManagerStub::OnRemoteRequest(uint32_t code,
@@ -776,6 +780,66 @@ int32_t SystemAbilityManagerStub::UnloadAllIdleSystemAbilityInner(MessageParcel&
     int32_t result = UnloadAllIdleSystemAbility();
     HILOGI("UnloadAllIdleSystemAbilityInner result is %{public}d", result);
     return result;
+}
+
+int32_t SystemAbilityManagerStub::UnloadProcessInner(MessageParcel& data, MessageParcel& reply)
+{
+    if (!SamgrUtil::CheckCallerProcess("memmgrservice")) {
+        HILOGE("UnloadProcessInner invalid caller process, only support for memmgrservice");
+        return ERR_PERMISSION_DENIED;
+    }
+    std::vector<std::u16string> processList;
+    if (!data.ReadString16Vector(&processList)) {
+        HILOGE("UnloadProcessInner read processList fail");
+        return ERR_NULL_OBJECT;
+    }
+    int32_t result = UnloadProcess(processList);
+    HILOGI("UnloadProcessInner result is %{public}d", result);
+    return result;
+}
+
+int32_t SystemAbilityManagerStub::GetLruIdleSystemAbilityProcInner(MessageParcel& data, MessageParcel& reply)
+{
+    if (!SamgrUtil::CheckCallerProcess("memmgrservice")) {
+        HILOGE("GetLruIdleSystemAbilityProcInner invalid caller process, only support for memmgrservice");
+        return ERR_PERMISSION_DENIED;
+    }
+    HILOGI("GetLruIdleSystemAbilityProcInner called");
+    std::vector<IdleProcessInfo> infos;
+    int32_t result = GetLruIdleSystemAbilityProc(infos);
+    bool ret = reply.WriteInt32(result);
+    if (!ret) {
+        HILOGE("GetLruIdleSystemAbilityProcInner write reply failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (result != ERR_OK) {
+        HILOGE("GetLruIdleSystemAbilityProc  result is %{public}d", result);
+        return ERR_OK;
+    }
+    size_t size = infos.size();
+    ret = reply.WriteInt32(size);
+    if (!ret) {
+        HILOGE("GetLruIdleSystemAbilityProcInner write size failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    for (auto& systemAbilityProcInfo : infos) {
+        ret = reply.WriteInt32(systemAbilityProcInfo.pid);
+        if (!ret) {
+            HILOGE("GetLruIdleSystemAbilityProcInner write pid failed!");
+            return ERR_FLATTEN_OBJECT;
+        }
+        ret = reply.WriteString16(systemAbilityProcInfo.processName);
+        if (!ret) {
+            HILOGE("GetLruIdleSystemAbilityProcInner write processName failed!");
+            return ERR_FLATTEN_OBJECT;
+        }
+        ret = reply.WriteInt64(systemAbilityProcInfo.lastIdleTime);
+        if (!ret) {
+            HILOGE("GetLruIdleSystemAbilityProcInner write lastIdleTime failed!");
+            return ERR_FLATTEN_OBJECT;
+        }
+    }
+    return ERR_OK;
 }
 
 int32_t SystemAbilityManagerStub::GetSystemProcessInfoInner(MessageParcel& data, MessageParcel& reply)

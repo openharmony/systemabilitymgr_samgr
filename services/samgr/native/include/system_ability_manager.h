@@ -183,6 +183,8 @@ public:
         const nlohmann::json& idleReason, int32_t& delayTime);
     bool ActiveSystemAbility(int32_t systemAbilityId, const std::u16string& procName,
         const nlohmann::json& activeReason);
+    int32_t UnloadProcess(const std::vector<std::u16string>& processList) override;
+    int32_t GetLruIdleSystemAbilityProc(std::vector<IdleProcessInfo>& processInfos) override;
     void OnAbilityCallbackDied(const sptr<IRemoteObject>& remoteObject);
     void OnRemoteCallbackDied(const sptr<IRemoteObject>& remoteObject);
     sptr<IRemoteObject> GetSystemAbilityFromRemote(int32_t systemAbilityId);

@@ -1296,4 +1296,48 @@ HWTEST_F(SystemAbilityMgrProxyTest, GetLocalAbilityManagerProxy003, TestSize.Lev
     EXPECT_TRUE(ret == nullptr);
     DTEST_LOG << " GetLocalAbilityManagerProxy003 end " << std::endl;
 }
+
+/**
+ * @tc.name: UnloadProcess001
+ * @tc.desc: UnloadProcess
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, UnloadProcess001, TestSize.Level1)
+{
+    SamMockPermission::MockProcess("memmgrservice");
+    sptr<ISystemAbilityManager> samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    std::vector<std::u16string> processList;
+    processList.push_back(u"test");
+    int32_t res = samgrProxy->UnloadProcess(processList);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+
+/**
+ * @tc.name: GetLruIdleSystemAbilityProc001
+ * @tc.desc: GetLruIdleSystemAbilityProc
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, GetLruIdleSystemAbilityProc001, TestSize.Level1)
+{
+    SamMockPermission::MockProcess("memmgrservice");
+    sptr<ISystemAbilityManager> samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    std::vector<IdleProcessInfo> procInfos;
+    int32_t res = samgrProxy->GetLruIdleSystemAbilityProc(procInfos);
+    EXPECT_EQ(res, ERR_OK);
+}
+
+/**
+ * @tc.name: GetLruIdleSystemAbilityProc002
+ * @tc.desc: GetLruIdleSystemAbilityProc
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, GetLruIdleSystemAbilityProc002, TestSize.Level1)
+{
+    sptr<ISystemAbilityManager> samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    std::vector<IdleProcessInfo> procInfos;
+    int32_t res = samgrProxy->GetLruIdleSystemAbilityProc(procInfos);
+    EXPECT_NE(res, ERR_OK);
+}
+
 }

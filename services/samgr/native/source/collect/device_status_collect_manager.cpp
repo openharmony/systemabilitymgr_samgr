@@ -594,4 +594,9 @@ int32_t DeviceStatusCollectManager::UpdateOnDemandEvents(int32_t systemAbilityId
     }
     return ERR_OK;
 }
+
+const std::vector<int32_t>& DeviceStatusCollectManager::GetLowMemPrepareList()
+{
+    return collectPluginMap_[PARAM]->GetLowMemPrepareList();
+}
 }  // namespace OHOS

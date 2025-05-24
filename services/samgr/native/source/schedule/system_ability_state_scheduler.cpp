@@ -54,6 +54,7 @@ constexpr const char *PROCESS_STATE_ENUM_STR[] = {
     "NOT_STARTED", "STARTED", "STOPPING" };
 constexpr const char *PENDINGEVENT_ENUM_STR[] = {
     "NO_EVENT", "LOAD_ABILITY_EVENT", "UNLOAD_ABILITY_EVENT" };
+const std::string PARAM_LOW_MEM_PREPARE_NAME = "resourceschedule.memmgr.low.memory.prepare";
 }
 void SystemAbilityStateScheduler::Init(const std::list<SaProfile>& saProfiles)
 {
@@ -368,7 +369,8 @@ int32_t SystemAbilityStateScheduler::HandleUnloadAbilityEventLocked(
             result = PendUnloadEventLocked(abilityContext, unloadRequestInfo);
             break;
         case SystemAbilityState::LOADED:
-            if (unloadRequestInfo->unloadEvent.eventId == INTERFACE_CALL) {
+            if (unloadRequestInfo->unloadEvent.eventId == INTERFACE_CALL ||
+                unloadRequestInfo->unloadEvent.name == PARAM_LOW_MEM_PREPARE_NAME) {
                 result = ProcessDelayUnloadEventLocked(abilityContext->systemAbilityId);
             } else {
                 result = SendDelayUnloadEventLocked(abilityContext->systemAbilityId, abilityContext->delayUnloadTime);
@@ -757,6 +759,33 @@ int32_t SystemAbilityStateScheduler::DoUnloadSystemAbilityLocked(
         abilityContext->ownProcessContext->processName, abilityContext->unloadRequest->unloadEvent);
     if (result == ERR_OK) {
         return stateMachine_->AbilityStateTransitionLocked(abilityContext, SystemAbilityState::UNLOADING);
+    }
+    return result;
+}
+
+int32_t SystemAbilityStateScheduler::UnloadProcess(const std::vector<std::u16string>& processList)
+{
+    HILOGI("Scheduler:UnloadProcess");
+    int32_t result = ERR_OK;
+    std::shared_lock<std::shared_mutex> readLock(processMapLock_);
+    for (auto it : processList) {
+        if (processContextMap_.count(it) != 0) {
+            auto& processContext = processContextMap_[it];
+            if (processContext == nullptr) {
+                continue;
+            }
+    
+            int32_t ret = ERR_OK;
+            std::lock_guard<std::mutex> autoLock(processContext->processLock);
+            if (CanUnloadAllSystemAbilityLocked(processContext)) {
+                ret = UnloadAllSystemAbilityLocked(processContext);
+            }
+            if (ret != ERR_OK) {
+                result = ret;
+                HILOGI("Scheduler proc:%{public}s unload fail",
+                    Str16ToStr8(processContext->processName).c_str());
+            }
+        }
     }
     return result;
 }
@@ -1391,6 +1420,30 @@ int32_t SystemAbilityStateScheduler::CheckStopEnableOnce(const OnDemandEvent& ev
             "Ondemand unload err:" + ToString(result));
     }
     return result;
+}
+
+int64_t SystemAbilityStateScheduler::GetSystemAbilityIdleTime(int32_t systemAbilityId)
+{
+    std::shared_ptr<SystemAbilityContext> abilityContext;
+    if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
+        return -1;
+    }
+    std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
+    return abilityContext->lastIdleTime;
+}
+
+bool SystemAbilityStateScheduler::GetLruIdleSystemAbilityInfo(int32_t systemAbilityId, std::u16string& processName, int64_t& lastStopTime,
+        int32_t& pid)
+{
+    std::shared_ptr<SystemAbilityContext> abilityContext;
+    if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
+        return false;
+    }
+    std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
+    processName = abilityContext->ownProcessContext->processName;
+    pid = abilityContext->ownProcessContext->pid;
+    lastStopTime = abilityContext->ownProcessContext->lastStopTime;
+    return true;
 }
 
 void SystemAbilityStateScheduler::UnloadEventHandler::ProcessEvent(uint32_t eventId)

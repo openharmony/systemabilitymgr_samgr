@@ -83,6 +83,7 @@ constexpr int64_t CHECK_LOADED_DELAY_TIME = 4 * 1000; // ms
 #endif
 constexpr int32_t SOFTBUS_SERVER_SA_ID = 4700;
 constexpr int32_t FIRST_DUMP_INDEX = 0;
+constexpr int64_t TWO_MINUTES_SECONDS = 120 *1000; // ms
 }
 
 std::mutex SystemAbilityManager::instanceLock;
@@ -1736,6 +1737,52 @@ int32_t SystemAbilityManager::UnloadAllIdleSystemAbility()
         return ERR_INVALID_VALUE;
     }
     return abilityStateScheduler_->UnloadAllIdleSystemAbility();
+}
+
+int32_t SystemAbilityManager::UnloadProcess(const std::vector<std::u16string>& processList)
+{
+    if (abilityStateScheduler_ == nullptr) {
+        HILOGE("abilityStateScheduler is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+    return abilityStateScheduler_->UnloadProcess(processList);
+}
+
+int32_t SystemAbilityManager::GetLruIdleSystemAbilityProc(std::vector<IdleProcessInfo>& processInfos)
+{
+    std::vector<int32_t> saIds = collectManager_->GetLowMemPrepareList();
+    std::map<std::u16string, IdleProcessInfo> procInfos;
+    std::set<std::u16string> activeProcess;
+    for (const auto& saId : saIds) {
+        IdleProcessInfo info;
+        int64_t lastStopTime = -1;
+        if (!abilityStateScheduler_->GetLruIdleSystemAbilityInfo(saId, info.processName, lastStopTime, info.pid)) {
+            continue;
+        }
+        info.lastIdleTime = abilityStateScheduler_->GetSystemAbilityIdleTime(saId);
+        if (info.lastIdleTime < 0) {
+            activeProcess.insert(info.processName);
+            continue;
+        }
+        if (lastStopTime != -1 && (GetTickCount() - lastStopTime < TWO_MINUTES_SECONDS)) {
+            continue;
+        }
+        auto procInfo = procInfos.find(info.processName);
+        if (procInfo == procInfos.end()) {
+            procInfos[info.processName] = info;
+        } else if (procInfos[info.processName].lastIdleTime < info.lastIdleTime) {
+            procInfos[info.processName] = info;
+        }
+    }
+    for (const auto& pair : procInfos) {
+        if (activeProcess.find(pair.first) == activeProcess.end()) {
+            processInfos.push_back(pair.second);
+        }
+    }
+    std::sort(processInfos.begin(), processInfos.end(), [](const IdleProcessInfo& a, IdleProcessInfo& b){
+        return a.lastIdleTime < b.lastIdleTime;
+    });
+    return ERR_OK;
 }
 
 bool SystemAbilityManager::IdleSystemAbility(int32_t systemAbilityId, const std::u16string& procName,

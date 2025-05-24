@@ -15,6 +15,7 @@
 
 #include <shared_mutex>
 
+#include "datetime_ex.h"
 #include "sam_log.h"
 #include "string_ex.h"
 #include "samgr_err_code.h"
@@ -176,6 +177,7 @@ bool LoadedStateHandler::CanEnter(SystemAbilityState fromState)
 
 void LoadedStateHandler::OnEnter(const std::shared_ptr<SystemAbilityContext>& context)
 {
+    context->lastIdleTime = -1;
     auto listener = listener_.lock();
     if (listener == nullptr) {
         HILOGE("Scheduler:listener is null");
@@ -191,6 +193,7 @@ bool UnloadableStateHandler::CanEnter(SystemAbilityState fromState)
 
 void UnloadableStateHandler::OnEnter(const std::shared_ptr<SystemAbilityContext>& context)
 {
+    context->lastIdleTime = GetTickCount();
     auto listener = listener_.lock();
     if (listener == nullptr) {
         HILOGE("Scheduler:listener is null");
@@ -226,6 +229,7 @@ void NotStartedStateHandler::OnEnter(const std::shared_ptr<SystemProcessContext>
         HILOGE("Scheduler:listener is null");
         return;
     }
+    context->lastStopTime = GetTickCount(); //进程退出
     listener->OnProcessNotStartedLocked(context->processName);
 }
 
