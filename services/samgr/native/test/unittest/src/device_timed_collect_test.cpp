@@ -722,7 +722,7 @@ HWTEST_F(DeviceTimedCollectTest, ProcessPersistenceTimedTask001, TestSize.Level3
     deviceTimedCollect->ProcessPersistenceTimedTask(disTime, strTime);
     EXPECT_EQ(disTime, 0);
 
-    disTime = 5;
+    disTime = 50;
     deviceTimedCollect->ProcessPersistenceTimedTask(disTime, strTime);
     EXPECT_NE(disTime, 0);
     DTEST_LOG << "ProcessPersistenceTimedTask001 end" << std::endl;
@@ -770,7 +770,7 @@ HWTEST_F(DeviceTimedCollectTest, ProcessPersistenceTimedTask003, TestSize.Level3
     deviceTimedCollect->ProcessPersistenceTimedTask(disTime, strTime);
     EXPECT_EQ(disTime, 0);
 
-    disTime = 5;
+    disTime = 50;
     deviceTimedCollect->ProcessPersistenceTimedTask(disTime, strTime);
     EXPECT_NE(disTime, 0);
     DTEST_LOG << " ProcessPersistenceTimedTask003 end" << std::endl;
@@ -885,11 +885,11 @@ HWTEST_F(DeviceTimedCollectTest, PostNonPersistenceTimedTaskLocked003, TestSize.
     DTEST_LOG << " PostNonPersistenceTimedTaskLocked003 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     std::shared_ptr<DeviceTimedCollect> deviceTimedCollect = std::make_shared<DeviceTimedCollect>(collect);
-    std::string strTime = "10";
+    std::string strTime = "100";
     int64_t timeGap = 0;
     deviceTimedCollect->PostNonPersistenceTimedTaskLocked(strTime, timeGap);
     EXPECT_EQ(0, timeGap);
-    timeGap = 5;
+    timeGap = 50;
     deviceTimedCollect->PostNonPersistenceTimedTaskLocked(strTime, timeGap);
     EXPECT_NE(0, timeGap);
     DTEST_LOG << " PostNonPersistenceTimedTaskLocked003 end" << std::endl;

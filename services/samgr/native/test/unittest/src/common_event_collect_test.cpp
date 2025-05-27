@@ -89,6 +89,7 @@ HWTEST_F(CommonEventCollectTest, OnStart002, TestSize.Level3)
     commonEventCollect->commonEventNames_.insert("test");
     int32_t ret = commonEventCollect->OnStart();
     EXPECT_EQ(ERR_OK, ret);
+    commonEventCollect->workHandler_->CleanFfrt();
     DTEST_LOG << " OnStart002 END" << std::endl;
 }
 
