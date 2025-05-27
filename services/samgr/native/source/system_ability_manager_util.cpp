@@ -252,14 +252,15 @@ void SamgrUtil::GetFilesByPriority(const std::string& path, std::vector<std::str
         std::map<std::string, std::string> fileNamesMap;
         CfgFiles* filePaths = GetCfgFiles(path.c_str());
         for (int i = 0; filePaths && i < MAX_CFG_POLICY_DIRS_CNT; i++) {
-            if (filePaths->paths[i] != nullptr) {
-                HILOGI("GetFilesByPriority filePaths : %{public}s!", filePaths->paths[i]);
-                std::vector<std::string> files;
-                GetDirFiles(filePaths->paths[i], files);
-                for (const auto& file : files) {
-                    HILOGD("GetFilesByPriority file : %{public}s!", file.c_str());
-                    fileNamesMap[fs::path(file).filename().string()] = file;
-                }
+            if (filePaths->paths[i] == nullptr) {
+                continue;
+            }
+            HILOGI("GetFilesByPriority filePaths : %{public}s!", filePaths->paths[i]);
+            std::vector<std::string> files;
+            GetDirFiles(filePaths->paths[i], files);
+            for (const auto& file : files) {
+                HILOGD("GetFilesByPriority file : %{public}s!", file.c_str());
+                fileNamesMap[fs::path(file).filename().string()] = file;
             }
         }
 
