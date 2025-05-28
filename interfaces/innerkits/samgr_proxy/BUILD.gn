@@ -69,7 +69,6 @@ ohos_shared_library("samgr_proxy") {
     ":lsamgr_proxy_config",
     ":samgr_proxy_config",
   ]
-  all_dependent_configs = [ ":samgr_proxy_config" ]
 
   if (is_standard_system) {
     external_deps = [
