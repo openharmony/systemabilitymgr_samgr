@@ -89,7 +89,7 @@ void ParseUtilTest::TearDown()
  * @tc.desc: Verify if can load not exist file
  * @tc.type: FUNC
  */
-HWTEST_F(ParseUtilTest, ParseSaProfile001, TestSize.Level2)
+HWTEST_F(ParseUtilTest, ParseSaProfile001, TestSize.Level0)
 {
     DTEST_LOG << " ParseSaProfile001 start " << std::endl;
     /**
@@ -471,7 +471,7 @@ HWTEST_F(ParseUtilTest, GetProfile002, TestSize.Level2)
  * @tc.type: FUNC
  * @tc.require: I5KMF7
  */
-HWTEST_F(ParseUtilTest, LoadSaLib001, TestSize.Level2)
+HWTEST_F(ParseUtilTest, LoadSaLib001, TestSize.Level0)
 {
     DTEST_LOG << " LoadSaLib001 start " << std::endl;
     /**

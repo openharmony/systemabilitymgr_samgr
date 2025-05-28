@@ -68,7 +68,7 @@ void DeviceNetworkingCollectTest::TearDown()
  * @tc.desc: test onStart
  * @tc.type: FUNC
  */
-HWTEST_F(DeviceNetworkingCollectTest, OnStart001, TestSize.Level3)
+HWTEST_F(DeviceNetworkingCollectTest, OnStart001, TestSize.Level0)
 {
     DTEST_LOG << " OnStart001 BEGIN" << std::endl;
     sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(nullptr);

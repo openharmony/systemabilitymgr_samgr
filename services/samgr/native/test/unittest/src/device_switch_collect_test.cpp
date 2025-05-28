@@ -225,7 +225,7 @@ HWTEST_F(DeviceSwitchCollectTest, CollectSubscribeSwitchEvent003, TestSize.Level
  * @tc.require: I7RSCL
  */
 
-HWTEST_F(DeviceSwitchCollectTest, OnStart001, TestSize.Level3)
+HWTEST_F(DeviceSwitchCollectTest, OnStart001, TestSize.Level0)
 {
     DTEST_LOG << "OnStart001 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
@@ -271,7 +271,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnStart002, TestSize.Level3)
  * @tc.require: I7RSCL
  */
 
-HWTEST_F(DeviceSwitchCollectTest, OnStop001, TestSize.Level3)
+HWTEST_F(DeviceSwitchCollectTest, OnStop001, TestSize.Level0)
 {
     DTEST_LOG << "OnStop001 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();

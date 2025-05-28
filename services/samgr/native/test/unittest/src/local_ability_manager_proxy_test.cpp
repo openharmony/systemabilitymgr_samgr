@@ -119,7 +119,7 @@ HWTEST_F(LocalAbilityManagerProxyTest, LocalAbilityManagerProxy004, TestSize.Lev
  * @tc.type: FUNC
  * @tc.require: I6NKWX
  */
-HWTEST_F(LocalAbilityManagerProxyTest, StartAbility001, TestSize.Level1)
+HWTEST_F(LocalAbilityManagerProxyTest, StartAbility001, TestSize.Level0)
 {
     sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
     sptr<LocalAbilityManagerProxy> localAbility(new LocalAbilityManagerProxy(testAbility));
@@ -134,7 +134,7 @@ HWTEST_F(LocalAbilityManagerProxyTest, StartAbility001, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I6J4T7
  */
-HWTEST_F(LocalAbilityManagerProxyTest, StopAbility001, TestSize.Level1)
+HWTEST_F(LocalAbilityManagerProxyTest, StopAbility001, TestSize.Level0)
 {
     sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
     testAbility->result_ = 1;

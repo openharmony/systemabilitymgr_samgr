@@ -105,7 +105,7 @@ HWTEST_F(DeviceParamCollectTest, DeviceParamInit002, TestSize.Level3)
  * @tc.require: I6FDNZ
  */
 
-HWTEST_F(DeviceParamCollectTest, OnStop001, TestSize.Level3)
+HWTEST_F(DeviceParamCollectTest, OnStop001, TestSize.Level0)
 {
     sptr<IReport> report;
     std::shared_ptr<DeviceParamCollect> deviceParamCollect =
@@ -121,7 +121,7 @@ HWTEST_F(DeviceParamCollectTest, OnStop001, TestSize.Level3)
  * @tc.require: I6OU0A
  */
 
-HWTEST_F(DeviceParamCollectTest, OnAddSystemAbility001, TestSize.Level3)
+HWTEST_F(DeviceParamCollectTest, OnAddSystemAbility001, TestSize.Level0)
 {
     sptr<IReport> report;
     sptr<DeviceParamCollect> deviceParamCollect = new DeviceParamCollect(report);

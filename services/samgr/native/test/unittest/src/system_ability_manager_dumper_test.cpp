@@ -95,7 +95,7 @@ HWTEST_F(SystemAbilityManagerDumperTest, CanDump001, TestSize.Level3)
  */
 
 #ifdef SUPPORT_ACCESS_TOKEN
-HWTEST_F(SystemAbilityManagerDumperTest, FfrtDumpProc001, TestSize.Level3)
+HWTEST_F(SystemAbilityManagerDumperTest, FfrtDumpProc001, TestSize.Level0)
 {
     DTEST_LOG << "FfrtDumpProc001 begin" << std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler;
@@ -114,7 +114,7 @@ HWTEST_F(SystemAbilityManagerDumperTest, FfrtDumpProc001, TestSize.Level3)
  * @tc.require: IBMM2R
  */
 #ifdef SUPPORT_ACCESS_TOKEN
-HWTEST_F(SystemAbilityManagerDumperTest, FfrtDumpProc002, TestSize.Level3)
+HWTEST_F(SystemAbilityManagerDumperTest, FfrtDumpProc002, TestSize.Level0)
 {
     DTEST_LOG << "FfrtDumpProc002 begin" << std::endl;
     SamMockPermission::MockProcess("hidumper_service");

@@ -236,7 +236,7 @@ HWTEST_F(DeviceTimedCollectTest, Init008, TestSize.Level3)
  * @tc.desc: test OnStart
  * @tc.type: FUNC
  */
-HWTEST_F(DeviceTimedCollectTest, OnStart001, TestSize.Level3)
+HWTEST_F(DeviceTimedCollectTest, OnStart001, TestSize.Level0)
 {
     DTEST_LOG << "OnStart001 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
@@ -541,7 +541,7 @@ HWTEST_F(DeviceTimedCollectTest, AddCollectEvent007, TestSize.Level3)
  * @tc.type: FUNC
  * @tc.require: I7G775
  */
-HWTEST_F(DeviceTimedCollectTest, OnStop001, TestSize.Level3)
+HWTEST_F(DeviceTimedCollectTest, OnStop001, TestSize.Level0)
 {
     DTEST_LOG << "OnStop001 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();

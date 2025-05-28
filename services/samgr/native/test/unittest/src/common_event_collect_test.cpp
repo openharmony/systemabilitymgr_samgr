@@ -68,7 +68,7 @@ void CommonEventCollectTest::TearDown()
  * @tc.desc: test Onstart
  * @tc.type: FUNC
  */
-HWTEST_F(CommonEventCollectTest, OnStart001, TestSize.Level3)
+HWTEST_F(CommonEventCollectTest, OnStart001, TestSize.Level0)
 {
     DTEST_LOG << " OnStart001 BEGIN" << std::endl;
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
@@ -98,7 +98,7 @@ HWTEST_F(CommonEventCollectTest, OnStart002, TestSize.Level3)
  * @tc.desc: test OnStop
  * @tc.type: FUNC
  */
-HWTEST_F(CommonEventCollectTest, OnStop001, TestSize.Level3)
+HWTEST_F(CommonEventCollectTest, OnStop001, TestSize.Level0)
 {
     DTEST_LOG << " OnStop001 BEGIN" << std::endl;
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr);
