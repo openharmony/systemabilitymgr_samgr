@@ -312,7 +312,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, IsSystemAbilityUnloading004, TestSize.
  * @tc.type: FUNC
  * @tc.require: I6FDNZ
  */
-HWTEST_F(SystemAbilityStateSchedulerTest, HandleLoadAbilityEvent001, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, HandleLoadAbilityEvent001, TestSize.Level0)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();
@@ -546,7 +546,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleLoadAbilityEventLocked003, TestS
  * @tc.type: FUNC
  * @tc.require: I6FDNZ
  */
-HWTEST_F(SystemAbilityStateSchedulerTest, HandleUnloadAbilityEvent001, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, HandleUnloadAbilityEvent001, TestSize.Level0)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
         std::make_shared<SystemAbilityStateScheduler>();

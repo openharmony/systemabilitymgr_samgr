@@ -81,7 +81,7 @@ void SystemAbilityMgrProxyTest::TearDown()
  * @tc.type: FUNC
  * @tc.require: I5KMF7
  */
-HWTEST_F(SystemAbilityMgrProxyTest, AddSystemProcess001, TestSize.Level1)
+HWTEST_F(SystemAbilityMgrProxyTest, AddSystemProcess001, TestSize.Level0)
 {
     DTEST_LOG << " AddSystemProcess001 start " << std::endl;
     /**
@@ -236,7 +236,7 @@ HWTEST_F(SystemAbilityMgrProxyTest, AddOnDemandSystemAbilityInfo002, TestSize.Le
  * @tc.type: FUNC
  * @tc.require: I5KMF7
  */
-HWTEST_F(SystemAbilityMgrProxyTest, SubscribeSystemAbility001, TestSize.Level1)
+HWTEST_F(SystemAbilityMgrProxyTest, SubscribeSystemAbility001, TestSize.Level0)
 {
     DTEST_LOG << " SubscribeSystemAbility001 start " << std::endl;
     sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -266,7 +266,7 @@ HWTEST_F(SystemAbilityMgrProxyTest, SubscribeSystemAbility002, TestSize.Level1)
  * @tc.type: FUNC
  * @tc.require: I5KMF7
  */
-HWTEST_F(SystemAbilityMgrProxyTest, UnSubscribeSystemAbility001, TestSize.Level1)
+HWTEST_F(SystemAbilityMgrProxyTest, UnSubscribeSystemAbility001, TestSize.Level0)
 {
     sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     EXPECT_NE(sm, nullptr);
@@ -327,7 +327,7 @@ HWTEST_F(SystemAbilityMgrProxyTest, UnSubscribeSystemAbility004, TestSize.Level1
  * @tc.type: FUNC
  * @tc.require: I5KMF7
  */
-HWTEST_F(SystemAbilityMgrProxyTest, LoadSystemAbility001, TestSize.Level1)
+HWTEST_F(SystemAbilityMgrProxyTest, LoadSystemAbility001, TestSize.Level0)
 {
     sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     EXPECT_NE(sm, nullptr);
@@ -649,7 +649,7 @@ HWTEST_F(SystemAbilityMgrProxyTest, OnLoadSACompleteForRemote005, TestSize.Level
  * @tc.type: FUNC
  * @tc.require: I5KMF7
  */
-HWTEST_F(SystemAbilityMgrProxyTest, OnAddSystemAbility001, TestSize.Level1)
+HWTEST_F(SystemAbilityMgrProxyTest, OnAddSystemAbility001, TestSize.Level0)
 {
     sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
     sptr<SystemAbilityStatusChangeProxy> systemAbility(new SystemAbilityStatusChangeProxy(testAbility));

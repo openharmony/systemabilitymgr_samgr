@@ -1063,7 +1063,7 @@ HWTEST_F(SystemAbilityMgrStubLoadTest, LoadSystemAbilityFromRpc006, TestSize.Lev
  * @tc.desc: test LoadSystemAbility001, systemAbilityId or callback invalid!
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrStubLoadTest, LoadSystemAbility001, TestSize.Level1)
+HWTEST_F(SystemAbilityMgrStubLoadTest, LoadSystemAbility001, TestSize.Level0)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
