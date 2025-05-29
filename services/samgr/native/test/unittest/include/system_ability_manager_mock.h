@@ -63,6 +63,10 @@ public:
 
     int32_t UnloadAllIdleSystemAbility() override;
 
+    int32_t UnloadProcess(const std::vector<std::u16string>& processList) override;
+
+    int32_t GetLruIdleSystemAbilityProc(std::vector<IdleProcessInfo>& processInfos) override;
+
     int32_t GetSystemProcessInfo(int32_t systemAbilityId, SystemProcessInfo& systemProcessInfo) override;
 
     int32_t GetRunningSystemProcess(std::list<SystemProcessInfo>& systemProcessInfos) override;

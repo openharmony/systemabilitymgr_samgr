@@ -1340,4 +1340,26 @@ HWTEST_F(SystemAbilityMgrProxyTest, GetLruIdleSystemAbilityProc002, TestSize.Lev
     EXPECT_NE(res, ERR_OK);
 }
 
+HWTEST_F(SystemAbilityMgrProxyTest, UnloadProcess002, TestSize.Level3)
+{
+    DTEST_LOG << " UnloadProcess002 begin " << std::endl;
+    sptr<ISystemAbilityManager> samgrMock = new ISystemAbilityManagerMock;
+    EXPECT_TRUE(samgrMock != nullptr);
+    std::vector<std::u16string> processList;
+    int32_t ret = samgrMock->UnloadProcess(processList);
+    EXPECT_TRUE(ret == 0);
+    DTEST_LOG << " UnloadProcess002 end " << std::endl;
+}
+
+HWTEST_F(SystemAbilityMgrProxyTest, GetLruIdleSystemAbilityProc003, TestSize.Level3)
+{
+    DTEST_LOG << " GetLruIdleSystemAbilityProc003 begin " << std::endl;
+    sptr<ISystemAbilityManager> samgrMock = new ISystemAbilityManagerMock;
+    EXPECT_TRUE(samgrMock != nullptr);
+    std::vector<IdleProcessInfo> processInfos;
+    int32_t ret = samgrMock->GetLruIdleSystemAbilityProc(processInfos);
+    EXPECT_TRUE(ret == 0);
+    DTEST_LOG << " GetLruIdleSystemAbilityProc003 end " << std::endl;
+}
+
 }
