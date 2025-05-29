@@ -118,6 +118,16 @@ int32_t ISystemAbilityManagerMock::UnloadAllIdleSystemAbility()
     return 0;
 }
 
+int32_t ISystemAbilityManagerMock::UnloadProcess(const std::vector<std::u16string>& processList)
+{
+    return 0;
+}
+
+int32_t ISystemAbilityManagerMock::GetLruIdleSystemAbilityProc(std::vector<IdleProcessInfo>& processInfos)
+{
+    return 0;
+}
+
 int32_t ISystemAbilityManagerMock::GetSystemProcessInfo(int32_t systemAbilityId, SystemProcessInfo& systemProcessInfo)
 {
     return 0;
