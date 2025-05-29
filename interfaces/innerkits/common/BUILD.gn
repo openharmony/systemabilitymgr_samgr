@@ -62,11 +62,6 @@ ohos_shared_library("samgr_common") {
 
   external_deps = [ "libxml2:libxml2" ]
 
-  all_dependent_configs = [
-    ":all_config_samgr_common",
-    "//third_party/libxml2:libxml2_config",
-  ]
-
   if (is_standard_system) {
     external_deps += [
       "c_utils:utils",
