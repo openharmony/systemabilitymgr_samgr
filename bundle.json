@@ -35,6 +35,8 @@
                 "c_utils",
                 "common_event_service",
                 "device_manager",
+                "dsoftbus",
+                "eventhandler",
                 "ffrt",
                 "hicollie",
                 "hilog",
@@ -45,9 +47,11 @@
                 "json",
                 "libxml2",
                 "preferences",
+                "rust_cxx",
                 "safwk",
                 "selinux_adapter",
-                "config_policy"
+                "config_policy",
+                "ylong_runtime"
             ]
         },
         "build": {

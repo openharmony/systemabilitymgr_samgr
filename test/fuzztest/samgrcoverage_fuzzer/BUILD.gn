@@ -84,6 +84,7 @@ ohos_fuzztest("SamgrCoverageFuzzTest") {
     "hitrace:hitrace_meter",
     "init:libbeget_proxy",
     "init:libbegetutil",
+    "ipc:ipc_core",
     "ipc:ipc_single",
     "ipc:libdbinder",
     "json:nlohmann_json_static",
