@@ -245,31 +245,36 @@ bool SamgrUtil::CheckPengLai()
 
 void SamgrUtil::GetFilesByPriority(const std::string& path, std::vector<std::string>& fileNames)
 {
+    std::map<std::string, std::string> fileNamesMap;
+    CfgFiles* filePaths = GetCfgFiles(path.c_str());
+    for (int i = 0; filePaths && i < MAX_CFG_POLICY_DIRS_CNT; i++) {
+        if (filePaths->paths[i] == nullptr) {
+            continue;
+        }
+        HILOGI("GetFilesByPriority filePaths : %{public}s!", filePaths->paths[i]);
+        std::vector<std::string> files;
+        GetDirFiles(filePaths->paths[i], files);
+        for (const auto& file : files) {
+            HILOGD("GetFilesByPriority file : %{public}s!", file.c_str());
+            fileNamesMap[fs::path(file).filename().string()] = file;
+        }
+    }
+    
     if (SamgrUtil::CheckPengLai()) {
         HILOGI("GetFilesByPriority penglai!");
+        std::vector<std::string> files;
         GetDirFiles(PENGLAI_PATH, fileNames);
-    } else {
-        std::map<std::string, std::string> fileNamesMap;
-        CfgFiles* filePaths = GetCfgFiles(path.c_str());
-        for (int i = 0; filePaths && i < MAX_CFG_POLICY_DIRS_CNT; i++) {
-            if (filePaths->paths[i] == nullptr) {
-                continue;
-            }
-            HILOGI("GetFilesByPriority filePaths : %{public}s!", filePaths->paths[i]);
-            std::vector<std::string> files;
-            GetDirFiles(filePaths->paths[i], files);
-            for (const auto& file : files) {
-                HILOGD("GetFilesByPriority file : %{public}s!", file.c_str());
-                fileNamesMap[fs::path(file).filename().string()] = file;
-            }
+        for (const auto& file : files) {
+            HILOGD("GetFilesByPriority file : %{public}s!", file.c_str());
+            fileNamesMap[fs::path(file).filename().string()] = file;
         }
-
-        for (const auto& pair : fileNamesMap) {
-            HILOGD("GetFilesByPriority files : %{public}s!", pair.second.c_str());
-            fileNames.push_back(pair.second);
-        }
-
-        FreeCfgFiles(filePaths);
     }
+
+    for (const auto& pair : fileNamesMap) {
+        HILOGD("GetFilesByPriority files : %{public}s!", pair.second.c_str());
+        fileNames.push_back(pair.second);
+    }
+
+    FreeCfgFiles(filePaths);
 }
 }
