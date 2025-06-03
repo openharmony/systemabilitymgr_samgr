@@ -263,7 +263,7 @@ void SamgrUtil::GetFilesByPriority(const std::string& path, std::vector<std::str
     if (SamgrUtil::CheckPengLai()) {
         HILOGI("GetFilesByPriority penglai!");
         std::vector<std::string> files;
-        GetDirFiles(PENGLAI_PATH, fileNames);
+        GetDirFiles(PENGLAI_PATH, files);
         for (const auto& file : files) {
             HILOGD("GetFilesByPriority file : %{public}s!", file.c_str());
             fileNamesMap[fs::path(file).filename().string()] = file;
