@@ -36,7 +36,6 @@ ohos_unittest("ParseUtilTest") {
   deps = [
     "//foundation/systemabilitymgr/samgr/interfaces/innerkits/common:samgr_common",
     "//foundation/systemabilitymgr/samgr/services/common/test/mock:mock_sa",
-    "//third_party/googletest:gtest_main",
   ]
 
   cflags = []
@@ -46,6 +45,7 @@ ohos_unittest("ParseUtilTest") {
 
   external_deps = [
     "c_utils:utils",
+    "googletest:gtest_main",
     "json:nlohmann_json_static",
   ]
 }
