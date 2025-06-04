@@ -277,6 +277,5 @@ void SamgrUtil::GetFilesByPriority(const std::string& path, std::vector<std::str
         HILOGD("GetFilesByPriority files : %{public}s!", pair.second.c_str());
         fileNames.push_back(pair.second);
     }
-
 }
 }
