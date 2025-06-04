@@ -49,6 +49,7 @@ public:
     static void FilterCommonSaProfile(const SaProfile& oldProfile, CommonSaProfile& newProfile);
     static bool CheckPengLai();
     static void GetFilesByPriority(const std::string& path, std::vector<std::string>& files);
+    static void GetFilesFromPath(const std::string& path, std::map<std::string, std::string>& fileNamesMap);
 private:
     static std::shared_ptr<FFRTHandler> setParmHandler_;
 };
