@@ -503,6 +503,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, ReportEvent002, TestSize.Level3)
     std::list<SaProfile> saProfiles;
     collect->Init(saProfiles);
     OnDemandEvent event;
+    collect->collectHandler_ = std::make_shared<FFRTHandler>("collect");
     collect->ReportEvent(event);
     EXPECT_EQ(true, collect->collectHandler_ != nullptr);
     PostTask(collect->collectHandler_);
@@ -510,6 +511,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, ReportEvent002, TestSize.Level3)
     collect->PostDelayTask(nullptr, std::numeric_limits<int32_t>::max());
     event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
     collect->ReportEvent(event);
+    collect->collectHandler_->CleanFfrt();
     DTEST_LOG << " ReportEvent002 END" << std::endl;
 }
 
@@ -526,6 +528,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, ReportEvent003, TestSize.Level3)
     OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
     std::list<SaControlInfo> saControlList;
     SaProfile saProfile;
+    collect->collectHandler_ = std::make_shared<FFRTHandler>("collect");
     OnDemandEvent event1 = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
     OnDemandEvent event2 = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "off" };
     saProfile.startOnDemand.onDemandEvents.emplace_back(event1);
@@ -535,6 +538,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, ReportEvent003, TestSize.Level3)
     collect->ReportEvent(event);
     EXPECT_EQ(true, collect->collectHandler_ != nullptr);
     PostTask(collect->collectHandler_);
+    collect->collectHandler_->CleanFfrt();
     DTEST_LOG << " ReportEvent003 END" << std::endl;
 }
 

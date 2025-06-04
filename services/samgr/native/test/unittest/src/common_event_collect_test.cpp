@@ -166,6 +166,7 @@ HWTEST_F(CommonEventCollectTest, ProcessEvent001, TestSize.Level3)
     EXPECT_EQ(true, ret);
     ret = commonEventCollect->workHandler_->SendEvent(COMMON_DIED_EVENT);
     EXPECT_EQ(true, ret);
+    commonEventCollect->workHandler_->CleanFfrt();
     DTEST_LOG << " ProcessEvent001 END" << std::endl;
 }
 
@@ -406,6 +407,7 @@ HWTEST_F(CommonEventCollectTest, RemoveOnDemandReasonExtraData001, TestSize.Leve
     commonEventCollect->SaveOnDemandReasonExtraData(eventData);
     commonEventCollect->RemoveOnDemandReasonExtraData(1);
     EXPECT_TRUE(commonEventCollect->extraDatas_.empty());
+    commonEventCollect->workHandler_->CleanFfrt();
     DTEST_LOG << "RemoveOnDemandReasonExtraData001 end" << std::endl;
 }
 
@@ -446,6 +448,7 @@ HWTEST_F(CommonEventCollectTest, GetOnDemandReasonExtraData002, TestSize.Level3)
     commonEventCollect->SaveOnDemandReasonExtraData(eventData);
     bool ret = commonEventCollect->GetOnDemandReasonExtraData(1, onDemandReasonExtraData);
     EXPECT_TRUE(ret);
+    commonEventCollect->workHandler_->CleanFfrt();
     DTEST_LOG << "GetOnDemandReasonExtraData002 end" << std::endl;
 }
 
