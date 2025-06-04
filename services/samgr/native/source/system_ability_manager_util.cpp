@@ -40,7 +40,7 @@ constexpr const char* EVENT_EXTRA_DATA_ID = "extraDataId";
 constexpr const char* MODULE_UPDATE_PARAM = "persist.samgr.moduleupdate";
 constexpr const char* PENG_LAI_PARAM = "ohos.boot.minisys.mode";
 constexpr const char* PENG_LAI = "penglai";
-constexpr const char* PENGLAI_PATH = "/sys_prod/profile/penglai";
+constexpr const char* PENGLAI_PATH = "profile/penglai";
 std::shared_ptr<FFRTHandler> SamgrUtil::setParmHandler_ = make_shared<FFRTHandler>("setParmHandler");
 
 bool SamgrUtil::IsNameInValid(const std::u16string& name)
@@ -243,9 +243,8 @@ bool SamgrUtil::CheckPengLai()
     return paramValue == PENG_LAI;
 }
 
-void SamgrUtil::GetFilesByPriority(const std::string& path, std::vector<std::string>& fileNames)
+void SamgrUtil::GetFilesFromPath(const std::string& path, std::map<std::string, std::string>& fileNamesMap)
 {
-    std::map<std::string, std::string> fileNamesMap;
     CfgFiles* filePaths = GetCfgFiles(path.c_str());
     for (int i = 0; filePaths && i < MAX_CFG_POLICY_DIRS_CNT; i++) {
         if (filePaths->paths[i] == nullptr) {
@@ -259,15 +258,19 @@ void SamgrUtil::GetFilesByPriority(const std::string& path, std::vector<std::str
             fileNamesMap[fs::path(file).filename().string()] = file;
         }
     }
+
+    FreeCfgFiles(filePaths);
+}
+
+
+void SamgrUtil::GetFilesByPriority(const std::string& path, std::vector<std::string>& fileNames)
+{
+    std::map<std::string, std::string> fileNamesMap;
+    GetFilesFromPath(path, fileNamesMap);
     
     if (SamgrUtil::CheckPengLai()) {
         HILOGI("GetFilesByPriority penglai!");
-        std::vector<std::string> files;
-        GetDirFiles(PENGLAI_PATH, files);
-        for (const auto& file : files) {
-            HILOGD("GetFilesByPriority file : %{public}s!", file.c_str());
-            fileNamesMap[fs::path(file).filename().string()] = file;
-        }
+        GetFilesFromPath(PENGLAI_PATH, fileNamesMap);
     }
 
     for (const auto& pair : fileNamesMap) {
@@ -275,6 +278,5 @@ void SamgrUtil::GetFilesByPriority(const std::string& path, std::vector<std::str
         fileNames.push_back(pair.second);
     }
 
-    FreeCfgFiles(filePaths);
 }
 }
