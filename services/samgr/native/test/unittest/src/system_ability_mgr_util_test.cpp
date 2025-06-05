@@ -37,10 +37,9 @@ namespace system {
 const std::u16string PROCESS_NAME = u"test_process_name";
 constexpr const char* PENG_LAI = "penglai";
 
-struct CfgFiles
-{
+struct CfgFiles {
     const char* paths[MAX_CFG_POLICY_DIRS_CNT];
-}
+};
 
 CfgFiles* g_mockCfgFiles = nullptr;
 std::vector<std::string> mockDirFiles;
