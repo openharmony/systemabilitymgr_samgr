@@ -40,9 +40,9 @@ constexpr const char* PENG_LAI = "penglai";
 struct CfgFiles
 {
     const char* paths[MAX_CFG_POLICY_DIRS_CNT];
-};
+}
 
-CfgFiles* mockCfgFiles = nullptr;
+CfgFiles* g_mockCfgFiles = nullptr;
 std::vector<std::string> mockDirFiles;
 
 void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
