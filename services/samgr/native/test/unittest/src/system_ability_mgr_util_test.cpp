@@ -64,7 +64,7 @@ void GetDirFiles(const char* path, std::vector<std::string>& files)
 
 CfgFiles* GetCfgFiles(const char* path)
 {
-    return mockCfgFiles;
+    return g_mockCfgFiles;
 }
 
 void SamgrUtilTest::SetUpTestCase()
@@ -82,7 +82,7 @@ void SamgrUtilTest::SetUp()
     SamMockPermission::MockPermission();
     system::mockValue = "";
     mockDirFiles.clear();
-    mockCfgFiles = nullptr;
+    g_mockCfgFiles = nullptr;
     DTEST_LOG << "SetUp" << std::endl;
 }
 
@@ -434,12 +434,12 @@ HWTEST_F(SamgrUtilTest, TestGetFilesByPriority001, TestSize.Level3)
 HWTEST_F(SamgrUtilTest, TestGetFilesByPriority002, TestSize.Level3)
 {
     system::mockValue = "";
-    mockCfgFiles = new CfgFiles();
+    g_mockCfgFiles = new CfgFiles();
     
     std::vector<std::string> result;
     SamgrUtil::GetFilesByPriority("test_path", result);
     
     ASSERT_TRUE(result.empty());
-    delete mockCfgFiles;
+    delete g_mockCfgFiles;
 }
 }
