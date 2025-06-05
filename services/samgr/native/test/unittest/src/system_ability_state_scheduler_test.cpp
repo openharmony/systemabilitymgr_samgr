@@ -1941,7 +1941,6 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetLruIdleSystemAbilityInfo001, TestSi
     bool ret = systemAbilityStateScheduler->GetLruIdleSystemAbilityInfo(invalidSaid, processName, lastStopTime, pid);
     EXPECT_EQ(ret, false);
     DTEST_LOG<<"GetLruIdleSystemAbilityInfo001 END"<<std::endl;
-    
 }
 
 /**
