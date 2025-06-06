@@ -81,7 +81,7 @@ void SamgrUtilTest::SetUp()
     SamMockPermission::MockPermission();
     system::mockValue = "";
     mockDirFiles.clear();
-    g_g_mockCfgFiles = nullptr;
+    g_mockCfgFiles = nullptr;
     DTEST_LOG << "SetUp" << std::endl;
 }
 
