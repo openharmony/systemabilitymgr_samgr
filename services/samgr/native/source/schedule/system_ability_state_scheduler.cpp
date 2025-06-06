@@ -1432,8 +1432,8 @@ int64_t SystemAbilityStateScheduler::GetSystemAbilityIdleTime(int32_t systemAbil
     return abilityContext->lastIdleTime;
 }
 
-bool SystemAbilityStateScheduler::GetLruIdleSystemAbilityInfo(int32_t systemAbilityId, std::u16string& processName, int64_t& lastStopTime,
-        int32_t& pid)
+bool SystemAbilityStateScheduler::GetLruIdleSystemAbilityInfo(int32_t systemAbilityId,
+    std::u16string& processName, int64_t& lastStopTime, int32_t& pid)
 {
     std::shared_ptr<SystemAbilityContext> abilityContext;
     if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
