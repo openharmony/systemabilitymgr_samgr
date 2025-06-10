@@ -2,8 +2,7 @@
   "description": "Subscription function verification",
   "environment": [
     {
-      "type": "device",
-      "label": "phone"
+      "type": "device"
     }
   ],
   "driver": {

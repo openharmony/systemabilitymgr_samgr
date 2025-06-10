@@ -2,8 +2,7 @@
   "description": "Check if the system can detect startup events",
   "environment": [
     {
-      "type": "device",
-      "label": "phone"
+      "type": "device"
     }
   ],
   "driver": {

@@ -2,8 +2,7 @@
   "description": "Dynamically update and load configuration files",
   "environment": [
     {
-      "type": "device",
-      "label": "phone"
+      "type": "device"
     }
   ],
   "driver": {

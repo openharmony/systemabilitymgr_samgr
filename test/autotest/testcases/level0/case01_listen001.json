@@ -2,8 +2,7 @@
   "description": "Kill a process, check process registration and death listening",
   "environment": [
     {
-      "type": "device",
-      "label": "phone"
+      "type": "device"
     }
   ],
   "driver": {

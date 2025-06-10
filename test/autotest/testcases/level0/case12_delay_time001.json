@@ -2,8 +2,7 @@
   "description": "Process Delay Exit Function Verification",
   "environment": [
     {
-      "type": "device",
-      "label": "phone"
+      "type": "device"
     }
   ],
   "driver": {

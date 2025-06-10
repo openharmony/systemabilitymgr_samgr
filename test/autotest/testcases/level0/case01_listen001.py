@@ -18,7 +18,6 @@ from devicetest.core.test_case import TestCase, CheckPoint, get_report_dir
 from hypium import UiDriver
 import time
 from hypium.action.os_hypium.device_logger import DeviceLogger
-from hypium.action.host import host
 
 
 class case01_listen001(TestCase):
@@ -34,20 +33,20 @@ class case01_listen001(TestCase):
 
     def setup(self):
         self.log.info("case01_listen001 start")
-        host.shell("hdc -t {} shell rm -r /data/log/hilog".format(self.sn))
-        host.shell("hdc -t {} shell hilog -d /system/bin/samgr".format(self.sn))
+        self.driver.shell("rm -r /data/log/hilog")
+        self.driver.shell("hilog -d /system/bin/samgr")
 
     def test_step(self):
         driver = self.driver
         device_logger = DeviceLogger(driver).set_filter_string("01800")
         device_logger.start_log(get_report_dir() + "//case01_listen001.txt")
-        driver.System.execute_command("ps -e |grep distributedata")
-        driver.System.execute_command("kill -9 `pidof distributeddata`")
+        driver.System.execute_command("ps -e | grep resource_schedule_service")
+        driver.System.execute_command("kill -9 `pidof resource_schedule_service`")
         time.sleep(2)
         device_logger.stop_log()
-        CheckPoint("'AddProc:distributeddata and rm DeadProc:distributeddata' is present in the logs")
-        device_logger.check_log("AddProc:distributeddata", EXCEPTION=True)
-        device_logger.check_log("rm DeadProc:distributeddata", EXCEPTION=True)
+        CheckPoint("'AddProc:resource_schedule_service and rm DeadProc:resource_schedule_service' is present in the logs")
+        device_logger.check_log("AddProc:resource_schedule_service", EXCEPTION=True)
+        device_logger.check_log("rm DeadProc:resource_schedule_service", EXCEPTION=True)
 
     def teardown(self):
         self.log.info("case01_listen001 down")

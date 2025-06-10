@@ -2,8 +2,7 @@
   "description": "System normal startup configuration Samgr Selina policy",
   "environment": [
     {
-      "type": "device",
-      "label": "phone"
+      "type": "device"
     }
   ],
   "driver": {

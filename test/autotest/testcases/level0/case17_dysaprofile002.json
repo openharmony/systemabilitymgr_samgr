@@ -2,8 +2,7 @@
   "description": "Get on-demand start stop unloading information",
   "environment": [
     {
-      "type": "device",
-      "label": "phone"
+      "type": "device"
     }
   ],
   "driver": {

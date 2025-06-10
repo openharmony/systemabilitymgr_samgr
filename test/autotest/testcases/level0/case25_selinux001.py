@@ -14,11 +14,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+import sys
+
+current_dir = os.path.abspath(os.path.dirname(__file__))
+rootPath = os.path.split(current_dir)[0]
+awPath = os.path.split(rootPath)[0]
+sys.path.append(rootPath)
+sys.path.append(os.path.join(awPath, "aw"))
+
 import os.path
 from devicetest.core.test_case import TestCase, CheckPoint
 from hypium import UiDriver
-from hypium.action.host import host
-import tools.disk_drop_log
+import disk_drop_log
 
 
 class case25_selinux001(TestCase):
@@ -30,19 +38,18 @@ class case25_selinux001(TestCase):
             "test_step"
         ]
         self.driver = UiDriver(self.device1)
-        self.sn = self.device1.device_sn
 
     def setup(self):
         self.log.info("case25_selinux001 start")
-        host.shell("hdc -t {} shell rm -r /data/log/hilog".format(self.sn))
-        host.shell("hdc -t {} shell hilog -d /system/bin/samgr".format(self.sn))
+        self.driver.shell("rm -r /data/log/hilog")
+        self.driver.shell("hilog -d /system/bin/samgr")
         self.driver.System.reboot()
 
     def test_step(self):
         log_revice_path = os.path.join(self.get_case_report_path(), "disk_drop")
-        tools.disk_drop_log.pulling_disk_dropping_logs(log_revice_path, self.sn)
-        tools.disk_drop_log.parse_disk_dropping_logs(log_revice_path)
-        result = tools.disk_drop_log.check_disk_dropping_logs(log_revice_path, "scontext=u:r:samgr:s0")
+        disk_drop_log.pulling_disk_dropping_logs(log_revice_path, self.driver)
+        disk_drop_log.parse_disk_dropping_logs(log_revice_path)
+        result = disk_drop_log.check_disk_dropping_logs(log_revice_path, "scontext=u:r:samgr:s0")
         CheckPoint("The log does not contain 'scontext=u:r:samgr:s0'")
         assert result is False
 
