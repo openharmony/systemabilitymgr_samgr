@@ -2,8 +2,7 @@
   "description": "SA process creates and destroys relevant information",
   "environment": [
     {
-      "type": "device",
-      "label": "phone"
+      "type": "device"
     }
   ],
   "driver": {

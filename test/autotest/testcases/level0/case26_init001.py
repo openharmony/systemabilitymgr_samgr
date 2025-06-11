@@ -17,7 +17,6 @@
 import time
 from devicetest.core.test_case import TestCase, CheckPoint
 from hypium import UiDriver
-from hypium.action.host import host
 import subprocess
 import shlex
 
@@ -42,7 +41,6 @@ class case26_init001(TestCase):
             "test_step"
         ]
         self.driver = UiDriver(self.device1)
-        self.sn = self.device1.device_sn
 
     def setup(self):
         self.log.info("case26_init001 start")
@@ -53,7 +51,7 @@ class case26_init001(TestCase):
         result = driver.System.get_pid("samgr")
         assert result is not None
         time.sleep(1)
-        host.shell("hdc -t {} shell kill -9 `pidof samgr`".format(self.sn))
+        driver.shell("kill -9 `pidof samgr`")
         command = "fastboot reboot"
         timeout = 3
         current_number = 0
@@ -68,7 +66,7 @@ class case26_init001(TestCase):
         CheckPoint("Second kill samgr, enter fastboot or restart")
         result = driver.System.get_pid("samgr")
         assert result is not None
-        host.shell("hdc -t {} shell kill -9 `pidof samgr`".format(self.sn))
+        driver.shell("kill -9 `pidof samgr`")
         current_number = 0
         return_code = -1
         while current_number < max_number and return_code == -1:

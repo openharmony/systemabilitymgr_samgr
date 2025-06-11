@@ -2,8 +2,7 @@
   "description": "The attribute transformation plugin is functioning properly",
   "environment": [
     {
-      "type": "device",
-      "label": "phone"
+      "type": "device"
     }
   ],
   "driver": {

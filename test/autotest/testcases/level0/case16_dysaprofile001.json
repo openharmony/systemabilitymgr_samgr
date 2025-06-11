@@ -2,8 +2,7 @@
   "description": "Get on-demand start stop loading information",
   "environment": [
     {
-      "type": "device",
-      "label": "phone"
+      "type": "device"
     }
   ],
   "driver": {

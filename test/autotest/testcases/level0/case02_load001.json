@@ -2,8 +2,7 @@
   "description": "Load local verification",
   "environment": [
     {
-      "type": "device",
-      "label": "phone"
+      "type": "device"
     }
   ],
   "driver": {

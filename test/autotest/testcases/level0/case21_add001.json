@@ -2,8 +2,7 @@
   "description": "Non native process add intercepted",
   "environment": [
     {
-      "type": "device",
-      "label": "phone"
+      "type": "device"
     }
   ],
   "driver": {

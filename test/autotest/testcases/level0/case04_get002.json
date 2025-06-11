@@ -2,8 +2,7 @@
   "description": "Get local successful verification",
   "environment": [
     {
-      "type": "device",
-      "label": "phone"
+      "type": "device"
     }
   ],
   "driver": {

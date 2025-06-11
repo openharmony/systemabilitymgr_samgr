@@ -16,7 +16,6 @@
 
 from devicetest.core.test_case import TestCase, CheckPoint
 from hypium import UiDriver
-from hypium.action.host import host
 
 
 class case05_init001(TestCase):
@@ -32,7 +31,7 @@ class case05_init001(TestCase):
 
     def setup(self):
         self.log.info("case05_init001 start")
-        host.shell("hdc -t {} shell rm -r /data/log/hilog".format(self.sn))
+        self.driver.shell("rm -r /data/log/hilog")
 
     def test_step(self):
         driver = self.driver

@@ -2,8 +2,7 @@
   "description": "Timer+combination condition (param)",
   "environment": [
     {
-      "type": "device",
-      "label": "phone"
+      "type": "device"
     }
   ],
   "driver": {

@@ -2,8 +2,7 @@
   "description": "Samgr process crash recovery detection",
   "environment": [
     {
-      "type": "device",
-      "label": "phone"
+      "type": "device"
     }
   ],
   "driver": {

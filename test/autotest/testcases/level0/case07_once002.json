@@ -2,8 +2,7 @@
   "description": "Only effective once for normal use (timer)",
   "environment": [
     {
-      "type": "device",
-      "label": "phone"
+      "type": "device"
     }
   ],
   "driver": {

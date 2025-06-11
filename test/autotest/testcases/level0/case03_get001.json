@@ -2,8 +2,7 @@
   "description": "Get local failed validation",
   "environment": [
     {
-      "type": "device",
-      "label": "phone"
+      "type": "device"
     }
   ],
   "driver": {

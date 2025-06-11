@@ -14,13 +14,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+import sys
+
+current_dir = os.path.abspath(os.path.dirname(__file__))
+rootPath = os.path.split(current_dir)[0]
+awPath = os.path.split(rootPath)[0]
+sys.path.append(rootPath)
+sys.path.append(os.path.join(awPath, "aw"))
+
 import os.path
 import time
 from devicetest.core.test_case import TestCase, Step, CheckPoint, get_report_dir
 from hypium import UiDriver
-import tools.disk_drop_log
-from tools.get_source_path import get_source_path
-from tools.push_remove_source import push_source, remove_source
+import disk_drop_log
+from get_source_path import get_source_path
+from push_remove_source import push_source, remove_source
 
 
 class case24_sub001(TestCase):
@@ -37,8 +46,8 @@ class case24_sub001(TestCase):
 
     def setup(self):
         self.log.info("case24_sub001 start")
-        need_source = {"cfg": True, "fwk": True, "listen_test": True, "audio_ability": True, "ondemand": True,
-                       "proxy": True, "para": False}
+        need_source = {"cfg": True, "listen_test": False, "audio_ability": False, "ondemand": False,
+                       "proxy": False, "para": False}
         self.source_path = get_source_path(need_source=need_source, casename="level0/case24_sub001")
         push_source(source_path=self.source_path, driver=self.driver, sn=self.sn)
 
@@ -55,18 +64,17 @@ class case24_sub001(TestCase):
         assert "1494" in result
 
         log_revice_path = os.path.join(self.get_case_report_path(), "disk_drop")
-        tools.disk_drop_log.pulling_disk_dropping_logs(log_revice_path, self.sn)
-        tools.disk_drop_log.parse_disk_dropping_logs(log_revice_path)
-        result = tools.disk_drop_log.check_disk_dropping_logs(log_revice_path,
+        disk_drop_log.pulling_disk_dropping_logs(log_revice_path, self.driver)
+        disk_drop_log.parse_disk_dropping_logs(log_revice_path)
+        result = disk_drop_log.check_disk_dropping_logs(log_revice_path,
                                                               "OnAddSystemAbility systemAbilityId:1901 added!")
         CheckPoint("The log contains 'ListenAbility: OnAddSystemAbility systemAbilityId:1901 added!'")
         assert result is True
-        result = tools.disk_drop_log.check_disk_dropping_logs(log_revice_path,
+        result = disk_drop_log.check_disk_dropping_logs(log_revice_path,
                                                               "OnAddSystemAbility systemAbilityId:4700 added!")
         CheckPoint("The log contains 'ListenAbility: OnAddSystemAbility systemAbilityId:4700 added!'")
         assert result is True
 
     def teardown(self):
-        self.driver.Screen.close()
         remove_source(source_path=self.source_path, driver=self.driver, sn=self.sn)
         self.log.info("case24_sub001 down")

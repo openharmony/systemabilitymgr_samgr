@@ -14,11 +14,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import os
+import sys
+
+current_dir = os.path.abspath(os.path.dirname(__file__))
+rootPath = os.path.split(current_dir)[0]
+awPath = os.path.split(rootPath)[0]
+sys.path.append(rootPath)
+sys.path.append(os.path.join(awPath, "aw"))
+
 import time
 from devicetest.core.test_case import TestCase, CheckPoint
 from hypium import UiDriver
-from tools.get_source_path import get_source_path
-from tools.push_remove_source import remove_source
+from get_source_path import get_source_path
+from push_remove_source import push_source, remove_source
 
 
 class case15_dysaprofile004(TestCase):
@@ -34,6 +43,10 @@ class case15_dysaprofile004(TestCase):
 
     def setup(self):
         self.log.info("case15_dysaprofile004 start")
+        need_source = {"cfg": True, "listen_test": False, "audio_ability": False, "ondemand": False,
+                       "proxy": False, "para": False}
+        self.source_path = get_source_path(need_source=need_source, casename="level0/case15_dysaprofile004")
+        push_source(source_path=self.source_path, driver=self.driver, sn=self.sn)
 
     def test_step(self):
         driver = self.driver
@@ -54,8 +67,5 @@ class case15_dysaprofile004(TestCase):
         assert "1494" not in result
 
     def teardown(self):
-        need_source = {"cfg": True, "fwk": False, "listen_test": True, "audio_ability": False, "ondemand": True,
-                       "proxy": True, "para": False}
-        source_path = get_source_path(need_source=need_source, casename="level0/case14_dysaprofile003")
-        remove_source(source_path=source_path, driver=self.driver, sn=self.sn)
+        remove_source(source_path=self.source_path, driver=self.driver, sn=self.sn)
         self.log.info("case15_dysaprofile004 down")
