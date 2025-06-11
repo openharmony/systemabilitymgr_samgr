@@ -805,7 +805,7 @@ float CommonEventCollect::GetCpuUsage(const char* file, uint32_t interval)
 void CommonEventCollect::MonitorCpuUsageThread()
 {
     struct sysinfo info;
-    uint64_t coreNum = sysconf(_SC_NPROCESSORS_ONLN);
+    uint64_t coreNum = static_cast<uint64_t>(sysconf(_SC_NPROCESSORS_ONLN));
     uint64_t baseLoad = coreNum << CPU_LOAD_SHIFT;
     pthread_setname_np(pthread_self(), "OS_CPU_MONITOR");
 
