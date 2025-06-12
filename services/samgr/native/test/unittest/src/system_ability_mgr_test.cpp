@@ -1666,4 +1666,25 @@ HWTEST_F(SystemAbilityMgrTest, GetLocalAbilityManagerProxy002, TestSize.Level3)
 
     DTEST_LOG << "GetLocalAbilityManagerProxy002 END" << std::endl;
 }
+
+/**
+ * @tc.name: UnloadProcess001
+ * @tc.desc: Test UnloadProcess
+ * @tc.type: FUNC
+ * @tc.require: I7VQQG
+ */
+HWTEST_F(SystemAbilityMgrTest, UnloadProcess001, TestSize.Level3)
+{
+    DTEST_LOG << "UnloadProcess001 BEGIN" << std::endl;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
+    std::vector<std::u16string> processList;
+    int32_t ret = saMgr->UnloadProcess(processList);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+    ret = saMgr->UnloadProcess(processList);
+    EXPECT_NE(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << "UnloadProcess001 END" << std::endl;
+}
+
 } // namespace OHOS

@@ -1362,4 +1362,33 @@ HWTEST_F(SystemAbilityMgrProxyTest, GetLruIdleSystemAbilityProc003, TestSize.Lev
     DTEST_LOG << " GetLruIdleSystemAbilityProc003 end " << std::endl;
 }
 
+/**
+ * @tc.name: ReadIdleProcessInfoFromParcel001
+ * @tc.desc: Test ReadIdleProcessInfoFromParcel
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, ReadIdleProcessInfoFromParcel001, TestSize.Level3)
+{
+    DTEST_LOG << " ReadIdleProcessInfoFromParcel001 begin " << std::endl;
+    SamMockPermission::MockProcess("memmgrservice");
+    sptr<SystemAbilityManagerProxy> sm = new SystemAbilityManagerProxy(nullptr);
+    std::vector<IdleProcessInfo> procInfos;
+    MessageParcel reply;
+
+    int32_t size = 1;
+    reply.WriteInt32(size);
+
+    int32_t pid = 12345;
+    reply.WriteInt32(pid);
+
+    std::u16string procName = u"testProcName";
+    reply.WriteString16(procName);
+
+    int64_t lastTime = 1749631716;
+    reply.WriteInt64(lastTime);
+
+    int32_t res = sm->ReadIdleProcessInfoFromParcel(reply, procInfos);
+    EXPECT_EQ(res, ERR_OK);
+    DTEST_LOG << " ReadIdleProcessInfoFromParcel001 end " << std::endl;
+}
 }

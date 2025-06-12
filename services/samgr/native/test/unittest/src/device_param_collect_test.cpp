@@ -287,6 +287,7 @@ HWTEST_F(DeviceParamCollectTest, AddCollectEvent002, TestSize.Level3)
     events.emplace_back(event);
     events.emplace_back(event2);
     int32_t ret = deviceParamCollect->AddCollectEvent(events);
+    deviceParamCollect->GetLowMemPrepareList();
     EXPECT_EQ(ret, ERR_OK);
 }
 }  // namespace OHOS

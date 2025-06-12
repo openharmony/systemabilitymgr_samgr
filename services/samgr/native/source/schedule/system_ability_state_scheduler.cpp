@@ -768,7 +768,7 @@ int32_t SystemAbilityStateScheduler::UnloadProcess(const std::vector<std::u16str
     HILOGI("Scheduler:UnloadProcess");
     int32_t result = ERR_OK;
     std::shared_lock<std::shared_mutex> readLock(processMapLock_);
-    for (auto it : processList) {
+    for (const auto& it : processList) {
         if (processContextMap_.count(it) != 0) {
             auto& processContext = processContextMap_[it];
             if (processContext == nullptr) {
