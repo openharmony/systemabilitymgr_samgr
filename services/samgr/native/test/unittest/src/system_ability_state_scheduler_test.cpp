@@ -1977,12 +1977,12 @@ HWTEST_F(SystemAbilityStateSchedulerTest, UnloadProcess001, TestSize.Level3)
         std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
-    systemAbilityStateScheduler->processContextMap_.clear();
+    systemAbilityStateScheduler->processContextMap_[u"satest"] =
+        std::make_shared<SystemProcessContext>();
     std::vector<std::u16string> processList;
-    processList.push_back(u"test");
+    processList.push_back(u"satest");
     int32_t ret = systemAbilityStateScheduler->UnloadProcess(processList);
     EXPECT_NE(ret, TRANSIT_PROC_STATE_FAIL);
     DTEST_LOG<<"UnloadProcess001 END"<<std::endl;
 }
-
 }

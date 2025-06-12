@@ -28,6 +28,7 @@
 #define private public
 #include "sa_status_change_mock.h"
 #include "system_ability_manager.h"
+#include "device_param_collect.h"
 
 using namespace std;
 using namespace testing;
@@ -513,5 +514,51 @@ HWTEST_F(SystemAbilityMgrStubUnLoadTest, UnloadSystemAbilityInner003, TestSize.L
     data.WriteInt32(SAID);
     int32_t result = saMgr->UnloadSystemAbilityInner(data, reply);
     EXPECT_EQ(result, GET_SA_CONTEXT_FAIL);
+}
+
+/**
+ * @tc.name: UnloadProcessInner001
+ * @tc.desc: Test UnloadProcess
+ * @tc.type: FUNC
+ * @tc.require: I6H10P
+ */
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, UnloadProcessInner001, TestSize.Level3)
+{
+    DTEST_LOG << "UnloadProcessInner001 begin" << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    SamMockPermission::MockProcess("memmgrservice");
+    EXPECT_TRUE(saMgr != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t result = saMgr->UnloadProcessInner(data, reply);
+    EXPECT_EQ(result, ERR_OK);
+    string deviceId = "memmgrservice";
+    data.WriteString(deviceId);
+    result = saMgr->UnloadProcessInner(data, reply);
+    EXPECT_EQ(result, ERR_OK);
+    DTEST_LOG << "UnloadProcessInner001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetLruIdleSystemAbilityProcInner001
+ * @tc.desc: Test GetLruIdleSystemAbilityProcInner
+ * @tc.type: FUNC
+ * @tc.require: I6H10P
+ */
+HWTEST_F(SystemAbilityMgrStubUnLoadTest, GetLruIdleSystemAbilityProcInner001, TestSize.Level3)
+{
+    DTEST_LOG << "GetLruIdleSystemAbilityProcInner001 begin" << std::endl;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<DeviceStatusCollectManager> pCollect = new DeviceStatusCollectManager();
+    saMgr->collectManager_ = pCollect;
+    sptr<DeviceParamCollect> deviceParamCollect = new DeviceParamCollect(pCollect);
+    deviceParamCollect->lowMemPrepareList_.push_back(INVALID_SAID);
+    deviceParamCollect->lowMemPrepareList_.push_back(SAID);
+    saMgr->collectManager_->collectPluginMap_[PARAM] = deviceParamCollect;
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t result = saMgr->GetLruIdleSystemAbilityProcInner(data, reply);
+    EXPECT_EQ(result, ERR_OK);
+    DTEST_LOG << "GetLruIdleSystemAbilityProcInner001 end" << std::endl;
 }
 }

@@ -77,7 +77,7 @@ public:
     }
     virtual const std::vector<int32_t>& GetLowMemPrepareList()
     {
-        std::vector<int32_t> res;
+        static std::vector<int32_t> res;
         return res;
     }
     void ReportEvent(const OnDemandEvent& event);

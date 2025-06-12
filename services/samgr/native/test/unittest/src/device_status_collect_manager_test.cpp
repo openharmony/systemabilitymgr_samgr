@@ -22,6 +22,7 @@
 #define private public
 #include "common_event_collect.h"
 #include "device_status_collect_manager.h"
+#include "device_param_collect.h"
 #ifdef SUPPORT_COMMON_EVENT
 #include "common_event_collect.h"
 #include "common_event_manager.h"
@@ -48,6 +49,8 @@ constexpr int64_t EXTRA_ID = 1;
 const std::string SA_TAG_DEVICE_ON_LINE = "deviceonline";
 const std::string WIFI_NAME = "wifi_status";
 constexpr int32_t MOCK_PLUGIN = 20;
+constexpr uint32_t SAID = 1494;
+constexpr uint32_t INVALID_SAID = -1;
 sptr<DeviceStatusCollectManager> collect;
 }
 
@@ -731,6 +734,24 @@ HWTEST_F(DeviceStatusCollectManagerTest, UpdateOnDemandEvents003, TestSize.Level
     int32_t ret = collect->UpdateOnDemandEvents(systemAbilityId, type, events);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     DTEST_LOG << "UpdateOnDemandEvents003 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetLowMemPrepareList001
+ * @tc.desc: Test GetLowMemPrepareList
+ * @tc.type: FUNC
+ * @tc.require: I76X9Q
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, GetLowMemPrepareList001, TestSize.Level3)
+{
+    DTEST_LOG << "GetLowMemPrepareList001 begin"<<std::endl;
+    sptr<DeviceParamCollect> deviceParamCollect = new DeviceParamCollect(collect);
+    deviceParamCollect->lowMemPrepareList_.push_back(INVALID_SAID);
+    deviceParamCollect->lowMemPrepareList_.push_back(SAID);
+    collect->collectPluginMap_[PARAM] = deviceParamCollect;
+    std::vector<int32_t> saIds = collect->GetLowMemPrepareList();
+    EXPECT_FALSE(saIds.empty());
+    DTEST_LOG << "GetLowMemPrepareList001 end"<<std::endl;
 }
 
 /**

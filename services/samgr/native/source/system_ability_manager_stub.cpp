@@ -814,7 +814,7 @@ int32_t SystemAbilityManagerStub::GetLruIdleSystemAbilityProcInner(MessageParcel
     }
     if (result != ERR_OK) {
         HILOGE("GetLruIdleSystemAbilityProc  result is %{public}d", result);
-        return ERR_OK;
+        return result;
     }
     size_t size = infos.size();
     ret = reply.WriteInt32(size);
