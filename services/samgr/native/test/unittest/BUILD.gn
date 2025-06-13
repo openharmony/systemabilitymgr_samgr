@@ -156,6 +156,11 @@ ohos_unittest("SystemAbilityMgrTest") {
     ]
     defines += [ "SUPPORT_COMMON_EVENT" ]
   }
+
+  if (support_penglai_mode) {
+    external_deps += [ "penglai_mode_service:penglai_client" ]
+    defines += [ "SUPPORT_PENGLAI_MODE" ]
+  }
 }
 
 ohos_unittest("SystemAbilityMgrCollectTest") {
@@ -292,6 +297,10 @@ ohos_unittest("SystemAbilityMgrCollectTest") {
     external_deps += [ "device_manager:devicemanagersdk" ]
     defines += [ "SUPPORT_DEVICE_MANAGER" ]
   }
+  if (support_penglai_mode) {
+    external_deps += [ "penglai_mode_service:penglai_client" ]
+    defines += [ "SUPPORT_PENGLAI_MODE" ]
+  }
 }
 
 ohos_unittest("SystemAbilityMgrDeviceNetworkingTest") {
@@ -396,6 +405,11 @@ ohos_unittest("SystemAbilityMgrDeviceNetworkingTest") {
     external_deps += [ "device_manager:devicemanagersdk" ]
     defines += [ "SUPPORT_DEVICE_MANAGER" ]
   }
+
+  if (support_penglai_mode) {
+    external_deps += [ "penglai_mode_service:penglai_client" ]
+    defines += [ "SUPPORT_PENGLAI_MODE" ]
+  }
 }
 
 ohos_unittest("SystemAbilityMgrStubTest") {
@@ -496,6 +510,13 @@ ohos_unittest("SystemAbilityMgrStubTest") {
       "access_token:libtokensetproc_shared",
     ]
     defines += [ "SUPPORT_ACCESS_TOKEN" ]
+  }
+
+  if (support_penglai_mode) {
+    sources +=
+        [ "${samgr_services_dir}/test/unittest/src/mock_penglai_service_client.cpp" ]
+    external_deps += [ "penglai_mode_service:penglai_client" ]
+    defines += [ "SUPPORT_PENGLAI_MODE" ]
   }
 }
 
@@ -688,6 +709,11 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
     external_deps += [ "device_manager:devicemanagersdk" ]
     defines += [ "SUPPORT_DEVICE_MANAGER" ]
   }
+
+  if (support_penglai_mode) {
+    external_deps += [ "penglai_mode_service:penglai_client" ]
+    defines += [ "SUPPORT_PENGLAI_MODE" ]
+  }
 }
 
 ohos_unittest("SystemAbilityMgrDumperTest") {
@@ -762,6 +788,10 @@ ohos_unittest("SystemAbilityMgrDumperTest") {
       "access_token:libtokensetproc_shared",
     ]
     defines += [ "SUPPORT_ACCESS_TOKEN" ]
+  }
+  if (support_penglai_mode) {
+    external_deps += [ "penglai_mode_service:penglai_client" ]
+    defines += [ "SUPPORT_PENGLAI_MODE" ]
   }
 }
 
@@ -1019,6 +1049,10 @@ ohos_executable("TestTool") {
     "safwk:system_ability_fwk",
     "samgr:dynamic_cache",
   ]
+  if (support_penglai_mode) {
+    external_deps += [ "penglai_mode_service:penglai_client" ]
+    defines += [ "SUPPORT_PENGLAI_MODE" ]
+  }
   part_name = "samgr"
   subsystem_name = "systemabilitymgr"
 }

@@ -210,6 +210,11 @@ foreach(item, samgr_fuzztests) {
       external_deps += [ "device_manager:devicemanagersdk" ]
       defines += [ "SUPPORT_DEVICE_MANAGER" ]
     }
+
+    if (support_penglai_mode) {
+      external_deps += [ "penglai_mode_service:penglai_client" ]
+      defines += [ "SUPPORT_PENGLAI_MODE" ]
+    }
   }
 }
 

@@ -109,6 +109,12 @@ const std::string EXT_TRANSACTION_PERMISSION = "ohos.permission.ACCESS_EXT_SYSTE
 const std::string PERMISSION_SVC = "ohos.permission.CONTROL_SVC_CMD";
 }
 
+void SystemAbilityManagerStub::SetPengLai(bool isPengLai)
+{
+    isPengLai_ = isPengLai;
+    HILOGI("SAMStub: SetPengLai isPengLai_ = %{public}d", isPengLai_);
+}
+
 void SystemAbilityManagerStub::SetAbilityFuncMap()
 {
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_SYSTEM_ABILITY_TRANSACTION)] =
@@ -157,6 +163,7 @@ void SystemAbilityManagerStub::SetProcessFuncMap()
 
 SystemAbilityManagerStub::SystemAbilityManagerStub()
 {
+    SetPengLai(SamgrUtil::CheckPengLai());
     SetAbilityFuncMap();
     SetProcessFuncMap();
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_ONDEMAND_REASON_EXTRA_DATA_TRANSACTION)] =
@@ -411,6 +418,12 @@ int32_t SystemAbilityManagerStub::CheckSystemAbilityImmeInner(MessageParcel& dat
         return ERR_NULL_OBJECT;
     }
 
+    if (isPengLai_ && !SamgrUtil::CheckPengLaiPermission(systemAbilityId)) {
+        HILOGW("CheckPengLaiPermission denied! SA:%{public}d,callUid:%{public}d",
+            systemAbilityId, OHOS::IPCSkeleton::GetCallingUid());
+        return ERR_PERMISSION_DENIED;
+    }
+
     if (!CheckGetSAPermission(systemAbilityId)) {
         HILOGD("CheckSystemAbilityImmeInner selinux permission denied! SA:%{public}d,callSid:%{public}s",
             systemAbilityId, OHOS::IPCSkeleton::GetCallingSid().c_str());
@@ -523,6 +536,12 @@ int32_t SystemAbilityManagerStub::GetSystemAbilityInner(MessageParcel& data, Mes
         return ERR_NULL_OBJECT;
     }
 
+    if (isPengLai_ && !SamgrUtil::CheckPengLaiPermission(systemAbilityId)) {
+        HILOGW("CheckPengLaiPermission denied! SA:%{public}d,callUid:%{public}d",
+            systemAbilityId, OHOS::IPCSkeleton::GetCallingUid());
+        return ERR_PERMISSION_DENIED;
+    }
+
     if (!CheckGetSAPermission(systemAbilityId)) {
         HILOGE("GetSystemAbilityInner selinux permission denied! SA:%{public}d,callSid:%{public}s",
             systemAbilityId, OHOS::IPCSkeleton::GetCallingSid().c_str());
@@ -551,6 +570,12 @@ int32_t SystemAbilityManagerStub::CheckSystemAbilityInner(MessageParcel& data, M
     if (!CheckInputSysAbilityId(systemAbilityId)) {
         HILOGW("CheckSystemAbilityInner read SAId failed!");
         return ERR_NULL_OBJECT;
+    }
+
+    if (isPengLai_ && !SamgrUtil::CheckPengLaiPermission(systemAbilityId)) {
+        HILOGW("CheckPengLaiPermission denied! SA:%{public}d,callUid:%{public}d",
+            systemAbilityId, OHOS::IPCSkeleton::GetCallingUid());
+        return ERR_PERMISSION_DENIED;
     }
 
     if (!CheckGetSAPermission(systemAbilityId)) {
