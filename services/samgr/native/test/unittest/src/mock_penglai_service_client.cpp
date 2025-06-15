@@ -22,12 +22,10 @@ namespace Penglai {
 bool permissionRet = true;
 PenglaiServiceClient::PenglaiServiceClient()
 {
-
 }
 
 PenglaiServiceClient::~PenglaiServiceClient()
 {
-
 }
 
 bool PenglaiServiceClient::IsLaunchAllowedByUid(const int32_t &callerUid, const int32_t &systemAbilityId)
