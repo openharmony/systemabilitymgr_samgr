@@ -381,8 +381,14 @@ HWTEST_F(SystemAbilityMgrStubUnLoadTest, UnloadSystemAbilityInner002, TestSize.L
     MessageParcel data;
     MessageParcel reply;
     data.WriteInt32(SAID);
+    CommonSaProfile saProfile;
+    saProfile.process = u"test";
+    saProfile.distributed = true;
+    saProfile.saId = SAID;
+    saMgr->saProfileMap_[SAID] = saProfile;
     int32_t result = saMgr->UnloadSystemAbilityInner(data, reply);
     EXPECT_EQ(result, INVALID_CALL_PROC);
+    saMgr->saProfileMap_.erase(SAID);
 }
 #endif
 
@@ -411,8 +417,14 @@ HWTEST_F(SystemAbilityMgrStubUnLoadTest, UnloadSystemAbility002, TestSize.Level3
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
+    CommonSaProfile saProfile;
+    saProfile.process = u"test";
+    saProfile.distributed = true;
+    saProfile.saId = SAID;
+    saMgr->saProfileMap_[SAID] = saProfile;
     int32_t result = saMgr->UnloadSystemAbility(SAID);
     EXPECT_EQ(result, INVALID_CALL_PROC);
+    saMgr->saProfileMap_.erase(SAID);
 }
 #endif
 

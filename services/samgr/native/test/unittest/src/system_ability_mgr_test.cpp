@@ -189,7 +189,7 @@ HWTEST_F(SystemAbilityMgrTest, AddSystemAbility004, TestSize.Level1)
 
 /**
  * @tc.name: AddSystemAbility005
- * @tc.desc: add system ability with validated capability.
+ * @tc.desc: add system ability, saExtraProp diff from saProfileMap_.
  * @tc.type: FUNC
  */
 HWTEST_F(SystemAbilityMgrTest, AddSystemAbility005, TestSize.Level1)
@@ -201,7 +201,35 @@ HWTEST_F(SystemAbilityMgrTest, AddSystemAbility005, TestSize.Level1)
         \"ccc\":\"this is string\", \"ddd\":\"[aa, bb, cc, dd]\", \"eee\":5.60, \"fff\":4545, \"ggg\":true}}";
     ISystemAbilityManager::SAExtraProp saExtraProp(true, ISystemAbilityManager::DUMP_FLAG_PRIORITY_DEFAULT,
         capability, u"");
+    CommonSaProfile saProfile;
+    saProfile.process = u"test";
+    saProfile.distributed = false;
+    saProfile.saId = systemAbilityId;
+    saMgr->saProfileMap_[systemAbilityId] = saProfile;
     int32_t ret = saMgr->AddSystemAbility(systemAbilityId, new TestTransactionService(), saExtraProp);
+    saMgr->saProfileMap_.erase(systemAbilityId);
+    saMgr->RemoveSystemAbility(systemAbilityId);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: AddSystemAbility006
+ * @tc.desc: add system ability, ERR_OK.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, AddSystemAbility006, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+    CommonSaProfile saProfile;
+    saProfile.process = u"test";
+    saProfile.distributed = true;
+    saProfile.saId = SAID;
+    saMgr->saProfileMap_[SAID] = saProfile;
+    ISystemAbilityManager::SAExtraProp extraProp(true, DUMP_FLAG_PRIORITY_DEFAULT, u"", u"");
+    int32_t ret = saMgr->AddSystemAbility(SAID, new TestTransactionService(), extraProp);
+    saMgr->saProfileMap_.erase(SAID);
+    saMgr->RemoveSystemAbility(SAID);
     EXPECT_EQ(ret, ERR_OK);
 }
 

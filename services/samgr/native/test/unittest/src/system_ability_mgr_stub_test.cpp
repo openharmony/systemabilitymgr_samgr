@@ -634,16 +634,17 @@ HWTEST_F(SystemAbilityMgrStubTest, AddSystemAbilityInner004, TestSize.Level3)
 
 /**
  * @tc.name: AddSystemAbilityInner005
- * @tc.desc: test AddSystemAbilityInner!
+ * @tc.desc: test AddSystemAbilityInner, ERR_OK.
  * @tc.type: FUNC
  */
 HWTEST_F(SystemAbilityMgrStubTest, AddSystemAbilityInner005, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
     sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
     EXPECT_TRUE(saMgr != nullptr);
     SystemAbilityManager::SAExtraProp extraProp;
-    bool isExist = false;
+    bool isDistributed = true;
     int32_t dumpFlags = 0;
     std::u16string capability = u"capability";
     std::u16string permission = u"permission";
@@ -651,12 +652,18 @@ HWTEST_F(SystemAbilityMgrStubTest, AddSystemAbilityInner005, TestSize.Level1)
     MessageParcel reply;
     data.WriteInt32(SAID);
     data.WriteRemoteObject(testAbility);
-    data.WriteBool(isExist);
+    data.WriteBool(isDistributed);
     data.WriteInt32(dumpFlags);
     data.WriteString16(capability);
     data.WriteString16(permission);
+    CommonSaProfile saProfile;
+    saProfile.process = u"test";
+    saProfile.distributed = true;
+    saProfile.saId = SAID;
+    saMgr->saProfileMap_[SAID] = saProfile;
     int32_t result = saMgr->AddSystemAbilityInner(data, reply);
     EXPECT_EQ(result, ERR_OK);
+    saMgr->saProfileMap_.erase(SAID);
 }
 
 /**

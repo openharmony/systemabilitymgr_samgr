@@ -545,13 +545,7 @@ sptr<IRemoteObject> SystemAbilityManager::CheckSystemAbility(int32_t systemAbili
 sptr<IRemoteObject> SystemAbilityManager::CheckSystemAbility(int32_t systemAbilityId,
     const std::string& deviceId)
 {
-    CommonSaProfile saProfile;
-    bool ret = GetSaProfile(systemAbilityId, saProfile);
-    if (!ret) {
-        HILOGE("CheckSystemAbilityFromRpc SA:%{public}d not supported!", systemAbilityId);
-        return nullptr;
-    }
-    if (!saProfile.distributed) {
+    if (!IsDistributedSystemAbility(systemAbilityId)) {
         HILOGE("CheckSystemAbilityFromRpc SA:%{public}d not distributed!", systemAbilityId);
         return nullptr;
     }
@@ -1061,6 +1055,11 @@ int32_t SystemAbilityManager::AddSystemAbility(int32_t systemAbilityId, const sp
         auto saSize = abilityMap_.size();
         if (saSize >= MAX_SERVICES) {
             HILOGE("map size error, (Has been greater than %zu)", saSize);
+            return ERR_INVALID_VALUE;
+        }
+        if (extraProp.isDistributed != IsDistributedSystemAbility(systemAbilityId)) {
+            HILOGE("SA:%{public}d extraProp isDistributed:%{public}d different from saProfile", systemAbilityId,
+                extraProp.isDistributed);
             return ERR_INVALID_VALUE;
         }
         SAInfo saInfo = { ability, extraProp.isDistributed, extraProp.capability, Str16ToStr8(extraProp.permission) };
@@ -1644,14 +1643,7 @@ bool SystemAbilityManager::LoadSystemAbilityFromRpc(const std::string& srcDevice
         HILOGW("LoadSystemAbility said or callback invalid!");
         return false;
     }
-    CommonSaProfile saProfile;
-    bool ret = GetSaProfile(systemAbilityId, saProfile);
-    if (!ret) {
-        HILOGE("LoadSystemAbilityFromRpc SA:%{public}d not supported!", systemAbilityId);
-        return false;
-    }
-
-    if (!saProfile.distributed) {
+    if (!IsDistributedSystemAbility(systemAbilityId)) {
         HILOGE("LoadSystemAbilityFromRpc SA:%{public}d not distributed!", systemAbilityId);
         return false;
     }

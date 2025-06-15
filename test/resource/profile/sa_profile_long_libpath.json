@@ -5,7 +5,7 @@
             "name": 1401,
             "libpath": "111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111111",
             "run-on-create": true,
-            "distributed": true,
+            "distributed": false,
             "dump-level": 1,
             "start-on-demand": {
                 "deviceonline": [
