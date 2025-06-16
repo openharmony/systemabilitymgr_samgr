@@ -185,7 +185,7 @@ HWTEST_F(RefCountCollectTest, IdentifyUnrefOndemand001, TestSize.Level1)
 {
     DTEST_LOG<<"IdentifyUnrefOndemand001 BEGIN"<<std::endl;
     sptr<DeviceStatusCollectManager> manager = new DeviceStatusCollectManager();
-    sptr<RefCountCollect> collect = new RefCountCollect(manager);
+    sptr<RefCountCollect> statuCollect = new RefCountCollect(manager);
     uint32_t timerId = 0;
     statuCollect->timer_ = std::make_unique<Utils::Timer>("refCountCollectTimer");
     statuCollect->timer_->Setup();
