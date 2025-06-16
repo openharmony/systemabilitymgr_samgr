@@ -40,7 +40,7 @@ void RefCountCollect::Init(const std::list<SaProfile>& saProfiles)
 int32_t RefCountCollect::OnStart()
 {
     uint32_t timerId = 0;
-    timer_ = std::make_unique<Utils::Timer>("RefCountCollectTimer");
+    timer_ = std::make_unique<Utils::Timer>("RefCountCollectTimer", -1);
     timer_->Setup();
 
     if (!residentSaList_.empty()) {

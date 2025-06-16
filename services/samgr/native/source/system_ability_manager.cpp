@@ -170,7 +170,7 @@ void SystemAbilityManager::Init()
     collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
     abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
     InitSaProfile();
-    reportEventTimer_ = std::make_unique<Utils::Timer>("DfxReporter");
+    reportEventTimer_ = std::make_unique<Utils::Timer>("DfxReporter", -1);
     OndemandLoadForPerf();
     SetKey(DYNAMIC_CACHE_PARAM);
     SamgrUtil::InvalidateSACache();
