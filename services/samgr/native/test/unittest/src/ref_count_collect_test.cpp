@@ -174,6 +174,8 @@ HWTEST_F(RefCountCollectTest, OnStart003, TestSize.Level1)
  */
 HWTEST_F(RefCountCollectTest, OnStop001, TestSize.Level1)
 {
+    sptr<DeviceStatusCollectManager> manager = new DeviceStatusCollectManager();
+    sptr<RefCountCollect> collect = new RefCountCollect(manager);
     collect->timer_ = nullptr;
     auto ret = collect->OnStop();
     EXPECT_EQ(ret, ERR_OK);
