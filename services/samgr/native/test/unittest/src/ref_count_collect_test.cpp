@@ -34,8 +34,6 @@ void RefCountCollectTest::TearDownTestCase()
 
 void RefCountCollectTest::SetUp()
 {
-    sptr<DeviceStatusCollectManager> manager = new DeviceStatusCollectManager();
-    collect = std::make_shared<RefCountCollect>(manager);
     DTEST_LOG << "SetUp" << std::endl;
 }
 
@@ -51,6 +49,8 @@ void RefCountCollectTest::TearDown()
  */
 HWTEST_F(RefCountCollectTest, Init001, TestSize.Level1)
 {
+    sptr<DeviceStatusCollectManager> manager = new DeviceStatusCollectManager();
+    sptr<RefCountCollect> collect = new RefCountCollect(manager);
     std::list<SaProfile> saProfiles;
     {
         SaProfile saProfile;
@@ -76,6 +76,8 @@ HWTEST_F(RefCountCollectTest, Init001, TestSize.Level1)
  */
 HWTEST_F(RefCountCollectTest, Init002, TestSize.Level1)
 {
+    sptr<DeviceStatusCollectManager> manager = new DeviceStatusCollectManager();
+    sptr<RefCountCollect> collect = new RefCountCollect(manager);
     std::list<SaProfile> saProfiles;
     {
         SaProfile saProfile;
@@ -101,6 +103,8 @@ HWTEST_F(RefCountCollectTest, Init002, TestSize.Level1)
  */
 HWTEST_F(RefCountCollectTest, Init003, TestSize.Level1)
 {
+    sptr<DeviceStatusCollectManager> manager = new DeviceStatusCollectManager();
+    sptr<RefCountCollect> collect = new RefCountCollect(manager);
     std::list<SaProfile> saProfiles;
     SaProfile saProfile;
     saProfile.saId = 1;
@@ -120,6 +124,8 @@ HWTEST_F(RefCountCollectTest, Init003, TestSize.Level1)
  */
 HWTEST_F(RefCountCollectTest, OnStart001, TestSize.Level1)
 {
+    sptr<DeviceStatusCollectManager> manager = new DeviceStatusCollectManager();
+    sptr<RefCountCollect> collect = new RefCountCollect(manager);
     collect->residentSaList_.push_back(1);
     auto ret = collect->OnStart();
     EXPECT_EQ(ret, ERR_OK);
@@ -134,6 +140,8 @@ HWTEST_F(RefCountCollectTest, OnStart001, TestSize.Level1)
  */
 HWTEST_F(RefCountCollectTest, OnStart002, TestSize.Level1)
 {
+    sptr<DeviceStatusCollectManager> manager = new DeviceStatusCollectManager();
+    sptr<RefCountCollect> collect = new RefCountCollect(manager);
     collect->residentSaList_.clear();
     collect->unrefUnloadSaList_.push_back(1);
     auto ret = collect->OnStart();
@@ -149,6 +157,8 @@ HWTEST_F(RefCountCollectTest, OnStart002, TestSize.Level1)
  */
 HWTEST_F(RefCountCollectTest, OnStart003, TestSize.Level1)
 {
+    sptr<DeviceStatusCollectManager> manager = new DeviceStatusCollectManager();
+    sptr<RefCountCollect> collect = new RefCountCollect(manager);
     collect->residentSaList_.clear();
     collect->unrefUnloadSaList_.clear();
     auto ret = collect->OnStart();
@@ -173,9 +183,9 @@ HWTEST_F(RefCountCollectTest, IdentifyUnrefOndemand001, TestSize.Level1)
 {
     DTEST_LOG<<"IdentifyUnrefOndemand001 BEGIN"<<std::endl;
     sptr<DeviceStatusCollectManager> manager = new DeviceStatusCollectManager();
-    std::shared_ptr<RefCountCollect> statuCollect = std::make_shared<RefCountCollect>(manager);
+    sptr<RefCountCollect> collect = new RefCountCollect(manager);
     uint32_t timerId = 0;
-    statuCollect->timer_ = std::make_unique<Utils::Timer>("refCountCollectTimer", -1);
+    statuCollect->timer_ = std::make_unique<Utils::Timer>("refCountCollectTimer");
     statuCollect->timer_->Setup();
     statuCollect->unrefUnloadSaList_.push_back(1);
     timerId = statuCollect->timer_->Register(std::bind(&RefCountCollect::IdentifyUnrefOndemand, statuCollect),

@@ -26,7 +26,6 @@ protected:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
-    std::shared_ptr<RefCountCollect> collect;
 };
 } // namespace OHOS
 #endif /* SAMGR_TEST_UNITTEST_REF_COUNT_COLLECT_TEST_H */
