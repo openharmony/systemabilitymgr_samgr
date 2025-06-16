@@ -419,7 +419,7 @@ int32_t SystemAbilityManagerStub::CheckSystemAbilityImmeInner(MessageParcel& dat
     }
 
     if (isPengLai_ && !SamgrUtil::CheckPengLaiPermission(systemAbilityId)) {
-        HILOGW("CheckPengLaiPermission denied! SA:%{public}d,callUid:%{public}d",
+        HILOGW("CheckSAImme CheckPengLaiPermission denied! SA:%{public}d,callUid:%{public}d",
             systemAbilityId, OHOS::IPCSkeleton::GetCallingUid());
         return ERR_PERMISSION_DENIED;
     }
@@ -537,7 +537,7 @@ int32_t SystemAbilityManagerStub::GetSystemAbilityInner(MessageParcel& data, Mes
     }
 
     if (isPengLai_ && !SamgrUtil::CheckPengLaiPermission(systemAbilityId)) {
-        HILOGW("CheckPengLaiPermission denied! SA:%{public}d,callUid:%{public}d",
+        HILOGW("GetSA CheckPengLaiPermission denied! SA:%{public}d,callUid:%{public}d",
             systemAbilityId, OHOS::IPCSkeleton::GetCallingUid());
         return ERR_PERMISSION_DENIED;
     }
@@ -573,7 +573,7 @@ int32_t SystemAbilityManagerStub::CheckSystemAbilityInner(MessageParcel& data, M
     }
 
     if (isPengLai_ && !SamgrUtil::CheckPengLaiPermission(systemAbilityId)) {
-        HILOGW("CheckPengLaiPermission denied! SA:%{public}d,callUid:%{public}d",
+        HILOGW("CheckSA CheckPengLaiPermission denied! SA:%{public}d,callUid:%{public}d",
             systemAbilityId, OHOS::IPCSkeleton::GetCallingUid());
         return ERR_PERMISSION_DENIED;
     }
