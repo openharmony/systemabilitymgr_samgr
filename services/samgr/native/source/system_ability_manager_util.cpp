@@ -250,7 +250,7 @@ bool SamgrUtil::CheckPengLaiPermission(int32_t systemAbilityId)
 {
 #ifdef SUPPORT_PENGLAI_MODE
     auto callingUid = IPCSkeleton::GetCallingUid();
-    auto penglaiMgr = Penglai::PengLaiServiceClient::GetInstance();
+    auto penglaiMgr = Penglai::PenglaiServiceClient::GetInstance();
     if (penglaiMgr == nullptr) {
         HILOGE("PengLaiServiceClient GetInstance failed.");
         return true;
@@ -261,7 +261,7 @@ bool SamgrUtil::CheckPengLaiPermission(int32_t systemAbilityId)
         HILOGE("IsLaunchAllowedByUid failed. callingUid:%{public}d, SA:%{public}d", callingUid, systemAbilityId);
         return false;
     }
-    HILOGD("CheckPengLaiPerm suc.cUid:%{public}d,SA:%{public}d", callingUid, systemAbilityId);
+    HILOGD("CheckPengLaiPerm suc. cUid:%{public}d,SA:%{public}d", callingUid, systemAbilityId);
     return isAllow;
 #else
     return true;
