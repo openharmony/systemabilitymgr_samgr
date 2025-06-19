@@ -19,6 +19,7 @@ declare_args() {
   support_common_event = false
   support_softbus = true
   samgr_support_access_token = true
+  support_penglai_mode = false
   if (!defined(global_parts_info) ||
       defined(global_parts_info.communication_bluetooth)) {
     bluetooth_part_enable = true
@@ -46,5 +47,9 @@ declare_args() {
   if (defined(global_parts_info) &&
       !defined(global_parts_info.security_access_token)) {
     samgr_support_access_token = false
+  }
+  if (defined(global_parts_info) &&
+      defined(global_parts_info.penglai_penglai_mode_service)) {
+    support_penglai_mode = true
   }
 }

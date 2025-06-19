@@ -23,6 +23,9 @@
 #include "string_ex.h"
 #include "tools.h"
 #include "sam_log.h"
+#ifdef SUPPORT_PENGLAI_MODE
+#include "penglai_service_client.h"
+#endif
 
 namespace OHOS {
 namespace fs = std::filesystem;
@@ -241,6 +244,28 @@ bool SamgrUtil::CheckPengLai()
     std::string defaultValue = "";
     std::string paramValue = system::GetParameter(PENG_LAI_PARAM, defaultValue);
     return paramValue == PENG_LAI;
+}
+
+bool SamgrUtil::CheckPengLaiPermission(int32_t systemAbilityId)
+{
+#ifdef SUPPORT_PENGLAI_MODE
+    auto callingUid = IPCSkeleton::GetCallingUid();
+    auto penglaiMgr = Penglai::PenglaiServiceClient::GetInstance();
+    if (penglaiMgr == nullptr) {
+        HILOGE("PengLaiServiceClient GetInstance failed.");
+        return true;
+    }
+
+    bool isAllow = penglaiMgr->IsLaunchAllowedByUid(callingUid, systemAbilityId);
+    if (!isAllow) {
+        HILOGE("IsLaunchAllowedByUid failed. callingUid:%{public}d, SA:%{public}d", callingUid, systemAbilityId);
+        return false;
+    }
+    HILOGD("CheckPengLaiPerm suc. cUid:%{public}d,SA:%{public}d", callingUid, systemAbilityId);
+    return isAllow;
+#else
+    return true;
+#endif
 }
 
 void SamgrUtil::GetFilesFromPath(const std::string& path, std::map<std::string, std::string>& fileNamesMap)

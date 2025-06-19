@@ -111,6 +111,11 @@ ohos_fuzztest("SystemAbilityManagerFuzzTest") {
     ]
     defines += [ "SUPPORT_ACCESS_TOKEN" ]
   }
+
+  if (support_penglai_mode) {
+    external_deps += [ "penglai_mode_service:penglai_client" ]
+    defines += [ "SUPPORT_PENGLAI_MODE" ]
+  }
 }
 
 group("fuzztest") {

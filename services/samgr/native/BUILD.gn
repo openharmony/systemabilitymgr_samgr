@@ -155,6 +155,11 @@ ohos_executable("samgr") {
     if (samgr_enable_delay_dbinder) {
       defines += [ "SAMGR_ENABLE_DELAY_DBINDER" ]
     }
+
+    if (support_penglai_mode) {
+      external_deps += [ "penglai_mode_service:penglai_client" ]
+      defines += [ "SUPPORT_PENGLAI_MODE" ]
+    }
     part_name = "samgr"
   }
 
