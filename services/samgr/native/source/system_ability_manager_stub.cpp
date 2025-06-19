@@ -87,6 +87,21 @@ namespace {
 #endif
     }
 
+    bool CheckAddRemoteSAPermission(const int32_t said)
+    {
+#ifdef WITH_SELINUX
+        int64_t begin = OHOS::GetTickCount();
+        auto callingSid = OHOS::IPCSkeleton::GetCallingSid();
+        auto ret = selinuxChecker_->AddRemoteServiceCheck(callingSid, std::to_string(said)) == 0;
+        HILOG_SE_DEBUG(LOG_CORE, "AddRemoteServiceCheck callingSid:%{public}s,SA:%{public}d,"
+            "ret:%{public}s,spend:%{public}" PRId64 "ms", callingSid.c_str(), said,
+            ret == true ? "suc" : "fail", OHOS::GetTickCount() - begin);
+        return ret;
+#else
+        return true; // if not support selinux, not check selinux permission
+#endif
+    }
+
     bool CheckListSAPermission()
     {
 #ifdef WITH_SELINUX
@@ -514,6 +529,11 @@ int32_t SystemAbilityManagerStub::AddSystemAbilityInner(MessageParcel& data, Mes
     if (result != ERR_OK) {
         KHILOGW("AddSystemAbilityExtraInner UnmarshalingSaExtraProp failed!");
         return result;
+    }
+    if (extraProp.isDistributed && !CheckAddRemoteSAPermission(systemAbilityId)) {
+        KHILOGE("CheckAddRemoteSAPermission selinux permission denied! SA:%{public}d,callSid:%{public}s",
+            systemAbilityId, OHOS::IPCSkeleton::GetCallingSid().c_str());
+        return ERR_PERMISSION_DENIED;
     }
     result = AddSystemAbility(systemAbilityId, object, extraProp);
     ret = reply.WriteInt32(result);

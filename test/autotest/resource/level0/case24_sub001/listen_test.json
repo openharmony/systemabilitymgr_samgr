@@ -5,14 +5,14 @@
       "name": 1494,
       "libpath": "liblisten_test.z.so",
       "run-on-create": true,
-      "distributed": true,
+      "distributed": false,
       "dump_level": 1
     },
     {
       "name": 1499,
       "libpath": "libtest_audio_ability.z.so",
       "run-on-create": true,
-      "distributed": true,
+      "distributed": false,
       "dump_level": 1
     }
   ]
