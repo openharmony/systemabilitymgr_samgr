@@ -45,8 +45,14 @@ ohos_static_library("samgr_rust_cpp") {
     "c_utils:utils",
     "hilog:libhilog",
     "ipc:ipc_single",
-    "rust_cxx:cxx_cppdeps",
   ]
+
+  if (defined(global_parts_info) &&
+      !defined(global_parts_info.third_party_rust_cxx)) {
+    deps += [ "//third_party/rust/crates/cxx:cxx_cppdeps" ]
+  } else {
+    external_deps += [ "rust_cxx:cxx_cppdeps" ]
+  }
 
   subsystem_name = "systemabilitymgr"
   part_name = "samgr"
@@ -60,10 +66,16 @@ ohos_rust_shared_library("samgr_rust") {
   external_deps = [
     "hilog:hilog_rust",
     "ipc:ipc_rust",
-    "rust_cxx:lib",
   ]
 
   deps = [ ":samgr_rust_cpp" ]
+
+  if (defined(global_parts_info) &&
+      !defined(global_parts_info.third_party_rust_cxx)) {
+    deps += [ "//third_party/rust/crates/cxx:lib" ]
+  } else {
+    external_deps += [ "rust_cxx:lib" ]
+  }
 
   crate_name = "samgr"
 
