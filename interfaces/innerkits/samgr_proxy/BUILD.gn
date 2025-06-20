@@ -86,7 +86,7 @@ ohos_shared_library("samgr_proxy") {
   }
 
   innerapi_tags = [
-    "chipsetsdk",
+    "chipsetsdk_sp",
     "platformsdk",
     "sasdk",
   ]
