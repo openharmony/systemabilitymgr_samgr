@@ -46,7 +46,6 @@
                 "ipc",
                 "json",
                 "libxml2",
-                "penglai_mode_service",
                 "preferences",
                 "rust_cxx",
                 "safwk",
