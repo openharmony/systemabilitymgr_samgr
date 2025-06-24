@@ -746,7 +746,7 @@ HWTEST_F(DeviceTimedCollectTest, ProcessPersistenceTimedTask003, TestSize.Level3
 {
     DTEST_LOG << " ProcessPersistenceTimedTask003 begin" << std::endl;
     sptr<IReport> report;
-    sptr<DeviceTimedCollect> deviceTimedCollect = new DeviceTimedCollect(collect);
+    sptr<DeviceTimedCollect> deviceTimedCollect = new DeviceTimedCollect(report);
     deviceTimedCollect->preferencesUtil_ = PreferencesUtil::GetInstance();
     int64_t disTime = 0;
     std::string strTime = "IntervalTime";
