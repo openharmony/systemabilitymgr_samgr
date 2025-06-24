@@ -64,7 +64,7 @@ int32_t RefCountCollect::OnStop()
 {
     if (timer_ != nullptr) {
         HILOGI("RefCountCollect stop timer");
-        timer_->Shutdown();
+        timer_->Shutdown(false);
     }
     return ERR_OK;
 }
