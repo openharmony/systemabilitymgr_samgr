@@ -109,7 +109,7 @@ int SamgrTimeHandler::CreateAndRetry()
 
 bool SamgrTimeHandler::PostTask(TaskType func, uint64_t delayTime)
 {
-    HILOGI("SamgrTimeHandler postTask start: %{public}llu s", delayTime);
+    HILOGI("SamgrTimeHandler postTask start: %{public}" PRId64 "s", delayTime);
     int timerfd = CreateAndRetry();
     if (timerfd == -1) {
         timerfd = timerfd_create(CLOCK_MONOTONIC, 0);
