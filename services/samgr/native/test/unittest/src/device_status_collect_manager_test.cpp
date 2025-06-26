@@ -505,6 +505,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, ReportEvent002, TestSize.Level3)
     DTEST_LOG << " ReportEvent002 BEGIN" << std::endl;
     std::list<SaProfile> saProfiles;
     sptr<DeviceStatusCollectManager> collectMgr = new DeviceStatusCollectManager();
+    EXPECT_EQ(true, collectMgr != nullptr);
     collectMgr->Init(saProfiles);
     OnDemandEvent event;
     collectMgr->ReportEvent(event);
@@ -525,6 +526,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, ReportEvent003, TestSize.Level3)
     DTEST_LOG << " ReportEvent003 BEGIN" << std::endl;
     std::list<SaProfile> saProfiles;
     sptr<DeviceStatusCollectManager> collectMgr = new DeviceStatusCollectManager();
+    EXPECT_EQ(true, collectMgr != nullptr);
     collectMgr->Init(saProfiles);
     OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
     std::list<SaControlInfo> saControlList;
