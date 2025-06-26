@@ -130,6 +130,7 @@ HWTEST_F(RefCountCollectTest, OnStart001, TestSize.Level1)
     auto ret = collect->OnStart();
     EXPECT_EQ(ret, ERR_OK);
     ret = collect->OnStop();
+    usleep(500 * 1000);
     EXPECT_EQ(ret, ERR_OK);
 }
 
@@ -147,6 +148,7 @@ HWTEST_F(RefCountCollectTest, OnStart002, TestSize.Level1)
     auto ret = collect->OnStart();
     EXPECT_EQ(ret, ERR_OK);
     ret = collect->OnStop();
+    usleep(500 * 1000);
     EXPECT_EQ(ret, ERR_OK);
 }
 
@@ -164,6 +166,7 @@ HWTEST_F(RefCountCollectTest, OnStart003, TestSize.Level1)
     auto ret = collect->OnStart();
     EXPECT_EQ(ret, ERR_OK);
     ret = collect->OnStop();
+    usleep(500 * 1000);
     EXPECT_EQ(ret, ERR_OK);
 }
 
