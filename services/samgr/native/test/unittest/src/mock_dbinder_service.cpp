@@ -16,7 +16,7 @@
 #include "dbinder_service.h"
 
 namespace OHOS {
-DBinderService::DBinderService() 
+DBinderService::DBinderService()
 {
     HILOGI("Mock_DBinderService::DBinderService");
 }
