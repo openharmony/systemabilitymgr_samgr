@@ -14,6 +14,7 @@
  */
 
 #include "dbinder_service.h"
+#include "sam_log.h"
 
 namespace OHOS {
 DBinderService::DBinderService()
