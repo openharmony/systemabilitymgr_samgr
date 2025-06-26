@@ -18,40 +18,48 @@
 namespace OHOS {
 DBinderService::DBinderService() 
 {
+    HILOGI("Mock_DBinderService::DBinderService");
 }
 
 DBinderService::~DBinderService()
 {
+    HILOGI("Mock_DBinderService::~DBinderService");
 }
 
 sptr<DBinderServiceStub> DBinderService::MakeRemoteBinder(const std::u16string &serviceName,
     const std::string &deviceID, int32_t binderObject, uint32_t pid, uint32_t uid)
 {
+    HILOGI("Mock_DBinderService::MakeRemoteBinder");
     return nullptr;
 }
 
 void DBinderService::LoadSystemAbilityComplete(const std::string& srcNetworkId, int32_t systemAbilityId,
     const sptr<IRemoteObject>& remoteObject)
 {
+    HILOGI("Mock_DBinderService::LoadSystemAbilityComplete");
 }
 
-bool DBinderService::RegisterRemoteProxy(std::u16string serviceName, sptr<IRemoteObject> binderObject)
+bool DBinderService::RegisterRemoteProxy(std::u16string serviceName, int32_t systemAbilityId)
 {
+    HILOGI("Mock_DBinderService::RegisterRemoteProxy");
     return true;
 }
 
 bool DBinderService::StartDBinderService(std::shared_ptr<RpcSystemAbilityCallback> &callbackImpl)
 {
+    HILOGI("Mock_DBinderService::StartDBinderService");
     return true;
 }
 
 int32_t DBinderService::NoticeServiceDie(const std::u16string &serviceName, const std::string &deviceID)
 {
+    HILOGI("Mock_DBinderService::NoticeServiceDie");
     return ERR_NONE;
 }
 
 int32_t DBinderService::NoticeDeviceDie(const std::string &deviceID)
 {
+    HILOGI("Mock_DBinderService::NoticeDeviceDie");
     return ERR_NONE;
 }
 } // namespace OHOS
