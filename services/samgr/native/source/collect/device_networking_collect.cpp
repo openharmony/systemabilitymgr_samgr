@@ -269,6 +269,7 @@ void WorkHandler::CleanFfrt()
 {
     if (handler_ != nullptr) {
         handler_->CleanFfrt();
+        handler_ = nullptr;
     }
 }
 
