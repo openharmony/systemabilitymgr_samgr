@@ -71,7 +71,7 @@ bool FFRTHandler::PostTask(std::function<void()> func)
 bool FFRTHandler::PostTask(std::function<void()> func, uint64_t delayTime)
 {
     if (!func) {
-        HILOGE("FFRTHandler post task failed, func is null");
+        HILOGE("FFRTHandler post delay task failed, func is null");
         return false;
     }
     if (delayTime > std::numeric_limits<uint64_t>::max() / CONVERSION_FACTOR) {
@@ -89,7 +89,7 @@ bool FFRTHandler::PostTask(std::function<void()> func, uint64_t delayTime)
 bool FFRTHandler::PostTask(std::function<void()> func, const std::string& name, uint64_t delayTime)
 {
     if (!func) {
-        HILOGE("FFRTHandler post task failed, func is null");
+        HILOGE("FFRTHandler post delay task with name failed, func is null");
         return false;
     }
     if (delayTime > std::numeric_limits<uint64_t>::max() / CONVERSION_FACTOR) {
