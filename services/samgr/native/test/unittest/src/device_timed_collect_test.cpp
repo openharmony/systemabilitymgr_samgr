@@ -938,4 +938,49 @@ HWTEST_F(DeviceTimedCollectTest, RemovePersistenceLoopTask001, TestSize.Level3)
     EXPECT_TRUE(deviceTimedCollect->persitenceLoopEventSet_.empty());
     DTEST_LOG << " RemovePersistenceLoopTask001 end" << std::endl;
 }
+
+/**
+ * @tc.name: TestFFRTHandlerPostTask001
+ * @tc.desc: test FFRTHandler PostTask, with func is null
+ * @tc.type: FUNC
+ * @tc.require: I7VZ98
+ */
+HWTEST_F(DeviceTimedCollectTest, TestFFRTHandlerPostTask001, TestSize.Level3)
+{
+    DTEST_LOG << " TestFFRTHandlerPostTask001 begin" << std::endl;
+    std::shared_ptr<FFRTHandler> collectHandler = std::make_shared<FFRTHandler>("collect");
+    std::function<void()> func = nullptr;
+    EXPECT_FALSE(collectHandler->PostTask(func));
+    DTEST_LOG << " TestFFRTHandlerPostTask001 end" << std::endl;
+}
+
+/**
+ * @tc.name: TestFFRTHandlerPostTask002
+ * @tc.desc: test FFRTHandler PostTask, with func is null
+ * @tc.type: FUNC
+ * @tc.require: I7VZ98
+ */
+HWTEST_F(DeviceTimedCollectTest, TestFFRTHandlerPostTask002, TestSize.Level3)
+{
+    DTEST_LOG << " TestFFRTHandlerPostTask002 begin" << std::endl;
+    std::shared_ptr<FFRTHandler> collectHandler = std::make_shared<FFRTHandler>("collect");
+    std::function<void()> func = nullptr;
+    EXPECT_FALSE(collectHandler->PostTask(func, 1));
+    DTEST_LOG << " TestFFRTHandlerPostTask002 end" << std::endl;
+}
+
+/**
+ * @tc.name: TestFFRTHandlerPostTask003
+ * @tc.desc: test FFRTHandler PostTask, with func is null
+ * @tc.type: FUNC
+ * @tc.require: I7VZ98
+ */
+HWTEST_F(DeviceTimedCollectTest, TestFFRTHandlerPostTask003, TestSize.Level3)
+{
+    DTEST_LOG << " TestFFRTHandlerPostTask003 begin" << std::endl;
+    std::shared_ptr<FFRTHandler> collectHandler = std::make_shared<FFRTHandler>("collect");
+    std::function<void()> func = nullptr;
+    EXPECT_FALSE(collectHandler->PostTask(func, "test", 1));
+    DTEST_LOG << " TestFFRTHandlerPostTask003 end" << std::endl;
+}
 }
