@@ -115,8 +115,14 @@ void DeviceTimedCollect::ProcessPersistenceLoopTask(int64_t disTime, int64_t tri
         return;
     }
     persitenceLoopTasks_[interval] = [this, interval] () {
-        ReportEventByTimeInfo(interval, true);
-        PostPersistenceDelayTask(persitenceLoopTasks_[interval], interval, interval);
+        lock_guard<mutex> autoLock(persitenceLoopEventSetLock_);
+        if (persitenceLoopTasks_.find(interval) != persitenceLoopTasks_.end()) {
+            HILOGI("DeviceTimedCollect Persistence ReportEvent interval: %{public}" PRId64, interval);
+            ReportEventByTimeInfo(interval, true);
+            PostPersistenceDelayTask(persitenceLoopTasks_[interval], interval, interval);
+        } else {
+            HILOGI("DeviceTimedCollect Persistence interval %{public}" PRId64 " has been remove", interval);
+        }
     };
     if (disTime <= 0) {
         ReportEventByTimeInfo(interval, true);
@@ -194,8 +200,14 @@ void DeviceTimedCollect::PostPersistenceLoopTaskLocked(int32_t interval)
         return;
     }
     persitenceLoopTasks_[interval] = [this, interval] () {
-        ReportEventByTimeInfo(interval, true);
-        PostPersistenceDelayTask(persitenceLoopTasks_[interval], interval, interval);
+        lock_guard<mutex> autoLock(persitenceLoopEventSetLock_);
+        if (persitenceLoopTasks_.find(interval) != persitenceLoopTasks_.end()) {
+            HILOGI("DeviceTimedCollect Persistence ReportEvent interval: %{public}d", interval);
+            ReportEventByTimeInfo(interval, true);
+            PostPersistenceDelayTask(persitenceLoopTasks_[interval], interval, interval);
+        } else {
+            HILOGI("DeviceTimedCollect Persistence interval %{public}d has been remove", interval);
+        }
     };
     PostPersistenceDelayTask(persitenceLoopTasks_[interval], interval, interval);
 }
