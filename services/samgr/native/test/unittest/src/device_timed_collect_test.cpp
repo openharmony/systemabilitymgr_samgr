@@ -21,6 +21,7 @@
 #define private public
 #include "device_status_collect_manager.h"
 #include "device_timed_collect.h"
+#include "samgr_time_handler.h"
 #ifdef PREFERENCES_ENABLE
 #include "preferences_errno.h"
 #include "preferences_helper.h"
@@ -982,5 +983,36 @@ HWTEST_F(DeviceTimedCollectTest, TestFFRTHandlerPostTask003, TestSize.Level3)
     std::function<void()> func = nullptr;
     EXPECT_FALSE(collectHandler->PostTask(func, "test", 1));
     DTEST_LOG << " TestFFRTHandlerPostTask003 end" << std::endl;
+}
+
+/**
+ * @tc.name: SamgrTimeHandlerTest001
+ * @tc.desc: test SamgrTimeHandler PostTask, with func is null
+ * @tc.type: FUNC
+ * @tc.require: I7VZ98
+ */
+
+HWTEST_F(DeviceTimedCollectTest, SamgrTimeHandlerTest001, TestSize.Level3)
+{
+    DTEST_LOG << " SamgrTimeHandlerTest001 begin" << std::endl;
+    std::function<void()> timedTask = nullptr;
+    bool bRet = SamgrTimeHandler::GetInstance()->PostTask(timedTask, 1);
+    EXPECT_FALSE(bRet);
+    DTEST_LOG << " SamgrTimeHandlerTest001 end" << std::endl;
+}
+
+/**
+ * @tc.name: SamgrTimeHandlerTest002
+ * @tc.desc: test SamgrTimeHandler PostTask, with func is not null
+ * @tc.type: FUNC
+ * @tc.require: I7VZ98
+ */
+HWTEST_F(DeviceTimedCollectTest, SamgrTimeHandlerTest002, TestSize.Level3)
+{
+    DTEST_LOG << " SamgrTimeHandlerTest002 begin" << std::endl;
+    std::function<void()> timedTask = [] () {};
+    bool bRet = SamgrTimeHandler::GetInstance()->PostTask(timedTask, 1);
+    EXPECT_TRUE(bRet);
+    DTEST_LOG << " SamgrTimeHandlerTest002 end" << std::endl;
 }
 }
