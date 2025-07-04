@@ -109,6 +109,10 @@ int SamgrTimeHandler::CreateAndRetry()
 
 bool SamgrTimeHandler::PostTask(TaskType func, uint64_t delayTime)
 {
+    if (!func) {
+        HILOGE("SamgrTimeHandler PostTask failed, func is null");
+        return false;
+    }
     HILOGI("SamgrTimeHandler postTask start: %{public}" PRId64 "s", delayTime);
     int timerfd = CreateAndRetry();
     if (timerfd == -1) {
