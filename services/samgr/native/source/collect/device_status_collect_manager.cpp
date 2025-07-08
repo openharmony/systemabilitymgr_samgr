@@ -311,7 +311,7 @@ void DeviceStatusCollectManager::PostTask(std::function<void()> callback)
 
 void DeviceStatusCollectManager::PostDelayTask(std::function<void()> callback, int32_t delayTime)
 {
-    HILOGI("DeviceStaMgr PostDelayTask begin");
+    HILOGI("DeviceStaMgr PostDelayTask begin, delayTime:%{public}d", delayTime);
     if (delayTime < 0 || delayTime > std::numeric_limits<int32_t>::max() / TO_MILLISECOND) {
         HILOGE("DeviceStaMgr PostDelayTask Failed : delayTime out of range %{public}d", delayTime);
         return;

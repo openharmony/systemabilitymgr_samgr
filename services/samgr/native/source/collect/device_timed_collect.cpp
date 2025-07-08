@@ -100,8 +100,11 @@ void DeviceTimedCollect::ProcessPersistenceTimedTask(int64_t disTime, std::strin
 void DeviceTimedCollect::ProcessPersistenceLoopTask(int64_t disTime, int64_t triggerTime, std::string strInterval)
 {
     int64_t interval = atoi(strInterval.c_str());
-    if (persitenceLoopTasks_.count(interval) > 0) {
-        return;
+    {
+        lock_guard<mutex> autoLock(persitenceLoopEventSetLock_);
+        if (persitenceLoopTasks_.count(interval) > 0) {
+            return;
+        }
     }
 #ifdef PREFERENCES_ENABLE
     int64_t currentTime = TimeUtils::GetTimestamp();
@@ -114,10 +117,20 @@ void DeviceTimedCollect::ProcessPersistenceLoopTask(int64_t disTime, int64_t tri
         HILOGW("interval is not true");
         return;
     }
-    persitenceLoopTasks_[interval] = [this, interval] () {
-        ReportEventByTimeInfo(interval, true);
-        PostPersistenceDelayTask(persitenceLoopTasks_[interval], interval, interval);
+    auto task = [this, interval] () {
+        lock_guard<mutex> autoLock(persitenceLoopEventSetLock_);
+        if (persitenceLoopTasks_.find(interval) != persitenceLoopTasks_.end()) {
+            HILOGI("DeviceTimedCollect Persistence ReportEvent interval: %{public}" PRId64, interval);
+            ReportEventByTimeInfo(interval, true);
+            PostPersistenceDelayTask(persitenceLoopTasks_[interval], interval, interval);
+        } else {
+            HILOGI("DeviceTimedCollect Persistence interval %{public}" PRId64 " has been remove", interval);
+        }
     };
+    {
+        lock_guard<mutex> autoLock(persitenceLoopEventSetLock_);
+        persitenceLoopTasks_[interval] = task;
+    }
     if (disTime <= 0) {
         ReportEventByTimeInfo(interval, true);
         // In order to enable the timer to start on time next time and make up for the missing time
@@ -194,8 +207,14 @@ void DeviceTimedCollect::PostPersistenceLoopTaskLocked(int32_t interval)
         return;
     }
     persitenceLoopTasks_[interval] = [this, interval] () {
-        ReportEventByTimeInfo(interval, true);
-        PostPersistenceDelayTask(persitenceLoopTasks_[interval], interval, interval);
+        lock_guard<mutex> autoLock(persitenceLoopEventSetLock_);
+        if (persitenceLoopTasks_.find(interval) != persitenceLoopTasks_.end()) {
+            HILOGI("DeviceTimedCollect PostPersistence ReportEvent interval: %{public}d", interval);
+            ReportEventByTimeInfo(interval, true);
+            PostPersistenceDelayTask(persitenceLoopTasks_[interval], interval, interval);
+        } else {
+            HILOGI("DeviceTimedCollect PostPersistence interval %{public}d has been remove", interval);
+        }
     };
     PostPersistenceDelayTask(persitenceLoopTasks_[interval], interval, interval);
 }
