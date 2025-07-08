@@ -209,11 +209,11 @@ void DeviceTimedCollect::PostPersistenceLoopTaskLocked(int32_t interval)
     persitenceLoopTasks_[interval] = [this, interval] () {
         lock_guard<mutex> autoLock(persitenceLoopEventSetLock_);
         if (persitenceLoopTasks_.find(interval) != persitenceLoopTasks_.end()) {
-            HILOGI("DeviceTimedCollect Persistence ReportEvent interval: %{public}d", interval);
+            HILOGI("DeviceTimedCollect PostPersistence ReportEvent interval: %{public}d", interval);
             ReportEventByTimeInfo(interval, true);
             PostPersistenceDelayTask(persitenceLoopTasks_[interval], interval, interval);
         } else {
-            HILOGI("DeviceTimedCollect Persistence interval %{public}d has been remove", interval);
+            HILOGI("DeviceTimedCollect PostPersistence interval %{public}d has been remove", interval);
         }
     };
     PostPersistenceDelayTask(persitenceLoopTasks_[interval], interval, interval);
