@@ -135,9 +135,9 @@ void DeviceTimedCollect::ProcessPersistenceLoopTask(int64_t disTime, int64_t tri
         ReportEventByTimeInfo(interval, true);
         // In order to enable the timer to start on time next time and make up for the missing time
         disTime = interval - abs(disTime) % interval;
-        PostPersistenceDelayTask(persitenceLoopTasks_[interval], interval, disTime);
+        PostPersistenceDelayTask(task, interval, disTime);
     } else {
-        PostDelayTaskByTimeInfo(persitenceLoopTasks_[interval], interval, disTime);
+        PostDelayTaskByTimeInfo(task, interval, disTime);
     }
 }
 
