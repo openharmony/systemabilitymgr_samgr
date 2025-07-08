@@ -865,9 +865,9 @@ HWTEST_F(DeviceTimedCollectTest, ProcessPersistenceLoopTask001, TestSize.Level3)
     DTEST_LOG << " ProcessPersistenceLoopTask001 end" << std::endl;
 }
 
-HWTEST_F(DeviceTimedCollectTest, PostPersistenceLoopTaskLocked002, TestSize.Level3)
+HWTEST_F(DeviceTimedCollectTest, PostPersistenceLoopTaskLocked001, TestSize.Level3)
 {
-    DTEST_LOG << " PostPersistenceLoopTaskLocked002 begin" << std::endl;
+    DTEST_LOG << " PostPersistenceLoopTaskLocked001 begin" << std::endl;
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     collect->collectHandler_ = std::make_shared<FFRTHandler>("collect");
     sptr<DeviceTimedCollect> deviceTimedCollect = new DeviceTimedCollect(collect);
@@ -881,6 +881,25 @@ HWTEST_F(DeviceTimedCollectTest, PostPersistenceLoopTaskLocked002, TestSize.Leve
     deviceTimedCollect->persitenceLoopTasks_.erase(1);
     usleep(1500 * 1000);
     EXPECT_TRUE(deviceTimedCollect->persitenceLoopTasks_.empty());
+    DTEST_LOG << " PostPersistenceLoopTaskLocked001 end" << std::endl;
+}
+
+HWTEST_F(DeviceTimedCollectTest, PostPersistenceLoopTaskLocked002, TestSize.Level3)
+{
+    DTEST_LOG << " PostPersistenceLoopTaskLocked002 begin" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    collect->collectHandler_ = std::make_shared<FFRTHandler>("collect");
+    sptr<DeviceTimedCollect> deviceTimedCollect = new DeviceTimedCollect(collect);
+    EXPECT_EQ(true, deviceTimedCollect != nullptr);
+    deviceTimedCollect->preferencesUtil_ = PreferencesUtil::GetInstance();
+    TimeInfo info;
+    info.awake = false;
+    info.normal = true;
+    deviceTimedCollect->timeInfos_[1] = info;
+    deviceTimedCollect->PostPersistenceLoopTaskLocked(1);
+    EXPECT_FALSE(deviceTimedCollect->persitenceLoopTasks_.empty());
+    usleep(1100 * 1000);
+    deviceTimedCollect->persitenceLoopTasks_.erase(1);
     DTEST_LOG << " PostPersistenceLoopTaskLocked002 end" << std::endl;
 }
 
