@@ -72,19 +72,6 @@ def remove_source(source_path, driver, sn):
         driver.Storage.remove_file("/system/etc/init/listen_test.cfg")
         driver.Storage.remove_file("/system/etc/init/listen_test.json")
 
-    if "sa_lib_listen_test_path" in source_path:
-        driver.Storage.remove_file("/system/lib/liblisten_test.z.so")
-
-    if "sa_proxy_path" in source_path:
-        driver.Storage.remove_file("/system/lib/libtest_sa_proxy.z.so")
-
-
-    if "sa_lib_audio_ability" in source_path:
-        driver.Storage.remove_file("/system/lib/libtest_audio_ability.z.so")
-
-    if "sa_ondemand_path" in source_path:
-        driver.Storage.remove_file("/system/bin/ondemand")
-
     if "sa_para_path" in source_path:
         driver.Storage.remove_file("/system/etc/param/samgr.para")
         driver.Storage.remove_file("/system/etc/param/samgr.para.dac")
