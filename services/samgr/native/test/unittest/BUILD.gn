@@ -444,6 +444,7 @@ ohos_unittest("SystemAbilityMgrStubTest") {
     "${samgr_services_dir}/source/system_ability_manager_util.cpp",
     "${samgr_services_dir}/test/unittest/src/itest_transaction_service.cpp",
     "${samgr_services_dir}/test/unittest/src/mock_accesstoken_kit.cpp",
+    "${samgr_services_dir}/test/unittest/src/mock_dbinder_service.cpp",
     "${samgr_services_dir}/test/unittest/src/mock_permission.cpp",
     "${samgr_services_dir}/test/unittest/src/sa_status_change_mock.cpp",
     "${samgr_services_dir}/test/unittest/src/system_ability_mgr_stub_load_test.cpp",
