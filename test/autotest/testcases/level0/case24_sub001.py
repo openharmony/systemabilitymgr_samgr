@@ -30,6 +30,7 @@ from hypium import UiDriver
 import disk_drop_log
 from get_source_path import get_source_path
 from push_remove_source import push_source, remove_source
+from hypium.action.os_hypium.device_logger import DeviceLogger
 
 
 class case24_sub001(TestCase):
@@ -53,8 +54,11 @@ class case24_sub001(TestCase):
 
     def test_step(self):
         driver = self.driver
+        device_logger = DeviceLogger(driver).set_filter_string("01800")
+        device_logger.start_log(get_report_dir() + "//case024_sub001.txt")
+        driver.System.execute_command("ondemand sa load 1494")
         result = driver.System.execute_command("hidumper -ls")
-        max_wait_time = 5
+        max_wait_time = 10
         wait_time = 0
         while ("1494" not in result and wait_time <= max_wait_time):
             wait_time += 1
@@ -63,17 +67,12 @@ class case24_sub001(TestCase):
         CheckPoint("1494 is loaded after booting up")
         assert "1494" in result
 
-        log_revice_path = os.path.join(self.get_case_report_path(), "disk_drop")
-        disk_drop_log.pulling_disk_dropping_logs(log_revice_path, self.driver)
-        disk_drop_log.parse_disk_dropping_logs(log_revice_path)
-        result = disk_drop_log.check_disk_dropping_logs(log_revice_path,
-                                                              "OnAddSystemAbility systemAbilityId:1901 added!")
+        time.sleep(5)
+        device_logger.stop_log()  
         CheckPoint("The log contains 'ListenAbility: OnAddSystemAbility systemAbilityId:1901 added!'")
-        assert result is True
-        result = disk_drop_log.check_disk_dropping_logs(log_revice_path,
-                                                              "OnAddSystemAbility systemAbilityId:4700 added!")
+        device_logger.check_log("OnAddSystemAbility systemAbilityId:1901 added!", EXCEPTION=True)
         CheckPoint("The log contains 'ListenAbility: OnAddSystemAbility systemAbilityId:4700 added!'")
-        assert result is True
+        device_logger.check_log("OnAddSystemAbility systemAbilityId:4700 added!", EXCEPTION=True)
 
     def teardown(self):
         remove_source(source_path=self.source_path, driver=self.driver, sn=self.sn)

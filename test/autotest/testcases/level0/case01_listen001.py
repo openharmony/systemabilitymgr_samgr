@@ -42,7 +42,7 @@ class case01_listen001(TestCase):
         device_logger.start_log(get_report_dir() + "//case01_listen001.txt")
         driver.System.execute_command("ps -e | grep resource_schedule_service")
         driver.System.execute_command("kill -9 `pidof resource_schedule_service`")
-        time.sleep(2)
+        time.sleep(5)
         device_logger.stop_log()
         CheckPoint("'AddProc:resource_schedule_service and rm DeadProc:resource_schedule_service' is present in the logs")
         device_logger.check_log("AddProc:resource_schedule_service", EXCEPTION=True)
