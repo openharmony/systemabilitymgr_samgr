@@ -157,7 +157,7 @@ void CesStateListener::OnRemoveSystemAbility(int32_t systemAbilityId, const std:
 int32_t SwitchEventSubscriber::SubscribeSwitchEvent()
 {
     HILOGI("DeviceSwitchCollect Subscribe Switch State");
-    std::lock_guard<std::mutex> autoLock(isListenEventLock_);
+    std::lock_guard<ffrt::mutex> autoLock(isListenEventLock_);
     if (isListenSwitchEvent_) {
         return ERR_OK;
     }
@@ -171,7 +171,7 @@ int32_t SwitchEventSubscriber::SubscribeSwitchEvent()
 int32_t SwitchEventSubscriber::UnSubscribeSwitchEvent()
 {
     HILOGI("DeviceSwitchCollect UnSubscribe Switch State");
-    std::lock_guard<std::mutex> autoLock(isListenEventLock_);
+    std::lock_guard<ffrt::mutex> autoLock(isListenEventLock_);
     if (!isListenSwitchEvent_) {
         return ERR_OK;
     }

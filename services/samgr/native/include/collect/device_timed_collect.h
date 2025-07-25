@@ -20,6 +20,7 @@
 #include "device_timed_collect_tool.h"
 #endif
 #include "icollect_plugin.h"
+#include "ffrt.h"
 
 #include <mutex>
 #include <set>
@@ -65,13 +66,13 @@ private:
     void RemoveTimesInfo(const OnDemandEvent& onDemandEvent, int32_t interval);
     std::set<int32_t> nonPersitenceLoopEventSet_;
     std::set<int32_t> persitenceLoopEventSet_;
-    std::mutex nonPersitenceLoopEventSetLock_;
+    ffrt::mutex nonPersitenceLoopEventSetLock_;
     std::mutex nonPersitenceTimedEventSetLock;
-    std::mutex persitenceLoopEventSetLock_;
+    ffrt::mutex persitenceLoopEventSetLock_;
     std::mutex persitenceTimedEventSetLock_;
     std::map<int32_t, std::function<void()>> nonPersitenceLoopTasks_;
     std::map<int32_t, std::function<void()>> persitenceLoopTasks_;
-    std::mutex timeInfosLock_;
+    ffrt::mutex timeInfosLock_;
     std::map<int32_t, TimeInfo> timeInfos_;
 #ifdef PREFERENCES_ENABLE
     std::shared_ptr<PreferencesUtil> preferencesUtil_;

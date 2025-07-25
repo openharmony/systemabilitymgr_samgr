@@ -18,7 +18,6 @@
 
 #include <map>
 #include <memory>
-#include <mutex>
 #include <string>
 #include <shared_mutex>
 
@@ -161,8 +160,8 @@ private:
     };
     std::shared_ptr<SystemAbilityStateMachine> stateMachine_;
     std::shared_ptr<SystemAbilityEventHandler> stateEventHandler_;
-    std::shared_mutex abiltyMapLock_;
-    std::shared_mutex processMapLock_;
+    ffrt::shared_mutex abiltyMapLock_;
+    ffrt::shared_mutex processMapLock_;
     std::map<int32_t, std::shared_ptr<SystemAbilityContext>> abilityContextMap_;
     std::map<std::u16string, std::shared_ptr<SystemProcessContext>> processContextMap_;
     std::shared_ptr<UnloadEventHandler> unloadEventHandler_;
@@ -170,9 +169,9 @@ private:
     std::shared_mutex listenerSetLock_;
     std::list<sptr<ISystemProcessStatusChange>> processListeners_;
     sptr<IRemoteObject::DeathRecipient> processListenerDeath_;
-    std::mutex startEnableOnceLock_;
+    ffrt::mutex startEnableOnceLock_;
     std::map<int32_t, std::list<OnDemandEvent>> startEnableOnceMap_;
-    std::mutex stopEnableOnceLock_;
+    ffrt::mutex stopEnableOnceLock_;
     std::map<int32_t, std::list<OnDemandEvent>> stopEnableOnceMap_;
 };
 } // namespace OHOS

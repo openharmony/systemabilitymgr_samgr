@@ -17,6 +17,7 @@
 #define OHOS_SYSTEM_ABILITY_MANAGER_DEVICE_PARAM_COLLECT_H
 
 #include "icollect_plugin.h"
+#include "ffrt.h"
 #include "system_ability_status_change_stub.h"
 #include <set>
 #include <list>
@@ -35,7 +36,7 @@ public:
     int32_t OnStop() override;
     const std::vector<int32_t>& GetLowMemPrepareList() override;
 private:
-    std::mutex paramLock_;
+    ffrt::mutex paramLock_;
     std::set<std::string> pendingParams_;
     std::set<std::string> params_;
     std::vector<int32_t> lowMemPrepareList_;

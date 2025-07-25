@@ -52,7 +52,7 @@ bool DeviceParamCollect::CheckCondition(const OnDemandCondition& condition)
 
 void DeviceParamCollect::Init(const std::list<SaProfile>& saProfiles)
 {
-    std::lock_guard<std::mutex> autoLock(paramLock_);
+    std::lock_guard<ffrt::mutex> autoLock(paramLock_);
     HILOGI("DeviceParamCollect Init begin");
     for (auto saProfile : saProfiles) {
         for (auto onDemandEvent : saProfile.startOnDemand.onDemandEvents) {
@@ -89,7 +89,7 @@ int32_t DeviceParamCollect::OnStop()
 
 void DeviceParamCollect::WatchParameters()
 {
-    std::lock_guard<std::mutex> autoLock(paramLock_);
+    std::lock_guard<ffrt::mutex> autoLock(paramLock_);
     for (auto param : pendingParams_) {
         HILOGD("DeviceParamCollect watch param: %{public}s", param.c_str());
         int32_t result = WatchParameter(param.c_str(), DeviceParamCallback, this);
@@ -104,7 +104,7 @@ void DeviceParamCollect::WatchParameters()
 
 int32_t DeviceParamCollect::AddCollectEvent(const std::vector<OnDemandEvent>& events)
 {
-    std::lock_guard<std::mutex> autoLock(paramLock_);
+    std::lock_guard<ffrt::mutex> autoLock(paramLock_);
     for (auto& event : events) {
         auto iter = params_.find(event.name);
         if (iter != params_.end()) {
@@ -123,7 +123,7 @@ int32_t DeviceParamCollect::AddCollectEvent(const std::vector<OnDemandEvent>& ev
 
 int32_t DeviceParamCollect::RemoveUnusedEvent(const OnDemandEvent& event)
 {
-    std::lock_guard<std::mutex> autoLock(paramLock_);
+    std::lock_guard<ffrt::mutex> autoLock(paramLock_);
     auto iter = params_.find(event.name);
     if (iter != params_.end()) {
         int32_t result = RemoveParameterWatcher(event.name.c_str(), nullptr, nullptr);

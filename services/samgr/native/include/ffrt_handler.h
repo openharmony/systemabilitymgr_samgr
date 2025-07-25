@@ -17,7 +17,6 @@
 #define OHOS_SAMGR_FFRT_HANDLER_H
 
 #include <map>
-#include <shared_mutex>
 #include <string>
 
 #include "ffrt.h"
@@ -37,7 +36,7 @@ public:
     void SetFfrt(const std::string& name);
 
 private:
-    std::shared_mutex mutex_;
+    ffrt::shared_mutex mutex_;
     std::map<std::string, ffrt::task_handle> taskMap_;
     std::shared_ptr<ffrt::queue> queue_;
 };

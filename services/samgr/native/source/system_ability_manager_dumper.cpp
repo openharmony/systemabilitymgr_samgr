@@ -62,7 +62,7 @@ constexpr const char* IPC_DUMP_FAIL = " fail\n";
 std::shared_ptr<FFRTHandler> SystemAbilityManagerDumper::handler_ = nullptr;
 char* SystemAbilityManagerDumper::ffrtMetricBuffer = nullptr;
 bool SystemAbilityManagerDumper::collectEnable = false;
-std::mutex SystemAbilityManagerDumper::ffrtMetricLock;
+ffrt::mutex SystemAbilityManagerDumper::ffrtMetricLock;
 
 void SystemAbilityManagerDumper::ShowListenerHelp(string& result)
 {
@@ -449,7 +449,7 @@ void SystemAbilityManagerDumper::ClearFfrtStatisticsBufferLocked()
 void SystemAbilityManagerDumper::ClearFfrtStatistics()
 {
     HILOGW("ClearFfrtStatistics start");
-    std::lock_guard<std::mutex> autoLock(ffrtMetricLock);
+    std::lock_guard<ffrt::mutex> autoLock(ffrtMetricLock);
     if (collectEnable) {
         auto ret = ffrt_dump(ffrt_dump_cmd_t::DUMP_STOP_STAT, ffrtMetricBuffer, BUFFER_SIZE);
         if (ret != ERR_OK) {
@@ -462,7 +462,7 @@ void SystemAbilityManagerDumper::ClearFfrtStatistics()
 
 bool SystemAbilityManagerDumper::CollectFfrtStatistics(int32_t cmd, std::string& result)
 {
-    std::lock_guard<std::mutex> autoLock(ffrtMetricLock);
+    std::lock_guard<ffrt::mutex> autoLock(ffrtMetricLock);
     result.append("pid:" + ToString(getpid()) + " ");
     auto ret = false;
     switch (cmd) {

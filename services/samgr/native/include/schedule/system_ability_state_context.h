@@ -19,10 +19,9 @@
 #include <list>
 #include <map>
 #include <memory>
-#include <mutex>
 #include <string>
-#include <shared_mutex>
 
+#include "ffrt.h"
 #include "refbase.h"
 #include "sa_profiles.h"
 #include "isystem_ability_load_callback.h"
@@ -66,8 +65,8 @@ struct UnloadRequestInfo {
 };
 
 struct SystemProcessContext {
-    std::mutex stateCountLock;
-    std::mutex processLock;
+    ffrt::mutex stateCountLock;
+    ffrt::mutex processLock;
     std::u16string processName;
     std::list<int32_t> saList;
     std::map<SystemAbilityState, uint32_t> abilityStateCountMap;

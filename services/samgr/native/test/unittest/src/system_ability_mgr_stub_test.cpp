@@ -90,7 +90,7 @@ void SystemAbilityMgrStubTest::AddSystemAbilityContext(int32_t systemAbilityId, 
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
     EXPECT_TRUE(saMgr->abilityStateScheduler_ != nullptr);
-    std::unique_lock<std::shared_mutex> processWriteLock(saMgr->abilityStateScheduler_->processMapLock_);
+    std::unique_lock<ffrt::shared_mutex> processWriteLock(saMgr->abilityStateScheduler_->processMapLock_);
     if (saMgr->abilityStateScheduler_->processContextMap_.count(processName) == 0) {
         auto processContext = std::make_shared<SystemProcessContext>();
         processContext->processName = processName;
@@ -108,7 +108,7 @@ void SystemAbilityMgrStubTest::AddSystemAbilityContext(int32_t systemAbilityId, 
     auto abilityContext = std::make_shared<SystemAbilityContext>();
     abilityContext->systemAbilityId = systemAbilityId;
     abilityContext->ownProcessContext = saMgr->abilityStateScheduler_->processContextMap_[processName];
-    std::unique_lock<std::shared_mutex> abiltyWriteLock(saMgr->abilityStateScheduler_->abiltyMapLock_);
+    std::unique_lock<ffrt::shared_mutex> abiltyWriteLock(saMgr->abilityStateScheduler_->abiltyMapLock_);
     saMgr->abilityStateScheduler_->abilityContextMap_[systemAbilityId] = abilityContext;
 }
 

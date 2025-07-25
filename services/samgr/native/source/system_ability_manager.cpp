@@ -87,14 +87,14 @@ constexpr int32_t FIRST_DUMP_INDEX = 0;
 constexpr int64_t TWO_MINUTES_SECONDS = 120 * 1000; // ms
 }
 
-std::mutex SystemAbilityManager::instanceLock;
+ffrt::mutex SystemAbilityManager::instanceLock;
 sptr<SystemAbilityManager> SystemAbilityManager::instance;
 
 void SystemAbilityManager::RegisterDistribute(int32_t systemAbilityId, bool isDistributed)
 {
 #ifdef SAMGR_ENABLE_DELAY_DBINDER
     if (isDistributed) {
-        std::shared_lock<std::shared_mutex> readLock(dBinderServiceLock_);
+        std::shared_lock<ffrt::shared_mutex> readLock(dBinderServiceLock_);
         if (dBinderService_ != nullptr) {
             u16string strName = Str8ToStr16(to_string(systemAbilityId));
             dBinderService_->RegisterRemoteProxy(strName, systemAbilityId);
@@ -106,7 +106,7 @@ void SystemAbilityManager::RegisterDistribute(int32_t systemAbilityId, bool isDi
         }
     }
     if (systemAbilityId == SOFTBUS_SERVER_SA_ID) {
-        std::shared_lock<std::shared_mutex> readLock(dBinderServiceLock_);
+        std::shared_lock<ffrt::shared_mutex> readLock(dBinderServiceLock_);
         if (dBinderService_ != nullptr && rpcCallbackImp_ != nullptr) {
             bool ret = dBinderService_->StartDBinderService(rpcCallbackImp_);
             HILOGI("start result is %{public}s", ret ? "succeed" : "fail");
@@ -130,7 +130,7 @@ void SystemAbilityManager::RegisterDistribute(int32_t systemAbilityId, bool isDi
 #ifdef SAMGR_ENABLE_DELAY_DBINDER
 void SystemAbilityManager::InitDbinderService()
 {
-    std::unique_lock<std::shared_mutex> writeLock(dBinderServiceLock_);
+    std::unique_lock<ffrt::shared_mutex> writeLock(dBinderServiceLock_);
     if (!isDbinderServiceInit_) {
         dBinderService_ = DBinderService::GetInstance();
         rpcCallbackImp_ = make_shared<RpcCallbackImp>();
@@ -213,7 +213,7 @@ bool SystemAbilityManager::IpcStatSamgrProc(int32_t fd, int32_t cmd)
 
 void SystemAbilityManager::IpcDumpAllProcess(int32_t fd, int32_t cmd)
 {
-    lock_guard<mutex> autoLock(systemProcessMapLock_);
+    lock_guard<ffrt::mutex> autoLock(systemProcessMapLock_);
     for (auto iter = systemProcessMap_.begin(); iter != systemProcessMap_.end(); iter++) {
         sptr<ILocalAbilityManager> obj = iface_cast<ILocalAbilityManager>(iter->second);
         if (obj != nullptr) {
@@ -271,7 +271,7 @@ int32_t SystemAbilityManager::Dump(int32_t fd, const std::vector<std::u16string>
     if ((argsWithStr8.size() > 0) && (argsWithStr8[FIRST_DUMP_INDEX] == ARGS_LISTENER_PARAM)) {
         std::map<int32_t, std::list<SAListener>> dumpListeners;
         {
-            lock_guard<mutex> autoLock(listenerMapLock_);
+            lock_guard<ffrt::mutex> autoLock(listenerMapLock_);
             dumpListeners = listenerMap_;
         }
         return SystemAbilityManagerDumper::ListenerDumpProc(dumpListeners, fd, argsWithStr8);
@@ -291,7 +291,7 @@ int32_t SystemAbilityManager::Dump(int32_t fd, const std::vector<std::u16string>
 
 void SystemAbilityManager::AddSamgrToAbilityMap()
 {
-    unique_lock<shared_mutex> writeLock(abilityMapLock_);
+    unique_lock<ffrt::shared_mutex> writeLock(abilityMapLock_);
     int32_t systemAbilityId = 0;
     SAInfo saInfo;
     saInfo.remoteObj = this;
@@ -335,7 +335,7 @@ void SystemAbilityManager::InitSaProfile()
     if (collectManager_ != nullptr) {
         collectManager_->Init(saInfos);
     }
-    lock_guard<mutex> autoLock(saProfileMapLock_);
+    lock_guard<ffrt::mutex> autoLock(saProfileMapLock_);
     onDemandSaIdsSet_.insert(DEVICE_INFO_SERVICE_SA);
     onDemandSaIdsSet_.insert(HIDUMPER_SERVICE_SA);
     onDemandSaIdsSet_.insert(MEDIA_ANALYSIS_SERVICE_SA);
@@ -377,9 +377,9 @@ std::list<int32_t> SystemAbilityManager::GetAllOndemandSa()
 {
     std::list<int32_t> ondemandSaids;
     {
-        lock_guard<mutex> autoLock(saProfileMapLock_);
+        lock_guard<ffrt::mutex> autoLock(saProfileMapLock_);
         for (const auto& [said, value] : saProfileMap_) {
-            shared_lock<shared_mutex> readLock(abilityMapLock_);
+            shared_lock<ffrt::shared_mutex> readLock(abilityMapLock_);
             auto iter = abilityMap_.find(said);
             if (iter == abilityMap_.end()) {
                 ondemandSaids.emplace_back(said);
@@ -509,7 +509,7 @@ sptr<IRemoteObject> SystemAbilityManager::GetSystemAbilityFromRemote(int32_t sys
         return nullptr;
     }
 
-    shared_lock<shared_mutex> readLock(abilityMapLock_);
+    shared_lock<ffrt::shared_mutex> readLock(abilityMapLock_);
     auto iter = abilityMap_.find(systemAbilityId);
     if (iter == abilityMap_.end()) {
         HILOGI("GetSystemAbilityFromRemote not found SA %{public}d.", systemAbilityId);
@@ -532,7 +532,7 @@ sptr<IRemoteObject> SystemAbilityManager::CheckSystemAbility(int32_t systemAbili
         return nullptr;
     }
     int32_t count = UpdateSaFreMap(IPCSkeleton::GetCallingUid(), systemAbilityId);
-    shared_lock<shared_mutex> readLock(abilityMapLock_);
+    shared_lock<ffrt::shared_mutex> readLock(abilityMapLock_);
     auto iter = abilityMap_.find(systemAbilityId);
     if (iter != abilityMap_.end()) {
         HILOGD("found SA:%{public}d,callpid:%{public}d", systemAbilityId, IPCSkeleton::GetCallingPid());
@@ -584,7 +584,7 @@ int32_t SystemAbilityManager::FindSystemAbilityNotify(int32_t systemAbilityId, c
     int32_t code)
 {
     HILOGI("FindSaNotify SA:%{public}d,%{public}d_%{public}zu", systemAbilityId, code, listenerMap_.size());
-    lock_guard<mutex> autoLock(listenerMapLock_);
+    lock_guard<ffrt::mutex> autoLock(listenerMapLock_);
     auto iter = listenerMap_.find(systemAbilityId);
     if (iter == listenerMap_.end()) {
         return ERR_OK;
@@ -664,7 +664,7 @@ int32_t SystemAbilityManager::AddOnDemandSystemAbilityInfo(int32_t systemAbility
         return ERR_INVALID_VALUE;
     }
 
-    lock_guard<mutex> autoLock(onDemandLock_);
+    lock_guard<ffrt::mutex> autoLock(onDemandLock_);
     auto onDemandSaSize = onDemandAbilityMap_.size();
     if (onDemandSaSize >= MAX_SERVICES) {
         HILOGE("map size error, (Has been greater than %{public}zu)",
@@ -672,7 +672,7 @@ int32_t SystemAbilityManager::AddOnDemandSystemAbilityInfo(int32_t systemAbility
         return ERR_INVALID_VALUE;
     }
     {
-        lock_guard<mutex> autoLock(systemProcessMapLock_);
+        lock_guard<ffrt::mutex> autoLock(systemProcessMapLock_);
         if (systemProcessMap_.count(procName) == 0) {
             HILOGW("AddOnDemandSystemAbilityInfo procName:%{public}s not exist.", Str16ToStr8(procName).c_str());
             return ERR_INVALID_VALUE;
@@ -696,7 +696,7 @@ int32_t SystemAbilityManager::AddOnDemandSystemAbilityInfo(int32_t systemAbility
 
 void SystemAbilityManager::RemoveOnDemandSaInDiedProc(std::shared_ptr<SystemProcessContext>& processContext)
 {
-    lock_guard<mutex> autoLock(onDemandLock_);
+    lock_guard<ffrt::mutex> autoLock(onDemandLock_);
     for (auto& saId : processContext->saList) {
         onDemandAbilityMap_.erase(saId);
     }
@@ -741,7 +741,7 @@ sptr<IRemoteObject> SystemAbilityManager::CheckSystemAbility(int32_t systemAbili
 
 bool SystemAbilityManager::DoLoadOnDemandAbility(int32_t systemAbilityId, bool& isExist)
 {
-    lock_guard<mutex> autoLock(onDemandLock_);
+    lock_guard<ffrt::mutex> autoLock(onDemandLock_);
     sptr<IRemoteObject> abilityProxy = CheckSystemAbility(systemAbilityId);
     if (abilityProxy != nullptr) {
         isExist = true;
@@ -769,7 +769,7 @@ int32_t SystemAbilityManager::RemoveSystemAbility(int32_t systemAbilityId)
         return ERR_INVALID_VALUE;
     }
     {
-        unique_lock<shared_mutex> writeLock(abilityMapLock_);
+        unique_lock<ffrt::shared_mutex> writeLock(abilityMapLock_);
         auto itSystemAbility = abilityMap_.find(systemAbilityId);
         if (itSystemAbility == abilityMap_.end()) {
             HILOGI("RemoveSystemAbility not found!");
@@ -805,7 +805,7 @@ int32_t SystemAbilityManager::RemoveSystemAbility(const sptr<IRemoteObject>& abi
 
     int32_t saId = 0;
     {
-        unique_lock<shared_mutex> writeLock(abilityMapLock_);
+        unique_lock<ffrt::shared_mutex> writeLock(abilityMapLock_);
         for (auto iter = abilityMap_.begin(); iter != abilityMap_.end(); ++iter) {
             if (iter->second.remoteObj == ability) {
                 saId = iter->first;
@@ -838,7 +838,7 @@ int32_t SystemAbilityManager::RemoveSystemAbility(const sptr<IRemoteObject>& abi
 int32_t SystemAbilityManager::RemoveDiedSystemAbility(int32_t systemAbilityId)
 {
     {
-        unique_lock<shared_mutex> writeLock(abilityMapLock_);
+        unique_lock<ffrt::shared_mutex> writeLock(abilityMapLock_);
         auto itSystemAbility = abilityMap_.find(systemAbilityId);
         if (itSystemAbility == abilityMap_.end()) {
             return ERR_OK;
@@ -858,7 +858,7 @@ int32_t SystemAbilityManager::RemoveDiedSystemAbility(int32_t systemAbilityId)
 vector<u16string> SystemAbilityManager::ListSystemAbilities(uint32_t dumpFlags)
 {
     vector<u16string> list;
-    shared_lock<shared_mutex> readLock(abilityMapLock_);
+    shared_lock<ffrt::shared_mutex> readLock(abilityMapLock_);
     for (auto iter = abilityMap_.begin(); iter != abilityMap_.end(); iter++) {
         list.emplace_back(Str8ToStr16(to_string(iter->first)));
     }
@@ -889,7 +889,7 @@ void SystemAbilityManager::CheckListenerNotify(int32_t systemAbilityId,
     if (targetObject == nullptr) {
         return;
     }
-    lock_guard<mutex> autoLock(listenerMapLock_);
+    lock_guard<ffrt::mutex> autoLock(listenerMapLock_);
     auto& listeners = listenerMap_[systemAbilityId];
     for (auto& itemListener : listeners) {
         if (listener->AsObject() == itemListener.listener->AsObject()) {
@@ -918,7 +918,7 @@ int32_t SystemAbilityManager::SubscribeSystemAbility(int32_t systemAbilityId,
 
     auto callingPid = IPCSkeleton::GetCallingPid();
     {
-        lock_guard<mutex> autoLock(listenerMapLock_);
+        lock_guard<ffrt::mutex> autoLock(listenerMapLock_);
         auto& listeners = listenerMap_[systemAbilityId];
         for (const auto& itemListener : listeners) {
             if (listener->AsObject() == itemListener.listener->AsObject()) {
@@ -980,7 +980,7 @@ int32_t SystemAbilityManager::UnSubscribeSystemAbility(int32_t systemAbilityId,
         return ERR_INVALID_VALUE;
     }
 
-    lock_guard<mutex> autoLock(listenerMapLock_);
+    lock_guard<ffrt::mutex> autoLock(listenerMapLock_);
     auto& listeners = listenerMap_[systemAbilityId];
     UnSubscribeSystemAbilityLocked(listeners, listener->AsObject());
     if (abilityStatusDeath_ != nullptr) {
@@ -992,7 +992,7 @@ int32_t SystemAbilityManager::UnSubscribeSystemAbility(int32_t systemAbilityId,
 
 void SystemAbilityManager::UnSubscribeSystemAbility(const sptr<IRemoteObject>& remoteObject)
 {
-    lock_guard<mutex> autoLock(listenerMapLock_);
+    lock_guard<ffrt::mutex> autoLock(listenerMapLock_);
     HILOGD("UnSubscribeSA remote object dead! size:%{public}zu", listenerMap_.size());
     for (auto& item : listenerMap_) {
         auto& listeners = item.second;
@@ -1009,7 +1009,7 @@ void SystemAbilityManager::NotifyRemoteSaDied(const std::u16string& name)
     std::string deviceId;
     SamgrUtil::ParseRemoteSaName(name, deviceId, saName);
 #ifdef SAMGR_ENABLE_DELAY_DBINDER
-    std::shared_lock<std::shared_mutex> readLock(dBinderServiceLock_);
+    std::shared_lock<ffrt::shared_mutex> readLock(dBinderServiceLock_);
 #endif
     if (dBinderService_ != nullptr) {
         std::string nodeId = SamgrUtil::TransformDeviceId(deviceId, NODE_ID, false);
@@ -1022,7 +1022,7 @@ void SystemAbilityManager::NotifyRemoteSaDied(const std::u16string& name)
 void SystemAbilityManager::NotifyRemoteDeviceOffline(const std::string& deviceId)
 {
 #ifdef SAMGR_ENABLE_DELAY_DBINDER
-    std::shared_lock<std::shared_mutex> readLock(dBinderServiceLock_);
+    std::shared_lock<ffrt::shared_mutex> readLock(dBinderServiceLock_);
 #endif
     if (dBinderService_ != nullptr) {
         dBinderService_->NoticeDeviceDie(deviceId);
@@ -1032,7 +1032,7 @@ void SystemAbilityManager::NotifyRemoteDeviceOffline(const std::string& deviceId
 
 void SystemAbilityManager::RefreshListenerState(int32_t systemAbilityId)
 {
-    lock_guard<mutex> autoLock(listenerMapLock_);
+    lock_guard<ffrt::mutex> autoLock(listenerMapLock_);
     auto iter = listenerMap_.find(systemAbilityId);
     if (iter != listenerMap_.end()) {
         auto& listeners = iter->second;
@@ -1051,7 +1051,7 @@ int32_t SystemAbilityManager::AddSystemAbility(int32_t systemAbilityId, const sp
     }
     RefreshListenerState(systemAbilityId);
     {
-        unique_lock<shared_mutex> writeLock(abilityMapLock_);
+        unique_lock<ffrt::shared_mutex> writeLock(abilityMapLock_);
         auto saSize = abilityMap_.size();
         if (saSize >= MAX_SERVICES) {
             HILOGE("map size error, (Has been greater than %zu)", saSize);
@@ -1107,7 +1107,7 @@ int32_t SystemAbilityManager::AddSystemProcess(const u16string& procName,
         return ERR_INVALID_VALUE;
     }
     {
-        lock_guard<mutex> autoLock(systemProcessMapLock_);
+        lock_guard<ffrt::mutex> autoLock(systemProcessMapLock_);
         size_t procNum = systemProcessMap_.size();
         if (procNum >= MAX_SERVICES) {
             HILOGE("AddSystemProcess map size reach MAX_SERVICES already");
@@ -1121,7 +1121,7 @@ int32_t SystemAbilityManager::AddSystemProcess(const u16string& procName,
     }
     int64_t duration = 0;
     {
-        lock_guard<mutex> autoLock(startingProcessMapLock_);
+        lock_guard<ffrt::mutex> autoLock(startingProcessMapLock_);
         auto iterStarting = startingProcessMap_.find(procName);
         if (iterStarting != startingProcessMap_.end()) {
             duration = GetTickCount() - iterStarting->second;
@@ -1155,7 +1155,7 @@ int32_t SystemAbilityManager::RemoveSystemProcess(const sptr<IRemoteObject>& pro
         procObject->RemoveDeathRecipient(systemProcessDeath_);
     }
     {
-        lock_guard<mutex> autoLock(systemProcessMapLock_);
+        lock_guard<ffrt::mutex> autoLock(systemProcessMapLock_);
         for (const auto& [procName, object] : systemProcessMap_) {
             if (object != procObject) {
                 continue;
@@ -1189,7 +1189,7 @@ sptr<IRemoteObject> SystemAbilityManager::GetSystemProcess(const u16string& proc
         return nullptr;
     }
 
-    lock_guard<mutex> autoLock(systemProcessMapLock_);
+    lock_guard<ffrt::mutex> autoLock(systemProcessMapLock_);
     auto iter = systemProcessMap_.find(procName);
     if (iter != systemProcessMap_.end()) {
         HILOGD("process:%{public}s found", Str16ToStr8(procName).c_str());
@@ -1332,14 +1332,14 @@ void SystemAbilityManager::CleanCallbackForLoadFailed(int32_t systemAbilityId, c
     const std::string& srcDeviceId, const sptr<ISystemAbilityLoadCallback>& callback)
 {
     {
-        lock_guard<mutex> autoLock(startingProcessMapLock_);
+        lock_guard<ffrt::mutex> autoLock(startingProcessMapLock_);
         auto iterStarting = startingProcessMap_.find(name);
         if (iterStarting != startingProcessMap_.end()) {
             HILOGI("CleanCallback clean process:%{public}s", Str16ToStr8(name).c_str());
             startingProcessMap_.erase(iterStarting);
         }
     }
-    lock_guard<mutex> autoLock(onDemandLock_);
+    lock_guard<ffrt::mutex> autoLock(onDemandLock_);
     auto iter = startingAbilityMap_.find(systemAbilityId);
     if (iter == startingAbilityMap_.end()) {
         HILOGI("CleanCallback SA:%{public}d not in startingAbilityMap.", systemAbilityId);
@@ -1415,7 +1415,7 @@ void SystemAbilityManager::NotifySystemAbilityLoaded(int32_t systemAbilityId, co
 
 void SystemAbilityManager::NotifySystemAbilityLoaded(int32_t systemAbilityId, const sptr<IRemoteObject>& remoteObject)
 {
-    lock_guard<mutex> autoLock(onDemandLock_);
+    lock_guard<ffrt::mutex> autoLock(onDemandLock_);
     auto iter = startingAbilityMap_.find(systemAbilityId);
     if (iter == startingAbilityMap_.end()) {
         return;
@@ -1491,7 +1491,7 @@ int32_t SystemAbilityManager::StartingSystemProcessLocked(const std::u16string& 
 {
     bool isProcessStarted = false;
     {
-        lock_guard<mutex> autoLock(systemProcessMapLock_);
+        lock_guard<ffrt::mutex> autoLock(systemProcessMapLock_);
         isProcessStarted = (systemProcessMap_.count(procName) != 0);
     }
     if (isProcessStarted) {
@@ -1501,7 +1501,7 @@ int32_t SystemAbilityManager::StartingSystemProcessLocked(const std::u16string& 
     }
     // call init start process
     {
-        lock_guard<mutex> autoLock(startingProcessMapLock_);
+        lock_guard<ffrt::mutex> autoLock(startingProcessMapLock_);
         if (startingProcessMap_.count(procName) != 0) {
             HILOGI("StartingProc:%{public}s already starting", Str16ToStr8(procName).c_str());
             return ERR_OK;
@@ -1512,7 +1512,7 @@ int32_t SystemAbilityManager::StartingSystemProcessLocked(const std::u16string& 
     }
     int32_t result = StartDynamicSystemProcess(procName, systemAbilityId, event);
     if (result != ERR_OK) {
-        lock_guard<mutex> autoLock(startingProcessMapLock_);
+        lock_guard<ffrt::mutex> autoLock(startingProcessMapLock_);
         auto iterStarting = startingProcessMap_.find(procName);
         if (iterStarting != startingProcessMap_.end()) {
             startingProcessMap_.erase(iterStarting);
@@ -1526,7 +1526,7 @@ int32_t SystemAbilityManager::StartingSystemProcess(const std::u16string& procNa
 {
     bool isProcessStarted = false;
     {
-        lock_guard<mutex> autoLock(systemProcessMapLock_);
+        lock_guard<ffrt::mutex> autoLock(systemProcessMapLock_);
         isProcessStarted = (systemProcessMap_.count(procName) != 0);
     }
     if (isProcessStarted) {
@@ -1536,7 +1536,7 @@ int32_t SystemAbilityManager::StartingSystemProcess(const std::u16string& procNa
     }
     // call init start process
     {
-        lock_guard<mutex> autoLock(startingProcessMapLock_);
+        lock_guard<ffrt::mutex> autoLock(startingProcessMapLock_);
         if (startingProcessMap_.count(procName) != 0) {
             HILOGI("StartingProc:%{public}s already starting", Str16ToStr8(procName).c_str());
             return ERR_OK;
@@ -1547,7 +1547,7 @@ int32_t SystemAbilityManager::StartingSystemProcess(const std::u16string& procNa
     }
     int32_t result = StartDynamicSystemProcess(procName, systemAbilityId, event);
     if (result != ERR_OK) {
-        lock_guard<mutex> autoLock(startingProcessMapLock_);
+        lock_guard<ffrt::mutex> autoLock(startingProcessMapLock_);
         auto iterStarting = startingProcessMap_.find(procName);
         if (iterStarting != startingProcessMap_.end()) {
             startingProcessMap_.erase(iterStarting);
@@ -1570,7 +1570,7 @@ int32_t SystemAbilityManager::DoLoadSystemAbility(int32_t systemAbilityId, const
     }
     int32_t result = ERR_INVALID_VALUE;
     {
-        lock_guard<mutex> autoLock(onDemandLock_);
+        lock_guard<ffrt::mutex> autoLock(onDemandLock_);
         auto& abilityItem = startingAbilityMap_[systemAbilityId];
         for (const auto& itemCallback : abilityItem.callbackMap[LOCAL_DEVICE]) {
             if (callback->AsObject() == itemCallback.first->AsObject()) {
@@ -1608,7 +1608,7 @@ int32_t SystemAbilityManager::DoLoadSystemAbilityFromRpc(const std::string& srcD
         return ERR_OK;
     }
     {
-        lock_guard<mutex> autoLock(onDemandLock_);
+        lock_guard<ffrt::mutex> autoLock(onDemandLock_);
         auto& abilityItem = startingAbilityMap_[systemAbilityId];
         abilityItem.callbackMap[srcDeviceId].emplace_back(callback, 0);
         StartingSystemProcessLocked(procName, systemAbilityId, event);
@@ -1710,7 +1710,7 @@ int32_t SystemAbilityManager::DoUnloadSystemAbility(int32_t systemAbilityId,
         return ERR_OK;
     }
     {
-        lock_guard<mutex> autoLock(onDemandLock_);
+        lock_guard<ffrt::mutex> autoLock(onDemandLock_);
         bool result = StopOnDemandAbilityInner(procName, systemAbilityId, event);
         if (!result) {
             HILOGE("unload system ability failed, SA:%{public}d", systemAbilityId);
@@ -1901,7 +1901,7 @@ sptr<DBinderServiceStub> SystemAbilityManager::DoMakeRemoteBinder(int32_t system
 #endif
     sptr<DBinderServiceStub> remoteBinder = nullptr;
 #ifdef SAMGR_ENABLE_DELAY_DBINDER
-    std::shared_lock<std::shared_mutex> readLock(dBinderServiceLock_);
+    std::shared_lock<ffrt::shared_mutex> readLock(dBinderServiceLock_);
 #endif
     if (dBinderService_ != nullptr) {
         string strName = to_string(systemAbilityId);
@@ -1925,7 +1925,7 @@ void SystemAbilityManager::NotifyRpcLoadCompleted(const std::string& srcDeviceId
     }
     auto notifyTask = [srcDeviceId, systemAbilityId, remoteObject, this]() {
 #ifdef SAMGR_ENABLE_DELAY_DBINDER
-        std::shared_lock<std::shared_mutex> readLock(dBinderServiceLock_);
+        std::shared_lock<ffrt::shared_mutex> readLock(dBinderServiceLock_);
 #endif
         if (dBinderService_ != nullptr) {
             SamgrXCollie samgrXCollie("samgr--LoadSystemAbilityComplete_" + ToString(systemAbilityId));
@@ -1991,7 +1991,7 @@ void SystemAbilityManager::OnAbilityCallbackDied(const sptr<IRemoteObject>& remo
     if (remoteObject == nullptr) {
         return;
     }
-    lock_guard<mutex> autoLock(onDemandLock_);
+    lock_guard<ffrt::mutex> autoLock(onDemandLock_);
     auto iter = startingAbilityMap_.begin();
     while (iter != startingAbilityMap_.end()) {
         AbilityItem& abilityItem = iter->second;
@@ -2045,7 +2045,7 @@ int32_t SystemAbilityManager::UpdateSaFreMap(int32_t uid, int32_t saId)
     }
 
     uint64_t key = SamgrUtil::GenerateFreKey(uid, saId);
-    lock_guard<mutex> autoLock(saFrequencyLock_);
+    lock_guard<ffrt::mutex> autoLock(saFrequencyLock_);
     auto& count = saFrequencyMap_[key];
     if (count < MAX_SA_FREQUENCY_COUNT) {
         count++;
@@ -2056,7 +2056,7 @@ int32_t SystemAbilityManager::UpdateSaFreMap(int32_t uid, int32_t saId)
 void SystemAbilityManager::ReportGetSAPeriodically()
 {
     HILOGI("ReportGetSAPeriodically start!");
-    lock_guard<mutex> autoLock(saFrequencyLock_);
+    lock_guard<ffrt::mutex> autoLock(saFrequencyLock_);
     for (const auto& [key, count] : saFrequencyMap_) {
         uint32_t saId = static_cast<uint32_t>(key);
         uint32_t uid = key >> SHFIT_BIT;
@@ -2110,7 +2110,7 @@ int32_t SystemAbilityManager::SendStrategy(int32_t type, std::vector<int32_t>& s
 
 int32_t SystemAbilityManager::GetExtensionSaIds(const std::string& extension, std::vector<int32_t>& saIds)
 {
-    lock_guard<mutex> autoLock(saProfileMapLock_);
+    lock_guard<ffrt::mutex> autoLock(saProfileMapLock_);
     for (const auto& [saId, value] : saProfileMap_) {
         if (std::find(value.extension.begin(), value.extension.end(), extension) !=
             value.extension.end()) {
@@ -2123,11 +2123,11 @@ int32_t SystemAbilityManager::GetExtensionSaIds(const std::string& extension, st
 int32_t SystemAbilityManager::GetExtensionRunningSaList(const std::string& extension,
     std::vector<sptr<IRemoteObject>>& saList)
 {
-    lock_guard<mutex> autoLock(saProfileMapLock_);
+    lock_guard<ffrt::mutex> autoLock(saProfileMapLock_);
     for (const auto& [saId, value] : saProfileMap_) {
         if (std::find(value.extension.begin(), value.extension.end(), extension)
             != value.extension.end()) {
-            shared_lock<shared_mutex> readLock(abilityMapLock_);
+            shared_lock<ffrt::shared_mutex> readLock(abilityMapLock_);
             auto iter = abilityMap_.find(saId);
             if (iter != abilityMap_.end() && iter->second.remoteObj != nullptr) {
                 saList.push_back(iter->second.remoteObj);
@@ -2141,7 +2141,7 @@ int32_t SystemAbilityManager::GetExtensionRunningSaList(const std::string& exten
 int32_t SystemAbilityManager::GetRunningSaExtensionInfoList(const std::string& extension,
     std::vector<SaExtensionInfo>& infoList)
 {
-    lock_guard<mutex> autoLock(saProfileMapLock_);
+    lock_guard<ffrt::mutex> autoLock(saProfileMapLock_);
     for (const auto& [saId, value] : saProfileMap_) {
         if (std::find(value.extension.begin(), value.extension.end(), extension)
             != value.extension.end()) {
@@ -2150,7 +2150,7 @@ int32_t SystemAbilityManager::GetRunningSaExtensionInfoList(const std::string& e
                 HILOGD("get SaExtInfoList sa not load,ext:%{public}s SA:%{public}d", extension.c_str(), saId);
                 continue;
             }
-            shared_lock<shared_mutex> readLock(abilityMapLock_);
+            shared_lock<ffrt::shared_mutex> readLock(abilityMapLock_);
             auto iter = abilityMap_.find(saId);
             if (iter == abilityMap_.end() || iter->second.remoteObj == nullptr) {
                 HILOGD("getRunningSaExtInfoList SA:%{public}d not load,ext:%{public}s", saId, extension.c_str());

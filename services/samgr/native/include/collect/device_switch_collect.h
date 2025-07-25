@@ -19,6 +19,7 @@
 #include <memory>
 
 #include "common_event_subscriber.h"
+#include "ffrt.h"
 #include "icollect_plugin.h"
 #include "system_ability_status_change_stub.h"
 
@@ -39,7 +40,7 @@ private:
     void OnReceiveWifiEvent(const EventFwk::CommonEventData& data);
     void OnReceiveBluetoothEvent(const EventFwk::CommonEventData& data);
     void ReportEvent(const OnDemandEvent& event);
-    std::mutex isListenEventLock_;
+    ffrt::mutex isListenEventLock_;
     bool isListenSwitchEvent_ = false;
     wptr<DeviceSwitchCollect> deviceSwitchCollect_;
 };
