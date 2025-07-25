@@ -19,8 +19,16 @@
 #include "system_ability_load_callback_stub.h"
 #include "system_ability_on_demand_event.h"
 #include "system_process_status_change_stub.h"
+#include "string_ex.h"
 
 namespace OHOS {
+
+enum class TimeEventId {
+    LOOP_EVENT = 1,
+    AWAKE_LOOP_EVENT = 2,
+    ORDER_TIMED_EVENT = 3,
+};
+
 class OnDemandHelper {
 public:
     ~OnDemandHelper() = default;
@@ -52,6 +60,8 @@ public:
     sptr<IRemoteObject> SyncOnDemandAbility(int32_t systemAbilityId);
     int32_t TestSyncOnDemandAbility(int32_t systemAbilityId);
     int32_t UnloadAllIdleSystemAbility();
+    int32_t GetLruIdleSystemAbilityProc();
+    int32_t UnloadProcess(const std::vector<std::u16string>& processList);
     void GetSystemProcessInfo(int32_t systemAbilityId);
     int32_t LoadOndemandAbilityCase1();
     int32_t LoadOndemandAbilityCase2();
@@ -82,6 +92,7 @@ public:
     void GetCommonEventExtraId(int32_t saId, const std::string& eventName = "");
     int32_t GetExtensionSaIds(const std::string& extension, std::vector<int32_t> &saIds);
     int32_t GetExtensionRunningSaList(const std::string& extension, std::vector<sptr<IRemoteObject>>& saList);
+    int argc_;
 protected:
     class OnDemandLoadCallback : public SystemAbilityLoadCallbackStub {
     public:

@@ -864,7 +864,8 @@ ohos_executable("manual_ondemand") {
   testonly = true
   sources = [
     "${samgr_services_dir}/test/unittest/src/mock_permission.cpp",
-    "./src/manual_ondemand_helper.cpp",
+    "./src/manual_ondemand_tool.cpp",
+    "./src/ondemand_helper.cpp",
   ]
   configs = [
     ":sam_test_config",
@@ -913,6 +914,7 @@ ohos_executable("ondemand") {
   sources = [
     "${samgr_services_dir}/test/unittest/src/mock_permission.cpp",
     "./src/ondemand_helper.cpp",
+    "./src/ondemand_tool.cpp",
   ]
   configs = [
     ":sam_test_config",
