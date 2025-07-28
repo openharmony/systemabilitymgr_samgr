@@ -162,6 +162,7 @@ ohos_unittest("SystemAbilityMgrTest") {
     external_deps += [ "penglai_mode_service:penglai_client" ]
     defines += [ "SUPPORT_PENGLAI_MODE" ]
   }
+  defines += ["SAMGR_USE_FFRT"]
 }
 
 ohos_unittest("SystemAbilityMgrCollectTest") {
@@ -302,6 +303,7 @@ ohos_unittest("SystemAbilityMgrCollectTest") {
     external_deps += [ "penglai_mode_service:penglai_client" ]
     defines += [ "SUPPORT_PENGLAI_MODE" ]
   }
+  defines += ["SAMGR_USE_FFRT"]
 }
 
 ohos_unittest("SystemAbilityMgrDeviceNetworkingTest") {
@@ -411,6 +413,7 @@ ohos_unittest("SystemAbilityMgrDeviceNetworkingTest") {
     external_deps += [ "penglai_mode_service:penglai_client" ]
     defines += [ "SUPPORT_PENGLAI_MODE" ]
   }
+  defines += ["SAMGR_USE_FFRT"]
 }
 
 ohos_unittest("SystemAbilityMgrStubTest") {
@@ -520,6 +523,7 @@ ohos_unittest("SystemAbilityMgrStubTest") {
     external_deps += [ "penglai_mode_service:penglai_client" ]
     defines += [ "SUPPORT_PENGLAI_MODE" ]
   }
+  defines += ["SAMGR_USE_FFRT"]
 }
 
 ohos_unittest("SystemAbilityMgrProxyTest") {
@@ -716,6 +720,7 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
     external_deps += [ "penglai_mode_service:penglai_client" ]
     defines += [ "SUPPORT_PENGLAI_MODE" ]
   }
+  defines += ["SAMGR_USE_FFRT"]
 }
 
 ohos_unittest("SystemAbilityMgrDumperTest") {
@@ -795,6 +800,7 @@ ohos_unittest("SystemAbilityMgrDumperTest") {
     external_deps += [ "penglai_mode_service:penglai_client" ]
     defines += [ "SUPPORT_PENGLAI_MODE" ]
   }
+  defines += ["SAMGR_USE_FFRT"]
 }
 
 ohos_unittest("MockSystemAbilityManagerTest") {
@@ -851,6 +857,7 @@ ohos_unittest("MockSystemAbilityManagerTest") {
     ]
     defines += [ "SUPPORT_ACCESS_TOKEN" ]
   }
+  defines += ["SAMGR_USE_FFRT"]
 }
 
 ohos_executable("manual_ondemand") {
@@ -1055,6 +1062,7 @@ ohos_executable("TestTool") {
     external_deps += [ "penglai_mode_service:penglai_client" ]
     defines += [ "SUPPORT_PENGLAI_MODE" ]
   }
+  defines += ["SAMGR_USE_FFRT"]
   part_name = "samgr"
   subsystem_name = "systemabilitymgr"
 }

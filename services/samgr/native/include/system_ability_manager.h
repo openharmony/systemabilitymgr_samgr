@@ -17,9 +17,7 @@
 #define SERVICES_SAMGR_NATIVE_INCLUDE_SYSTEM_ABILITY_MANAGER_H
 
 #include <map>
-#include <mutex>
 #include <set>
-#include <shared_mutex>
 #include <string>
 #include <utility>
 
@@ -72,7 +70,7 @@ public:
     }
     static sptr<SystemAbilityManager> GetInstance()
     {
-        std::lock_guard<ffrt::mutex> autoLock(instanceLock);
+        std::lock_guard<samgr::mutex> autoLock(instanceLock);
         if (instance == nullptr) {
             instance = new SystemAbilityManager;
         }
@@ -285,7 +283,7 @@ private:
     void DoInsertSaData(const std::u16string& name, const sptr<IRemoteObject>& ability, const SAExtraProp& extraProp);
     int32_t StartOnDemandAbility(int32_t systemAbilityId, bool& isExist)
     {
-        std::lock_guard<ffrt::mutex> onDemandAbilityLock(onDemandLock_);
+        std::lock_guard<samgr::mutex> onDemandAbilityLock(onDemandLock_);
         return StartOnDemandAbilityLocked(systemAbilityId, isExist);
     }
     int32_t StartOnDemandAbilityLocked(int32_t systemAbilityId, bool& isExist);
@@ -298,7 +296,7 @@ private:
     void InitSaProfile();
     bool GetSaProfile(int32_t saId, CommonSaProfile& saProfile)
     {
-        std::lock_guard<ffrt::mutex> autoLock(saProfileMapLock_);
+        std::lock_guard<samgr::mutex> autoLock(saProfileMapLock_);
         auto iter = saProfileMap_.find(saId);
         if (iter == saProfileMap_.end()) {
             return false;
@@ -326,7 +324,7 @@ private:
         const OnDemandEvent& event);
     void StartOnDemandAbility(const std::u16string& name, int32_t systemAbilityId)
     {
-        std::lock_guard<ffrt::mutex> autoLock(onDemandLock_);
+        std::lock_guard<samgr::mutex> autoLock(onDemandLock_);
         StartOnDemandAbilityLocked(name, systemAbilityId);
     }
     void StartOnDemandAbilityLocked(const std::u16string& name, int32_t systemAbilityId);
@@ -335,7 +333,7 @@ private:
     int32_t StartDynamicSystemProcess(const std::u16string& name, int32_t systemAbilityId, const OnDemandEvent& event);
     bool StopOnDemandAbility(const std::u16string& name, int32_t systemAbilityId, const OnDemandEvent& event)
     {
-        std::lock_guard<ffrt::mutex> autoLock(onDemandLock_);
+        std::lock_guard<samgr::mutex> autoLock(onDemandLock_);
         return StopOnDemandAbilityInner(name, systemAbilityId, event);
     }
     bool StopOnDemandAbilityInner(const std::u16string& name, int32_t systemAbilityId, const OnDemandEvent& event);
@@ -383,7 +381,7 @@ private:
 
     std::u16string deviceName_;
     static sptr<SystemAbilityManager> instance;
-    static ffrt::mutex instanceLock;
+    static samgr::mutex instanceLock;
     sptr<IRemoteObject::DeathRecipient> abilityDeath_;
     sptr<IRemoteObject::DeathRecipient> systemProcessDeath_;
     sptr<IRemoteObject::DeathRecipient> abilityStatusDeath_;
@@ -394,26 +392,26 @@ private:
     std::shared_ptr<RpcSystemAbilityCallback> rpcCallbackImp_;
 
 #ifdef SAMGR_ENABLE_DELAY_DBINDER
-    ffrt::shared_mutex dBinderServiceLock_;
+    samgr::shared_mutex dBinderServiceLock_;
     std::list<int32_t> distributedSaList_;
     bool isDbinderServiceInit_ = false;
 #endif
 
     // must hold abilityMapLock_ never access other locks
-    ffrt::shared_mutex abilityMapLock_;
+    samgr::shared_mutex abilityMapLock_;
     std::map<int32_t, SAInfo> abilityMap_;
 
     // maybe hold listenerMapLock_ and then access onDemandLock_
-    ffrt::mutex listenerMapLock_;
+    samgr::mutex listenerMapLock_;
     std::map<int32_t, std::list<SAListener>> listenerMap_;
     std::map<int32_t, int32_t> subscribeCountMap_;
 
-    ffrt::mutex onDemandLock_;
+    samgr::mutex onDemandLock_;
     std::map<int32_t, std::u16string> onDemandAbilityMap_;
     std::map<int32_t, AbilityItem> startingAbilityMap_;
-    ffrt::mutex systemProcessMapLock_;
+    samgr::mutex systemProcessMapLock_;
     std::map<std::u16string, sptr<IRemoteObject>> systemProcessMap_;
-    ffrt::mutex startingProcessMapLock_;
+    samgr::mutex startingProcessMapLock_;
     std::map<std::u16string, int64_t> startingProcessMap_;
     std::map<int32_t, int32_t> callbackCountMap_;
 
@@ -421,11 +419,11 @@ private:
 
     std::map<int32_t, CommonSaProfile> saProfileMap_;
     std::set<int32_t> onDemandSaIdsSet_;
-    ffrt::mutex saProfileMapLock_;
-    std::mutex loadRemoteLock_;
+    samgr::mutex saProfileMapLock_;
+    samgr::mutex loadRemoteLock_;
     std::map<std::string, std::list<sptr<ISystemAbilityLoadCallback>>> remoteCallbacks_; // key : said_deviceId
 
-    ffrt::mutex saFrequencyLock_;
+    samgr::mutex saFrequencyLock_;
     std::map<uint64_t, int32_t> saFrequencyMap_; // {pid_said, count}
 
     std::unique_ptr<Utils::Timer> reportEventTimer_;

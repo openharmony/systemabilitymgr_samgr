@@ -117,6 +117,7 @@ ohos_fuzztest("SamgrDumperFuzzTest") {
     external_deps += [ "penglai_mode_service:penglai_client" ]
     defines += [ "SUPPORT_PENGLAI_MODE" ]
   }
+  defines += ["SAMGR_USE_FFRT"]
 }
 
 group("fuzztest") {

@@ -25,7 +25,6 @@
 #include <sys/time.h>
 #include <errno.h>
 #include <unistd.h>
-#include <mutex>
 #include <concurrent_map.h>
 #include <atomic>
 namespace OHOS {

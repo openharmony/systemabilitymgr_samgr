@@ -100,7 +100,7 @@ private:
     static std::shared_ptr<FFRTHandler> handler_;
     static char* ffrtMetricBuffer;
     static bool collectEnable;
-    static ffrt::mutex ffrtMetricLock;
+    static samgr::mutex ffrtMetricLock;
 };
 } // namespace OHOS
 #endif // SERVICES_SAMGR_NATIVE_INCLUDE_SYSTEM_ABILITY_MANAGER_DUMPER_H

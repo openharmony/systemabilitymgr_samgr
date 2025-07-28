@@ -33,7 +33,7 @@ FFRTHandler::FFRTHandler(const std::string& name)
 
 void FFRTHandler::CleanFfrt()
 {
-    std::unique_lock<ffrt::shared_mutex> lock(mutex_);
+    std::unique_lock<samgr::shared_mutex> lock(mutex_);
     for (auto iter = taskMap_.begin(); iter != taskMap_.end(); ++iter) {
         HILOGI("CleanFfrt taskMap_ %{public}s", iter->first.c_str());
         if (queue_ != nullptr && iter->second != nullptr) {
@@ -52,7 +52,7 @@ void FFRTHandler::CleanFfrt()
 
 void FFRTHandler::SetFfrt(const std::string& name)
 {
-    std::unique_lock<ffrt::shared_mutex> lock(mutex_);
+    std::unique_lock<samgr::shared_mutex> lock(mutex_);
     queue_ = std::make_shared<queue>(name.c_str());
 }
 
@@ -98,7 +98,7 @@ bool FFRTHandler::PostTask(std::function<void()> func, const std::string& name, 
         HILOGE("invalid delay time");
         return false;
     }
-    std::unique_lock<ffrt::shared_mutex> lock(mutex_);
+    std::unique_lock<samgr::shared_mutex> lock(mutex_);
     task_handle handler = queue_->submit_h(func, task_attr().delay(delayTime * CONVERSION_FACTOR));
     if (handler == nullptr) {
         HILOGE("FFRTHandler post task failed");
@@ -110,7 +110,7 @@ bool FFRTHandler::PostTask(std::function<void()> func, const std::string& name, 
 
 void FFRTHandler::RemoveTask(const std::string& name)
 {
-    std::unique_lock<ffrt::shared_mutex> lock(mutex_);
+    std::unique_lock<samgr::shared_mutex> lock(mutex_);
     auto item = taskMap_.find(name);
     if (item == taskMap_.end()) {
         HILOGW("rm task %{public}s NF", name.c_str());
@@ -127,7 +127,7 @@ void FFRTHandler::RemoveTask(const std::string& name)
 
 void FFRTHandler::DelTask(const std::string& name)
 {
-    std::unique_lock<ffrt::shared_mutex> lock(mutex_);
+    std::unique_lock<samgr::shared_mutex> lock(mutex_);
     auto item = taskMap_.find(name);
     if (item == taskMap_.end()) {
         HILOGW("del task %{public}s NF", name.c_str());
@@ -139,7 +139,7 @@ void FFRTHandler::DelTask(const std::string& name)
 
 bool FFRTHandler::HasInnerEvent(const std::string name)
 {
-    std::unique_lock<ffrt::shared_mutex> lock(mutex_);
+    std::unique_lock<samgr::shared_mutex> lock(mutex_);
     auto item = taskMap_.find(name);
     if (item == taskMap_.end()) {
         return false;

@@ -72,7 +72,7 @@ private:
     int32_t RemoveUnusedEventsLocked(const std::vector<OnDemandEvent>& events);
     std::map<int32_t, sptr<ICollectPlugin>> collectPluginMap_;
     std::shared_ptr<FFRTHandler> collectHandler_;
-    ffrt::shared_mutex saProfilesLock_;
+    samgr::shared_mutex saProfilesLock_;
     std::list<CollMgrSaProfile> onDemandSaProfiles_;
 };
 } // namespace OHOS

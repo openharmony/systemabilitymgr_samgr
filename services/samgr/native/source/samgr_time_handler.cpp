@@ -26,12 +26,12 @@ constexpr int32_t RETRY_TIMES = 3;
 }
 SamgrTimeHandler* volatile SamgrTimeHandler::singleton = nullptr;
 SamgrTimeHandler::Deletor SamgrTimeHandler::deletor;
-static mutex mtx;
+static samgr::mutex mtx;
 
 SamgrTimeHandler* SamgrTimeHandler::GetInstance()
 {
     if (singleton == nullptr) {
-        lock_guard<mutex> autoLock(mtx);
+        lock_guard<samgr::mutex> autoLock(mtx);
         if (singleton == nullptr) {
             singleton = new SamgrTimeHandler;
         }

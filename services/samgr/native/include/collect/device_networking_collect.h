@@ -37,7 +37,7 @@ class DeviceStateCallback : public DistributedHardware::DeviceStateCallback {
     private:
        sptr<ICollectPlugin> collect_;
        std::set<std::string> deviceOnlineSet_;
-       ffrt::mutex deviceOnlineLock_;
+       samgr::mutex deviceOnlineLock_;
 };
 
 class WorkHandler;

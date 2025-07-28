@@ -101,7 +101,7 @@ void DeviceTimedCollect::ProcessPersistenceLoopTask(int64_t disTime, int64_t tri
 {
     int64_t interval = atoi(strInterval.c_str());
     {
-        lock_guard<ffrt::mutex> autoLock(persitenceLoopEventSetLock_);
+        lock_guard<samgr::mutex> autoLock(persitenceLoopEventSetLock_);
         if (persitenceLoopTasks_.count(interval) > 0) {
             return;
         }
@@ -118,7 +118,7 @@ void DeviceTimedCollect::ProcessPersistenceLoopTask(int64_t disTime, int64_t tri
         return;
     }
     auto task = [this, interval] () {
-        lock_guard<ffrt::mutex> autoLock(persitenceLoopEventSetLock_);
+        lock_guard<samgr::mutex> autoLock(persitenceLoopEventSetLock_);
         if (persitenceLoopTasks_.find(interval) != persitenceLoopTasks_.end()) {
             HILOGI("DeviceTimedCollect Persistence ReportEvent interval: %{public}" PRId64, interval);
             ReportEventByTimeInfo(interval, true);
@@ -128,7 +128,7 @@ void DeviceTimedCollect::ProcessPersistenceLoopTask(int64_t disTime, int64_t tri
         }
     };
     {
-        lock_guard<ffrt::mutex> autoLock(persitenceLoopEventSetLock_);
+        lock_guard<samgr::mutex> autoLock(persitenceLoopEventSetLock_);
         persitenceLoopTasks_[interval] = task;
     }
     if (disTime <= 0) {
@@ -143,7 +143,7 @@ void DeviceTimedCollect::ProcessPersistenceLoopTask(int64_t disTime, int64_t tri
 
 void DeviceTimedCollect::ReportEventByTimeInfo(int32_t interval, bool persistence)
 {
-    lock_guard<ffrt::mutex> autoLock(timeInfosLock_);
+    lock_guard<samgr::mutex> autoLock(timeInfosLock_);
     if (timeInfos_.count(interval) == 0) {
         return;
     }
@@ -161,7 +161,7 @@ void DeviceTimedCollect::ReportEventByTimeInfo(int32_t interval, bool persistenc
 
 void DeviceTimedCollect::SaveTimedInfos(const OnDemandEvent& onDemandEvent, int32_t interval)
 {
-    lock_guard<ffrt::mutex> autoLock(timeInfosLock_);
+    lock_guard<samgr::mutex> autoLock(timeInfosLock_);
     if (timeInfos_.count(interval) == 0) {
         TimeInfo info;
         timeInfos_[interval] = info;
@@ -191,10 +191,10 @@ void DeviceTimedCollect::SaveTimedEvent(const OnDemandEvent& onDemandEvent)
             return;
         }
         if (onDemandEvent.persistence) {
-            lock_guard<ffrt::mutex> autoLock(persitenceLoopEventSetLock_);
+            lock_guard<samgr::mutex> autoLock(persitenceLoopEventSetLock_);
             persitenceLoopEventSet_.insert(interval);
         } else {
-            lock_guard<ffrt::mutex> autoLock(nonPersitenceLoopEventSetLock_);
+            lock_guard<samgr::mutex> autoLock(nonPersitenceLoopEventSetLock_);
             nonPersitenceLoopEventSet_.insert(interval);
         }
         SaveTimedInfos(onDemandEvent, interval);
@@ -207,7 +207,7 @@ void DeviceTimedCollect::PostPersistenceLoopTaskLocked(int32_t interval)
         return;
     }
     persitenceLoopTasks_[interval] = [this, interval] () {
-        lock_guard<ffrt::mutex> autoLock(persitenceLoopEventSetLock_);
+        lock_guard<samgr::mutex> autoLock(persitenceLoopEventSetLock_);
         if (persitenceLoopTasks_.find(interval) != persitenceLoopTasks_.end()) {
             HILOGI("DeviceTimedCollect PostPersistence ReportEvent interval: %{public}d", interval);
             ReportEventByTimeInfo(interval, true);
@@ -226,7 +226,7 @@ void DeviceTimedCollect::PostNonPersistenceLoopTaskLocked(int32_t interval)
         return;
     }
     nonPersitenceLoopTasks_[interval] = [this, interval] () {
-        lock_guard<ffrt::mutex> autoLock(nonPersitenceLoopEventSetLock_);
+        lock_guard<samgr::mutex> autoLock(nonPersitenceLoopEventSetLock_);
         if (nonPersitenceLoopEventSet_.find(interval) != nonPersitenceLoopEventSet_.end()) {
             HILOGI("DeviceTimedCollect ReportEvent interval: %{public}d", interval);
             ReportEventByTimeInfo(interval, false);
@@ -241,7 +241,7 @@ void DeviceTimedCollect::PostNonPersistenceLoopTaskLocked(int32_t interval)
 void DeviceTimedCollect::PostDelayTaskByTimeInfo(std::function<void()> callback,
     int32_t interval, int32_t disTime)
 {
-    lock_guard<ffrt::mutex> autoLock(timeInfosLock_);
+    lock_guard<samgr::mutex> autoLock(timeInfosLock_);
     if (timeInfos_.count(interval) == 0) {
         return;
     }
@@ -277,7 +277,7 @@ int32_t DeviceTimedCollect::OnStart()
 
 void DeviceTimedCollect::PostNonPersistenceLoopTasks()
 {
-    lock_guard<ffrt::mutex> autoLock(nonPersitenceLoopEventSetLock_);
+    lock_guard<samgr::mutex> autoLock(nonPersitenceLoopEventSetLock_);
     for (auto it = nonPersitenceLoopEventSet_.begin(); it != nonPersitenceLoopEventSet_.end(); ++it) {
         HILOGI("DeviceTimedCollect send task: %{public}d", *it);
         PostNonPersistenceLoopTaskLocked(*it);
@@ -286,7 +286,7 @@ void DeviceTimedCollect::PostNonPersistenceLoopTasks()
 
 void DeviceTimedCollect::PostPersistenceLoopTasks()
 {
-    lock_guard<ffrt::mutex> autoLock(persitenceLoopEventSetLock_);
+    lock_guard<samgr::mutex> autoLock(persitenceLoopEventSetLock_);
     for (auto it = persitenceLoopEventSet_.begin(); it != persitenceLoopEventSet_.end(); ++it) {
         HILOGI("DeviceTimedCollect send persitence task: %{public}d", *it);
         PostPersistenceLoopTaskLocked(*it);
@@ -355,12 +355,12 @@ int32_t DeviceTimedCollect::AddCollectEvent(const std::vector<OnDemandEvent>& ev
             int64_t timeGap = CalculateDelayTime(event.value);
 #ifdef PREFERENCES_ENABLE
             if (event.persistence) {
-                std::lock_guard<std::mutex> autoLock(persitenceTimedEventSetLock_);
+                std::lock_guard<samgr::mutex> autoLock(persitenceTimedEventSetLock_);
                 PostPersistenceTimedTaskLocked(event.value, timeGap);
                 continue;
             }
 #endif
-            std::lock_guard<std::mutex> autoLock(nonPersitenceTimedEventSetLock);
+            std::lock_guard<samgr::mutex> autoLock(nonPersitenceTimedEventSetLock);
             PostNonPersistenceTimedTaskLocked(event.value, timeGap);
             continue;
         }
@@ -378,7 +378,7 @@ int32_t DeviceTimedCollect::AddCollectEvent(const std::vector<OnDemandEvent>& ev
             return ERR_INVALID_VALUE;
         }
         SaveTimedInfos(event, interval);
-        std::lock_guard<ffrt::mutex> autoLock(nonPersitenceLoopEventSetLock_);
+        std::lock_guard<samgr::mutex> autoLock(nonPersitenceLoopEventSetLock_);
         auto iter = nonPersitenceLoopEventSet_.find(interval);
         if (iter != nonPersitenceLoopEventSet_.end()) {
             continue;
@@ -408,7 +408,7 @@ int32_t DeviceTimedCollect::RemoveUnusedEvent(const OnDemandEvent& event)
 
 void DeviceTimedCollect::RemoveTimesInfo(const OnDemandEvent& onDemandEvent, int32_t interval)
 {
-    lock_guard<ffrt::mutex> autoLock(timeInfosLock_);
+    lock_guard<samgr::mutex> autoLock(timeInfosLock_);
     if (timeInfos_.count(interval) == 0) {
         return;
     }
@@ -427,7 +427,7 @@ void DeviceTimedCollect::RemoveTimesInfo(const OnDemandEvent& onDemandEvent, int
 
 void DeviceTimedCollect::RemoveNonPersistenceLoopTask(int32_t interval)
 {
-    std::lock_guard<ffrt::mutex> autoLock(nonPersitenceLoopEventSetLock_);
+    std::lock_guard<samgr::mutex> autoLock(nonPersitenceLoopEventSetLock_);
     auto iter = nonPersitenceLoopEventSet_.find(interval);
     if (iter != nonPersitenceLoopEventSet_.end()) {
         nonPersitenceLoopEventSet_.erase(iter);
@@ -437,7 +437,7 @@ void DeviceTimedCollect::RemoveNonPersistenceLoopTask(int32_t interval)
 
 void DeviceTimedCollect::RemovePersistenceLoopTask(int32_t interval)
 {
-    std::lock_guard<ffrt::mutex> autoLock(persitenceLoopEventSetLock_);
+    std::lock_guard<samgr::mutex> autoLock(persitenceLoopEventSetLock_);
     auto iter = persitenceLoopEventSet_.find(interval);
     if (iter != persitenceLoopEventSet_.end()) {
         persitenceLoopEventSet_.erase(iter);

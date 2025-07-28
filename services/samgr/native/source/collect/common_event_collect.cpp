@@ -69,7 +69,7 @@ CommonEventCollect::CommonEventCollect(const sptr<IReport>& report)
 
 void CommonEventCollect::RemoveWhiteCommonEvent()
 {
-    std::lock_guard<ffrt::mutex> autoLock(commonEventStateLock_);
+    std::lock_guard<samgr::mutex> autoLock(commonEventStateLock_);
     commonEventWhitelist.erase(EventFwk::CommonEventSupport::COMMON_EVENT_USER_UNLOCKED);
     HILOGI("rm USER_UNLOCKED,size=%{public}zu", commonEventWhitelist.size());
 }
@@ -124,7 +124,7 @@ int32_t CommonEventCollect::OnStop()
 void CommonEventCollect::InitCommonEventState(const OnDemandEvent& event)
 {
     if (event.eventId == COMMON_EVENT) {
-        std::lock_guard<ffrt::mutex> autoLock(commomEventLock_);
+        std::lock_guard<samgr::mutex> autoLock(commomEventLock_);
         commonEventNames_.insert(event.name);
     }
     for (auto& condition : event.conditions) {
@@ -132,11 +132,11 @@ void CommonEventCollect::InitCommonEventState(const OnDemandEvent& event)
             continue;
         }
         {
-            std::lock_guard<ffrt::mutex> autoLock(commomEventLock_);
+            std::lock_guard<samgr::mutex> autoLock(commomEventLock_);
             commonEventNames_.insert(condition.name);
         }
         if (condition.extraMessages.size() > 0) {
-            std::lock_guard<ffrt::mutex> autoLock(commonEventStateLock_);
+            std::lock_guard<samgr::mutex> autoLock(commonEventStateLock_);
             for (auto [key, value] : condition.extraMessages) {
                 commonEventConditionExtraData_[condition.name][key] = "";
             }
@@ -147,13 +147,13 @@ void CommonEventCollect::InitCommonEventState(const OnDemandEvent& event)
 void CommonEventCollect::Init(const std::list<SaProfile>& onDemandSaProfiles)
 {
     {
-        std::lock_guard<ffrt::mutex> autoLock(commonEventStateLock_);
+        std::lock_guard<samgr::mutex> autoLock(commonEventStateLock_);
         commonEventWhitelist.insert(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON);
         commonEventWhitelist.insert(EventFwk::CommonEventSupport::COMMON_EVENT_DISCHARGING);
         commonEventWhitelist.insert(EventFwk::CommonEventSupport::COMMON_EVENT_POWER_DISCONNECTED);
     }
     {
-        std::lock_guard<ffrt::mutex> autoLock(commomEventLock_);
+        std::lock_guard<samgr::mutex> autoLock(commomEventLock_);
         commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON);
         commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
         commonEventNames_.insert(EventFwk::CommonEventSupport::COMMON_EVENT_CHARGING);
@@ -178,7 +178,7 @@ void CommonEventCollect::Init(const std::list<SaProfile>& onDemandSaProfiles)
 
 void CommonEventCollect::AddSkillsEvent(EventFwk::MatchingSkills& skill)
 {
-    std::lock_guard<ffrt::mutex> autoLock(commomEventLock_);
+    std::lock_guard<samgr::mutex> autoLock(commomEventLock_);
     for (auto& commonEventName : commonEventNames_) {
         HILOGD("CommonEventCollect add event: %{public}s", commonEventName.c_str());
         skill.AddEvent(commonEventName);
@@ -192,7 +192,7 @@ void CommonEventCollect::CleanFailedEventLocked(const std::vector<std::string>& 
         return;
     }
     EventFwk::MatchingSkills skill = commonEventSubscriber_->GetSubscribeInfo().GetMatchingSkills();
-    std::lock_guard<ffrt::mutex> autoLock(commomEventLock_);
+    std::lock_guard<samgr::mutex> autoLock(commomEventLock_);
     for (auto& eventName : eventNames) {
         skill.RemoveEvent(eventName);
         commonEventNames_.erase(eventName);
@@ -201,7 +201,7 @@ void CommonEventCollect::CleanFailedEventLocked(const std::vector<std::string>& 
 
 bool CommonEventCollect::CreateCommonEventSubscriber()
 {
-    std::lock_guard<ffrt::mutex> autoLock(commonEventSubscriberLock_);
+    std::lock_guard<samgr::mutex> autoLock(commonEventSubscriberLock_);
     return CreateCommonEventSubscriberLocked();
 }
 
@@ -266,7 +266,7 @@ void CommonEventListener::OnRemoveSystemAbility(int32_t systemAblityId, const st
 
 void CommonEventCollect::SaveAction(const std::string& action)
 {
-    std::lock_guard<ffrt::mutex> autoLock(commonEventStateLock_);
+    std::lock_guard<samgr::mutex> autoLock(commonEventStateLock_);
     if (action == EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON) {
         commonEventWhitelist.insert(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_ON);
         commonEventWhitelist.erase(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
@@ -292,7 +292,7 @@ void CommonEventCollect::SaveAction(const std::string& action)
 
 bool CommonEventCollect::CheckCondition(const OnDemandCondition& condition)
 {
-    std::lock_guard<ffrt::mutex> autoLock(commonEventStateLock_);
+    std::lock_guard<samgr::mutex> autoLock(commonEventStateLock_);
     std::map<std::string, std::string> stateMap = commonEventConditionExtraData_[condition.name];
     for (auto [key, profileValue] : condition.extraMessages) {
         if (!ParseUtil::CheckLogicRelationship(stateMap[key], profileValue)) {
@@ -374,7 +374,7 @@ int64_t CommonEventCollect::SaveOnDemandReasonExtraData(const EventFwk::CommonEv
     wantMap[BUNDLE_NAME] = want.GetBundle();
     int64_t extraDataId = 0;
     {
-        std::lock_guard<ffrt::mutex> autoLock(extraDataLock_);
+        std::lock_guard<samgr::mutex> autoLock(extraDataLock_);
         wantMap[COMMON_EVENT_ACTION_NAME] = want.GetAction();
         OnDemandReasonExtraData extraData(data.GetCode(), data.GetData(), wantMap);
 
@@ -393,7 +393,7 @@ int64_t CommonEventCollect::SaveOnDemandReasonExtraData(const EventFwk::CommonEv
 
 void CommonEventCollect::SaveOnDemandConditionExtraData(const EventFwk::CommonEventData& data)
 {
-    std::lock_guard<ffrt::mutex> autoLock(commonEventStateLock_);
+    std::lock_guard<samgr::mutex> autoLock(commonEventStateLock_);
     AAFwk::Want want = data.GetWant();
     commonEventConditionValue_[want.GetAction()] = std::to_string(data.GetCode());
     for (auto& [key, value] : commonEventConditionExtraData_[want.GetAction()]) {
@@ -404,7 +404,7 @@ void CommonEventCollect::SaveOnDemandConditionExtraData(const EventFwk::CommonEv
 void CommonEventCollect::RemoveOnDemandReasonExtraData(int64_t extraDataId)
 {
     {
-        std::lock_guard<ffrt::mutex> autoLock(extraDataLock_);
+        std::lock_guard<samgr::mutex> autoLock(extraDataLock_);
         extraDatas_.erase(extraDataId);
     }
     HILOGD("CommonEventCollect remove extraData %{public}d", static_cast<int32_t>(extraDataId));
@@ -413,7 +413,7 @@ void CommonEventCollect::RemoveOnDemandReasonExtraData(int64_t extraDataId)
 
 bool CommonEventCollect::GetOnDemandReasonExtraData(int64_t extraDataId, OnDemandReasonExtraData& extraData)
 {
-    std::lock_guard<ffrt::mutex> autoLock(extraDataLock_);
+    std::lock_guard<samgr::mutex> autoLock(extraDataLock_);
     HILOGD("CommonEventCollect get extraData %{public}d", static_cast<int32_t>(extraDataId));
     if (extraDatas_.count(extraDataId) == 0) {
         return false;
@@ -436,7 +436,7 @@ void CommonEventCollect::SaveCacheCommonEventSaExtraId(const OnDemandEvent& even
 
 void CommonEventCollect::SaveSaExtraDataId(int32_t saId, int64_t extraDataId)
 {
-    std::lock_guard<ffrt::mutex> autoLock(saExtraDataIdLock_);
+    std::lock_guard<samgr::mutex> autoLock(saExtraDataIdLock_);
     auto& extraIdList = saExtraDataIdMap_[saId];
     extraIdList.emplace_back(extraDataId);
     HILOGI("save SA:%{public}d,exId:%{public}d,n:%{public}zu", saId, static_cast<int32_t>(extraDataId),
@@ -445,7 +445,7 @@ void CommonEventCollect::SaveSaExtraDataId(int32_t saId, int64_t extraDataId)
 
 void CommonEventCollect::RemoveSaExtraDataId(int64_t extraDataId)
 {
-    std::lock_guard<ffrt::mutex> autoLock(saExtraDataIdLock_);
+    std::lock_guard<samgr::mutex> autoLock(saExtraDataIdLock_);
     HILOGD("rm saExtraId:%{public}d", static_cast<int32_t>(extraDataId));
     auto iter = saExtraDataIdMap_.begin();
     while (iter != saExtraDataIdMap_.end()) {
@@ -467,7 +467,7 @@ void CommonEventCollect::RemoveSaExtraDataId(int64_t extraDataId)
 
 void CommonEventCollect::ClearSaExtraDataId(int32_t saId)
 {
-    std::lock_guard<ffrt::mutex> autoLock(saExtraDataIdLock_);
+    std::lock_guard<samgr::mutex> autoLock(saExtraDataIdLock_);
     if (saExtraDataIdMap_.count(saId) == 0) {
         return;
     }
@@ -481,7 +481,7 @@ int32_t CommonEventCollect::GetSaExtraDataIdList(int32_t saId, std::vector<int64
 {
     std::list<int64_t> temp;
     {
-        std::lock_guard<ffrt::mutex> autoLock(saExtraDataIdLock_);
+        std::lock_guard<samgr::mutex> autoLock(saExtraDataIdLock_);
         if (saExtraDataIdMap_.count(saId) == 0) {
             HILOGD("NF exId SA:%{public}d", saId);
             return ERR_OK;
@@ -513,7 +513,7 @@ int32_t CommonEventCollect::GetSaExtraDataIdList(int32_t saId, std::vector<int64
 }
 std::vector<std::string> CommonEventCollect::AddCommonEventName(const std::vector<OnDemandEvent>& events)
 {
-    std::lock_guard<ffrt::mutex> autoLock(commomEventLock_);
+    std::lock_guard<samgr::mutex> autoLock(commomEventLock_);
     std::vector<std::string> insertNames;
     for (auto& event : events) {
         auto iter = commonEventNames_.find(event.name);
@@ -529,7 +529,7 @@ std::vector<std::string> CommonEventCollect::AddCommonEventName(const std::vecto
 
 int32_t CommonEventCollect::AddCollectEvent(const std::vector<OnDemandEvent>& events)
 {
-    std::lock_guard<ffrt::mutex> autoLock(commonEventSubscriberLock_);
+    std::lock_guard<samgr::mutex> autoLock(commonEventSubscriberLock_);
     auto insertNames = AddCommonEventName(events);
     if (insertNames.empty()) {
         return ERR_OK;
@@ -545,7 +545,7 @@ int32_t CommonEventCollect::AddCollectEvent(const std::vector<OnDemandEvent>& ev
 
 int32_t CommonEventCollect::RemoveUnusedEvent(const OnDemandEvent& event)
 {
-    std::lock_guard<ffrt::mutex> autoLock(commomEventLock_);
+    std::lock_guard<samgr::mutex> autoLock(commomEventLock_);
     auto iter = commonEventNames_.find(event.name);
     if (iter != commonEventNames_.end()) {
         HILOGI("CommonEventCollect remove event name: %{public}s", event.name.c_str());

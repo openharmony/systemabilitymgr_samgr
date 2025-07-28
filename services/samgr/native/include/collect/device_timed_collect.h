@@ -20,9 +20,8 @@
 #include "device_timed_collect_tool.h"
 #endif
 #include "icollect_plugin.h"
-#include "ffrt.h"
+#include "samgr_ffrt_api.h"
 
-#include <mutex>
 #include <set>
 
 namespace OHOS {
@@ -66,13 +65,13 @@ private:
     void RemoveTimesInfo(const OnDemandEvent& onDemandEvent, int32_t interval);
     std::set<int32_t> nonPersitenceLoopEventSet_;
     std::set<int32_t> persitenceLoopEventSet_;
-    ffrt::mutex nonPersitenceLoopEventSetLock_;
-    std::mutex nonPersitenceTimedEventSetLock;
-    ffrt::mutex persitenceLoopEventSetLock_;
-    std::mutex persitenceTimedEventSetLock_;
+    samgr::mutex nonPersitenceLoopEventSetLock_;
+    samgr::mutex nonPersitenceTimedEventSetLock;
+    samgr::mutex persitenceLoopEventSetLock_;
+    samgr::mutex persitenceTimedEventSetLock_;
     std::map<int32_t, std::function<void()>> nonPersitenceLoopTasks_;
     std::map<int32_t, std::function<void()>> persitenceLoopTasks_;
-    ffrt::mutex timeInfosLock_;
+    samgr::mutex timeInfosLock_;
     std::map<int32_t, TimeInfo> timeInfos_;
 #ifdef PREFERENCES_ENABLE
     std::shared_ptr<PreferencesUtil> preferencesUtil_;

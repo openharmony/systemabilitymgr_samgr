@@ -21,7 +21,7 @@
 #include <memory>
 #include <string>
 
-#include "ffrt.h"
+#include "samgr_ffrt_api.h"
 #include "refbase.h"
 #include "sa_profiles.h"
 #include "isystem_ability_load_callback.h"
@@ -65,8 +65,8 @@ struct UnloadRequestInfo {
 };
 
 struct SystemProcessContext {
-    ffrt::mutex stateCountLock;
-    ffrt::mutex processLock;
+    samgr::mutex stateCountLock;
+    samgr::mutex processLock;
     std::u16string processName;
     std::list<int32_t> saList;
     std::map<SystemAbilityState, uint32_t> abilityStateCountMap;
