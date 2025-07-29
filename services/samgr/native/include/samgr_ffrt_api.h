@@ -26,7 +26,10 @@ namespace samgr {
 #else
 #include <mutex>
 #include <shared_mutex>
-#define samgr std
+namespace samgr {
+    using mutex = std::mutex;
+    using shared_mutex = std::shared_mutex;
+}
 
 #endif // SAMGR_USE_FFRT
 #endif // SAMGR_FFRT_API_H
