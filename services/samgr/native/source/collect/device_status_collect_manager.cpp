@@ -78,7 +78,7 @@ void DeviceStatusCollectManager::RemoveWhiteCommonEvent()
 
 void DeviceStatusCollectManager::FilterOnDemandSaProfiles(const std::list<SaProfile>& saProfiles)
 {
-    std::unique_lock<std::shared_mutex> writeLock(saProfilesLock_);
+    std::unique_lock<samgr::shared_mutex> writeLock(saProfilesLock_);
     for (auto& saProfile : saProfiles) {
         if (saProfile.startOnDemand.onDemandEvents.empty() && saProfile.stopOnDemand.onDemandEvents.empty()) {
             continue;
@@ -129,7 +129,7 @@ void DeviceStatusCollectManager::GetSaControlListByPersistEvent(const OnDemandEv
 void DeviceStatusCollectManager::GetSaControlListByEvent(const OnDemandEvent& event,
     std::list<SaControlInfo>& saControlList)
 {
-    std::shared_lock<std::shared_mutex> readLock(saProfilesLock_);
+    std::shared_lock<samgr::shared_mutex> readLock(saProfilesLock_);
     for (auto& profile : onDemandSaProfiles_) {
         // start on demand
         for (auto iterStart = profile.startOnDemandEvents.begin();
@@ -425,7 +425,7 @@ int32_t DeviceStatusCollectManager::GetOnDemandEvents(int32_t systemAbilityId, O
     std::vector<OnDemandEvent>& events)
 {
     HILOGI("GetOnDemandEvents begin");
-    std::shared_lock<std::shared_mutex> readLock(saProfilesLock_);
+    std::shared_lock<samgr::shared_mutex> readLock(saProfilesLock_);
     auto iter = std::find_if(onDemandSaProfiles_.begin(), onDemandSaProfiles_.end(), [systemAbilityId](auto saProfile) {
         return saProfile.saId == systemAbilityId;
     });
@@ -565,7 +565,7 @@ int32_t DeviceStatusCollectManager::UpdateOnDemandEvents(int32_t systemAbilityId
 {
     HILOGI("UpdateOnDemandEvents begin saId:%{public}d, type:%{public}d", systemAbilityId, type);
     std::vector<OnDemandEvent> oldEvents;
-    std::unique_lock<std::shared_mutex> writeLock(saProfilesLock_);
+    std::unique_lock<samgr::shared_mutex> writeLock(saProfilesLock_);
     auto iter = std::find_if(onDemandSaProfiles_.begin(), onDemandSaProfiles_.end(),
     [systemAbilityId](auto saProfile) {
         return saProfile.saId == systemAbilityId;

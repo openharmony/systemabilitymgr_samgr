@@ -18,7 +18,6 @@
 
 #include <list>
 #include <memory>
-#include <shared_mutex>
 
 #include "ffrt_handler.h"
 #include "icollect_plugin.h"
@@ -73,7 +72,7 @@ private:
     int32_t RemoveUnusedEventsLocked(const std::vector<OnDemandEvent>& events);
     std::map<int32_t, sptr<ICollectPlugin>> collectPluginMap_;
     std::shared_ptr<FFRTHandler> collectHandler_;
-    std::shared_mutex saProfilesLock_;
+    samgr::shared_mutex saProfilesLock_;
     std::list<CollMgrSaProfile> onDemandSaProfiles_;
 };
 } // namespace OHOS
