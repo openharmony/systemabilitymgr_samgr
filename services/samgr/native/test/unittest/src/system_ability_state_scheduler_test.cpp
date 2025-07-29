@@ -1887,81 +1887,230 @@ HWTEST_F(SystemAbilityStateSchedulerTest, SetFfrt001, TestSize.Level3)
 }
 
 /**
- * @tc.name: GetSystemAbilityIdleTime001
- * @tc.desc: test GetSystemAbilityIdleTime
+ * @tc.name: GetIdleProcessInfo001
+ * @tc.desc: Tests the case where the system ability ID is invalid and GetSystemAbilityContext fails.
  * @tc.type: FUNC
  * @tc.require: I7VEPG
  */
-HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemAbilityIdleTime001, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, GetIdleProcessInfo001, TestSize.Level3)
 {
-    DTEST_LOG<<"GetSystemAbilityIdleTime001 BEGIN"<<std::endl;
+    DTEST_LOG<<"GetIdleProcessInfo001 BEGIN"<<std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
     std::make_shared<SystemAbilityStateScheduler>();
-    int32_t invalidSaid = 101;
-    
-    int64_t ret = systemAbilityStateScheduler->GetSystemAbilityIdleTime(invalidSaid);
-    EXPECT_EQ(ret, -1);
-    DTEST_LOG<<"GetSystemAbilityIdleTime001 END"<<std::endl;
+    int32_t invalidSaId = -1;
+    IdleProcessInfo idleInfo;
+    bool result = systemAbilityStateScheduler->GetIdleProcessInfo(invalidSaId, idleInfo);
+    EXPECT_FALSE(result);
+    DTEST_LOG<<"GetIdleProcessInfo001 END"<<std::endl;
 }
 
 /**
- * @tc.name: GetSystemAbilityIdleTime002
- * @tc.desc: test GetSystemAbilityIdleTime
+ * @tc.name: GetIdleProcessInfo002
+ * @tc.desc: Tests when the system ability state is not UNLOADABLE, which should return false.
  * @tc.type: FUNC
  * @tc.require: I7VEPG
  */
-HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemAbilityIdleTime002, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, GetIdleProcessInfo002, TestSize.Level3)
 {
-    DTEST_LOG<<"GetSystemAbilityIdleTime002 BEGIN"<<std::endl;
+    DTEST_LOG<<"GetIdleProcessInfo002 BEGIN"<<std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
     std::make_shared<SystemAbilityStateScheduler>();
-    int said = 401;
-    
-    int64_t ret = systemAbilityStateScheduler->GetSystemAbilityIdleTime(said);
-    EXPECT_EQ(ret, -1);
-    DTEST_LOG<<"GetSystemAbilityIdleTime002 END"<<std::endl;
+    IdleProcessInfo idleInfo;
+    int saId = 123;
+
+    // Setup mock to return context with SA state != UNLOADABLE
+    auto context = std::make_shared<SystemAbilityContext>();
+    context->state = SystemAbilityState::LOADED;
+    context->ownProcessContext = std::make_shared<SystemProcessContext>();
+    context->ownProcessContext->state = SystemProcessState::STARTED;
+    systemAbilityStateScheduler->abilityContextMap_[saId] = context;
+
+    bool result = systemAbilityStateScheduler->GetIdleProcessInfo(saId, idleInfo);
+    EXPECT_FALSE(result);
+    DTEST_LOG<<"GetIdleProcessInfo002 END"<<std::endl;
 }
 
 /**
- * @tc.name: GetLruIdleSystemAbilityInfo001
- * @tc.desc: test GetLruIdleSystemAbilityInfo
+ * @tc.name: GetIdleProcessInfo003
+ * @tc.desc: Tests when the process state is NOT_STARTED, which should return false.
  * @tc.type: FUNC
  * @tc.require: I7VEPG
  */
-HWTEST_F(SystemAbilityStateSchedulerTest, GetLruIdleSystemAbilityInfo001, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, GetIdleProcessInfo003, TestSize.Level3)
 {
-    DTEST_LOG<<"GetLruIdleSystemAbilityInfo001 BEGIN"<<std::endl;
+    DTEST_LOG<<"GetIdleProcessInfo003 BEGIN"<<std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
     std::make_shared<SystemAbilityStateScheduler>();
-    int32_t invalidSaid = 101;
-    int64_t lastStopTime = -1;
-    std::u16string processName;
-    int32_t pid = -1;
-    
-    bool ret = systemAbilityStateScheduler->GetLruIdleSystemAbilityInfo(invalidSaid, processName, lastStopTime, pid);
-    EXPECT_EQ(ret, false);
-    DTEST_LOG<<"GetLruIdleSystemAbilityInfo001 END"<<std::endl;
+    IdleProcessInfo idleInfo;
+    int saId = 123;
+
+    // Setup mock to return context with process state NOT_STARTED
+    auto context = std::make_shared<SystemAbilityContext>();
+    context->state = SystemAbilityState::UNLOADABLE;
+    context->ownProcessContext = std::make_shared<SystemProcessContext>();
+    context->ownProcessContext->state = SystemProcessState::NOT_STARTED;
+    systemAbilityStateScheduler->abilityContextMap_[saId] = context;
+
+    bool result = systemAbilityStateScheduler->GetIdleProcessInfo(saId, idleInfo);
+    EXPECT_FALSE(result);
+    DTEST_LOG<<"GetIdleProcessInfo003 END"<<std::endl;
 }
 
 /**
- * @tc.name: GetLruIdleSystemAbilityInfo002
- * @tc.desc: test GetLruIdleSystemAbilityInfo
+ * @tc.name: GetIdleProcessInfo004
+ * @tc.desc: Tests when the last stop time is less than 2 minutes ago, which should return false.
  * @tc.type: FUNC
  * @tc.require: I7VEPG
  */
-HWTEST_F(SystemAbilityStateSchedulerTest, GetLruIdleSystemAbilityInfo002, TestSize.Level3)
+HWTEST_F(SystemAbilityStateSchedulerTest, GetIdleProcessInfo004, TestSize.Level3)
 {
-    DTEST_LOG<<"GetLruIdleSystemAbilityInfo002 BEGIN"<<std::endl;
+    DTEST_LOG<<"GetIdleProcessInfo004 BEGIN"<<std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
     std::make_shared<SystemAbilityStateScheduler>();
-    int said = 401;
-    int64_t lastStopTime = -1;
-    std::u16string processName;
-    int32_t pid = -1;
-    
-    bool ret = systemAbilityStateScheduler->GetLruIdleSystemAbilityInfo(said, processName, lastStopTime, pid);
-    EXPECT_NE(lastStopTime, 0);
-    DTEST_LOG<<"GetLruIdleSystemAbilityInfo002 END"<<std::endl;
+    IdleProcessInfo idleInfo;
+    int saId = 123;
+
+    // Setup mock to return context with recent stop time
+    auto context = std::make_shared<SystemAbilityContext>();
+    context->state = SystemAbilityState::UNLOADABLE;
+    context->ownProcessContext = std::make_shared<SystemProcessContext>();
+    context->ownProcessContext->state = SystemProcessState::STARTED;
+    context->ownProcessContext->lastStopTime = GetTickCount() - 60; // 1 minute ago
+    systemAbilityStateScheduler->abilityContextMap_[saId] = context;
+
+    bool result = systemAbilityStateScheduler->GetIdleProcessInfo(saId, idleInfo);
+    EXPECT_FALSE(result);
+    DTEST_LOG<<"GetIdleProcessInfo004 END"<<std::endl;
+}
+
+/**
+ * @tc.name: GetIdleProcessInfo005
+ * @tc.desc: test GetIdleProcessInfo return true result
+ * @tc.type: FUNC
+ * @tc.require: I7VEPG
+ */
+HWTEST_F(SystemAbilityStateSchedulerTest, GetIdleProcessInfo005, TestSize.Level3)
+{
+    DTEST_LOG<<"GetIdleProcessInfo005 BEGIN"<<std::endl;
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+    std::make_shared<SystemAbilityStateScheduler>();
+    IdleProcessInfo idleInfo;
+    int32_t saId = 123;
+    std::u16string expectedName = u"test_process";
+    int32_t expectedPid = 456;
+    int64_t expectedIdleTime = 1000;
+
+    // Setup mock to return valid context
+    auto context = std::make_shared<SystemAbilityContext>();
+    context->state = SystemAbilityState::UNLOADABLE;
+    context->lastIdleTime = expectedIdleTime;
+    context->ownProcessContext = std::make_shared<SystemProcessContext>();
+    context->ownProcessContext->state = SystemProcessState::STARTED;
+    context->ownProcessContext->lastStopTime = GetTickCount() - 130 * 1000; // > 2 minutes ago
+    context->ownProcessContext->processName = expectedName;
+    context->ownProcessContext->pid = expectedPid;
+    systemAbilityStateScheduler->abilityContextMap_[saId] = context;
+
+    bool result = systemAbilityStateScheduler->GetIdleProcessInfo(saId, idleInfo);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(idleInfo.processName, expectedName);
+    EXPECT_EQ(idleInfo.pid, expectedPid);
+    EXPECT_EQ(idleInfo.lastIdleTime, expectedIdleTime);
+    DTEST_LOG<<"GetIdleProcessInfo005 END"<<std::endl;
+}
+
+/**
+ * @tc.name: GetIdleProcessInfo006
+ * @tc.desc: Tests the case where lastStopTime is -1
+ * @tc.type: FUNC
+ * @tc.require: I7VEPG
+ */
+HWTEST_F(SystemAbilityStateSchedulerTest, GetIdleProcessInfo006, TestSize.Level3)
+{
+    DTEST_LOG<<"GetIdleProcessInfo006 BEGIN"<<std::endl;
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+    std::make_shared<SystemAbilityStateScheduler>();
+    IdleProcessInfo idleInfo;
+    int32_t saId = 123;
+
+    // Setup mock to return context with lastStopTime = -1
+    auto context = std::make_shared<SystemAbilityContext>();
+    context->state = SystemAbilityState::UNLOADABLE;
+    context->ownProcessContext = std::make_shared<SystemProcessContext>();
+    context->ownProcessContext->state = SystemProcessState::STARTED;
+    context->ownProcessContext->lastStopTime = -1;
+    systemAbilityStateScheduler->abilityContextMap_[saId] = context;
+
+    bool result = systemAbilityStateScheduler->GetIdleProcessInfo(saId, idleInfo);
+    EXPECT_TRUE(result);
+    DTEST_LOG<<"GetIdleProcessInfo006 END"<<std::endl;
+}
+
+/**
+ * @tc.name: IsSystemProcessCanUnload001
+ * @tc.desc: test IsSystemProcessCanUnload with invalid process name
+ * @tc.type: FUNC
+ * @tc.require: I6FDNZ
+ */
+HWTEST_F(SystemAbilityStateSchedulerTest, IsSystemProcessCanUnload001, TestSize.Level3)
+{
+    DTEST_LOG<<"IsSystemProcessCanUnload001 BEGIN"<<std::endl;
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::u16string processName = u"test_process";
+    bool result = systemAbilityStateScheduler->IsSystemProcessCanUnload(processName);
+    EXPECT_FALSE(result);
+    DTEST_LOG<<"IsSystemProcessCanUnload001 END"<<std::endl;
+}
+
+/**
+ * @tc.name: IsSystemProcessCanUnload002
+ * @tc.desc: test IsSystemProcessCanUnload return true
+ * @tc.type: FUNC
+ * @tc.require: I6FDNZ
+ */
+HWTEST_F(SystemAbilityStateSchedulerTest, IsSystemProcessCanUnload002, TestSize.Level3)
+{
+    DTEST_LOG<<"IsSystemProcessCanUnload002 BEGIN"<<std::endl;
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::u16string processName = u"test_process";
+
+    auto processContext = std::make_shared<SystemProcessContext>();
+    processContext->saList.push_back(SAID);
+    processContext->saList.push_back(SAID);
+    processContext->saList.push_back(SAID);
+    processContext->abilityStateCountMap[SystemAbilityState::NOT_LOADED] = 1;
+    processContext->abilityStateCountMap[SystemAbilityState::UNLOADABLE] = 2;
+    systemAbilityStateScheduler->processContextMap_[processName] = processContext;
+    bool result = systemAbilityStateScheduler->IsSystemProcessCanUnload(processName);
+    EXPECT_TRUE(result);
+    DTEST_LOG<<"IsSystemProcessCanUnload002 END"<<std::endl;
+}
+
+/**
+ * @tc.name: IsSystemProcessCanUnload003
+ * @tc.desc: test IsSystemProcessCanUnload with invalid process name
+ * @tc.type: FUNC
+ * @tc.require: I6FDNZ
+ */
+HWTEST_F(SystemAbilityStateSchedulerTest, IsSystemProcessCanUnload003, TestSize.Level3)
+{
+    DTEST_LOG<<"IsSystemProcessCanUnload003 BEGIN"<<std::endl;
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::u16string processName = u"test_process";
+
+    auto processContext = std::make_shared<SystemProcessContext>();
+    processContext->saList.push_back(SAID);
+    processContext->saList.push_back(SAID);
+    processContext->saList.push_back(SAID);
+    processContext->abilityStateCountMap[SystemAbilityState::NOT_LOADED] = 0;
+    processContext->abilityStateCountMap[SystemAbilityState::UNLOADABLE] = 2;
+    systemAbilityStateScheduler->processContextMap_[processName] = processContext;
+    bool result = systemAbilityStateScheduler->IsSystemProcessCanUnload(processName);
+    EXPECT_FALSE(result);
+    DTEST_LOG<<"IsSystemProcessCanUnload003 END"<<std::endl;
 }
 
 /**

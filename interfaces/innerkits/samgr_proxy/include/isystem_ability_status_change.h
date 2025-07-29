@@ -21,11 +21,6 @@
 #include "iremote_proxy.h"
 
 namespace OHOS {
-struct IdleProcessInfo {
-    int32_t pid = -1;
-    std::u16string processName;
-    int64_t lastIdleTime = 0;
-};
 
 class ISystemAbilityStatusChange : public IRemoteBroker {
 public:
