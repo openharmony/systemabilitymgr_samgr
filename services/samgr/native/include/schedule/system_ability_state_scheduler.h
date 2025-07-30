@@ -18,9 +18,7 @@
 
 #include <map>
 #include <memory>
-#include <mutex>
 #include <string>
-#include <shared_mutex>
 
 #include "ffrt_handler.h"
 #include "isystem_process_status_change.h"
@@ -161,18 +159,18 @@ private:
     };
     std::shared_ptr<SystemAbilityStateMachine> stateMachine_;
     std::shared_ptr<SystemAbilityEventHandler> stateEventHandler_;
-    std::shared_mutex abiltyMapLock_;
-    std::shared_mutex processMapLock_;
+    samgr::shared_mutex abiltyMapLock_;
+    samgr::shared_mutex processMapLock_;
     std::map<int32_t, std::shared_ptr<SystemAbilityContext>> abilityContextMap_;
     std::map<std::u16string, std::shared_ptr<SystemProcessContext>> processContextMap_;
     std::shared_ptr<UnloadEventHandler> unloadEventHandler_;
     std::shared_ptr<FFRTHandler> processHandler_;
-    std::shared_mutex listenerSetLock_;
+    samgr::shared_mutex listenerSetLock_;
     std::list<sptr<ISystemProcessStatusChange>> processListeners_;
     sptr<IRemoteObject::DeathRecipient> processListenerDeath_;
-    std::mutex startEnableOnceLock_;
+    samgr::mutex startEnableOnceLock_;
     std::map<int32_t, std::list<OnDemandEvent>> startEnableOnceMap_;
-    std::mutex stopEnableOnceLock_;
+    samgr::mutex stopEnableOnceLock_;
     std::map<int32_t, std::list<OnDemandEvent>> stopEnableOnceMap_;
 };
 } // namespace OHOS

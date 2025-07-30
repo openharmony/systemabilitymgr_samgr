@@ -16,7 +16,6 @@
 #define SYSTEM_ABILITY_MANAGER_COMMON_EVENT_COLLECT_H
 
 #include <memory>
-#include <mutex>
 #include <thread>
 
 #include "common_event_subscriber.h"
@@ -72,21 +71,21 @@ private:
     bool GetCpuTimes(const char* file, uint64_t& total, uint64_t& idle);
     float GetCpuUsage(const char* file, uint32_t interval);
     void MonitorCpuUsageThread();
-    std::mutex commomEventLock_;
-    std::mutex commonEventSubscriberLock_;
+    samgr::mutex commomEventLock_;
+    samgr::mutex commonEventSubscriberLock_;
     sptr<IRemoteObject::DeathRecipient> commonEventDeath_;
     std::set<std::string> commonEventNames_;
     std::shared_ptr<CommonHandler> workHandler_;
     std::shared_ptr<CommonHandler> unsubHandler_;
     std::shared_ptr<EventFwk::CommonEventSubscriber> commonEventSubscriber_ = nullptr;
-    std::mutex commonEventStateLock_;
+    samgr::mutex commonEventStateLock_;
     std::set<std::string> commonEventWhitelist;
     std::map<std::string, std::map<std::string, std::string>> commonEventConditionExtraData_;
     std::map<std::string, std::string> commonEventConditionValue_;
-    std::mutex extraDataLock_;
+    samgr::mutex extraDataLock_;
     int64_t extraDataId_ = 0;
     std::map<int64_t, OnDemandReasonExtraData> extraDatas_;
-    std::mutex saExtraDataIdLock_;
+    samgr::mutex saExtraDataIdLock_;
     std::map<int32_t, std::list<int64_t>> saExtraDataIdMap_;
     std::atomic<bool> isAwakeNotified_ {false};
     std::atomic<bool> isTriggerTaskStart_ {false};

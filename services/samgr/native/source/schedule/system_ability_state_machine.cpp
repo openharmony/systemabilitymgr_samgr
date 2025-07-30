@@ -13,8 +13,6 @@
  * limitations under the License.
  */
 
-#include <shared_mutex>
-
 #include "datetime_ex.h"
 #include "sam_log.h"
 #include "string_ex.h"
@@ -85,7 +83,7 @@ bool SystemAbilityStateMachine::UpdateStateCount(const std::shared_ptr<SystemPro
         HILOGE("Scheduler:proc context is null");
         return false;
     }
-    std::lock_guard<std::mutex> autoLock(context->stateCountLock);
+    std::lock_guard<samgr::mutex> autoLock(context->stateCountLock);
     if (!context->abilityStateCountMap.count(fromState) || !context->abilityStateCountMap.count(toState)) {
         HILOGE("Scheduler proc:%{public}s invalid state",
             Str16ToStr8(context->processName).c_str());

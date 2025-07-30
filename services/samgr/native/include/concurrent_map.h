@@ -17,8 +17,9 @@
 #define OHOS_SAMGR_CONCURRENT_MAP_H
 
 #include <map>
-#include <mutex>
 #include <functional>
+
+#include "samgr_ffrt_api.h"
 
 namespace OHOS {
 template <typename K, typename V> class ConcurrentMap {
@@ -44,27 +45,27 @@ public:
     // when multithread calling size() return a tmp status, some threads may insert just after size() call
     int Size()
     {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<samgr::mutex> lock(mutex_);
         return map_.size();
     }
 
     // when multithread calling Empty() return a tmp status, some threads may insert just after Empty() call
     bool IsEmpty()
     {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<samgr::mutex> lock(mutex_);
         return map_.empty();
     }
 
     bool Insert(const K &key, const V &value)
     {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<samgr::mutex> lock(mutex_);
         auto ret = map_.insert(std::pair<K, V>(key, value));
         return ret.second;
     }
 
     bool FirstInsert(const K &key, const V &value)
     {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<samgr::mutex> lock(mutex_);
         auto isFirst = map_.empty();
         auto ret = map_.insert(std::pair<K, V>(key, value));
         // find key and cannot insert
@@ -77,7 +78,7 @@ public:
 
     void EnsureInsert(const K &key, const V &value)
     {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<samgr::mutex> lock(mutex_);
         auto ret = map_.insert(std::pair<K, V>(key, value));
         // find key and cannot insert
         if (!ret.second) {
@@ -91,7 +92,7 @@ public:
     bool Find(const K &key, V &value)
     {
         bool ret = false;
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<samgr::mutex> lock(mutex_);
 
         auto iter = map_.find(key);
         if (iter != map_.end()) {
@@ -104,20 +105,20 @@ public:
 
     void Erase(const K &key)
     {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<samgr::mutex> lock(mutex_);
         map_.erase(key);
     }
 
     void Clear()
     {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<samgr::mutex> lock(mutex_);
         map_.clear();
         return;
     }
 
     void Clear(std::function<void(K)> func)
     {
-        std::lock_guard<std::mutex> lock(mutex_);
+        std::lock_guard<samgr::mutex> lock(mutex_);
         for (auto iter = map_.begin(); iter != map_.end(); iter++) {
             func(iter->first);
         }
@@ -126,7 +127,7 @@ public:
     }
 
 private:
-    std::mutex mutex_;
+    samgr::mutex mutex_;
     std::map<K, V> map_;
 };
 } // namespace OHOS

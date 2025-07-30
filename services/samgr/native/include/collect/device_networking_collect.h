@@ -17,7 +17,6 @@
 #define OHOS_SYSTEM_ABILITY_MANAGER_DEVICE_NETWORKING_COLLECT_H
 #include "icollect_plugin.h"
 
-#include <mutex>
 #include <set>
 
 #include "device_manager.h"
@@ -38,7 +37,7 @@ class DeviceStateCallback : public DistributedHardware::DeviceStateCallback {
     private:
        sptr<ICollectPlugin> collect_;
        std::set<std::string> deviceOnlineSet_;
-       std::mutex deviceOnlineLock_;
+       samgr::mutex deviceOnlineLock_;
 };
 
 class WorkHandler;

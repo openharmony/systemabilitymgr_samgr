@@ -197,7 +197,7 @@ void DeviceStateCallback::OnDeviceOnline(const DmDeviceInfo& deviceInfo)
     SystemAbilityManager::GetInstance()->InitDbinderService();
 #endif
     {
-        lock_guard<mutex> autoLock(deviceOnlineLock_);
+        lock_guard<samgr::mutex> autoLock(deviceOnlineLock_);
         deviceOnlineSet_.emplace(deviceInfo.networkId);
     }
 
@@ -214,7 +214,7 @@ void DeviceStateCallback::OnDeviceOffline(const DmDeviceInfo& deviceInfo)
     HILOGI("DeviceNetworkingCollect OnDeviceOffline size %{public}zu", deviceOnlineSet_.size());
     bool isOffline = false;
     {
-        lock_guard<mutex> autoLock(deviceOnlineLock_);
+        lock_guard<samgr::mutex> autoLock(deviceOnlineLock_);
         deviceOnlineSet_.erase(deviceInfo.networkId);
         isOffline = deviceOnlineSet_.empty();
     }
@@ -232,19 +232,19 @@ void DeviceStateCallback::OnDeviceOffline(const DmDeviceInfo& deviceInfo)
 
 void DeviceStateCallback::ClearDeviceOnlineSet()
 {
-    lock_guard<mutex> autoLock(deviceOnlineLock_);
+    lock_guard<samgr::mutex> autoLock(deviceOnlineLock_);
     deviceOnlineSet_.clear();
 }
 
 bool DeviceStateCallback::IsOnline()
 {
-    lock_guard<mutex> autoLock(deviceOnlineLock_);
+    lock_guard<samgr::mutex> autoLock(deviceOnlineLock_);
     return !deviceOnlineSet_.empty();
 }
 
 void DeviceStateCallback::UpdateDeviceOnlineSet(const std::string& deviceId)
 {
-    lock_guard<mutex> autoLock(deviceOnlineLock_);
+    lock_guard<samgr::mutex> autoLock(deviceOnlineLock_);
     deviceOnlineSet_.emplace(deviceId);
 }
 

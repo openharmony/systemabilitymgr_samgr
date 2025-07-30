@@ -94,7 +94,7 @@ void SystemAbilityStateScheduler::SetFfrt()
 
 void SystemAbilityStateScheduler::CleanResource()
 {
-    std::unique_lock<std::shared_mutex> abiltyWriteLock(abiltyMapLock_);
+    std::unique_lock<samgr::shared_mutex> abiltyWriteLock(abiltyMapLock_);
     HILOGI("Scheduler CleanResource");
     abilityContextMap_.clear();
 }
@@ -105,7 +105,7 @@ void SystemAbilityStateScheduler::InitStateContext(const std::list<SaProfile>& s
         if (saProfile.process.empty()) {
             continue;
         }
-        std::unique_lock<std::shared_mutex> processWriteLock(processMapLock_);
+        std::unique_lock<samgr::shared_mutex> processWriteLock(processMapLock_);
         if (processContextMap_.count(saProfile.process) == 0) {
             auto processContext = std::make_shared<SystemProcessContext>();
             processContext->processName = saProfile.process;
@@ -124,7 +124,7 @@ void SystemAbilityStateScheduler::InitStateContext(const std::list<SaProfile>& s
         int32_t delayUnloadTime = LimitDelayUnloadTime(saProfile.stopOnDemand.delayTime);
         abilityContext->delayUnloadTime = delayUnloadTime;
         abilityContext->ownProcessContext = processContextMap_[saProfile.process];
-        std::unique_lock<std::shared_mutex> abiltyWriteLock(abiltyMapLock_);
+        std::unique_lock<samgr::shared_mutex> abiltyWriteLock(abiltyMapLock_);
         abilityContextMap_[saProfile.saId] = abilityContext;
     }
 }
@@ -149,7 +149,7 @@ void SystemAbilityStateScheduler::InitSamgrProcessContext()
     abilityContext->isAutoRestart = false;
     abilityContext->delayUnloadTime = MAX_DELAY_TIME;
     abilityContext->ownProcessContext = processContextMap_[SAMGR_PROCESS_NAME];
-    std::unique_lock<std::shared_mutex> abiltyWriteLock(abiltyMapLock_);
+    std::unique_lock<samgr::shared_mutex> abiltyWriteLock(abiltyMapLock_);
     abilityContextMap_[0] = abilityContext;
 }
 
@@ -167,7 +167,7 @@ int32_t SystemAbilityStateScheduler::LimitDelayUnloadTime(int32_t delayUnloadTim
 bool SystemAbilityStateScheduler::GetSystemAbilityContext(int32_t systemAbilityId,
     std::shared_ptr<SystemAbilityContext>& abilityContext)
 {
-    std::shared_lock<std::shared_mutex> readLock(abiltyMapLock_);
+    std::shared_lock<samgr::shared_mutex> readLock(abiltyMapLock_);
     if (abilityContextMap_.count(systemAbilityId) == 0) {
         HILOGD("Scheduler SA:%{public}d not in SA profiles", systemAbilityId);
         return false;
@@ -205,7 +205,7 @@ void SystemAbilityStateScheduler::UpdateLimitDelayUnloadTimeTask(int32_t systemA
     if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
         return;
     }
-    std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
+    std::lock_guard<samgr::mutex> autoLock(abilityContext->ownProcessContext->processLock);
     if (abilityContext->lastStartTime != 0) {
         int64_t begin = abilityContext->lastStartTime;
         int64_t end = GetTickCount();
@@ -222,7 +222,7 @@ void SystemAbilityStateScheduler::UpdateLimitDelayUnloadTimeTask(int32_t systemA
 bool SystemAbilityStateScheduler::GetSystemProcessContext(const std::u16string& processName,
     std::shared_ptr<SystemProcessContext>& processContext)
 {
-    std::shared_lock<std::shared_mutex> readLock(processMapLock_);
+    std::shared_lock<samgr::shared_mutex> readLock(processMapLock_);
     if (processContextMap_.count(processName) == 0) {
         HILOGE("Scheduler proc:%{public}s invalid", Str16ToStr8(processName).c_str());
         return false;
@@ -241,7 +241,7 @@ bool SystemAbilityStateScheduler::IsSystemAbilityUnloading(int32_t systemAbility
     if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
         return false;
     }
-    std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
+    std::lock_guard<samgr::mutex> autoLock(abilityContext->ownProcessContext->processLock);
     if (abilityContext->state ==SystemAbilityState::UNLOADING
         || abilityContext->ownProcessContext->state == SystemProcessState::STOPPING) {
         return true;
@@ -256,7 +256,7 @@ int32_t SystemAbilityStateScheduler::HandleLoadAbilityEvent(int32_t systemAbilit
         isExist = false;
         return ERR_INVALID_VALUE;
     }
-    std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
+    std::lock_guard<samgr::mutex> autoLock(abilityContext->ownProcessContext->processLock);
     if (abilityContext->ownProcessContext->state == SystemProcessState::NOT_STARTED) {
         isExist = false;
         return ERR_INVALID_VALUE;
@@ -283,7 +283,7 @@ int32_t SystemAbilityStateScheduler::HandleLoadAbilityEvent(const LoadRequestInf
     HILOGI("Scheduler SA:%{public}d load start %{public}d,%{public}d_"
         "%{public}d_%{public}d", loadRequestInfo.systemAbilityId, loadRequestInfo.callingPid,
         loadRequestInfo.loadEvent.eventId, abilityContext->ownProcessContext->state, abilityContext->state);
-    std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
+    std::lock_guard<samgr::mutex> autoLock(abilityContext->ownProcessContext->processLock);
     int32_t result = HandleLoadAbilityEventLocked(abilityContext, loadRequestInfo);
     if (result != ERR_OK) {
         HILOGE("Scheduler SA:%{public}d handle load fail,ret:%{public}d",
@@ -346,7 +346,7 @@ int32_t SystemAbilityStateScheduler::HandleUnloadAbilityEvent(
     HILOGI("Scheduler SA:%{public}d unload start %{public}d,%{public}d_"
         "%{public}d_%{public}d", unloadRequestInfo->systemAbilityId, unloadRequestInfo->callingPid,
         unloadRequestInfo->unloadEvent.eventId, abilityContext->ownProcessContext->state, abilityContext->state);
-    std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
+    std::lock_guard<samgr::mutex> autoLock(abilityContext->ownProcessContext->processLock);
     int32_t result = HandleUnloadAbilityEventLocked(abilityContext, unloadRequestInfo);
     if (result != ERR_OK) {
         HILOGE("Scheduler SA:%{public}d handle unload fail,ret:%{public}d",
@@ -399,7 +399,7 @@ int32_t SystemAbilityStateScheduler::HandleCancelUnloadAbilityEvent(int32_t syst
     activeReason[KEY_VALUE] = "";
     activeReason[KEY_EXTRA_DATA_ID] = -1;
     int32_t result = ERR_INVALID_VALUE;
-    std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
+    std::lock_guard<samgr::mutex> autoLock(abilityContext->ownProcessContext->processLock);
     switch (abilityContext->state) {
         case SystemAbilityState::UNLOADABLE:
             result = ActiveSystemAbilityLocked(abilityContext, activeReason);
@@ -433,7 +433,7 @@ int32_t SystemAbilityStateScheduler::SendAbilityStateEvent(int32_t systemAbility
     if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
         return ERR_INVALID_VALUE;
     }
-    std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
+    std::lock_guard<samgr::mutex> autoLock(abilityContext->ownProcessContext->processLock);
     return stateEventHandler_->HandleAbilityEventLocked(abilityContext, event);
 }
 
@@ -445,7 +445,7 @@ int32_t SystemAbilityStateScheduler::SendProcessStateEvent(const ProcessInfo& pr
     if (!GetSystemProcessContext(processInfo.processName, processContext)) {
         return ERR_INVALID_VALUE;
     }
-    std::lock_guard<std::mutex> autoLock(processContext->processLock);
+    std::lock_guard<samgr::mutex> autoLock(processContext->processLock);
     return stateEventHandler_->HandleProcessEventLocked(processContext, processInfo, event);
 }
 
@@ -590,7 +590,7 @@ int32_t SystemAbilityStateScheduler::TryUnloadAllSystemAbility(
         HILOGE("Scheduler:proc context is null");
         return ERR_INVALID_VALUE;
     }
-    std::lock_guard<std::mutex> autoLock(processContext->processLock);
+    std::lock_guard<samgr::mutex> autoLock(processContext->processLock);
     if (CanUnloadAllSystemAbilityLocked(processContext, true)) {
         return UnloadAllSystemAbilityLocked(processContext);
     }
@@ -600,7 +600,7 @@ int32_t SystemAbilityStateScheduler::TryUnloadAllSystemAbility(
 bool SystemAbilityStateScheduler::CanUnloadAllSystemAbility(
     const std::shared_ptr<SystemProcessContext>& processContext)
 {
-    std::lock_guard<std::mutex> autoLock(processContext->stateCountLock);
+    std::lock_guard<samgr::mutex> autoLock(processContext->stateCountLock);
     return CanUnloadAllSystemAbilityLocked(processContext, true);
 }
 
@@ -677,7 +677,7 @@ int32_t SystemAbilityStateScheduler::PostUnloadTimeoutTask(const std::shared_ptr
         } else {
             HILOGE("TimeoutTask processHandler_ is null");
         }
-        std::lock_guard<std::mutex> autoLock(processContext->processLock);
+        std::lock_guard<samgr::mutex> autoLock(processContext->processLock);
         if (processContext->state == SystemProcessState::STOPPING) {
             HILOGW("Scheduler proc:%{public}s unload SA timeout",
                 Str16ToStr8(processContext->processName).c_str());
@@ -768,7 +768,7 @@ int32_t SystemAbilityStateScheduler::UnloadProcess(const std::vector<std::u16str
 {
     HILOGI("Scheduler:UnloadProcess");
     int32_t result = ERR_OK;
-    std::shared_lock<std::shared_mutex> readLock(processMapLock_);
+    std::shared_lock<samgr::shared_mutex> readLock(processMapLock_);
     for (const auto& it : processList) {
         if (processContextMap_.count(it) != 0) {
             auto& processContext = processContextMap_[it];
@@ -777,7 +777,7 @@ int32_t SystemAbilityStateScheduler::UnloadProcess(const std::vector<std::u16str
             }
     
             int32_t ret = ERR_OK;
-            std::lock_guard<std::mutex> autoLock(processContext->processLock);
+            std::lock_guard<samgr::mutex> autoLock(processContext->processLock);
             if (CanUnloadAllSystemAbilityLocked(processContext)) {
                 ret = UnloadAllSystemAbilityLocked(processContext);
             }
@@ -795,7 +795,7 @@ int32_t SystemAbilityStateScheduler::UnloadAllIdleSystemAbility()
 {
     HILOGI("Scheduler:UnloadAllIdleSa");
     int32_t result = ERR_OK;
-    std::shared_lock<std::shared_mutex> readLock(processMapLock_);
+    std::shared_lock<samgr::shared_mutex> readLock(processMapLock_);
     for (auto it : processContextMap_) {
         auto& processContext = it.second;
         if (processContext == nullptr) {
@@ -803,7 +803,7 @@ int32_t SystemAbilityStateScheduler::UnloadAllIdleSystemAbility()
         }
 
         int32_t ret = ERR_OK;
-        std::lock_guard<std::mutex> autoLock(processContext->processLock);
+        std::lock_guard<samgr::mutex> autoLock(processContext->processLock);
         if (CanUnloadAllSystemAbilityLocked(processContext)) {
             ret = UnloadAllSystemAbilityLocked(processContext);
         }
@@ -823,7 +823,7 @@ int32_t SystemAbilityStateScheduler::TryKillSystemProcess(
         HILOGE("Scheduler:proc context is null");
         return ERR_INVALID_VALUE;
     }
-    std::lock_guard<std::mutex> autoLock(processContext->processLock);
+    std::lock_guard<samgr::mutex> autoLock(processContext->processLock);
     if (CanKillSystemProcessLocked(processContext)) {
         return KillSystemProcessLocked(processContext);
     }
@@ -833,7 +833,7 @@ int32_t SystemAbilityStateScheduler::TryKillSystemProcess(
 bool SystemAbilityStateScheduler::CanKillSystemProcess(
     const std::shared_ptr<SystemProcessContext>& processContext)
 {
-    std::lock_guard<std::mutex> autoLock(processContext->stateCountLock);
+    std::lock_guard<samgr::mutex> autoLock(processContext->stateCountLock);
     return CanKillSystemProcessLocked(processContext);
 }
 
@@ -955,7 +955,7 @@ int32_t SystemAbilityStateScheduler::HandleAbnormallyDiedAbilityLocked(
 
 void SystemAbilityStateScheduler::NotifyProcessStarted(const std::shared_ptr<SystemProcessContext>& processContext)
 {
-    std::shared_lock<std::shared_mutex> readLock(listenerSetLock_);
+    std::shared_lock<samgr::shared_mutex> readLock(listenerSetLock_);
     for (auto& listener : processListeners_) {
         if (listener->AsObject() != nullptr) {
             SystemProcessInfo systemProcessInfo = {Str16ToStr8(processContext->processName), processContext->pid,
@@ -967,7 +967,7 @@ void SystemAbilityStateScheduler::NotifyProcessStarted(const std::shared_ptr<Sys
 
 void SystemAbilityStateScheduler::NotifyProcessStopped(const std::shared_ptr<SystemProcessContext>& processContext)
 {
-    std::shared_lock<std::shared_mutex> readLock(listenerSetLock_);
+    std::shared_lock<samgr::shared_mutex> readLock(listenerSetLock_);
     for (auto& listener : processListeners_) {
         if (listener->AsObject() != nullptr) {
             SystemProcessInfo systemProcessInfo = {Str16ToStr8(processContext->processName), processContext->pid,
@@ -1066,7 +1066,7 @@ int32_t SystemAbilityStateScheduler::GetSystemProcessInfo(int32_t systemAbilityI
         return ERR_INVALID_VALUE;
     }
     std::shared_ptr<SystemProcessContext> processContext = abilityContext->ownProcessContext;
-    std::lock_guard<std::mutex> autoLock(processContext->processLock);
+    std::lock_guard<samgr::mutex> autoLock(processContext->processLock);
     systemProcessInfo = {Str16ToStr8(processContext->processName), processContext->pid,
                 processContext->uid};
     return ERR_OK;
@@ -1075,13 +1075,13 @@ int32_t SystemAbilityStateScheduler::GetSystemProcessInfo(int32_t systemAbilityI
 int32_t SystemAbilityStateScheduler::GetRunningSystemProcess(std::list<SystemProcessInfo>& systemProcessInfos)
 {
     HILOGI("Scheduler:get running process");
-    std::shared_lock<std::shared_mutex> readLock(processMapLock_);
+    std::shared_lock<samgr::shared_mutex> readLock(processMapLock_);
     for (auto it : processContextMap_) {
         auto& processContext = it.second;
         if (processContext == nullptr) {
             continue;
         }
-        std::lock_guard<std::mutex> autoLock(processContext->processLock);
+        std::lock_guard<samgr::mutex> autoLock(processContext->processLock);
         if (processContext->state == SystemProcessState::STARTED) {
             SystemProcessInfo systemProcessInfo = {Str16ToStr8(processContext->processName), processContext->pid,
                 processContext->uid};
@@ -1094,13 +1094,13 @@ int32_t SystemAbilityStateScheduler::GetRunningSystemProcess(std::list<SystemPro
 int32_t SystemAbilityStateScheduler::GetProcessNameByProcessId(int32_t pid, std::u16string& processName)
 {
     HILOGD("[SA Scheduler] get processName by processId");
-    std::shared_lock<std::shared_mutex> readLock(processMapLock_);
+    std::shared_lock<samgr::shared_mutex> readLock(processMapLock_);
     for (auto it : processContextMap_) {
         auto& processContext = it.second;
         if (processContext == nullptr) {
             continue;
         }
-        std::lock_guard<std::mutex> autoLock(processContext->processLock);
+        std::lock_guard<samgr::mutex> autoLock(processContext->processLock);
         if (processContext->pid == pid) {
             processName = processContext->processName;
             return ERR_OK;
@@ -1111,7 +1111,7 @@ int32_t SystemAbilityStateScheduler::GetProcessNameByProcessId(int32_t pid, std:
 
 void SystemAbilityStateScheduler::GetAllSystemAbilityInfo(std::string& result)
 {
-    std::shared_lock<std::shared_mutex> readLock(abiltyMapLock_);
+    std::shared_lock<samgr::shared_mutex> readLock(abiltyMapLock_);
     for (auto it : abilityContextMap_) {
         if (it.second == nullptr) {
             continue;
@@ -1125,7 +1125,7 @@ void SystemAbilityStateScheduler::GetAllSystemAbilityInfo(std::string& result)
         result += "sa_pending_event:               ";
         result += PENDINGEVENT_ENUM_STR[static_cast<int32_t>(it.second->pendingEvent)];
         if (it.second->ownProcessContext != nullptr) {
-            std::lock_guard<std::mutex> autoLock(it.second->ownProcessContext->stateCountLock);
+            std::lock_guard<samgr::mutex> autoLock(it.second->ownProcessContext->stateCountLock);
             result += '\n';
             result += "process_name:                   ";
             result += Str16ToStr8(it.second->ownProcessContext->processName);
@@ -1147,7 +1147,7 @@ void SystemAbilityStateScheduler::GetSystemAbilityInfo(int32_t said, std::string
         result.append("said is not exist");
         return;
     }
-    std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
+    std::lock_guard<samgr::mutex> autoLock(abilityContext->ownProcessContext->processLock);
     result += "said:                           ";
     result += std::to_string(said);
     result += "\n";
@@ -1175,7 +1175,7 @@ void SystemAbilityStateScheduler::GetProcessInfo(const std::string& processName,
         result.append("process is not exist");
         return;
     }
-    std::lock_guard<std::mutex> autoLock(processContext->processLock);
+    std::lock_guard<samgr::mutex> autoLock(processContext->processLock);
     result += "process_name:                   ";
     result += Str16ToStr8(processContext->processName);
     result += "\n";
@@ -1205,7 +1205,7 @@ void SystemAbilityStateScheduler::GetProcessInfo(const std::string& processName,
 
 void SystemAbilityStateScheduler::GetAllSystemAbilityInfoByState(const std::string& state, std::string& result)
 {
-    std::shared_lock<std::shared_mutex> readLock(abiltyMapLock_);
+    std::shared_lock<samgr::shared_mutex> readLock(abiltyMapLock_);
     for (auto it : abilityContextMap_) {
         if (it.second == nullptr || SA_STATE_ENUM_STR[static_cast<int32_t>(it.second->state)] != state) {
             continue;
@@ -1219,7 +1219,7 @@ void SystemAbilityStateScheduler::GetAllSystemAbilityInfoByState(const std::stri
         result += "sa_pending_event:               ";
         result += PENDINGEVENT_ENUM_STR[static_cast<int32_t>(it.second->pendingEvent)];
         if (it.second->ownProcessContext != nullptr) {
-            std::lock_guard<std::mutex> autoLock(it.second->ownProcessContext->stateCountLock);
+            std::lock_guard<samgr::mutex> autoLock(it.second->ownProcessContext->stateCountLock);
             result += '\n';
             result += "process_name:                   ";
             result += Str16ToStr8(it.second->ownProcessContext->processName);
@@ -1236,7 +1236,7 @@ void SystemAbilityStateScheduler::GetAllSystemAbilityInfoByState(const std::stri
 
 int32_t SystemAbilityStateScheduler::SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener)
 {
-    std::unique_lock<std::shared_mutex> writeLock(listenerSetLock_);
+    std::unique_lock<samgr::shared_mutex> writeLock(listenerSetLock_);
     auto iter = std::find_if(processListeners_.begin(), processListeners_.end(),
         [listener](sptr<ISystemProcessStatusChange>& item) {
         return item->AsObject() == listener->AsObject();
@@ -1255,7 +1255,7 @@ int32_t SystemAbilityStateScheduler::SubscribeSystemProcess(const sptr<ISystemPr
 
 int32_t SystemAbilityStateScheduler::UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener)
 {
-    std::unique_lock<std::shared_mutex> writeLock(listenerSetLock_);
+    std::unique_lock<samgr::shared_mutex> writeLock(listenerSetLock_);
     auto iter = std::find_if(processListeners_.begin(), processListeners_.end(),
         [listener](sptr<ISystemProcessStatusChange>& item) {
         return item->AsObject() == listener->AsObject();
@@ -1287,7 +1287,7 @@ int32_t SystemAbilityStateScheduler::ProcessDelayUnloadEvent(int32_t systemAbili
     if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
         return GET_SA_CONTEXT_FAIL;
     }
-    std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
+    std::lock_guard<samgr::mutex> autoLock(abilityContext->ownProcessContext->processLock);
     return ProcessDelayUnloadEventLocked(systemAbilityId);
 }
 
@@ -1355,7 +1355,7 @@ int32_t SystemAbilityStateScheduler::CheckStartEnableOnce(const OnDemandEvent& e
 {
     int32_t result = ERR_INVALID_VALUE;
     if (saControl.enableOnce) {
-        std::lock_guard<std::mutex> autoLock(startEnableOnceLock_);
+        std::lock_guard<samgr::mutex> autoLock(startEnableOnceLock_);
         auto iter = startEnableOnceMap_.find(saControl.saId);
         if (iter != startEnableOnceMap_.end() && SamgrUtil::IsSameEvent(event, startEnableOnceMap_[saControl.saId])) {
             HILOGI("ondemand canceled for enable-once, ondemandId:%{public}d, SA:%{public}d",
@@ -1370,7 +1370,7 @@ int32_t SystemAbilityStateScheduler::CheckStartEnableOnce(const OnDemandEvent& e
     LoadRequestInfo loadRequestInfo = {LOCAL_DEVICE, callback, saControl.saId, callingPid, event};
     result = HandleLoadAbilityEvent(loadRequestInfo);
     if (saControl.enableOnce && result != ERR_OK) {
-        std::lock_guard<std::mutex> autoLock(startEnableOnceLock_);
+        std::lock_guard<samgr::mutex> autoLock(startEnableOnceLock_);
         auto& events = startEnableOnceMap_[saControl.saId];
         events.remove(event);
         if (events.empty()) {
@@ -1391,7 +1391,7 @@ int32_t SystemAbilityStateScheduler::CheckStopEnableOnce(const OnDemandEvent& ev
 {
     int32_t result = ERR_INVALID_VALUE;
     if (saControl.enableOnce) {
-        std::lock_guard<std::mutex> autoLock(stopEnableOnceLock_);
+        std::lock_guard<samgr::mutex> autoLock(stopEnableOnceLock_);
         auto iter = stopEnableOnceMap_.find(saControl.saId);
         if (iter != stopEnableOnceMap_.end() && SamgrUtil::IsSameEvent(event, stopEnableOnceMap_[saControl.saId])) {
             HILOGI("ondemand canceled for enable-once, ondemandId:%{public}d, SA:%{public}d",
@@ -1407,7 +1407,7 @@ int32_t SystemAbilityStateScheduler::CheckStopEnableOnce(const OnDemandEvent& ev
         std::make_shared<UnloadRequestInfo>(event, saControl.saId, callingPid);
     result = HandleUnloadAbilityEvent(unloadRequestInfo);
     if (saControl.enableOnce && result != ERR_OK) {
-        std::lock_guard<std::mutex> autoLock(stopEnableOnceLock_);
+        std::lock_guard<samgr::mutex> autoLock(stopEnableOnceLock_);
         auto& events = stopEnableOnceMap_[saControl.saId];
         events.remove(event);
         if (events.empty()) {
@@ -1429,7 +1429,7 @@ bool SystemAbilityStateScheduler::GetIdleProcessInfo(int32_t systemAbilityId, Id
     if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
         return false;
     }
-    std::lock_guard<std::mutex> autoLock(abilityContext->ownProcessContext->processLock);
+    std::lock_guard<samgr::mutex> autoLock(abilityContext->ownProcessContext->processLock);
     if (abilityContext->state != SystemAbilityState::UNLOADABLE ||
         abilityContext->ownProcessContext->state == SystemProcessState::NOT_STARTED) {
         HILOGD("GetIdleProcessInfo SA:%{public}d state not idle or proc not started", systemAbilityId);
@@ -1452,7 +1452,7 @@ bool SystemAbilityStateScheduler::IsSystemProcessCanUnload(const std::u16string&
     if (!GetSystemProcessContext(processName, processContext)) {
         return false;
     }
-    std::lock_guard<std::mutex> autoLock(processContext->processLock);
+    std::lock_guard<samgr::mutex> autoLock(processContext->processLock);
     return CanUnloadAllSystemAbilityLocked(processContext);
 }
 

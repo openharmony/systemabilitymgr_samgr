@@ -17,10 +17,10 @@
 #define OHOS_SAMGR_FFRT_HANDLER_H
 
 #include <map>
-#include <shared_mutex>
 #include <string>
 
 #include "ffrt.h"
+#include "samgr_ffrt_api.h"
 
 namespace OHOS {
 class FFRTHandler {
@@ -37,7 +37,7 @@ public:
     void SetFfrt(const std::string& name);
 
 private:
-    std::shared_mutex mutex_;
+    samgr::shared_mutex mutex_;
     std::map<std::string, ffrt::task_handle> taskMap_;
     std::shared_ptr<ffrt::queue> queue_;
 };

@@ -93,6 +93,7 @@ ohos_executable("samgr") {
       defines += [ "CONFIG_USE_JEMALLOC_DFX_INTF" ]
     }
   }
+  defines += ["SAMGR_USE_FFRT"]
   if (is_standard_system) {
     external_deps = [
       "access_token:libaccesstoken_sdk",
