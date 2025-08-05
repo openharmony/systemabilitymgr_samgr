@@ -158,7 +158,6 @@ ohos_executable("samgr") {
     }
 
     if (support_penglai_mode) {
-      external_deps += [ "penglai_mode_service:penglai_client" ]
       defines += [ "SUPPORT_PENGLAI_MODE" ]
     }
     part_name = "samgr"
