@@ -102,6 +102,7 @@ HWTEST_F(SystemAbilityMgrLoadTest, LoadSystemAbility001, TestSize.Level0)
     DTEST_LOG << "LoadSystemAbility001 begin" << std::endl;
     int32_t systemAbilityId = TEST_EXCEPTION_LOW_SA_ID;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
     InitSaMgr(saMgr);
     int32_t result = saMgr->LoadSystemAbility(systemAbilityId, nullptr);
     EXPECT_TRUE(result != ERR_OK);
@@ -118,6 +119,7 @@ HWTEST_F(SystemAbilityMgrLoadTest, LoadSystemAbility002, TestSize.Level0)
     DTEST_LOG << "LoadSystemAbility002 begin" << std::endl;
     int32_t systemAbilityId = TEST_EXCEPTION_HIGH_SA_ID;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
     InitSaMgr(saMgr);
     int32_t result = saMgr->LoadSystemAbility(systemAbilityId, nullptr);
     EXPECT_TRUE(result != ERR_OK);
@@ -134,6 +136,7 @@ HWTEST_F(SystemAbilityMgrLoadTest, LoadSystemAbility003, TestSize.Level0)
     DTEST_LOG << "LoadSystemAbility003 begin" << std::endl;
     int32_t systemAbilityId = DISTRIBUTED_SCHED_TEST_SO_ID;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
     InitSaMgr(saMgr);
     int32_t result = saMgr->LoadSystemAbility(systemAbilityId, nullptr);
     EXPECT_TRUE(result != ERR_OK);
@@ -150,6 +153,7 @@ HWTEST_F(SystemAbilityMgrLoadTest, LoadSystemAbility004, TestSize.Level0)
     DTEST_LOG << "LoadSystemAbility004 begin" << std::endl;
     int32_t systemAbilityId = DISTRIBUTED_SCHED_TEST_SO_ID;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
     InitSaMgr(saMgr);
     sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
     int32_t result = saMgr->LoadSystemAbility(systemAbilityId, callback);
@@ -166,6 +170,8 @@ HWTEST_F(SystemAbilityMgrLoadTest, LoadSystemAbility005, TestSize.Level1)
 {
     DTEST_LOG << "LoadSystemAbility005 begin" << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
+    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -184,6 +190,8 @@ HWTEST_F(SystemAbilityMgrLoadTest, LoadSystemAbility006, TestSize.Level1)
 {
     DTEST_LOG << "LoadSystemAbility006 begin" << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
+    InitSaMgr(saMgr);
     MessageParcel data;
     data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN);
     MessageParcel reply;
@@ -203,6 +211,8 @@ HWTEST_F(SystemAbilityMgrLoadTest, LoadSystemAbility007, TestSize.Level1)
 {
     DTEST_LOG << "LoadSystemAbility007 begin" << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
+    InitSaMgr(saMgr);
     MessageParcel data;
     data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN);
     data.WriteInt32(TEST_EXCEPTION_HIGH_SA_ID);
@@ -223,6 +233,8 @@ HWTEST_F(SystemAbilityMgrLoadTest, LoadSystemAbility008, TestSize.Level1)
 {
     DTEST_LOG << "LoadSystemAbility008 begin" << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
+    InitSaMgr(saMgr);
     MessageParcel data;
     data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN);
     data.WriteInt32(DISTRIBUTED_SCHED_TEST_SO_ID);
@@ -243,6 +255,8 @@ HWTEST_F(SystemAbilityMgrLoadTest, LoadSystemAbility009, TestSize.Level1)
 {
     DTEST_LOG << "LoadSystemAbility009 begin" << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
+    InitSaMgr(saMgr);
     MessageParcel data;
     data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN);
     data.WriteInt32(DISTRIBUTED_SCHED_TEST_SO_ID);
@@ -267,6 +281,7 @@ HWTEST_F(SystemAbilityMgrLoadTest, LoadSystemAbility010, TestSize.Level3)
     DTEST_LOG << "LoadSystemAbility010 begin" << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     InitSaMgr(saMgr);
+    saMgr->saProfileMap_.clear();
     sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
     int32_t ret = saMgr->LoadSystemAbility(SAID, callback);
     EXPECT_EQ(ret, PROFILE_NOT_EXIST);
@@ -283,6 +298,7 @@ HWTEST_F(SystemAbilityMgrLoadTest, LoadSystemAbility011, TestSize.Level3)
 {
     DTEST_LOG << "LoadSystemAbility011 begin" << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
     InitSaMgr(saMgr);
     sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
     int32_t ret = saMgr->LoadSystemAbility(-1, callback);
@@ -299,6 +315,7 @@ HWTEST_F(SystemAbilityMgrLoadTest, OnLoadSystemAbilitySuccess001, TestSize.Level
 {
     DTEST_LOG << "OnLoadSystemAbilitySuccess001 begin" << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
     InitSaMgr(saMgr);
     sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
     saMgr->NotifySystemAbilityLoaded(DISTRIBUTED_SCHED_TEST_SO_ID, nullptr, nullptr);
@@ -315,7 +332,8 @@ HWTEST_F(SystemAbilityMgrLoadTest, OnLoadSystemAbilitySuccess002, TestSize.Level
 {
     DTEST_LOG << "OnLoadSystemAbilitySuccess002 begin" << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
-    saMgr->Init();
+    EXPECT_TRUE(saMgr != nullptr);
+    InitSaMgr(saMgr);
     sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
     saMgr->NotifySystemAbilityLoaded(DISTRIBUTED_SCHED_TEST_SO_ID, nullptr, callback);
     EXPECT_TRUE(callback->GetSystemAbilityId() == DISTRIBUTED_SCHED_TEST_SO_ID);
@@ -332,6 +350,7 @@ HWTEST_F(SystemAbilityMgrLoadTest, OnLoadSystemAbilitySuccess003, TestSize.Level
 {
     DTEST_LOG << "OnLoadSystemAbilitySuccess003 begin" << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
     InitSaMgr(saMgr);
     sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
     sptr<IRemoteObject> remoteObject = new TestTransactionService();
@@ -350,6 +369,7 @@ HWTEST_F(SystemAbilityMgrLoadTest, OnLoadSystemAbilitySuccess004, TestSize.Level
 {
     DTEST_LOG << " OnLoadSystemAbilitySuccess004 begin" << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
     InitSaMgr(saMgr);
     sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
     saMgr->NotifySystemAbilityLoaded(DISTRIBUTED_SCHED_TEST_SO_ID, nullptr, nullptr);
@@ -366,6 +386,7 @@ HWTEST_F(SystemAbilityMgrLoadTest, ReportLoadSAOverflow001, TestSize.Level1)
 {
     DTEST_LOG << "ReportLoadSAOverflow001 begin" << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    ASSERT_TRUE(saMgr != nullptr);
     InitSaMgr(saMgr);
     for (int i = 0; i < OVERFLOW_TIME; ++i) {
         sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
@@ -704,6 +725,7 @@ HWTEST_F(SystemAbilityMgrLoadTest, UnloadSystemAbility002, TestSize.Level3)
 {
     DTEST_LOG << "UnloadSystemAbility002 begin" << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
     InitSaMgr(saMgr);
     int32_t systemAbilityId = 1;
     CommonSaProfile saProfile;
@@ -726,6 +748,7 @@ HWTEST_F(SystemAbilityMgrLoadTest, UnloadSystemAbility003, TestSize.Level3)
     DTEST_LOG << " UnloadSystemAbility003 begin" << std::endl;
     SamMockPermission::MockProcess("memmgrservice");
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
     InitSaMgr(saMgr);
     CommonSaProfile saProfile;
     saProfile.process = u"memmgrservice";
@@ -747,6 +770,7 @@ HWTEST_F(SystemAbilityMgrLoadTest, CancelUnloadSystemAbility001, TestSize.Level3
 {
     DTEST_LOG << " CancelUnloadSystemAbility001 begin" << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
     InitSaMgr(saMgr);
     int32_t systemAbilityId = -1;
     int32_t ret = saMgr->CancelUnloadSystemAbility(systemAbilityId);
@@ -764,6 +788,7 @@ HWTEST_F(SystemAbilityMgrLoadTest, CancelUnloadSystemAbility002, TestSize.Level3
 {
     DTEST_LOG << " CancelUnloadSystemAbility002 begin" << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
     InitSaMgr(saMgr);
     int32_t systemAbilityId = 1;
     int32_t ret = saMgr->CancelUnloadSystemAbility(systemAbilityId);
@@ -781,6 +806,7 @@ HWTEST_F(SystemAbilityMgrLoadTest, CancelUnloadSystemAbility003, TestSize.Level3
 {
     DTEST_LOG << " CancelUnloadSystemAbility003 begin" << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
     InitSaMgr(saMgr);
     CommonSaProfile saProfile;
     saMgr->saProfileMap_[1] = saProfile;
@@ -801,6 +827,7 @@ HWTEST_F(SystemAbilityMgrLoadTest, CancelUnloadSystemAbility004, TestSize.Level3
     DTEST_LOG << " CancelUnloadSystemAbility004 begin" << std::endl;
     SamMockPermission::MockProcess("mockProcess");
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
     InitSaMgr(saMgr);
     CommonSaProfile saProfile;
     saProfile.process = u"mockProcess";
@@ -822,6 +849,7 @@ HWTEST_F(SystemAbilityMgrLoadTest, CancelUnloadSystemAbility005, TestSize.Level3
     DTEST_LOG << " CancelUnloadSystemAbility005 begin" << std::endl;
     SamMockPermission::MockProcess("mockProcess");
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
     InitSaMgr(saMgr);
     CommonSaProfile saProfile;
     saProfile.process = u"mockProcess";
@@ -844,6 +872,7 @@ HWTEST_F(SystemAbilityMgrLoadTest, CancelUnloadSystemAbility006, TestSize.Level3
 {
     DTEST_LOG << " CancelUnloadSystemAbility006 begin" << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
     InitSaMgr(saMgr);
     uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
     Security::AccessToken::NativeTokenInfo nativeTokenInfo;
@@ -870,6 +899,7 @@ HWTEST_F(SystemAbilityMgrLoadTest, DoUnloadSystemAbility001, TestSize.Level3)
 {
     DTEST_LOG << "DoUnloadSystemAbility001 begin" << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
     InitSaMgr(saMgr);
     std::u16string procName = u"foundation";
     int32_t said = 401;
@@ -899,6 +929,7 @@ HWTEST_F(SystemAbilityMgrLoadTest, DoUnloadSystemAbility002, TestSize.Level3)
 {
     DTEST_LOG << "DoUnloadSystemAbility002 begin" << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
     InitSaMgr(saMgr);
     ISystemAbilityManager::SAExtraProp saExtraProp(false, 0, u"", u"");
     int32_t systemAbilityId = DISTRIBUTED_SCHED_TEST_TT_ID;
@@ -925,6 +956,7 @@ HWTEST_F(SystemAbilityMgrLoadTest, UnloadAllIdleSystemAbility001, TestSize.Level
     DTEST_LOG << "UnloadAllIdleSystemAbility001 begin" << std::endl;
     SamMockPermission::MockProcess("memmgrservice");
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
     InitSaMgr(saMgr);
     int32_t ret = saMgr->UnloadAllIdleSystemAbility();
     EXPECT_EQ(ret, ERR_OK);
@@ -942,6 +974,7 @@ HWTEST_F(SystemAbilityMgrLoadTest, UnloadAllIdleSystemAbility002, TestSize.Level
     DTEST_LOG << "UnloadAllIdleSystemAbility002 begin" << std::endl;
     SamMockPermission::MockProcess("memmgrservice");
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
     InitSaMgr(saMgr);
     saMgr->abilityStateScheduler_ = nullptr;
     int32_t ret = saMgr->UnloadAllIdleSystemAbility();
@@ -960,6 +993,7 @@ HWTEST_F(SystemAbilityMgrLoadTest, UnloadAllIdleSystemAbility003, TestSize.Level
 {
     DTEST_LOG << "UnloadAllIdleSystemAbility003 begin" << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
     InitSaMgr(saMgr);
     int32_t ret = saMgr->UnloadAllIdleSystemAbility();
     EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
