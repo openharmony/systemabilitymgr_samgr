@@ -171,7 +171,6 @@ HWTEST_F(SystemAbilityMgrLoadTest, LoadSystemAbility005, TestSize.Level1)
     DTEST_LOG << "LoadSystemAbility005 begin" << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_TRUE(saMgr != nullptr);
-    InitSaMgr(saMgr);
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
@@ -191,7 +190,6 @@ HWTEST_F(SystemAbilityMgrLoadTest, LoadSystemAbility006, TestSize.Level1)
     DTEST_LOG << "LoadSystemAbility006 begin" << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_TRUE(saMgr != nullptr);
-    InitSaMgr(saMgr);
     MessageParcel data;
     data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN);
     MessageParcel reply;
@@ -212,7 +210,6 @@ HWTEST_F(SystemAbilityMgrLoadTest, LoadSystemAbility007, TestSize.Level1)
     DTEST_LOG << "LoadSystemAbility007 begin" << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_TRUE(saMgr != nullptr);
-    InitSaMgr(saMgr);
     MessageParcel data;
     data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN);
     data.WriteInt32(TEST_EXCEPTION_HIGH_SA_ID);
@@ -234,7 +231,6 @@ HWTEST_F(SystemAbilityMgrLoadTest, LoadSystemAbility008, TestSize.Level1)
     DTEST_LOG << "LoadSystemAbility008 begin" << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_TRUE(saMgr != nullptr);
-    InitSaMgr(saMgr);
     MessageParcel data;
     data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN);
     data.WriteInt32(DISTRIBUTED_SCHED_TEST_SO_ID);
@@ -256,7 +252,6 @@ HWTEST_F(SystemAbilityMgrLoadTest, LoadSystemAbility009, TestSize.Level1)
     DTEST_LOG << "LoadSystemAbility009 begin" << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_TRUE(saMgr != nullptr);
-    InitSaMgr(saMgr);
     MessageParcel data;
     data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN);
     data.WriteInt32(DISTRIBUTED_SCHED_TEST_SO_ID);
@@ -298,7 +293,6 @@ HWTEST_F(SystemAbilityMgrLoadTest, LoadSystemAbility011, TestSize.Level3)
 {
     DTEST_LOG << "LoadSystemAbility011 begin" << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
-    EXPECT_TRUE(saMgr != nullptr);
     InitSaMgr(saMgr);
     sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
     int32_t ret = saMgr->LoadSystemAbility(-1, callback);

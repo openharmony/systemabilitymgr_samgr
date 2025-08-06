@@ -187,6 +187,8 @@ void SystemAbilityMgrNewTest::TearDown()
 HWTEST_F(SystemAbilityMgrNewTest, GetLocalNodeId001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
+    InitSaMgr(saMgr);
     string ret = saMgr->GetLocalNodeId();
     EXPECT_EQ(ret, "");
 }
@@ -261,7 +263,7 @@ HWTEST_F(SystemAbilityMgrNewTest, GetSystemAbilityFromRemote001, TestSize.Level3
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_TRUE(saMgr != nullptr);
-    InitSaMgr(saMgr);
+    saMgr->Init();
     auto ability = saMgr->GetSystemAbilityFromRemote(TEST_EXCEPTION_LOW_SA_ID);
     EXPECT_EQ(ability, nullptr);
 }
@@ -341,6 +343,7 @@ HWTEST_F(SystemAbilityMgrNewTest, GetDBinder001, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrNewTest, NotifyRpcLoadCompleted001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
     InitSaMgr(saMgr);
 #ifdef SAMGR_ENABLE_DELAY_DBINDER
     saMgr->InitDbinderService();
@@ -348,6 +351,7 @@ HWTEST_F(SystemAbilityMgrNewTest, NotifyRpcLoadCompleted001, TestSize.Level3)
     sptr<IRemoteObject> testAbility = new TestTransactionService();
     saMgr->workHandler_ = nullptr;
     saMgr->NotifyRpcLoadCompleted("", 1, testAbility);
+    EXPECT_TRUE(saMgr != nullptr);
 }
 
 /**
@@ -375,12 +379,14 @@ HWTEST_F(SystemAbilityMgrNewTest, NotifyRpcLoadCompleted002, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrNewTest, NotifyRpcLoadCompleted003, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
     InitSaMgr(saMgr);
 #ifdef SAMGR_ENABLE_DELAY_DBINDER
     saMgr->InitDbinderService();
 #endif
     sptr<IRemoteObject> testAbility = new TestTransactionService();
     saMgr->NotifyRpcLoadCompleted("", 1, testAbility);
+    EXPECT_TRUE(saMgr != nullptr);
 }
 
 /**
@@ -436,7 +442,6 @@ HWTEST_F(SystemAbilityMgrNewTest, Dump003, TestSize.Level3)
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_TRUE(saMgr != nullptr);
     InitSaMgr(saMgr);
-    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
     vector<std::u16string> args;
     args.push_back(u"--ipc");
     args.push_back(u"all");
@@ -457,7 +462,6 @@ HWTEST_F(SystemAbilityMgrNewTest, Dump004, TestSize.Level3)
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_TRUE(saMgr != nullptr);
     InitSaMgr(saMgr);
-    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
     vector<std::u16string> args;
     args.push_back(u"--ffrt");
     args.push_back(u"99999");
@@ -542,13 +546,13 @@ HWTEST_F(SystemAbilityMgrNewTest, RemoveWhiteCommonEvent001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_TRUE(saMgr != nullptr);
+    InitSaMgr(saMgr);
     saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
     saMgr->CleanFfrt();
     saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
     saMgr->CleanFfrt();
     saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
     saMgr->CleanFfrt();
-    InitSaMgr(saMgr);
     const std::u16string name;
     saMgr->NotifyRemoteSaDied(name);
     saMgr->RemoveWhiteCommonEvent();
@@ -734,7 +738,7 @@ HWTEST_F(SystemAbilityMgrNewTest, GetSystemProcessInfo003, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_TRUE(saMgr != nullptr);
-    InitSaMgr(saMgr);
+    saMgr->abilityStateScheduler_ = nullptr;
     int32_t systemAbilityId = 0;
     SystemProcessInfo systemProcessInfo;
     int32_t ret = saMgr->GetSystemProcessInfo(systemAbilityId, systemProcessInfo);
@@ -751,6 +755,7 @@ HWTEST_F(SystemAbilityMgrNewTest, IsModuleUpdate001, TestSize.Level2)
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_TRUE(saMgr != nullptr);
     InitSaMgr(saMgr);
+    saMgr->saProfileMap_.clear();
     bool ret = saMgr->IsModuleUpdate(SAID);
     EXPECT_FALSE(ret);
 }
@@ -765,6 +770,7 @@ HWTEST_F(SystemAbilityMgrNewTest, IsModuleUpdate002, TestSize.Level2)
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_TRUE(saMgr != nullptr);
     InitSaMgr(saMgr);
+    saMgr->saProfileMap_.clear();
     CommonSaProfile saprofile;
     saMgr->saProfileMap_[saprofile.saId] = saprofile;
     bool ret = saMgr->IsModuleUpdate(saprofile.saId);
@@ -781,6 +787,7 @@ HWTEST_F(SystemAbilityMgrNewTest, IsModuleUpdate003, TestSize.Level2)
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_TRUE(saMgr != nullptr);
     InitSaMgr(saMgr);
+    saMgr->saProfileMap_.clear();
     CommonSaProfile saprofile;
     saprofile.moduleUpdate = true;
     saMgr->saProfileMap_[saprofile.saId] = saprofile;
