@@ -1975,7 +1975,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetIdleProcessInfo004, TestSize.Level3
     context->state = SystemAbilityState::UNLOADABLE;
     context->ownProcessContext = std::make_shared<SystemProcessContext>();
     context->ownProcessContext->state = SystemProcessState::STARTED;
-    context->ownProcessContext->lastStopTime = GetTickCount() - 60; // 1 minute ago
+    context->ownProcessContext->lastStopTime = GetTickCount() - 60 * 1000; // 1 minute ago
     systemAbilityStateScheduler->abilityContextMap_[saId] = context;
 
     bool result = systemAbilityStateScheduler->GetIdleProcessInfo(saId, idleInfo);
@@ -2077,9 +2077,9 @@ HWTEST_F(SystemAbilityStateSchedulerTest, IsSystemProcessCanUnload002, TestSize.
     std::u16string processName = u"test_process";
 
     auto processContext = std::make_shared<SystemProcessContext>();
-    processContext->saList.push_back(SAID);
-    processContext->saList.push_back(SAID);
-    processContext->saList.push_back(SAID);
+    processContext->saList.push_back(123);
+    processContext->saList.push_back(124);
+    processContext->saList.push_back(125);
     processContext->abilityStateCountMap[SystemAbilityState::NOT_LOADED] = 1;
     processContext->abilityStateCountMap[SystemAbilityState::UNLOADABLE] = 2;
     systemAbilityStateScheduler->processContextMap_[processName] = processContext;
@@ -2102,9 +2102,9 @@ HWTEST_F(SystemAbilityStateSchedulerTest, IsSystemProcessCanUnload003, TestSize.
     std::u16string processName = u"test_process";
 
     auto processContext = std::make_shared<SystemProcessContext>();
-    processContext->saList.push_back(SAID);
-    processContext->saList.push_back(SAID);
-    processContext->saList.push_back(SAID);
+    processContext->saList.push_back(123);
+    processContext->saList.push_back(124);
+    processContext->saList.push_back(125);
     processContext->abilityStateCountMap[SystemAbilityState::NOT_LOADED] = 0;
     processContext->abilityStateCountMap[SystemAbilityState::UNLOADABLE] = 2;
     systemAbilityStateScheduler->processContextMap_[processName] = processContext;
