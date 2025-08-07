@@ -48,10 +48,16 @@ public:
     static void InvalidateSACache();
     static void FilterCommonSaProfile(const SaProfile& oldProfile, CommonSaProfile& newProfile);
     static bool CheckPengLai();
+#ifdef SUPPORT_PENGLAT_MODE
     static bool CheckPengLaiPermission(int32_t systemAbilityId);
+#endif
     static void GetFilesByPriority(const std::string& path, std::vector<std::string>& files);
     static void GetFilesFromPath(const std::string& path, std::map<std::string, std::string>& fileNamesMap);
 private:
+#ifdef SUPPORT_PENGLAT_MODE
+    static void* InitPenglaiFunc();
+    static void* penglaiFunc_;
+#endif
     static std::shared_ptr<FFRTHandler> setParmHandler_;
 };
 } // namespace OHOS

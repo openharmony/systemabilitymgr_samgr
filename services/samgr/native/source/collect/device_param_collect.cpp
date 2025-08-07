@@ -62,12 +62,17 @@ void DeviceParamCollect::Init(const std::list<SaProfile>& saProfiles)
         }
         for (auto onDemandEvent : saProfile.stopOnDemand.onDemandEvents) {
             if (onDemandEvent.eventId == PARAM) {
-                if (onDemandEvent.name == PARAM_LOW_MEM_PREPARE_NAME) {
-                    lowMemPrepareList_.push_back(saProfile.saId);
-                }
+                CheckLowMemSA(onDemandEvent.name, saProfile.saId);
                 pendingParams_.insert(onDemandEvent.name);
             }
         }
+    }
+}
+
+void DeviceParamCollect::CheckLowMemSA(const std::string& name, int32_t saId)
+{
+    if (name == PARAM_LOW_MEM_PREPARE_NAME) {
+        lowMemPrepareList_.push_back(saId);
     }
 }
 

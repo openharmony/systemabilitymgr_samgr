@@ -36,6 +36,7 @@ public:
     int32_t OnStop() override;
     const std::vector<int32_t>& GetLowMemPrepareList() override;
 private:
+    void CheckLowMemSA(const std::string& name, int32_t saId);
     samgr::mutex paramLock_;
     std::set<std::string> pendingParams_;
     std::set<std::string> params_;

@@ -228,14 +228,16 @@ private:
     int32_t GetCommonEventExtraDataIdlistInner(MessageParcel& data, MessageParcel& reply);
     int32_t GetLocalAbilityManagerProxyInner(MessageParcel& data, MessageParcel& reply);
     static int32_t GetHapIdMultiuser(int32_t uid);
+#ifdef SUPPORT_PENGLAT_MODE
     void SetPengLai(bool isPengLai);
+    bool isPengLai_ = false;
+#endif
     void SetAbilityFuncMap();
     void SetProcessFuncMap();
 
     using SystemAbilityManagerStubFunc =
         int32_t (*)(SystemAbilityManagerStub* stub, MessageParcel& data, MessageParcel& reply);
     std::map<uint32_t, SystemAbilityManagerStubFunc> memberFuncMap_;
-    bool isPengLai_ = false;
 };
 } // namespace OHOS
 

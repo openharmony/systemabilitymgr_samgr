@@ -61,8 +61,8 @@ constexpr int32_t CONTAINER_SA_MAX = 0x0001055f; //66911
 
 static bool IsInCrashWhiteList(int32_t saId)
 {
-    std::vector<int> whiteList = { 10, 1201, 1202, 1203, 1204, 1205, 1213, 1215, 5002, 5100, 5110, 9999, 65537, 65830,
-        65850, 66064, 66186, 69930, 131071, 345135 };
+    std::vector<int> whiteList = { 1205, 1213, 1215, 9999, 65537, 65830,
+        65850, 66064, 69930, 131071, 345135 };
     for (auto sa : whiteList) {
         if (saId == sa) {
             return true;

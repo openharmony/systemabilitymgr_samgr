@@ -23,13 +23,16 @@
 #include "string_ex.h"
 #include "tools.h"
 #include "sam_log.h"
-#ifdef SUPPORT_PENGLAI_MODE
-#include "penglai_service_client.h"
-#endif
 
 namespace OHOS {
 namespace fs = std::filesystem;
 using namespace std;
+#ifdef SUPPORT_PENGLAI_MODE
+using PenglaiFunc = bool (*) (const int32_t, const int32_t);
+constexpr const char* PENGLAI_SO_PATH = "libpenglai_client.z.so";
+constexpr const char* PENGLAT_SYM = "IsLaunchAllowedByUid";
+void* SamgrUtil::penglaiFunc_ = InitPenglaiFunc();
+#endif
 constexpr int32_t MAX_NAME_SIZE = 200;
 constexpr int32_t SPLIT_NAME_VECTOR_SIZE = 2;
 constexpr int32_t UID_ROOT = 0;
@@ -246,27 +249,44 @@ bool SamgrUtil::CheckPengLai()
     return paramValue == PENG_LAI;
 }
 
+#ifdef SUPPORT_PENGLAI_MODE
+void* SamgrUtil::InitPenglaiFunc()
+{
+    if (!CheckPengLai()) {
+        HILOGI("InitPenglaiFunc not penglai");
+        return nullptr;
+    }
+    DlHandle handle = dlopen(PENGLAI_SO_PATH, RTLD_NOW);
+    if (handle == nullptr) {
+        HILOGE("InitPenglaiFunc dlopen %{public}s so failed.", PENGLAI_SO_PATH);
+        return nullptr;
+    }
+    void* func = dlsym(handle, PENGLAT_SYM);
+    if (func == nullptr) {
+        HILOGE("InitPenglaiFunc dlsym %{public}s symbol failed.", PENGLAT_SYM);
+        dlclose(handle);
+        return nullptr;
+    }
+    HILOGI("InitPenglaiFunc success");
+    return func;
+}
+
 bool SamgrUtil::CheckPengLaiPermission(int32_t systemAbilityId)
 {
-#ifdef SUPPORT_PENGLAI_MODE
     auto callingUid = IPCSkeleton::GetCallingUid();
-    auto penglaiMgr = Penglai::PenglaiServiceClient::GetInstance();
-    if (penglaiMgr == nullptr) {
-        HILOGE("PengLaiServiceClient GetInstance failed.");
+    if (penglaiFunc_ == nullptr) {
         return true;
     }
-
-    bool isAllow = penglaiMgr->IsLaunchAllowedByUid(callingUid, systemAbilityId);
+    PenglaiFunc IsLaunchAllowedByUid = (PenglaiFunc)PenglaiFunc_;
+    bool isAllow = IsLaunchAllowedByUid(callingUid, systemAbilityId);
     if (!isAllow) {
         HILOGE("IsLaunchAllowedByUid failed. callingUid:%{public}d, SA:%{public}d", callingUid, systemAbilityId);
         return false;
     }
     HILOGD("CheckPengLaiPerm suc. cUid:%{public}d,SA:%{public}d", callingUid, systemAbilityId);
     return isAllow;
-#else
-    return true;
-#endif
 }
+#endif
 
 void SamgrUtil::GetFilesFromPath(const std::string& path, std::map<std::string, std::string>& fileNamesMap)
 {
@@ -283,16 +303,15 @@ void SamgrUtil::GetFilesFromPath(const std::string& path, std::map<std::string, 
             fileNamesMap[fs::path(file).filename().string()] = file;
         }
     }
-
     FreeCfgFiles(filePaths);
 }
-
 
 void SamgrUtil::GetFilesByPriority(const std::string& path, std::vector<std::string>& fileNames)
 {
     std::map<std::string, std::string> fileNamesMap;
+
     GetFilesFromPath(path, fileNamesMap);
-    
+
     if (SamgrUtil::CheckPengLai()) {
         HILOGI("GetFilesByPriority penglai!");
         GetFilesFromPath(PENGLAI_PATH, fileNamesMap);
