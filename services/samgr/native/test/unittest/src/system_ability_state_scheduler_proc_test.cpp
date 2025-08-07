@@ -39,6 +39,17 @@ constexpr int32_t STATENUMS = 1;
 const std::u16string process = u"test";
 const std::u16string process_invalid = u"test_invalid";
 const std::string LOCAL_DEVICE = "local";
+void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
+{
+    saMgr->abilityDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityDeathRecipient());
+    saMgr->systemProcessDeath_ = sptr<IRemoteObject::DeathRecipient>(new SystemProcessDeathRecipient());
+    saMgr->abilityStatusDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityStatusDeathRecipient());
+    saMgr->abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityCallbackDeathRecipient());
+    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
+    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+}
 }
 
 void SystemAbilityStateSchedulerProcTest::SetUpTestCase()
