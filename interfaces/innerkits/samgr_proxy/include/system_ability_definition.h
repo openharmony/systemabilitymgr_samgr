@@ -1,4 +1,4 @@
-/*
+ /*
  * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -319,6 +319,7 @@ enum {
     APP_DOMAIN_VERIFY_AGENT_SA_ID                    = 6201,
     SUBSYS_ACE_SYS_ABILITY_ID_BEGIN                  = 7001,
     ARKUI_UI_APPEARANCE_SERVICE_ID                   = 7002,
+    MECH_BODY_SA_ID                                  = 7811,
     CA_DAEMON_ID                                     = 8001,
     TRUSTED_SERVICE_ID                               = 8002,
     ANTI_FRAUD_SERVICE_ID                            = 8003,
