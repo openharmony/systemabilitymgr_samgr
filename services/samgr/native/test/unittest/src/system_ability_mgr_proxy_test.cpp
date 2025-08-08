@@ -1312,7 +1312,6 @@ HWTEST_F(SystemAbilityMgrProxyTest, UnloadProcess001, TestSize.Level1)
     EXPECT_EQ(res, ERR_OK);
 }
 
-
 /**
  * @tc.name: GetLruIdleSystemAbilityProc001
  * @tc.desc: GetLruIdleSystemAbilityProc
@@ -1340,6 +1339,11 @@ HWTEST_F(SystemAbilityMgrProxyTest, GetLruIdleSystemAbilityProc002, TestSize.Lev
     EXPECT_NE(res, ERR_OK);
 }
 
+/**
+ * @tc.name: UnloadProcess002
+ * @tc.desc: UnloadProcess base interface cover
+ * @tc.type: FUNC
+ */
 HWTEST_F(SystemAbilityMgrProxyTest, UnloadProcess002, TestSize.Level3)
 {
     DTEST_LOG << " UnloadProcess002 begin " << std::endl;
@@ -1351,6 +1355,11 @@ HWTEST_F(SystemAbilityMgrProxyTest, UnloadProcess002, TestSize.Level3)
     DTEST_LOG << " UnloadProcess002 end " << std::endl;
 }
 
+/**
+ * @tc.name: GetLruIdleSystemAbilityProc003
+ * @tc.desc: GetLruIdleSystemAbilityProc base interface cover
+ * @tc.type: FUNC
+ */
 HWTEST_F(SystemAbilityMgrProxyTest, GetLruIdleSystemAbilityProc003, TestSize.Level3)
 {
     DTEST_LOG << " GetLruIdleSystemAbilityProc003 begin " << std::endl;

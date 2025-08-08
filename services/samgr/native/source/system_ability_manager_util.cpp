@@ -28,9 +28,9 @@ namespace OHOS {
 namespace fs = std::filesystem;
 using namespace std;
 #ifdef SUPPORT_PENGLAI_MODE
-using PenglaiFunc = bool (*) (const int32_t, const int32_t);
+using PenglaiFunc = bool (*)(const int32_t, const int32_t);
 constexpr const char* PENGLAI_SO_PATH = "libpenglai_client.z.so";
-constexpr const char* PENGLAT_SYM = "IsLaunchAllowedByUid";
+constexpr const char* PENGLAI_SYM = "IsLaunchAllowedByUid";
 void* SamgrUtil::penglaiFunc_ = InitPenglaiFunc();
 #endif
 constexpr int32_t MAX_NAME_SIZE = 200;
@@ -261,23 +261,24 @@ void* SamgrUtil::InitPenglaiFunc()
         HILOGE("InitPenglaiFunc dlopen %{public}s so failed.", PENGLAI_SO_PATH);
         return nullptr;
     }
-    void* func = dlsym(handle, PENGLAT_SYM);
+    void* func = dlsym(handle, PENGLAI_SYM);
     if (func == nullptr) {
-        HILOGE("InitPenglaiFunc dlsym %{public}s symbol failed.", PENGLAT_SYM);
+        HILOGE("InitPenglaiFunc dlsym %{public}s symbol failed.", PENGLAI_SYM);
         dlclose(handle);
         return nullptr;
     }
-    HILOGI("InitPenglaiFunc success");
+    HILOGI("InitPenglaiFunc success.");
     return func;
 }
 
 bool SamgrUtil::CheckPengLaiPermission(int32_t systemAbilityId)
 {
     auto callingUid = IPCSkeleton::GetCallingUid();
+
     if (penglaiFunc_ == nullptr) {
         return true;
     }
-    PenglaiFunc IsLaunchAllowedByUid = (PenglaiFunc)PenglaiFunc_;
+    PenglaiFunc IsLaunchAllowedByUid = (PenglaiFunc)penglaiFunc_;
     bool isAllow = IsLaunchAllowedByUid(callingUid, systemAbilityId);
     if (!isAllow) {
         HILOGE("IsLaunchAllowedByUid failed. callingUid:%{public}d, SA:%{public}d", callingUid, systemAbilityId);
@@ -309,7 +310,7 @@ void SamgrUtil::GetFilesFromPath(const std::string& path, std::map<std::string, 
 void SamgrUtil::GetFilesByPriority(const std::string& path, std::vector<std::string>& fileNames)
 {
     std::map<std::string, std::string> fileNamesMap;
-
+    
     GetFilesFromPath(path, fileNamesMap);
 
     if (SamgrUtil::CheckPengLai()) {

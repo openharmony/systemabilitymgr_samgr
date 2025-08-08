@@ -28,6 +28,7 @@
 #define private public
 #include "sa_status_change_mock.h"
 #include "system_ability_manager.h"
+#include "system_ability_manager_util.h"
 
 using namespace std;
 using namespace testing;
@@ -44,9 +45,22 @@ constexpr int32_t INVALID_SAID = -1;
 constexpr uint32_t INVALID_CODE = 50;
 }
 #ifdef SUPPORT_PENGLAI_MODE
-namespace Penglai {
+bool g_permissionRet = false;
+void* g_originHandle = SamgrUtil::penglaiFunc_;
+bool MockIsLaunchAllowedByUid(const int32_t callingUid, const int32_t systemAbilityId)
+{
+    return g_permissionRet;
+}
 
-extern bool permissionRet;
+void SetPenglaiPerm(bool permission)
+{
+    SamgrUtil::penglaiFunc_ = (void*)MockIsLaunchAllowedByUid;
+    g_permissionRet = permission;
+}
+
+void UnSetPenglaiPerm()
+{
+    SamgrUtil::penglaiFunc_ = g_originHandle;
 }
 #endif
 
@@ -573,9 +587,10 @@ HWTEST_F(SystemAbilityMgrStubTest, CheckSystemAbilityImmeInner004, TestSize.Leve
     data.WriteInt32(SAID);
     saMgr->SetPengLai(true);
     // set permission denied
-    Penglai::permissionRet = false;
+    SetPenglaiPerm(false);
     int32_t result = saMgr->CheckSystemAbilityImmeInner(data, reply);
     EXPECT_EQ(result, ERR_PERMISSION_DENIED);
+    UnSetPenglaiPerm();
     saMgr->SetPengLai(false);
 }
 #endif
@@ -595,9 +610,10 @@ HWTEST_F(SystemAbilityMgrStubTest, CheckSystemAbilityImmeInner005, TestSize.Leve
     data.WriteInt32(SAID);
     saMgr->SetPengLai(true);
     // set permission true
-    Penglai::permissionRet = true;
+    SetPenglaiPerm(true);
     int32_t result = saMgr->CheckSystemAbilityImmeInner(data, reply);
     EXPECT_NE(result, ERR_PERMISSION_DENIED);
+    UnSetPenglaiPerm();
     saMgr->SetPengLai(false);
 }
 #endif
@@ -632,9 +648,10 @@ HWTEST_F(SystemAbilityMgrStubTest, GetSystemAbilityInner002, TestSize.Level3)
     data.WriteInt32(SAID);
     saMgr->SetPengLai(true);
     // set permission denied
-    Penglai::permissionRet = false;
+    SetPenglaiPerm(false);
     int32_t result = saMgr->GetSystemAbilityInner(data, reply);
     EXPECT_EQ(result, ERR_PERMISSION_DENIED);
+    UnSetPenglaiPerm();
     saMgr->SetPengLai(false);
 }
 #endif
@@ -654,9 +671,10 @@ HWTEST_F(SystemAbilityMgrStubTest, GetSystemAbilityInner003, TestSize.Level3)
     data.WriteInt32(SAID);
     saMgr->SetPengLai(true);
     // set permission true
-    Penglai::permissionRet = true;
+    SetPenglaiPerm(true);
     int32_t result = saMgr->GetSystemAbilityInner(data, reply);
     EXPECT_NE(result, ERR_PERMISSION_DENIED);
+    UnSetPenglaiPerm();
     saMgr->SetPengLai(false);
 }
 #endif
@@ -691,9 +709,10 @@ HWTEST_F(SystemAbilityMgrStubTest, CheckSystemAbilityInner002, TestSize.Level3)
     data.WriteInt32(SAID);
     saMgr->SetPengLai(true);
     // set permission denied
-    Penglai::permissionRet = false;
+    SetPenglaiPerm(false);
     int32_t result = saMgr->CheckSystemAbilityInner(data, reply);
     EXPECT_EQ(result, ERR_PERMISSION_DENIED);
+    UnSetPenglaiPerm();
     saMgr->SetPengLai(false);
 }
 #endif
@@ -713,9 +732,10 @@ HWTEST_F(SystemAbilityMgrStubTest, CheckSystemAbilityInner003, TestSize.Level3)
     data.WriteInt32(SAID);
     saMgr->SetPengLai(true);
     // set permission true
-    Penglai::permissionRet = true;
+    SetPenglaiPerm(true);
     int32_t result = saMgr->CheckSystemAbilityInner(data, reply);
     EXPECT_NE(result, ERR_PERMISSION_DENIED);
+    UnSetPenglaiPerm();
     saMgr->SetPengLai(false);
 }
 #endif

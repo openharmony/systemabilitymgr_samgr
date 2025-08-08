@@ -33,7 +33,7 @@
     *LocalAbilityManagerProxy*;
     *WriteOnDemandEventsToParcel*;
     *ReadOnDemandEventsFromParcel*;
-    *GetLocalAbilitymanagerProxy*;
+    *GetLocalAbilityManagerProxy*;
   local:
     *;
 };

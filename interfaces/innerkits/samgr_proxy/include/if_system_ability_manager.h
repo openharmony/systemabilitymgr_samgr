@@ -29,13 +29,6 @@
 #include "system_ability_on_demand_event.h"
 
 namespace OHOS {
-
-struct IdleProcessInfo {
-    int32_t pid = -1;
-    std::u16string processName;
-    int64_t lastIdleTime = 0;
-};
-
 class ISystemAbilityManager : public IRemoteBroker {
 public:
     /**
@@ -238,8 +231,7 @@ public:
      * UnloadProcess, unload process by process name list.
      * only support for memmgrservice
      *
-     * @param processList, Need a processList to unload.
-     * @return ERR_OK It means unload process in processList success.
+     * @return ERR_OK It means unload all process in list.
      */
     virtual int32_t UnloadProcess(const std::vector<std::u16string>& processList)
     {
@@ -248,10 +240,10 @@ public:
     }
 
     /**
-     * GetLruIdleSystemAbilityProc, Get idle process info list.
+     * GetSystemProcessInfo, Get process info by said.
      * only support for memmgrservice
      *
-     * @param processInfos, Issue a parameter and return it as a result.
+     * @param processList, Issue a parameter and return it as a result.
      * @return ERR_OK indicates that the get successfully.
      */
     virtual int32_t GetLruIdleSystemAbilityProc(std::vector<IdleProcessInfo>& processInfos)

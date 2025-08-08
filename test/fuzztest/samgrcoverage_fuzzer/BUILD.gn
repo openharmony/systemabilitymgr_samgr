@@ -89,7 +89,6 @@ ohos_fuzztest("SamgrCoverageFuzzTest") {
     "ipc:libdbinder",
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
-    "samgr:dynamic_cache",
     "samgr:samgr_common",
     "samgr:samgr_proxy",
   ]
@@ -113,7 +112,6 @@ ohos_fuzztest("SamgrCoverageFuzzTest") {
     defines += [ "SUPPORT_DEVICE_MANAGER" ]
   }
   if (support_penglai_mode) {
-    external_deps += [ "penglai_mode_service:penglai_client" ]
     defines += [ "SUPPORT_PENGLAI_MODE" ]
   }
   defines += ["SAMGR_USE_FFRT"]
