@@ -50,6 +50,7 @@
                 "safwk",
                 "selinux_adapter",
                 "config_policy",
+                "ylong_runtime",
                 "rust_cxx"
             ]
         },
