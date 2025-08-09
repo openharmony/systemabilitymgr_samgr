@@ -47,10 +47,11 @@
                 "json",
                 "libxml2",
                 "preferences",
+                "rust_cxx",
                 "safwk",
                 "selinux_adapter",
                 "config_policy",
-                "rust_cxx"
+                "ylong_runtime"
             ]
         },
         "build": {
