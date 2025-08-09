@@ -441,4 +441,30 @@ HWTEST_F(SamgrUtilTest, TestGetFilesByPriority002, TestSize.Level3)
     ASSERT_TRUE(result.empty());
     delete g_mockCfgFiles;
 }
+
+#ifdef SUPPORT_PENGLAI_MODE
+/**
+ * @tc.name: InitPenglaiFunc001
+ * @tc.desc: test InitPenglaiFunc
+ * @tc.type: FUNC
+ */
+HWTEST_F(SamgrUtilTest, InitPenglaiFunc001, TestSize.Level3)
+{
+    system::mockValue = PENG_LAI;
+    void* func = SamgrUtil::InitPenglaiFunc();
+    EXPECT_TRUE(func != nullptr);
+}
+
+/**
+ * @tc.name: CheckPengLaiPermission001
+ * @tc.desc: test CheckPengLaiPermission
+ * @tc.type: FUNC
+ */
+HWTEST_F(SamgrUtilTest, CheckPengLaiPermission001, TestSize.Level3)
+{
+    SamgrUtil::penglaiFunc_ = nullptr;
+    bool ret = SamgrUtil::CheckPengLaiPermission(1);
+    EXPECT_TRUE(ret);
+}
+#endif
 }

@@ -531,7 +531,6 @@ HWTEST_F(DeviceStatusCollectManagerTest, ReportEvent003, TestSize.Level3)
     OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
     std::list<SaControlInfo> saControlList;
     SaProfile saProfile;
-    collect->collectHandler_ = std::make_shared<FFRTHandler>("collect");
     OnDemandEvent event1 = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };
     OnDemandEvent event2 = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "off" };
     saProfile.startOnDemand.onDemandEvents.emplace_back(event1);

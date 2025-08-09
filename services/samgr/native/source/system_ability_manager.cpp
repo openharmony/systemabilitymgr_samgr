@@ -84,6 +84,7 @@ constexpr int64_t CHECK_LOADED_DELAY_TIME = 4 * 1000; // ms
 #endif
 constexpr int32_t SOFTBUS_SERVER_SA_ID = 4700;
 constexpr int32_t FIRST_DUMP_INDEX = 0;
+constexpr int64_t TWO_MINUTES_SECONDS = 120 * 1000; // ms
 }
 
 samgr::mutex SystemAbilityManager::instanceLock;
@@ -1049,16 +1050,16 @@ int32_t SystemAbilityManager::AddSystemAbility(int32_t systemAbilityId, const sp
         return ERR_INVALID_VALUE;
     }
     RefreshListenerState(systemAbilityId);
+    if (extraProp.isDistributed != IsDistributedSystemAbility(systemAbilityId)) {
+        HILOGE("SA:%{public}d extraProp isDistributed:%{public}d different from saProfile", systemAbilityId,
+            extraProp.isDistributed);
+        return ERR_INVALID_VALUE;
+    }
     {
         unique_lock<samgr::shared_mutex> writeLock(abilityMapLock_);
         auto saSize = abilityMap_.size();
         if (saSize >= MAX_SERVICES) {
             HILOGE("map size error, (Has been greater than %zu)", saSize);
-            return ERR_INVALID_VALUE;
-        }
-        if (extraProp.isDistributed != IsDistributedSystemAbility(systemAbilityId)) {
-            HILOGE("SA:%{public}d extraProp isDistributed:%{public}d different from saProfile", systemAbilityId,
-                extraProp.isDistributed);
             return ERR_INVALID_VALUE;
         }
         SAInfo saInfo = { ability, extraProp.isDistributed, extraProp.capability, Str16ToStr8(extraProp.permission) };
@@ -1747,9 +1748,19 @@ int32_t SystemAbilityManager::GetLruIdleSystemAbilityProc(std::vector<IdleProces
 {
     std::vector<int32_t> saIds = collectManager_->GetLowMemPrepareList();
     std::map<std::u16string, IdleProcessInfo> procInfos;
+    std::set<std::u16string> activeProcess;
     for (const auto& saId : saIds) {
         IdleProcessInfo info;
-        if (!abilityStateScheduler_->GetIdleProcessInfo(saId, info)) {
+        int64_t lastStopTime = -1;
+        if (!abilityStateScheduler_->GetLruIdleSystemAbilityInfo(saId, info.processName, lastStopTime, info.pid)) {
+            continue;
+        }
+        info.lastIdleTime = abilityStateScheduler_->GetSystemAbilityIdleTime(saId);
+        if (info.lastIdleTime < 0) {
+            activeProcess.insert(info.processName);
+            continue;
+        }
+        if (lastStopTime != -1 && (GetTickCount() - lastStopTime < TWO_MINUTES_SECONDS)) {
             continue;
         }
         auto procInfo = procInfos.find(info.processName);
@@ -1760,9 +1771,8 @@ int32_t SystemAbilityManager::GetLruIdleSystemAbilityProc(std::vector<IdleProces
         }
     }
     for (const auto& pair : procInfos) {
-        if (abilityStateScheduler_->IsSystemProcessCanUnload(pair.first)) {
+        if (activeProcess.find(pair.first) == activeProcess.end()) {
             processInfos.push_back(pair.second);
-            HILOGD("GetLruIdle processName:%{public}s", Str16ToStr8(pair.first).c_str());
         }
     }
     std::sort(processInfos.begin(), processInfos.end(), [](const IdleProcessInfo& a, IdleProcessInfo& b) {

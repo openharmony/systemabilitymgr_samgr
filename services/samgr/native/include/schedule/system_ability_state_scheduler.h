@@ -22,7 +22,6 @@
 
 #include "ffrt_handler.h"
 #include "isystem_process_status_change.h"
-#include "if_system_ability_manager.h"
 #include "nlohmann/json.hpp"
 #include "sa_profiles.h"
 #include "schedule/system_ability_event_handler.h"
@@ -71,8 +70,9 @@ public:
     int32_t CheckStopEnableOnce(const OnDemandEvent& event, const SaControlInfo& saControl);
     void UpdateLimitDelayUnloadTime(int32_t systemAbilityId);
     void UpdateLimitDelayUnloadTimeTask(int32_t systemAbilityId);
-    bool GetIdleProcessInfo(int32_t systemAbilityId, IdleProcessInfo& idleProcessInfo);
-    bool IsSystemProcessCanUnload(const std::u16string& processName);
+    int64_t GetSystemAbilityIdleTime(int32_t systemAbilityId);
+    bool GetLruIdleSystemAbilityInfo(int32_t systemAbilityId, std::u16string& processName, int64_t& lastStopTime,
+        int32_t& pid);
 private:
     void InitStateContext(const std::list<SaProfile>& saProfiles);
 

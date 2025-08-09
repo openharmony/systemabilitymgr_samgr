@@ -228,7 +228,7 @@ private:
     int32_t GetCommonEventExtraDataIdlistInner(MessageParcel& data, MessageParcel& reply);
     int32_t GetLocalAbilityManagerProxyInner(MessageParcel& data, MessageParcel& reply);
     static int32_t GetHapIdMultiuser(int32_t uid);
-#ifdef SUPPORT_PENGLAT_MODE
+#ifdef SUPPORT_PENGLAI_MODE
     void SetPengLai(bool isPengLai);
     bool isPengLai_ = false;
 #endif

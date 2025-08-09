@@ -681,7 +681,6 @@ HWTEST_F(DeviceNetworkingCollectTest, SendEvent001, TestSize.Level3)
     std::function<void()> callback = [] () {};
     sptr<ICollectPlugin> collectOne = new DeviceNetworkingCollect(nullptr);
     collectOne->PostTask(callback);
-    networkingCollect->workHandler_->handler_ = std::make_shared<FFRTHandler>("WorkHandler");
     bool bRet = networkingCollect->workHandler_->SendEvent(DM_DIED_EVENT);
     EXPECT_EQ(true, bRet);
 

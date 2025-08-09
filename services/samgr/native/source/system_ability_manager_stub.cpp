@@ -124,7 +124,7 @@ const std::string EXT_TRANSACTION_PERMISSION = "ohos.permission.ACCESS_EXT_SYSTE
 const std::string PERMISSION_SVC = "ohos.permission.CONTROL_SVC_CMD";
 }
 
-#ifdef SUPPORT_PENGLAT_MODE
+#ifdef SUPPORT_PENGLAI_MODE
 void SystemAbilityManagerStub::SetPengLai(bool isPengLai)
 {
     isPengLai_ = isPengLai;
@@ -180,7 +180,7 @@ void SystemAbilityManagerStub::SetProcessFuncMap()
 
 SystemAbilityManagerStub::SystemAbilityManagerStub()
 {
-#ifdef SUPPORT_PENGLAT_MODE
+#ifdef SUPPORT_PENGLAI_MODE
     SetPengLai(SamgrUtil::CheckPengLai());
 #endif
     SetAbilityFuncMap();
@@ -437,7 +437,7 @@ int32_t SystemAbilityManagerStub::CheckSystemAbilityImmeInner(MessageParcel& dat
         return ERR_NULL_OBJECT;
     }
 
-#ifdef SUPPORT_PENGLAT_MODE
+#ifdef SUPPORT_PENGLAI_MODE
     if (isPengLai_ && !SamgrUtil::CheckPengLaiPermission(systemAbilityId)) {
         HILOGW("CheckSAImme CheckPengLaiPermission denied! SA:%{public}d,callUid:%{public}d",
             systemAbilityId, OHOS::IPCSkeleton::GetCallingUid());
@@ -562,7 +562,7 @@ int32_t SystemAbilityManagerStub::GetSystemAbilityInner(MessageParcel& data, Mes
         return ERR_NULL_OBJECT;
     }
 
-#ifdef SUPPORT_PENGLAT_MODE
+#ifdef SUPPORT_PENGLAI_MODE
     if (isPengLai_ && !SamgrUtil::CheckPengLaiPermission(systemAbilityId)) {
         HILOGW("GetSA CheckPengLaiPermission denied! SA:%{public}d,callUid:%{public}d",
             systemAbilityId, OHOS::IPCSkeleton::GetCallingUid());
@@ -600,7 +600,7 @@ int32_t SystemAbilityManagerStub::CheckSystemAbilityInner(MessageParcel& data, M
         return ERR_NULL_OBJECT;
     }
 
-#ifdef SUPPORT_PENGLAT_MODE
+#ifdef SUPPORT_PENGLAI_MODE
     if (isPengLai_ && !SamgrUtil::CheckPengLaiPermission(systemAbilityId)) {
         HILOGW("CheckSA CheckPengLaiPermission denied! SA:%{public}d,callUid:%{public}d",
             systemAbilityId, OHOS::IPCSkeleton::GetCallingUid());
