@@ -239,7 +239,7 @@ public:
         return 0;
     }
 
-    /**
+/**
      * GetSystemProcessInfo, Get process info by said.
      * only support for memmgrservice
      *
