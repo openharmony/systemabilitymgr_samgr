@@ -41,17 +41,6 @@ const string DEFAULT_LOAD_NAME = "loadevent";
 constexpr uint32_t SAID = 1499;
 constexpr int64_t DEFAULT_EVENTID = 0;
 constexpr int32_t INVALID_SAID = -1;
-void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
-{
-    saMgr->abilityDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityDeathRecipient());
-    saMgr->systemProcessDeath_ = sptr<IRemoteObject::DeathRecipient>(new SystemProcessDeathRecipient());
-    saMgr->abilityStatusDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityStatusDeathRecipient());
-    saMgr->abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityCallbackDeathRecipient());
-    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
-    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
-    saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
-    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
-}
 }
 
 void SystemAbilityMgrStubLoadTest::SetUpTestCase()
