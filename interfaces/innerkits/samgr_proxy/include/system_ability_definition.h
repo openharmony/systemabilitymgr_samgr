@@ -328,7 +328,7 @@ enum {
     SUBSYS_WEBVIEW_SYS_UPDATE_SERVICE_ID             = 8350,
     COMM_WEARABLE_DISTRIBUTED_NET_ABILITY_ID         = 8400,
     SELECTION_FWK_SA_ID                              = 8500,
-    MECH_BODY_SA_ID                                  = 66378,
+    MECH_BODY_SA_ID                                  = 8550,
     // reserved for vendor
     VENDOR_SYS_ABILITY_ID_BEGIN                      = 0x00010000,  // 65536
     VENDOR_SYS_ABILITY_ID_END                        = 0x00020000,  // 131072
