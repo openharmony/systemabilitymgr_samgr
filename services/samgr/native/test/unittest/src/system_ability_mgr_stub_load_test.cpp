@@ -42,6 +42,13 @@ constexpr uint32_t SAID = 1499;
 constexpr int64_t DEFAULT_EVENTID = 0;
 constexpr int32_t INVALID_SAID = -1;
 }
+#ifdef SUPPORT_PENGLAI_MODE
+extern bool g_permissionRet;
+extern void* g_originHandle;
+bool MockIsLaunchAllowedByUid(const int32_t callingUid, const int32_t systemAbilityId);
+void SetPenglaiPerm(bool permission);
+void UnSetPenglaiPerm();
+#endif
 
 void SystemAbilityMgrStubLoadTest::SetUpTestCase()
 {
@@ -318,6 +325,52 @@ HWTEST_F(SystemAbilityMgrStubLoadTest, LoadRemoteSystemAbilityInner005, TestSize
     int32_t result = saMgr->LoadRemoteSystemAbilityInner(data, reply);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
 }
+
+/**
+ * @tc.name: LoadRemoteSystemAbilityInner006
+ * @tc.desc: test LoadRemoteSystemAbilityInner, penglai mode permission check failed!
+ * @tc.type: FUNC
+ */
+#ifdef SUPPORT_PENGLAI_MODE
+HWTEST_F(SystemAbilityMgrStubTest, LoadRemoteSystemAbilityInner006, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInt32(SAID);
+    saMgr->SetPengLai(true);
+    // set permission denied
+    SetPenglaiPerm(false);
+    int32_t result = saMgr->LoadRemoteSystemAbilityInner(data, reply);
+    EXPECT_EQ(result, ERR_PERMISSION_DENIED);
+    UnSetPenglaiPerm();
+    saMgr->SetPengLai(false);
+}
+#endif
+
+/**
+ * @tc.name: LoadRemoteSystemAbilityInner007
+ * @tc.desc: test LoadRemoteSystemAbilityInner, penglai mode permission check success!
+ * @tc.type: FUNC
+ */
+#ifdef SUPPORT_PENGLAI_MODE
+HWTEST_F(SystemAbilityMgrStubTest, LoadRemoteSystemAbilityInner007, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInt32(SAID);
+    saMgr->SetPengLai(true);
+    // set permission true
+    SetPenglaiPerm(true);
+    int32_t result = saMgr->LoadRemoteSystemAbilityInner(data, reply);
+    EXPECT_NE(result, ERR_PERMISSION_DENIED);
+    UnSetPenglaiPerm();
+    saMgr->SetPengLai(false);
+}
+#endif
 
 HWTEST_F(SystemAbilityMgrStubLoadTest, InitSaProfile001, TestSize.Level1)
 {
@@ -1215,6 +1268,52 @@ HWTEST_F(SystemAbilityMgrStubLoadTest, LoadSystemAbility008, TestSize.Level3)
     saMgr->abilityStateScheduler_->abilityContextMap_.clear();
     EXPECT_EQ(res, ERR_OK);
 }
+
+/**
+ * @tc.name: LoadSystemAbilityInner001
+ * @tc.desc: test LoadSystemAbilityInner, penglai mode permission check failed!
+ * @tc.type: FUNC
+ */
+#ifdef SUPPORT_PENGLAI_MODE
+HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbilityInner001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInt32(SAID);
+    saMgr->SetPengLai(true);
+    // set permission denied
+    SetPenglaiPerm(false);
+    int32_t result = saMgr->LoadSystemAbilityInner(data, reply);
+    EXPECT_EQ(result, ERR_PERMISSION_DENIED);
+    UnSetPenglaiPerm();
+    saMgr->SetPengLai(false);
+}
+#endif
+
+/**
+ * @tc.name: LoadSystemAbilityInner002
+ * @tc.desc: test LoadSystemAbilityInner, penglai mode permission check success!
+ * @tc.type: FUNC
+ */
+#ifdef SUPPORT_PENGLAI_MODE
+HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbilityInner002, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInt32(SAID);
+    saMgr->SetPengLai(true);
+    // set permission true
+    SetPenglaiPerm(true);
+    int32_t result = saMgr->LoadSystemAbilityInner(data, reply);
+    EXPECT_NE(result, ERR_PERMISSION_DENIED);
+    UnSetPenglaiPerm();
+    saMgr->SetPengLai(false);
+}
+#endif
 
 /**
  * @tc.name: DoMakeRemoteBinder001

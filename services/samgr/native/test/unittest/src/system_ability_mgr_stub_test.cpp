@@ -171,18 +171,6 @@ HWTEST_F(SystemAbilityMgrStubTest, UnSubsSystemAbilityInner001, TestSize.Level4)
 }
 
 #ifdef SUPPORT_ACCESS_TOKEN
-HWTEST_F(SystemAbilityMgrStubTest, CheckRemtSystemAbilityInner001, TestSize.Level4)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
-    MessageParcel data;
-    MessageParcel reply;
-    int32_t result = saMgr->CheckRemtSystemAbilityInner(data, reply);
-    EXPECT_EQ(result, ERR_PERMISSION_DENIED);
-}
-#endif
-
-#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityMgrStubTest, AddOndemandSystemAbilityInner001, TestSize.Level4)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
@@ -392,6 +380,18 @@ HWTEST_F(SystemAbilityMgrStubTest, ListSystemAbilityInner004, TestSize.Level1)
     EXPECT_EQ(result, ERR_NONE);
 }
 
+#ifdef SUPPORT_ACCESS_TOKEN
+HWTEST_F(SystemAbilityMgrStubTest, CheckRemtSystemAbilityInner001, TestSize.Level4)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t result = saMgr->CheckRemtSystemAbilityInner(data, reply);
+    EXPECT_EQ(result, ERR_PERMISSION_DENIED);
+}
+#endif
+
 /**
  * @tc.name: CheckRemtSystemAbilityInner002
  * @tc.desc: test CheckRemtSystemAbilityInner, read systemAbilityId failed!
@@ -441,6 +441,52 @@ HWTEST_F(SystemAbilityMgrStubTest, CheckRemtSystemAbilityInner004, TestSize.Leve
     int32_t result = saMgr->CheckRemtSystemAbilityInner(data, reply);
     EXPECT_EQ(result, ERR_NULL_OBJECT);
 }
+
+/**
+ * @tc.name: CheckRemtSystemAbilityInner005
+ * @tc.desc: test CheckRemtSystemAbilityInner, penglai mode permission check failed!
+ * @tc.type: FUNC
+ */
+#ifdef SUPPORT_PENGLAI_MODE
+HWTEST_F(SystemAbilityMgrStubTest, CheckRemtSystemAbilityInner005, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInt32(SAID);
+    saMgr->SetPengLai(true);
+    // set permission denied
+    SetPenglaiPerm(false);
+    int32_t result = saMgr->CheckRemtSystemAbilityInner(data, reply);
+    EXPECT_EQ(result, ERR_PERMISSION_DENIED);
+    UnSetPenglaiPerm();
+    saMgr->SetPengLai(false);
+}
+#endif
+
+/**
+ * @tc.name: CheckRemtSystemAbilityInner006
+ * @tc.desc: test CheckSystemAbilityImmeInner, penglai mode permission check success!
+ * @tc.type: FUNC
+ */
+#ifdef SUPPORT_PENGLAI_MODE
+HWTEST_F(SystemAbilityMgrStubTest, CheckRemtSystemAbilityInner006, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    data.WriteInt32(SAID);
+    saMgr->SetPengLai(true);
+    // set permission true
+    SetPenglaiPerm(true);
+    int32_t result = saMgr->CheckRemtSystemAbilityInner(data, reply);
+    EXPECT_NE(result, ERR_PERMISSION_DENIED);
+    UnSetPenglaiPerm();
+    saMgr->SetPengLai(false);
+}
+#endif
 
 /**
  * @tc.name: AddOndemandSystemAbilityInner002
