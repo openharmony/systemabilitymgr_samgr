@@ -358,6 +358,14 @@ int32_t SystemAbilityManagerStub::CheckRemtSystemAbilityInner(MessageParcel& dat
         return ERR_NULL_OBJECT;
     }
 
+#ifdef SUPPORT_PENGLAI_MODE
+    if (isPengLai_ && !SamgrUtil::CheckPengLaiPermission(systemAbilityId)) {
+        HILOGW("CheckRemt CheckPengLaiPermission denied! SA:%{public}d,callUid:%{public}d",
+            systemAbilityId, OHOS::IPCSkeleton::GetCallingUid());
+        return ERR_PERMISSION_DENIED;
+    }
+#endif
+
     if (!CheckGetRemoteSAPermission(systemAbilityId)) {
         HILOGE("CheckRemtSystemAbilityInner selinux permission denied! SA:%{public}d,callSid:%{public}s",
             systemAbilityId, OHOS::IPCSkeleton::GetCallingSid().c_str());
@@ -685,6 +693,29 @@ int32_t SystemAbilityManagerStub::AddSystemProcessInner(MessageParcel& data, Mes
     return result;
 }
 
+int32_t SystemAbilityManagerStub::LoadSACheck(int32_t systemAbilityId)
+{
+    if (!CheckInputSysAbilityId(systemAbilityId)) {
+        HILOGW("LoadSystemAbilityInner check SAId failed!");
+        return ERR_INVALID_VALUE;
+    }
+
+#ifdef SUPPORT_PENGLAI_MODE
+    if (isPengLai_ && !SamgrUtil::CheckPengLaiPermission(systemAbilityId)) {
+        HILOGW("LoadSA CheckPengLaiPermission denied! SA:%{public}d,callUid:%{public}d",
+            systemAbilityId, OHOS::IPCSkeleton::GetCallingUid());
+        return ERR_PERMISSION_DENIED;
+    }
+#endif
+
+    if (!CheckGetSAPermission(systemAbilityId)) {
+        HILOGE("LoadSystemAbilityInner selinux permission denied!SA:%{public}d,callSid:%{public}s",
+            systemAbilityId, OHOS::IPCSkeleton::GetCallingSid().c_str());
+        return ERR_PERMISSION_DENIED;
+    }
+    return ERR_OK;
+}
+
 int32_t SystemAbilityManagerStub::LoadSystemAbilityInner(MessageParcel& data, MessageParcel& reply)
 {
     int32_t systemAbilityId = -1;
@@ -697,17 +728,10 @@ int32_t SystemAbilityManagerStub::LoadSystemAbilityInner(MessageParcel& data, Me
             HILOGW("LoadSystemAbilityInner read SAId failed!");
             return ERR_INVALID_VALUE;
         }
-        if (!CheckInputSysAbilityId(systemAbilityId)) {
-            HILOGW("LoadSystemAbilityInner check SAId failed!");
-            return ERR_INVALID_VALUE;
+        int32_t checkRet = LoadSACheck(systemAbilityId);
+        if (checkRet != ERR_OK) {
+            return checkRet;
         }
-
-        if (!CheckGetSAPermission(systemAbilityId)) {
-            HILOGE("LoadSystemAbilityInner selinux permission denied!SA:%{public}d,callSid:%{public}s",
-                systemAbilityId, OHOS::IPCSkeleton::GetCallingSid().c_str());
-            return ERR_PERMISSION_DENIED;
-        }
-
         sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
         if (remoteObject == nullptr) {
             HILOGW("LoadSystemAbilityInner read callback failed!");
@@ -740,6 +764,29 @@ int32_t SystemAbilityManagerStub::LoadSystemAbilityInner(MessageParcel& data, Me
     return result;
 }
 
+int32_t SystemAbilityManagerStub::LoadRemoteSACheck(int32_t systemAbilityId)
+{
+    if (!CheckInputSysAbilityId(systemAbilityId)) {
+        HILOGW("LoadRemoteSystemAbilityInner check SAId invalid");
+        return ERR_INVALID_VALUE;
+    }
+
+#ifdef SUPPORT_PENGLAI_MODE
+    if (isPengLai_ && !SamgrUtil::CheckPengLaiPermission(systemAbilityId)) {
+        HILOGW("LoadRemote CheckPengLaiPermission denied! SA:%{public}d,callUid:%{public}d",
+            systemAbilityId, OHOS::IPCSkeleton::GetCallingUid());
+        return ERR_PERMISSION_DENIED;
+    }
+#endif
+
+    if (!CheckGetRemoteSAPermission(systemAbilityId)) {
+        HILOGE("LoadRemoteSystemAbilityInner selinux permission denied! SA:%{public}d,callSid:%{public}s",
+            systemAbilityId, OHOS::IPCSkeleton::GetCallingSid().c_str());
+        return ERR_PERMISSION_DENIED;
+    }
+    return ERR_OK;
+}
+
 int32_t SystemAbilityManagerStub::LoadRemoteSystemAbilityInner(MessageParcel& data, MessageParcel& reply)
 {
     int32_t systemAbilityId = -1;
@@ -754,17 +801,10 @@ int32_t SystemAbilityManagerStub::LoadRemoteSystemAbilityInner(MessageParcel& da
             HILOGW("LoadRemoteSystemAbilityInner read SAId invalid");
             return ERR_INVALID_VALUE;
         }
-        if (!CheckInputSysAbilityId(systemAbilityId)) {
-            HILOGW("LoadRemoteSystemAbilityInner check SAId invalid");
-            return ERR_INVALID_VALUE;
+        int32_t checkRet = LoadRemoteSACheck(systemAbilityId);
+        if (checkRet != ERR_OK) {
+            return checkRet;
         }
-
-        if (!CheckGetRemoteSAPermission(systemAbilityId)) {
-            HILOGE("LoadRemoteSystemAbilityInner selinux permission denied! SA:%{public}d,callSid:%{public}s",
-                systemAbilityId, OHOS::IPCSkeleton::GetCallingSid().c_str());
-            return ERR_PERMISSION_DENIED;
-        }
-
         deviceId = data.ReadString();
         if (deviceId.empty()) {
             HILOGW("LoadRemoteSystemAbilityInner read deviceId failed");
