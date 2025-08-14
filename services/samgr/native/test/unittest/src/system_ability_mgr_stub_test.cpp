@@ -171,6 +171,18 @@ HWTEST_F(SystemAbilityMgrStubTest, UnSubsSystemAbilityInner001, TestSize.Level4)
 }
 
 #ifdef SUPPORT_ACCESS_TOKEN
+HWTEST_F(SystemAbilityMgrStubTest, CheckRemtSystemAbilityInner001, TestSize.Level4)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_TRUE(saMgr != nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t result = saMgr->CheckRemtSystemAbilityInner(data, reply);
+    EXPECT_EQ(result, ERR_PERMISSION_DENIED);
+}
+#endif
+
+#ifdef SUPPORT_ACCESS_TOKEN
 HWTEST_F(SystemAbilityMgrStubTest, AddOndemandSystemAbilityInner001, TestSize.Level4)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
@@ -379,18 +391,6 @@ HWTEST_F(SystemAbilityMgrStubTest, ListSystemAbilityInner004, TestSize.Level1)
     int32_t result = saMgr->ListSystemAbilityInner(data, reply);
     EXPECT_EQ(result, ERR_NONE);
 }
-
-#ifdef SUPPORT_ACCESS_TOKEN
-HWTEST_F(SystemAbilityMgrStubTest, CheckRemtSystemAbilityInner001, TestSize.Level4)
-{
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    EXPECT_TRUE(saMgr != nullptr);
-    MessageParcel data;
-    MessageParcel reply;
-    int32_t result = saMgr->CheckRemtSystemAbilityInner(data, reply);
-    EXPECT_EQ(result, ERR_PERMISSION_DENIED);
-}
-#endif
 
 /**
  * @tc.name: CheckRemtSystemAbilityInner002
