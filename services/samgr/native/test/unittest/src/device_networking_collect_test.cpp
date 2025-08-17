@@ -22,7 +22,6 @@
 
 #define private public
 #include "device_networking_collect.h"
-#include "event_handler.h"
 
 using namespace std;
 using namespace testing;
@@ -39,12 +38,9 @@ constexpr uint32_t DELAY_TIME = 100;
 bool DeviceNetworkingCollectTest::isCaseDone_ = false;
 std::mutex DeviceNetworkingCollectTest::caseDoneLock_;
 std::condition_variable DeviceNetworkingCollectTest::caseDoneCondition_;
-std::shared_ptr<AppExecFwk::EventHandler> collectHandler_ = nullptr;
 
 void DeviceNetworkingCollectTest::SetUpTestCase()
 {
-    auto runner = AppExecFwk::EventRunner::Create("collect_test2");
-    collectHandler_ = std::make_shared<AppExecFwk::EventHandler>(runner);
     DTEST_LOG << "SetUpTestCase" << std::endl;
 }
 

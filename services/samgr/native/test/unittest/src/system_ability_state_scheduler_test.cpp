@@ -23,7 +23,6 @@
 
 #define private public
 #include "schedule/system_ability_state_scheduler.h"
-#include "event_handler.h"
 #include "system_ability_manager.h"
 
 using namespace std;
