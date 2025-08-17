@@ -23,7 +23,6 @@
 #include "system_ability_manager.h"
 
 using namespace std;
-using namespace OHOS::AppExecFwk;
 
 namespace OHOS {
 namespace {

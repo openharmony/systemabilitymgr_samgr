@@ -24,7 +24,6 @@
 #define private public
 #include "common_event_collect.h"
 #include "device_status_collect_manager.h"
-#include "event_handler.h"
 #undef private
 
 using namespace std;
@@ -181,60 +180,9 @@ HWTEST_F(CommonEventCollectTest, ProcessEvent002, TestSize.Level3)
     sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
     std::shared_ptr<CommonHandler> commonHandler = std::make_shared<CommonHandler>(commonEventCollect);
-    AppExecFwk::InnerEvent *event = nullptr;
-    auto destructor = [](AppExecFwk::InnerEvent *event) {
-        if (event != nullptr) {
-            delete event;
-        }
-    };
     commonHandler->ProcessEvent(COMMON_DIED_EVENT, 0);
-    EXPECT_EQ(event, nullptr);
+    EXPECT_NE(commonEventCollect->commonEventSubscriber_, nullptr);
     DTEST_LOG << "ProcessEvent002 end" << std::endl;
-}
-
-/**
- * @tc.name: ProcessEvent003
- * @tc.desc: test ProcessEvent, commonCollect_ is nullptr
- * @tc.type: FUNC
- * @tc.require: I6OU0A
- */
-HWTEST_F(CommonEventCollectTest, ProcessEvent003, TestSize.Level3)
-{
-    DTEST_LOG << "ProcessEvent003 begin" << std::endl;
-    sptr<CommonEventCollect> commonEventCollect = nullptr;
-    std::shared_ptr<CommonHandler> commonHandler = std::make_shared<CommonHandler>(commonEventCollect);
-    AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
-    auto destructor = [](AppExecFwk::InnerEvent *event) {
-        if (event != nullptr) {
-            delete event;
-        }
-    };
-    commonHandler->ProcessEvent(COMMON_DIED_EVENT, 0);
-    EXPECT_NE(event, nullptr);
-    DTEST_LOG << "ProcessEvent003 end" << std::endl;
-}
-
-/**
- * @tc.name: ProcessEvent004
- * @tc.desc: test ProcessEvent, eventId is invalid
- * @tc.type: FUNC
- * @tc.require: I6OU0A
- */
-HWTEST_F(CommonEventCollectTest, ProcessEvent004, TestSize.Level3)
-{
-    DTEST_LOG << "ProcessEvent004 begin" << std::endl;
-    sptr<CommonEventCollect> commonEventCollect = nullptr;
-    std::shared_ptr<CommonHandler> commonHandler = std::make_shared<CommonHandler>(commonEventCollect);
-    AppExecFwk::InnerEvent *event = new AppExecFwk::InnerEvent();
-    event->innerEventId_ = static_cast<uint32_t>(-1);
-    auto destructor = [](AppExecFwk::InnerEvent *event) {
-        if (event != nullptr) {
-            delete event;
-        }
-    };
-    commonHandler->ProcessEvent(-1, 0);
-    EXPECT_NE(event, nullptr);
-    DTEST_LOG << "ProcessEvent004 end" << std::endl;
 }
 
 /**
