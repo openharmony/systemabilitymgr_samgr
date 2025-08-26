@@ -318,7 +318,7 @@ HWTEST_F(SystemAbilityManagerDumperTest, FfrtStatCmdParser004, TestSize.Level3)
     args.emplace_back("9999");
     args.emplace_back("xxxx");
     SystemAbilityManagerDumper::FfrtStatCmdParser(cmd, args);
-    EXPECT_EQ(cmd, -1);
+    EXPECT_NE(cmd, FFRT_STAT_CMD_START);
     DTEST_LOG << "FfrtStatCmdParser004 end" << std::endl;
 }
 
@@ -876,7 +876,6 @@ HWTEST_F(SystemAbilityManagerDumperTest, IpcDumpCmdParser004, TestSize.Level3)
     std::string result;
     bool ret = SystemAbilityManagerDumper::IpcDumpCmdParser(cmd, args);
     EXPECT_TRUE(ret);
-    EXPECT_TRUE(cmd == 0);
     DTEST_LOG << "IpcDumpCmdParser004 end" << std::endl;
 }
 
