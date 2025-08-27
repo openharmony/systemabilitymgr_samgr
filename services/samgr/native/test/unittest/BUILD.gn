@@ -158,7 +158,6 @@ ohos_unittest("SystemAbilityMgrTest") {
   }
 
   if (support_penglai_mode) {
-    external_deps += [ "penglai_mode_service:penglai_client" ]
     defines += [ "SUPPORT_PENGLAI_MODE" ]
   }
   defines += ["SAMGR_USE_FFRT"]
@@ -298,7 +297,6 @@ ohos_unittest("SystemAbilityMgrCollectTest") {
     defines += [ "SUPPORT_DEVICE_MANAGER" ]
   }
   if (support_penglai_mode) {
-    external_deps += [ "penglai_mode_service:penglai_client" ]
     defines += [ "SUPPORT_PENGLAI_MODE" ]
   }
   defines += ["SAMGR_USE_FFRT"]
@@ -407,7 +405,6 @@ ohos_unittest("SystemAbilityMgrDeviceNetworkingTest") {
   }
 
   if (support_penglai_mode) {
-    external_deps += [ "penglai_mode_service:penglai_client" ]
     defines += [ "SUPPORT_PENGLAI_MODE" ]
   }
   defines += ["SAMGR_USE_FFRT"]
@@ -514,9 +511,6 @@ ohos_unittest("SystemAbilityMgrStubTest") {
   }
 
   if (support_penglai_mode) {
-    sources +=
-        [ "${samgr_services_dir}/test/unittest/src/mock_penglai_service_client.cpp" ]
-    external_deps += [ "penglai_mode_service:penglai_client" ]
     defines += [ "SUPPORT_PENGLAI_MODE" ]
   }
   defines += ["SAMGR_USE_FFRT"]
@@ -639,6 +633,7 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
     "${samgr_services_dir}/source/collect/icollect_plugin.cpp",
     "${samgr_services_dir}/source/ffrt_handler.cpp",
     "${samgr_services_dir}/source/memory_guard.cpp",
+    "${samgr_services_dir}/source/rpc_callback_imp.cpp",
     "${samgr_services_dir}/source/samgr_time_handler.cpp",
     "${samgr_services_dir}/source/schedule/system_ability_event_handler.cpp",
     "${samgr_services_dir}/source/schedule/system_ability_state_machine.cpp",
@@ -647,7 +642,9 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
     "${samgr_services_dir}/source/system_ability_manager_dumper.cpp",
     "${samgr_services_dir}/source/system_ability_manager_stub.cpp",
     "${samgr_services_dir}/source/system_ability_manager_util.cpp",
+    "${samgr_services_dir}/test/unittest/src/itest_transaction_service.cpp",
     "${samgr_services_dir}/test/unittest/src/mock_accesstoken_kit.cpp",
+    "${samgr_services_dir}/test/unittest/src/mock_permission.cpp",
     "${samgr_services_dir}/test/unittest/src/sa_status_change_mock.cpp",
     "${samgr_services_dir}/test/unittest/src/system_ability_event_handler_test.cpp",
     "${samgr_services_dir}/test/unittest/src/system_ability_state_machine_test.cpp",
@@ -712,7 +709,6 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
   }
 
   if (support_penglai_mode) {
-    external_deps += [ "penglai_mode_service:penglai_client" ]
     defines += [ "SUPPORT_PENGLAI_MODE" ]
   }
   defines += ["SAMGR_USE_FFRT"]
@@ -792,7 +788,6 @@ ohos_unittest("SystemAbilityMgrDumperTest") {
     defines += [ "SUPPORT_ACCESS_TOKEN" ]
   }
   if (support_penglai_mode) {
-    external_deps += [ "penglai_mode_service:penglai_client" ]
     defines += [ "SUPPORT_PENGLAI_MODE" ]
   }
   defines += ["SAMGR_USE_FFRT"]
@@ -1055,7 +1050,6 @@ ohos_executable("TestTool") {
     "samgr:dynamic_cache",
   ]
   if (support_penglai_mode) {
-    external_deps += [ "penglai_mode_service:penglai_client" ]
     defines += [ "SUPPORT_PENGLAI_MODE" ]
   }
   defines += ["SAMGR_USE_FFRT"]

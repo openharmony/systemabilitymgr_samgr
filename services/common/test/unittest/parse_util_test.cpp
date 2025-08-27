@@ -732,7 +732,6 @@ HWTEST_F(ParseUtilTest, GetOnDemandConditionsFromJson004, TestSize.Level3)
     DTEST_LOG << " GetOnDemandConditionsFromJson004 END" << std::endl;
 }
 
-
 /**
  * @tc.name: GetOnDemandExtraMessagesFromJson001
  * @tc.desc: parse OnDemandExtraMessages, ExtraMessages is empty.
@@ -791,7 +790,6 @@ HWTEST_F(ParseUtilTest, GetOnDemandExtraMessagesFromJson003, TestSize.Level3)
     EXPECT_EQ(out.size(), 0);
     DTEST_LOG << " GetOnDemandExtraMessagesFromJson003 END" << std::endl;
 }
-
 
 /**
  * @tc.name: ParseJsonFile001
