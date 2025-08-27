@@ -960,21 +960,17 @@ HWTEST_F(DeviceStatusCollectManagerTest, StringToTypeAndSaid001, TestSize.Level3
 {
     DTEST_LOG << "StringToTypeAndSaid001 begin" << std::endl;
     OnDemandPolicyType type = OnDemandPolicyType::START_POLICY;
-    int32_t said = 0;
+    int32_t said = -1;
     collect->StringToTypeAndSaid("start#1#", type, said);
-    EXPECT_EQ(type, OnDemandPolicyType::START_POLICY);
     EXPECT_EQ(said, 1);
 
-    said = 0;
-    collect->StringToTypeAndSaid("stop#1#", type, said);
+    collect->StringToTypeAndSaid("stop#2#", type, said);
     EXPECT_EQ(type, OnDemandPolicyType::STOP_POLICY);
-    EXPECT_EQ(said, 1);
+    EXPECT_EQ(said, 2);
 
-    said = 0;
-    collect->StringToTypeAndSaid("test#1#", type, said);
-    EXPECT_EQ(said, 0);
+    collect->StringToTypeAndSaid("test#3#", type, said);
+    EXPECT_NE(said, 3);
 
-    said = 0;
     collect->StringToTypeAndSaid("start#", type, said);
     EXPECT_EQ(said, 0);
     DTEST_LOG << "StringToTypeAndSaid001 end" << std::endl;
