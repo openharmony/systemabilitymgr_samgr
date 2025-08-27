@@ -41,6 +41,7 @@ constexpr const char* LOCAL_DEVICE = "local";
 constexpr int32_t MAX_DELAY_TIME = 5 * 60 * 1000;
 constexpr int32_t MAX_DURATION = 10 * 60 * 1000; // ms
 constexpr int32_t ONCE_DELAY_TIME = 10 * 1000; // ms
+constexpr int64_t TWO_MINUTES_MS = 120 * 1000; // ms
 constexpr const char* CANCEL_UNLOAD = "cancelUnload";
 constexpr const char* KEY_EVENT_ID = "eventId";
 constexpr const char* KEY_NAME = "name";
@@ -1422,28 +1423,37 @@ int32_t SystemAbilityStateScheduler::CheckStopEnableOnce(const OnDemandEvent& ev
     return result;
 }
 
-int64_t SystemAbilityStateScheduler::GetSystemAbilityIdleTime(int32_t systemAbilityId)
-{
-    std::shared_ptr<SystemAbilityContext> abilityContext;
-    if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
-        return -1;
-    }
-    std::lock_guard<samgr::mutex> autoLock(abilityContext->ownProcessContext->processLock);
-    return abilityContext->lastIdleTime;
-}
-
-bool SystemAbilityStateScheduler::GetLruIdleSystemAbilityInfo(int32_t systemAbilityId, std::u16string& processName,
-    int64_t& lastStopTime, int32_t& pid)
+bool SystemAbilityStateScheduler::GetIdleProcessInfo(int32_t systemAbilityId, IdleProcessInfo& idleProcessInfo)
 {
     std::shared_ptr<SystemAbilityContext> abilityContext;
     if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
         return false;
     }
     std::lock_guard<samgr::mutex> autoLock(abilityContext->ownProcessContext->processLock);
-    processName = abilityContext->ownProcessContext->processName;
-    pid = abilityContext->ownProcessContext->pid;
-    lastStopTime = abilityContext->ownProcessContext->lastStopTime;
+    if (abilityContext->state != SystemAbilityState::UNLOADABLE ||
+        abilityContext->ownProcessContext->state == SystemProcessState::NOT_STARTED) {
+        HILOGD("GetIdleProcessInfo SA:%{public}d state not idle or proc not started", systemAbilityId);
+        return false;
+    }
+    int64_t lastStopTime = abilityContext->ownProcessContext->lastStopTime;
+    if (lastStopTime != -1 && (GetTickCount() - lastStopTime < TWO_MINUTES_MS)) {
+        HILOGD("GetIdleProcessInfo SA:%{public}d lastStopTime less than 2 min", systemAbilityId);
+        return false;
+    }
+    idleProcessInfo.processName = abilityContext->ownProcessContext->processName;
+    idleProcessInfo.pid = abilityContext->ownProcessContext->pid;
+    idleProcessInfo.lastIdleTime = abilityContext->lastIdleTime;
     return true;
+}
+
+bool SystemAbilityStateScheduler::IsSystemProcessCanUnload(const std::u16string& processName)
+{
+    std::shared_ptr<SystemProcessContext> processContext;
+    if (!GetSystemProcessContext(processName, processContext)) {
+        return false;
+    }
+    std::lock_guard<samgr::mutex> autoLock(processContext->processLock);
+    return CanUnloadAllSystemAbilityLocked(processContext);
 }
 
 void SystemAbilityStateScheduler::UnloadEventHandler::ProcessEvent(uint32_t eventId)
