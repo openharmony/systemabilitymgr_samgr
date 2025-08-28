@@ -64,7 +64,6 @@ ohos_rust_shared_library("samgr_rust") {
   ]
 
   deps = [ ":samgr_rust_cpp" ]
-
   crate_name = "samgr"
 
   install_images = [ system_base_dir ]

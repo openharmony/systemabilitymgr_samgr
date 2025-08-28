@@ -32,14 +32,12 @@ enum {
     IPC_STAT_CMD_GET = 2,
     IPC_STAT_CMD_MAX = 3
 };
-
 enum {
     FFRT_STAT_CMD_START = 0,
     FFRT_STAT_CMD_STOP = 1,
     FFRT_STAT_CMD_GET = 2,
     FFRT_STAT_CMD_MAX = 3
 };
-
 class SystemAbilityExtensionPara {
 public:
     SystemAbilityExtensionPara()
@@ -62,7 +60,6 @@ public:
         return true;
     };
 };
-
 class ILocalAbilityManager : public IRemoteBroker {
 public:
     virtual bool StartAbility(int32_t systemAbilityId, const std::string& eventStr) = 0;
