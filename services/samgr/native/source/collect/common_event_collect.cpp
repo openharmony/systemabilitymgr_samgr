@@ -34,7 +34,6 @@
 #include "system_ability_manager.h"
 #include "samgr_xcollie.h"
 
-using namespace OHOS::AppExecFwk;
 namespace OHOS {
 namespace {
 constexpr uint32_t INIT_EVENT = 10;
