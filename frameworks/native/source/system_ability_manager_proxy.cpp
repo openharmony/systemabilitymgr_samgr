@@ -891,7 +891,7 @@ int32_t SystemAbilityManagerProxy::GetLruIdleSystemAbilityProc(std::vector<IdleP
     MessageOption option;
     int32_t err = remote->SendRequest(
         static_cast<uint32_t>(SamgrInterfaceCode::GET_LRU_IDLE_SYSTEM_ABILITY_PROCESS_TRANSACTION),
-            data, reply, option);
+        data, reply, option);
     if (err != ERR_NONE) {
         HILOGE("GetLruIdleSystempAbilityProc SendRequest error:%{public}d", err);
         return err;
