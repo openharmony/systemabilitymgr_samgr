@@ -95,7 +95,7 @@ impl SystemAbilityManager {
     /// let download_service = SystemAbilityManager::check_system_ability(DOWNLOAD_SERVICE_ID).unwrap();
     /// ```
     pub fn check_system_ability(said: i32) -> Option<RemoteObj> {
-        info!("check system ability {}", said);
+        debug!("check system ability {}", said);
 
         RemoteObj::from_sptr(CheckSystemAbility(said))
     }
@@ -161,12 +161,12 @@ impl SystemAbilityManager {
     }
 
     pub fn load_system_ability(said: i32, timeout: i32) -> Option<RemoteObj> {
-        info!("load system ability {}", said);
+        debug!("load system ability {}", said);
         RemoteObj::from_sptr(LoadSystemAbility(said, timeout))
     }
 
     pub fn load_system_ability_with_callback(said: i32, on_success: fn(), on_fail: fn()) -> i32 {
-        info!("load system ability {}", said);
+        debug!("load system ability {}", said);
         LoadSystemAbilityWithCallback(said, on_success, on_fail)
     }
 
@@ -175,7 +175,7 @@ impl SystemAbilityManager {
         on_add: fn(i32, &str),
         on_remove: fn(i32, &str),
     ) -> UnsubscribeHandler {
-        info!("subscribe system ability {}", said);
+        debug!("subscribe system ability {}", said);
         UnsubscribeHandler::new(Unsubscribe::Ability(SubscribeSystemAbility(
             said, on_add, on_remove,
         )))
@@ -195,7 +195,7 @@ impl SystemAbilityManager {
     }
 
     pub fn unload_system_ability(said: i32) -> i32 {
-        info!("unload system ability {}", said);
+        debug!("unload system ability {}", said);
         UnloadSystemAbility(said)
     }
 

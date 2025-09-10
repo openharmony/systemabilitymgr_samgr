@@ -979,13 +979,14 @@ int32_t SystemAbilityManager::UnSubscribeSystemAbility(int32_t systemAbilityId,
         return ERR_INVALID_VALUE;
     }
 
+    auto callingPid = IPCSkeleton::GetCallingPid();
     lock_guard<samgr::mutex> autoLock(listenerMapLock_);
     auto& listeners = listenerMap_[systemAbilityId];
     UnSubscribeSystemAbilityLocked(listeners, listener->AsObject());
     if (abilityStatusDeath_ != nullptr) {
         listener->AsObject()->RemoveDeathRecipient(abilityStatusDeath_);
     }
-    HILOGI("UnSubscribeSA:%{public}d_%{public}zu", systemAbilityId, listeners.size());
+    HILOGI("UnSubscribeSA:%{public}d_%{public}d_%{public}zu", systemAbilityId, callingPid, listeners.size());
     return ERR_OK;
 }
 
