@@ -65,6 +65,7 @@ public:
 
     /**
      * GetSystemAbility, Retrieve an existing ability, retrying and blocking for a few seconds if it doesn't exist.
+     * GetSystemAbility will attempt to request 7 times, with an interval fo 200 ms each time.
      *
      * @param systemAbilityId, Need to obtain the said of sa.
      * @return nullptr indicates acquisition failure.
@@ -89,6 +90,7 @@ public:
 
     /**
      * SubscribeSystemAbility, Subscribe a system ability status.
+     * The maximum limit for the number of listeners subscribed within the same process is 256.
      *
      * @param systemAbilityId, Need to subscribe the said of sa.
      * @param listener, Need to implement OnAddSystemAbility, OnRemoveSystemAbility.
@@ -108,7 +110,8 @@ public:
         const sptr<ISystemAbilityStatusChange>& listener) = 0;
 
     /**
-     * GetSystemAbility, Retrieve an existing ability, blocking for a few seconds if it doesn't exist.
+     * GetSystemAbility, Retrieve an cross-device ability, blocking for a few seconds if it doesn't exist.
+     * GetSystemAbility will attempt to request 7 times, with an interval fo 200 ms each time.
      *
      * @param systemAbilityId, Need to get the said of sa.
      * @param deviceId, If the device id is empty, it indicates that it is a local get.
@@ -117,7 +120,7 @@ public:
     virtual sptr<IRemoteObject> GetSystemAbility(int32_t systemAbilityId, const std::string& deviceId) = 0;
 
     /**
-     * CheckSystemAbility, Retrieve an existing ability, no-blocking.
+     * CheckSystemAbility, Retrieve an cross-device ability, no-blocking.
      *
      * @param systemAbilityId, Need to get the said of sa.
      * @param deviceId, If the device id is empty, it indicates that it is a local get.
@@ -137,6 +140,7 @@ public:
 
     /**
      * CheckSystemAbility, Retrieve an ability, no-blocking.
+     * If SA process is already started, this interface can load the ondemand SA in process.
      *
      * @param systemAbilityId, Need to check the said of sa.
      * @param isExist, Issue parameters, and a result of true indicates success.
@@ -163,6 +167,7 @@ public:
 
     /**
      * AddSystemAbility, add an ability to samgr.
+     * If the same said is registered repeatedly, the latter will overwrite the former one.
      *
      * @param systemAbilityId, Need to add the said of sa.
      * @param ability, SA to be added.
@@ -182,7 +187,7 @@ public:
     virtual int32_t AddSystemProcess(const std::u16string& procName, const sptr<IRemoteObject>& procObject) = 0;
 
     /**
-     * LoadSystemAbility, Load sa.
+     * LoadSystemAbility, Load sa, blocking.
      *
      * @param systemAbilityId, Need to load the said of sa.
      * @param timeout, limited time to load sa.
@@ -191,7 +196,7 @@ public:
     virtual sptr<IRemoteObject> LoadSystemAbility(int32_t systemAbilityId, int32_t timeout) = 0;
 
     /**
-     * LoadSystemAbility, Load sa.
+     * LoadSystemAbility, Load sa, no-blocking.
      *
      * @param systemAbilityId, Need to load the said of sa.
      * @param callback, OnLoadSystemAbilityFail and OnLoadSystemAbilitySuccess need be rewritten.
@@ -262,6 +267,9 @@ public:
 
     /**
      * GetSystemProcessInfo, Get process info by said.
+     * If said is invalid, will return ERR_INVALID_VALUE.
+     * If said is valid but SA process is not registered, the value of pid and uid will be the default value -1.
+     * If SA process has been registered but is not running, the value of pid is the value from last run.
      *
      * @param systemAbilityId, Need the said of sa which wants to get process info.
      * @param systemProcessInfo, Issue a parameter and return it as a result.
