@@ -815,4 +815,29 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, ProcessDelayUnloadEvent003, TestSi
     int32_t ret = systemAbilityStateScheduler->ProcessDelayUnloadEvent(SAID);
     EXPECT_EQ(ret, IDLE_SA_FAIL);
 }
+
+/**
+ * @tc.name: SendProcessStateEvent002
+ * @tc.desc: test SendProcessStateEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityStateSchedulerProcTest, SendProcessStateEvent002, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> scheduler = std::make_shared<SystemAbilityStateScheduler>();
+    std::list<SaProfile> saProfiles;
+    SaProfile saProfile = {u"test", SAID};
+    saProfiles.emplace_back(saProfile);
+    scheduler->Init(saProfiles);
+    ProcessInfo processInfo = {u"test"};
+    auto ret = scheduler->SendProcessStateEvent(processInfo, ProcessStateEvent::PROCESS_STARTED_EVENT);
+    EXPECT_EQ(ret, ERR_OK);
+    std::shared_ptr<SystemProcessContext> processContext;
+    scheduler->GetSystemProcessContext(processInfo.processName, processContext);
+    scheduler->AddRunningProcessLocked(processContext);
+    ret = scheduler->SendProcessStateEvent(processInfo, ProcessStateEvent::PROCESS_STARTED_EVENT);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ret = scheduler->SendProcessStateEvent(processInfo, ProcessStateEvent::PROCESS_STOPPED_EVENT);
+    scheduler->RemoveRunningProcessLocked(processContext);
+    EXPECT_EQ(ret, ERR_OK);
+}
 }

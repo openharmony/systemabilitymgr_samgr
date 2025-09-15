@@ -446,7 +446,15 @@ int32_t SystemAbilityStateScheduler::SendProcessStateEvent(const ProcessInfo& pr
         return ERR_INVALID_VALUE;
     }
     std::lock_guard<samgr::mutex> autoLock(processContext->processLock);
-    return stateEventHandler_->HandleProcessEventLocked(processContext, processInfo, event);
+    int32_t ret = stateEventHandler_->HandleProcessEventLocked(processContext, processInfo, event);
+    if (ret == ERR_OK) {
+        if (event == ProcessStateEvent::PROCESS_STARTED_EVENT) {
+            AddRunningProcessLocked(processContext);
+        } else {
+            RemoveRunningProcessLocked(processContext);
+        }
+    }
+    return ret;
 }
 
 int32_t SystemAbilityStateScheduler::SendDelayUnloadEventLocked(uint32_t systemAbilityId, int32_t delayTime)
@@ -1075,19 +1083,8 @@ int32_t SystemAbilityStateScheduler::GetSystemProcessInfo(int32_t systemAbilityI
 int32_t SystemAbilityStateScheduler::GetRunningSystemProcess(std::list<SystemProcessInfo>& systemProcessInfos)
 {
     HILOGI("Scheduler:get running process");
-    std::shared_lock<samgr::shared_mutex> readLock(processMapLock_);
-    for (auto it : processContextMap_) {
-        auto& processContext = it.second;
-        if (processContext == nullptr) {
-            continue;
-        }
-        std::lock_guard<samgr::mutex> autoLock(processContext->processLock);
-        if (processContext->state == SystemProcessState::STARTED) {
-            SystemProcessInfo systemProcessInfo = {Str16ToStr8(processContext->processName), processContext->pid,
-                processContext->uid};
-            systemProcessInfos.emplace_back(systemProcessInfo);
-        }
-    }
+    std::shared_lock<samgr::shared_mutex> autoLock(runningProcessListLock_);
+    systemProcessInfos = runningProcessList_;
     return ERR_OK;
 }
 
@@ -1454,6 +1451,39 @@ bool SystemAbilityStateScheduler::IsSystemProcessCanUnload(const std::u16string&
     }
     std::lock_guard<samgr::mutex> autoLock(processContext->processLock);
     return CanUnloadAllSystemAbilityLocked(processContext);
+}
+
+void SystemAbilityStateScheduler::RemoveRunningProcessLocked(
+    const std::shared_ptr<SystemProcessContext>& processContext)
+{
+    std::unique_lock<samgr::shared_mutex> autoLock(runningProcessListLock_);
+    auto it = std::find_if(runningProcessList_.begin(), runningProcessList_.end(),
+        [&](const SystemProcessInfo& systemProcessInfo) {
+            return systemProcessInfo.processName == Str16ToStr8(processContext->processName);
+        });
+    if (it != runningProcessList_.end()) {
+        runningProcessList_.erase(it);
+        HILOGD("runningProcessList_ remove process:%{public}s", Str16ToStr8(processContext->processName).c_str());
+    }
+}
+
+void SystemAbilityStateScheduler::AddRunningProcessLocked(
+    const std::shared_ptr<SystemProcessContext>& processContext)
+{
+    std::unique_lock<samgr::shared_mutex> autoLock(runningProcessListLock_);
+    auto it = std::find_if(runningProcessList_.begin(), runningProcessList_.end(),
+        [&](const SystemProcessInfo& systemProcessInfo) {
+            return systemProcessInfo.processName == Str16ToStr8(processContext->processName);
+        });
+    if (it == runningProcessList_.end()) {
+        SystemProcessInfo systemProcessInfo = {Str16ToStr8(processContext->processName), processContext->pid,
+            processContext->uid};
+        runningProcessList_.emplace_back(std::move(systemProcessInfo));
+    } else {
+        it->pid = processContext->pid;
+        it->uid = processContext->uid;
+    }
+    HILOGD("runningProcessList_ add process:%{public}s", Str16ToStr8(processContext->processName).c_str());
 }
 
 void SystemAbilityStateScheduler::UnloadEventHandler::ProcessEvent(uint32_t eventId)

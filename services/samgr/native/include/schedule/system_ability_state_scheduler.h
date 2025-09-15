@@ -134,6 +134,8 @@ private:
     void OnAbilityUnloadableLocked(int32_t systemAbilityId) override;
     void OnProcessNotStartedLocked(const std::u16string& processName) override;
     void OnProcessStartedLocked(const std::u16string& processName) override;
+    void RemoveRunningProcessLocked(const std::shared_ptr<SystemProcessContext>& processContext);
+    void AddRunningProcessLocked(const std::shared_ptr<SystemProcessContext>& processContext);
 
     int32_t ActiveSystemAbilityLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext,
         const nlohmann::json& activeReason);
@@ -172,6 +174,8 @@ private:
     std::map<int32_t, std::list<OnDemandEvent>> startEnableOnceMap_;
     samgr::mutex stopEnableOnceLock_;
     std::map<int32_t, std::list<OnDemandEvent>> stopEnableOnceMap_;
+    samgr::shared_mutex runningProcessListLock_;
+    std::list<SystemProcessInfo> runningProcessList_;
 };
 } // namespace OHOS
 
