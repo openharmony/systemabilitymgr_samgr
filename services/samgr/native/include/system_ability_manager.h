@@ -368,16 +368,12 @@ private:
     void OndemandLoadForPerf();
     std::list<int32_t> GetAllOndemandSa();
     void SystemAbilityInvalidateCache(int32_t systemAbilityId);
-#ifdef SUPPORT_DEVICE_MANAGER
-    void DeviceIdToNetworkId(std::string& networkId);
-#endif
     bool IpcStatSamgrProc(int32_t fd, int32_t cmd);
     void IpcDumpAllProcess(int32_t fd, int32_t cmd);
     void IpcDumpSamgrProcess(int32_t fd, int32_t cmd);
     void IpcDumpSingleProcess(int32_t fd, int32_t cmd, const std::string processName);
     int32_t IpcDumpProc(int32_t fd, const std::vector<std::string>& args);
     void RegisterDistribute(int32_t said, bool isDistributed);
-    void ConvertDumpListener(std::vector<std::pair<int32_t, std::list<int32_t>>>& dumpListeners);
 
     std::u16string deviceName_;
     static sptr<SystemAbilityManager> instance;

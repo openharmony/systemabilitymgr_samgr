@@ -43,18 +43,11 @@
 #include "tools.h"
 #include "samgr_xcollie.h"
 
-#ifdef SUPPORT_DEVICE_MANAGER
-#include "device_manager.h"
-using namespace OHOS::DistributedHardware;
-#endif
 namespace fs = std::filesystem;
 using namespace std;
 
 namespace OHOS {
 namespace {
-#ifdef SUPPORT_DEVICE_MANAGER
-constexpr const char* PKG_NAME = "Samgr_Networking";
-#endif
 constexpr const char* PREFIX = "profile";
 constexpr const char* SYSTEM_PREFIX = "/system/profile";
 constexpr const char* LOCAL_DEVICE = "local";
@@ -171,7 +164,6 @@ void SystemAbilityManager::Init()
     InitSaProfile();
     reportEventTimer_ = std::make_unique<Utils::Timer>("DfxReporter", -1);
     OndemandLoadForPerf();
-    SetKey(DYNAMIC_CACHE_PARAM);
     SamgrUtil::InvalidateSACache();
 }
 
@@ -582,8 +574,8 @@ void SystemAbilityManager::NotifySystemAbilityChanged(int32_t systemAbilityId, c
 int32_t SystemAbilityManager::FindSystemAbilityNotify(int32_t systemAbilityId, const std::string& deviceId,
     int32_t code)
 {
-    HILOGI("FindSaNotify SA:%{public}d,%{public}d_%{public}zu", systemAbilityId, code, listenerMap_.size());
     lock_guard<samgr::mutex> autoLock(listenerMapLock_);
+    HILOGI("FindSaNotify SA:%{public}d,%{public}d_%{public}zu", systemAbilityId, code, listenerMap_.size());
     auto iter = listenerMap_.find(systemAbilityId);
     if (iter == listenerMap_.end()) {
         return ERR_OK;
@@ -1407,9 +1399,7 @@ void SystemAbilityManager::NotifySystemAbilityLoaded(int32_t systemAbilityId, co
         HILOGE("NotifySystemAbilityLoaded callback null!");
         return;
     }
-    HILOGD("NotifySaLoaded SA:%{public}d,SaSize:%{public}zu,ProcSize:%{public}zu,"
-        "startingSaSize:%{public}zu", systemAbilityId, abilityMap_.size(), systemProcessMap_.size(),
-        startingAbilityMap_.size());
+    HILOGD("NotifySaLoaded SA:%{public}d", systemAbilityId);
     callback->OnLoadSystemAbilitySuccess(systemAbilityId, remoteObject);
 }
 
@@ -1423,8 +1413,7 @@ void SystemAbilityManager::NotifySystemAbilityLoaded(int32_t systemAbilityId, co
     auto& abilityItem = iter->second;
     for (auto& [deviceId, callbackList] : abilityItem.callbackMap) {
         for (auto& callbackItem : callbackList) {
-            HILOGI("notify SA:%{public}d,%{public}zu_%{public}zu_%{public}d",
-                systemAbilityId, abilityMap_.size(), systemProcessMap_.size(), callbackItem.second);
+            HILOGI("notify SA:%{public}d,%{public}d", systemAbilityId, callbackItem.second);
             NotifySystemAbilityLoaded(systemAbilityId, remoteObject, callbackItem.first);
             RemoveStartingAbilityCallbackLocked(callbackItem);
         }
@@ -1867,28 +1856,13 @@ void SystemAbilityManager::DoLoadRemoteSystemAbility(int32_t systemAbilityId, in
     }
 }
 
-#ifdef SUPPORT_DEVICE_MANAGER
-void SystemAbilityManager::DeviceIdToNetworkId(std::string& networkId)
-{
-    std::vector<DmDeviceInfo> devList;
-    if (DeviceManager::GetInstance().GetTrustedDeviceList(PKG_NAME, "", devList) == ERR_OK) {
-        for (const DmDeviceInfo& devInfo : devList) {
-            if (networkId == devInfo.deviceId) {
-                networkId = devInfo.networkId;
-                break;
-            }
-        }
-    }
-}
-#endif
-
 sptr<DBinderServiceStub> SystemAbilityManager::DoMakeRemoteBinder(int32_t systemAbilityId, int32_t callingPid,
     int32_t callingUid, const std::string& deviceId)
 {
     HILOGI("MakeRemoteBinder begin, SA:%{public}d", systemAbilityId);
     std::string networkId = deviceId;
 #ifdef SUPPORT_DEVICE_MANAGER
-    DeviceIdToNetworkId(networkId);
+    SamgrUtil::DeviceIdToNetworkId(networkId);
 #endif
     sptr<DBinderServiceStub> remoteBinder = nullptr;
 #ifdef SAMGR_ENABLE_DELAY_DBINDER

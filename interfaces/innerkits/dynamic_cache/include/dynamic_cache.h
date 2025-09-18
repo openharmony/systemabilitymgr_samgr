@@ -24,7 +24,6 @@ namespace OHOS {
 using namespace std;
 class DynamicCache : public IRemoteObject::DeathRecipient {
 public:
-
     void OnRemoteDied(const wptr<IRemoteObject>& remote) override
     {
         ClearCache();
@@ -44,7 +43,6 @@ public:
     }
     
     bool InvalidateCache();
-    bool SetKey(const std::string& key);
     virtual sptr<IRemoteObject> Recompute(int32_t querySaId, int32_t code)
     {
         std::lock_guard<std::mutex> autoLock(queryCacheLock_);
@@ -57,7 +55,7 @@ public:
 private:
     std::mutex queryCacheLock_;
     std::map<std::string, std::string> localPara_;
-    std::string key_;
+    std::string key_ = "samgr.cache.sa";
     int32_t lastQuerySaId_;
     sptr<IRemoteObject> lastQuerySaProxy_;
 };
