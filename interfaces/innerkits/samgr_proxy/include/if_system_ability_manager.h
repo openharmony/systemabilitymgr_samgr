@@ -188,9 +188,10 @@ public:
 
     /**
      * LoadSystemAbility, Load sa, blocking.
+     * the maximum timeout for the watch product is 12 seconds, the others is 4 seconds.
      *
      * @param systemAbilityId, Need to load the said of sa.
-     * @param timeout, limited time to load sa.
+     * @param timeout, limited time to load sa, the unit is seconds.
      * @return remote object means that the load was successful.
      */
     virtual sptr<IRemoteObject> LoadSystemAbility(int32_t systemAbilityId, int32_t timeout) = 0;
