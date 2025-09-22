@@ -1194,4 +1194,37 @@ HWTEST_F(SystemAbilityMgrNewTest, RegisterDistribute001, TestSize.Level2)
 }
 #endif
 
+/**
+ * @tc.name: CleanFfrt001
+ * @tc.desc: test CleanFfrt
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrNewTest, CleanFfrt001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
+    InitSaMgr(saMgr);
+    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    auto& handlerList = saMgr->workHandler_->taskMap_["test"];
+    handlerList.push_back(nullptr);
+    saMgr->workHandler_->CleanFfrt();
+    EXPECT_EQ(saMgr->workHandler_->taskMap_, nullptr);
+}
+
+/**
+ * @tc.name: RemoveTask001
+ * @tc.desc: test RemoveTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrNewTest, RemoveTask001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
+    InitSaMgr(saMgr);
+    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    auto& handlerList = saMgr->workHandler_->taskMap_["test"];
+    handlerList.push_back(nullptr);
+    saMgr->workHandler_->RemoveTask("test");
+    EXPECT_EQ(saMgr->workHandler_->taskMap_, nullptr);
+}
 } // namespace OHOS
