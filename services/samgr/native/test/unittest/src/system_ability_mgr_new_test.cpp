@@ -1196,7 +1196,7 @@ HWTEST_F(SystemAbilityMgrNewTest, RegisterDistribute001, TestSize.Level2)
 
 /**
  * @tc.name: CleanFfrt001
- * @tc.desc: test CleanFfrt
+ * @tc.desc: test CleanFfrt handler null
  * @tc.type: FUNC
  */
 HWTEST_F(SystemAbilityMgrNewTest, CleanFfrt001, TestSize.Level3)
@@ -1205,15 +1205,17 @@ HWTEST_F(SystemAbilityMgrNewTest, CleanFfrt001, TestSize.Level3)
     EXPECT_TRUE(saMgr != nullptr);
     InitSaMgr(saMgr);
     saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
-    auto& handlerList = saMgr->workHandler_->taskMap_["test"];
-    handlerList.push_back(nullptr);
+    auto testTask = [] () {};
+    saMgr->workHandler_->PostTask(testTask, "test", 1000);
+    auto& handlerQueue = saMgr->workHandler_->taskMap_["test"];
+    handlerQueue.push(nullptr);
     saMgr->workHandler_->CleanFfrt();
-    EXPECT_EQ(saMgr->workHandler_->taskMap_, nullptr);
+    EXPECT_TRUE(saMgr->workHandler_->taskMap_.empty());
 }
 
 /**
  * @tc.name: RemoveTask001
- * @tc.desc: test RemoveTask
+ * @tc.desc: test RemoveTask handler null
  * @tc.type: FUNC
  */
 HWTEST_F(SystemAbilityMgrNewTest, RemoveTask001, TestSize.Level3)
@@ -1222,9 +1224,34 @@ HWTEST_F(SystemAbilityMgrNewTest, RemoveTask001, TestSize.Level3)
     EXPECT_TRUE(saMgr != nullptr);
     InitSaMgr(saMgr);
     saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
-    auto& handlerList = saMgr->workHandler_->taskMap_["test"];
-    handlerList.push_back(nullptr);
+    auto testTask = [] () {};
+    saMgr->workHandler_->PostTask(testTask, "test", 1000);
+    auto& handlerQueue = saMgr->workHandler_->taskMap_["test"];
+    handlerQueue.push(nullptr);
     saMgr->workHandler_->RemoveTask("test");
-    EXPECT_EQ(saMgr->workHandler_->taskMap_, nullptr);
+    EXPECT_TRUE(saMgr->workHandler_->taskMap_.empty());
+}
+
+/**
+ * @tc.name: DelTask001
+ * @tc.desc: test DelTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrNewTest, DelTask001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
+    InitSaMgr(saMgr);
+    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    auto& handlerQueue = saMgr->workHandler_->taskMap_["test"];
+    handlerQueue.push(nullptr);
+    handlerQueue.push(nullptr);
+    EXPECT_EQ(handlerQueue.size(), 2);
+    saMgr->workHandler_->DelTask("test");
+    saMgr->workHandler_->DelTask("test");
+    EXPECT_TRUE(saMgr->workHandler_->taskMap_.empty());
+    handlerQueue = saMgr->workHandler_->taskMap_["test"];
+    saMgr->workHandler_->DelTask("test");
+    EXPECT_TRUE(saMgr->workHandler_->taskMap_.empty());
 }
 } // namespace OHOS

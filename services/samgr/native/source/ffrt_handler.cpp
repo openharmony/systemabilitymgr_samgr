@@ -39,7 +39,10 @@ void FFRTHandler::CleanFfrt()
     }
     for (auto iter = taskMap_.begin(); iter != taskMap_.end(); ++iter) {
         HILOGI("CleanFfrt taskMap_ %{public}s", iter->first.c_str());
-        for (auto& handler : iter->second) {
+        auto& handlerQueue = iter->second;
+        while (!handlerQueue.empty()) {
+            auto& handler = handlerQueue.front();
+            handlerQueue.pop();
             if (handler == nullptr) {
                 continue;
             }
@@ -47,7 +50,6 @@ void FFRTHandler::CleanFfrt()
             if (ret != 0) {
                 HILOGE("cancel task failed, error code %{public}d", ret);
             }
-            handler = nullptr;
         }
     }
     taskMap_.clear();
@@ -108,8 +110,8 @@ bool FFRTHandler::PostTask(std::function<void()> func, const std::string& name, 
         HILOGE("FFRTHandler post task failed");
         return false;
     }
-    auto& handlerList = taskMap_[name];
-    handlerList.push_back(std::move(handler));
+    auto& handlerQueue = taskMap_[name];
+    handlerQueue.push(std::move(handler));
     return true;
 }
 
@@ -121,7 +123,9 @@ void FFRTHandler::RemoveTask(const std::string& name)
         HILOGW("rm task %{public}s NF", name.c_str());
         return;
     }
-    for (auto& handler : item->second) {
+    auto& handlerQueue = item->second;
+    while (!handlerQueue.empty()) {
+        auto& handler = handlerQueue.front();
         if (handler != nullptr) {
             auto ret = queue_->cancel(handler);
             if (ret != 0) {
@@ -129,6 +133,7 @@ void FFRTHandler::RemoveTask(const std::string& name)
             }
             handler = nullptr;
         }
+        handlerQueue.pop();
     }
     taskMap_.erase(name);
 }
@@ -141,8 +146,14 @@ void FFRTHandler::DelTask(const std::string& name)
         HILOGW("del task %{public}s NF", name.c_str());
         return;
     }
-    HILOGD("erase task %{public}s ", name.c_str());
-    taskMap_.erase(name);
+    auto& handlerQueue = item->second;
+    if (!handlerQueue.empty()) {
+        handlerQueue.pop();
+    }
+    if (handlerQueue.empty()) {
+        HILOGD("erase task %{public}s ", name.c_str());
+        taskMap_.erase(name);
+    }
 }
 
 bool FFRTHandler::HasInnerEvent(const std::string name)
