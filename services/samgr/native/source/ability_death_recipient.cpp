@@ -50,7 +50,6 @@ void AbilityStatusDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote
 
 void AbilityCallbackDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
-    auto callPid = IPCSkeleton::GetCallingPid();
     HILOGD("AbilityCallbackDeathRecipient called!");
     string OnRemoteDiedTag = "_AbilityCallbackDeath";
     HitraceScopedEx samgrHitrace(HITRACE_LEVEL_INFO, HITRACE_TAG_SAMGR, OnRemoteDiedTag.c_str());
@@ -60,7 +59,6 @@ void AbilityCallbackDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remo
 
 void RemoteCallbackDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
-    auto callPid = IPCSkeleton::GetCallingPid();
     HILOGD("RemoteCallbackDeathRecipient called!");
     string OnRemoteDiedTag = "_RemoteCallbackDeath";
     HitraceScopedEx samgrHitrace(HITRACE_LEVEL_INFO, HITRACE_TAG_SAMGR, OnRemoteDiedTag.c_str());
@@ -70,7 +68,6 @@ void RemoteCallbackDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remot
 
 void SystemProcessListenerDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
-    auto callPid = IPCSkeleton::GetCallingPid();
     HILOGD("SystemProcessListenerDeathRecipient called!");
     string OnRemoteDiedTag = "_SystemProcessListenerDeath";
     HitraceScopedEx samgrHitrace(HITRACE_LEVEL_INFO, HITRACE_TAG_SAMGR, OnRemoteDiedTag.c_str());
