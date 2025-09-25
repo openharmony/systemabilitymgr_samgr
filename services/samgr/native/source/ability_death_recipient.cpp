@@ -18,11 +18,14 @@
 #include "iremote_proxy.h"
 #include "sam_log.h"
 #include "system_ability_manager.h"
+#include "hitrace_meter.h"
 
 namespace OHOS {
 void AbilityDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
     HILOGD("AbilityDeathRecipient OnRemoteDied called");
+    string OnRemoteDiedTag = "AbilityDeath";
+    HitraceScopedEx samgrHitrace(HITRACE_LEVEL_INFO, HITRACE_TAG_SAMGR, OnRemoteDiedTag.c_str());
     SystemAbilityManager::GetInstance()->RemoveSystemAbility(remote.promote());
     HILOGD("AbilityDeathRecipients death notice success");
 }
@@ -30,6 +33,8 @@ void AbilityDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 void SystemProcessDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
     HILOGD("SystemProcessDeathRecipient called!");
+    string OnRemoteDiedTag = "SystemProcessDeath";
+    HitraceScopedEx samgrHitrace(HITRACE_LEVEL_INFO, HITRACE_TAG_SAMGR, OnRemoteDiedTag.c_str());
     SystemAbilityManager::GetInstance()->RemoveSystemProcess(remote.promote());
     HILOGD("SystemProcessDeathRecipient death notice success");
 }
@@ -37,6 +42,8 @@ void SystemProcessDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote
 void AbilityStatusDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
     HILOGD("AbilityStatusDeathRecipient called!");
+    string OnRemoteDiedTag = "AbilityStatusDeath";
+    HitraceScopedEx samgrHitrace(HITRACE_LEVEL_INFO, HITRACE_TAG_SAMGR, OnRemoteDiedTag.c_str());
     SystemAbilityManager::GetInstance()->UnSubscribeSystemAbility(remote.promote());
     HILOGD("AbilityStatusDeathRecipient death notice success");
 }
@@ -44,6 +51,8 @@ void AbilityStatusDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote
 void AbilityCallbackDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
     HILOGD("AbilityCallbackDeathRecipient called!");
+    string OnRemoteDiedTag = "AbilityCallbackDeath";
+    HitraceScopedEx samgrHitrace(HITRACE_LEVEL_INFO, HITRACE_TAG_SAMGR, OnRemoteDiedTag.c_str());
     SystemAbilityManager::GetInstance()->OnAbilityCallbackDied(remote.promote());
     HILOGD("AbilityCallbackDeathRecipient death notice success");
 }
@@ -51,6 +60,8 @@ void AbilityCallbackDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remo
 void RemoteCallbackDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
     HILOGD("RemoteCallbackDeathRecipient called!");
+    string OnRemoteDiedTag = "RemoteCallbackDeath";
+    HitraceScopedEx samgrHitrace(HITRACE_LEVEL_INFO, HITRACE_TAG_SAMGR, OnRemoteDiedTag.c_str());
     SystemAbilityManager::GetInstance()->OnRemoteCallbackDied(remote.promote());
     HILOGD("RemoteCallbackDeathRecipient death notice success");
 }
@@ -58,6 +69,8 @@ void RemoteCallbackDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remot
 void SystemProcessListenerDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
 {
     HILOGD("SystemProcessListenerDeathRecipient called!");
+    string OnRemoteDiedTag = "SystemProcessListenerDeath";
+    HitraceScopedEx samgrHitrace(HITRACE_LEVEL_INFO, HITRACE_TAG_SAMGR, OnRemoteDiedTag.c_str());
     sptr<ISystemProcessStatusChange> listener = iface_cast<ISystemProcessStatusChange>(remote.promote());
     SystemAbilityManager::GetInstance()->UnSubscribeSystemProcess(listener);
     HILOGD("SystemProcessListenerDeathRecipient death notice success");
