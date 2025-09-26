@@ -18,6 +18,7 @@
 
 #include <map>
 #include <string>
+#include <queue>
 
 #include "ffrt.h"
 #include "samgr_ffrt_api.h"
@@ -38,7 +39,7 @@ public:
 
 private:
     samgr::shared_mutex mutex_;
-    std::map<std::string, ffrt::task_handle> taskMap_;
+    std::map<std::string, std::queue<ffrt::task_handle>> taskMap_;
     std::shared_ptr<ffrt::queue> queue_;
 };
 } // namespace OHOS

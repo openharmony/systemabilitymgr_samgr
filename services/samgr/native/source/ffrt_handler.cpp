@@ -34,20 +34,26 @@ FFRTHandler::FFRTHandler(const std::string& name)
 void FFRTHandler::CleanFfrt()
 {
     std::unique_lock<samgr::shared_mutex> lock(mutex_);
+    if (queue_ == nullptr) {
+        return;
+    }
     for (auto iter = taskMap_.begin(); iter != taskMap_.end(); ++iter) {
         HILOGI("CleanFfrt taskMap_ %{public}s", iter->first.c_str());
-        if (queue_ != nullptr && iter->second != nullptr) {
-            auto ret = queue_->cancel(iter->second);
+        auto& handlerQueue = iter->second;
+        while (!handlerQueue.empty()) {
+            auto& handler = handlerQueue.front();
+            handlerQueue.pop();
+            if (handler == nullptr) {
+                continue;
+            }
+            auto ret = queue_->cancel(handler);
             if (ret != 0) {
                 HILOGE("cancel task failed, error code %{public}d", ret);
             }
         }
-        iter->second = nullptr;
     }
     taskMap_.clear();
-    if (queue_ != nullptr) {
-        queue_.reset();
-    }
+    queue_.reset();
 }
 
 void FFRTHandler::SetFfrt(const std::string& name)
@@ -104,7 +110,8 @@ bool FFRTHandler::PostTask(std::function<void()> func, const std::string& name, 
         HILOGE("FFRTHandler post task failed");
         return false;
     }
-    taskMap_[name] = std::move(handler);
+    auto& handlerQueue = taskMap_[name];
+    handlerQueue.push(std::move(handler));
     return true;
 }
 
@@ -116,11 +123,17 @@ void FFRTHandler::RemoveTask(const std::string& name)
         HILOGW("rm task %{public}s NF", name.c_str());
         return;
     }
-    if (item->second != nullptr) {
-        auto ret = queue_->cancel(item->second);
-        if (ret != 0) {
-            HILOGE("cancel task failed, error code %{public}d", ret);
+    auto& handlerQueue = item->second;
+    while (!handlerQueue.empty()) {
+        auto& handler = handlerQueue.front();
+        if (handler != nullptr) {
+            auto ret = queue_->cancel(handler);
+            if (ret != 0) {
+                HILOGE("cancel task failed, error code %{public}d", ret);
+            }
+            handler = nullptr;
         }
+        handlerQueue.pop();
     }
     taskMap_.erase(name);
 }
@@ -133,8 +146,14 @@ void FFRTHandler::DelTask(const std::string& name)
         HILOGW("del task %{public}s NF", name.c_str());
         return;
     }
-    HILOGD("erase task %{public}s ", name.c_str());
-    taskMap_.erase(name);
+    auto& handlerQueue = item->second;
+    if (!handlerQueue.empty()) {
+        handlerQueue.pop();
+    }
+    if (handlerQueue.empty()) {
+        HILOGD("erase task %{public}s ", name.c_str());
+        taskMap_.erase(name);
+    }
 }
 
 bool FFRTHandler::HasInnerEvent(const std::string name)
