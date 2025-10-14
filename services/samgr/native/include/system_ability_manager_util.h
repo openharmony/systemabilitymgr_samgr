@@ -53,6 +53,9 @@ public:
 #endif
     static void GetFilesByPriority(const std::string& path, std::vector<std::string>& files);
     static void GetFilesFromPath(const std::string& path, std::map<std::string, std::string>& fileNamesMap);
+#ifdef SUPPORT_DEVICE_MANAGER
+    static void DeviceIdToNetworkId(std::string& networkId);
+#endif
 private:
 #ifdef SUPPORT_PENGLAI_MODE
     static void* InitPenglaiFunc();

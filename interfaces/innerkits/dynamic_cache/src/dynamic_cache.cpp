@@ -23,7 +23,6 @@
 
 using namespace std;
 namespace OHOS {
-
 sptr<IRemoteObject> DynamicCache::QueryResult(int32_t querySaId, int32_t code)
 {
     int32_t waterLineLength = 128;
@@ -73,17 +72,6 @@ bool DynamicCache::InvalidateCache()
         return false;
     }
     HILOGD("DynamicCache InvalidateCache End");
-    return true;
-}
-
-bool DynamicCache::SetKey(const string& key)
-{
-    int32_t maxLength = 256;
-    if (key.size() == 0 || (int32_t)key.size() > maxLength) {
-        HILOGE("DynamicCache SetKey size error:%{public}zu!", key.size());
-        return false;
-    }
-    key_ = key;
     return true;
 }
 } // namespace OHOS

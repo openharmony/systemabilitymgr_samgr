@@ -96,11 +96,13 @@ void CommonEventCollect::SetFfrt()
 int32_t CommonEventCollect::OnStart()
 {
     HILOGI("CommonEventCollect OnStart called");
-    if (commonEventNames_.empty()) {
-        HILOGW("CommonEventCollect commonEventNames_ is empty");
-        return ERR_OK;
+    {
+        std::lock_guard<samgr::mutex> autoLock(commomEventLock_);
+        if (commonEventNames_.empty()) {
+            HILOGW("CommonEventCollect commonEventNames_ is empty");
+            return ERR_OK;
+        }
     }
-
     workHandler_ = std::make_shared<CommonHandler>(this);
     unsubHandler_ = std::make_shared<CommonHandler>(this);
     workHandler_->SendEvent(INIT_EVENT);

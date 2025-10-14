@@ -48,7 +48,6 @@ const int32_t SLEEP_INTERVAL_TIME = 200;
 const int32_t GET_SYSTEM_ABILITY_CODE = 1;
 const int32_t CHECK_SYSTEM_ABILITY_CODE = 2;
 const int32_t SLEEP_ONE_MILLI_SECOND_TIME = 1000;
-constexpr const char* PARAM_KEY = "samgr.cache.sa";
 }
 
 static void* g_selfSoHandle = nullptr;
@@ -109,10 +108,6 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::GetSystemAbility(int32_t systemAb
         return GetSystemAbilityWrapper(systemAbilityId);
     }
 
-    bool ret = SetKey(PARAM_KEY);
-    if (!ret) {
-        return GetSystemAbilityWrapper(systemAbilityId);
-    }
     return QueryResult(systemAbilityId, GET_SYSTEM_ABILITY_CODE);
 }
 
@@ -236,10 +231,6 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t system
         return CheckSystemAbilityTransaction(systemAbilityId);
     }
 
-    bool ret = SetKey(PARAM_KEY);
-    if (!ret) {
-        return CheckSystemAbilityTransaction(systemAbilityId);
-    }
     return QueryResult(systemAbilityId, CHECK_SYSTEM_ABILITY_CODE);
 }
 

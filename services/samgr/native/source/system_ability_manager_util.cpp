@@ -23,6 +23,10 @@
 #include "string_ex.h"
 #include "tools.h"
 #include "sam_log.h"
+#ifdef SUPPORT_DEVICE_MANAGER
+#include "device_manager.h"
+using namespace OHOS::DistributedHardware;
+#endif
 
 namespace OHOS {
 namespace fs = std::filesystem;
@@ -47,6 +51,9 @@ constexpr const char* MODULE_UPDATE_PARAM = "persist.samgr.moduleupdate";
 constexpr const char* PENG_LAI_PARAM = "ohos.boot.minisys.mode";
 constexpr const char* PENG_LAI = "penglai";
 constexpr const char* PENGLAI_PATH = "profile/penglai";
+#ifdef SUPPORT_DEVICE_MANAGER
+constexpr const char* PKG_NAME = "Samgr_Networking";
+#endif
 std::shared_ptr<FFRTHandler> SamgrUtil::setParmHandler_ = make_shared<FFRTHandler>("setParmHandler");
 
 bool SamgrUtil::IsNameInValid(const std::u16string& name)
@@ -323,4 +330,19 @@ void SamgrUtil::GetFilesByPriority(const std::string& path, std::vector<std::str
         fileNames.push_back(pair.second);
     }
 }
+
+#ifdef SUPPORT_DEVICE_MANAGER
+void SamgrUtil::DeviceIdToNetworkId(std::string& networkId)
+{
+    std::vector<DmDeviceInfo> devList;
+    if (DeviceManager::GetInstance().GetTrustedDeviceList(PKG_NAME, "", devList) == ERR_OK) {
+        for (const DmDeviceInfo& devInfo : devList) {
+            if (networkId == devInfo.deviceId) {
+                networkId = devInfo.networkId;
+                break;
+            }
+        }
+    }
+}
+#endif
 }
