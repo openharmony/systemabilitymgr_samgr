@@ -52,7 +52,6 @@ constexpr const char* PREFIX = "profile";
 constexpr const char* SYSTEM_PREFIX = "/system/profile";
 constexpr const char* LOCAL_DEVICE = "local";
 constexpr const char* ONDEMAND_PARAM = "persist.samgr.perf.ondemand";
-constexpr const char* DYNAMIC_CACHE_PARAM = "samgr.cache.sa";
 constexpr const char* RESOURCE_SCHEDULE_PROCESS_NAME = "resource_schedule_service";
 constexpr const char* IPC_STAT_DUMP_PREFIX = "--ipc";
 constexpr const char* ONDEMAND_PERF_PARAM = "persist.samgr.perf.ondemand";
@@ -106,12 +105,12 @@ void SystemAbilityManager::RegisterDistribute(int32_t systemAbilityId, bool isDi
     }
 #else
     u16string strName = Str8ToStr16(to_string(systemAbilityId));
-    if (isDistributed && dBinderService_!= nullptr) {
+    if (isDistributed && dBinderService_ != nullptr) {
         dBinderService_->RegisterRemoteProxy(strName, systemAbilityId);
         HILOGI("AddSystemAbility RegisterRemoteProxy, SA:%{public}d", systemAbilityId);
     }
     if (systemAbilityId == SOFTBUS_SERVER_SA_ID) {
-        if (dBinderService_!= nullptr && rpcCallbackImp_!= nullptr) {
+        if (dBinderService_ != nullptr && rpcCallbackImp_ != nullptr) {
             bool ret = dBinderService_->StartDBinderService(rpcCallbackImp_);
             HILOGI("start result is %{public}s", ret? "succeed" : "fail");
         }
@@ -1120,8 +1119,8 @@ int32_t SystemAbilityManager::AddSystemProcess(const u16string& procName,
             startingProcessMap_.erase(iterStarting);
         }
     }
-    HILOGI("AddProc:%{public}s,%{public}zu_%{public}" PRId64 "ms%{public}s", Str16ToStr8(procName).c_str(),
-        systemProcessMap_.size(), duration, ret ? "" : ",AddDeath fail");
+    HILOGI("AddProc:%{public}s,%{public}" PRId64 "ms%{public}s", Str16ToStr8(procName).c_str(),
+        duration, ret ? "" : ",AddDeath fail");
     auto callingPid = IPCSkeleton::GetCallingPid();
     auto callingUid = IPCSkeleton::GetCallingUid();
     ReportProcessStartDuration(Str16ToStr8(procName), callingPid, callingUid, duration);

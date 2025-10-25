@@ -242,7 +242,7 @@ bool SystemAbilityStateScheduler::IsSystemAbilityUnloading(int32_t systemAbility
         return false;
     }
     std::lock_guard<samgr::mutex> autoLock(abilityContext->ownProcessContext->processLock);
-    if (abilityContext->state ==SystemAbilityState::UNLOADING
+    if (abilityContext->state == SystemAbilityState::UNLOADING
         || abilityContext->ownProcessContext->state == SystemProcessState::STOPPING) {
         return true;
     }
@@ -262,7 +262,7 @@ int32_t SystemAbilityStateScheduler::HandleLoadAbilityEvent(int32_t systemAbilit
         return ERR_INVALID_VALUE;
     }
     if (abilityContext->ownProcessContext->state == SystemProcessState::STARTED
-        && abilityContext->state ==SystemAbilityState::NOT_LOADED) {
+        && abilityContext->state == SystemAbilityState::NOT_LOADED) {
         HILOGD("Scheduler SA:%{public}d handle load event by check start", systemAbilityId);
         bool result = SystemAbilityManager::GetInstance()->DoLoadOnDemandAbility(systemAbilityId, isExist);
         if (result) {
@@ -295,7 +295,7 @@ int32_t SystemAbilityStateScheduler::HandleLoadAbilityEvent(const LoadRequestInf
 int32_t SystemAbilityStateScheduler::HandleLoadAbilityEventLocked(
     const std::shared_ptr<SystemAbilityContext>& abilityContext, const LoadRequestInfo& loadRequestInfo)
 {
-    if (abilityContext->state ==SystemAbilityState::UNLOADING
+    if (abilityContext->state == SystemAbilityState::UNLOADING
         || abilityContext->ownProcessContext->state == SystemProcessState::STOPPING) {
         HILOGW("Scheduler SA:%{public}d state %{public}d, proc state %{public}d",
             abilityContext->systemAbilityId, abilityContext->state, abilityContext->ownProcessContext->state);
