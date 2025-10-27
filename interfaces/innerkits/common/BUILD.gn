@@ -67,7 +67,6 @@ ohos_shared_library("samgr_common") {
       "c_utils:utils",
       "hilog:libhilog",
       "hisysevent:libhisysevent",
-      "hisysevent:libhisysevent_easy",
       "hitrace:hitrace_meter",
     ]
 
