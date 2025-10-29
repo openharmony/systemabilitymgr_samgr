@@ -36,8 +36,6 @@ public:
 
 private:
     void IdentifyUnrefOndemand();
-    void IdentifyUnrefResident();
-    std::list<int32_t> residentSaList_;
     std::list<int32_t> unrefUnloadSaList_;
     std::unique_ptr<Utils::Timer> timer_;
 };

@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 #include "hisysevent_adapter.h"
-#include "hisysevent_easy.h"
 
 #include <string>
 
@@ -49,7 +48,6 @@ constexpr const char* PROCESS_START_FAIL = "PROCESS_START_FAIL";
 constexpr const char* PROCESS_STOP_FAIL = "PROCESS_STOP_FAIL";
 constexpr const char* PROCESS_START_DURATION = "PROCESS_START_DURATION";
 constexpr const char* PROCESS_STOP_DURATION = "PROCESS_STOP_DURATION";
-constexpr const char* SA_IDLE = "SA_IDLE";
 constexpr const char* PROCESS_NAME = "PROCESS_NAME";
 constexpr const char* PID = "PID";
 constexpr const char* UID = "UID";
@@ -292,13 +290,5 @@ void WatchDogSendEvent(int32_t pid, uint32_t uid, const std::string& sendMsg,
     if (ret != 0) {
         HILOGE("hisysevent report watchdog failed! ret %{public}d.", ret);
     }
-}
-
-void ReportSAIdle(const char* reason)
-{
-    HiSysEventEasyWrite(HiSysEvent::Domain::SAMGR,
-        SA_IDLE,
-        HiSysEventEasyType::EASY_EVENT_TYPE_BEHAVIOR,
-        reason);
 }
 } // OHOS

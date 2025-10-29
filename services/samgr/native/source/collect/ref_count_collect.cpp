@@ -14,11 +14,9 @@
  */
 
 #include "ref_count_collect.h"
-#include <securec.h>
 
 namespace OHOS {
 namespace {
-constexpr int32_t REF_RESIDENT_TIMER_INTERVAL = 1000 * 60 * 60;
 constexpr int32_t REF_ONDEMAND_TIMER_INTERVAL = 1000 * 60 * 1;
 }
 
@@ -27,14 +25,11 @@ RefCountCollect::RefCountCollect(const sptr<IReport>& report) : ICollectPlugin(r
 void RefCountCollect::Init(const std::list<SaProfile>& saProfiles)
 {
     for (const auto& saProfile : saProfiles) {
-        if (saProfile.runOnCreate) {
-            residentSaList_.push_back(saProfile.saId);
-        } else if (saProfile.stopOnDemand.unrefUnload) {
+        if (saProfile.stopOnDemand.unrefUnload) {
             unrefUnloadSaList_.push_back(saProfile.saId);
         }
     }
-    HILOGI("RefCountCollect Init residentSaList size:%{public}zu, unrefUnloadSaList size:%{public}zu",
-        residentSaList_.size(), unrefUnloadSaList_.size());
+    HILOGI("RefCountCollect Init unrefUnloadSaList size:%{public}zu", unrefUnloadSaList_.size());
 }
 
 int32_t RefCountCollect::OnStart()
@@ -42,13 +37,6 @@ int32_t RefCountCollect::OnStart()
     uint32_t timerId = 0;
     timer_ = std::make_unique<Utils::Timer>("RefCountCollectTimer", -1);
     timer_->Setup();
-
-    if (!residentSaList_.empty()) {
-        timerId = timer_->Register(std::bind(&RefCountCollect::IdentifyUnrefResident, this),
-            REF_RESIDENT_TIMER_INTERVAL);
-        HILOGI("RefCountCollect register resident timerId:%{public}u, interval:%{public}d",
-            timerId, REF_RESIDENT_TIMER_INTERVAL);
-    }
 
     if (!unrefUnloadSaList_.empty()) {
         timerId = timer_->Register(std::bind(&RefCountCollect::IdentifyUnrefOndemand, this),
@@ -100,32 +88,5 @@ void RefCountCollect::IdentifyUnrefOndemand()
         SystemAbilityManager::GetInstance()->ProcessOnDemandEvent(event, saIdleList);
     };
     PostTask(callback);
-}
-
-void RefCountCollect::IdentifyUnrefResident()
-{
-    sptr<SystemAbilityManager> samgr = SystemAbilityManager::GetInstance();
-    for (const auto& saId : residentSaList_) {
-        sptr<IRemoteObject> object = samgr->CheckSystemAbility(saId);
-        if (object == nullptr) {
-            continue;
-        }
-        sptr<IPCObjectProxy> saProxy = reinterpret_cast<IPCObjectProxy*>(object.GetRefPtr());
-        if (saProxy == nullptr) {
-            continue;
-        }
-        uint32_t refCount = saProxy->GetStrongRefCountForStub();
-        HILOGD("resident SA:%{public}d, ref count:%{public}u", saId, refCount);
-        if (refCount == 1) {
-            char reason[128] = {0};
-            errno_t res = snprintf_s(reason, sizeof(reason), sizeof(reason) - 1, "saId:%d REASON:ref count 1", saId);
-            if (res < 0) {
-                HILOGE("SA:%{public}d report SA_IDLE snprintf_s error:%{public}d", saId, res);
-                continue;
-            }
-            ReportSAIdle(reason);
-            HILOGI("resident SA:%{public}d, ref count:1", saId);
-        }
-    }
 }
 } // namespace OHOS

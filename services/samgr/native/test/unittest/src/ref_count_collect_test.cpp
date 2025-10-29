@@ -44,37 +44,10 @@ void RefCountCollectTest::TearDown()
 
 /**
  * @tc.name: Init001
- * @tc.desc: test Init001, resident sa init
+ * @tc.desc: test Init001, ondemand sa config unrefUnload init
  * @tc.type: FUNC
  */
 HWTEST_F(RefCountCollectTest, Init001, TestSize.Level1)
-{
-    sptr<DeviceStatusCollectManager> manager = new DeviceStatusCollectManager();
-    sptr<RefCountCollect> collect = new RefCountCollect(manager);
-    std::list<SaProfile> saProfiles;
-    {
-        SaProfile saProfile;
-        saProfile.saId = 1;
-        saProfile.runOnCreate = true;
-        saProfiles.push_back(saProfile);
-    }
-    {
-        SaProfile saProfile;
-        saProfile.saId = 2;
-        saProfile.runOnCreate = false;
-        saProfiles.push_back(saProfile);
-    }
-    collect->Init(saProfiles);
-    EXPECT_EQ(collect->residentSaList_.size(), 1);
-    EXPECT_EQ(collect->residentSaList_.front(), 1);
-}
-
-/**
- * @tc.name: Init002
- * @tc.desc: test Init002, ondemand sa config unrefUnload init
- * @tc.type: FUNC
- */
-HWTEST_F(RefCountCollectTest, Init002, TestSize.Level1)
 {
     sptr<DeviceStatusCollectManager> manager = new DeviceStatusCollectManager();
     sptr<RefCountCollect> collect = new RefCountCollect(manager);
@@ -113,37 +86,18 @@ HWTEST_F(RefCountCollectTest, Init003, TestSize.Level1)
     saProfiles.push_back(saProfile);
 
     collect->Init(saProfiles);
-    EXPECT_EQ(collect->residentSaList_.size(), 0);
     EXPECT_EQ(collect->unrefUnloadSaList_.size(), 0);
 }
 
 /**
  * @tc.name: OnStart001
- * @tc.desc: test OnStart001, start resident sa check timer
+ * @tc.desc: test OnStart001, start ondemand sa config unrefUnload check timer
  * @tc.type: FUNC
  */
 HWTEST_F(RefCountCollectTest, OnStart001, TestSize.Level1)
 {
     sptr<DeviceStatusCollectManager> manager = new DeviceStatusCollectManager();
     sptr<RefCountCollect> collect = new RefCountCollect(manager);
-    collect->residentSaList_.push_back(1);
-    auto ret = collect->OnStart();
-    EXPECT_EQ(ret, ERR_OK);
-    ret = collect->OnStop();
-    usleep(500 * 1000);
-    EXPECT_EQ(ret, ERR_OK);
-}
-
-/**
- * @tc.name: OnStart002
- * @tc.desc: test OnStart002, start ondemand sa config unrefUnload check timer
- * @tc.type: FUNC
- */
-HWTEST_F(RefCountCollectTest, OnStart002, TestSize.Level1)
-{
-    sptr<DeviceStatusCollectManager> manager = new DeviceStatusCollectManager();
-    sptr<RefCountCollect> collect = new RefCountCollect(manager);
-    collect->residentSaList_.clear();
     collect->unrefUnloadSaList_.push_back(1);
     auto ret = collect->OnStart();
     EXPECT_EQ(ret, ERR_OK);
@@ -161,7 +115,6 @@ HWTEST_F(RefCountCollectTest, OnStart003, TestSize.Level1)
 {
     sptr<DeviceStatusCollectManager> manager = new DeviceStatusCollectManager();
     sptr<RefCountCollect> collect = new RefCountCollect(manager);
-    collect->residentSaList_.clear();
     collect->unrefUnloadSaList_.clear();
     auto ret = collect->OnStart();
     EXPECT_EQ(ret, ERR_OK);
