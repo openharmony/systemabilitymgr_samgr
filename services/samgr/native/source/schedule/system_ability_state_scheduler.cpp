@@ -143,6 +143,12 @@ void SystemAbilityStateScheduler::InitSamgrProcessContext()
     processContextMap_[SAMGR_PROCESS_NAME] = processContext;
     processContextMap_[SAMGR_PROCESS_NAME]->saList.push_back(0);
     processContext->state = SystemProcessState::STARTED;
+    {
+        std::unique_lock<samgr::shared_mutex> autoLock(runningProcessListLock_);
+        SystemProcessInfo systemProcessInfo = {Str16ToStr8(processContext->processName), processContext->pid,
+            processContext->uid};
+        runningProcessList_.emplace_back(std::move(systemProcessInfo));
+    }
 
     auto abilityContext = std::make_shared<SystemAbilityContext>();
     abilityContext->systemAbilityId = 0;
