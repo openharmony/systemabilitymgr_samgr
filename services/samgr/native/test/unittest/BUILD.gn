@@ -280,12 +280,11 @@ ohos_unittest("SystemAbilityMgrCollectTest") {
     defines += [ "SUPPORT_COMMON_EVENT" ]
   }
 
-  if (support_common_event && bluetooth_part_enable) {
+  if (support_common_event) {
     sources += [
       "${samgr_services_dir}/source/collect/device_switch_collect.cpp",
       "${samgr_services_dir}/test/unittest/src/device_switch_collect_test.cpp",
     ]
-    external_deps += [ "bluetooth:btframework" ]
     defines += [ "SUPPORT_SWITCH_COLLECT" ]
   }
   if (support_device_manager) {
