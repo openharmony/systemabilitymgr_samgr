@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 declare_args() {
-  bluetooth_part_enable = false
   hicollie_able = true
   preferences_enable = true
   ressched_able = true
@@ -20,10 +19,6 @@ declare_args() {
   support_softbus = true
   samgr_support_access_token = true
   support_penglai_mode = false
-  if (!defined(global_parts_info) ||
-      defined(global_parts_info.communication_bluetooth)) {
-    bluetooth_part_enable = true
-  }
   if (defined(global_parts_info) &&
       !defined(global_parts_info.hiviewdfx_hicollie)) {
     hicollie_able = false
