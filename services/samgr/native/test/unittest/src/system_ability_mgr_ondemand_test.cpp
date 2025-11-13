@@ -975,6 +975,30 @@ HWTEST_F(SystemAbilityMgrOnDemandTest, IdleSystemAbility003, TestSize.Level3)
 }
 
 /**
+ * @tc.name: IdleSystemAbility004
+ * @tc.desc: test IdleSystemAbility, return true
+ * @tc.type: FUNC
+ * @tc.require: I6MO6A
+ */
+HWTEST_F(SystemAbilityMgrOnDemandTest, IdleSystemAbility004, TestSize.Level1)
+{
+    DTEST_LOG << "IdleSystemAbility004 start" << std::endl;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
+    sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
+    SAInfo saInfo;
+    saInfo.remoteObj = testAbility;
+    saMgr->abilityMap_[SAID] = saInfo;
+    nlohmann::json idleReason;
+    int32_t delayTime = 0;
+    bool ret = saMgr->IdleSystemAbility(SAID, u"test", idleReason, delayTime);
+    EXPECT_FALSE(ret);
+    saMgr->abilityMap_.erase(SAID);
+    DTEST_LOG << "IdleSystemAbility004 end" << std::endl;
+}
+
+/**
  * @tc.name: ActiveSystemAbility001
  * @tc.desc: test ActiveSystemAbility001, said is invalid
  * @tc.type: FUNC
@@ -1033,6 +1057,28 @@ HWTEST_F(SystemAbilityMgrOnDemandTest, ActiveSystemAbility003, TestSize.Level3)
     bool ret = saMgr->ActiveSystemAbility(TEST_OVERFLOW_SAID, u"test", activeReason);
     EXPECT_FALSE(ret);
     saMgr->abilityMap_.erase(TEST_OVERFLOW_SAID);
+}
+
+/**
+ * @tc.name: ActiveSystemAbility004
+ * @tc.desc: test ActiveSystemAbility, return true
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrOnDemandTest, ActiveSystemAbility004, TestSize.Level1)
+{
+    DTEST_LOG << "ActiveSystemAbility004 start" << std::endl; 
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
+    sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
+    SAInfo saInfo;
+    saInfo.remoteObj = testAbility;
+    saMgr->abilityMap_[SAID] = saInfo;
+    nlohmann::json activeReason;
+    bool ret = saMgr->ActiveSystemAbility(testAbility, u"test", activeReason);
+    EXPECT_FALSE(ret);
+    saMgr->abilityMap_.erase(testAbility);
+    DTEST_LOG << "ActiveSystemAbility004 end" << std::endl;
 }
 
 } // namespace OHOS

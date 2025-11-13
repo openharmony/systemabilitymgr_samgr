@@ -1775,7 +1775,11 @@ bool SystemAbilityManager::IdleSystemAbility(int32_t systemAbilityId, const std:
         return false;
     }
     HILOGI("IdleSA:%{public}d", systemAbilityId);
-    SamgrXCollie samgrXCollie("samgr--IdleSa_" + ToString(systemAbilityId));
+    int curTid = gettid();
+    auto killPeerTask = [curTid](void *) {
+        SamgrUtil::killProcessByPid(getpid(), curTid);
+    }
+    SamgrXCollie samgrXCollie("samgr--IdleSa_" + ToString(systemAbilityId), 60, killpeerTask);
     return procObject->IdleAbility(systemAbilityId, idleReason, delayTime);
 }
 
@@ -1794,7 +1798,11 @@ bool SystemAbilityManager::ActiveSystemAbility(int32_t systemAbilityId, const st
         return false;
     }
     HILOGI("ActiveSA:%{public}d", systemAbilityId);
-    SamgrXCollie samgrXCollie("samgr--ActiveSa_" + ToString(systemAbilityId));
+    int curTid = gettid();
+    auto killPeerTask = [curTid](void *) {
+        SamgrUtil::killProcessByPid(getpid(), curTid);
+    }
+    SamgrXCollie samgrXCollie("samgr--ActiveSa_" + ToString(systemAbilityId), 60, killpeerTask);
     return procObject->ActiveAbility(systemAbilityId, activeReason);
 }
 

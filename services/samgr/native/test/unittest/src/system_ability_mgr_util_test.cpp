@@ -19,6 +19,7 @@
 #include "sam_mock_permission.h"
 #include "ability_death_recipient.h"
 #include "test_log.h"
+#include <fstream>
 
 using namespace std;
 using namespace testing;
@@ -467,4 +468,110 @@ HWTEST_F(SamgrUtilTest, CheckPengLaiPermission001, TestSize.Level3)
     EXPECT_TRUE(ret);
 }
 #endif
+
+/**
+ * @tc.name: GetProcessNameByPid001
+ * @tc.desc: test valid GetProcessNameByPid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SamgrUtilTest, GetProcessNameByPid001, TestSize.Level3)
+{
+    DTEST_LOG << "GetProcessNameByPid001 start" << std::endl;
+    int32_t pid = getpid(); // test value
+    // SystemAbilityMgrCollectTest is cut to SystemAbilityMg
+    std::string testName = "SystemAbilityMg";
+    std::string procName = SamgrUtil::GetProcessNameByPid(pid);
+    EXPECT_EQ(testName, procName);
+    DTEST_LOG << "GetProcessNameByPid001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetProcessNameByPid002
+ * @tc.desc: test invalid GetProcessNameByPid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SamgrUtilTest, GetProcessNameByPid002, TestSize.Level3)
+{
+    DTEST_LOG << "GetProcessNameByPid002 start" << std::endl;
+    int32_t pid = 9999; // test value
+    std::string procName = SamgrUtil::GetProcessNameByPid(pid);
+    EXPECT_EQ("Error: Cannot open /proc/9999/comm", procName);
+    DTEST_LOG << "GetProcessNameByPid002 end" << std::endl;
+}
+
+/**
+ * @tc.name: ParsePeerBinderPid001
+ * @tc.desc: test valid ParsePeerBinderPid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SamgrUtilTest, ParsePeerBinderPid001, TestSize.Level3)
+{
+    DTEST_LOG << "ParsePeerBinderPid001 start" << std::endl;
+    int32_t pid = 12000; // test value
+    int32_t tid = 12000; // test value
+    std::string path = "/data/test/log/test1.txt";
+    std::ofstream ofs(path, std::ios::trunc);
+    if (!ofs.is_open()) {
+        DTEST_LOG << "open file failed!, path=" << path << std::endl;
+        return;
+    }
+    ofs << "aync 1:1 to 2:2 code 9 wait:4 s test" << std::endl;
+    ofs << "12000:12000 to 12001:12001 code 9 wait:61 s test" << std::endl;
+    ofs << "22000:22000 to 12001:12001 code 9 wait:1 s test" << std::endl;
+    ofs << "12000:12000 to 12001:12001 code 9 wait:4 s test" << std::endl;
+    ofs.close();
+    std::ifstream fin(path);
+    if (!fin.is_open()) {
+        DTEST_LOG << "open file failed!, path=" << path << std::endl;
+        return;
+    }
+    int result = SamgrUtil::ParsePeerBinderPid(fin, pid, tid);
+    fin.close();
+    EXPECT_TRUE(result > 0);
+    DTEST_LOG << "ParsePeerBinderPid001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ParsePeerBinderPid002
+ * @tc.desc: test invalid ParsePeerBinderPid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SamgrUtilTest, ParsePeerBinderPid002, TestSize.Level3)
+{
+    DTEST_LOG << "ParsePeerBinderPid002 start" << std::endl;
+    int32_t pid = 12000; // test value
+    int32_t tid = 12000; // test value
+    std::string path = "/data/test/log/test2.txt";
+    std::ofstream ofs(path, std::ios::trunc);
+    if (!ofs.is_open()) {
+        DTEST_LOG << "open file failed!, path=" << path << std::endl;
+        return;
+    }
+    ofs << "context" << std::endl;
+    ofs.close();
+    std::ifstream fin(path);
+    if (!fin.is_open()) {
+        DTEST_LOG << "open file failed!, path=" << path << std::endl;
+        return;
+    }
+    int result = SamgrUtil::ParsePeerBinderPid(fin, pid, tid);
+    fin.close();
+    EXPECT_TRUE(result < 0);
+    DTEST_LOG << "ParsePeerBinderPid002 end" << std::endl;
+}
+
+/**
+ * @tc.name: KillProcessByPid001
+ * @tc.desc: test kill process
+ * @tc.type: FUNC
+ */
+HWTEST_F(SamgrUtilTest, KillProcessByPid001, TestSize.Level3)
+{
+    DTEST_LOG << "KillProcessByPid001 start" << std::endl;
+    int32_t pid = 12000; // test value
+    int32_t tid = 12000; // test value
+    bool ret = SamgrUtil::killProcessByPid(pid, tid);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "KillProcessByPid001 end" << std::endl;
+}
 }
