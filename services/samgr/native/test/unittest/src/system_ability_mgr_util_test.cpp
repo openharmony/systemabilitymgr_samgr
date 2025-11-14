@@ -509,16 +509,28 @@ HWTEST_F(SamgrUtilTest, ParsePeerBinderPid001, TestSize.Level3)
     DTEST_LOG << "ParsePeerBinderPid001 start" << std::endl;
     int32_t pid = 12000; // test value
     int32_t tid = 12000; // test value
-    std::string path = "/data/test/log/test1.txt";
+    std::string path = "/data/test/test1.txt";
     std::ofstream ofs(path, std::ios::trunc);
     if (!ofs.is_open()) {
         DTEST_LOG << "open file failed!, path=" << path << std::endl;
         return;
     }
     ofs << "aync 1:1 to 2:2 code 9 wait:4 s test" << std::endl;
+    ofs << ":12000 to 12001:12001 code 9 wait:1 s test" << std::endl;
+    ofs << "12000:12000 to :12001 code 9 wait:1 s test" << std::endl;
+    ofs << "12000:12000 to 12001:12001 code 9 wait: s test" << std::endl;
+    ofs << ":12000 to :12001 code 9 wait:1 s test" << std::endl;
+    ofs << ":12000 to 12001:12001 code 9 wait: s test" << std::endl;
+    ofs << "12000:12000 to :12001 code 9 wait: s test" << std::endl;
+    ofs << ":12000 to :12001 code 9 wait: s test" << std::endl;
+    ofs << "12000:12001 to 12001:12001 code 9 wait:1 s test" << std::endl;
+    ofs << "12002:12000 to 12001:12001 code 9 wait:1 s test" << std::endl;
+    ofs << "12002:12001 to 12001:12001 code 9 wait:61 s test" << std::endl;
+    ofs << "12000:12000 to 12001:12001 code 9 wait:1 s test" << std::endl;
+    ofs << "12000:12001 to 12001:12001 code 9 wait:61 s test" << std::endl;
+    ofs << "12002:12000 to 12001:12001 code 9 wait:61 s test" << std::endl;
     ofs << "12000:12000 to 12001:12001 code 9 wait:61 s test" << std::endl;
     ofs << "22000:22000 to 12001:12001 code 9 wait:1 s test" << std::endl;
-    ofs << "12000:12000 to 12001:12001 code 9 wait:4 s test" << std::endl;
     ofs.close();
     std::ifstream fin(path);
     if (!fin.is_open()) {
@@ -541,7 +553,7 @@ HWTEST_F(SamgrUtilTest, ParsePeerBinderPid002, TestSize.Level3)
     DTEST_LOG << "ParsePeerBinderPid002 start" << std::endl;
     int32_t pid = 12000; // test value
     int32_t tid = 12000; // test value
-    std::string path = "/data/test/log/test2.txt";
+    std::string path = "/data/test/test2.txt";
     std::ofstream ofs(path, std::ios::trunc);
     if (!ofs.is_open()) {
         DTEST_LOG << "open file failed!, path=" << path << std::endl;

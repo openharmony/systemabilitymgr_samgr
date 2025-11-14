@@ -17,7 +17,6 @@
 #include <sstream>
 #include <fstream>
 #include <string>
-#include <csignal>
 #include "nlohmann/json.hpp"
 #include "system_ability_manager.h"
 #include "system_ability_manager_util.h"
@@ -361,7 +360,8 @@ std::string SamgrUtil::GetProcessNameByPid(int32_t pid)
 
     std::ifstream file(path);
     if(!file.is_open()) {
-        return "Error: Cannot open /proc/" + std::to_string(pid) + "/comm";
+        HILOGI("Error: Cannot open %{public}s", path.c_str());
+        return "";
     }
 
     std::string name;
@@ -371,7 +371,7 @@ std::string SamgrUtil::GetProcessNameByPid(int32_t pid)
     name.erase(std::remove(name.begin(), name.end(), '\n'), name.end());
     name.erase(std::remove(name.begin(), name.end(), '\r'), name.end());
 
-    return name
+    return name;
 }
 
 int SamgrUtil::ParsePeerBinderPid(std::ifstream& fin, int32_t pid, int32_t tid)
@@ -379,7 +379,7 @@ int SamgrUtil::ParsePeerBinderPid(std::ifstream& fin, int32_t pid, int32_t tid)
     const int decimal = 10;
     std::string line;
     bool isBinderMatchup = false;
-    while (!isBinderMatchup && std::getline(fin, line)) {
+    while (!isBinderMatchup && getline(fin, line)) {
         if (line.find("async\t") != std::string::npos) {
             continue;
         }       
@@ -391,8 +391,8 @@ int SamgrUtil::ParsePeerBinderPid(std::ifstream& fin, int32_t pid, int32_t tid)
         }
         auto splitPhase = [](const std::string& str, uint16_t index) -> std::string {
             std::vector<std::string> strings;
-            SplitString(str, " ", strings);
-            if (index >= strings.size()) {
+            SplitStr(str, ":", strings);
+            if (index < strings.size()) {
                 return strings[index];
             }
             return "";
@@ -400,7 +400,7 @@ int SamgrUtil::ParsePeerBinderPid(std::ifstream& fin, int32_t pid, int32_t tid)
         if (strList.size() >= 7) { // 7: valid array size
             std::string client = splitPhase(strList[0], 0); // 0: local pid,
             std::string clientTid = splitPhase(strList[0], 1); // 0: local tid,
-            std::string server = splitPhase(strList[2], 0); // 2: peer id,
+            std::string server = splitPhase(strList[2], 0); // 2: peer Pid,
             std::string wait = splitPhase(strList[5], 1); // 5: wait time, s
             if (server == "" || client == "" || wait == "") {
                 continue;
@@ -409,7 +409,7 @@ int SamgrUtil::ParsePeerBinderPid(std::ifstream& fin, int32_t pid, int32_t tid)
             int clientTidNum = std::strtol(clientTid.c_str(), nullptr, decimal);
             int serverNum = std::strtol(server.c_str(), nullptr, decimal);
             int waitNum = std::strtol(wait.c_str(), nullptr, decimal);
-            HILOGI("client pid:%{public}d, clientTid:%{public}d, server pid:%{public}d, wait:%{public}d",
+            HILOGI("ParsePeerBinderPid client pid:%{public}d, clientTid:%{public}d, server pid:%{public}d, wait:%{public}d",
                 clientNum, clientTidNum, serverNum, waitNum);
             if (clientNum != pid || clientTidNum != tid||waitNum < MIN_WAIT_NUM) {
                 continue;
@@ -423,7 +423,7 @@ int SamgrUtil::ParsePeerBinderPid(std::ifstream& fin, int32_t pid, int32_t tid)
     return -1;
 }
 
-bool KillProcessByPid(int32_t pid, int32_t tid)
+bool SamgrUtil::KillProcessByPid(int32_t pid, int32_t tid)
 {
     std::ifstream fin;
     std::string path = std::string(LOGGER_TEANSPROC_PATH);
