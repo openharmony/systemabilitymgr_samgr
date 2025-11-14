@@ -523,11 +523,11 @@ HWTEST_F(SamgrUtilTest, ParsePeerBinderPid001, TestSize.Level3)
     ofs << ":12000 to 12001:12001 code 9 wait: s test" << std::endl;
     ofs << "12000:12000 to :12001 code 9 wait: s test" << std::endl;
     ofs << ":12000 to :12001 code 9 wait: s test" << std::endl;
-    ofs << "12000:12001 to 12001:12001 code 9 wait:1 s test" << std::endl;
+    ofs << "12000:12002 to 12001:12001 code 9 wait:1 s test" << std::endl;
     ofs << "12002:12000 to 12001:12001 code 9 wait:1 s test" << std::endl;
-    ofs << "12002:12001 to 12001:12001 code 9 wait:61 s test" << std::endl;
+    ofs << "12002:12002 to 12001:12001 code 9 wait:61 s test" << std::endl;
     ofs << "12000:12000 to 12001:12001 code 9 wait:1 s test" << std::endl;
-    ofs << "12000:12001 to 12001:12001 code 9 wait:61 s test" << std::endl;
+    ofs << "12000:12002 to 12001:12001 code 9 wait:61 s test" << std::endl;
     ofs << "12002:12000 to 12001:12001 code 9 wait:61 s test" << std::endl;
     ofs << "12000:12000 to 12001:12001 code 9 wait:61 s test" << std::endl;
     ofs << "22000:22000 to 12001:12001 code 9 wait:1 s test" << std::endl;

@@ -49,6 +49,7 @@ constexpr int32_t UID_SYSTEM = 1000;
 constexpr int32_t SHFIT_BIT = 32;
 constexpr int32_t MIN_WAIT_NUM = 60;
 constexpr int32_t INIT_PID = 1;
+constexpr int32_t MAX_STRLIST_SIZE = 7;
 
 constexpr const char* EVENT_TYPE = "eventId";
 constexpr const char* EVENT_NAME = "name";
@@ -397,7 +398,7 @@ int SamgrUtil::ParsePeerBinderPid(std::ifstream& fin, int32_t pid, int32_t tid)
             }
             return "";
         };
-        if (strList.size() >= 7) { // 7: valid array size
+        if (strList.size() >= MAX_STRLIST_SIZE) { // 7: valid array size
             std::string client = splitPhase(strList[0], 0); // 0: local pid,
             std::string clientTid = splitPhase(strList[0], 1); // 0: local tid,
             std::string server = splitPhase(strList[2], 0); // 2: peer Pid,
