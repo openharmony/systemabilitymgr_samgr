@@ -1779,7 +1779,7 @@ bool SystemAbilityManager::IdleSystemAbility(int32_t systemAbilityId, const std:
     auto killPeerTask = [curTid]() {
         SamgrUtil::killProcessByPid(getpid(), curTid);
     };
-    SamgrXCollie samgrXCollie("samgr--IdleSa_" + ToString(systemAbilityId), 60, killpeerTask);
+    SamgrXCollie samgrXCollie("samgr--IdleSa_" + ToString(systemAbilityId), 60, killPeerTask);
     return procObject->IdleAbility(systemAbilityId, idleReason, delayTime);
 }
 
@@ -1802,7 +1802,7 @@ bool SystemAbilityManager::ActiveSystemAbility(int32_t systemAbilityId, const st
     auto killPeerTask = [curTid]() {
         SamgrUtil::killProcessByPid(getpid(), curTid);
     };
-    SamgrXCollie samgrXCollie("samgr--ActiveSa_" + ToString(systemAbilityId), 60, killpeerTask);
+    SamgrXCollie samgrXCollie("samgr--ActiveSa_" + ToString(systemAbilityId), 60, killPeerTask);
     return procObject->ActiveAbility(systemAbilityId, activeReason);
 }
 

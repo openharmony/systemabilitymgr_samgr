@@ -1077,7 +1077,7 @@ HWTEST_F(SystemAbilityMgrOnDemandTest, ActiveSystemAbility004, TestSize.Level1)
     nlohmann::json activeReason;
     bool ret = saMgr->ActiveSystemAbility(SAID, u"test", activeReason);
     EXPECT_FALSE(ret);
-    saMgr->abilityMap_.erase(testAbility);
+    saMgr->abilityMap_.erase(SAID);
     DTEST_LOG << "ActiveSystemAbility004 end" << std::endl;
 }
 
