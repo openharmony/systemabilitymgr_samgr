@@ -513,7 +513,7 @@ HWTEST_F(SamgrUtilTest, ParsePeerBinderPid001, TestSize.Level3)
     std::ofstream ofs(path, std::ios::trunc);
     if (!ofs.is_open()) {
         DTEST_LOG << "open file failed!, path=" << path << std::endl;
-        return false;
+        FAIL();
     }
     ofs << "aync 1:1 to 2:2 code 9 wait:4 s test" << std::endl;
     ofs << ":12000 to 12001:12001 code 9 wait:1 s test" << std::endl;
@@ -582,7 +582,7 @@ HWTEST_F(SamgrUtilTest, KillProcessByPid001, TestSize.Level3)
     DTEST_LOG << "KillProcessByPid001 start" << std::endl;
     int32_t pid = 12000; // test value
     int32_t tid = 12000; // test value
-    bool ret = SamgrUtil::killProcessByPid(pid, tid);
+    bool ret = SamgrUtil::KillProcessByPid(pid, tid);
     EXPECT_EQ(ret, false);
     DTEST_LOG << "KillProcessByPid001 end" << std::endl;
 }
