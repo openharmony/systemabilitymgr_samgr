@@ -427,7 +427,7 @@ int SamgrUtil::ParsePeerBinderPid(std::ifstream& fin, int32_t pid, int32_t tid)
 bool SamgrUtil::KillProcessByPid(int32_t pid, int32_t tid)
 {
     std::ifstream fin;
-    std::string path = std::string(LOGGER_TEANSPROC_PATH);
+    std::string path = std::string(LOGGER_TRANSPROC_PATH);
     char resolvePath[PATH_MAX] = {0};
     if (realpath(path.c_str(), resolvePath) == nullptr) {
         HILOGI("GetBinderPeerPids realpath error");
