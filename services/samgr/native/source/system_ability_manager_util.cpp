@@ -360,7 +360,7 @@ std::string SamgrUtil::GetProcessNameByPid(int32_t pid)
     std::string path = "/proc/" + std::to_string(pid) + "/comm";
 
     std::ifstream file(path);
-    if(!file.is_open()) {
+    if (!file.is_open()) {
         HILOGI("Error: Cannot open %{public}s", path.c_str());
         return "";
     }
@@ -383,7 +383,7 @@ int SamgrUtil::ParsePeerBinderPid(std::ifstream& fin, int32_t pid, int32_t tid)
     while (!isBinderMatchup && getline(fin, line)) {
         if (line.find("async\t") != std::string::npos) {
             continue;
-        }       
+        }
         std::istringstream lineStream(line);
         std::vector<std::string> strList;
         std::string tmpstr;
@@ -410,8 +410,8 @@ int SamgrUtil::ParsePeerBinderPid(std::ifstream& fin, int32_t pid, int32_t tid)
             int clientTidNum = std::strtol(clientTid.c_str(), nullptr, decimal);
             int serverNum = std::strtol(server.c_str(), nullptr, decimal);
             int waitNum = std::strtol(wait.c_str(), nullptr, decimal);
-            HILOGI("ParsePeerBinderPid client pid:%{public}d, clientTid:%{public}d, server pid:%{public}d, wait:%{public}d",
-                clientNum, clientTidNum, serverNum, waitNum);
+            HILOGI("ParsePeerBinderPid client pid:%{public}d, clientTid:%{public}d, server pid:%{public}d,
+                wait:%{public}d", clientNum, clientTidNum, serverNum, waitNum);
             if (clientNum != pid || clientTidNum != tid||waitNum < MIN_WAIT_NUM) {
                 continue;
             }

@@ -535,7 +535,7 @@ HWTEST_F(SamgrUtilTest, ParsePeerBinderPid001, TestSize.Level3)
     std::ifstream fin(path);
     if (!fin.is_open()) {
         DTEST_LOG << "open file failed!, path=" << path << std::endl;
-        return false;
+        FAIL();
     }
     int result = SamgrUtil::ParsePeerBinderPid(fin, pid, tid);
     fin.close();
@@ -557,14 +557,14 @@ HWTEST_F(SamgrUtilTest, ParsePeerBinderPid002, TestSize.Level3)
     std::ofstream ofs(path, std::ios::trunc);
     if (!ofs.is_open()) {
         DTEST_LOG << "open file failed!, path=" << path << std::endl;
-        return false;
+        FAIL();
     }
     ofs << "context" << std::endl;
     ofs.close();
     std::ifstream fin(path);
     if (!fin.is_open()) {
         DTEST_LOG << "open file failed!, path=" << path << std::endl;
-        return false;
+        FAIL();
     }
     int result = SamgrUtil::ParsePeerBinderPid(fin, pid, tid);
     fin.close();

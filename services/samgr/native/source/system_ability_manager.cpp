@@ -76,6 +76,7 @@ constexpr int64_t CHECK_LOADED_DELAY_TIME = 4 * 1000; // ms
 #endif
 constexpr int32_t SOFTBUS_SERVER_SA_ID = 4700;
 constexpr int32_t FIRST_DUMP_INDEX = 0;
+constexpr int32_t KILL_TIMEOUT_TIME = 60; // s
 }
 
 samgr::mutex SystemAbilityManager::instanceLock;
@@ -1779,7 +1780,7 @@ bool SystemAbilityManager::IdleSystemAbility(int32_t systemAbilityId, const std:
     auto killPeerTask = [curTid]() {
         SamgrUtil::killProcessByPid(getpid(), curTid);
     };
-    SamgrXCollie samgrXCollie("samgr--IdleSa_" + ToString(systemAbilityId), 60, killPeerTask);
+    SamgrXCollie samgrXCollie("samgr--IdleSa_" + ToString(systemAbilityId), KILL_TIMEOUT_TIME, killPeerTask);
     return procObject->IdleAbility(systemAbilityId, idleReason, delayTime);
 }
 
@@ -1802,7 +1803,7 @@ bool SystemAbilityManager::ActiveSystemAbility(int32_t systemAbilityId, const st
     auto killPeerTask = [curTid]() {
         SamgrUtil::killProcessByPid(getpid(), curTid);
     };
-    SamgrXCollie samgrXCollie("samgr--ActiveSa_" + ToString(systemAbilityId), 60, killPeerTask);
+    SamgrXCollie samgrXCollie("samgr--ActiveSa_" + ToString(systemAbilityId), KILL_TIMEOUT_TIME, killPeerTask);
     return procObject->ActiveAbility(systemAbilityId, activeReason);
 }
 

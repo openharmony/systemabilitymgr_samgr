@@ -1066,7 +1066,7 @@ HWTEST_F(SystemAbilityMgrOnDemandTest, ActiveSystemAbility003, TestSize.Level3)
  */
 HWTEST_F(SystemAbilityMgrOnDemandTest, ActiveSystemAbility004, TestSize.Level1)
 {
-    DTEST_LOG << "ActiveSystemAbility004 start" << std::endl; 
+    DTEST_LOG << "ActiveSystemAbility004 start" << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
     InitSaMgr(saMgr);
