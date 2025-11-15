@@ -48,5 +48,7 @@ void ReportProcessStopFail(const std::string& processName, int32_t pid, int32_t 
 void ReportProcessStartDuration(const std::string& processName, int32_t pid, int32_t uid, int64_t duration);
 
 void ReportProcessStopDuration(const std::string& processName, int32_t pid, int32_t uid, int64_t duration);
+
+void ReportSaAbnormallyFrozen(int32_t saId, const std::string& processName, const std::string& reason);
 } // OHOS
 #endif // SAMGR_SERVICES_DFX_INCLUDE__HISYSEVENT_ADAPTER_H

@@ -107,3 +107,9 @@ SERVICE_BLOCK:
   PID: {type: INT32, desc: caller pid}
   UID: {type: UINT32, desc: caller uid}
   MSG: {type: STRING, desc: time msg}
+
+SA_ABNORMALLY_FROZEN:
+  __BASE: {type: FAULT, level: CRITICAL, desc: SA abnormally frozen}
+  SAID: {type: INT32, desc: system ability id}
+  PROCESS_NAME: {type: STRING, desc: process name}
+  REASON: {type: STRING, desc: SA abnormally frozen reason}

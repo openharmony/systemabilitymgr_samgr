@@ -40,6 +40,7 @@ constexpr const char* ONDEMAND_SA_LOAD = "ONDEMAND_SA_LOAD";
 constexpr const char* EVENT = "EVENT";
 constexpr const char* SA_CRASH = "SA_CRASH";
 constexpr const char* ONDEMAND_SA_UNLOAD = "ONDEMAND_SA_UNLOAD";
+constexpr const char* SA_ABNORMALLY_FROZEN = "SA_ABNORMALLY_FROZEN";
 constexpr const char* SA_UNLOAD_FAIL = "SA_UNLOAD_FAIL";
 constexpr const char* SA_LOAD_DURATION = "SA_LOAD_DURATION";
 constexpr const char* SA_UNLOAD_DURATION = "SA_UNLOAD_DURATION";
@@ -289,6 +290,19 @@ void WatchDogSendEvent(int32_t pid, uint32_t uid, const std::string& sendMsg,
         "MSG", sendMsg);
     if (ret != 0) {
         HILOGE("hisysevent report watchdog failed! ret %{public}d.", ret);
+    }
+}
+
+void ReportSaAbnormallyFrozen(int32_t saId, const std::string& processName, const std::string& reason)
+{
+    int ret = HiSysEventWrite(HiSysEvent::Domain::SAMGR,
+        SA_ABNORMALLY_FROZEN,
+        HiSysEvent::EventType::FAULT,
+        SAID, saId,
+        PROCESS_NAME, processName,
+        REASON, reason);
+    if (ret != 0) {
+        HILOGE("hisysevent report SA abnormally frozen event failed! ret %{public}d.", ret);
     }
 }
 } // OHOS
