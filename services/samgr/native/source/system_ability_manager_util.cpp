@@ -412,7 +412,7 @@ int SamgrUtil::ParsePeerBinderPid(std::ifstream& fin, int32_t pid, int32_t tid)
             int waitNum = std::strtol(wait.c_str(), nullptr, decimal);
             HILOGI("client pid:%{public}d, clientTid:%{public}d, server pid:%{public}d, wait:%{public}d",
                 clientNum, clientTidNum, serverNum, waitNum);
-            if (clientNum != pid || clientTidNum != tid||waitNum < MIN_WAIT_NUM) {
+            if (clientNum != pid || clientTidNum != tid || waitNum < MIN_WAIT_NUM) {
                 continue;
             }
             return serverNum;
@@ -430,32 +430,27 @@ bool SamgrUtil::KillProcessByPid(int32_t pid, int32_t tid)
     std::string path = std::string(LOGGER_TRANSPROC_PATH);
     char resolvePath[PATH_MAX] = {0};
     if (realpath(path.c_str(), resolvePath) == nullptr) {
-        HILOGI("GetBinderPeerPids realpath error");
+        HILOGE("GetBinderPeerPids realpath error");
         return false;
     }
     fin.open(resolvePath);
     if (!fin.is_open()) {
-        HILOGI("open file failed, %{public}s.", resolvePath);
+        HILOGE("open file failed, %{public}s.", resolvePath);
         return false;
     }
 
     int peerBinderPid = ParsePeerBinderPid(fin, pid, tid);
     fin.close();
     if (peerBinderPid <= INIT_PID || peerBinderPid == pid) {
-        HILOGI("No PeerBinder process freeze occurs in the current process. "
+        HILOGE("No PeerBinder process freeze occurs in the current process. "
             "peerBinderPid=%{public}d, pid=%{public}d", peerBinderPid, pid);
         return false;
     }
     std::string processName = GetProcessNameByPid(peerBinderPid);
     int32_t ret = ServiceControlWithExtra(processName.c_str(),
         ServiceAction::STOP, nullptr, 0);
-    if (ret != 0) {
-        HILOGI("Kill PeerBinder process failed, pid=%{public}d, processName=%{public}s",
-            peerBinderPid, processName.c_str());
-    } else {
-        HILOGI("Kill PeerBinder process success, pid=%{public}d, processName=%{public}s",
-            peerBinderPid, processName.c_str());
-    }
+    HILOGI("Kill PeerBinder process %{public}s, pid=%{public}d, processName=%{public}s",
+        (ret != 0) ? "failed" : "success", peerBinderPid, processName.c_str());
     return (ret == 0);
 }
 }
