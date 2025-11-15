@@ -286,7 +286,6 @@ void SystemAbilityManager::AddSamgrToAbilityMap()
     SAInfo saInfo;
     saInfo.remoteObj = this;
     saInfo.isDistributed = false;
-    saInfo.capability = u"";
     abilityMap_[systemAbilityId] = std::move(saInfo);
     if (abilityStateScheduler_ != nullptr) {
         abilityStateScheduler_->InitSamgrProcessContext();
@@ -1053,7 +1052,7 @@ int32_t SystemAbilityManager::AddSystemAbility(int32_t systemAbilityId, const sp
             HILOGE("map size error, (Has been greater than %zu)", saSize);
             return ERR_INVALID_VALUE;
         }
-        SAInfo saInfo = { ability, extraProp.isDistributed, extraProp.capability, Str16ToStr8(extraProp.permission) };
+        SAInfo saInfo = { ability, extraProp.isDistributed };
         if (abilityMap_.count(systemAbilityId) > 0) {
             SystemAbilityInvalidateCache(systemAbilityId);
             auto callingPid = IPCSkeleton::GetCallingPid();
