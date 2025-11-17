@@ -357,7 +357,7 @@ void SamgrUtil::DeviceIdToNetworkId(std::string& networkId)
 
 std::string SamgrUtil::GetProcessNameByPid(int32_t pid)
 {
-    std::string path = "/proc/" + std::to_string(pid) + "/comm";
+    std::string path = "/proc/" + std::to_string(pid) + "/cmdline";
 
     std::ifstream file(path);
     if (!file.is_open()) {
@@ -373,6 +373,26 @@ std::string SamgrUtil::GetProcessNameByPid(int32_t pid)
     name.erase(std::remove(name.begin(), name.end(), '\r'), name.end());
 
     return name;
+}
+
+int SmagrUtil::ConvertStringToInt(const std::string& str)
+{
+    const int decimal = 10;
+    errno = 0;
+    char* endptr = nullptr;
+    int ret = std::strtol(str.c_str(), &endptr, decimal);
+    if (endptr == str.c_str()) {
+        HILOGE("No numeric characters in string, string %{public}s", str.c_str());
+        return 0;
+    }
+    if (errno == ERANGE && (ret > INT_MAX || ret < INT_MIN)) {
+        HILOGE("out of range, string:%{public}s to int", str.c_str());
+        return 0;
+    }
+    if (endptr == nullptr || *endptr != '\0') {
+        HILOGE("String contain non-numeric characters, string:%{public}s to int", str.c_str())
+    }
+    return static_cast<int>(ret);
 }
 
 int SamgrUtil::ParsePeerBinderPid(std::ifstream& fin, int32_t pid, int32_t tid)
@@ -406,15 +426,15 @@ int SamgrUtil::ParsePeerBinderPid(std::ifstream& fin, int32_t pid, int32_t tid)
             if (server == "" || client == "" || wait == "") {
                 continue;
             }
-            int clientNum = std::strtol(client.c_str(), nullptr, decimal);
-            int clientTidNum = std::strtol(clientTid.c_str(), nullptr, decimal);
-            int serverNum = std::strtol(server.c_str(), nullptr, decimal);
-            int waitNum = std::strtol(wait.c_str(), nullptr, decimal);
-            HILOGI("client pid:%{public}d, clientTid:%{public}d, server pid:%{public}d, wait:%{public}d",
-                clientNum, clientTidNum, serverNum, waitNum);
+            int clientNum = ConvertStringToInt(client.c_str());
+            int clientTidNum = ConvertStringToInt(clientTid.c_str());
+            int serverNum = ConvertStringToInt(server.c_str());
+            int waitNum = ConvertStringToInt(wait.c_str());
             if (clientNum != pid || clientTidNum != tid || waitNum < MIN_WAIT_NUM) {
                 continue;
             }
+            HILOGI("client pid:%{public}d, clientTid:%{public}d, server pid:%{public}d, wait:%{public}d",
+                clientNum, clientTidNum, serverNum, waitNum);
             return serverNum;
         }
         if (line.find("context") != line.npos) {

@@ -57,6 +57,7 @@ public:
     static void DeviceIdToNetworkId(std::string& networkId);
 #endif
     static std::string GetProcessNameByPid(int32_t pid);
+    static ConvertStringToInt(const std::string& str);
     static int ParsePeerBinderPid(std::ifstream& fin, int32_t pid, int32_t tid);
     static bool KillProcessByPid(int32_t pid, int32_t tid);
 private:
