@@ -361,7 +361,7 @@ std::string SamgrUtil::GetProcessNameByPid(int32_t pid)
 
     std::ifstream file(path);
     if (!file.is_open()) {
-        HILOGI("Error: Cannot open %{public}s", path.c_str());
+        HILOGE("Error: Cannot open %{public}s, pid: %{public}d", path.c_str(), pid);
         return "";
     }
 
