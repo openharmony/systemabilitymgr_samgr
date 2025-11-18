@@ -530,10 +530,6 @@ HWTEST_F(SamgrUtilTest, ParsePeerBinderPid001, TestSize.Level3)
     ofs << "70002:70000 to 70001:70001 code 9 wait:61 s test" << std::endl;
     ofs << "70000:70000 to 70001:70001 code 9 wait:61 s test" << std::endl;
     ofs << "72000:72000 to 70001:70001 code 9 wait:1 s test" << std::endl;
-    ofs << "72abc:72000 to 70001:70001 code 9 wait:1 s test" << std::endl;
-    ofs << "abc:72000 to 70001:70001 code 9 wait:1 s test" << std::endl;
-    ofs << "3000000000:72000 to 70001:70001 code 9 wait:1 s test" << std::endl;
-    ofs << "-3000000000:72000 to 70001:70001 code 9 wait:1 s test" << std::endl;
     ofs.close();
     std::ifstream fin(path);
     if (!fin.is_open()) {
@@ -562,7 +558,7 @@ HWTEST_F(SamgrUtilTest, ParsePeerBinderPid002, TestSize.Level3)
         DTEST_LOG << "open file failed!, path=" << path << std::endl;
         FAIL();
     }
-    ofs << "context" << std::endl;
+    ofs << " context " << std::endl;
     ofs.close();
     std::ifstream fin(path);
     if (!fin.is_open()) {

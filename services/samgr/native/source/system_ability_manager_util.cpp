@@ -382,27 +382,6 @@ std::string SamgrUtil::GetProcessNameByPid(int32_t pid)
     return name;
 }
 
-int SamgrUtil::ConvertStringToInt(const std::string& str)
-{
-    const int decimal = 10;
-    errno = 0;
-    char* endptr = nullptr;
-    long ret = std::strtol(str.c_str(), &endptr, decimal);
-    if (endptr == str.c_str()) {
-        HILOGE("No numeric characters in string, string %{public}s", str.c_str());
-        return -1;
-    }
-    if (errno == ERANGE && (ret > INT_MAX || ret < INT_MIN)) {
-        HILOGE("out of range, string:%{public}s to int", str.c_str());
-        return -1;
-    }
-    if (endptr == nullptr || *endptr != '\0') {
-        HILOGE("String contain non-numeric characters, string:%{public}s to int", str.c_str());
-        return -1;
-    }
-    return static_cast<int>(ret);
-}
-
 int SamgrUtil::ParsePeerBinderPid(std::ifstream& fin, int32_t pid, int32_t tid)
 {
     const int decimal = 10;
@@ -434,10 +413,10 @@ int SamgrUtil::ParsePeerBinderPid(std::ifstream& fin, int32_t pid, int32_t tid)
             if (server == "" || client == "" || wait == "") {
                 continue;
             }
-            int clientNum = ConvertStringToInt(client.c_str());
-            int clientTidNum = ConvertStringToInt(clientTid.c_str());
-            int serverNum = ConvertStringToInt(server.c_str());
-            int waitNum = ConvertStringToInt(wait.c_str());
+            int clientNum = atoi(client.c_str());
+            int clientTidNum = atoi(clientTid.c_str());
+            int serverNum = atoi(server.c_str());
+            int waitNum = atoi(wait.c_str());
             if (clientNum != pid || clientTidNum != tid || waitNum < MIN_WAIT_NUM) {
                 HILOGD("client pid:%{public}d, clientTid:%{public}d, server pid:%{public}d, wait:%{public}d",
                     clientNum, clientTidNum, serverNum, waitNum);
