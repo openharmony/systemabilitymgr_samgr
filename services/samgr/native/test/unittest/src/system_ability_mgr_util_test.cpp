@@ -478,8 +478,7 @@ HWTEST_F(SamgrUtilTest, GetProcessNameByPid001, TestSize.Level3)
 {
     DTEST_LOG << "GetProcessNameByPid001 start" << std::endl;
     int32_t pid = getpid(); // test value
-    // SystemAbilityMgrCollectTest is cut to SystemAbilityMg
-    std::string testName = "SystemAbilityMg";
+    std::string testName = "SystemAbilityMgrCollectTest";
     std::string procName = SamgrUtil::GetProcessNameByPid(pid);
     EXPECT_EQ(testName, procName);
     DTEST_LOG << "GetProcessNameByPid001 end" << std::endl;
@@ -493,9 +492,9 @@ HWTEST_F(SamgrUtilTest, GetProcessNameByPid001, TestSize.Level3)
 HWTEST_F(SamgrUtilTest, GetProcessNameByPid002, TestSize.Level3)
 {
     DTEST_LOG << "GetProcessNameByPid002 start" << std::endl;
-    int32_t pid = 9999; // test value
+    int32_t pid = 70000; // test value
     std::string procName = SamgrUtil::GetProcessNameByPid(pid);
-    EXPECT_EQ("Error: Cannot open /proc/9999/comm", procName);
+    EXPECT_EQ("", procName);
     DTEST_LOG << "GetProcessNameByPid002 end" << std::endl;
 }
 
@@ -530,7 +529,7 @@ HWTEST_F(SamgrUtilTest, ParsePeerBinderPid001, TestSize.Level3)
     ofs << "70000:70002 to 70001:70001 code 9 wait:61 s test" << std::endl;
     ofs << "70002:70000 to 70001:70001 code 9 wait:61 s test" << std::endl;
     ofs << "70000:70000 to 70001:70001 code 9 wait:61 s test" << std::endl;
-    ofs << "22000:22000 to 70001:70001 code 9 wait:1 s test" << std::endl;
+    ofs << "72000:72000 to 70001:70001 code 9 wait:1 s test" << std::endl;
     ofs.close();
     std::ifstream fin(path);
     if (!fin.is_open()) {
