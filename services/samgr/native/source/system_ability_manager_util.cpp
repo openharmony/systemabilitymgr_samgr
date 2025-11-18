@@ -375,7 +375,7 @@ std::string SamgrUtil::GetProcessNameByPid(int32_t pid)
     return name;
 }
 
-int SmagrUtil::ConvertStringToInt(const std::string& str)
+int SamgrUtil::ConvertStringToInt(const std::string& str)
 {
     const int decimal = 10;
     errno = 0;
@@ -390,7 +390,7 @@ int SmagrUtil::ConvertStringToInt(const std::string& str)
         return 0;
     }
     if (endptr == nullptr || *endptr != '\0') {
-        HILOGE("String contain non-numeric characters, string:%{public}s to int", str.c_str())
+        HILOGE("String contain non-numeric characters, string:%{public}s to int", str.c_str());
     }
     return static_cast<int>(ret);
 }

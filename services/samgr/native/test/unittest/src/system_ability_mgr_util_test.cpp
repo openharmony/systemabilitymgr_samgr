@@ -507,8 +507,8 @@ HWTEST_F(SamgrUtilTest, GetProcessNameByPid002, TestSize.Level3)
 HWTEST_F(SamgrUtilTest, ParsePeerBinderPid001, TestSize.Level3)
 {
     DTEST_LOG << "ParsePeerBinderPid001 start" << std::endl;
-    int32_t pid = 12000; // test value
-    int32_t tid = 12000; // test value
+    int32_t pid = 70000; // test value
+    int32_t tid = 70000; // test value
     std::string path = "/data/test/test1.txt";
     std::ofstream ofs(path, std::ios::trunc);
     if (!ofs.is_open()) {
@@ -516,21 +516,21 @@ HWTEST_F(SamgrUtilTest, ParsePeerBinderPid001, TestSize.Level3)
         FAIL();
     }
     ofs << "aync 1:1 to 2:2 code 9 wait:4 s test" << std::endl;
-    ofs << ":12000 to 12001:12001 code 9 wait:1 s test" << std::endl;
-    ofs << "12000:12000 to :12001 code 9 wait:1 s test" << std::endl;
-    ofs << "12000:12000 to 12001:12001 code 9 wait: s test" << std::endl;
-    ofs << ":12000 to :12001 code 9 wait:1 s test" << std::endl;
-    ofs << ":12000 to 12001:12001 code 9 wait: s test" << std::endl;
-    ofs << "12000:12000 to :12001 code 9 wait: s test" << std::endl;
-    ofs << ":12000 to :12001 code 9 wait: s test" << std::endl;
-    ofs << "12000:12002 to 12001:12001 code 9 wait:1 s test" << std::endl;
-    ofs << "12002:12000 to 12001:12001 code 9 wait:1 s test" << std::endl;
-    ofs << "12002:12002 to 12001:12001 code 9 wait:61 s test" << std::endl;
-    ofs << "12000:12000 to 12001:12001 code 9 wait:1 s test" << std::endl;
-    ofs << "12000:12002 to 12001:12001 code 9 wait:61 s test" << std::endl;
-    ofs << "12002:12000 to 12001:12001 code 9 wait:61 s test" << std::endl;
-    ofs << "12000:12000 to 12001:12001 code 9 wait:61 s test" << std::endl;
-    ofs << "22000:22000 to 12001:12001 code 9 wait:1 s test" << std::endl;
+    ofs << ":70000 to 70001:70001 code 9 wait:1 s test" << std::endl;
+    ofs << "70000:70000 to :70001 code 9 wait:1 s test" << std::endl;
+    ofs << "70000:70000 to 70001:70001 code 9 wait: s test" << std::endl;
+    ofs << ":70000 to :70001 code 9 wait:1 s test" << std::endl;
+    ofs << ":70000 to 70001:70001 code 9 wait: s test" << std::endl;
+    ofs << "70000:70000 to :70001 code 9 wait: s test" << std::endl;
+    ofs << ":70000 to :70001 code 9 wait: s test" << std::endl;
+    ofs << "70000:70002 to 70001:70001 code 9 wait:1 s test" << std::endl;
+    ofs << "70002:70000 to 70001:70001 code 9 wait:1 s test" << std::endl;
+    ofs << "70002:70002 to 70001:70001 code 9 wait:61 s test" << std::endl;
+    ofs << "70000:70000 to 70001:70001 code 9 wait:1 s test" << std::endl;
+    ofs << "70000:70002 to 70001:70001 code 9 wait:61 s test" << std::endl;
+    ofs << "70002:70000 to 70001:70001 code 9 wait:61 s test" << std::endl;
+    ofs << "70000:70000 to 70001:70001 code 9 wait:61 s test" << std::endl;
+    ofs << "22000:22000 to 70001:70001 code 9 wait:1 s test" << std::endl;
     ofs.close();
     std::ifstream fin(path);
     if (!fin.is_open()) {
@@ -551,8 +551,8 @@ HWTEST_F(SamgrUtilTest, ParsePeerBinderPid001, TestSize.Level3)
 HWTEST_F(SamgrUtilTest, ParsePeerBinderPid002, TestSize.Level3)
 {
     DTEST_LOG << "ParsePeerBinderPid002 start" << std::endl;
-    int32_t pid = 12000; // test value
-    int32_t tid = 12000; // test value
+    int32_t pid = 70000; // test value
+    int32_t tid = 70000; // test value
     std::string path = "/data/test/test2.txt";
     std::ofstream ofs(path, std::ios::trunc);
     if (!ofs.is_open()) {
@@ -580,8 +580,8 @@ HWTEST_F(SamgrUtilTest, ParsePeerBinderPid002, TestSize.Level3)
 HWTEST_F(SamgrUtilTest, KillProcessByPid001, TestSize.Level3)
 {
     DTEST_LOG << "KillProcessByPid001 start" << std::endl;
-    int32_t pid = 12000; // test value
-    int32_t tid = 12000; // test value
+    int32_t pid = 70000; // test value
+    int32_t tid = 70000; // test value
     bool ret = SamgrUtil::KillProcessByPid(pid, tid);
     EXPECT_EQ(ret, false);
     DTEST_LOG << "KillProcessByPid001 end" << std::endl;
