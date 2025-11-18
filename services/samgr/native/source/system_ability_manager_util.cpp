@@ -367,10 +367,17 @@ std::string SamgrUtil::GetProcessNameByPid(int32_t pid)
 
     std::string name;
     std::getline(file, name);
-
+    file.close();
     // Remove newline characters
+    name.erase(std::remove(name.begin(), name.end(), '\0'), name.end());
     name.erase(std::remove(name.begin(), name.end(), '\n'), name.end());
     name.erase(std::remove(name.begin(), name.end(), '\r'), name.end());
+
+    // Extract just the filename from the path
+    size_t lastSlash = fullPath.find_last_of('/');
+    if (lastSlash != std::string::npos) {
+        return fullPath.substr(lastSlash + 1);
+    }
 
     return name;
 }
