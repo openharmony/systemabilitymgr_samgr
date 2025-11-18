@@ -374,9 +374,9 @@ std::string SamgrUtil::GetProcessNameByPid(int32_t pid)
     name.erase(std::remove(name.begin(), name.end(), '\r'), name.end());
 
     // Extract just the filename from the path
-    size_t lastSlash = file.find_last_of('/');
+    size_t lastSlash = name.find_last_of('/');
     if (lastSlash != std::string::npos) {
-        return file.substr(lastSlash + 1);
+        return name.substr(lastSlash + 1);
     }
 
     return name;
