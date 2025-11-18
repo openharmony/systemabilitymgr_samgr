@@ -384,7 +384,6 @@ std::string SamgrUtil::GetProcessNameByPid(int32_t pid)
 
 int SamgrUtil::ParsePeerBinderPid(std::ifstream& fin, int32_t pid, int32_t tid)
 {
-    const int decimal = 10;
     std::string line;
     bool isBinderMatchup = false;
     while (!isBinderMatchup && getline(fin, line)) {
