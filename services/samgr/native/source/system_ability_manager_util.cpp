@@ -372,7 +372,7 @@ std::string SamgrUtil::GetProcessNameFromCmdline(int32_t pid)
     if (lastSlash != std::string::npos) {
         name = name.substr(lastSlash + 1);
     }
-    HILOGD("GetProcessNameByPid name: %{public}s");
+    HILOGD("GetProcessNameByPid name: %{public}s", name.c_str());
     return name;
 }
 
