@@ -364,6 +364,7 @@ std::string SamgrUtil::GetProcessNameFromCmdline(int32_t pid)
         HILOGE("Error: Cannot open %{public}s, pid: %{public}d", path.c_str(), pid);
         return "";
     }
+    std::string name;
     std::getline(file, name, '\0');
     file.close();
     // Extract just the filename from the path
