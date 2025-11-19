@@ -1779,6 +1779,7 @@ bool SystemAbilityManager::IdleSystemAbility(int32_t systemAbilityId, const std:
     int curTid = gettid();
     auto killPeerTask = [curTid](void *) {
         (void)SamgrUtil::KillProcessByPid(getpid(), curTid);
+        ReportSaAbnormallyFrozen(systemAbilityId, Str16ToStr8(procName), "IdleSa timeout");
     };
     SamgrXCollie samgrXCollie("samgr--IdleSa_" + ToString(systemAbilityId), KILL_TIMEOUT_TIME, killPeerTask);
     return procObject->IdleAbility(systemAbilityId, idleReason, delayTime);
@@ -1802,6 +1803,7 @@ bool SystemAbilityManager::ActiveSystemAbility(int32_t systemAbilityId, const st
     int curTid = gettid();
     auto killPeerTask = [curTid](void *) {
         (void)SamgrUtil::KillProcessByPid(getpid(), curTid);
+        ReportSaAbnormallyFrozen(systemAbilityId, Str16ToStr8(procName), "ActiveSa timeout");
     };
     SamgrXCollie samgrXCollie("samgr--ActiveSa_" + ToString(systemAbilityId), KILL_TIMEOUT_TIME, killPeerTask);
     return procObject->ActiveAbility(systemAbilityId, activeReason);

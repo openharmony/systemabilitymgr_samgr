@@ -359,24 +359,26 @@ std::string SamgrUtil::GetProcessNameByPid(int32_t pid)
 {
     std::string path = "/proc/" + std::to_string(pid) + "/cmdline";
 
-    std::ifstream file(path);
+    std::ifstream file(path, std::ios::binary);
     if (!file.is_open()) {
         HILOGE("Error: Cannot open %{public}s, pid: %{public}d", path.c_str(), pid);
         return "";
     }
 
-    std::string name;
-    std::getline(file, name);
+    std::string name((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
     file.close();
-    // Remove newline characters
-    name.erase(std::remove(name.begin(), name.end(), '\0'), name.end());
-    name.erase(std::remove(name.begin(), name.end(), '\n'), name.end());
-    name.erase(std::remove(name.begin(), name.end(), '\r'), name.end());
+
+    // Find the first null-terminated string (the executable path)
+    size_t firstNull = name.find('\0');
+    if (firstNull == std::string::npos) {
+        firstNull = name.length();
+    }
+    name = name.substr(0, firstNull);
 
     // Extract just the filename from the path
     size_t lastSlash = name.find_last_of('/');
     if (lastSlash != std::string::npos) {
-        return name.substr(lastSlash + 1);
+        name = name.substr(lastSlash + 1);
     }
 
     return name;
