@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 
+#include <iostream>
+#include <sstream>
+#include <fstream>
+#include <string>
 #include "nlohmann/json.hpp"
 #include "system_ability_manager.h"
 #include "system_ability_manager_util.h"
@@ -20,6 +24,7 @@
 #include "parameters.h"
 #include "accesstoken_kit.h"
 #include "ipc_skeleton.h"
+#include "service_control.h"
 #include "string_ex.h"
 #include "tools.h"
 #include "sam_log.h"
@@ -42,6 +47,9 @@ constexpr int32_t SPLIT_NAME_VECTOR_SIZE = 2;
 constexpr int32_t UID_ROOT = 0;
 constexpr int32_t UID_SYSTEM = 1000;
 constexpr int32_t SHFIT_BIT = 32;
+constexpr int32_t MIN_WAIT_NUM = 60;
+constexpr int32_t INIT_PID = 1;
+constexpr int32_t MAX_STRLIST_SIZE = 7;
 
 constexpr const char* EVENT_TYPE = "eventId";
 constexpr const char* EVENT_NAME = "name";
@@ -51,6 +59,7 @@ constexpr const char* MODULE_UPDATE_PARAM = "persist.samgr.moduleupdate";
 constexpr const char* PENG_LAI_PARAM = "ohos.boot.minisys.mode";
 constexpr const char* PENG_LAI = "penglai";
 constexpr const char* PENGLAI_PATH = "profile/penglai";
+constexpr const char* LOGGER_TRANSPROC_PATH = "/proc/transaction_proc";
 #ifdef SUPPORT_DEVICE_MANAGER
 constexpr const char* PKG_NAME = "Samgr_Networking";
 #endif
@@ -345,4 +354,105 @@ void SamgrUtil::DeviceIdToNetworkId(std::string& networkId)
     }
 }
 #endif
+
+std::string SamgrUtil::GetProcessNameFromCmdline(int32_t pid)
+{
+    std::string path = "/proc/" + std::to_string(pid) + "/cmdline";
+
+    std::ifstream file(path, std::ios::binary);
+    if (!file.is_open()) {
+        HILOGE("Error: Cannot open %{public}s, pid: %{public}d", path.c_str(), pid);
+        return "";
+    }
+    std::string name;
+    std::getline(file, name, '\0');
+    file.close();
+    // Extract just the filename from the path
+    size_t lastSlash = name.find_last_of('/');
+    if (lastSlash != std::string::npos) {
+        name = name.substr(lastSlash + 1);
+    }
+    HILOGD("GetProcessNameByPid name: %{public}s", name.c_str());
+    return name;
+}
+
+int SamgrUtil::ParsePeerBinderPid(std::ifstream& fin, int32_t pid, int32_t tid)
+{
+    std::string line;
+    bool isBinderMatchup = false;
+    while (!isBinderMatchup && getline(fin, line)) {
+        if (line.find("async\t") != std::string::npos) {
+            continue;
+        }
+        std::istringstream lineStream(line);
+        std::vector<std::string> strList;
+        std::string tmpstr;
+        while (lineStream >> tmpstr) {
+            strList.push_back(tmpstr);
+        }
+        auto splitPhase = [](const std::string& str, uint16_t index) -> std::string {
+            std::vector<std::string> strings;
+            SplitStr(str, ":", strings);
+            if (index < strings.size()) {
+                return strings[index];
+            }
+            return "";
+        };
+        if (strList.size() >= MAX_STRLIST_SIZE) { // 7: valid array size
+            std::string client = splitPhase(strList[0], 0); // 0: local pid,
+            std::string clientTid = splitPhase(strList[0], 1); // 0: local tid,
+            std::string server = splitPhase(strList[2], 0); // 2: peer Pid,
+            std::string wait = splitPhase(strList[5], 1); // 5: wait time, s
+            if (server == "" || client == "" || wait == "") {
+                continue;
+            }
+            int clientNum = atoi(client.c_str());
+            int clientTidNum = atoi(clientTid.c_str());
+            int serverNum = atoi(server.c_str());
+            int waitNum = atoi(wait.c_str());
+            if (clientNum != pid || clientTidNum != tid || waitNum < MIN_WAIT_NUM) {
+                HILOGD("client pid:%{public}d, clientTid:%{public}d, server pid:%{public}d, wait:%{public}d",
+                    clientNum, clientTidNum, serverNum, waitNum);
+                continue;
+            }
+            HILOGI("client pid:%{public}d, clientTid:%{public}d, server pid:%{public}d, wait:%{public}d",
+                clientNum, clientTidNum, serverNum, waitNum);
+            return serverNum;
+        }
+        if (line.find("context") != line.npos) {
+            isBinderMatchup = true;
+        }
+    }
+    return -1;
+}
+
+bool SamgrUtil::KillProcessByPid(int32_t pid, int32_t tid)
+{
+    std::ifstream fin;
+    std::string path = std::string(LOGGER_TRANSPROC_PATH);
+    char resolvePath[PATH_MAX] = {0};
+    if (realpath(path.c_str(), resolvePath) == nullptr) {
+        HILOGE("GetBinderPeerPids realpath error");
+        return false;
+    }
+    fin.open(resolvePath);
+    if (!fin.is_open()) {
+        HILOGE("open file failed, %{public}s.", resolvePath);
+        return false;
+    }
+
+    int peerBinderPid = ParsePeerBinderPid(fin, pid, tid);
+    fin.close();
+    if (peerBinderPid <= INIT_PID || peerBinderPid == pid) {
+        HILOGE("No PeerBinder process freeze occurs in the current process. "
+            "peerBinderPid=%{public}d, pid=%{public}d", peerBinderPid, pid);
+        return false;
+    }
+    std::string processName = GetProcessNameFromCmdline(peerBinderPid);
+    int32_t ret = ServiceControlWithExtra(processName.c_str(),
+        ServiceAction::STOP, nullptr, 0);
+    HILOGI("Kill PeerBinder process %{public}s, pid=%{public}d, processName=%{public}s",
+        (ret != 0) ? "failed" : "success", peerBinderPid, processName.c_str());
+    return (ret == 0);
+}
 }

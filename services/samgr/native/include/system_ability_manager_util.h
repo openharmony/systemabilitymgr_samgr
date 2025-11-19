@@ -56,6 +56,9 @@ public:
 #ifdef SUPPORT_DEVICE_MANAGER
     static void DeviceIdToNetworkId(std::string& networkId);
 #endif
+    static std::string GetProcessNameFromCmdline(int32_t pid);
+    static int ParsePeerBinderPid(std::ifstream& fin, int32_t pid, int32_t tid);
+    static bool KillProcessByPid(int32_t pid, int32_t tid);
 private:
 #ifdef SUPPORT_PENGLAI_MODE
     static void* InitPenglaiFunc();

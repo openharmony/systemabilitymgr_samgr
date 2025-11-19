@@ -76,6 +76,7 @@ constexpr int64_t CHECK_LOADED_DELAY_TIME = 4 * 1000; // ms
 #endif
 constexpr int32_t SOFTBUS_SERVER_SA_ID = 4700;
 constexpr int32_t FIRST_DUMP_INDEX = 0;
+constexpr int32_t KILL_TIMEOUT_TIME = 60; // s
 }
 
 samgr::mutex SystemAbilityManager::instanceLock;
@@ -1775,7 +1776,12 @@ bool SystemAbilityManager::IdleSystemAbility(int32_t systemAbilityId, const std:
         return false;
     }
     HILOGI("IdleSA:%{public}d", systemAbilityId);
-    SamgrXCollie samgrXCollie("samgr--IdleSa_" + ToString(systemAbilityId));
+    int curTid = gettid();
+    auto killPeerTask = [curTid, systemAbilityId, procName](void *) {
+        (void)SamgrUtil::KillProcessByPid(getpid(), curTid);
+        ReportSaAbnormallyFrozen(systemAbilityId, Str16ToStr8(procName), "IdleSa timeout");
+    };
+    SamgrXCollie samgrXCollie("samgr--IdleSa_" + ToString(systemAbilityId), KILL_TIMEOUT_TIME, killPeerTask);
     return procObject->IdleAbility(systemAbilityId, idleReason, delayTime);
 }
 
@@ -1794,7 +1800,12 @@ bool SystemAbilityManager::ActiveSystemAbility(int32_t systemAbilityId, const st
         return false;
     }
     HILOGI("ActiveSA:%{public}d", systemAbilityId);
-    SamgrXCollie samgrXCollie("samgr--ActiveSa_" + ToString(systemAbilityId));
+    int curTid = gettid();
+    auto killPeerTask = [curTid, systemAbilityId, procName](void *) {
+        (void)SamgrUtil::KillProcessByPid(getpid(), curTid);
+        ReportSaAbnormallyFrozen(systemAbilityId, Str16ToStr8(procName), "ActiveSa timeout");
+    };
+    SamgrXCollie samgrXCollie("samgr--ActiveSa_" + ToString(systemAbilityId), KILL_TIMEOUT_TIME, killPeerTask);
     return procObject->ActiveAbility(systemAbilityId, activeReason);
 }
 

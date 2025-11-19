@@ -19,6 +19,7 @@
 #include "sam_mock_permission.h"
 #include "ability_death_recipient.h"
 #include "test_log.h"
+#include <fstream>
 
 using namespace std;
 using namespace testing;
@@ -467,4 +468,121 @@ HWTEST_F(SamgrUtilTest, CheckPengLaiPermission001, TestSize.Level3)
     EXPECT_TRUE(ret);
 }
 #endif
+
+/**
+ * @tc.name: GetProcessNameFromCmdline001
+ * @tc.desc: test valid GetProcessNameFromCmdline
+ * @tc.type: FUNC
+ */
+HWTEST_F(SamgrUtilTest, GetProcessNameFromCmdline001, TestSize.Level3)
+{
+    DTEST_LOG << "GetProcessNameFromCmdline001 start" << std::endl;
+    int32_t pid = getpid(); // test value
+    std::string testName = "SystemAbilityMgrCollectTest";
+    std::string procName = SamgrUtil::GetProcessNameFromCmdline(pid);
+    EXPECT_EQ(testName, procName);
+    DTEST_LOG << "GetProcessNameFromCmdline001 end" << std::endl;
+}
+
+/**
+ * @tc.name: GetProcessNameFromCmdline002
+ * @tc.desc: test invalid GetProcessNameFromCmdline
+ * @tc.type: FUNC
+ */
+HWTEST_F(SamgrUtilTest, GetProcessNameFromCmdline002, TestSize.Level3)
+{
+    DTEST_LOG << "GetProcessNameFromCmdline002 start" << std::endl;
+    int32_t pid = 70000; // test value
+    std::string procName = SamgrUtil::GetProcessNameFromCmdline(pid);
+    EXPECT_EQ("", procName);
+    DTEST_LOG << "GetProcessNameFromCmdline002 end" << std::endl;
+}
+
+/**
+ * @tc.name: ParsePeerBinderPid001
+ * @tc.desc: test valid ParsePeerBinderPid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SamgrUtilTest, ParsePeerBinderPid001, TestSize.Level3)
+{
+    DTEST_LOG << "ParsePeerBinderPid001 start" << std::endl;
+    int32_t pid = 70000; // test value
+    int32_t tid = 70000; // test value
+    std::string path = "/data/test/test1.txt";
+    std::ofstream ofs(path, std::ios::trunc);
+    if (!ofs.is_open()) {
+        DTEST_LOG << "open file failed!, path=" << path << std::endl;
+        FAIL();
+    }
+    ofs << "aync 1:1 to 2:2 code 9 wait:4 s test" << std::endl;
+    ofs << ":70000 to 70001:70001 code 9 wait:1 s test" << std::endl;
+    ofs << "70000:70000 to :70001 code 9 wait:1 s test" << std::endl;
+    ofs << "70000:70000 to 70001:70001 code 9 wait: s test" << std::endl;
+    ofs << ":70000 to :70001 code 9 wait:1 s test" << std::endl;
+    ofs << ":70000 to 70001:70001 code 9 wait: s test" << std::endl;
+    ofs << "70000:70000 to :70001 code 9 wait: s test" << std::endl;
+    ofs << ":70000 to :70001 code 9 wait: s test" << std::endl;
+    ofs << "70000:70002 to 70001:70001 code 9 wait:1 s test" << std::endl;
+    ofs << "70002:70000 to 70001:70001 code 9 wait:1 s test" << std::endl;
+    ofs << "70002:70002 to 70001:70001 code 9 wait:61 s test" << std::endl;
+    ofs << "70000:70000 to 70001:70001 code 9 wait:1 s test" << std::endl;
+    ofs << "70000:70002 to 70001:70001 code 9 wait:61 s test" << std::endl;
+    ofs << "70002:70000 to 70001:70001 code 9 wait:61 s test" << std::endl;
+    ofs << "70000:70000 to 70001:70001 code 9 wait:61 s test" << std::endl;
+    ofs << "72000:72000 to 70001:70001 code 9 wait:1 s test" << std::endl;
+    ofs.close();
+    std::ifstream fin(path);
+    if (!fin.is_open()) {
+        DTEST_LOG << "open file failed!, path=" << path << std::endl;
+        FAIL();
+    }
+    int result = SamgrUtil::ParsePeerBinderPid(fin, pid, tid);
+    fin.close();
+    EXPECT_TRUE(result > 0);
+    DTEST_LOG << "ParsePeerBinderPid001 end" << std::endl;
+}
+
+/**
+ * @tc.name: ParsePeerBinderPid002
+ * @tc.desc: test invalid ParsePeerBinderPid
+ * @tc.type: FUNC
+ */
+HWTEST_F(SamgrUtilTest, ParsePeerBinderPid002, TestSize.Level3)
+{
+    DTEST_LOG << "ParsePeerBinderPid002 start" << std::endl;
+    int32_t pid = 70000; // test value
+    int32_t tid = 70000; // test value
+    std::string path = "/data/test/test2.txt";
+    std::ofstream ofs(path, std::ios::trunc);
+    if (!ofs.is_open()) {
+        DTEST_LOG << "open file failed!, path=" << path << std::endl;
+        FAIL();
+    }
+    ofs << " context " << std::endl;
+    ofs.close();
+    std::ifstream fin(path);
+    if (!fin.is_open()) {
+        DTEST_LOG << "open file failed!, path=" << path << std::endl;
+        FAIL();
+    }
+    int result = SamgrUtil::ParsePeerBinderPid(fin, pid, tid);
+    fin.close();
+    EXPECT_TRUE(result < 0);
+    DTEST_LOG << "ParsePeerBinderPid002 end" << std::endl;
+}
+
+/**
+ * @tc.name: KillProcessByPid001
+ * @tc.desc: test kill process
+ * @tc.type: FUNC
+ */
+HWTEST_F(SamgrUtilTest, KillProcessByPid001, TestSize.Level3)
+{
+    DTEST_LOG << "KillProcessByPid001 start" << std::endl;
+    int32_t pid = 70000; // test value
+    int32_t tid = 70000; // test value
+    bool ret = SamgrUtil::KillProcessByPid(pid, tid);
+    EXPECT_EQ(ret, false);
+    DTEST_LOG << "KillProcessByPid001 end" << std::endl;
+}
 }
