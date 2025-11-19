@@ -470,32 +470,32 @@ HWTEST_F(SamgrUtilTest, CheckPengLaiPermission001, TestSize.Level3)
 #endif
 
 /**
- * @tc.name: GetProcessNameByPid001
- * @tc.desc: test valid GetProcessNameByPid
+ * @tc.name: GetProcessNameFromCmdline001
+ * @tc.desc: test valid GetProcessNameFromCmdline
  * @tc.type: FUNC
  */
-HWTEST_F(SamgrUtilTest, GetProcessNameByPid001, TestSize.Level3)
+HWTEST_F(SamgrUtilTest, GetProcessNameFromCmdline001, TestSize.Level3)
 {
-    DTEST_LOG << "GetProcessNameByPid001 start" << std::endl;
+    DTEST_LOG << "GetProcessNameFromCmdline001 start" << std::endl;
     int32_t pid = getpid(); // test value
     std::string testName = "SystemAbilityMgrCollectTest";
-    std::string procName = SamgrUtil::GetProcessNameByPid(pid);
+    std::string procName = SamgrUtil::GetProcessNameFromCmdline(pid);
     EXPECT_EQ(testName, procName);
-    DTEST_LOG << "GetProcessNameByPid001 end" << std::endl;
+    DTEST_LOG << "GetProcessNameFromCmdline001 end" << std::endl;
 }
 
 /**
- * @tc.name: GetProcessNameByPid002
- * @tc.desc: test invalid GetProcessNameByPid
+ * @tc.name: GetProcessNameFromCmdline002
+ * @tc.desc: test invalid GetProcessNameFromCmdline
  * @tc.type: FUNC
  */
-HWTEST_F(SamgrUtilTest, GetProcessNameByPid002, TestSize.Level3)
+HWTEST_F(SamgrUtilTest, GetProcessNameFromCmdline002, TestSize.Level3)
 {
-    DTEST_LOG << "GetProcessNameByPid002 start" << std::endl;
+    DTEST_LOG << "GetProcessNameFromCmdline002 start" << std::endl;
     int32_t pid = 70000; // test value
-    std::string procName = SamgrUtil::GetProcessNameByPid(pid);
+    std::string procName = SamgrUtil::GetProcessNameFromCmdline(pid);
     EXPECT_EQ("", procName);
-    DTEST_LOG << "GetProcessNameByPid002 end" << std::endl;
+    DTEST_LOG << "GetProcessNameFromCmdline002 end" << std::endl;
 }
 
 /**

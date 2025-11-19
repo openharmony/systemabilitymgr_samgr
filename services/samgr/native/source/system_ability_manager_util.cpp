@@ -355,7 +355,7 @@ void SamgrUtil::DeviceIdToNetworkId(std::string& networkId)
 }
 #endif
 
-std::string SamgrUtil::GetProcessNameByPid(int32_t pid)
+std::string SamgrUtil::GetProcessNameFromCmdline(int32_t pid)
 {
     std::string path = "/proc/" + std::to_string(pid) + "/cmdline";
 
@@ -364,23 +364,14 @@ std::string SamgrUtil::GetProcessNameByPid(int32_t pid)
         HILOGE("Error: Cannot open %{public}s, pid: %{public}d", path.c_str(), pid);
         return "";
     }
-
-    std::string name((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+    std::getline(file, name, '\0');
     file.close();
-
-    // Find the first null-terminated string (the executable path)
-    size_t firstNull = name.find('\0');
-    if (firstNull == std::string::npos) {
-        firstNull = name.length();
-    }
-    name = name.substr(0, firstNull);
-
     // Extract just the filename from the path
     size_t lastSlash = name.find_last_of('/');
     if (lastSlash != std::string::npos) {
         name = name.substr(lastSlash + 1);
     }
-
+    HILOGD("GetProcessNameByPid name: %{public}s");
     return name;
 }
 
@@ -456,7 +447,7 @@ bool SamgrUtil::KillProcessByPid(int32_t pid, int32_t tid)
             "peerBinderPid=%{public}d, pid=%{public}d", peerBinderPid, pid);
         return false;
     }
-    std::string processName = GetProcessNameByPid(peerBinderPid);
+    std::string processName = GetProcessNameFromCmdline(peerBinderPid);
     int32_t ret = ServiceControlWithExtra(processName.c_str(),
         ServiceAction::STOP, nullptr, 0);
     HILOGI("Kill PeerBinder process %{public}s, pid=%{public}d, processName=%{public}s",

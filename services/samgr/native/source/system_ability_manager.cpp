@@ -1777,7 +1777,7 @@ bool SystemAbilityManager::IdleSystemAbility(int32_t systemAbilityId, const std:
     }
     HILOGI("IdleSA:%{public}d", systemAbilityId);
     int curTid = gettid();
-    auto killPeerTask = [curTid](void *) {
+    auto killPeerTask = [curTid, systemAbilityId, procName](void *) {
         (void)SamgrUtil::KillProcessByPid(getpid(), curTid);
         ReportSaAbnormallyFrozen(systemAbilityId, Str16ToStr8(procName), "IdleSa timeout");
     };
@@ -1801,7 +1801,7 @@ bool SystemAbilityManager::ActiveSystemAbility(int32_t systemAbilityId, const st
     }
     HILOGI("ActiveSA:%{public}d", systemAbilityId);
     int curTid = gettid();
-    auto killPeerTask = [curTid](void *) {
+    auto killPeerTask = [curTid, systemAbilityId, procName](void *) {
         (void)SamgrUtil::KillProcessByPid(getpid(), curTid);
         ReportSaAbnormallyFrozen(systemAbilityId, Str16ToStr8(procName), "ActiveSa timeout");
     };
