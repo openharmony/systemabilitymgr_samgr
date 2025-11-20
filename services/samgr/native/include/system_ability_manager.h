@@ -37,8 +37,6 @@ namespace OHOS {
 struct SAInfo {
     sptr<IRemoteObject> remoteObj;
     bool isDistributed = false;
-    std::u16string capability;
-    std::string permission;
 };
 
 enum {

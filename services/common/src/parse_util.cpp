@@ -51,8 +51,6 @@ constexpr const char* SA_TAG_AUTO_RESTART = "auto-restart";
 constexpr const char* SA_TAG_DISTRIBUTED = "distributed";
 constexpr const char* SA_TAG_CACHE_COMMON_EVENT = "cache-common-event";
 constexpr const char* SA_TAG_DUMP_LEVEL = "dump-level";
-constexpr const char* SA_TAG_CAPABILITY = "capability";
-constexpr const char* SA_TAG_PERMISSION = "permission";
 constexpr const char* SA_TAG_BOOT_PHASE = "bootphase";
 constexpr const char* SA_TAG_SAID = "said";
 constexpr const char* SA_TAG_START_ON_DEMAND = "start-on-demand";
@@ -403,12 +401,6 @@ bool ParseUtil::ParseSystemAbilityGetSaExtInfo(SaProfile& saProfile, nlohmann::j
         GetInt32FromJson(systemAbilityJson, SA_TAG_DEPEND_TIMEOUT_COMPATIBILITY, saProfile.dependTimeout);
     }
     GetInt32FromJson(systemAbilityJson, SA_TAG_DUMP_LEVEL, saProfile.dumpLevel);
-    string capability;
-    GetStringFromJson(systemAbilityJson, SA_TAG_CAPABILITY, capability);
-    saProfile.capability = capability.length() <= MAX_JSON_STRING_LENGTH ? Str8ToStr16(capability) : u"";
-    string permission;
-    GetStringFromJson(systemAbilityJson, SA_TAG_PERMISSION, permission);
-    saProfile.permission = permission.length() <= MAX_JSON_STRING_LENGTH ? Str8ToStr16(permission) : u"";
     string bootPhase;
     GetStringFromJson(systemAbilityJson, SA_TAG_BOOT_PHASE, bootPhase);
     saProfile.bootPhase = GetBootPriorityPara(bootPhase);
