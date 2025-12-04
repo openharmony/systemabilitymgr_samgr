@@ -543,6 +543,10 @@ void DeviceStatusCollectManager::StringToTypeAndSaid(const std::string& eventStr
     int32_t& systemAbilityId)
 {
     std::size_t pos = eventStr.find("#");
+    if (pos == std::string::npos) {
+        HILOGW("StringToSaid failed");
+        return;
+    }
     std::string strType = eventStr.substr(0, pos);
     if (strType == "start") {
         type = OnDemandPolicyType::START_POLICY;
@@ -550,10 +554,6 @@ void DeviceStatusCollectManager::StringToTypeAndSaid(const std::string& eventStr
         type = OnDemandPolicyType::STOP_POLICY;
     } else {
         HILOGW("StringToTypeAndSaid failed");
-        return;
-    }
-    if (pos == std::string::npos) {
-        HILOGW("StringToSaid failed");
         return;
     }
     systemAbilityId = atoi((eventStr.substr(pos + 1, eventStr.size() - pos - 1)).c_str());
