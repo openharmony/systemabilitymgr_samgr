@@ -19,6 +19,7 @@ group("fuzztest") {
     "./samgr_fuzzer:fuzztest",
     "./samgrcoverage_fuzzer:fuzztest",
     "./samgrdumper_fuzzer:fuzztest",
+    "./samgrparallelize_fuzzer:fuzztest",
     "./systemabilitymanager_fuzzer:fuzztest",
   ]
 }
