@@ -186,6 +186,28 @@ HWTEST_F(CommonEventCollectTest, ProcessEvent002, TestSize.Level3)
 }
 
 /**
+ * @tc.name: ProcessEvent003
+ * @tc.desc: test ProcessEvent, event is nullptr
+ * @tc.type: FUNC
+ * @tc.require: I6OU0A
+ */
+HWTEST_F(CommonEventCollectTest, ProcessEvent003, TestSize.Level3)
+{
+    DTEST_LOG << "ProcessEvent003 begin" << std::endl;
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
+    std::shared_ptr<CommonHandler> commonHandler = std::make_shared<CommonHandler>(commonEventCollect);
+    EventFwk::MatchingSkills skill = EventFwk::MatchingSkills();
+    EventFwk::CommonEventSubscribeInfo info(skill);
+    std::shared_ptr<CommonEventSubscriber> commonEventStatusSubscriber
+        = std::make_shared<CommonEventSubscriber>(info, commonEventCollect);
+    commonEventCollect->commonEventSubscriber_ = commonEventStatusSubscriber;
+    commonHandler->ProcessEvent(COMMON_DIED_EVENT, 0);
+    EXPECT_NE(commonEventCollect->commonEventSubscriber_, nullptr);
+    DTEST_LOG << "ProcessEvent003 end" << std::endl;
+}
+
+/**
  * @tc.name: OnReceiveEvent001
  * @tc.desc: test OnReceiveEvent
  * @tc.type: FUNC
