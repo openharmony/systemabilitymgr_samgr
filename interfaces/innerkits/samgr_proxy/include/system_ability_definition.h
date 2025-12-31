@@ -42,6 +42,7 @@ enum {
     DATAOBS_MGR_SERVICE_SA_ID                        = 182,
     URI_PERMISSION_MGR_SERVICE_ID                    = 183,
     QUICK_FIX_MGR_SERVICE_ID                         = 184,
+    AGENT_MGR_SERVICE_ID                             = 185,
     SUBSYS_AAFWK_SYS_ABILITY_ID_END                  = 199,
     SUBSYS_ACCOUNT_SYS_ABILITY_ID_BEGIN              = 200,
     SUBSYS_AI_SYS_ABILITY_ID_BEGIN                   = 300,
