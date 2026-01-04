@@ -1,0 +1,64 @@
+/*
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+#ifndef MOCK_DM_DEVICE_INFO_H
+#define MOCK_DM_DEVICE_INFO_H
+
+#define DM_MAX_DEVICE_ID_LEN (97)
+
+namespace OHOS::DistributedHardware {
+struct DmDeviceInfo {
+    char deviceId[DM_MAX_DEVICE_ID_LEN] = {0};
+    char deviceName[DM_MAX_DEVICE_ID_LEN] = {0};
+    uint16_t deviceTypeId;
+    char networkId[DM_MAX_DEVICE_ID_LEN] = {0};
+    int32_t range;
+    int32_t networkType;
+    int32_t authForm;
+    std::string extraData;
+};
+
+struct DmAccessCaller {
+    std::string accountId;
+    std::string pkgName;
+    std::string networkId;
+    int32_t userId;
+    uint64_t tokenId = 0;
+    std::string extra;
+};
+
+struct DmAccessCallee {
+    std::string accountId;
+    std::string networkId;
+    std::string peerId;
+    std::string pkgName;
+    int32_t userId;
+    uint64_t tokenId = 0;
+    std::string extra;
+};
+
+enum DmNotifyEvent {
+    DM_NOTIFY_EVENT_ONDEVICEREADY,
+};
+
+enum DmDeviceType {
+    DEVICE_TYPE_UNKNOWN = 0x00,
+    DEVICE_TYPE_PC = 0x0C,
+    DEVICE_TYPE_PAD = 0x11,
+    DEVICE_TYPE_CAR = 0x83,
+    DEVICE_TYPE_2IN1 = 0xA2F,
+};
+} // namespace OHOS::DistributedHardware
+#endif // MOCK_DM_DEVICE_INFO_H
