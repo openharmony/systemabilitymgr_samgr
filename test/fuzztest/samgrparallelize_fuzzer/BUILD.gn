@@ -101,7 +101,6 @@ ohos_fuzztest("SamgrParallelizeFuzzTest") {
   if (support_device_manager) {
     sources +=
         [ "${samgr_services_dir}/source/collect/device_networking_collect.cpp" ]
-    external_deps += [ "device_manager:devicemanagersdk" ]
     defines += [ "SUPPORT_DEVICE_MANAGER" ]
   }
 
