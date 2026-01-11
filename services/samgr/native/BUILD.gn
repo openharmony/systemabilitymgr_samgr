@@ -161,6 +161,12 @@ ohos_executable("samgr") {
     }
     part_name = "samgr"
   }
+  if (use_musl) {
+    external_deps += [ "toybox:toybox" ]
+    if (samgr_mksh_enable) {
+      external_deps += [ "mksh:sh" ]
+    }
+  }
 
   subsystem_name = "systemabilitymgr"
 }

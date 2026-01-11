@@ -17,4 +17,10 @@ declare_args() {
 
   # enable extend load sa timeout.
   samgr_enable_extend_load_timeout = false
+
+  # deps mksh
+  samgr_mksh_enable = true
+  if (defined(global_parts_info) && !defined(global_parts_info.thirdparty_mksh)) {
+    samgr_mksh_enable = false
+  }
 }

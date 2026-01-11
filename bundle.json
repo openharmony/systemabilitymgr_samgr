@@ -44,9 +44,11 @@
                 "ipc",
                 "json",
                 "libxml2",
+                "mksh",
                 "preferences",
                 "safwk",
                 "selinux_adapter",
+                "toybox",
                 "config_policy",
                 "rust_cxx",
                 "ylong_runtime"
