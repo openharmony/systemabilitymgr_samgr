@@ -212,26 +212,18 @@ bool CommonEventCollect::CreateCommonEventSubscriberLocked()
     EventFwk::MatchingSkills skill = EventFwk::MatchingSkills();
     AddSkillsEvent(skill);
     EventFwk::CommonEventSubscribeInfo info(skill);
-    std::shared_ptr<EventFwk::CommonEventSubscriber> comEvtScrb = commonEventSubscriber_;
-    commonEventSubscriber_ = std::make_shared<CommonEventSubscriber>(info, this);
-    bool ret = EventFwk::CommonEventManager::SubscribeCommonEvent(commonEventSubscriber_);
-    HILOGI("SubsComEvt %{public}" PRId64 "ms %{public}s", (GetTickCount() - begin), ret ? "suc" : "fail");
-    if (comEvtScrb != nullptr) {
-        auto unsubTask = [comEvtScrb]() {
-            HILOGI("UnSubsComEvt start");
-            {
-                SamgrXCollie samgrXCollie("samgr--UnSubscribeCommonEvent");
-                bool isUnsubscribe = EventFwk::CommonEventManager::UnSubscribeCommonEvent(comEvtScrb);
-                if (!isUnsubscribe) {
-                    HILOGE("CreateCommonEventSubscriberLocked isUnsubscribe failed!");
-                }
-            }
-        };
-        if (unsubHandler_ != nullptr) {
-            unsubHandler_->PostTask(unsubTask, UNSUB_DELAY_TIME);
-        } else {
-            HILOGE("CreateCommonEventSubscriberLocked unsubHandler is null!");
-        }
+    bool ret = false;
+    if (commonEventSubscriber_ == nullptr) {
+        commonEventSubscriber_ = std::make_shared<CommonEventSubscriber>(info, this);
+        ret = EventFwk::CommonEventManager::SubscribeCommonEvent(commonEventSubscriber_);
+        HILOGI("SubsComEvt %{public}" PRId64 "ms %{public}s", (GetTickCount() - begin),
+            ret ? "suc" : "fail");
+    } else {
+        commonEventSubscriber_->SetSubscribeInfo(info);
+        auto res = EventFwk::CommonEventManager::Subscribe(commonEventSubscriber_);
+        ret = (res == ERR_OK) ? true : false;
+        HILOGI("UpdateComEvt %{public}" PRId64 "ms %{public}s, res:%{public}d", (GetTickCount() - begin),
+            ret ? "suc" : "fail", res);
     }
     return ret;
 }
