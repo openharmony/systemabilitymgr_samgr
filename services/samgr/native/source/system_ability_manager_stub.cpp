@@ -220,21 +220,36 @@ void SystemAbilityManagerStub::SetIpcPrior()
 {
     if (priorEnable_) {
         HILOGD("SAMStub::OnRemoteRequest SetIpcPrior");
-        QOS::SetThreadQos(OHOS::QOS::QosLevel::QOS_USER_INTERACTIVE);
         int tid = gettid();
-        std::lock_guard<std::mutex> lock(highPrioTidSetLock_);
-        highPrioTidSet_.insert(tid);
+        {
+            std::lock_guard<std::mutex> lock(highPrioTidSetLock_);
+            if (highPrioTidSet_.find(tid) != highPrioTidSet_.end()) {
+                return;
+            }
+            highPrioTidSet_.insert(tid);
+        }
+        {
+            SamgrXCollie samgrXCollie("samgr--SetThreadQos");
+            QOS::SetThreadQos(OHOS::QOS::QosLevel::QOS_USER_INTERACTIVE);
+        }
     }
 }
 
 void SystemAbilityManagerStub::ResetIpcPrior()
 {
-    std::lock_guard<std::mutex> lock(highPrioTidSetLock_);
-    HILOGI("SAMStub::ResetIpcPrior");
-    for (const auto& tid : highPrioTidSet_) {
-        QOS::ResetQosForOtherThread(tid);
+    std::set<int> curSet;
+    {
+        std::lock_guard<std::mutex> lock(highPrioTidSetLock_);
+        curSet = highPrioTidSet_;
+        highPrioTidSet_.clear();
     }
-    highPrioTidSet_.clear();
+    HILOGI("SAMStub::ResetIpcPrior");
+    {
+        SamgrXCollie samgrXCollie("samgr--ResetQos");
+        for (const auto& tid : curSet) {
+            QOS::ResetQosForOtherThread(tid);
+        }
+    }
 }
 
 int32_t SystemAbilityManagerStub::OnRemoteRequest(uint32_t code,
