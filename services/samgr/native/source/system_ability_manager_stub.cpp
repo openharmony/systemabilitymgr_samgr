@@ -221,35 +221,27 @@ void SystemAbilityManagerStub::SetIpcPrior()
     if (priorEnable_) {
         HILOGD("SAMStub::OnRemoteRequest SetIpcPrior");
         int tid = gettid();
-        {
-            std::lock_guard<std::mutex> lock(highPrioTidSetLock_);
-            if (highPrioTidSet_.find(tid) != highPrioTidSet_.end()) {
-                return;
-            }
-            highPrioTidSet_.insert(tid);
+        SamgrXCollie samgrXCollie("samgr--SetThreadQos");
+        std::lock_guard<std::mutex> lock(highPrioTidSetLock_);
+        if (highPrioTidSet_.find(tid) != highPrioTidSet_.end()) {
+            return;
         }
-        {
-            SamgrXCollie samgrXCollie("samgr--SetThreadQos");
-            QOS::SetThreadQos(OHOS::QOS::QosLevel::QOS_USER_INTERACTIVE);
-        }
+        highPrioTidSet_.insert(tid);
+        QOS::SetThreadQos(OHOS::QOS::QosLevel::QOS_USER_INTERACTIVE);
     }
 }
 
 void SystemAbilityManagerStub::ResetIpcPrior()
 {
-    std::set<int> curSet;
-    {
-        std::lock_guard<std::mutex> lock(highPrioTidSetLock_);
-        curSet = highPrioTidSet_;
-        highPrioTidSet_.clear();
-    }
+    QOS::SetThreadQos(OHOS::QOS::QosLevel::QOS_USER_INTERACTIVE);
+    SamgrXCollie samgrXCollie("samgr--ResetQos");
+    std::lock_guard<std::mutex> lock(highPrioTidSetLock_);
     HILOGI("SAMStub::ResetIpcPrior");
-    {
-        SamgrXCollie samgrXCollie("samgr--ResetQos");
-        for (const auto& tid : curSet) {
-            QOS::ResetQosForOtherThread(tid);
-        }
+    for (const auto& tid : highPrioTidSet_) {
+        QOS::ResetQosForOtherThread(tid);
     }
+    highPrioTidSet_.clear();
+    QOS::ResetThreadQos();
 }
 
 int32_t SystemAbilityManagerStub::OnRemoteRequest(uint32_t code,
