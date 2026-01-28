@@ -693,6 +693,24 @@ int32_t OnDemandHelper::OnDemandAbility(int32_t systemAbilityId)
     return ERR_OK;
 }
 
+int32_t OnDemandHelper::SetSamgrIpcPrior(bool enalbe)
+{
+    SamMockPermission::MockProcess("resource_schedule_service");
+    int64_t begin = GetTickCount();
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (sm == nullptr) {
+        cout << "SetSamgrIpcPrior samgr object null!" << endl;
+        return ERR_NULL_OBJECT;
+    }
+    int32_t result = sm->SetSamgrIpcPrior(enalbe);
+    if (result != ERR_OK) {
+        cout << "SetSamgrIpcPrior failed, result code:" << result << endl;
+        return result;
+    }
+    cout << "SetSamgrIpcPrior result:" << result << " spend:" << (GetTickCount() - begin) << " ms" << endl;
+    return ERR_OK;
+}
+
 #ifdef SUPPORT_SOFTBUS
 void OnDemandHelper::GetDeviceList()
 {

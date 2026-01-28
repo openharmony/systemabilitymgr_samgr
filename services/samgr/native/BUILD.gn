@@ -109,6 +109,8 @@ ohos_executable("samgr") {
       "ipc:libdbinder",
       "json:nlohmann_json_static",
       "safwk:system_ability_ondemand_reason",
+      "qos_manager:qos",
+      "qos_manager:concurrent_task_client",
     ]
 
     if (build_selinux) {

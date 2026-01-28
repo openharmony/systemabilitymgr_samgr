@@ -345,6 +345,12 @@ public:
         return nullptr;
     }
 
+    virtual int32_t SetSamgrIpcPrior(bool enable)
+    {
+        (void) enable;
+        return 0;
+    }
+
     /**
      * GetRunningSaExtensionInfoList, Return list of started said and process hanlde that match extension.
      *

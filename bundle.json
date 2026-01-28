@@ -48,6 +48,7 @@
                 "preferences",
                 "safwk",
                 "selinux_adapter",
+                "qos_manager",
                 "toybox",
                 "config_policy",
                 "rust_cxx",

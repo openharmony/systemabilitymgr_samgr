@@ -17,6 +17,7 @@
 #define SERVICES_SAMGR_NATIVE_INCLUDE_SYSTEM_ABILITY_MANAGER_STUB_H
 
 #include <map>
+#include <set>
 #include "if_system_ability_manager.h"
 #include "iremote_object.h"
 #include "iremote_stub.h"
@@ -32,7 +33,12 @@ protected:
     static bool CanRequest();
     static bool EnforceInterceToken(MessageParcel& data);
     static bool CheckPermission(const std::string& permission);
+    void SetIpcPrior();
+    void ResetIpcPrior();
 
+    std::atomic<bool> priorEnable_ {false};
+    std::mutex highPrioTidSetLock_;
+    std::set<int> highPrioTidSet_;
 private:
     static int32_t LocalListSystemAbility(SystemAbilityManagerStub* stub,
         MessageParcel& data, MessageParcel& reply)
@@ -194,6 +200,11 @@ private:
     {
         return stub->GetLocalAbilityManagerProxyInner(data, reply);
     }
+    static int32_t LocalSetSamgrIpcPrior(SystemAbilityManagerStub* stub,
+        MessageParcel& data, MessageParcel& reply)
+    {
+        return stub->SetSamgrIpcPriorInner(data, reply);
+    }
     int32_t ListSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t SubsSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t UnSubsSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
@@ -227,6 +238,7 @@ private:
     int32_t GetRunningSaExtensionInfoListInner(MessageParcel& data, MessageParcel& reply);
     int32_t GetCommonEventExtraDataIdlistInner(MessageParcel& data, MessageParcel& reply);
     int32_t GetLocalAbilityManagerProxyInner(MessageParcel& data, MessageParcel& reply);
+    int32_t SetSamgrIpcPriorInner(MessageParcel& data, MessageParcel& reply);
     static int32_t GetHapIdMultiuser(int32_t uid);
     int32_t LoadSACheck(int32_t systemAbilityId);
     int32_t LoadRemoteSACheck(int32_t systemAbilityId);

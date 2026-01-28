@@ -87,6 +87,8 @@ ohos_fuzztest("SystemAbilityManagerFuzzTest") {
     "safwk:system_ability_fwk",
     "samgr:samgr_common",
     "samgr:samgr_proxy",
+    "qos_manager:qos",
+    "qos_manager:concurrent_task_client",
   ]
   defines = []
   if (hicollie_able) {

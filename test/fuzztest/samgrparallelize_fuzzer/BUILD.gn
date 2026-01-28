@@ -91,6 +91,8 @@ ohos_fuzztest("SamgrParallelizeFuzzTest") {
     "ipc:libdbinder",
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
+    "qos_manager:qos",
+    "qos_manager:concurrent_task_client",
   ]
   defines = []
   if (hicollie_able) {

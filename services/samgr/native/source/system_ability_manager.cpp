@@ -60,6 +60,7 @@ constexpr const char* ARGS_FFRT_PARAM = "--ffrt";
 constexpr const char* ARGS_LISTENER_PARAM = "--listener";
 constexpr const char* BOOT_INIT_TIME_PARAM = "ohos.boot.time.init";
 constexpr const char* DEFAULT_BOOT_INIT_TIME = "0";
+constexpr const char* RESET_IPC_PRIOR = "resetIpcPrior";
 
 constexpr uint32_t REPORT_GET_SA_INTERVAL = 24 * 60 * 60 * 1000; // ms and is one day
 constexpr int32_t MAX_SUBSCRIBE_COUNT = 256;
@@ -77,6 +78,7 @@ constexpr int64_t CHECK_LOADED_DELAY_TIME = 4 * 1000; // ms
 constexpr int32_t SOFTBUS_SERVER_SA_ID = 4700;
 constexpr int32_t FIRST_DUMP_INDEX = 0;
 constexpr int32_t KILL_TIMEOUT_TIME = 60; // s
+constexpr int32_t RESET_IPC_PRIOR_TIMEOUT = 10 * 1000; // ms
 }
 
 samgr::mutex SystemAbilityManager::instanceLock;
@@ -165,6 +167,7 @@ void SystemAbilityManager::Init()
     reportEventTimer_ = std::make_unique<Utils::Timer>("DfxReporter", -1);
     OndemandLoadForPerf();
     SamgrUtil::InvalidateSACache();
+    SamgrUtil::RegisterSAListener();
 }
 
 bool SystemAbilityManager::IpcStatSamgrProc(int32_t fd, int32_t cmd)
@@ -2153,4 +2156,44 @@ int32_t SystemAbilityManager::GetCommonEventExtraDataIdlist(int32_t saId, std::v
     return collectManager_->GetSaExtraDataIdList(saId, extraDataIdList, eventName);
 }
 
+void SystemAbilityManager::FlushResetPriorTask()
+{
+    if (workHandler_->HasInnerEvent(RESET_IPC_PRIOR)) {
+        workHandler_->RemoveTask(RESET_IPC_PRIOR);
+    }
+    auto resetTimeoutTask = [this]() {
+        std::lock_guard<std::mutex> lock(priorRefCntLock_);
+        HILOGI("ResetPrior for time out");
+        priorEnable_ = false;
+        ResetIpcPrior();
+        priorRefCnt_ = 0;
+    };
+    workHandler_->PostTask(resetTimeoutTask, RESET_IPC_PRIOR, RESET_IPC_PRIOR_TIMEOUT);
+}
+
+int32_t SystemAbilityManager::SetSamgrIpcPrior(bool enable)
+{
+    std::lock_guard<std::mutex> lock(priorRefCntLock_);
+    if (enable) {
+        if (!priorEnable_) {
+            priorEnable_ = true;
+            HILOGI("SetSamgrIpcPrior enable");
+        }
+        ++priorRefCnt_;
+        FlushResetPriorTask();
+    } else {
+        if (!priorEnable_ || priorRefCnt_ <= 0) {
+            HILOGW("SetSamgrIpcPrior disable invalid");
+            return ERR_OK;
+        }
+        --priorRefCnt_;
+        if (priorRefCnt_ == 0) {
+            priorEnable_ = false;
+            ResetIpcPrior();
+            workHandler_->RemoveTask(RESET_IPC_PRIOR);
+            HILOGI("SetSamgrIpcPrior disable");
+        }
+    }
+    return ERR_OK;
+}
 } // namespace OHOS
