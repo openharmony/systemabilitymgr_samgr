@@ -78,7 +78,7 @@ constexpr int64_t CHECK_LOADED_DELAY_TIME = 4 * 1000; // ms
 constexpr int32_t SOFTBUS_SERVER_SA_ID = 4700;
 constexpr int32_t FIRST_DUMP_INDEX = 0;
 constexpr int32_t KILL_TIMEOUT_TIME = 60; // s
-constexpr int32_t RESET_IPC_PRIOR_TIMEOUT = 10 * 1000; // ms
+constexpr int32_t RESET_IPC_PRIOR_TIMEOUT = 5 * 1000; // ms
 }
 
 samgr::mutex SystemAbilityManager::instanceLock;
