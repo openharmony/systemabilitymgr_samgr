@@ -37,6 +37,7 @@ protected:
     void ResetIpcPrior();
 
     std::atomic<bool> priorEnable_ {false};
+    bool isSupportSetPrior_ = false;
     std::mutex highPrioTidSetLock_;
     std::set<int> highPrioTidSet_;
 private:
@@ -242,6 +243,7 @@ private:
     static int32_t GetHapIdMultiuser(int32_t uid);
     int32_t LoadSACheck(int32_t systemAbilityId);
     int32_t LoadRemoteSACheck(int32_t systemAbilityId);
+    void SetSupportPrior(bool isSupport);
 #ifdef SUPPORT_PENGLAI_MODE
     void SetPengLai(bool isPengLai);
     bool isPengLai_ = false;

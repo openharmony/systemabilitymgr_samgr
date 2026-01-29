@@ -1729,6 +1729,7 @@ HWTEST_F(SystemAbilityMgrTest, SetSamgrIpcPrior001, TestSize.Level3)
     EXPECT_TRUE(saMgr != nullptr);
     // Initialize necessary members
     saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    saMgr->isSupportSetPrior_ = true;
 
     // Test enabling IPC priority
     int32_t result = saMgr->SetSamgrIpcPrior(true);
@@ -1756,6 +1757,7 @@ HWTEST_F(SystemAbilityMgrTest, SetSamgrIpcPrior002, TestSize.Level3)
     EXPECT_TRUE(saMgr != nullptr);
     // Initialize necessary members
     saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    saMgr->isSupportSetPrior_ = true;
 
     // First enable
     saMgr->SetSamgrIpcPrior(true);
@@ -1788,6 +1790,7 @@ HWTEST_F(SystemAbilityMgrTest, SetSamgrIpcPrior003, TestSize.Level3)
     EXPECT_TRUE(saMgr != nullptr);
     // Initialize necessary members
     saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    saMgr->isSupportSetPrior_ = true;
 
     // Reset state
     saMgr->priorRefCnt_ = 0;
@@ -1833,6 +1836,7 @@ HWTEST_F(SystemAbilityMgrTest, SetSamgrIpcPrior004, TestSize.Level3)
     EXPECT_TRUE(saMgr != nullptr);
     // Initialize necessary members
     saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    saMgr->isSupportSetPrior_ = true;
 
     // Reset state
     saMgr->priorRefCnt_ = 0;
@@ -1862,6 +1866,7 @@ HWTEST_F(SystemAbilityMgrTest, SetSamgrIpcPrior005, TestSize.Level3)
     EXPECT_TRUE(saMgr != nullptr);
     // Initialize necessary members
     saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    saMgr->isSupportSetPrior_ = true;
     saMgr->priorRefCnt_ = 0;
     saMgr->priorEnable_ = false;
 
@@ -1894,6 +1899,7 @@ HWTEST_F(SystemAbilityMgrTest, SetSamgrIpcPrior006, TestSize.Level2)
 
     // Initialize necessary members
     saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    saMgr->isSupportSetPrior_ = true;
     saMgr->priorRefCnt_ = 0;
     saMgr->priorEnable_ = false;
 
@@ -1921,6 +1927,7 @@ HWTEST_F(SystemAbilityMgrTest, SetSamgrIpcPrior007, TestSize.Level2)
 
     // Initialize necessary members
     saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    saMgr->isSupportSetPrior_ = true;
     saMgr->priorRefCnt_ = 0;
     saMgr->priorEnable_ = false;
 

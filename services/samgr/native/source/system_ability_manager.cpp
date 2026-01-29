@@ -2173,6 +2173,10 @@ void SystemAbilityManager::FlushResetPriorTask()
 
 int32_t SystemAbilityManager::SetSamgrIpcPrior(bool enable)
 {
+    if (!isSupportSetPrior_) {
+        HILOGW("SetSamgrIpcPrior is not support");
+        return ERR_INVALID_OPERATION;
+    }
     std::lock_guard<std::mutex> lock(priorRefCntLock_);
     if (enable) {
         if (!priorEnable_) {

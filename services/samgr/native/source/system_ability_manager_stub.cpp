@@ -133,6 +133,12 @@ void SystemAbilityManagerStub::SetPengLai(bool isPengLai)
 }
 #endif
 
+void SystemAbilityManagerStub::SetSupportPrior(bool isSupport)
+{
+    isSupportSetPrior_ = isSupport;
+    HILOGI("SAMStub: SetSupportPrior isSupportSetPrior_ = %{public}d", isSupport);
+}
+
 void SystemAbilityManagerStub::SetAbilityFuncMap()
 {
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_SYSTEM_ABILITY_TRANSACTION)] =
@@ -184,6 +190,7 @@ SystemAbilityManagerStub::SystemAbilityManagerStub()
 #ifdef SUPPORT_PENGLAI_MODE
     SetPengLai(SamgrUtil::CheckPengLai());
 #endif
+    SetSupportPrior(SamgrUtil::CheckSupportSetPrior());
     SetAbilityFuncMap();
     SetProcessFuncMap();
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_ONDEMAND_REASON_EXTRA_DATA_TRANSACTION)] =
@@ -218,6 +225,9 @@ SystemAbilityManagerStub::SystemAbilityManagerStub()
 
 void SystemAbilityManagerStub::SetIpcPrior()
 {
+    if (!isSupportSetPrior_) {
+        return;
+    }
     if (priorEnable_) {
         HILOGD("SAMStub::OnRemoteRequest SetIpcPrior");
         int tid = gettid();

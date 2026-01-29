@@ -62,6 +62,7 @@ constexpr const char* PENG_LAI_PARAM = "ohos.boot.minisys.mode";
 constexpr const char* PENG_LAI = "penglai";
 constexpr const char* PENGLAI_PATH = "profile/penglai";
 constexpr const char* LOGGER_TRANSPROC_PATH = "/proc/transaction_proc";
+constexpr const char* SET_PRIOR_PARAM = "const.samgr.setprior.support";
 #ifdef SUPPORT_DEVICE_MANAGER
 constexpr const char* PKG_NAME = "Samgr_Networking";
 #endif
@@ -280,6 +281,11 @@ bool SamgrUtil::CheckPengLai()
     std::string defaultValue = "";
     std::string paramValue = system::GetParameter(PENG_LAI_PARAM, defaultValue);
     return paramValue == PENG_LAI;
+}
+
+bool SamgrUtil::CheckSupportSetPrior()
+{
+    return system::GetBoolParameter(SET_PRIOR_PARAM, false);
 }
 
 #ifdef SUPPORT_PENGLAI_MODE
