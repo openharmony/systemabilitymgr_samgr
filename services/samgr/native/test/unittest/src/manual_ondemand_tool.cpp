@@ -640,6 +640,20 @@ static void TestMemory(OHOS::OnDemandHelper& ondemandHelper)
     }
 }
 
+static void TestSetPrior(OHOS::OnDemandHelper& ondemandHelper)
+{
+    std::string cmd = "";
+    cout << "please input set prior true or false(1:true 0:false)" << endl;
+    cin >> cmd;
+    if (cmd == "1" || cmd == "true")  {
+        ondemandHelper.SetSamgrIpcPrior(true);
+    } else if (cmd == "0" || cmd == "false") {
+        ondemandHelper.SetSamgrIpcPrior(false);
+    } else {
+        cout << "invalid input" << endl;
+    }
+}
+
 static void TestIntCommand(OHOS::OnDemandHelper& ondemandHelper, string& cmd)
 {
     if (cmd == "1") {
@@ -662,6 +676,8 @@ static void TestIntCommand(OHOS::OnDemandHelper& ondemandHelper, string& cmd)
         TestScheduler(ondemandHelper);
     } else if (cmd == "10") {
         TestMemory(ondemandHelper);
+    } else if (cmd == "11") {
+        TestSetPrior(ondemandHelper);
     } else {
         cout << "invalid input" << endl;
     }
@@ -689,6 +705,8 @@ static void TestStringCommand(OHOS::OnDemandHelper& ondemandHelper, string& cmd)
         TestScheduler(ondemandHelper);
     } else if (cmd == "memory") {
         TestMemory(ondemandHelper);
+    } else if (cmd == "setPrior") {
+        TestSetPrior(ondemandHelper);
     } else {
         cout << "invalid input" << endl;
     }
@@ -701,7 +719,7 @@ int main(int argc, char* argv[])
     string cmd = "load";
     do {
         cout << "please input operation(1-param/2-sa/3-proc/4-policy/5-getExtension)" << endl;
-        cout << "please input operation(6-getEvent/7-check/8-policy_time/9-test/10-memory)" << endl;
+        cout << "please input operation(6-getEvent/7-check/8-policy_time/9-test/10-memory/11-setPrior)" << endl;
         cmd.clear();
         cin.clear();
         cin >> cmd;

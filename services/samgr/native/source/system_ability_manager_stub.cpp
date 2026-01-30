@@ -33,6 +33,7 @@
 #include "system_ability_on_demand_event.h"
 #include "tools.h"
 #include "samgr_xcollie.h"
+#include "qos.h"
 
 #ifdef WITH_SELINUX
 #include "service_checker.h"
@@ -132,6 +133,12 @@ void SystemAbilityManagerStub::SetPengLai(bool isPengLai)
 }
 #endif
 
+void SystemAbilityManagerStub::SetSupportPrior(bool isSupport)
+{
+    isSupportSetPrior_ = isSupport;
+    HILOGI("SAMStub: SetSupportPrior isSupportSetPrior_ = %{public}d", isSupport);
+}
+
 void SystemAbilityManagerStub::SetAbilityFuncMap()
 {
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_SYSTEM_ABILITY_TRANSACTION)] =
@@ -183,6 +190,7 @@ SystemAbilityManagerStub::SystemAbilityManagerStub()
 #ifdef SUPPORT_PENGLAI_MODE
     SetPengLai(SamgrUtil::CheckPengLai());
 #endif
+    SetSupportPrior(SamgrUtil::CheckSupportSetPrior());
     SetAbilityFuncMap();
     SetProcessFuncMap();
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_ONDEMAND_REASON_EXTRA_DATA_TRANSACTION)] =
@@ -211,6 +219,39 @@ SystemAbilityManagerStub::SystemAbilityManagerStub()
         SystemAbilityManagerStub::LocalUnloadProcess;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_LRU_IDLE_SYSTEM_ABILITY_PROCESS_TRANSACTION)] =
         SystemAbilityManagerStub::LocalGetLruIdleSystemAbilityProc;
+    memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::SET_SAMGR_IPC_PRIOR_TRANSACTION)] =
+        SystemAbilityManagerStub::LocalSetSamgrIpcPrior;
+}
+
+void SystemAbilityManagerStub::SetIpcPrior()
+{
+    if (!isSupportSetPrior_) {
+        return;
+    }
+    if (priorEnable_) {
+        HILOGD("SAMStub::OnRemoteRequest SetIpcPrior");
+        int tid = gettid();
+        SamgrXCollie samgrXCollie("samgr--SetThreadQos");
+        std::lock_guard<std::mutex> lock(highPrioTidSetLock_);
+        if (highPrioTidSet_.find(tid) != highPrioTidSet_.end()) {
+            return;
+        }
+        highPrioTidSet_.insert(tid);
+        QOS::SetThreadQos(OHOS::QOS::QosLevel::QOS_USER_INTERACTIVE);
+    }
+}
+
+void SystemAbilityManagerStub::ResetIpcPrior()
+{
+    QOS::SetThreadQos(OHOS::QOS::QosLevel::QOS_USER_INTERACTIVE);
+    SamgrXCollie samgrXCollie("samgr--ResetQos");
+    std::lock_guard<std::mutex> lock(highPrioTidSetLock_);
+    HILOGI("SAMStub::ResetIpcPrior");
+    for (const auto& tid : highPrioTidSet_) {
+        QOS::ResetQosForOtherThread(tid);
+    }
+    highPrioTidSet_.clear();
+    QOS::ResetThreadQos();
 }
 
 int32_t SystemAbilityManagerStub::OnRemoteRequest(uint32_t code,
@@ -223,6 +264,7 @@ int32_t SystemAbilityManagerStub::OnRemoteRequest(uint32_t code,
         HILOGE("SAMStub::OnReceived, code = %{public}u, check interfaceToken failed", code);
         return ERR_PERMISSION_DENIED;
     }
+    SetIpcPrior();
     auto itFunc = memberFuncMap_.find(code);
     if (itFunc != memberFuncMap_.end()) {
         return itFunc->second(this, data, reply);
@@ -1430,5 +1472,27 @@ int32_t SystemAbilityManagerStub::GetLocalAbilityManagerProxyInner(MessageParcel
         return ERR_FLATTEN_OBJECT;
     }
     return ERR_NONE;
+}
+
+int32_t SystemAbilityManagerStub::SetSamgrIpcPriorInner(MessageParcel& data, MessageParcel& reply)
+{
+    if (!SamgrUtil::CheckCallerProcess("resource_schedule_service")) {
+        HILOGE("SetSamgrIpcPriorInner invalid caller process, only support for resource_schedule_service");
+        return ERR_PERMISSION_DENIED;
+    }
+
+    bool enable = false;
+    bool ret = data.ReadBool(enable);
+    if (!ret) {
+        HILOGE("SetSamgrIpcPriorInner read enable failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t result = SetSamgrIpcPrior(enable);
+    if (!reply.WriteInt32(result)) {
+        HILOGE("SetSamgrIpcPriorInner write result failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ERR_OK;
 }
 } // namespace OHOS

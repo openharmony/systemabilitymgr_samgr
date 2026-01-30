@@ -61,6 +61,7 @@ public:
     int32_t TestSyncOnDemandAbility(int32_t systemAbilityId);
     int32_t UnloadAllIdleSystemAbility();
     int32_t GetLruIdleSystemAbilityProc();
+    int32_t SetSamgrIpcPrior(bool enalbe);
     int32_t UnloadProcess(const std::vector<std::u16string>& processList);
     void GetSystemProcessInfo(int32_t systemAbilityId);
     int32_t LoadOndemandAbilityCase1();

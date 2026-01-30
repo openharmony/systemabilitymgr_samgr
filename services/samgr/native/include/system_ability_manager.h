@@ -200,6 +200,7 @@ public:
     int32_t GetOnDemandSystemAbilityIds(std::vector<int32_t>& systemAbilityIds) override;
     int32_t SendStrategy(int32_t type, std::vector<int32_t>& systemAbilityIds,
         int32_t level, std::string& action) override;
+    int32_t SetSamgrIpcPrior(bool enable) override;
     bool CheckSaIsImmediatelyRecycle(int32_t systemAbilityId)
     {
         CommonSaProfile saProfile;
@@ -372,6 +373,7 @@ private:
     void IpcDumpSingleProcess(int32_t fd, int32_t cmd, const std::string processName);
     int32_t IpcDumpProc(int32_t fd, const std::vector<std::string>& args);
     void RegisterDistribute(int32_t said, bool isDistributed);
+    void FlushResetPriorTask();
 
     std::u16string deviceName_;
     static sptr<SystemAbilityManager> instance;
@@ -422,6 +424,8 @@ private:
 
     std::unique_ptr<Utils::Timer> reportEventTimer_;
     std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler_;
+    std::mutex priorRefCntLock_;
+    int32_t priorRefCnt_ = 0;
 };
 } // namespace OHOS
 

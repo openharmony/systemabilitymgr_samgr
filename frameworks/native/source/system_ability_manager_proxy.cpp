@@ -1693,4 +1693,35 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::GetLocalAbilityManagerProxy(int32
     }
     return reply.ReadRemoteObject();
 }
+
+int32_t SystemAbilityManagerProxy::SetSamgrIpcPrior(bool enable)
+{
+    HILOGI("SetSamgrIpcPrior called:%{public}d", enable);
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("SetSamgrIpcPrior remote is nullptr");
+        return ERR_INVALID_OPERATION;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        HILOGE("SetSamgrIpcPrior write interface token failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteBool(enable)) {
+        HILOGE("SetSamgrIpcPrior write enable failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::SET_SAMGR_IPC_PRIOR_TRANSACTION), data, reply, option);
+    if (err != ERR_NONE) {
+        HILOGE("SetSamgrIpcPrior SendRequest error:%{public}d", err);
+        return err;
+    }
+    HILOGD("SetSamgrIpcPrior SendRequest succeed");
+    return ERR_OK;
+}
 } // namespace OHOS

@@ -31,6 +31,7 @@
 #include "test_log.h"
 #include "ability_death_recipient.h"
 #define private public
+#define protected public
 #include "ipc_skeleton.h"
 #ifdef SUPPORT_ACCESS_TOKEN
 #include "accesstoken_kit.h"
@@ -1715,4 +1716,232 @@ HWTEST_F(SystemAbilityMgrTest, UnloadProcess001, TestSize.Level3)
     DTEST_LOG << "UnloadProcess001 END" << std::endl;
 }
 
+/**
+ * @tc.name: SetSamgrIpcPrior001
+ * @tc.desc: Test SetSamgrIpcPrior with enable=true
+ * @tc.type: FUNC
+ * @tc.require: I7VQQG
+ */
+HWTEST_F(SystemAbilityMgrTest, SetSamgrIpcPrior001, TestSize.Level3)
+{
+    DTEST_LOG << "SetSamgrIpcPrior001 BEGIN" << std::endl;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
+    // Initialize necessary members
+    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    saMgr->isSupportSetPrior_ = true;
+
+    // Test enabling IPC priority
+    int32_t result = saMgr->SetSamgrIpcPrior(true);
+    EXPECT_EQ(result, ERR_OK);
+
+    // Verify priorEnable_ is set to true
+    EXPECT_TRUE(saMgr->priorEnable_);
+
+    // Verify reference count is incremented
+    EXPECT_EQ(saMgr->priorRefCnt_, 1);
+    saMgr->workHandler_->CleanFfrt();
+    DTEST_LOG << "SetSamgrIpcPrior001 END" << std::endl;
+}
+
+/**
+ * @tc.name: SetSamgrIpcPrior002
+ * @tc.desc: Test SetSamgrIpcPrior with enable=false
+ * @tc.type: FUNC
+ * @tc.require: I7VQQG
+ */
+HWTEST_F(SystemAbilityMgrTest, SetSamgrIpcPrior002, TestSize.Level3)
+{
+    DTEST_LOG << "SetSamgrIpcPrior002 BEGIN" << std::endl;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
+    // Initialize necessary members
+    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    saMgr->isSupportSetPrior_ = true;
+
+    // First enable
+    saMgr->SetSamgrIpcPrior(true);
+    EXPECT_TRUE(saMgr->priorEnable_);
+
+    // Then disable
+    int32_t result = saMgr->SetSamgrIpcPrior(false);
+    EXPECT_EQ(result, ERR_OK);
+
+    // Verify priorEnable_ is set to false
+    EXPECT_FALSE(saMgr->priorEnable_);
+
+    // Verify reference count is decremented
+    EXPECT_EQ(saMgr->priorRefCnt_, 0);
+    saMgr->workHandler_->CleanFfrt();
+    DTEST_LOG << "SetSamgrIpcPrior002 END" << std::endl;
+}
+
+
+/**
+ * @tc.name: SetSamgrIpcPrior003
+ * @tc.desc: Test SetSamgrIpcPrior reference counting mechanism
+ * @tc.type: FUNC
+ * @tc.require: I7VQQG
+ */
+HWTEST_F(SystemAbilityMgrTest, SetSamgrIpcPrior003, TestSize.Level3)
+{
+    DTEST_LOG << "SetSamgrIpcPrior003 BEGIN" << std::endl;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
+    // Initialize necessary members
+    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    saMgr->isSupportSetPrior_ = true;
+
+    // Reset state
+    saMgr->priorRefCnt_ = 0;
+    saMgr->priorEnable_ = false;
+
+    // First enable
+    int32_t result1 = saMgr->SetSamgrIpcPrior(true);
+    EXPECT_EQ(result1, ERR_OK);
+    EXPECT_TRUE(saMgr->priorEnable_);
+    EXPECT_EQ(saMgr->priorRefCnt_, 1);
+
+    // Second enable (should increment ref count)
+    int32_t result2 = saMgr->SetSamgrIpcPrior(true);
+    EXPECT_EQ(result2, ERR_OK);
+    EXPECT_TRUE(saMgr->priorEnable_);
+    EXPECT_EQ(saMgr->priorRefCnt_, 2);
+
+    // First disable (ref count > 1, should not disable yet)
+    int32_t result3 = saMgr->SetSamgrIpcPrior(false);
+    EXPECT_EQ(result3, ERR_OK);
+    EXPECT_TRUE(saMgr->priorEnable_); // Should still be enabled
+    EXPECT_EQ(saMgr->priorRefCnt_, 1);
+
+    // Second disable (ref count == 1, should disable now)
+    int32_t result4 = saMgr->SetSamgrIpcPrior(false);
+    EXPECT_EQ(result4, ERR_OK);
+    EXPECT_FALSE(saMgr->priorEnable_); // Should be disabled now
+    EXPECT_EQ(saMgr->priorRefCnt_, 0);
+    saMgr->workHandler_->CleanFfrt();
+    DTEST_LOG << "SetSamgrIpcPrior003 END" << std::endl;
+}
+
+/**
+ * @tc.name: SetSamgrIpcPrior004
+ * @tc.desc: Test SetSamgrIpcPrior with multiple consecutive enable calls
+ * @tc.type: FUNC
+ * @tc.require: I7VQQG
+ */
+HWTEST_F(SystemAbilityMgrTest, SetSamgrIpcPrior004, TestSize.Level3)
+{
+    DTEST_LOG << "SetSamgrIpcPrior004 BEGIN" << std::endl;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
+    // Initialize necessary members
+    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    saMgr->isSupportSetPrior_ = true;
+
+    // Reset state
+    saMgr->priorRefCnt_ = 0;
+    saMgr->priorEnable_ = false;
+
+    // Multiple enable calls
+    for (int32_t i = 0; i < 5; i++) {
+        int32_t result = saMgr->SetSamgrIpcPrior(true);
+        EXPECT_EQ(result, ERR_OK);
+        EXPECT_TRUE(saMgr->priorEnable_);
+        EXPECT_EQ(saMgr->priorRefCnt_, i + 1);
+    }
+    saMgr->workHandler_->CleanFfrt();
+    DTEST_LOG << "SetSamgrIpcPrior004 END" << std::endl;
+}
+
+/**
+ * @tc.name: SetSamgrIpcPrior005
+ * @tc.desc: Test SetSamgrIpcPrior under stress conditions
+ * @tc.type: FUNC
+ * @tc.require: I7VQQG
+ */
+HWTEST_F(SystemAbilityMgrTest, SetSamgrIpcPrior005, TestSize.Level3)
+{
+    DTEST_LOG << "SetSamgrIpcPrior005 BEGIN" << std::endl;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
+    // Initialize necessary members
+    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    saMgr->isSupportSetPrior_ = true;
+    saMgr->priorRefCnt_ = 0;
+    saMgr->priorEnable_ = false;
+
+    // Stress test with multiple enable/disable cycles
+    for (int32_t i = 0; i < 100; i++) {
+        int32_t result1 = saMgr->SetSamgrIpcPrior(true);
+        EXPECT_EQ(result1, ERR_OK);
+
+        int32_t result2 = saMgr->SetSamgrIpcPrior(false);
+        EXPECT_EQ(result2, ERR_OK);
+
+        EXPECT_EQ(saMgr->priorRefCnt_, 0);
+        EXPECT_FALSE(saMgr->priorEnable_);
+    }
+    saMgr->workHandler_->CleanFfrt();
+    DTEST_LOG << "SetSamgrIpcPrior005 END" << std::endl;
+}
+
+/**
+ * @tc.name: SetSamgrIpcPrior006
+ * @tc.desc: Test SetSamgrIpcPrior with enable=false when already disabled
+ * @tc.type: FUNC
+ * @tc.require: I7VQQG
+ */
+HWTEST_F(SystemAbilityMgrTest, SetSamgrIpcPrior006, TestSize.Level2)
+{
+    DTEST_LOG << "SetSamgrIpcPrior006 start" << std::endl;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
+
+    // Initialize necessary members
+    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    saMgr->isSupportSetPrior_ = true;
+    saMgr->priorRefCnt_ = 0;
+    saMgr->priorEnable_ = false;
+
+    // Try to disable when already disabled
+    int32_t result = saMgr->SetSamgrIpcPrior(false);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_FALSE(saMgr->priorEnable_);
+    EXPECT_EQ(saMgr->priorRefCnt_, 0);
+    saMgr->workHandler_->CleanFfrt();
+
+    DTEST_LOG << "SetSamgrIpcPrior006 end" << std::endl;
+}
+
+/**
+ * @tc.name: SetSamgrIpcPrior007
+ * @tc.desc: Test SetSamgrIpcPrior with enable=true when already enabled
+ * @tc.type: FUNC
+ * @tc.require: I7VQQG
+ */
+HWTEST_F(SystemAbilityMgrTest, SetSamgrIpcPrior007, TestSize.Level2)
+{
+    DTEST_LOG << "SetSamgrIpcPrior007 start" << std::endl;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
+
+    // Initialize necessary members
+    saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    saMgr->isSupportSetPrior_ = true;
+    saMgr->priorRefCnt_ = 0;
+    saMgr->priorEnable_ = false;
+
+    // First enable
+    saMgr->SetSamgrIpcPrior(true);
+    int32_t initialRefCount = saMgr->priorRefCnt_;
+
+    // Enable again
+    int32_t result = saMgr->SetSamgrIpcPrior(true);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_TRUE(saMgr->priorEnable_);
+    EXPECT_EQ(saMgr->priorRefCnt_, initialRefCount + 1);
+    saMgr->workHandler_->CleanFfrt();
+
+    DTEST_LOG << "SetSamgrIpcPrior007 end" << std::endl;
+}
 } // namespace OHOS

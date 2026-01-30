@@ -1400,4 +1400,19 @@ HWTEST_F(SystemAbilityMgrProxyTest, ReadIdleProcessInfoFromParcel001, TestSize.L
     EXPECT_EQ(res, ERR_OK);
     DTEST_LOG << " ReadIdleProcessInfoFromParcel001 end " << std::endl;
 }
+
+/**
+ * @tc.name: SetSamgrIpcPrior001
+ * @tc.desc: Test SetSamgrIpcPrior
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, SetSamgrIpcPrior001, TestSize.Level3)
+{
+    DTEST_LOG << " SetSamgrIpcPrior001 begin " << std::endl;
+    sptr<ISystemAbilityManager> samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+
+    auto ret = samgrProxy->SetSamgrIpcPrior(true);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << " ReadIdleProSetSamgrIpcPrior001cessInfoFromParcel001 end " << std::endl;
+}
 }

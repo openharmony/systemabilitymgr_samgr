@@ -16,3 +16,5 @@ persist.samgr.perf.ondemand = false
 samgr.cache.sa = 0
 
 persist.samgr.moduleupdate.start = false
+
+const.samgr.setprior.support = false

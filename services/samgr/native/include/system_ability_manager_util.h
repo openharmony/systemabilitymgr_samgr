@@ -24,8 +24,19 @@
 #include "sa_profiles.h"
 #include "system_ability_on_demand_event.h"
 #include "ffrt_handler.h"
+#include "system_ability_status_change_stub.h"
 
 namespace OHOS {
+class SamgrUtilListener : public SystemAbilityStatusChangeStub {
+public:
+    SamgrUtilListener();
+    void OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+    void OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId) override;
+
+private:
+    static std::shared_ptr<FFRTHandler> setParmHandler_;
+};
+
 class SamgrUtil {
 public:
     ~SamgrUtil();
@@ -48,11 +59,14 @@ public:
     static void InvalidateSACache();
     static void FilterCommonSaProfile(const SaProfile& oldProfile, CommonSaProfile& newProfile);
     static bool CheckPengLai();
+    static bool CheckSupportSetPrior();
 #ifdef SUPPORT_PENGLAI_MODE
     static bool CheckPengLaiPermission(int32_t systemAbilityId);
 #endif
     static void GetFilesByPriority(const std::string& path, std::vector<std::string>& files);
     static void GetFilesFromPath(const std::string& path, std::map<std::string, std::string>& fileNamesMap);
+    static void RegisterSAListener();
+    static void RequestAuth();
 #ifdef SUPPORT_DEVICE_MANAGER
     static void DeviceIdToNetworkId(std::string& networkId);
 #endif

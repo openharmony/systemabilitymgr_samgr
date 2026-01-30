@@ -116,6 +116,8 @@ ohos_unittest("SystemAbilityMgrTest") {
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
     "samgr:dynamic_cache",
+    "qos_manager:qos",
+    "qos_manager:concurrent_task_client",
   ]
   defines = []
   if (use_musl) {
@@ -240,6 +242,8 @@ ohos_unittest("SystemAbilityMgrCollectTest") {
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
     "samgr:dynamic_cache",
+    "qos_manager:qos",
+    "qos_manager:concurrent_task_client",
   ]
   defines = []
   if (use_musl) {
@@ -372,6 +376,8 @@ ohos_unittest("SystemAbilityMgrDeviceNetworkingTest") {
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
     "samgr:dynamic_cache",
+    "qos_manager:qos",
+    "qos_manager:concurrent_task_client",
   ]
   defines = []
   if (use_musl) {
@@ -478,6 +484,8 @@ ohos_unittest("SystemAbilityMgrStubTest") {
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
     "samgr:dynamic_cache",
+    "qos_manager:qos",
+    "qos_manager:concurrent_task_client",
   ]
   defines = []
   if (use_musl) {
@@ -685,6 +693,8 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
     "samgr:dynamic_cache",
+    "qos_manager:qos",
+    "qos_manager:concurrent_task_client",
   ]
   defines = []
   if (samgr_support_access_token) {
@@ -769,6 +779,8 @@ ohos_unittest("SystemAbilityMgrDumperTest") {
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
     "samgr:dynamic_cache",
+    "qos_manager:qos",
+    "qos_manager:concurrent_task_client",
   ]
   defines = []
   if (samgr_support_access_token) {
@@ -1037,6 +1049,8 @@ ohos_executable("TestTool") {
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
     "samgr:dynamic_cache",
+    "qos_manager:qos",
+    "qos_manager:concurrent_task_client",
   ]
   if (support_penglai_mode) {
     defines += [ "SUPPORT_PENGLAI_MODE" ]

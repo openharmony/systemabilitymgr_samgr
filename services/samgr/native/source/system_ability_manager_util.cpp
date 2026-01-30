@@ -28,6 +28,7 @@
 #include "string_ex.h"
 #include "tools.h"
 #include "sam_log.h"
+#include "concurrent_task_client.h"
 #ifdef SUPPORT_DEVICE_MANAGER
 #include "device_manager.h"
 using namespace OHOS::DistributedHardware;
@@ -50,6 +51,7 @@ constexpr int32_t SHFIT_BIT = 32;
 constexpr int32_t MIN_WAIT_NUM = 60;
 constexpr int32_t INIT_PID = 1;
 constexpr int32_t MAX_STRLIST_SIZE = 7;
+constexpr int32_t CONCURRENT_TASK_SERVICE_ID = 1912;
 
 constexpr const char* EVENT_TYPE = "eventId";
 constexpr const char* EVENT_NAME = "name";
@@ -60,10 +62,26 @@ constexpr const char* PENG_LAI_PARAM = "ohos.boot.minisys.mode";
 constexpr const char* PENG_LAI = "penglai";
 constexpr const char* PENGLAI_PATH = "profile/penglai";
 constexpr const char* LOGGER_TRANSPROC_PATH = "/proc/transaction_proc";
+constexpr const char* SET_PRIOR_PARAM = "const.samgr.setprior.support";
 #ifdef SUPPORT_DEVICE_MANAGER
 constexpr const char* PKG_NAME = "Samgr_Networking";
 #endif
 std::shared_ptr<FFRTHandler> SamgrUtil::setParmHandler_ = make_shared<FFRTHandler>("setParmHandler");
+std::shared_ptr<FFRTHandler> SamgrUtilListener::setParmHandler_ = make_shared<FFRTHandler>("setParmHandler");
+SamgrUtilListener::SamgrUtilListener()
+{
+}
+
+void SamgrUtilListener::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
+{
+    HILOGI("SamgrUtilListener OnAddSystemAbility systemAbilityId:%{public}d", systemAbilityId);
+    SamgrUtil::RequestAuth();
+}
+
+void SamgrUtilListener::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
+{
+    HILOGI("SamgrUtilListener OnRemoveSystemAbility systemAbilityId:%{public}d", systemAbilityId);
+}
 
 bool SamgrUtil::IsNameInValid(const std::u16string& name)
 {
@@ -265,6 +283,11 @@ bool SamgrUtil::CheckPengLai()
     return paramValue == PENG_LAI;
 }
 
+bool SamgrUtil::CheckSupportSetPrior()
+{
+    return system::GetBoolParameter(SET_PRIOR_PARAM, false);
+}
+
 #ifdef SUPPORT_PENGLAI_MODE
 void* SamgrUtil::InitPenglaiFunc()
 {
@@ -338,6 +361,21 @@ void SamgrUtil::GetFilesByPriority(const std::string& path, std::vector<std::str
         HILOGD("GetFilesByPriority files : %{public}s!", pair.second.c_str());
         fileNames.push_back(pair.second);
     }
+}
+
+void SamgrUtil::RegisterSAListener()
+{
+    sptr<SamgrUtilListener> listener = new SamgrUtilListener();
+    SystemAbilityManager::GetInstance()->SubscribeSystemAbility(CONCURRENT_TASK_SERVICE_ID, listener);
+}
+
+void SamgrUtil::RequestAuth()
+{
+    HILOGI("RequestAuth begin");
+    std::unordered_map<std::string, std::string> payload;
+    payload["pid"] = std::to_string(getpid());
+    OHOS::ConcurrentTask::ConcurrentTaskClient::GetInstance().RequestAuth(payload);
+    HILOGI("RequestAuth end");
 }
 
 #ifdef SUPPORT_DEVICE_MANAGER

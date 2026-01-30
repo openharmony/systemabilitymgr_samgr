@@ -581,6 +581,17 @@ static void TestMemory(OHOS::OnDemandHelper& ondemandHelper, char* argv[])
     }
 }
 
+static void TestSetPrior(OHOS::OnDemandHelper& ondemandHelper, char* argv[])
+{
+    if (strcmp(argv[SECOND_NUM], "true") == 0 || strcmp(argv[SECOND_NUM], "1") == 0) {
+        ondemandHelper.SetSamgrIpcPrior(true);
+    } else if (strcmp(argv[SECOND_NUM], "false") == 0 || strcmp(argv[SECOND_NUM], "0") == 0) {
+        ondemandHelper.SetSamgrIpcPrior(false);
+    } else {
+        cout << "invalid input" << endl;
+    }
+}
+
 static void TestIntCommand(OHOS::OnDemandHelper& ondemandHelper, char* argv[])
 {
     if (strcmp(argv[FIRST_NUM], "1") == 0) {
@@ -603,6 +614,8 @@ static void TestIntCommand(OHOS::OnDemandHelper& ondemandHelper, char* argv[])
         TestScheduler(ondemandHelper);
     } else if (strcmp(argv[FIRST_NUM], "10") == 0) {
         TestMemory(ondemandHelper, argv);
+    } else if (strcmp(argv[FIRST_NUM], "11") == 0) {
+        TestSetPrior(ondemandHelper, argv);
     } else {
         cout << "invalid input" << endl;
     }
@@ -630,6 +643,8 @@ static void TestStringCommand(OHOS::OnDemandHelper& ondemandHelper, char* argv[]
         TestScheduler(ondemandHelper);
     } else if (strcmp(argv[FIRST_NUM], "memory") == 0) {
         TestMemory(ondemandHelper, argv);
+    } else if (strcmp(argv[FIRST_NUM], "setPrior") == 0) {
+        TestSetPrior(ondemandHelper, argv);
     } else {
         cout << "invalid input" << endl;
     }
@@ -641,7 +656,7 @@ int main(int argc, char* argv[])
     OHOS::OnDemandHelper& ondemandHelper = OnDemandHelper::GetInstance();
     ondemandHelper.argc_ = argc;
     cout << "please input operation(1-param/2-sa/3-proc/4-policy/5-getExtension)" << endl;
-    cout << "please input operation(6-getEvent/7-check/8-policy_time/9-test/10-memory)" << endl;
+    cout << "please input operation(6-getEvent/7-check/8-policy_time/9-test/10-memory/11-setPrior)" << endl;
     int32_t cmd = atoi(argv[FIRST_NUM]);
     if (cmd == 0) {
         TestStringCommand(ondemandHelper, argv);

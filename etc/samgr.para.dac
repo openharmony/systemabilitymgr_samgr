@@ -18,3 +18,5 @@ persist.samgr.perf.ondemand = samgr:samgr:0775:bool
 samgr.cache.sa = samgr:samgr:0775
 
 persist.samgr.moduleupdate. = samgr:samgr:0775
+
+const.samgr.setprior.support = samgr:samgr:0775:bool

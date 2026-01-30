@@ -1066,4 +1066,37 @@ HWTEST_F(SystemAbilityMgrStubTest, GetLocalAbilityManagerProxyInner003, TestSize
     int32_t ret = saMgr->GetLocalAbilityManagerProxyInner(data, reply);
     EXPECT_EQ(ret, ERR_NULL_OBJECT);
 }
+
+/**
+ * @tc.name: SetSamgrIpcPriorInner001
+ * @tc.desc: test SetSamgrIpcPriorInner with other process
+ * @tc.type: FUNC
+ * @tc.require: I6XB42
+ */
+HWTEST_F(SystemAbilityMgrStubTest, SetSamgrIpcPriorInner001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_TRUE(data.WriteBool(true));
+    int32_t ret = saMgr->SetSamgrIpcPriorInner(data, reply);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: SetSamgrIpcPriorInner002
+ * @tc.desc: test SetSamgrIpcPriorInner with rss process
+ * @tc.type: FUNC
+ * @tc.require: I6XB42
+ */
+HWTEST_F(SystemAbilityMgrStubTest, SetSamgrIpcPriorInner002, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    SamMockPermission::MockProcess("resource_schedule_service");
+    EXPECT_TRUE(data.WriteBool(true));
+    int32_t ret = saMgr->SetSamgrIpcPriorInner(data, reply);
+    EXPECT_EQ(ret, ERR_OK);
+}
 }
