@@ -295,6 +295,57 @@ public:
     virtual int32_t SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener) = 0;
 
     /**
+     * SubscribeLowMemSystemProcess, Subscribe the status of low-mem process.
+     *
+     * @param listener, callback
+     * @return ERR_OK indicates that the Subscribe successfully.
+     */
+    virtual int32_t SubscribeLowMemSystemProcess(const sptr<ISystemProcessStatusChange>& listener)
+    {
+        (void)listener;
+        return 0;
+    }
+    
+    /**
+     * UnSubscribeLowMemSystemProcess, UnSubscribe the status of low-mem process.\     *
+     * @param listener, callback
+     * @return ERR_OK indicates that the UnSubscribe successfully.
+     */
+    virtual int32_t UnSubscribeLowMemSystemProcess(const sptr<ISystemProcessStatusChange>& listener)
+    {
+        (void)listener;
+        return 0;
+    }
+    
+    /**
+     * SubscribeSystemProcessList, Subscribe the status of process list.
+     *
+     * @param listener, callback
+     * @return ERR_OK indicates that the Subscribe successfully.
+     */
+    virtual int32_t SubscribeSystemProcessList(const std::list<std::u16string>& procNames,
+        const sptr<ISystemProcessStatusChange>& listener)
+    {
+        (void)listener;
+        (void)procNames;
+        return 0;
+    }
+
+    /**
+     * SubscribeSystemProcessList, Subscribe the status of process list.
+     *
+     * @param listener, callback
+     * @return ERR_OK indicates that the Subscribe successfully.
+     */
+    virtual int32_t UnSubscribeSystemProcessList(const std::list<std::u16string>& procNames,
+        const sptr<ISystemProcessStatusChange>& listener)
+    {
+        (void)listener;
+        (void)procNames;
+        return 0;
+    }
+
+    /**
      * SendStrategy, Send strategy to SA.
      *
      * @param type, type is a certain device status type.

@@ -53,6 +53,7 @@ public:
     void InitSystemProcessStatusChange();
     void GetSystemProcess();
     void SubscribeSystemProcess();
+    void SubscribeLowMemSystemProcess();
     void UnSubscribeSystemProcess();
     void GetOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type);
     void UpdateOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
@@ -106,6 +107,8 @@ protected:
     public:
         void OnSystemProcessStarted(SystemProcessInfo& systemProcessInfo) override;
         void OnSystemProcessStopped(SystemProcessInfo& systemProcessInfo) override;
+        void OnSystemProcessActivated(SystemProcessInfo& systemProcessInfo) override;
+        void OnSystemProcessIdled(SystemProcessInfo& systemProcessInfo) override;
     };
 private:
     OnDemandHelper();

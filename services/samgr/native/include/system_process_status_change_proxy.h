@@ -28,6 +28,8 @@ public:
 
     void OnSystemProcessStarted(SystemProcessInfo& systemProcessInfo) override;
     void OnSystemProcessStopped(SystemProcessInfo& systemProcessInfo) override;
+    void OnSystemProcessActivated(SystemProcessInfo& systemProcessInfo) override;
+    void OnSystemProcessIdled(SystemProcessInfo& systemProcessInfo) override;
 private:
     bool SendRequestInner(uint32_t code, SystemProcessInfo systemProcessInfo);
     static inline BrokerDelegator<SystemProcessStatusChangeProxy> delegator_;

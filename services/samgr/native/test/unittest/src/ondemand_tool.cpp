@@ -227,6 +227,32 @@ static void TestProcess(OHOS::OnDemandHelper& ondemandHelper, char* inputcmd)
     }
 }
 
+static void TestLowMemProcess(OHOS::OnDemandHelper& ondemandHelper, char* inputcmd)
+{
+    std::string cmd = "";
+    cout << "please input proc test case(1-getp/2-initp)" << endl;
+    if (strcmp(inputcmd, "getp") == 0 || strcmp(inputcmd, "1") == 0) {
+        SamMockPermission::MockProcess("resource_schedule_service");
+        ondemandHelper.GetSystemProcess();
+    } else if (strcmp(inputcmd, "initp") == 0 || strcmp(inputcmd, "2") == 0) {
+        ondemandHelper.InitSystemProcessStatusChange();
+        SamMockPermission::MockProcess("resource_schedule_service");
+        ondemandHelper.SubscribeLowMemSystemProcess();
+        ::system("ondemand load 1494");
+        ::system("ondemand load 1499");
+        sleep(1);
+
+        ::system("ondemand unload 1494");
+        ::system("ondemand unload 1499");
+        sleep(1);
+
+        ::system("ondemand load 1494");
+        ::system("ondemand load 1499");
+    } else {
+        cout << "invalid input" << endl;
+    }
+}
+
 static void TestSystemAbility(OHOS::OnDemandHelper& ondemandHelper, char* inputcmd, char* inputsaid,
     char* inputOtherSaid, char* inputOtherDevice)
 {
@@ -616,6 +642,8 @@ static void TestIntCommand(OHOS::OnDemandHelper& ondemandHelper, char* argv[])
         TestMemory(ondemandHelper, argv);
     } else if (strcmp(argv[FIRST_NUM], "11") == 0) {
         TestSetPrior(ondemandHelper, argv);
+    } else if (strcmp(argv[FIRST_NUM], "12") == 0) {
+        TestLowMemProcess(ondemandHelper, argv[SECOND_NUM]);
     } else {
         cout << "invalid input" << endl;
     }
@@ -645,6 +673,8 @@ static void TestStringCommand(OHOS::OnDemandHelper& ondemandHelper, char* argv[]
         TestMemory(ondemandHelper, argv);
     } else if (strcmp(argv[FIRST_NUM], "setPrior") == 0) {
         TestSetPrior(ondemandHelper, argv);
+    } else if (strcmp(argv[FIRST_NUM], "lowmem") == 0) {
+        TestLowMemProcess(ondemandHelper, argv[SECOND_NUM]);
     } else {
         cout << "invalid input" << endl;
     }
@@ -656,7 +686,7 @@ int main(int argc, char* argv[])
     OHOS::OnDemandHelper& ondemandHelper = OnDemandHelper::GetInstance();
     ondemandHelper.argc_ = argc;
     cout << "please input operation(1-param/2-sa/3-proc/4-policy/5-getExtension)" << endl;
-    cout << "please input operation(6-getEvent/7-check/8-policy_time/9-test/10-memory/11-setPrior)" << endl;
+    cout << "please input operation(6-getEvent/7-check/8-policy_time/9-test/10-memory/11-setPrior/12-lowmem)" << endl;
     int32_t cmd = atoi(argv[FIRST_NUM]);
     if (cmd == 0) {
         TestStringCommand(ondemandHelper, argv);

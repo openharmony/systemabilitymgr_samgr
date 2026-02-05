@@ -63,6 +63,12 @@ public:
     void GetAllSystemAbilityInfoByState(const std::string& state, std::string& result);
     int32_t SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener);
     int32_t UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener);
+    int32_t SubscribeLowMemSystemProcess(const sptr<ISystemProcessStatusChange>& listener);
+    int32_t UnSubscribeLowMemSystemProcess(const sptr<ISystemProcessStatusChange>& listener);
+    int32_t SubscribeSystemProcessList(const std::list<std::u16string>& procNames,
+        const sptr<ISystemProcessStatusChange>& listener);
+    int32_t UnSubscribeSystemProcessList(const std::list<std::u16string>& procNames,
+        const sptr<ISystemProcessStatusChange>& listener);
     bool IsSystemProcessNeverStartedLocked(const std::u16string& processName);
     void InitSamgrProcessContext();
     void CheckEnableOnce(const OnDemandEvent& event, const std::list<SaControlInfo>& saControlList);
@@ -75,6 +81,7 @@ public:
     bool IsSystemProcessCanUnload(const std::u16string& processName);
 private:
     void InitStateContext(const std::list<SaProfile>& saProfiles);
+    void InitLowMemProcessList();
 
     int32_t LimitDelayUnloadTime(int32_t delayUnloadTime);
     bool GetSystemAbilityContext(int32_t systemAbilityId,
@@ -113,6 +120,8 @@ private:
     bool CanUnloadAllSystemAbility(const std::shared_ptr<SystemProcessContext>& processContext);
     bool CanUnloadAllSystemAbilityLocked(const std::shared_ptr<SystemProcessContext>& processContext,
         bool isNeedCheckRecycleStrategy = false);
+    bool IsProcessActive(const std::shared_ptr<SystemProcessContext>& processContext);
+    bool IsProcessIdle(const std::shared_ptr<SystemProcessContext>& processContext);
     bool CheckSaIsImmediatelyRecycle(const std::shared_ptr<SystemProcessContext>& processContext);
     int32_t UnloadAllSystemAbilityLocked(const std::shared_ptr<SystemProcessContext>& processContext);
 
@@ -129,13 +138,19 @@ private:
 
     void NotifyProcessStarted(const std::shared_ptr<SystemProcessContext>& processContext);
     void NotifyProcessStopped(const std::shared_ptr<SystemProcessContext>& processContext);
+    void NotifyProcessActivated(const std::shared_ptr<SystemProcessContext>& processContext);
+    void NotifyProcessIdled(const std::shared_ptr<SystemProcessContext>& processContext);
     void OnAbilityNotLoadedLocked(int32_t systemAbilityId) override;
     void OnAbilityLoadedLocked(int32_t systemAbilityId) override;
     void OnAbilityUnloadableLocked(int32_t systemAbilityId) override;
     void OnProcessNotStartedLocked(const std::u16string& processName) override;
     void OnProcessStartedLocked(const std::u16string& processName) override;
+    void OnProcessActivatedLocked(const std::u16string& processName) override;
+    void OnProcessIdledLocked(const std::u16string& processName) override;
     void RemoveRunningProcessLocked(const std::shared_ptr<SystemProcessContext>& processContext);
     void AddRunningProcessLocked(const std::shared_ptr<SystemProcessContext>& processContext);
+    void UnSubscribeSystemProcessListLocked(std::list<sptr<ISystemProcessStatusChange>>& listeners,
+        const sptr<IRemoteObject>& listener);
 
     int32_t ActiveSystemAbilityLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext,
         const nlohmann::json& activeReason);
@@ -167,6 +182,9 @@ private:
     std::map<std::u16string, std::shared_ptr<SystemProcessContext>> processContextMap_;
     std::shared_ptr<UnloadEventHandler> unloadEventHandler_;
     std::shared_ptr<FFRTHandler> processHandler_;
+    samgr::mutex procListenerMapLock_;
+    std::map<std::u16string, std::list<sptr<ISystemProcessStatusChange>>> procListenerMap_;
+    std::map<int32_t, int32_t> subscribeProcCountMap_;
     samgr::shared_mutex listenerSetLock_;
     std::list<sptr<ISystemProcessStatusChange>> processListeners_;
     sptr<IRemoteObject::DeathRecipient> processListenerDeath_;
@@ -176,6 +194,7 @@ private:
     std::map<int32_t, std::list<OnDemandEvent>> stopEnableOnceMap_;
     samgr::shared_mutex runningProcessListLock_;
     std::list<SystemProcessInfo> runningProcessList_;
+    std::list<std::u16string> lowMemoryProcessList_;
 };
 } // namespace OHOS
 

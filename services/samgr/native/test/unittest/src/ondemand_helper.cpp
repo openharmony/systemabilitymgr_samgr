@@ -611,6 +611,21 @@ void OnDemandHelper::SubscribeSystemProcess()
     cout << "SubscribeSystemProcess success" << endl;
 }
 
+void OnDemandHelper::SubscribeLowMemSystemProcess()
+{
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (sm == nullptr) {
+        cout << "GetSystemAbilityManager samgr object null!" << endl;
+        return;
+    }
+    int32_t ret = sm->SubscribeLowMemSystemProcess(systemProcessStatusChange_);
+    if (ret != ERR_OK) {
+        cout << "SubscribeLowMemSystemProcess failed" << endl;
+        return;
+    }
+    cout << "SubscribeLowMemSystemProcess success" << endl;
+}
+
 void OnDemandHelper::UnSubscribeSystemProcess()
 {
     sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -635,6 +650,18 @@ void OnDemandHelper::SystemProcessStatusChange::OnSystemProcessStarted(SystemPro
 void OnDemandHelper::SystemProcessStatusChange::OnSystemProcessStopped(SystemProcessInfo& systemProcessInfo)
 {
     cout << "OnSystemProcessStopped, processName: " << systemProcessInfo.processName << " pid:"
+        << systemProcessInfo.pid << " uid:" << systemProcessInfo.uid << endl;
+}
+
+void OnDemandHelper::SystemProcessStatusChange::OnSystemProcessActivated(SystemProcessInfo& systemProcessInfo)
+{
+    cout << "OnSystemProcessActivated, processName: " << systemProcessInfo.processName << " pid:"
+        << systemProcessInfo.pid << " uid:" << systemProcessInfo.uid << endl;
+}
+
+void OnDemandHelper::SystemProcessStatusChange::OnSystemProcessIdled(SystemProcessInfo& systemProcessInfo)
+{
+    cout << "OnSystemProcessIdled, processName: " << systemProcessInfo.processName << " pid:"
         << systemProcessInfo.pid << " uid:" << systemProcessInfo.uid << endl;
 }
 

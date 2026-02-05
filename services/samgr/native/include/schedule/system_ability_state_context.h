@@ -76,6 +76,7 @@ struct SystemProcessContext {
     SystemProcessState state = SystemProcessState::NOT_STARTED;
     bool enableRestart = true;
     int64_t lastStopTime = -1;
+    bool isIdle = false;
 };
 
 struct SystemAbilityContext {

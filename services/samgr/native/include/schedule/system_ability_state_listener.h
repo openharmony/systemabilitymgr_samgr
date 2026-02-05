@@ -53,6 +53,14 @@ public:
     {
         HILOGI("Scheduler proc:%{public}s started", Str16ToStr8(processName).c_str());
     };
+    virtual void OnProcessActivatedLocked(const std::u16string& processName)
+    {
+        HILOGI("Scheduler proc:%{public}s activated", Str16ToStr8(processName).c_str());
+    };
+    virtual void OnProcessIdledLocked(const std::u16string& processName)
+    {
+        HILOGI("Scheduler proc:%{public}s idled", Str16ToStr8(processName).c_str());
+    };
     virtual void OnProcessStoppingLocked(const std::u16string& processName)
     {
         HILOGI("Scheduler proc:%{public}s stopping", Str16ToStr8(processName).c_str());
