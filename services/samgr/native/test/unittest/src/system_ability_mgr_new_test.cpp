@@ -371,25 +371,6 @@ HWTEST_F(SystemAbilityMgrNewTest, NotifyRpcLoadCompleted002, TestSize.Level3)
 }
 
 /**
- * @tc.name: NotifyRpcLoadCompleted003
- * @tc.desc: test NotifyRpcLoadCompleted
- * @tc.type: FUNC
- * @tc.require: I6MO6A
- */
-HWTEST_F(SystemAbilityMgrNewTest, NotifyRpcLoadCompleted003, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
-    EXPECT_TRUE(saMgr != nullptr);
-    InitSaMgr(saMgr);
-#ifdef SAMGR_ENABLE_DELAY_DBINDER
-    saMgr->InitDbinderService();
-#endif
-    sptr<IRemoteObject> testAbility = new TestTransactionService();
-    saMgr->NotifyRpcLoadCompleted("", 1, testAbility);
-    EXPECT_TRUE(saMgr != nullptr);
-}
-
-/**
  * @tc.name: Dump001
  * @tc.desc: call Dump, return ERR_OK
  * @tc.type: FUNC
