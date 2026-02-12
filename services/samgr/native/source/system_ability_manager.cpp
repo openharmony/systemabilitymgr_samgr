@@ -2174,7 +2174,7 @@ void SystemAbilityManager::FlushResetPriorTask()
 int32_t SystemAbilityManager::SetSamgrIpcPrior(bool enable)
 {
     if (!isSupportSetPrior_) {
-        HILOGW("SetSamgrIpcPrior is not support");
+        HILOGD("SetSamgrIpcPrior is not support");
         return ERR_INVALID_OPERATION;
     }
     std::lock_guard<std::mutex> lock(priorRefCntLock_);
@@ -2187,7 +2187,7 @@ int32_t SystemAbilityManager::SetSamgrIpcPrior(bool enable)
         FlushResetPriorTask();
     } else {
         if (!priorEnable_ || priorRefCnt_ <= 0) {
-            HILOGW("SetSamgrIpcPrior disable invalid");
+            HILOGD("SetSamgrIpcPrior disable invalid");
             return ERR_OK;
         }
         --priorRefCnt_;
