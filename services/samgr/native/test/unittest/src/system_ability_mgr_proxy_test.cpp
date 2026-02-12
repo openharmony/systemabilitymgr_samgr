@@ -1415,4 +1415,35 @@ HWTEST_F(SystemAbilityMgrProxyTest, SetSamgrIpcPrior001, TestSize.Level3)
     EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << " ReadIdleProSetSamgrIpcPrior001cessInfoFromParcel001 end " << std::endl;
 }
+
+/**
+ * @tc.name: SetSamgrIpcPrior002
+ * @tc.desc: SetSamgrIpcPrior
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, SetSamgrIpcPrior002, TestSize.Level3)
+{
+    DTEST_LOG << " SetSamgrIpcPrior002 begin " << std::endl;
+    sptr<ISystemAbilityManager> samgrMock = new ISystemAbilityManagerMock;
+    EXPECT_TRUE(samgrMock != nullptr);
+    int32_t ret = samgrMock->SetSamgrIpcPrior(true);
+    EXPECT_TRUE(ret == 0);
+    DTEST_LOG << " SetSamgrIpcPrior002 end " << std::endl;
+}
+
+/**
+ * @tc.name: ListSystemAbilities001
+ * @tc.desc: ListSystemAbilities
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, ListSystemAbilities001, TestSize.Level3)
+{
+    DTEST_LOG << " ListSystemAbilities001 begin " << std::endl;
+    sptr<ISystemAbilityManager> samgrProxy =
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+
+    auto res = samgrProxy->ListSystemAbilities(0);
+    EXPECT_FALSE(res.empty());
+    DTEST_LOG << " ListSystemAbilities001 end " << std::endl;
+}
 }
