@@ -1696,7 +1696,7 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::GetLocalAbilityManagerProxy(int32
 
 int32_t SystemAbilityManagerProxy::SetSamgrIpcPrior(bool enable)
 {
-    HILOGI("SetSamgrIpcPrior called:%{public}d", enable);
+    HILOGD("SetSamgrIpcPrior called:%{public}d", enable);
     sptr<IRemoteObject> remote = Remote();
     if (remote == nullptr) {
         HILOGE("SetSamgrIpcPrior remote is nullptr");
