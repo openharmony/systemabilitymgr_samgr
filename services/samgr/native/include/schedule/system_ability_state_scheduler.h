@@ -81,7 +81,7 @@ public:
     bool IsSystemProcessCanUnload(const std::u16string& processName);
 private:
     void InitStateContext(const std::list<SaProfile>& saProfiles);
-    void InitLowMemProcessList();
+    void InitLowMemProcessList(const std::list<SaProfile>& saProfiles);
 
     int32_t LimitDelayUnloadTime(int32_t delayUnloadTime);
     bool GetSystemAbilityContext(int32_t systemAbilityId,
@@ -120,8 +120,8 @@ private:
     bool CanUnloadAllSystemAbility(const std::shared_ptr<SystemProcessContext>& processContext);
     bool CanUnloadAllSystemAbilityLocked(const std::shared_ptr<SystemProcessContext>& processContext,
         bool isNeedCheckRecycleStrategy = false);
-    bool IsProcessActive(const std::shared_ptr<SystemProcessContext>& processContext);
-    bool IsProcessIdle(const std::shared_ptr<SystemProcessContext>& processContext);
+    bool IsProcessActivatedLocked(const std::shared_ptr<SystemProcessContext>& processContext);
+    bool IsProcessIdledLocked(const std::shared_ptr<SystemProcessContext>& processContext);
     bool CheckSaIsImmediatelyRecycle(const std::shared_ptr<SystemProcessContext>& processContext);
     int32_t UnloadAllSystemAbilityLocked(const std::shared_ptr<SystemProcessContext>& processContext);
 
@@ -145,8 +145,6 @@ private:
     void OnAbilityUnloadableLocked(int32_t systemAbilityId) override;
     void OnProcessNotStartedLocked(const std::u16string& processName) override;
     void OnProcessStartedLocked(const std::u16string& processName) override;
-    void OnProcessActivatedLocked(const std::u16string& processName) override;
-    void OnProcessIdledLocked(const std::u16string& processName) override;
     void RemoveRunningProcessLocked(const std::shared_ptr<SystemProcessContext>& processContext);
     void AddRunningProcessLocked(const std::shared_ptr<SystemProcessContext>& processContext);
     void UnSubscribeSystemProcessListLocked(std::list<sptr<ISystemProcessStatusChange>>& listeners,

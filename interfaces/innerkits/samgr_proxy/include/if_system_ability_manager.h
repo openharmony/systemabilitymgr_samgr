@@ -316,34 +316,6 @@ public:
         (void)listener;
         return 0;
     }
-    
-    /**
-     * SubscribeSystemProcessList, Subscribe the status of process list.
-     *
-     * @param listener, callback
-     * @return ERR_OK indicates that the Subscribe successfully.
-     */
-    virtual int32_t SubscribeSystemProcessList(const std::list<std::u16string>& procNames,
-        const sptr<ISystemProcessStatusChange>& listener)
-    {
-        (void)listener;
-        (void)procNames;
-        return 0;
-    }
-
-    /**
-     * SubscribeSystemProcessList, Subscribe the status of process list.
-     *
-     * @param listener, callback
-     * @return ERR_OK indicates that the Subscribe successfully.
-     */
-    virtual int32_t UnSubscribeSystemProcessList(const std::list<std::u16string>& procNames,
-        const sptr<ISystemProcessStatusChange>& listener)
-    {
-        (void)listener;
-        (void)procNames;
-        return 0;
-    }
 
     /**
      * SendStrategy, Send strategy to SA.

@@ -187,10 +187,6 @@ void SystemAbilityManagerStub::SetProcessFuncMap()
         SystemAbilityManagerStub::LocalSubscribeLowMemSystemProcess;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::UNSUBSCRIBE_LOWMEM_SYSTEM_PROCESS_TRANSACTION)] =
         SystemAbilityManagerStub::LocalUnSubscribeLowMemSystemProcess;
-    memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::SUBSCRIBE_SYSTEM_PROCESS_LIST_TRANSACTION)] =
-        SystemAbilityManagerStub::LocalSubscribeSystemProcessList;
-    memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::UNSUBSCRIBE_SYSTEM_PROCESS_LIST_TRANSACTION)] =
-        SystemAbilityManagerStub::LocalUnSubscribeSystemProcessList;
 }
 
 SystemAbilityManagerStub::SystemAbilityManagerStub()
@@ -1196,99 +1192,6 @@ int32_t SystemAbilityManagerStub::UnSubscribeLowMemSystemProcessInner(MessagePar
     bool ret = reply.WriteInt32(result);
     if (!ret) {
         HILOGW("UnSubscribeLowMemSystemProcessInner write reply failed.");
-        return ERR_FLATTEN_OBJECT;
-    }
-    return result;
-}
-int32_t SystemAbilityManagerStub::SubscribeSystemProcessListInner(MessageParcel& data, MessageParcel& reply)
-{
-    if (!CanRequest()) {
-        HILOGE("SubscribeSystemProcessListInner PERMISSION DENIED!");
-        return ERR_PERMISSION_DENIED;
-    }
-    sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
-    if (remoteObject == nullptr) {
-        HILOGW("SubscribeSystemProcessListInner read listener failed!");
-        return ERR_NULL_OBJECT;
-    }
-    sptr<ISystemProcessStatusChange> listener = iface_cast<ISystemProcessStatusChange>(remoteObject);
-    if (listener == nullptr) {
-        HILOGW("SubscribeSystemProcessListInner iface_cast failed!");
-        return ERR_NULL_OBJECT;
-    }
-    std::list<std::u16string> pocessNames;
-    int32_t size = 0;
-    if (!data.ReadInt32(size)) {
-        HILOGW("SubscribeSystemProcessListInner read size failed!");
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (size == 0) {
-        return ERR_OK;
-    }
-    if (static_cast<size_t>(size) > data.GetReadableBytes() || size < 0) {
-        HILOGW("Failed to read proc list, size=%{public}d!", size);
-        return ERR_FLATTEN_OBJECT;
-    }
-    for (int32_t i = 0; i < size; i++) {
-        std::u16string procName;
-        if (!data.ReadString16(procName)) {
-            HILOGW("SubscribeSystemProcessListInner read procName failed!");
-            return ERR_FLATTEN_OBJECT;
-        }
-        pocessNames.push_back(procName);
-    }
-    int32_t result = SubscribeSystemProcessList(pocessNames, listener);
-    HILOGD("SubscribeSystemProcessListInner result is %{public}d", result);
-    bool ret = reply.WriteInt32(result);
-    if (!ret) {
-        HILOGW("SubscribeSystemProcessListInner write reply failed.");
-        return ERR_FLATTEN_OBJECT;
-    }
-    return result;
-}
-
-int32_t SystemAbilityManagerStub::UnSubscribeSystemProcessListInner(MessageParcel& data, MessageParcel& reply)
-{
-    if (!CanRequest()) {
-        HILOGE("UnSubscribeSystemProcessListInner PERMISSION DENIED!");
-        return ERR_PERMISSION_DENIED;
-    }
-    sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
-    if (remoteObject == nullptr) {
-        HILOGW("UnSubscribeSystemProcessListInner read listener failed!");
-        return ERR_NULL_OBJECT;
-    }
-    sptr<ISystemProcessStatusChange> listener = iface_cast<ISystemProcessStatusChange>(remoteObject);
-    if (listener == nullptr) {
-        HILOGW("UnSubscribeSystemProcessListInner iface_cast failed!");
-        return ERR_NULL_OBJECT;
-    }
-    std::list<std::u16string> pocessNames;
-    int32_t size = 0;
-    if (!data.ReadInt32(size)) {
-        HILOGW("SubscribeSystemProcessListInner read size failed!");
-        return ERR_FLATTEN_OBJECT;
-    }
-    if (size == 0) {
-        return ERR_OK;
-    }
-    if (static_cast<size_t>(size) > data.GetReadableBytes() || size < 0) {
-        HILOGW("Failed to read proc list, size=%{public}d!", size);
-        return ERR_FLATTEN_OBJECT;
-    }
-    for (int32_t i = 0; i < size; i++) {
-        std::u16string procName;
-        if (!data.ReadString16(procName)) {
-            HILOGW("SubscribeSystemProcessListInner read procName failed!");
-            return ERR_FLATTEN_OBJECT;
-        }
-        pocessNames.push_back(procName);
-    }
-    int32_t result = UnSubscribeSystemProcessList(pocessNames, listener);
-    HILOGD("UnSubscribeSystemProcessListInner result is %{public}d", result);
-    bool ret = reply.WriteInt32(result);
-    if (!ret) {
-        HILOGW("UnSubscribeSystemProcessListInner write reply failed.");
         return ERR_FLATTEN_OBJECT;
     }
     return result;

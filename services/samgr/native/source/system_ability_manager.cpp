@@ -1247,27 +1247,6 @@ int32_t SystemAbilityManager::UnSubscribeLowMemSystemProcess(const sptr<ISystemP
     return abilityStateScheduler_->UnSubscribeLowMemSystemProcess(listener);
 }
 
-
-int32_t SystemAbilityManager::SubscribeSystemProcessList(const std::list<std::u16string>& procNames,
-    const sptr<ISystemProcessStatusChange>& listener)
-{
-    if (abilityStateScheduler_ == nullptr) {
-        HILOGE("abilityStateScheduler is nullptr");
-        return ERR_INVALID_VALUE;
-    }
-    return abilityStateScheduler_->SubscribeSystemProcessList(procNames, listener);
-}
-
-int32_t SystemAbilityManager::UnSubscribeSystemProcessList(const std::list<std::u16string>& procNames,
-    const sptr<ISystemProcessStatusChange>& listener)
-{
-    if (abilityStateScheduler_ == nullptr) {
-        HILOGE("abilityStateScheduler is nullptr");
-        return ERR_INVALID_VALUE;
-    }
-    return abilityStateScheduler_->UnSubscribeSystemProcessList(procNames, listener);
-}
-
 int32_t SystemAbilityManager::GetOnDemandReasonExtraData(int64_t extraDataId, MessageParcel& extraDataParcel)
 {
     if (collectManager_ == nullptr) {

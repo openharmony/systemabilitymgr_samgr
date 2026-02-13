@@ -126,16 +126,6 @@ private:
     {
         return stub->UnSubscribeLowMemSystemProcessInner(data, reply);
     }
-    static int32_t LocalSubscribeSystemProcessList(SystemAbilityManagerStub* stub,
-        MessageParcel& data, MessageParcel& reply)
-    {
-        return stub->SubscribeSystemProcessListInner(data, reply);
-    }
-    static int32_t LocalUnSubscribeSystemProcessList(SystemAbilityManagerStub* stub,
-        MessageParcel& data, MessageParcel& reply)
-    {
-        return stub->UnSubscribeSystemProcessListInner(data, reply);
-    }
     static int32_t LocalLoadSystemAbility(SystemAbilityManagerStub* stub,
         MessageParcel& data, MessageParcel& reply)
     {
