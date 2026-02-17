@@ -229,6 +229,7 @@ static void TestProcess(OHOS::OnDemandHelper& ondemandHelper, char* inputcmd)
 
 static void TestLowMemProcess(OHOS::OnDemandHelper& ondemandHelper, char* inputcmd)
 {
+    constexpr const int timeoutMs = 5000;
     std::string cmd = "";
     cout << "please input proc test case(1-getp/2-initp)" << endl;
     if (strcmp(inputcmd, "getp") == 0 || strcmp(inputcmd, "1") == 0) {
@@ -238,16 +239,33 @@ static void TestLowMemProcess(OHOS::OnDemandHelper& ondemandHelper, char* inputc
         ondemandHelper.InitSystemProcessStatusChange();
         SamMockPermission::MockProcess("resource_schedule_service");
         ondemandHelper.SubscribeLowMemSystemProcess();
-        ::system("ondemand load 1494");
-        ::system("ondemand load 1499");
-        sleep(1);
+        bool ret = false;
+        ::system("ondemand sa load 1494");
+        ::system("ondemand sa load 1499");
+        ret = ondemandHelper.WaitForProcessStatusChangeEvent(OnDemandHelper::ProcessStatusChangeEvent::Active,
+            timeoutMs);
+        if (!ret) {
+            cout << "wait for active event timed out" << endl;
+        }
+        ondemandHelper.ConsumeProcessStatusChangeEvent();
 
-        ::system("ondemand unload 1494");
-        ::system("ondemand unload 1499");
-        sleep(1);
+        ::system("ondemand sa unload 1494");
+        ::system("ondemand sa unload 1499");
+        ret = ondemandHelper.WaitForProcessStatusChangeEvent(OnDemandHelper::ProcessStatusChangeEvent::Idle,
+            timeoutMs);
+        if (!ret) {
+            cout << "wait for idle event timed out" << endl;
+        }
+        ondemandHelper.ConsumeProcessStatusChangeEvent();
 
-        ::system("ondemand load 1494");
-        ::system("ondemand load 1499");
+        ondemandHelper.UnSubscribeLowMemSystemProcess();
+        ::system("ondemand sa load 1494");
+        ::system("ondemand sa load 1499");
+        ret = ondemandHelper.WaitForProcessStatusChangeEvent(OnDemandHelper::ProcessStatusChangeEvent::Active,
+            timeoutMs);
+        if (!ret) {
+            cout << "wait for active event timed out" << endl;
+        }
     } else {
         cout << "invalid input" << endl;
     }

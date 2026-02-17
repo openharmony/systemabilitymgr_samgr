@@ -1099,4 +1099,130 @@ HWTEST_F(SystemAbilityMgrStubTest, SetSamgrIpcPriorInner002, TestSize.Level3)
     int32_t ret = saMgr->SetSamgrIpcPriorInner(data, reply);
     EXPECT_EQ(ret, ERR_OK);
 }
+
+/**
+ * @tc.name: SubscribeLowMemSystemProcessInner001
+ * @tc.desc: test SubscribeLowMemSystemProcessInner with empty data
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, SubscribeLowMemSystemProcessInner001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = saMgr->SubscribeLowMemSystemProcessInner(data, reply);
+    EXPECT_NE(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: SubscribeLowMemSystemProcessInner002
+ * @tc.desc: test SubscribeLowMemSystemProcessInner with iface_cast failure
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, SubscribeLowMemSystemProcessInner002, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<IPCObjectStub> invalidListener = sptr<IPCObjectStub>::MakeSptr(u"invalid listener");
+    data.WriteRemoteObject(invalidListener);
+    int32_t ret = saMgr->SubscribeLowMemSystemProcessInner(data, reply);
+    EXPECT_NE(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: SubscribeLowMemSystemProcessInner003
+ * @tc.desc: test SubscribeLowMemSystemProcessInner with null remote object
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, SubscribeLowMemSystemProcessInner003, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<IRemoteObject> ptr = new SystemProcessStatusChange();
+    data.WriteRemoteObject(ptr);
+    reply.ParseFrom(0, 0); // eventually makes reply non writable
+    int32_t ret = saMgr->SubscribeLowMemSystemProcessInner(data, reply);
+    EXPECT_NE(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: SubscribeLowMemSystemProcessInner004
+ * @tc.desc: test SubscribeLowMemSystemProcessInner succeeded
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, SubscribeLowMemSystemProcessInner004, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<IRemoteObject> ptr = new SystemProcessStatusChange();
+    data.WriteRemoteObject(ptr);
+    int32_t ret = saMgr->SubscribeLowMemSystemProcessInner(data, reply);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: UnSubscribeLowMemSystemProcessInner001
+ * @tc.desc: test UnSubscribeLowMemSystemProcessInner with empty data
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeLowMemSystemProcessInner001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = saMgr->UnSubscribeLowMemSystemProcessInner(data, reply);
+    EXPECT_NE(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: UnSubscribeLowMemSystemProcessInner002
+ * @tc.desc: test UnSubscribeLowMemSystemProcessInner with iface_cast failure
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeLowMemSystemProcessInner002, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<IPCObjectStub> invalidListener = sptr<IPCObjectStub>::MakeSptr(u"invalid listener");
+    data.WriteRemoteObject(invalidListener);
+    int32_t ret = saMgr->UnSubscribeLowMemSystemProcessInner(data, reply);
+    EXPECT_NE(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: UnSubscribeLowMemSystemProcessInner003
+ * @tc.desc: test UnSubscribeLowMemSystemProcessInner with null remote object
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeLowMemSystemProcessInner003, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<IRemoteObject> ptr = new SystemProcessStatusChange();
+    data.WriteRemoteObject(ptr);
+    reply.ParseFrom(0, 0); // eventually makes reply non writable
+    int32_t ret = saMgr->UnSubscribeLowMemSystemProcessInner(data, reply);
+    EXPECT_NE(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: UnSubscribeLowMemSystemProcessInner004
+ * @tc.desc: test UnSubscribeLowMemSystemProcessInner succeeded
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeLowMemSystemProcessInner004, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    sptr<IRemoteObject> ptr = new SystemProcessStatusChange();
+    data.WriteRemoteObject(ptr);
+    int32_t ret = saMgr->UnSubscribeLowMemSystemProcessInner(data, reply);
+    EXPECT_EQ(ret, ERR_OK);
+}
 }
