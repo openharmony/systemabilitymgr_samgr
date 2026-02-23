@@ -1053,11 +1053,17 @@ void SystemAbilityStateScheduler::OnAbilityNotLoadedLocked(int32_t systemAbility
 void SystemAbilityStateScheduler::OnAbilityLoadedLocked(int32_t systemAbilityId)
 {
     HILOGI("Scheduler SA:%{public}d loaded", systemAbilityId);
-    std::shared_ptr<SystemAbilityContext> abilityContext;
-    if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
-        return;
+    auto pendingUnloadTask = [systemAbilityId, this]() {
+        std::shared_ptr<SystemAbilityContext> abilityContext;
+        if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
+            return;
+        }
+        std::lock_guard<samgr::mutex> autoLock(abilityContext->ownProcessContext->processLock);
+        HandlePendingUnloadEventLocked(abilityContext);
+    };
+    if (processHandler_ != nullptr) {
+        processHandler_->PostTask(pendingUnloadTask);
     }
-    HandlePendingUnloadEventLocked(abilityContext);
 }
 
 void SystemAbilityStateScheduler::OnAbilityUnloadableLocked(int32_t systemAbilityId)
