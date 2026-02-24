@@ -1596,7 +1596,7 @@ int32_t SystemAbilityManager::DoLoadSystemAbility(int32_t systemAbilityId, const
         HILOGI("DoLoadSA:%{public}d,%{public}zu_%{public}d%{public}s", systemAbilityId,
             abilityItem.callbackMap[LOCAL_DEVICE].size(), count, ret ? "" : ",AddDeath fail");
     }
-    auto callPid = IPCSkeleton:;GetCallingPid();
+    auto callPid = IPCSkeleton::GetCallingPid();
     auto callPname = SamgrUtil::GetProcessNameFromCmdline(callPid);
     SystemProcessInfo procInfo;
     if (abilityStateScheduler_ != nullptr) {
