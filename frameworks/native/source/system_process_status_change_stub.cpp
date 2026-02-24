@@ -83,12 +83,14 @@ int32_t SystemProcessStatusChangeStub::OnSystemProcessStoppedInner(MessageParcel
 int32_t SystemProcessStatusChangeStub::OnSystemProcessActivatedInner(MessageParcel& data, MessageParcel& reply)
 {
     SystemProcessInfo systemProcessInfo;
-    systemProcessInfo.processName = data.ReadString();
-    if (systemProcessInfo.processName.empty()) {
+    if (!data.ReadString(systemProcessInfo.processName)) {
         HILOGW("read processName failed!");
         return ERR_NULL_OBJECT;
     }
-    systemProcessInfo.pid = data.ReadInt32();
+    if (!data.ReadInt32(systemProcessInfo.pid)) {
+        HILOGW("read pid failed!");
+        return ERR_NULL_OBJECT;
+    }
     HILOGI("onProcActivate,pid:%{public}d", systemProcessInfo.pid);
     OnSystemProcessActivated(systemProcessInfo);
     return ERR_NONE;
@@ -97,12 +99,14 @@ int32_t SystemProcessStatusChangeStub::OnSystemProcessActivatedInner(MessageParc
 int32_t SystemProcessStatusChangeStub::OnSystemProcessIdledInner(MessageParcel& data, MessageParcel& reply)
 {
     SystemProcessInfo systemProcessInfo;
-    systemProcessInfo.processName = data.ReadString();
-    if (systemProcessInfo.processName.empty()) {
+    if (!data.ReadString(systemProcessInfo.processName)) {
         HILOGW("read processName failed!");
         return ERR_NULL_OBJECT;
     }
-    systemProcessInfo.pid = data.ReadInt32();
+    if (!data.ReadInt32(systemProcessInfo.pid)) {
+        HILOGW("read pid failed!");
+        return ERR_NULL_OBJECT;
+    }
     HILOGI("onProcIdle,pid:%{public}d", systemProcessInfo.pid);
     OnSystemProcessIdled(systemProcessInfo);
     return ERR_NONE;

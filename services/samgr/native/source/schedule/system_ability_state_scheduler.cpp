@@ -145,6 +145,7 @@ void SystemAbilityStateScheduler::InitLowMemProcessList(const std::list<SaProfil
     }
     for (auto& [processName, lowmem] : ProcessLowmemState) {
         if (lowmem) {
+            HILOGD("adding %{public}s to lowmem list", Str16ToStr8(processName).c_str());
             lowMemoryProcessList_.emplace_back(processName);
         }
     }
@@ -673,6 +674,7 @@ bool SystemAbilityStateScheduler::IsProcessActivatedLocked(const std::shared_ptr
     // for now it is only called in OnEnter
     std::lock_guard<samgr::mutex> autoLock(processContext->stateCountLock); // check whether this mutex is redundant
     uint32_t loadAbilityCount = processContext->abilityStateCountMap[SystemAbilityState::LOADED];
+    HILOGD("loadAbilityCount=%{public}d", loadAbilityCount);
     return loadAbilityCount == 1;
 }
 
@@ -688,6 +690,7 @@ bool SystemAbilityStateScheduler::IsProcessIdledLocked(const std::shared_ptr<Sys
     std::lock_guard<samgr::mutex> autoLock(processContext->stateCountLock);
     uint32_t loadAbilityCount = processContext->abilityStateCountMap[SystemAbilityState::LOADED];
     uint32_t loadingAbilityCount = processContext->abilityStateCountMap[SystemAbilityState::LOADING];
+    HILOGD("loadAbilityCount=%{public}d, loadingAbilityCount=%{public}d", loadAbilityCount, loadingAbilityCount);
     return loadAbilityCount == 0 && loadingAbilityCount == 0;
 }
 
@@ -1421,11 +1424,11 @@ int32_t SystemAbilityStateScheduler::SubscribeSystemProcessList(const std::list<
                 HILOGE("SubscribeSystemProcessList pid:%{public}d overflow max subscribe count!", callingPid);
                 return ERR_PERMISSION_DENIED;
             }
-            ++count;
             bool ret = false;
             if (processListenerDeath_ != nullptr) {
                 ret = listener->AsObject()->AddDeathRecipient(processListenerDeath_);
                 listeners.emplace_back(listener);
+                ++count;
                 HILOGD("SubscribeProc:%{public}s,%{public}d_%{public}zu_%{public}d%{public}s",
                     processName.c_str(), callingPid, listeners.size(), count, ret ? "" : ",AddDeath fail");
             }

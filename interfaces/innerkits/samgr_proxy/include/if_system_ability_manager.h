@@ -307,7 +307,7 @@ public:
     }
     
     /**
-     * UnSubscribeLowMemSystemProcess, UnSubscribe the status of low-mem process.\     *
+     * UnSubscribeLowMemSystemProcess, UnSubscribe the status of low-mem process.
      * @param listener, callback
      * @return ERR_OK indicates that the UnSubscribe successfully.
      */

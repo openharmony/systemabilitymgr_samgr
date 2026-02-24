@@ -233,8 +233,6 @@ private:
     int32_t UnSubscribeSystemProcessInner(MessageParcel& data, MessageParcel& reply);
     int32_t SubscribeLowMemSystemProcessInner(MessageParcel& data, MessageParcel& reply);
     int32_t UnSubscribeLowMemSystemProcessInner(MessageParcel& data, MessageParcel& reply);
-    int32_t SubscribeSystemProcessListInner(MessageParcel& data, MessageParcel& reply);
-    int32_t UnSubscribeSystemProcessListInner(MessageParcel& data, MessageParcel& reply);
     int32_t LoadSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t LoadRemoteSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t UnloadSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
