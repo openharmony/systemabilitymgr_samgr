@@ -1113,12 +1113,14 @@ int32_t SystemAbilityManager::AddSystemProcess(const u16string& procName,
     if (systemProcessDeath_ != nullptr) {
         ret = procObject->AddDeathRecipient(systemProcessDeath_);
     }
+    StartingProcessInfo info;
     int64_t duration = 0;
     {
         lock_guard<samgr::mutex> autoLock(startingProcessMapLock_);
         auto iterStarting = startingProcessMap_.find(procName);
         if (iterStarting != startingProcessMap_.end()) {
-            duration = GetTickCount() - iterStarting->second;
+            info = iterStarting->second;
+            duration = GetTickCount() - info.second;
             startingProcessMap_.erase(iterStarting);
         }
     }
@@ -1126,7 +1128,9 @@ int32_t SystemAbilityManager::AddSystemProcess(const u16string& procName,
         duration, ret ? "" : ",AddDeath fail");
     auto callingPid = IPCSkeleton::GetCallingPid();
     auto callingUid = IPCSkeleton::GetCallingUid();
-    ReportProcessStartDuration(Str16ToStr8(procName), callingPid, callingUid, duration);
+    ProcessStartDurationInfo procStartDurInfo = {Str16ToStr8(procName), callingPid, callingUid,
+        duration, info.callPname, info.callingPid, info.callUid, info.calleeSaId};
+    ReportProcessStartDuration(procStartDurInfo);
     if (abilityStateScheduler_ == nullptr) {
         HILOGE("abilityStateScheduler is nullptr");
         return ERR_INVALID_VALUE;
@@ -1497,8 +1501,11 @@ int32_t SystemAbilityManager::StartingSystemProcessLocked(const std::u16string& 
             HILOGI("StartingProc:%{public}s already starting", Str16ToStr8(procName).c_str());
             return ERR_OK;
         } else {
+            auto callPid = IPCSkeleton::GetCallingPid;
+            auto callUid = IPCSkeleton::GetCallingUid;
             int64_t begin = GetTickCount();
-            startingProcessMap_.emplace(procName, begin);
+            StartingProcessInfo startingProcessInfo = {procName, callPid, callUid, callPname, systemAbilityId, begin};
+            startingProcessMap_.emplace(procName, std::move(startingProcessInfo));
         }
     }
     int32_t result = StartDynamicSystemProcess(procName, systemAbilityId, event);
@@ -1532,8 +1539,12 @@ int32_t SystemAbilityManager::StartingSystemProcess(const std::u16string& procNa
             HILOGI("StartingProc:%{public}s already starting", Str16ToStr8(procName).c_str());
             return ERR_OK;
         } else {
+            auto callPid = IPCSkeleton::GetCallingPid();
+            auto callUid = IPCSkeleton::GetCallingUid();
+            auto callPname = SamgrUtil::GetProcessNameFromCmdline(callPid);
             int64_t begin = GetTickCount();
-            startingProcessMap_.emplace(procName, begin);
+            StartingProcessInfo startingProcessInfo = {procName, callPid, callUid, callPname, systemAbilityId, begin}
+            startingProcessMap_.emplace(procName, std::move(startingProcessInfo));
         }
     }
     int32_t result = StartDynamicSystemProcess(procName, systemAbilityId, event);
@@ -1585,6 +1596,15 @@ int32_t SystemAbilityManager::DoLoadSystemAbility(int32_t systemAbilityId, const
         HILOGI("DoLoadSA:%{public}d,%{public}zu_%{public}d%{public}s", systemAbilityId,
             abilityItem.callbackMap[LOCAL_DEVICE].size(), count, ret ? "" : ",AddDeath fail");
     }
+    auto callPid = IPCSkeleton:;GetCallingPid();
+    auto callPname = SamgrUtil::GetProcessNameFromCmdline(callPid);
+    SystemProcessInfo procInfo;
+    if (abilityStateScheduler_ != nullptr) {
+        abilityStateScheduler_->GetRunningSystemProcess(procName, procInfo);
+    }
+    SamgrSaLoadInfo samgrSaLoadInfo = {systemAbilityId, callPname, callPid, IPCSkeleton::GetCallingUid(),
+        event.eventId, procInfo.processName, procInfo.pid, procInfo.uid};
+    ReportSamgrSaLoad(samgrSaLoadInfo);
     result = StartingSystemProcess(procName, systemAbilityId, event);
     SendCheckLoadedMsg(systemAbilityId, procName, LOCAL_DEVICE, callback);
     return result;

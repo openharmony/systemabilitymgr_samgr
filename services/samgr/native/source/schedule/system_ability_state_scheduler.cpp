@@ -1100,6 +1100,21 @@ int32_t SystemAbilityStateScheduler::GetRunningSystemProcess(std::list<SystemPro
     return ERR_OK;
 }
 
+void SystemAbilityStateScheduler::GetRunningSystemProcess(const std::u16string& processName,
+    SystemProcessInfo& systemProcessInfo)
+{
+    std::shared_lock<samgr::shared_mutex> autoLock(runningProcessList_);
+    systemProcessInfo.processName = Str16ToStr8(processName);
+    auto it = std::find_if(runningProcessList_.begin(), runningProcessList_.end(),
+        [&](const SystemProcessInfo& item) {
+            return item.processName == systemProcessInfo.processName;
+        });
+    if (it != runningProcessList_.end()) {
+        systemProcessInfo.pid = it->pid;
+        systemProcessInfo.uid = it->uid;
+    }
+}
+
 int32_t SystemAbilityStateScheduler::GetProcessNameByProcessId(int32_t pid, std::u16string& processName)
 {
     HILOGD("[SA Scheduler] get processName by processId");

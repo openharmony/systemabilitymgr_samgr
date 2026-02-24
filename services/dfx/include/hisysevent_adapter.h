@@ -18,6 +18,28 @@
 
 #include <string>
 namespace OHOS {
+struct ProcessStartDurationInfo {
+    std::string calleeProcessName;
+    int32_t calleePid = -1;
+    int32_t calleeUid = -1;
+    int64_t duration = -1;
+    std::string callingProcessName;
+    int32_t callingPid = -1;
+    int32_t callingUid = -1;
+    int32_t calleeSaId = -1;
+};
+
+struct SamgrSaLoadInfo {
+    int32_t said = -1;
+    std::string  callingProcessName;
+    int32_t callingPid = -1;
+    int32_t callingUid = -1;
+    int32_t eventId = -1;
+    std::string calleeProcessName;
+    int32_t calleePid = -1;
+    int32_t calleeUid = -1;
+};
+
 void ReportSaMainExit(const std::string& reason);
 
 void ReportAddSystemAbilityFailed(int32_t said, int32_t pid, int32_t uid, const std::string& filaName);
@@ -31,7 +53,7 @@ void ReportSaCrash(int32_t saId);
 
 void ReportSamgrSaLoadFail(int32_t said, int32_t pid, int32_t uid, const std::string& reason);
 
-void ReportSamgrSaLoad(int32_t said, int32_t pid, int32_t uid, int32_t eventId);
+void ReportSamgrSaLoad(SamgrSaLoadInfo& samgrSaLoadInfo);
 
 void ReportSamgrSaUnload(int32_t said, int32_t pid, int32_t uid, int32_t eventId);
 
@@ -45,7 +67,7 @@ void ReportProcessStartFail(const std::string& processName, int32_t pid, int32_t
 
 void ReportProcessStopFail(const std::string& processName, int32_t pid, int32_t uid, const std::string& reason);
 
-void ReportProcessStartDuration(const std::string& processName, int32_t pid, int32_t uid, int64_t duration);
+void ReportProcessStartDuration(ProcessStartDurationInfo& procStartDurInfo);
 
 void ReportProcessStopDuration(const std::string& processName, int32_t pid, int32_t uid, int64_t duration);
 

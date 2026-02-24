@@ -1235,4 +1235,26 @@ HWTEST_F(SystemAbilityMgrNewTest, DelTask001, TestSize.Level3)
     saMgr->workHandler_->DelTask("test");
     EXPECT_TRUE(saMgr->workHandler_->taskMap_.empty());
 }
+
+/**
+ * @tc.name: StartingSystemProcessLocked001
+ * @tc.desc: Test than the function should clean up the boot record when the boot process fails.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrNewTest, StartingSystemProcessLocked001, TestSize.Level3)
+{
+    DTEST_LOG <<"StartingSystemProcessLocked001 start " << std::endl;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
+    InitSaMgr(saMgr);
+    std::u16string procName = u"test_proc";
+    int32_t systemAbilityId = 123;
+    OnDemandEvent event;
+    saMgr->systemProcessMap_.clear();
+    saMgr->startingProcessMap_.clear();
+    int32_t expectedResult = -1;
+    int32_t result = saMgr->StartingSystemProcessLocked(procName, systemAbilityId, event);
+    EXPECT_EQ(result, expectedResult);
+    DTEST_LOG <<"StartingSystemProcessLocked001 end " << std::endl;
+}
 } // namespace OHOS

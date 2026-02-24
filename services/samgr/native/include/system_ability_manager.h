@@ -272,6 +272,15 @@ private:
         OnDemandEvent event;
     };
 
+    struct StartingProcessInfo {
+        std::u16string procName;
+        int32_t callingPid = -1;
+        int32_t callUid = -1;
+        std::string callPname;
+        int32_t calleeSaId = -1;
+        int64_t begin;
+    }
+
     SystemAbilityManager()
     {
 #ifndef SAMGR_ENABLE_DELAY_DBINDER
@@ -408,7 +417,7 @@ private:
     samgr::mutex systemProcessMapLock_;
     std::map<std::u16string, sptr<IRemoteObject>> systemProcessMap_;
     samgr::mutex startingProcessMapLock_;
-    std::map<std::u16string, int64_t> startingProcessMap_;
+    std::map<std::u16string, StartingProcessInfo> startingProcessMap_;
     std::map<int32_t, int32_t> callbackCountMap_;
 
     std::shared_ptr<FFRTHandler> workHandler_;
