@@ -179,7 +179,7 @@ void ReportProcessStartDuration(ProcessStartDurationInfo& procStartDurInfo)
         CALLING_PID, procStartDurInfo.callingPid,
         CALLING_UID, procStartDurInfo.callingUid,
         DURATION, procStartDurInfo.duration);
-    if(ret != 0) {
+    if (ret != 0) {
         HILOGE("report event:%{public}s failed! process:%{public}s, said:%{public}d, ret:%{public}d.",
             PROCESS_START_DURATION, procStartDurInfo.calleeProcessName.c_str(),
             procStartDurInfo.calleeSaId.c_str, ret);
