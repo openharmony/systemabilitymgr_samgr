@@ -2164,7 +2164,8 @@ HWTEST_F(SystemAbilityStateSchedulerTest, UnloadProcess001, TestSize.Level3)
 
 /**
  * @tc.name: GetRunningSystemProcess001
- * @tc.desc: test GetRunningSystemProcess, If the specified process exists in the running process list, the process information is correctly filled.
+ * @tc.desc: test GetRunningSystemProcess, If the specified process exists in the running process list,
+             the process information is correctly filled.
  * @tc.type: FUNC
  * @tc.require: I6FDNZ
  */
