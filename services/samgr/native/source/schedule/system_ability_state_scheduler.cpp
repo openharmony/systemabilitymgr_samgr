@@ -1103,7 +1103,7 @@ int32_t SystemAbilityStateScheduler::GetRunningSystemProcess(std::list<SystemPro
 void SystemAbilityStateScheduler::GetRunningSystemProcess(const std::u16string& processName,
     SystemProcessInfo& systemProcessInfo)
 {
-    std::shared_lock<samgr::shared_mutex> autoLock(runningProcessList_);
+    std::shared_lock<samgr::shared_mutex> autoLock(runningProcessListLock_);
     systemProcessInfo.processName = Str16ToStr8(processName);
     auto it = std::find_if(runningProcessList_.begin(), runningProcessList_.end(),
         [&](const SystemProcessInfo& item) {
