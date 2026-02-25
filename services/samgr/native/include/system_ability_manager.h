@@ -279,7 +279,7 @@ private:
         std::string callPname;
         int32_t calleeSaId = -1;
         int64_t begin;
-    }
+    };
 
     SystemAbilityManager()
     {
