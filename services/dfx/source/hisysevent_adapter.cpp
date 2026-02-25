@@ -240,7 +240,7 @@ void ReportSamgrSaLoad(SamgrSaLoadInfo& samgrSaLoadInfo)
         CALLING_PROCESS_NAME, samgrSaLoadInfo.callingProcessName,
         CALLING_PID, samgrSaLoadInfo.callingPid,
         CALLING_UID, samgrSaLoadInfo.callingUid,
-        EVENT, samgrSaLoadInfo.eventId
+        EVENT, samgrSaLoadInfo.eventId,
         CALLEE_PROCESS_NAME, samgrSaLoadInfo.calleeProcessName,
         CALLEE_PID, samgrSaLoadInfo.calleePid,
         CALLEE_UID, samgrSaLoadInfo.calleeUid);
