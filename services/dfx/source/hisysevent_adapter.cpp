@@ -168,7 +168,7 @@ static void ReportProcessDuration(const std::string& eventName, const std::strin
 
 void ReportProcessStartDuration(ProcessStartDurationInfo& procStartDurInfo)
 {
-    int ret = HiSysEventWrite(Hisysevent::Domain::SAMGR,
+    int ret = HiSysEventWrite(HiSysEvent::Domain::SAMGR,
         PROCESS_START_DURATION,
         HiSysEvent::EventType::BEHAVIOR,
         CALLEE_PROCESS_NAME, procStartDurInfo.calleeProcessName,
