@@ -1593,9 +1593,6 @@ int32_t SystemAbilityManager::DoLoadSystemAbility(int32_t systemAbilityId, const
         if (abilityCallbackDeath_ != nullptr) {
             ret = callback->AsObject()->AddDeathRecipient(abilityCallbackDeath_);
         }
-        SamgrSaLoadInfo saLoadInfo = {systemAbilityId, IPCSkeleton::GetCallingPid(),
-            IPCSkeleton::GetCallingUid(), event.eventId};
-        ReportSamgrSaLoad(saLoadInfo);
         HILOGI("DoLoadSA:%{public}d,%{public}zu_%{public}d%{public}s", systemAbilityId,
             abilityItem.callbackMap[LOCAL_DEVICE].size(), count, ret ? "" : ",AddDeath fail");
     }
