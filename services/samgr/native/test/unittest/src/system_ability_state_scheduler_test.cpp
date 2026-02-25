@@ -1658,7 +1658,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleAbnormallyDiedAbilityLocked003, 
     abilityContext->isAutoRestart = true;
     saMgr->abilityStateScheduler_->abilityContextMap_.clear();
     abilityContext->ownProcessContext = processContext;
-    abilityContext->systemAbilityID = SAID;
+    abilityContext->systemAbilityId = SAID;
     saMgr->abilityStateScheduler_->abilityContextMap_[SAID] = abilityContext;
     std::list<std::shared_ptr<SystemAbilityContext>> abnormallyDiedAbilityList;
     abnormallyDiedAbilityList.emplace_back(abilityContext);
@@ -2228,7 +2228,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetRunningSystemProcess003, TestSize.L
     info.processName = Str16ToStr8(testProcess);
     scheduler.runningProcessList_.push_back(info);
     SystemProcessInfo result;
-    systemAbilityStateScheduler->GetRunningSystemProcess(testProcess, result);
+    scheduler->GetRunningSystemProcess(testProcess, result);
     EXPECT_EQ(result.pid, 123);
     EXPECT_EQ(result.uid, 456);
     EXPECT_EQ(result.processName, Str16ToStr8(testProcess));
