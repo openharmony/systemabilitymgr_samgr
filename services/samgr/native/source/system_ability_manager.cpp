@@ -1501,8 +1501,8 @@ int32_t SystemAbilityManager::StartingSystemProcessLocked(const std::u16string& 
             HILOGI("StartingProc:%{public}s already starting", Str16ToStr8(procName).c_str());
             return ERR_OK;
         } else {
-            auto callPid = IPCSkeleton::GetCallingPid;
-            auto callUid = IPCSkeleton::GetCallingUid;
+            auto callPid = IPCSkeleton::GetCallingPid();
+            auto callUid = IPCSkeleton::GetCallingUid();
             auto callPname = SamgrUtil::GetProcessNameFromCmdline(callPid);
             int64_t begin = GetTickCount();
             StartingProcessInfo startingProcessInfo = {procName, callPid, callUid, callPname, systemAbilityId, begin};
