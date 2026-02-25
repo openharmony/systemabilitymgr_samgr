@@ -168,7 +168,7 @@ static void ReportProcessDuration(const std::string& eventName, const std::strin
 
 void ReportProcessStartDuration(ProcessStartDurationInfo& procStartDurInfo)
 {
-    int ret = HiSysEventWrite(hisysevent::Domain::SAMGR,
+    int ret = HiSysEventWrite(Hisysevent::Domain::SAMGR,
         PROCESS_START_DURATION,
         HiSysEvent::EventType::BEHAVIOR,
         CALLEE_PROCESS_NAME, procStartDurInfo.calleeProcessName,
@@ -182,7 +182,7 @@ void ReportProcessStartDuration(ProcessStartDurationInfo& procStartDurInfo)
     if (ret != 0) {
         HILOGE("report event:%{public}s failed! process:%{public}s, said:%{public}d, ret:%{public}d.",
             PROCESS_START_DURATION, procStartDurInfo.calleeProcessName.c_str(),
-            procStartDurInfo.calleeSaId.c_str, ret);
+            procStartDurInfo.calleeSaId, ret);
     }
 }
 
