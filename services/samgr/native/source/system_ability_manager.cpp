@@ -1120,7 +1120,7 @@ int32_t SystemAbilityManager::AddSystemProcess(const u16string& procName,
         auto iterStarting = startingProcessMap_.find(procName);
         if (iterStarting != startingProcessMap_.end()) {
             info = iterStarting->second;
-            duration = GetTickCount() - info.second;
+            duration = GetTickCount() - info.begin;
             startingProcessMap_.erase(iterStarting);
         }
     }
@@ -1503,6 +1503,7 @@ int32_t SystemAbilityManager::StartingSystemProcessLocked(const std::u16string& 
         } else {
             auto callPid = IPCSkeleton::GetCallingPid;
             auto callUid = IPCSkeleton::GetCallingUid;
+            auto callPname = SamgrUtil:GetProcessNameFromCmdline(callPid);
             int64_t begin = GetTickCount();
             StartingProcessInfo startingProcessInfo = {procName, callPid, callUid, callPname, systemAbilityId, begin};
             startingProcessMap_.emplace(procName, std::move(startingProcessInfo));
@@ -1543,7 +1544,7 @@ int32_t SystemAbilityManager::StartingSystemProcess(const std::u16string& procNa
             auto callUid = IPCSkeleton::GetCallingUid();
             auto callPname = SamgrUtil::GetProcessNameFromCmdline(callPid);
             int64_t begin = GetTickCount();
-            StartingProcessInfo startingProcessInfo = {procName, callPid, callUid, callPname, systemAbilityId, begin}
+            StartingProcessInfo startingProcessInfo = {procName, callPid, callUid, callPname, systemAbilityId, begin};
             startingProcessMap_.emplace(procName, std::move(startingProcessInfo));
         }
     }
@@ -1592,7 +1593,9 @@ int32_t SystemAbilityManager::DoLoadSystemAbility(int32_t systemAbilityId, const
         if (abilityCallbackDeath_ != nullptr) {
             ret = callback->AsObject()->AddDeathRecipient(abilityCallbackDeath_);
         }
-        ReportSamgrSaLoad(systemAbilityId, IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(), event.eventId);
+        SamgrSaLoadInfo saLoadInfo = {systemAbilityId, IPCSkeleton::GetCallingPid(),
+            IPCSkeleton::GetCallingUid(), event.eventId};
+        ReportSamgrSaLoad(saLoadInfo);
         HILOGI("DoLoadSA:%{public}d,%{public}zu_%{public}d%{public}s", systemAbilityId,
             abilityItem.callbackMap[LOCAL_DEVICE].size(), count, ret ? "" : ",AddDeath fail");
     }
