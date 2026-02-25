@@ -1503,7 +1503,7 @@ int32_t SystemAbilityManager::StartingSystemProcessLocked(const std::u16string& 
         } else {
             auto callPid = IPCSkeleton::GetCallingPid;
             auto callUid = IPCSkeleton::GetCallingUid;
-            auto callPname = SamgrUtil:GetProcessNameFromCmdline(callPid);
+            auto callPname = SamgrUtil::GetProcessNameFromCmdline(callPid);
             int64_t begin = GetTickCount();
             StartingProcessInfo startingProcessInfo = {procName, callPid, callUid, callPname, systemAbilityId, begin};
             startingProcessMap_.emplace(procName, std::move(startingProcessInfo));
