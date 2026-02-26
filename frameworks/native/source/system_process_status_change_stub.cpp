@@ -30,6 +30,10 @@ SystemProcessStatusChangeStub::SystemProcessStatusChangeStub()
         SystemProcessStatusChangeStub::LocalSystemProcessStarted;
     memberFuncMap_[ON_SYSTEM_PROCESS_STOPPED] =
         SystemProcessStatusChangeStub::LocalSystemProcessStopped;
+    memberFuncMap_[ON_SYSTEM_PROCESS_ACTIVATED] =
+        SystemProcessStatusChangeStub::LocalSystemProcessActivated;
+    memberFuncMap_[ON_SYSTEM_PROCESS_IDLED] =
+        SystemProcessStatusChangeStub::LocalSystemProcessIdled;
 }
 
 int32_t SystemProcessStatusChangeStub::OnRemoteRequest(uint32_t code,
@@ -73,6 +77,38 @@ int32_t SystemProcessStatusChangeStub::OnSystemProcessStoppedInner(MessageParcel
     systemProcessInfo.pid = data.ReadInt32();
     HILOGI("onProcStop,pid:%{public}d", systemProcessInfo.pid);
     OnSystemProcessStopped(systemProcessInfo);
+    return ERR_NONE;
+}
+
+int32_t SystemProcessStatusChangeStub::OnSystemProcessActivatedInner(MessageParcel& data, MessageParcel& reply)
+{
+    SystemProcessInfo systemProcessInfo;
+    if (!data.ReadString(systemProcessInfo.processName)) {
+        HILOGW("read processName failed!");
+        return ERR_NULL_OBJECT;
+    }
+    if (!data.ReadInt32(systemProcessInfo.pid)) {
+        HILOGW("read pid failed!");
+        return ERR_NULL_OBJECT;
+    }
+    HILOGI("onProcActivate,pid:%{public}d", systemProcessInfo.pid);
+    OnSystemProcessActivated(systemProcessInfo);
+    return ERR_NONE;
+}
+
+int32_t SystemProcessStatusChangeStub::OnSystemProcessIdledInner(MessageParcel& data, MessageParcel& reply)
+{
+    SystemProcessInfo systemProcessInfo;
+    if (!data.ReadString(systemProcessInfo.processName)) {
+        HILOGW("read processName failed!");
+        return ERR_NULL_OBJECT;
+    }
+    if (!data.ReadInt32(systemProcessInfo.pid)) {
+        HILOGW("read pid failed!");
+        return ERR_NULL_OBJECT;
+    }
+    HILOGI("onProcIdle,pid:%{public}d", systemProcessInfo.pid);
+    OnSystemProcessIdled(systemProcessInfo);
     return ERR_NONE;
 }
 

@@ -15,6 +15,9 @@
 #ifndef SAMGR_TEST_UNITTEST_INCLUDE_ONDEMAND_HELPER_H
 #define SAMGR_TEST_UNITTEST_INCLUDE_ONDEMAND_HELPER_H
 
+#include <chrono>
+#include <condition_variable>
+#include <mutex>
 #include "refbase.h"
 #include "system_ability_load_callback_stub.h"
 #include "system_ability_on_demand_event.h"
@@ -53,6 +56,8 @@ public:
     void InitSystemProcessStatusChange();
     void GetSystemProcess();
     void SubscribeSystemProcess();
+    void SubscribeLowMemSystemProcess();
+    void UnSubscribeLowMemSystemProcess();
     void UnSubscribeSystemProcess();
     void GetOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type);
     void UpdateOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
@@ -93,6 +98,21 @@ public:
     void GetCommonEventExtraId(int32_t saId, const std::string& eventName = "");
     int32_t GetExtensionSaIds(const std::string& extension, std::vector<int32_t> &saIds);
     int32_t GetExtensionRunningSaList(const std::string& extension, std::vector<sptr<IRemoteObject>>& saList);
+    enum class ProcessStatusChangeEvent { None = 0, Start, Stop, Active, Idle };
+    int WaitForProcessStatusChangeEvent(OnDemandHelper::ProcessStatusChangeEvent event, int32_t timeoutMs)
+    {
+        if (!systemProcessStatusChange_) {
+            return -1;
+        }
+        return static_cast<int>(systemProcessStatusChange_->WaitForEvent(event, timeoutMs));
+    }
+    void ConsumeProcessStatusChangeEvent()
+    {
+        if (!systemProcessStatusChange_) {
+            return;
+        }
+        systemProcessStatusChange_->ConsumeEvent();
+    }
     int argc_;
 protected:
     class OnDemandLoadCallback : public SystemAbilityLoadCallbackStub {
@@ -104,8 +124,40 @@ protected:
     };
     class SystemProcessStatusChange : public SystemProcessStatusChangeStub {
     public:
+        void ConsumeEvent()
+        {
+            std::unique_lock lock(mutex_);
+            eventFired_ = OnDemandHelper::ProcessStatusChangeEvent::None;
+        }
+        void WaitForEventForever(OnDemandHelper::ProcessStatusChangeEvent event)
+        {
+            std::unique_lock lock(mutex_);
+            if (eventFired_ == event) {
+                return;
+            }
+            cv_.wait(lock, [this, event] { return eventFired_ == event; });
+        }
+        bool WaitForEvent(OnDemandHelper::ProcessStatusChangeEvent event, int32_t timeoutMs)
+        {
+            if (timeoutMs <= 0) {
+                WaitForEventForever(event);
+                return true;
+            }
+            std::unique_lock lock(mutex_);
+            if (eventFired_ == event) {
+                return true;
+            }
+            return cv_.wait_for(lock, std::chrono::milliseconds {timeoutMs},
+                [this, event] { return eventFired_ == event; });
+        }
         void OnSystemProcessStarted(SystemProcessInfo& systemProcessInfo) override;
         void OnSystemProcessStopped(SystemProcessInfo& systemProcessInfo) override;
+        void OnSystemProcessActivated(SystemProcessInfo& systemProcessInfo) override;
+        void OnSystemProcessIdled(SystemProcessInfo& systemProcessInfo) override;
+    private:
+        OnDemandHelper::ProcessStatusChangeEvent eventFired_ = OnDemandHelper::ProcessStatusChangeEvent::None;
+        std::mutex mutex_;
+        std::condition_variable cv_;
     };
 private:
     OnDemandHelper();

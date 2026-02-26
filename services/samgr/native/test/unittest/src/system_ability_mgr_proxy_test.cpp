@@ -1097,6 +1097,97 @@ HWTEST_F(SystemAbilityMgrProxyTest, OnSystemProcessStoppedInner002, TestSize.Lev
 }
 
 /**
+ * @tc.name: OnSystemProcessActivatedInner001
+ * @tc.desc: OnSystemProcessActivatedInner001
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, OnSystemProcessActivatedInner001, TestSize.Level3)
+{
+    sptr<SystemProcessStatusChangeStub> processStub = new SystemProcessStatusChange();
+    MessageParcel data;
+    data.WriteString("test");
+    MessageParcel reply;
+    int32_t ret = processStub->OnSystemProcessActivatedInner(data, reply);
+    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+}
+
+/**
+ * @tc.name: OnSystemProcessActivatedInner002
+ * @tc.desc: OnSystemProcessActivatedInner002
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, OnSystemProcessActivatedInner002, TestSize.Level3)
+{
+    sptr<SystemProcessStatusChangeStub> processStub = new SystemProcessStatusChange();
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = processStub->OnSystemProcessActivatedInner(data, reply);
+    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+}
+
+/**
+ * @tc.name: OnSystemProcessActivatedInner003
+ * @tc.desc: OnSystemProcessActivatedInner003
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, OnSystemProcessActivatedInner003, TestSize.Level3)
+{
+    sptr<SystemProcessStatusChangeStub> processStub = new SystemProcessStatusChange();
+    MessageParcel data;
+    data.WriteString("test");
+    data.WriteInt32(0);
+    MessageParcel reply;
+    int32_t ret = processStub->OnSystemProcessActivatedInner(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+/**
+ * @tc.name: OnSystemProcessIdledInner001
+ * @tc.desc: OnSystemProcessIdledInner001
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, OnSystemProcessIdledInner001, TestSize.Level3)
+{
+    sptr<SystemProcessStatusChangeStub> processStub = new SystemProcessStatusChange();
+    MessageParcel data;
+    data.WriteString("test");
+    MessageParcel reply;
+    int32_t ret = processStub->OnSystemProcessIdledInner(data, reply);
+    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+}
+
+/**
+ * @tc.name: OnSystemProcessIdledInner002
+ * @tc.desc: OnSystemProcessIdledInner002
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, OnSystemProcessIdledInner002, TestSize.Level3)
+{
+    sptr<SystemProcessStatusChangeStub> processStub = new SystemProcessStatusChange();
+    MessageParcel data;
+    data.WriteString("test");
+    MessageParcel reply;
+    int32_t ret = processStub->OnSystemProcessIdledInner(data, reply);
+    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+}
+
+/**
+ * @tc.name: OnSystemProcessIdledInner003
+ * @tc.desc: OnSystemProcessIdledInner003
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, OnSystemProcessIdledInner003, TestSize.Level3)
+{
+    sptr<SystemProcessStatusChangeStub> processStub = new SystemProcessStatusChange();
+    MessageParcel data;
+    data.WriteString("test");
+    data.WriteInt32(0);
+    MessageParcel reply;
+    int32_t ret = processStub->OnSystemProcessIdledInner(data, reply);
+    EXPECT_EQ(ret, ERR_NONE);
+}
+
+/**
  * @tc.name: CancelUnloadSystemAbility001
  * @tc.desc: CancelUnloadSystemAbility001
  * @tc.type: FUNC
@@ -1445,5 +1536,155 @@ HWTEST_F(SystemAbilityMgrProxyTest, ListSystemAbilities001, TestSize.Level3)
     auto res = samgrProxy->ListSystemAbilities(0);
     EXPECT_FALSE(res.empty());
     DTEST_LOG << " ListSystemAbilities001 end " << std::endl;
+}
+
+/**
+ * @tc.name: SubscribeLowMemSystemProcess001
+ * @tc.desc: SubscribeLowMemSystemProcess with nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, SubscribeLowMemSystemProcess001, TestSize.Level3)
+{
+    DTEST_LOG << " SubscribeLowMemSystemProcess001 begin " << std::endl;
+    sptr<ISystemAbilityManager> samgrProxy =
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+
+    auto res = samgrProxy->SubscribeLowMemSystemProcess(nullptr);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+    DTEST_LOG << " SubscribeLowMemSystemProcess001 end " << std::endl;
+}
+
+/**
+ * @tc.name: SubscribeLowMemSystemProcess002
+ * @tc.desc: SubscribeLowMemSystemProcess with nullptr remote
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, SubscribeLowMemSystemProcess002, TestSize.Level3)
+{
+    DTEST_LOG << " SubscribeLowMemSystemProcess002 begin " << std::endl;
+    sptr<ISystemAbilityManager> samgrProxy =
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    // to make remote() return nullptr
+    static_cast<IRemoteProxy<ISystemAbilityManager>*>(samgrProxy.GetRefPtr())->beforeMagic_ = 0;
+    sptr<ISystemProcessStatusChange> listener = sptr<SystemProcessStatusChange>::MakeSptr(); // actually a stub
+    auto res = samgrProxy->SubscribeLowMemSystemProcess(listener);
+    // restore it
+    static_cast<IRemoteProxy<ISystemAbilityManager>*>(samgrProxy.GetRefPtr())->beforeMagic_ = BEFORE_MAGIC;
+    EXPECT_EQ(res, ERR_INVALID_OPERATION);
+    DTEST_LOG << " SubscribeLowMemSystemProcess002 end " << std::endl;
+}
+
+/**
+ * @tc.name: SubscribeLowMemSystemProcess003
+ * @tc.desc: SubscribeLowMemSystemProcess with WriteRemoteObject fail
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, SubscribeLowMemSystemProcess003, TestSize.Level3)
+{
+    DTEST_LOG << " SubscribeLowMemSystemProcess003 begin " << std::endl;
+    sptr<ISystemAbilityManager> samgrProxy =
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    class DefectSystemProcessStatusChange : public SystemProcessStatusChange {
+        sptr<IRemoteObject> AsObject() override
+        {
+            return nullptr;
+        }
+    };
+    sptr<ISystemProcessStatusChange> listener = sptr<DefectSystemProcessStatusChange>::MakeSptr();
+    // AsObject returns nullptr
+    auto res = samgrProxy->SubscribeLowMemSystemProcess(listener);
+    EXPECT_EQ(res, ERR_FLATTEN_OBJECT);
+    DTEST_LOG << " SubscribeLowMemSystemProcess003 end " << std::endl;
+}
+
+/**
+ * @tc.name: SubscribeLowMemSystemProcess004
+ * @tc.desc: SubscribeLowMemSystemProcess ok
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, SubscribeLowMemSystemProcess004, TestSize.Level3)
+{
+    DTEST_LOG << " SubscribeLowMemSystemProcess004 begin " << std::endl;
+    sptr<ISystemAbilityManager> samgrProxy =
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    sptr<ISystemProcessStatusChange> listener = sptr<SystemProcessStatusChange>::MakeSptr(); // actually a stub
+    auto res = samgrProxy->SubscribeLowMemSystemProcess(listener);
+    EXPECT_EQ(res, ERR_OK);
+    DTEST_LOG << " SubscribeLowMemSystemProcess004 end " << std::endl;
+}
+
+/**
+ * @tc.name: UnSubscribeLowMemSystemProcess001
+ * @tc.desc: UnSubscribeLowMemSystemProcess with nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, UnSubscribeLowMemSystemProcess001, TestSize.Level3)
+{
+    DTEST_LOG << " UnSubscribeLowMemSystemProcess001 begin " << std::endl;
+    sptr<ISystemAbilityManager> samgrProxy =
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+
+    auto res = samgrProxy->UnSubscribeLowMemSystemProcess(nullptr);
+    EXPECT_EQ(res, ERR_INVALID_VALUE);
+    DTEST_LOG << " UnSubscribeLowMemSystemProcess001 end " << std::endl;
+}
+
+/**
+ * @tc.name: UnSubscribeLowMemSystemProcess002
+ * @tc.desc: UnSubscribeLowMemSystemProcess with nullptr remote
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, UnSubscribeLowMemSystemProcess002, TestSize.Level3)
+{
+    DTEST_LOG << " UnSubscribeLowMemSystemProcess002 begin " << std::endl;
+    sptr<ISystemAbilityManager> samgrProxy =
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    // to make remote() return nullptr
+    static_cast<IRemoteProxy<ISystemAbilityManager>*>(samgrProxy.GetRefPtr())->beforeMagic_ = 0;
+    sptr<ISystemProcessStatusChange> listener = sptr<SystemProcessStatusChange>::MakeSptr(); // actually a stub
+    auto res = samgrProxy->UnSubscribeLowMemSystemProcess(listener);
+    // restore it
+    static_cast<IRemoteProxy<ISystemAbilityManager>*>(samgrProxy.GetRefPtr())->beforeMagic_ = BEFORE_MAGIC;
+    EXPECT_EQ(res, ERR_INVALID_OPERATION);
+    DTEST_LOG << " UnSubscribeLowMemSystemProcess002 end " << std::endl;
+}
+
+/**
+ * @tc.name: UnSubscribeLowMemSystemProcess003
+ * @tc.desc: UnSubscribeLowMemSystemProcess with WriteRemoteObject fail
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, UnSubscribeLowMemSystemProcess003, TestSize.Level3)
+{
+    DTEST_LOG << " UnSubscribeLowMemSystemProcess003 begin " << std::endl;
+    sptr<ISystemAbilityManager> samgrProxy =
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    class DefectSystemProcessStatusChange : public SystemProcessStatusChange {
+        sptr<IRemoteObject> AsObject() override
+        {
+            return nullptr;
+        }
+    };
+    sptr<ISystemProcessStatusChange> listener = sptr<DefectSystemProcessStatusChange>::MakeSptr();
+    // AsObject returns nullptr
+    auto res = samgrProxy->UnSubscribeLowMemSystemProcess(listener);
+    EXPECT_EQ(res, ERR_FLATTEN_OBJECT);
+    DTEST_LOG << " UnSubscribeLowMemSystemProcess003 end " << std::endl;
+}
+
+/**
+ * @tc.name: UnSubscribeLowMemSystemProcess004
+ * @tc.desc: UnSubscribeLowMemSystemProcess ok
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, UnSubscribeLowMemSystemProcess004, TestSize.Level3)
+{
+    DTEST_LOG << " UnSubscribeLowMemSystemProcess004 begin " << std::endl;
+    sptr<ISystemAbilityManager> samgrProxy =
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    sptr<ISystemProcessStatusChange> listener = sptr<SystemProcessStatusChange>::MakeSptr(); // actually a stub
+    auto res = samgrProxy->UnSubscribeLowMemSystemProcess(listener);
+    EXPECT_EQ(res, ERR_OK);
+    DTEST_LOG << " UnSubscribeLowMemSystemProcess004 end " << std::endl;
 }
 }

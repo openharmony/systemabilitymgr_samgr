@@ -270,6 +270,74 @@ HWTEST_F(SystemAbilityMgrSubscribeTest, UnSubscribeSystemProcess003, TestSize.Le
 }
 
 /**
+ * @tc.name: Test SubscribeLowMemSystemProcess001
+ * @tc.desc: SubscribeLowMemSystemProcess001
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrSubscribeTest, SubscribeLowMemSystemProcess001, TestSize.Level3)
+{
+    DTEST_LOG << " SubscribeLowMemSystemProcess001 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
+    sptr<ISystemProcessStatusChange> systemProcessStatusChange = new SystemProcessStatusChange();
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+    int32_t ret = saMgr->SubscribeLowMemSystemProcess(systemProcessStatusChange);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: Test SubscribeLowMemSystemProcess002
+ * @tc.desc: SubscribeLowMemSystemProcess002
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrSubscribeTest, SubscribeLowMemSystemProcess002, TestSize.Level3)
+{
+    DTEST_LOG << " SubscribeLowMemSystemProcess002 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
+    sptr<ISystemProcessStatusChange> systemProcessStatusChange = new SystemProcessStatusChange();
+    saMgr->abilityStateScheduler_ = nullptr;
+    int32_t ret = saMgr->SubscribeLowMemSystemProcess(systemProcessStatusChange);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: Test UnSubscribeLowMemSystemProcess001
+ * @tc.desc: UnSubscribeLowMemSystemProcess001
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrSubscribeTest, UnSubscribeLowMemSystemProcess001, TestSize.Level3)
+{
+    DTEST_LOG << " UnSubscribeLowMemSystemProcess001 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
+    sptr<ISystemProcessStatusChange> systemProcessStatusChange = new SystemProcessStatusChange();
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+    int32_t ret = saMgr->UnSubscribeLowMemSystemProcess(systemProcessStatusChange);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: Test UnSubscribeLowMemSystemProcess002
+ * @tc.desc: UnSubscribeLowMemSystemProcess002
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrSubscribeTest, UnSubscribeLowMemSystemProcess002, TestSize.Level3)
+{
+    DTEST_LOG << " UnSubscribeLowMemSystemProcess002 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
+    sptr<ISystemProcessStatusChange> systemProcessStatusChange = new SystemProcessStatusChange();
+    saMgr->abilityStateScheduler_ = nullptr;
+    int32_t ret = saMgr->UnSubscribeLowMemSystemProcess(systemProcessStatusChange);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
  * @tc.name: Test OnSystemProcessStarted001
  * @tc.desc: OnSystemProcessStarted
  * @tc.type: FUNC

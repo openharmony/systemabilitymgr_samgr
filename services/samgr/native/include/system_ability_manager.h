@@ -158,6 +158,8 @@ public:
     int32_t GetRunningSystemProcess(std::list<SystemProcessInfo>& systemProcessInfos) override;
     int32_t SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener) override;
     int32_t UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener) override;
+    int32_t SubscribeLowMemSystemProcess(const sptr<ISystemProcessStatusChange>& listener) override;
+    int32_t UnSubscribeLowMemSystemProcess(const sptr<ISystemProcessStatusChange>& listener) override;
     int32_t GetOnDemandReasonExtraData(int64_t extraDataId, MessageParcel& extraDataParcel) override;
 
     sptr<IRemoteObject> LoadSystemAbility(int32_t systemAbilityId, int32_t timeout) override

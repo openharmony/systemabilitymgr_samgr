@@ -48,10 +48,37 @@ public:
      * @return void.
      */
     virtual void OnSystemProcessStopped(SystemProcessInfo& systemProcessInfo) = 0;
+
+        /**
+     * OnSystemProcessActivated, OnSystemProcessActivated will be called when subscribe process Activated.
+     *
+     * @param systemProcessInfo, Process related status information.
+     * @return void.
+     */
+    virtual void OnSystemProcessActivated(SystemProcessInfo& systemProcessInfo)
+    {
+        (void)systemProcessInfo;
+        return;
+    }
+
+    /**
+     * OnSystemProcessIdled, OnSystemProcessIdled will be called when subscribe process Idled.
+     *
+     * @param systemProcessInfo, Process related status information.
+     * @return void.
+     */
+    virtual void OnSystemProcessIdled(SystemProcessInfo& systemProcessInfo)
+    {
+        (void)systemProcessInfo;
+        return;
+    }
+
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISystemProcessStatusChange");
     enum {
         ON_SYSTEM_PROCESS_STARTED = 1,
         ON_SYSTEM_PROCESS_STOPPED = 2,
+        ON_SYSTEM_PROCESS_ACTIVATED = 3,
+        ON_SYSTEM_PROCESS_IDLED = 4,
     };
 };
 }

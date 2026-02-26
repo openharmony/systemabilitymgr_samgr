@@ -37,8 +37,20 @@ private:
     {
         return stub->OnSystemProcessStoppedInner(data, reply);
     }
+    static int32_t LocalSystemProcessActivated(SystemProcessStatusChangeStub *stub,
+        MessageParcel& data, MessageParcel& reply)
+    {
+        return stub->OnSystemProcessActivatedInner(data, reply);
+    }
+    static int32_t LocalSystemProcessIdled(SystemProcessStatusChangeStub *stub,
+        MessageParcel& data, MessageParcel& reply)
+    {
+        return stub->OnSystemProcessIdledInner(data, reply);
+    }
     int32_t OnSystemProcessStartedInner(MessageParcel& data, MessageParcel& reply);
     int32_t OnSystemProcessStoppedInner(MessageParcel& data, MessageParcel& reply);
+    int32_t OnSystemProcessActivatedInner(MessageParcel& data, MessageParcel& reply);
+    int32_t OnSystemProcessIdledInner(MessageParcel& data, MessageParcel& reply);
     static bool EnforceInterceToken(MessageParcel& data);
 
     using SystemProcessStatusChangeStubFunc =

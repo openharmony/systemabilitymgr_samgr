@@ -611,6 +611,36 @@ void OnDemandHelper::SubscribeSystemProcess()
     cout << "SubscribeSystemProcess success" << endl;
 }
 
+void OnDemandHelper::SubscribeLowMemSystemProcess()
+{
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (sm == nullptr) {
+        cout << "GetSystemAbilityManager samgr object null!" << endl;
+        return;
+    }
+    int32_t ret = sm->SubscribeLowMemSystemProcess(systemProcessStatusChange_);
+    if (ret != ERR_OK) {
+        cout << "SubscribeLowMemSystemProcess failed" << endl;
+        return;
+    }
+    cout << "SubscribeLowMemSystemProcess success" << endl;
+}
+
+void OnDemandHelper::UnSubscribeLowMemSystemProcess()
+{
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (sm == nullptr) {
+        cout << "GetSystemAbilityManager samgr object null!" << endl;
+        return;
+    }
+    int32_t ret = sm->UnSubscribeLowMemSystemProcess(systemProcessStatusChange_);
+    if (ret != ERR_OK) {
+        cout << "UnSubscribeLowMemSystemProcess failed" << endl;
+        return;
+    }
+    cout << "UnSubscribeLowMemSystemProcess success" << endl;
+}
+
 void OnDemandHelper::UnSubscribeSystemProcess()
 {
     sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
@@ -636,6 +666,24 @@ void OnDemandHelper::SystemProcessStatusChange::OnSystemProcessStopped(SystemPro
 {
     cout << "OnSystemProcessStopped, processName: " << systemProcessInfo.processName << " pid:"
         << systemProcessInfo.pid << " uid:" << systemProcessInfo.uid << endl;
+}
+
+void OnDemandHelper::SystemProcessStatusChange::OnSystemProcessActivated(SystemProcessInfo& systemProcessInfo)
+{
+    std::unique_lock lock(mutex_);
+    cout << endl << "OnSystemProcessActivated, processName: " << systemProcessInfo.processName << " pid:"
+        << systemProcessInfo.pid << " uid:" << systemProcessInfo.uid << endl;
+    eventFired_ = OnDemandHelper::ProcessStatusChangeEvent::Active;
+    cv_.notify_all();
+}
+
+void OnDemandHelper::SystemProcessStatusChange::OnSystemProcessIdled(SystemProcessInfo& systemProcessInfo)
+{
+    std::unique_lock lock(mutex_);
+    cout << endl << "OnSystemProcessIdled, processName: " << systemProcessInfo.processName << " pid:"
+        << systemProcessInfo.pid << " uid:" << systemProcessInfo.uid << endl;
+    eventFired_ = OnDemandHelper::ProcessStatusChangeEvent::Idle;
+    cv_.notify_all();
 }
 
 int32_t OnDemandHelper::LoadSystemAbility(int32_t systemAbilityId, const sptr<ISystemAbilityLoadCallback>& callback)

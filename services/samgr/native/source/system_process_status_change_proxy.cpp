@@ -40,6 +40,22 @@ void SystemProcessStatusChangeProxy::OnSystemProcessStopped(SystemProcessInfo& s
     }
 }
 
+void SystemProcessStatusChangeProxy::OnSystemProcessActivated(SystemProcessInfo& systemProcessInfo)
+{
+    bool ret = SendRequestInner(ON_SYSTEM_PROCESS_ACTIVATED, systemProcessInfo);
+    if (!ret) {
+        HILOGE("ON_SYSTEM_PROCESS_ACTIVATED SendRequest failed!");
+    }
+}
+
+void SystemProcessStatusChangeProxy::OnSystemProcessIdled(SystemProcessInfo& systemProcessInfo)
+{
+    bool ret = SendRequestInner(ON_SYSTEM_PROCESS_IDLED, systemProcessInfo);
+    if (!ret) {
+        HILOGE("ON_SYSTEM_PROCESS_IDLED SendRequest failed!");
+    }
+}
+
 bool SystemProcessStatusChangeProxy::SendRequestInner(uint32_t code, SystemProcessInfo systemProcessInfo)
 {
     HILOGD("%{public}s called, process name is %{public}s", __func__,

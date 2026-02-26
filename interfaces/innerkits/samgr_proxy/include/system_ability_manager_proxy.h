@@ -236,6 +236,22 @@ public:
     int32_t SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener) override;
 
     /**
+     * SubscribeLowMemSystemProcess, Subscribe the status of process.
+     *
+     * @param listener, callback.
+     * @return ERR_OK indicates that the Subscribe successfully.
+     */
+    int32_t SubscribeLowMemSystemProcess(const sptr<ISystemProcessStatusChange>& listener) override;
+
+    /**
+     * UnSubscribeLowMemSystemProcess, UnSubscribe the status of low-mem process.
+     *
+     * @param listener, callback.
+     * @return ERR_OK indicates that the UnSubscribe successfully.
+     */
+    int32_t UnSubscribeLowMemSystemProcess(const sptr<ISystemProcessStatusChange>& listener) override;
+
+    /**
      * SendStrategy, Send strategy to SA.
      *
      * @param type, type is a certain device status type.

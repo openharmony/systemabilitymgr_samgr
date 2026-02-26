@@ -116,6 +116,16 @@ private:
     {
         return stub->UnSubscribeSystemProcessInner(data, reply);
     }
+    static int32_t LocalSubscribeLowMemSystemProcess(SystemAbilityManagerStub* stub,
+        MessageParcel& data, MessageParcel& reply)
+    {
+        return stub->SubscribeLowMemSystemProcessInner(data, reply);
+    }
+    static int32_t LocalUnSubscribeLowMemSystemProcess(SystemAbilityManagerStub* stub,
+        MessageParcel& data, MessageParcel& reply)
+    {
+        return stub->UnSubscribeLowMemSystemProcessInner(data, reply);
+    }
     static int32_t LocalLoadSystemAbility(SystemAbilityManagerStub* stub,
         MessageParcel& data, MessageParcel& reply)
     {
@@ -221,6 +231,8 @@ private:
     int32_t GetRunningSystemProcessInner(MessageParcel& data, MessageParcel& reply);
     int32_t SubscribeSystemProcessInner(MessageParcel& data, MessageParcel& reply);
     int32_t UnSubscribeSystemProcessInner(MessageParcel& data, MessageParcel& reply);
+    int32_t SubscribeLowMemSystemProcessInner(MessageParcel& data, MessageParcel& reply);
+    int32_t UnSubscribeLowMemSystemProcessInner(MessageParcel& data, MessageParcel& reply);
     int32_t LoadSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t LoadRemoteSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t UnloadSystemAbilityInner(MessageParcel& data, MessageParcel& reply);

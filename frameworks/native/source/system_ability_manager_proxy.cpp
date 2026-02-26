@@ -1264,6 +1264,90 @@ int32_t SystemAbilityManagerProxy::UnSubscribeSystemProcess(const sptr<ISystemPr
     return result;
 }
 
+int32_t SystemAbilityManagerProxy::SubscribeLowMemSystemProcess(const sptr<ISystemProcessStatusChange>& listener)
+{
+    HILOGD("SubscribeLowMemSystemProcess called");
+    if (listener == nullptr) {
+        HILOGE("SubscribeLowMemSystemProcess listener is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGI("SubscribeLowMemSystemProcess remote is nullptr");
+        return ERR_INVALID_OPERATION;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    bool ret = data.WriteRemoteObject(listener->AsObject());
+    if (!ret) {
+        HILOGW("SubscribeLowMemSystemProcess Write listenerName failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::SUBSCRIBE_LOWMEM_SYSTEM_PROCESS_TRANSACTION), data, reply, option);
+    if (err != ERR_NONE) {
+        HILOGE("SubscribeLowMemSystemProcess SendRequest error:%{public}d!", err);
+        return err;
+    }
+    HILOGD("SubscribeLowMemSystemProcess SendRequest succeed!");
+    int32_t result = 0;
+    ret = reply.ReadInt32(result);
+    if (!ret) {
+        HILOGW("SubscribeLowMemSystemProcess Read result failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
+int32_t SystemAbilityManagerProxy::UnSubscribeLowMemSystemProcess(const sptr<ISystemProcessStatusChange>& listener)
+{
+    HILOGD("UnSubscribeLowMemSystemProcess called");
+    if (listener == nullptr) {
+        HILOGE("UnSubscribeLowMemSystemProcess listener is nullptr");
+        return ERR_INVALID_VALUE;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGI("UnSubscribeLowMemSystemProcess remote is nullptr");
+        return ERR_INVALID_OPERATION;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    bool ret = data.WriteRemoteObject(listener->AsObject());
+    if (!ret) {
+        HILOGW("UnSubscribeLowMemSystemProcess Write listenerName failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::UNSUBSCRIBE_LOWMEM_SYSTEM_PROCESS_TRANSACTION), data, reply, option);
+    if (err != ERR_NONE) {
+        HILOGE("UnSubscribeLowMemSystemProcess SendRequest error:%{public}d!", err);
+        return err;
+    }
+    HILOGD("UnSubscribeLowMemSystemProcess SendRequest succeed!");
+    int32_t result = 0;
+    ret = reply.ReadInt32(result);
+    if (!ret) {
+        HILOGW("UnSubscribeLowMemSystemProcess Read result failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
 int32_t SystemAbilityManagerProxy::GetOnDemandReasonExtraData(int64_t extraDataId, MessageParcel& extraDataParcel)
 {
     HILOGD("GetOnDemandReasonExtraData called");

@@ -183,6 +183,10 @@ void SystemAbilityManagerStub::SetProcessFuncMap()
         SystemAbilityManagerStub::LocalSubscribeSystemProcess;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::UNSUBSCRIBE_SYSTEM_PROCESS_TRANSACTION)] =
         SystemAbilityManagerStub::LocalUnSubscribeSystemProcess;
+    memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::SUBSCRIBE_LOWMEM_SYSTEM_PROCESS_TRANSACTION)] =
+        SystemAbilityManagerStub::LocalSubscribeLowMemSystemProcess;
+    memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::UNSUBSCRIBE_LOWMEM_SYSTEM_PROCESS_TRANSACTION)] =
+        SystemAbilityManagerStub::LocalUnSubscribeLowMemSystemProcess;
 }
 
 SystemAbilityManagerStub::SystemAbilityManagerStub()
@@ -1136,6 +1140,58 @@ int32_t SystemAbilityManagerStub::CancelUnloadSystemAbilityInner(MessageParcel& 
     ret = reply.WriteInt32(result);
     if (!ret) {
         HILOGW("CancelUnloadSystemAbilityInner write reply failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
+int32_t SystemAbilityManagerStub::SubscribeLowMemSystemProcessInner(MessageParcel& data, MessageParcel& reply)
+{
+    if (!CanRequest()) {
+        HILOGE("SubscribeLowMemSystemProcessInner PERMISSION DENIED!");
+        return ERR_PERMISSION_DENIED;
+    }
+    sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
+    if (remoteObject == nullptr) {
+        HILOGW("SubscribeLowMemSystemProcessInner read listener failed!");
+        return ERR_NULL_OBJECT;
+    }
+    sptr<ISystemProcessStatusChange> listener = iface_cast<ISystemProcessStatusChange>(remoteObject);
+    if (listener == nullptr) {
+        HILOGW("SubscribeLowMemSystemProcessInner iface_cast failed!");
+        return ERR_NULL_OBJECT;
+    }
+    int32_t result = SubscribeLowMemSystemProcess(listener);
+    HILOGD("SubscribeLowMemSystemProcessInner result is %{public}d", result);
+    bool ret = reply.WriteInt32(result);
+    if (!ret) {
+        HILOGW("SubscribeLowMemSystemProcessInner write reply failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
+int32_t SystemAbilityManagerStub::UnSubscribeLowMemSystemProcessInner(MessageParcel& data, MessageParcel& reply)
+{
+    if (!CanRequest()) {
+        HILOGE("UnSubscribeLowMemSystemProcessInner PERMISSION DENIED!");
+        return ERR_PERMISSION_DENIED;
+    }
+    sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
+    if (remoteObject == nullptr) {
+        HILOGW("UnSubscribeLowMemSystemProcessInner read listener failed!");
+        return ERR_NULL_OBJECT;
+    }
+    sptr<ISystemProcessStatusChange> listener = iface_cast<ISystemProcessStatusChange>(remoteObject);
+    if (listener == nullptr) {
+        HILOGW("UnSubscribeLowMemSystemProcessInner iface_cast failed!");
+        return ERR_NULL_OBJECT;
+    }
+    int32_t result = UnSubscribeLowMemSystemProcess(listener);
+    HILOGD("UnSubscribeLowMemSystemProcessInner result is %{public}d", result);
+    bool ret = reply.WriteInt32(result);
+    if (!ret) {
+        HILOGW("UnSubscribeLowMemSystemProcessInner write reply failed.");
         return ERR_FLATTEN_OBJECT;
     }
     return result;

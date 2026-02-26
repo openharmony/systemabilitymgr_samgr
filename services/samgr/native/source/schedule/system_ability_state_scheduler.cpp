@@ -61,6 +61,7 @@ void SystemAbilityStateScheduler::Init(const std::list<SaProfile>& saProfiles)
 {
     HILOGI("Scheduler:init start");
     InitStateContext(saProfiles);
+    InitLowMemProcessList(saProfiles);
     processListenerDeath_ = sptr<IRemoteObject::DeathRecipient>(new SystemProcessListenerDeathRecipient());
     unloadEventHandler_ = std::make_shared<UnloadEventHandler>(weak_from_this());
 
@@ -126,6 +127,27 @@ void SystemAbilityStateScheduler::InitStateContext(const std::list<SaProfile>& s
         abilityContext->ownProcessContext = processContextMap_[saProfile.process];
         std::unique_lock<samgr::shared_mutex> abiltyWriteLock(abiltyMapLock_);
         abilityContextMap_[saProfile.saId] = abilityContext;
+    }
+}
+
+void SystemAbilityStateScheduler::InitLowMemProcessList(const std::list<SaProfile>& saProfiles)
+{
+    std::map<std::u16string, bool> ProcessLowmemState {};
+    for (auto& saProfile : saProfiles) {
+        if (saProfile.process.empty()) {
+            continue;
+        }
+        if (saProfile.recycleStrategy == IMMEDIATELY) {
+            ProcessLowmemState[saProfile.process] = false;
+        } else {
+            ProcessLowmemState.try_emplace(saProfile.process, true);
+        }
+    }
+    for (auto& [processName, lowmem] : ProcessLowmemState) {
+        if (lowmem) {
+            HILOGD("adding %{public}s to lowmem list", Str16ToStr8(processName).c_str());
+            lowMemoryProcessList_.emplace_back(processName);
+        }
     }
 }
 
@@ -639,6 +661,39 @@ bool SystemAbilityStateScheduler::CanUnloadAllSystemAbilityLocked(
     return false;
 }
 
+bool SystemAbilityStateScheduler::IsProcessActivatedLocked(const std::shared_ptr<SystemProcessContext>& processContext)
+{
+    // return early if there are no listeners monitoring the active/idle state of this process
+    {
+        std::lock_guard<samgr::mutex> autoLock(procListenerMapLock_);
+        if (!procListenerMap_.count(processContext->processName)) {
+            return false;
+        }
+    }
+    // stateCount should be already updated: THIS IS BOTH AN ASSUMPTION AND A REQUIREMENT
+    // for now it is only called in OnEnter
+    std::lock_guard<samgr::mutex> autoLock(processContext->stateCountLock); // check whether this mutex is redundant
+    uint32_t loadAbilityCount = processContext->abilityStateCountMap[SystemAbilityState::LOADED];
+    HILOGD("loadAbilityCount=%{public}d", loadAbilityCount);
+    return loadAbilityCount == 1;
+}
+
+bool SystemAbilityStateScheduler::IsProcessIdledLocked(const std::shared_ptr<SystemProcessContext>& processContext)
+{
+    // return early if there are no listeners monitoring the active/idle state of this process
+    {
+        std::lock_guard<samgr::mutex> autoLock(procListenerMapLock_);
+        if (!procListenerMap_.count(processContext->processName)) {
+            return false;
+        }
+    }
+    std::lock_guard<samgr::mutex> autoLock(processContext->stateCountLock);
+    uint32_t loadAbilityCount = processContext->abilityStateCountMap[SystemAbilityState::LOADED];
+    uint32_t loadingAbilityCount = processContext->abilityStateCountMap[SystemAbilityState::LOADING];
+    HILOGD("loadAbilityCount=%{public}d, loadingAbilityCount=%{public}d", loadAbilityCount, loadingAbilityCount);
+    return loadAbilityCount == 0 && loadingAbilityCount == 0;
+}
+
 bool SystemAbilityStateScheduler::CheckSaIsImmediatelyRecycle(
     const std::shared_ptr<SystemProcessContext>& processContext)
 {
@@ -991,6 +1046,34 @@ void SystemAbilityStateScheduler::NotifyProcessStopped(const std::shared_ptr<Sys
     }
 }
 
+void SystemAbilityStateScheduler::NotifyProcessActivated(const std::shared_ptr<SystemProcessContext>& processContext)
+{
+    std::lock_guard<samgr::mutex> autoLock(procListenerMapLock_);
+    for (auto& listener : procListenerMap_[processContext->processName]) {
+        if (listener->AsObject() != nullptr) {
+            SystemProcessInfo systemProcessInfo = {Str16ToStr8(processContext->processName), processContext->pid,
+                processContext->uid};
+            HILOGD("Scheduler proc:%{public}s Activated", Str16ToStr8(processContext->processName).c_str());
+            listener->OnSystemProcessActivated(systemProcessInfo);
+        }
+    }
+    HILOGI("process %{public}s is active", Str16ToStr8(processContext->processName).c_str());
+}
+
+void SystemAbilityStateScheduler::NotifyProcessIdled(const std::shared_ptr<SystemProcessContext>& processContext)
+{
+    std::lock_guard<samgr::mutex> autoLock(procListenerMapLock_);
+    for (auto& listener : procListenerMap_[processContext->processName]) {
+        if (listener->AsObject() != nullptr) {
+            SystemProcessInfo systemProcessInfo = {Str16ToStr8(processContext->processName), processContext->pid,
+                processContext->uid};
+            HILOGD("Scheduler proc:%{public}s Idled", Str16ToStr8(processContext->processName).c_str());
+            listener->OnSystemProcessIdled(systemProcessInfo);
+        }
+    }
+    HILOGI("process %{public}s is idle", Str16ToStr8(processContext->processName).c_str());
+}
+
 void SystemAbilityStateScheduler::OnProcessStartedLocked(const std::u16string& processName)
 {
     HILOGI("Scheduler proc:%{public}s started", Str16ToStr8(processName).c_str());
@@ -1064,6 +1147,15 @@ void SystemAbilityStateScheduler::OnAbilityLoadedLocked(int32_t systemAbilityId)
     if (processHandler_ != nullptr) {
         processHandler_->PostTask(pendingUnloadTask);
     }
+    std::shared_ptr<SystemAbilityContext> abilityContext;
+    if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
+        return;
+    }
+    if (abilityContext->ownProcessContext && IsProcessActivatedLocked(abilityContext->ownProcessContext)) {
+        HILOGI(
+            "Scheduler proc:%{public}s activated", Str16ToStr8(abilityContext->ownProcessContext->processName).c_str());
+        NotifyProcessActivated(abilityContext->ownProcessContext);
+    }
 }
 
 void SystemAbilityStateScheduler::OnAbilityUnloadableLocked(int32_t systemAbilityId)
@@ -1072,6 +1164,11 @@ void SystemAbilityStateScheduler::OnAbilityUnloadableLocked(int32_t systemAbilit
     std::shared_ptr<SystemAbilityContext> abilityContext;
     if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
         return;
+    }
+    // the transition can only be: LOADED -> UNLOADABLE
+    if (abilityContext->ownProcessContext && IsProcessIdledLocked(abilityContext->ownProcessContext)) {
+        HILOGI("Scheduler proc:%{public}s idled", Str16ToStr8(abilityContext->ownProcessContext->processName).c_str());
+        NotifyProcessIdled(abilityContext->ownProcessContext);
     }
     PostTryUnloadAllAbilityTask(abilityContext->ownProcessContext);
 }
@@ -1278,6 +1375,117 @@ int32_t SystemAbilityStateScheduler::UnSubscribeSystemProcess(const sptr<ISystem
     } else {
         HILOGI("UnSubscribeSystemProcess listener not exists");
     }
+    return ERR_OK;
+}
+
+int32_t SystemAbilityStateScheduler::SubscribeLowMemSystemProcess(const sptr<ISystemProcessStatusChange>& listener)
+{
+    if (listener == nullptr) {
+        HILOGE("SubscribeLowMemSystemProcess listener is invalid");
+        return ERR_INVALID_VALUE;
+    }
+    return SubscribeSystemProcessList(lowMemoryProcessList_, listener);
+}
+
+
+int32_t SystemAbilityStateScheduler::UnSubscribeLowMemSystemProcess(const sptr<ISystemProcessStatusChange>& listener)
+{
+    if (listener == nullptr) {
+        HILOGE("UnSubscribeLowMemSystemProcess listener is invalid");
+        return ERR_INVALID_VALUE;
+    }
+    return UnSubscribeSystemProcessList(lowMemoryProcessList_, listener);
+}
+
+int32_t SystemAbilityStateScheduler::SubscribeSystemProcessList(const std::list<std::u16string>& procNames,
+    const sptr<ISystemProcessStatusChange>& listener)
+{
+    if (listener == nullptr) {
+        HILOGE("SubscribeSystemProcessList listener is invalid");
+        return ERR_INVALID_VALUE;
+    }
+    std::shared_ptr<SystemProcessContext> processContext;
+    for (auto& procName : procNames) {
+        std::string processName = Str16ToStr8(procName);
+        HILOGD("SubscribeSystemProcessList processName %{public}s", processName.c_str());
+        if (!GetSystemProcessContext(procName, processContext)) {
+            continue;
+        }
+
+        auto callingPid = IPCSkeleton::GetCallingPid();
+        {
+            lock_guard<samgr::mutex> autoLock(procListenerMapLock_);
+            auto& listeners = procListenerMap_[procName];
+            if (std::find(listeners.cbegin(), listeners.cend(), listener) != listeners.cend()) {
+                continue;
+            }
+            auto& count = subscribeProcCountMap_[callingPid];
+            if (count >= MAX_SUBSCRIBE_COUNT) {
+                HILOGE("SubscribeSystemProcessList pid:%{public}d overflow max subscribe count!", callingPid);
+                return ERR_PERMISSION_DENIED;
+            }
+            bool ret = false;
+            if (processListenerDeath_ != nullptr) {
+                ret = listener->AsObject()->AddDeathRecipient(processListenerDeath_);
+                listeners.emplace_back(listener);
+                ++count;
+                HILOGD("SubscribeProc:%{public}s,%{public}d_%{public}zu_%{public}d%{public}s",
+                    processName.c_str(), callingPid, listeners.size(), count, ret ? "" : ",AddDeath fail");
+            }
+        }
+    }
+    HILOGI("%{public}s: calling pid: %{public}d", __func__, IPCSkeleton::GetCallingPid());
+    return ERR_OK;
+}
+
+void SystemAbilityStateScheduler::UnSubscribeSystemProcessListLocked(
+    std::list<sptr<ISystemProcessStatusChange>>& listeners, const sptr<IRemoteObject>& listener)
+{
+    auto iter = std::find_if(listeners.begin(), listeners.end(),
+        [listener](const sptr<ISystemProcessStatusChange>& item) {
+        return item->AsObject() == listener;
+    });
+    auto callingPid = IPCSkeleton::GetCallingPid();
+    if (iter != listeners.end()) {
+        listeners.erase(iter);
+        auto iterCount = subscribeProcCountMap_.find(callingPid);
+        if (iterCount != subscribeProcCountMap_.end()) {
+            --(iterCount->second);
+            if (iterCount->second <= 0) {
+                subscribeProcCountMap_.erase(iterCount);
+            }
+        }
+    }
+}
+
+int32_t SystemAbilityStateScheduler::UnSubscribeSystemProcessList(const std::list<std::u16string>& procNames,
+    const sptr<ISystemProcessStatusChange>& listener)
+{
+    if (listener == nullptr) {
+        HILOGE("UnSubscribeSystemProcessList listener is invalid");
+        return ERR_INVALID_VALUE;
+    }
+    for (auto& procName : procNames) {
+        std::string processName = Str16ToStr8(procName);
+        HILOGD("UnSubscribeSystemProcessList processName %{public}s", processName.c_str());
+        auto callingPid = IPCSkeleton::GetCallingPid();
+        {
+            lock_guard<samgr::mutex> autoLock(procListenerMapLock_);
+            if (!procListenerMap_.count(procName)) {
+                continue;
+            }
+            auto& listeners = procListenerMap_[procName];
+            UnSubscribeSystemProcessListLocked(listeners, listener->AsObject());
+            if (processListenerDeath_ != nullptr) {
+                listener->AsObject()->RemoveDeathRecipient(processListenerDeath_);
+                HILOGD("UnSubscribeProc:%{public}s_%{public}d_%{public}zu", processName.c_str(), callingPid,
+                    listeners.size());
+            } else {
+                HILOGW("UnSubscribeProc:%{public}s not found", processName.c_str());
+            }
+        }
+    }
+    HILOGI("%{public}s: calling pid: %{public}d", __func__, IPCSkeleton::GetCallingPid());
     return ERR_OK;
 }
 
