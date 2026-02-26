@@ -17,6 +17,7 @@
 
 #include <iostream>
 #include <memory>
+#include <sstream>
 #include <thread>
 #include <unistd.h>
 
@@ -654,6 +655,44 @@ static void TestSetPrior(OHOS::OnDemandHelper& ondemandHelper)
     }
 }
 
+static void TestLowMemProcess(OHOS::OnDemandHelper& ondemandHelper)
+{
+    std::string cmd = "";
+    SamMockPermission::MockProcess("resource_schedule_service");
+    ondemandHelper.InitSystemProcessStatusChange();
+    cout << "---------------------------------------------------------------------" << endl;
+    cout << "You are now inside TestLowMemProcess" << endl;
+    cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n');
+    bool exit = false;
+    while (!exit) {
+        cout << ">> Please choose your next action:\n"
+                ">> 1: SubscribeLowMemSystemProcess\n"
+                ">> 2: UnSubscribeLowMemSystemProcess\n"
+                ">> exit: return to top level\n"
+                ">> any other input: passed to TestSystemAbility (for example \"load <said>\")"
+             << endl;
+        cout << ">> ";
+        std::getline(cin, cmd);
+        if (cmd == "1") {
+            ondemandHelper.SubscribeLowMemSystemProcess();
+        } else if (cmd == "2") {
+            ondemandHelper.UnSubscribeLowMemSystemProcess();
+        } else if (cmd == "exit") {
+            exit = true; // to make the code check tool happy
+            break;
+        } else {
+            istringstream forwardInput {cmd};
+            auto origBuf = cin.rdbuf();
+            cin.rdbuf(forwardInput.rdbuf());
+            TestSystemAbility(ondemandHelper);
+            cin.rdbuf(origBuf);
+        }
+    }
+    cout << endl;
+    cout << "back to top level" << endl;
+    cout << "---------------------------------------------------------------------" << endl;
+}
+
 static void TestIntCommand(OHOS::OnDemandHelper& ondemandHelper, string& cmd)
 {
     if (cmd == "1") {
@@ -678,6 +717,8 @@ static void TestIntCommand(OHOS::OnDemandHelper& ondemandHelper, string& cmd)
         TestMemory(ondemandHelper);
     } else if (cmd == "11") {
         TestSetPrior(ondemandHelper);
+    } else if (cmd == "12") {
+        TestLowMemProcess(ondemandHelper);
     } else {
         cout << "invalid input" << endl;
     }
@@ -707,6 +748,8 @@ static void TestStringCommand(OHOS::OnDemandHelper& ondemandHelper, string& cmd)
         TestMemory(ondemandHelper);
     } else if (cmd == "setPrior") {
         TestSetPrior(ondemandHelper);
+    } else if (cmd == "lowmem") {
+        TestLowMemProcess(ondemandHelper);
     } else {
         cout << "invalid input" << endl;
     }
@@ -719,7 +762,8 @@ int main(int argc, char* argv[])
     string cmd = "load";
     do {
         cout << "please input operation(1-param/2-sa/3-proc/4-policy/5-getExtension)" << endl;
-        cout << "please input operation(6-getEvent/7-check/8-policy_time/9-test/10-memory/11-setPrior)" << endl;
+        cout << "please input operation(6-getEvent/7-check/8-policy_time/9-test/10-memory/11-setPrior/12-lowmem)"
+             << endl;
         cmd.clear();
         cin.clear();
         cin >> cmd;

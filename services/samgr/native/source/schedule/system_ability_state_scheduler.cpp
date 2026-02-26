@@ -1434,6 +1434,7 @@ int32_t SystemAbilityStateScheduler::SubscribeSystemProcessList(const std::list<
             }
         }
     }
+    HILOGI("%{public}s: calling pid: %{public}d", __func__, IPCSkeleton::GetCallingPid());
     return ERR_OK;
 }
 
@@ -1477,13 +1478,14 @@ int32_t SystemAbilityStateScheduler::UnSubscribeSystemProcessList(const std::lis
             UnSubscribeSystemProcessListLocked(listeners, listener->AsObject());
             if (processListenerDeath_ != nullptr) {
                 listener->AsObject()->RemoveDeathRecipient(processListenerDeath_);
-                HILOGI("UnSubscribeProc:%{public}s_%{public}d_%{public}zu",
-                    processName.c_str(), callingPid, listeners.size());
+                HILOGD("UnSubscribeProc:%{public}s_%{public}d_%{public}zu", processName.c_str(), callingPid,
+                    listeners.size());
             } else {
                 HILOGW("UnSubscribeProc:%{public}s not found", processName.c_str());
             }
         }
     }
+    HILOGI("%{public}s: calling pid: %{public}d", __func__, IPCSkeleton::GetCallingPid());
     return ERR_OK;
 }
 

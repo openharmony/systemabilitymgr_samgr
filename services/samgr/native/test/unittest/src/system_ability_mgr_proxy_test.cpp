@@ -1679,7 +1679,7 @@ HWTEST_F(SystemAbilityMgrProxyTest, UnSubscribeLowMemSystemProcess003, TestSize.
  */
 HWTEST_F(SystemAbilityMgrProxyTest, UnSubscribeLowMemSystemProcess004, TestSize.Level3)
 {
-    DTEST_LOG << " SubscribeLowMemSystemProcess004 begin " << std::endl;
+    DTEST_LOG << " UnSubscribeLowMemSystemProcess004 begin " << std::endl;
     sptr<ISystemAbilityManager> samgrProxy =
         SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
     sptr<ISystemProcessStatusChange> listener = sptr<SystemProcessStatusChange>::MakeSptr(); // actually a stub
