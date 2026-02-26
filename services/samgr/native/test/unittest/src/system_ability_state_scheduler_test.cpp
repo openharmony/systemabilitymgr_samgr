@@ -2228,7 +2228,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetRunningSystemProcess003, TestSize.L
     info.processName = Str16ToStr8(testProcess);
     scheduler.runningProcessList_.push_back(info);
     SystemProcessInfo result;
-    scheduler->GetRunningSystemProcess(testProcess, result);
+    scheduler.GetRunningSystemProcess(testProcess, result);
     EXPECT_EQ(result.pid, 123);
     EXPECT_EQ(result.uid, 456);
     EXPECT_EQ(result.processName, Str16ToStr8(testProcess));
@@ -2249,7 +2249,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetRunningSystemProcess004, TestSize.L
     SystemProcessInfo result;
     result.pid = -1;
     result.uid = -1;
-    scheduler->GetRunningSystemProcess(testProcess, result);
+    scheduler.GetRunningSystemProcess(testProcess, result);
     EXPECT_EQ(result.pid, -1);
     EXPECT_EQ(result.uid, -1);
     EXPECT_EQ(result.processName, Str16ToStr8(testProcess));
