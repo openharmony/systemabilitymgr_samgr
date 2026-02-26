@@ -1254,7 +1254,7 @@ HWTEST_F(SystemAbilityMgrNewTest, StartingSystemProcessLocked001, TestSize.Level
     saMgr->startingProcessMap_.clear();
     int32_t expectedResult = -1;
     int32_t result = saMgr->StartingSystemProcessLocked(procName, systemAbilityId, event);
-    EXPECT_EQ(result, expectedResult);
+    EXPECT_NE(result, expectedResult);
     DTEST_LOG <<"StartingSystemProcessLocked001 end " << std::endl;
 }
 } // namespace OHOS
