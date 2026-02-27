@@ -53,8 +53,39 @@ void FuzzUnSubscribeSystemProcess(const uint8_t *data, size_t size)
     FuzzTestUtils::FuzzTestRemoteRequest(data, size,
         static_cast<uint32_t>(SamgrInterfaceCode::UNSUBSCRIBE_SYSTEM_PROCESS_TRANSACTION));
 }
+
+void FuzzSubscribeLowMemSystemProcess(const uint8_t *data, size_t size)
+{
+    sptr<MockSystemProcessStatusChange> listener = new(std::nothrow) MockSystemProcessStatusChange();
+    if (listener == nullptr) {
+        return;
+    }
+    MessageParcel parcelData;
+    parcelData.WriteInterfaceToken(SAMGR_INTERFACE_TOKEN);
+    parcelData.WriteRemoteObject(listener);
+    FuzzTestUtils::FuzzTestRemoteRequest(parcelData,
+        static_cast<uint32_t>(SamgrInterfaceCode::SUBSCRIBE_LOWMEM_SYSTEM_PROCESS_TRANSACTION));
+    FuzzTestUtils::FuzzTestRemoteRequest(data, size,
+        static_cast<uint32_t>(SamgrInterfaceCode::SUBSCRIBE_LOWMEM_SYSTEM_PROCESS_TRANSACTION));
+}
+
+void FuzzUnSubscribeLowMemSystemProcess(const uint8_t *data, size_t size)
+{
+    sptr<MockSystemProcessStatusChange> listener = new(std::nothrow) MockSystemProcessStatusChange();
+    if (listener == nullptr) {
+        return;
+    }
+    MessageParcel parcelData;
+    parcelData.WriteInterfaceToken(SAMGR_INTERFACE_TOKEN);
+    parcelData.WriteRemoteObject(listener);
+    FuzzTestUtils::FuzzTestRemoteRequest(parcelData,
+        static_cast<uint32_t>(SamgrInterfaceCode::UNSUBSCRIBE_LOWMEM_SYSTEM_PROCESS_TRANSACTION));
+    FuzzTestUtils::FuzzTestRemoteRequest(data, size,
+        static_cast<uint32_t>(SamgrInterfaceCode::UNSUBSCRIBE_LOWMEM_SYSTEM_PROCESS_TRANSACTION));
 }
 }
+}
+
 /* Fuzzer entry point */
 extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
 {
@@ -63,5 +94,7 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
     }
     OHOS::Samgr::FuzzSubscribeSystemProcess(data, size);
     OHOS::Samgr::FuzzUnSubscribeSystemProcess(data, size);
+    OHOS::Samgr::FuzzSubscribeLowMemSystemProcess(data, size);
+    OHOS::Samgr::FuzzUnSubscribeLowMemSystemProcess(data, size);
     return 0;
 }
