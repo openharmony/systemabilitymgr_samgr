@@ -20,6 +20,7 @@ namespace OHOS {
 enum SamgrErrCode {
     SAMGR_OK = 0,
 
+    LOAD_SA_TIMEOUT = 999,
 // common
     INVALID_SYSTEM_ABILITY_ID = 1000,
     INVALID_INPUT_PARA,

@@ -225,6 +225,8 @@ SystemAbilityManagerStub::SystemAbilityManagerStub()
         SystemAbilityManagerStub::LocalGetLruIdleSystemAbilityProc;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::SET_SAMGR_IPC_PRIOR_TRANSACTION)] =
         SystemAbilityManagerStub::LocalSetSamgrIpcPrior;
+    memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::ONSTART_SYSTEM_ABILITY_FAIL_TRANSACTION)] =
+        SystemAbilityManagerStub::LocalOnStartSystemAbilityFail;
 }
 
 void SystemAbilityManagerStub::SetIpcPrior()
@@ -981,6 +983,37 @@ int32_t SystemAbilityManagerStub::GetLruIdleSystemAbilityProcInner(MessageParcel
         }
     }
     return ERR_OK;
+}
+
+int32_t SystemAbilityManagerStub::OnStartSystemAbilityFailInner(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t systemAbilityId = -1;
+    int32_t errCode = -1;
+    bool ret = data.ReadInt32(systemAbilityId);
+    if (!ret) {
+        HILOGW("OnStartSaFailInner read SAId failed");
+        return ERR_INVALID_VALUE;
+    }
+    ret = data.ReadInt32(errCode);
+    if (!ret) {
+        HILOGW("OnStartSaFailInner read errCode failed");
+        return ERR_INVALID_VALUE;
+    }
+    if (!CheckInputSysAbilityId(systemAbilityId)) {
+        HILOGW("OnStartSaFailInner check SAId invalid");
+        return ERR_NULL_OBJECT;
+    }
+    int32_t result = OnStartSystemAbilityFail(systemAbilityId, errCode);
+    if (result != ERR_OK) {
+        HILOGE("OnStartSaFailInner fail ret:%{public}d", result);
+    }
+    HILOGD("OnStartSaFailInner result is %{public}d", result);
+    ret = reply.WriteInt32(result);
+    if (!ret) {
+        HILOGW("OnStartSaFailInner write reply failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
 }
 
 int32_t SystemAbilityManagerStub::GetSystemProcessInfoInner(MessageParcel& data, MessageParcel& reply)

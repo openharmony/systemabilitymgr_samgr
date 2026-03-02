@@ -1225,4 +1225,59 @@ HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeLowMemSystemProcessInner004, TestS
     int32_t ret = saMgr->UnSubscribeLowMemSystemProcessInner(data, reply);
     EXPECT_EQ(ret, ERR_OK);
 }
+
+/**
+ * @tc.name: OnStartSystemAbilityFailInner001
+ * @tc.desc: test OnStartSystemAbilityFailInner, read failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, OnStartSystemAbilityFailInner001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        int32_t ret = saMgr->OnStartSystemAbilityFailInner(data, reply);
+        EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    }
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        EXPECT_TRUE(data.WriteInt32(SAID));
+        int32_t ret = saMgr->OnStartSystemAbilityFailInner(data, reply);
+        EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    }
+}
+
+/**
+ * @tc.name: OnStartSystemAbilityFailInner002
+ * @tc.desc: test OnStartSystemAbilityFailInner, Check said failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, OnStartSystemAbilityFailInner002, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_TRUE(data.WriteInt32(-1));
+    EXPECT_TRUE(data.WriteInt32(-1));
+    int32_t ret = saMgr->OnStartSystemAbilityFailInner(data, reply);
+    EXPECT_EQ(ret, ERR_NULL_OBJECT);
+}
+
+/**
+ * @tc.name: OnStartSystemAbilityFailInner003
+ * @tc.desc: test OnStartSystemAbilityFailInner, result failed
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, OnStartSystemAbilityFailInner003, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_TRUE(data.WriteInt32(SAID));
+    EXPECT_TRUE(data.WriteInt32(-1));
+    int32_t ret = saMgr->OnStartSystemAbilityFailInner(data, reply);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
 }

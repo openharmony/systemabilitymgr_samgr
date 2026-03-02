@@ -44,6 +44,8 @@ int32_t SystemAbilityLoadCallbackStub::OnRemoteRequest(uint32_t code,
             return OnLoadSystemAbilityFailInner(data, reply);
         case ON_LOAD_SYSTEM_ABILITY_COMPLETE_FOR_REMOTE:
             return OnLoadSACompleteForRemoteInner(data, reply);
+        case ON_LOAD_SYSTEM_ABILITY_FAIL_WITH_CODE:
+            return OnLoadSystemAbilityFailWithCodeInner(data, reply);
         default:
             HILOGW("SystemAbilityLoadCallbackStub::OnRemoteRequest unknown request code!");
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
@@ -89,6 +91,31 @@ int32_t SystemAbilityLoadCallbackStub::OnLoadSystemAbilityFailInner(MessageParce
     }
     int64_t begin = OHOS::GetTickCount();
     OnLoadSystemAbilityFail(systemAbilityId);
+    HILOGW("OnLoadSaFailInner SA:%{public}d spend %{public}" PRId64 "ms", systemAbilityId, GetTickCount() - begin);
+    return ERR_NONE;
+}
+
+int32_t SystemAbilityLoadCallbackStub::OnLoadSystemAbilityFailWithCodeInner(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t systemAbilityId = -1;
+    bool ret = data.ReadInt32(systemAbilityId);
+    if (!ret) {
+        HILOGW("OnLoadSystemAbilityFailInner read SA:%{public}d fail!", systemAbilityId);
+        return ERR_INVALID_VALUE;
+    }
+    int32_t errCode = -1;
+    ret = data.ReadInt32(errCode);
+    if (!ret) {
+        HILOGW("OnLoadSystemAbilityFailInner read errCode:%{public}d fail!", errCode);
+        return ERR_INVALID_VALUE;
+    }
+    HILOGI("OnLoadSystemAbilityFailInner, SA:%{public}d", systemAbilityId);
+    if (!CheckInputSystemAbilityId(systemAbilityId)) {
+        HILOGW("OnLoadSystemAbilityFailInner invalid SA:%{public}d !", systemAbilityId);
+        return ERR_INVALID_VALUE;
+    }
+    int64_t begin = OHOS::GetTickCount();
+    OnLoadSystemAbilityFail(systemAbilityId, errCode);
     HILOGW("OnLoadSaFailInner SA:%{public}d spend %{public}" PRId64 "ms", systemAbilityId, GetTickCount() - begin);
     return ERR_NONE;
 }

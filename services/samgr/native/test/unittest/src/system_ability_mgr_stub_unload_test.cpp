@@ -270,7 +270,7 @@ HWTEST_F(SystemAbilityMgrStubUnLoadTest, RemoveSystemProcess001, TestSize.Level1
     saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
     sptr<IRemoteObject> testAbility(nullptr);
     int32_t res = saMgr->RemoveSystemProcess(testAbility);
-    saMgr->NotifySystemAbilityLoadFail(SAID, nullptr);
+    saMgr->NotifySystemAbilityLoadFail(SAID, nullptr, -1);
     u16string name = u"test";
     string srcDeviceId = "srcDeviceId";
     saMgr->startingProcessMap_.clear();
@@ -297,7 +297,7 @@ HWTEST_F(SystemAbilityMgrStubUnLoadTest, RemoveSystemProcess002, TestSize.Level3
     saMgr->systemProcessDeath_ = nullptr;
     res = saMgr->RemoveSystemProcess(testAbility);
     sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
-    saMgr->NotifySystemAbilityLoadFail(SAID, callback);
+    saMgr->NotifySystemAbilityLoadFail(SAID, callback, -1);
     EXPECT_EQ(res, ERR_OK);
 }
 

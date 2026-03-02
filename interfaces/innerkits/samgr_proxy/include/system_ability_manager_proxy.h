@@ -211,6 +211,15 @@ public:
     virtual int32_t GetLruIdleSystemAbilityProc(std::vector<IdleProcessInfo>& processInfos) override;
 
     /**
+     * OnStartSystemAbilityFail, Notify samgr OnStart fail.
+     *
+     * @param systemAbilityId, Need the said of sa which wants to notifying samgr.
+     * @param errCode, OnStart error code.
+     * @return ERR_OK indicates that the notify successfully.
+     */
+    virtual int32_t OnStartSystemAbilityFail(int32_t systemAbilityId, int32_t errCode) override;
+
+    /**
      * GetSystemProcessInfo, Get process info by said.
      *
      * @param systemAbilityId, Need the said of sa which wants to get process info.

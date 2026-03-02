@@ -1081,4 +1081,68 @@ HWTEST_F(SystemAbilityMgrOnDemandTest, ActiveSystemAbility004, TestSize.Level1)
     DTEST_LOG << "ActiveSystemAbility004 end" << std::endl;
 }
 
+/**
+ * @tc.name: OnStartSystemAbilityFailInner001
+ * @tc.desc: test OnStartSystemAbilityFailInner, result ok
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrOnDemandTest, OnStartSystemAbilityFailInner001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
+    CommonSaProfile saProfile = {u"test", TEST_OVERFLOW_SAID};
+    saMgr->saProfileMap_[SAID] = saProfile;
+    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    Security::AccessToken::NativeTokenInfo nativeTokenInfo;
+    int32_t result = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
+    EXPECT_TRUE(result == ERR_OK);
+    saMgr->saProfileMap_[SAID].process = Str8ToStr16(nativeTokenInfo.processName);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_TRUE(data.WriteInt32(SAID));
+    EXPECT_TRUE(data.WriteInt32(-1));
+    int32_t ret = saMgr->OnStartSystemAbilityFailInner(data, reply);
+    EXPECT_EQ(ret, ERR_OK);
+    saMgr->saProfileMap_.erase(SAID);
+}
+
+/**
+ * @tc.name: OnStartSystemAbilityFail001
+ * @tc.desc: test OnStartSystemAbilityFail
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrOnDemandTest, OnStartSystemAbilityFail001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
+    int32_t ret = saMgr->OnStartSystemAbilityFail(TEST_OVERFLOW_SAID, -1);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    CommonSaProfile saProfile = {u"test", TEST_OVERFLOW_SAID};
+    saMgr->saProfileMap_[TEST_OVERFLOW_SAID] = saProfile;
+    ret = saMgr->OnStartSystemAbilityFail(TEST_OVERFLOW_SAID, -1);
+    EXPECT_EQ(ret, INVALID_CALL_PROC);
+
+    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
+    Security::AccessToken::NativeTokenInfo nativeTokenInfo;
+    int32_t result = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
+    EXPECT_TRUE(result == ERR_OK);
+    saMgr->saProfileMap_[TEST_OVERFLOW_SAID].process = Str8ToStr16(nativeTokenInfo.processName);
+    ret = saMgr->OnStartSystemAbilityFail(TEST_OVERFLOW_SAID, -1);
+    EXPECT_EQ(ret, ERR_OK);
+
+    SystemAbilityManager::AbilityItem abilityItem;
+    sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
+    abilityItem.callbackMap["local"].push_back(make_pair(callback, SAID));
+    saMgr->startingAbilityMap_[TEST_OVERFLOW_SAID] = abilityItem;
+    ret = saMgr->OnStartSystemAbilityFail(TEST_OVERFLOW_SAID, -1);
+    EXPECT_EQ(ret, ERR_OK);
+
+    SystemAbilityManager::AbilityItem abilityItem1;
+    saMgr->startingAbilityMap_[TEST_OVERFLOW_SAID] = abilityItem;
+    saMgr->startingAbilityMap_[SAID] = abilityItem1;
+    ret = saMgr->OnStartSystemAbilityFail(TEST_OVERFLOW_SAID, -1);
+    EXPECT_EQ(ret, ERR_OK);
+}
 } // namespace OHOS

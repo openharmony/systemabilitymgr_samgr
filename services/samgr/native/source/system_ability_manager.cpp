@@ -1365,7 +1365,7 @@ void SystemAbilityManager::CleanCallbackForLoadFailed(int32_t systemAbilityId, c
                 return;
             }
             auto listenerNotifyTask = [systemAbilityId, callbackItem, this]() {
-                NotifySystemAbilityLoadFail(systemAbilityId, callbackItem.first);
+                NotifySystemAbilityLoadFail(systemAbilityId, callbackItem.first, LOAD_SA_TIMEOUT);
             };
             if (!workHandler_->PostTask(listenerNotifyTask)) {
                 HILOGE("Send NotifySaLoadFailMsg PostTask fail");
@@ -1445,14 +1445,14 @@ void SystemAbilityManager::NotifySystemAbilityLoaded(int32_t systemAbilityId, co
 }
 
 void SystemAbilityManager::NotifySystemAbilityLoadFail(int32_t systemAbilityId,
-    const sptr<ISystemAbilityLoadCallback>& callback)
+    const sptr<ISystemAbilityLoadCallback>& callback, int32_t errCode)
 {
     if (callback == nullptr) {
         HILOGE("NotifySaLoadFail callback null");
         return;
     }
-    HILOGI("NotifySaLoadFail SA:%{public}d", systemAbilityId);
-    callback->OnLoadSystemAbilityFail(systemAbilityId);
+    HILOGI("NotifySaLoadFail SA:%{public}d_%{public}d", systemAbilityId, errCode);
+    callback->OnLoadSystemAbilityFail(systemAbilityId, errCode);
 }
 
 bool SystemAbilityManager::IsInitBootFinished()
@@ -1778,6 +1778,42 @@ int32_t SystemAbilityManager::GetLruIdleSystemAbilityProc(std::vector<IdleProces
     std::sort(processInfos.begin(), processInfos.end(), [](const IdleProcessInfo& a, IdleProcessInfo& b) {
         return a.lastIdleTime < b.lastIdleTime;
     });
+    return ERR_OK;
+}
+
+int32_t SystemAbilityManager::OnStartSystemAbilityFail(int32_t systemAbilityId, int32_t errCode)
+{
+    CommonSaProfile saProfile;
+    if (!GetSaProfile(systemAbilityId, saProfile)) {
+        HILOGW("OnStartSystemAbilityFail invalid SA: %{public}d", systemAbilityId);
+        return ERR_INVALID_VALUE;
+    }
+    if (!SamgrUtil::CheckCallerProcess(saProfile)) {
+        HILOGE("OnStartSystemAbilityFail invalid caller process, SA:%{public}d", systemAbilityId);
+        return INVALID_CALL_PROC;
+    }
+    lock_guard<samgr::mutex> autoLock(onDemandLock_);
+    auto onDemandIter = onDemandAbilityMap_.find(systemAbilityId);
+    if (onDemandIter == onDemandAbilityMap_.end()) {
+        onDemandAbilityMap_[systemAbilityId] = saProfile.process;
+    }
+    auto iter = startingAbilityMap_.find(systemAbilityId);
+    if (iter == startingAbilityMap_.end()) {
+        return ERR_OK;
+    }
+    RemoveCheckLoadedMsg(systemAbilityId);
+    auto& abilityItem = iter->second;
+    for (auto& [deviceId, callbackList] : abilityItem.callbackMap) {
+        for (auto& callbackItem : callbackList) {
+            HILOGI("notify SA:%{public}d,%{public}d", systemAbilityId, callbackItem.second);
+            NotifySystemAbilityLoadFail(systemAbilityId, callbackItem.first, errCode);
+            RemoveStartingAbilityCallbackLocked(callbackItem);
+        }
+    }
+    startingAbilityMap_.erase(iter);
+    if (!startingAbilityMap_.empty()) {
+        HILOGI("startingAbility size:%{public}zu", startingAbilityMap_.size());
+    }
     return ERR_OK;
 }
 

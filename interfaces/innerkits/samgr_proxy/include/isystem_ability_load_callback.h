@@ -41,7 +41,19 @@ public:
      * @return void.
      */
     virtual void OnLoadSystemAbilityFail([[maybe_unused]] int32_t systemAbilityId) {}
-    
+
+    /**
+     * OnLoadSystemAbilityFail, OnLoadSystemAbilityFail will be called when loadsystemability failed.
+     *
+     * @param systemAbilityId, The loaded said.
+     * @param errCode, The fail code.
+     * @return void.
+     */
+    virtual void OnLoadSystemAbilityFail([[maybe_unused]] int32_t systemAbilityId, [[maybe_unused]] int32_t errCode)
+    {
+        OnLoadSystemAbilityFail(systemAbilityId);
+    }
+
     /**
      * OnLoadSACompleteForRemote, OnLoadSACompleteForRemote will be called when loadsystemability remote.
      *
@@ -58,6 +70,7 @@ protected:
         ON_LOAD_SYSTEM_ABILITY_SUCCESS = 1,
         ON_LOAD_SYSTEM_ABILITY_FAIL = 2,
         ON_LOAD_SYSTEM_ABILITY_COMPLETE_FOR_REMOTE = 3,
+        ON_LOAD_SYSTEM_ABILITY_FAIL_WITH_CODE = 4,
     };
 };
 }

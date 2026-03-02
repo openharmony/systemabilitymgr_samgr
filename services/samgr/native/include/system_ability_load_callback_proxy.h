@@ -27,6 +27,7 @@ public:
 
     void OnLoadSystemAbilitySuccess(int32_t systemAbilityId, const sptr<IRemoteObject>& remoteObject) override;
     void OnLoadSystemAbilityFail(int32_t systemAbilityId) override;
+    void OnLoadSystemAbilityFail(int32_t systemAbilityId, int32_t errCode) override;
     void OnLoadSACompleteForRemote(const std::string& deviceId,
         int32_t systemAbilityId, const sptr<IRemoteObject>& remoteObject) override;
 private:

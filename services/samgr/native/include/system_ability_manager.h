@@ -183,6 +183,7 @@ public:
         const nlohmann::json& activeReason);
     int32_t UnloadProcess(const std::vector<std::u16string>& processList) override;
     int32_t GetLruIdleSystemAbilityProc(std::vector<IdleProcessInfo>& processInfos) override;
+    int32_t OnStartSystemAbilityFail(int32_t systemAbilityId, int32_t errCode) override;
     void OnAbilityCallbackDied(const sptr<IRemoteObject>& remoteObject);
     void OnRemoteCallbackDied(const sptr<IRemoteObject>& remoteObject);
     sptr<IRemoteObject> GetSystemAbilityFromRemote(int32_t systemAbilityId);
@@ -319,7 +320,8 @@ private:
     void NotifySystemAbilityLoaded(int32_t systemAbilityId, const sptr<IRemoteObject>& remoteObject);
     void NotifySystemAbilityLoaded(int32_t systemAbilityId, const sptr<IRemoteObject>& remoteObject,
         const sptr<ISystemAbilityLoadCallback>& callback);
-    void NotifySystemAbilityLoadFail(int32_t systemAbilityId, const sptr<ISystemAbilityLoadCallback>& callback);
+    void NotifySystemAbilityLoadFail(int32_t systemAbilityId, const sptr<ISystemAbilityLoadCallback>& callback,
+        int32_t errCode);
     int32_t StartingSystemProcess(const std::u16string& name, int32_t systemAbilityId, const OnDemandEvent& event);
     int32_t StartingSystemProcessLocked(const std::u16string& name, int32_t systemAbilityId,
         const OnDemandEvent& event);
