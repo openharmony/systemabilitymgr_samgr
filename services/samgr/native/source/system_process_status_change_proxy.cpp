@@ -83,6 +83,10 @@ bool SystemProcessStatusChangeProxy::SendRequestInner(uint32_t code, SystemProce
         HILOGW("SendRequestInner write pid failed!");
         return false;
     }
+    if (!data.WriteInt32(systemProcessInfo.uid)) {
+        HILOGW("SendRequestInner write uid failed!");
+        return false;
+    }
 
     MessageParcel reply;
     MessageOption option(MessageOption::TF_ASYNC);
