@@ -65,7 +65,7 @@ bool ReadProcessInfo(MessageParcel& data, SystemProcessInfo& info)
         return false;
     }
     if (!data.ReadInt32(info.uid)) {
-        HILOGW("read tid failed!");
+        HILOGW("read uid failed!");
         return false;
     }
     return true;

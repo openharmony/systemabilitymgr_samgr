@@ -27,30 +27,32 @@ public:
     ~SystemProcessStatusChangeStub() = default;
     int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption& option) override;
 private:
+    // The use of gnu extensions is for stabilizing compiler behaviour.
+    // Thus to keep ABI compatibilities as long as there are no real interface changes.
     static int32_t LocalSystemProcessStarted(SystemProcessStatusChangeStub *stub,
-        MessageParcel& data, MessageParcel& reply)
+        MessageParcel& data, MessageParcel& reply)  __attribute__((always_inline))
     {
         return stub->OnSystemProcessStartedInner(data, reply);
     }
     static int32_t LocalSystemProcessStopped(SystemProcessStatusChangeStub *stub,
-        MessageParcel& data, MessageParcel& reply)
+        MessageParcel& data, MessageParcel& reply) __attribute__((always_inline))
     {
         return stub->OnSystemProcessStoppedInner(data, reply);
     }
     static int32_t LocalSystemProcessActivated(SystemProcessStatusChangeStub *stub,
-        MessageParcel& data, MessageParcel& reply)
+        MessageParcel& data, MessageParcel& reply) __attribute__((always_inline))
     {
         return stub->OnSystemProcessActivatedInner(data, reply);
     }
     static int32_t LocalSystemProcessIdled(SystemProcessStatusChangeStub *stub,
-        MessageParcel& data, MessageParcel& reply)
+        MessageParcel& data, MessageParcel& reply) __attribute__((always_inline))
     {
         return stub->OnSystemProcessIdledInner(data, reply);
     }
-    int32_t OnSystemProcessStartedInner(MessageParcel& data, MessageParcel& reply);
-    int32_t OnSystemProcessStoppedInner(MessageParcel& data, MessageParcel& reply);
-    int32_t OnSystemProcessActivatedInner(MessageParcel& data, MessageParcel& reply);
-    int32_t OnSystemProcessIdledInner(MessageParcel& data, MessageParcel& reply);
+    int32_t OnSystemProcessStartedInner(MessageParcel& data, MessageParcel& reply) __attribute__((noinline));
+    int32_t OnSystemProcessStoppedInner(MessageParcel& data, MessageParcel& reply) __attribute__((noinline));
+    int32_t OnSystemProcessActivatedInner(MessageParcel& data, MessageParcel& reply) __attribute__((noinline));
+    int32_t OnSystemProcessIdledInner(MessageParcel& data, MessageParcel& reply) __attribute__((noinline));
     static bool EnforceInterceToken(MessageParcel& data);
 
     using SystemProcessStatusChangeStubFunc =
