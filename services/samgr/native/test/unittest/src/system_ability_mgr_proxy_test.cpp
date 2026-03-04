@@ -621,6 +621,39 @@ HWTEST_F(SystemAbilityMgrProxyTest, OnLoadSystemAbilityFailWithCode004, TestSize
 }
 
 /**
+ * @tc.name: OnStartSystemAbilityFail001
+ * @tc.desc: OnStartSystemAbilityFail
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, OnStartSystemAbilityFail001, TestSize.Level3)
+{
+    DTEST_LOG << " OnStartSystemAbilityFail001 begin " << std::endl;
+    sptr<ISystemAbilityManager> samgrProxy =
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    EXPECT_TRUE(samgrProxy != nullptr);
+    auto ret = samgrProxy->OnStartSystemAbilityFail(-1, 1);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ret = samgrProxy->OnStartSystemAbilityFail(1, 1);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << " OnStartSystemAbilityFail001 end " << std::endl;
+}
+
+/**
+ * @tc.name: OnStartSystemAbilityFail002
+ * @tc.desc: OnStartSystemAbilityFail
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, OnStartSystemAbilityFail002, TestSize.Level3)
+{
+    DTEST_LOG << " OnStartSystemAbilityFail002 begin " << std::endl;
+    sptr<ISystemAbilityManager> samgrMock = new ISystemAbilityManagerMock;
+    EXPECT_TRUE(samgrMock != nullptr);
+    int32_t ret = samgrMock->OnStartSystemAbilityFail(1, 1);
+    EXPECT_EQ(ret, 0);
+    DTEST_LOG << " OnStartSystemAbilityFail002 end " << std::endl;
+}
+
+/**
  * @tc.name: OnLoadSACompleteForRemote001
  * @tc.desc: check OnLoadSACompleteForRemote001
  * @tc.type: FUNC
@@ -1739,38 +1772,5 @@ HWTEST_F(SystemAbilityMgrProxyTest, UnSubscribeLowMemSystemProcess004, TestSize.
     auto res = samgrProxy->UnSubscribeLowMemSystemProcess(listener);
     EXPECT_EQ(res, ERR_OK);
     DTEST_LOG << " UnSubscribeLowMemSystemProcess004 end " << std::endl;
-}
-
-/**
- * @tc.name: OnStartSystemAbilityFail001
- * @tc.desc: OnStartSystemAbilityFail
- * @tc.type: FUNC
- */
-HWTEST_F(SystemAbilityMgrProxyTest, OnStartSystemAbilityFail001, TestSize.Level3)
-{
-    DTEST_LOG << " OnStartSystemAbilityFail001 begin " << std::endl;
-    sptr<ISystemAbilityManager> samgrProxy =
-        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
-    EXPECT_TRUE(samgrProxy != nullptr);
-    auto ret = samgrProxy->OnStartSystemAbilityFail(-1, 1);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    ret = samgrProxy->OnStartSystemAbilityFail(1, 1);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    DTEST_LOG << " OnStartSystemAbilityFail001 end " << std::endl;
-}
-
-/**
- * @tc.name: OnStartSystemAbilityFail002
- * @tc.desc: OnStartSystemAbilityFail
- * @tc.type: FUNC
- */
-HWTEST_F(SystemAbilityMgrProxyTest, OnStartSystemAbilityFail002, TestSize.Level3)
-{
-    DTEST_LOG << " OnStartSystemAbilityFail002 begin " << std::endl;
-    sptr<ISystemAbilityManager> samgrMock = new ISystemAbilityManagerMock;
-    EXPECT_TRUE(samgrMock != nullptr);
-    int32_t ret = samgrMock->OnStartSystemAbilityFail(1, 1);
-    EXPECT_EQ(ret, 0);
-    DTEST_LOG << " OnStartSystemAbilityFail002 end " << std::endl;
 }
 }

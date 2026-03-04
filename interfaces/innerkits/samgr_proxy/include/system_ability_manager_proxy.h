@@ -213,7 +213,7 @@ public:
     /**
      * OnStartSystemAbilityFail, Notify samgr OnStart fail.
      *
-     * @param systemAbilityId, Need the said of sa which wants to notifying samgr.
+     * @param systemAbilityId, Need the said of sa which wants to notify samgr.
      * @param errCode, OnStart error code.
      * @return ERR_OK indicates that the notify successfully.
      */

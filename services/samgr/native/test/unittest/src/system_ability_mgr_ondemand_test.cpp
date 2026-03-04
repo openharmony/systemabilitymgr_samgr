@@ -1117,7 +1117,14 @@ HWTEST_F(SystemAbilityMgrOnDemandTest, OnStartSystemAbilityFail001, TestSize.Lev
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
     InitSaMgr(saMgr);
+    sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
+    SAInfo saInfo;
+    saInfo.remoteObj = testAbility;
+    saMgr->abilityMap_[TEST_OVERFLOW_SAID] = saInfo;
     int32_t ret = saMgr->OnStartSystemAbilityFail(TEST_OVERFLOW_SAID, -1);
+    EXPECT_EQ(ret, ERR_OK);
+    saMgr->abilityMap_.erase(TEST_OVERFLOW_SAID);
+    ret = saMgr->OnStartSystemAbilityFail(TEST_OVERFLOW_SAID, -1);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
     CommonSaProfile saProfile = {u"test", TEST_OVERFLOW_SAID};
     saMgr->saProfileMap_[TEST_OVERFLOW_SAID] = saProfile;

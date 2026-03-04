@@ -100,23 +100,24 @@ int32_t SystemAbilityLoadCallbackStub::OnLoadSystemAbilityFailWithCodeInner(Mess
     int32_t systemAbilityId = -1;
     bool ret = data.ReadInt32(systemAbilityId);
     if (!ret) {
-        HILOGW("OnLoadSystemAbilityFailInner read SA:%{public}d fail!", systemAbilityId);
+        HILOGW("OnLoadSaFailInner read SA:%{public}d fail!", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
     int32_t errCode = -1;
     ret = data.ReadInt32(errCode);
     if (!ret) {
-        HILOGW("OnLoadSystemAbilityFailInner read errCode:%{public}d fail!", errCode);
+        HILOGW("OnLoadSaFailInner read errCode:%{public}d fail!", errCode);
         return ERR_INVALID_VALUE;
     }
-    HILOGI("OnLoadSystemAbilityFailInner, SA:%{public}d", systemAbilityId);
+    HILOGI("OnLoadSaFailInner SA:%{public}d_%{public}d", systemAbilityId, errCode);
     if (!CheckInputSystemAbilityId(systemAbilityId)) {
-        HILOGW("OnLoadSystemAbilityFailInner invalid SA:%{public}d !", systemAbilityId);
+        HILOGW("OnLoadSaFailInner invalid SA:%{public}d!", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
     int64_t begin = OHOS::GetTickCount();
     OnLoadSystemAbilityFail(systemAbilityId, errCode);
-    HILOGW("OnLoadSaFailInner SA:%{public}d spend %{public}" PRId64 "ms", systemAbilityId, GetTickCount() - begin);
+    HILOGW("OnLoadSaFailInner SA:%{public}d_%{public}d spend %{public}" PRId64 "ms", systemAbilityId, errCode,
+        GetTickCount() - begin);
     return ERR_NONE;
 }
 

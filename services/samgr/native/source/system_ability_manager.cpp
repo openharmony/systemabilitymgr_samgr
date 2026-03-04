@@ -1783,6 +1783,10 @@ int32_t SystemAbilityManager::GetLruIdleSystemAbilityProc(std::vector<IdleProces
 
 int32_t SystemAbilityManager::OnStartSystemAbilityFail(int32_t systemAbilityId, int32_t errCode)
 {
+    sptr<IRemoteObject> targetObject = CheckSystemAbility(systemAbilityId);
+    if (targetObject != nullptr) {
+        return ERR_OK;
+    }
     CommonSaProfile saProfile;
     if (!GetSaProfile(systemAbilityId, saProfile)) {
         HILOGW("OnStartSystemAbilityFail invalid SA: %{public}d", systemAbilityId);

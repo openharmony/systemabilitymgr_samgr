@@ -1278,6 +1278,6 @@ HWTEST_F(SystemAbilityMgrStubTest, OnStartSystemAbilityFailInner003, TestSize.Le
     EXPECT_TRUE(data.WriteInt32(SAID));
     EXPECT_TRUE(data.WriteInt32(-1));
     int32_t ret = saMgr->OnStartSystemAbilityFailInner(data, reply);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, ERR_OK);
 }
 }
