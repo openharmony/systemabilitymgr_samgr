@@ -267,6 +267,19 @@ public:
     }
 
     /**
+     * OnStartSystemAbilityFail, Notify samgr OnStart fail.
+     *
+     * @param systemAbilityId, Need the said of sa which wants to notifying samgr.
+     * @param errCode, OnStart error code.
+     * @return ERR_OK indicates that the notify successfully.
+     */
+    virtual int32_t OnStartSystemAbilityFail(int32_t systemAbilityId, int32_t errCode)
+    {
+        (void)systemAbilityId;
+        (void)errCode;
+        return 0;
+    }
+    /**
      * GetSystemProcessInfo, Get process info by said.
      * If said is invalid, will return ERR_INVALID_VALUE.
      * If said is valid but SA process is not registered, the value of pid and uid will be the default value -1.

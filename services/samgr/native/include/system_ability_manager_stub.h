@@ -161,6 +161,11 @@ private:
     {
         return stub->GetLruIdleSystemAbilityProcInner(data, reply);
     }
+    static int32_t LocalOnStartSystemAbilityFail(SystemAbilityManagerStub* stub,
+        MessageParcel& data, MessageParcel& reply)
+    {
+        return stub->OnStartSystemAbilityFailInner(data, reply);
+    }
     static int32_t LocalGetOnDemandReasonExtraData(SystemAbilityManagerStub* stub,
         MessageParcel& data, MessageParcel& reply)
     {
@@ -240,6 +245,7 @@ private:
     int32_t UnloadAllIdleSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t UnloadProcessInner(MessageParcel& data, MessageParcel& reply);
     int32_t GetLruIdleSystemAbilityProcInner(MessageParcel& data, MessageParcel& reply);
+    int32_t OnStartSystemAbilityFailInner(MessageParcel& data, MessageParcel& reply);
     int32_t GetOnDemandReasonExtraDataInner(MessageParcel& data, MessageParcel& reply);
     int32_t GetOnDemandPolicyInner(MessageParcel& data, MessageParcel& reply);
     int32_t UpdateOnDemandPolicyInner(MessageParcel& data, MessageParcel& reply);

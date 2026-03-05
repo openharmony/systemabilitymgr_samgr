@@ -1423,7 +1423,7 @@ HWTEST_F(SystemAbilityMgrStubLoadTest, OnRemoteRequest005, TestSize.Level3)
     MessageParcel reply;
     MessageOption option;
     int32_t result = testAbility->OnRemoteRequest(code, data, reply, option);
-    EXPECT_EQ(result, IPC_STUB_UNKNOW_TRANS_ERR);
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
 }
 
 /**
@@ -1472,6 +1472,46 @@ HWTEST_F(SystemAbilityMgrStubLoadTest, OnLoadSystemAbilityFailInner001, TestSize
     MessageParcel reply;
     int32_t result = testAbility->OnLoadSystemAbilityFailInner(data, reply);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: OnLoadSystemAbilityFailWithCodeInner001
+ * @tc.desc: test SystemAbilityLoadCallbackStub::OnLoadSystemAbilityFailWithCodeInner
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubLoadTest, OnLoadSystemAbilityFailWithCodeInner001, TestSize.Level3)
+{
+    sptr<SystemAbilityLoadCallbackMock> testAbility(new SystemAbilityLoadCallbackMock());
+    EXPECT_TRUE(testAbility != nullptr);
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        int32_t result = testAbility->OnLoadSystemAbilityFailWithCodeInner(data, reply);
+        EXPECT_EQ(result, ERR_INVALID_VALUE);
+    }
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        data.WriteInt32(INVALID_SAID);
+        int32_t result = testAbility->OnLoadSystemAbilityFailWithCodeInner(data, reply);
+        EXPECT_EQ(result, ERR_INVALID_VALUE);
+    }
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        data.WriteInt32(INVALID_SAID);
+        data.WriteInt32(INVALID_SAID);
+        int32_t result = testAbility->OnLoadSystemAbilityFailWithCodeInner(data, reply);
+        EXPECT_EQ(result, ERR_INVALID_VALUE);
+    }
+    {
+        MessageParcel data;
+        MessageParcel reply;
+        data.WriteInt32(0);
+        data.WriteInt32(INVALID_SAID);
+        int32_t result = testAbility->OnLoadSystemAbilityFailWithCodeInner(data, reply);
+        EXPECT_EQ(result, ERR_NONE);
+    }
 }
 
 /**

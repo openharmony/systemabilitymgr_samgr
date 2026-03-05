@@ -33,7 +33,7 @@ namespace OHOS {
 namespace Samgr {
 namespace {
     constexpr size_t THRESHOLD = 10;
-    constexpr uint8_t MAX_CALL_TRANSACTION = 40;
+    constexpr uint8_t MAX_CALL_TRANSACTION = 43;
     constexpr int32_t OFFSET = 4;
     constexpr int32_t INIT_TIME = 3;
     constexpr int32_t RETRY_TIME_OUT_NUMBER = 10;

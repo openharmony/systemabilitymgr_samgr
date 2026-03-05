@@ -568,6 +568,92 @@ HWTEST_F(SystemAbilityMgrProxyTest, OnLoadSystemAbilityFail004, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnLoadSystemAbilityFailWithCode001
+ * @tc.desc: check OnLoadSystemAbilityFailWithCode001
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, OnLoadSystemAbilityFailWithCode001, TestSize.Level1)
+{
+    sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
+    sptr<SystemAbilityLoadCallbackProxy> systemAbility(new SystemAbilityLoadCallbackProxy(testAbility));
+    systemAbility->OnLoadSystemAbilityFail(TEST_ID_NORANGE_SAID, -1);
+    EXPECT_EQ(testAbility->flag_, false);
+}
+
+/**
+ * @tc.name: OnLoadSystemAbilityFailWithCode002
+ * @tc.desc: check OnLoadSystemAbilityFailWithCode002
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, OnLoadSystemAbilityFailWithCode002, TestSize.Level1)
+{
+    sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
+    sptr<SystemAbilityLoadCallbackProxy> systemAbility(new SystemAbilityLoadCallbackProxy(nullptr));
+    systemAbility->OnLoadSystemAbilityFail(TEST_ID_VAILD, -1);
+    EXPECT_EQ(testAbility->flag_, false);
+}
+
+/**
+ * @tc.name: OnLoadSystemAbilityFailWithCode003
+ * @tc.desc: check OnLoadSystemAbilityFailWithCode003
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, OnLoadSystemAbilityFailWithCode003, TestSize.Level1)
+{
+    sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
+    sptr<SystemAbilityLoadCallbackProxy> systemAbility(new SystemAbilityLoadCallbackProxy(testAbility));
+    systemAbility->OnLoadSystemAbilityFail(TEST_ID_VAILD, -1);
+    EXPECT_EQ(testAbility->flag_, true);
+}
+
+/**
+ * @tc.name: OnLoadSystemAbilityFailWithCode004
+ * @tc.desc: check OnLoadSystemAbilityFailWithCode004
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, OnLoadSystemAbilityFailWithCode004, TestSize.Level1)
+{
+    sptr<MockIroSendrequesteStub> testAbility(new MockIroSendrequesteStub());
+    testAbility->result_ = 1;
+    sptr<SystemAbilityLoadCallbackProxy> systemAbility(new SystemAbilityLoadCallbackProxy(testAbility));
+    systemAbility->OnLoadSystemAbilityFail(TEST_ID_VAILD, -1);
+    EXPECT_EQ(testAbility->flag_, true);
+}
+
+/**
+ * @tc.name: OnStartSystemAbilityFail001
+ * @tc.desc: OnStartSystemAbilityFail
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, OnStartSystemAbilityFail001, TestSize.Level3)
+{
+    DTEST_LOG << " OnStartSystemAbilityFail001 begin " << std::endl;
+    sptr<ISystemAbilityManager> samgrProxy =
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    EXPECT_TRUE(samgrProxy != nullptr);
+    auto ret = samgrProxy->OnStartSystemAbilityFail(-1, 1);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    ret = samgrProxy->OnStartSystemAbilityFail(1, 1);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    DTEST_LOG << " OnStartSystemAbilityFail001 end " << std::endl;
+}
+
+/**
+ * @tc.name: OnStartSystemAbilityFail002
+ * @tc.desc: OnStartSystemAbilityFail
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, OnStartSystemAbilityFail002, TestSize.Level3)
+{
+    DTEST_LOG << " OnStartSystemAbilityFail002 begin " << std::endl;
+    sptr<ISystemAbilityManager> samgrMock = new ISystemAbilityManagerMock;
+    EXPECT_TRUE(samgrMock != nullptr);
+    int32_t ret = samgrMock->OnStartSystemAbilityFail(1, 1);
+    EXPECT_EQ(ret, 0);
+    DTEST_LOG << " OnStartSystemAbilityFail002 end " << std::endl;
+}
+
+/**
  * @tc.name: OnLoadSACompleteForRemote001
  * @tc.desc: check OnLoadSACompleteForRemote001
  * @tc.type: FUNC

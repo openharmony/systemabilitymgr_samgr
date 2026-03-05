@@ -257,7 +257,7 @@ void FuzzNotifySystemAbilityLoadFail(const uint8_t* data, size_t size)
     FuzzedDataProvider fdp(data, size);
     int32_t saId = fdp.ConsumeIntegral<int32_t>();
     sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
-    saMgr->NotifySystemAbilityLoadFail(saId, callback);
+    saMgr->NotifySystemAbilityLoadFail(saId, callback, -1);
 }
 
 void FuzzStartingSystemProcessLocked(const uint8_t* data, size_t size)

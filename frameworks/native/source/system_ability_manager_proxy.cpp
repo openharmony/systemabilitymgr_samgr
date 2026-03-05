@@ -900,6 +900,53 @@ int32_t SystemAbilityManagerProxy::GetLruIdleSystemAbilityProc(std::vector<IdleP
     return ReadIdleProcessInfoFromParcel(reply, procInfos);
 }
 
+int32_t SystemAbilityManagerProxy::OnStartSystemAbilityFail(int32_t systemAbilityId, int32_t errCode)
+{
+    if (!CheckInputSysAbilityId(systemAbilityId)) {
+        HILOGE("OnStartSaFail SA:%{public}d invalid", systemAbilityId);
+        return ERR_INVALID_VALUE;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("OnStartSaFail remote is nullptr");
+        return ERR_INVALID_OPERATION;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        HILOGW("OnStartSaFail write interface token failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    bool ret = data.WriteInt32(systemAbilityId);
+    if (!ret) {
+        HILOGW("OnStartSaFail Write SAId failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    ret = data.WriteInt32(errCode);
+    if (!ret) {
+        HILOGW("OnStartSaFail Write errCode failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option;
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::ONSTART_SYSTEM_ABILITY_FAIL_TRANSACTION), data, reply, option);
+    if (err != ERR_NONE) {
+        HILOGE("OnStartSaFail SA:%{public}d invalid error:%{public}d", systemAbilityId, err);
+        return err;
+    }
+    HILOGD("OnStartSaFail SA:%{public}d, SendRequest succeed", systemAbilityId);
+    int32_t result = 0;
+    ret = reply.ReadInt32(result);
+    if (!ret) {
+        HILOGW("OnStartSaFail Read reply failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
 int32_t SystemAbilityManagerProxy::ReadIdleProcessInfoFromParcel(MessageParcel& reply,
     std::vector<IdleProcessInfo>& procInfos)
 {

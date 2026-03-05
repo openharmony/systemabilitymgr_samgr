@@ -30,6 +30,7 @@ private:
 
     int32_t OnLoadSystemAbilitySuccessInner(MessageParcel& data, MessageParcel& reply);
     int32_t OnLoadSystemAbilityFailInner(MessageParcel& data, MessageParcel& reply);
+    int32_t OnLoadSystemAbilityFailWithCodeInner(MessageParcel& data, MessageParcel& reply);
     int32_t OnLoadSACompleteForRemoteInner(MessageParcel& data, MessageParcel& reply);
 };
 }
