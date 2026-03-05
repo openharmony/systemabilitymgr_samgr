@@ -1060,6 +1060,8 @@ HWTEST_F(SystemAbilityMgrProxyTest, OnSystemProcessStartedInner001, TestSize.Lev
     sptr<SystemProcessStatusChangeStub> processStub = new SystemProcessStatusChange();
     MessageParcel data;
     data.WriteString("test");
+    data.WriteInt32(0);
+    data.WriteInt32(0);
     MessageParcel reply;
     int32_t ret = processStub->OnSystemProcessStartedInner(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
@@ -1076,6 +1078,8 @@ HWTEST_F(SystemAbilityMgrProxyTest, OnSystemProcessStoppedInner001, TestSize.Lev
     sptr<SystemProcessStatusChangeStub> processStub = new SystemProcessStatusChange();
     MessageParcel data;
     data.WriteString("test");
+    data.WriteInt32(0);
+    data.WriteInt32(0);
     MessageParcel reply;
     int32_t ret = processStub->OnSystemProcessStoppedInner(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
@@ -1136,6 +1140,7 @@ HWTEST_F(SystemAbilityMgrProxyTest, OnSystemProcessActivatedInner003, TestSize.L
     MessageParcel data;
     data.WriteString("test");
     data.WriteInt32(0);
+    data.WriteInt32(0);
     MessageParcel reply;
     int32_t ret = processStub->OnSystemProcessActivatedInner(data, reply);
     EXPECT_EQ(ret, ERR_NONE);
@@ -1181,6 +1186,7 @@ HWTEST_F(SystemAbilityMgrProxyTest, OnSystemProcessIdledInner003, TestSize.Level
     sptr<SystemProcessStatusChangeStub> processStub = new SystemProcessStatusChange();
     MessageParcel data;
     data.WriteString("test");
+    data.WriteInt32(0);
     data.WriteInt32(0);
     MessageParcel reply;
     int32_t ret = processStub->OnSystemProcessIdledInner(data, reply);

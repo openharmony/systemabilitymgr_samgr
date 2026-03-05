@@ -402,4 +402,134 @@ HWTEST_F(SystemAbilityMgrSubscribeTest, SendRequestInner002, TestSize.Level3)
     EXPECT_EQ(ret, true);
 }
 
+namespace {
+enum class MockAction { False = 0, True = 1, Real = 2};
+std::vector<MockAction> g_mockRet {};
+thread_local bool g_enableMock {false};
+thread_local int g_writeInt32Counter = 0;
+}
+
+// Redefine shared lib symbols, for coverage
+bool Parcel::WriteInt32(int32_t value)
+{
+    if (g_enableMock) {
+        g_writeInt32Counter++;
+        MockAction ret = MockAction::Real;
+        if (!g_mockRet.empty()) {
+            ret = g_mockRet.back();
+            g_mockRet.pop_back();
+        }
+        if (ret == MockAction::False) {
+            return false;
+        }
+        if (ret == MockAction::True) {
+            return true;
+        }
+    }
+    // The template implementation is private and possibly inlined, anyway the symbol is not exported.
+    // Using other existing public interface to mimic the original behaviour.
+    // The redefinition affects all other function calls in the same executable.
+    // For pointers(should be always >= 0) a 32-bit number is required, used by remote objects sptrs.
+    // Otherwise 16-bit width should be enough for other testcases.
+    if (value >= 0) {
+        return WriteUint32(value);
+    } else {
+        return WriteInt16(value);
+    }
+}
+
+bool Parcel::WriteString(const std::string &value)
+{
+    if (g_enableMock) {
+        MockAction ret = MockAction::Real;
+        if (!g_mockRet.empty()) {
+            ret = g_mockRet.back();
+            g_mockRet.pop_back();
+        }
+        if (ret == MockAction::False) {
+            return false;
+        }
+        if (ret == MockAction::True) {
+            return true;
+        }
+    }
+
+    if (value.data() == nullptr) {
+        return WriteInt16(-1);
+    }
+
+    int32_t dataLength = value.length();
+    if (dataLength < 0 || dataLength >= INT16_MAX) {
+        return false;
+    }
+    int32_t typeSize = sizeof(char);
+    int32_t desireCapacity = dataLength + typeSize;
+
+    if (!WriteInt16(dataLength)) {
+        return false;
+    }
+
+    return WriteBufferAddTerminator(value.data(), desireCapacity, typeSize);
+}
+
+/**
+ * @tc.name: Test SendRequestInner003
+ * @tc.desc: SendRequestInner003 with invalid inputs
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrSubscribeTest, SendRequestInner003, TestSize.Level3)
+{
+    DTEST_LOG << " SendRequestInner003" << std::endl;
+    sptr<SystemProcessStatusChangeStub> stub = new SystemProcessStatusChange();
+    sptr<SystemProcessStatusChangeProxy> systemProcessStatusChange = new SystemProcessStatusChangeProxy(stub);
+    SystemProcessInfo systemProcessInfos;
+    systemProcessInfos.processName = "test";
+    g_enableMock = true;
+    // There are invocations of WriteInt32 inside WriteInterfacetoken, need to eliminate the side effects.
+    MessageParcel probeParcel;
+    g_writeInt32Counter = 0;
+    probeParcel.WriteInterfaceToken(u"probe");
+    int repeatTime = g_writeInt32Counter;
+    g_writeInt32Counter = 0;
+    for (uint32_t code : {1, 2, 3, 4}) {
+        // the first 3 cases fail on proxy side
+
+        g_mockRet = {MockAction::False, MockAction::False, MockAction::False};
+        g_mockRet.insert(g_mockRet.end(), repeatTime, MockAction::Real);
+        bool ret = systemProcessStatusChange->SendRequestInner(code, systemProcessInfos);
+        EXPECT_EQ(ret, false);
+
+        g_mockRet = {MockAction::False, MockAction::False, MockAction::True};
+        g_mockRet.insert(g_mockRet.end(), repeatTime, MockAction::Real);
+        ret = systemProcessStatusChange->SendRequestInner(code, systemProcessInfos);
+        EXPECT_EQ(ret, false);
+
+        g_mockRet = {MockAction::False, MockAction::True, MockAction::True};
+        g_mockRet.insert(g_mockRet.end(), repeatTime, MockAction::Real);
+        ret = systemProcessStatusChange->SendRequestInner(code, systemProcessInfos);
+        EXPECT_EQ(ret, false);
+
+        // the following cases will enter stub side
+        g_mockRet = {MockAction::True, MockAction::True, MockAction::True};
+        g_mockRet.insert(g_mockRet.end(), repeatTime, MockAction::Real);
+        ret = systemProcessStatusChange->SendRequestInner(code, systemProcessInfos);
+        EXPECT_EQ(ret, false);
+
+        g_mockRet = {MockAction::True, MockAction::True, MockAction::Real};
+        g_mockRet.insert(g_mockRet.end(), repeatTime, MockAction::Real);
+        ret = systemProcessStatusChange->SendRequestInner(code, systemProcessInfos);
+        EXPECT_EQ(ret, false);
+
+        g_mockRet = {MockAction::True, MockAction::Real, MockAction::Real};
+        g_mockRet.insert(g_mockRet.end(), repeatTime, MockAction::Real);
+        ret = systemProcessStatusChange->SendRequestInner(code, systemProcessInfos);
+        EXPECT_EQ(ret, false);
+
+        g_mockRet.clear();
+        ret = systemProcessStatusChange->SendRequestInner(code, systemProcessInfos);
+        EXPECT_EQ(ret, true);
+    }
+    g_enableMock = false;
+}
+
 } // namespace OHOS
