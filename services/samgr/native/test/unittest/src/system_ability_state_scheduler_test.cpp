@@ -1641,6 +1641,34 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleAbnormallyDiedAbilityLocked002, 
 }
 
 /**
+ * @tc.name: HandleAbnormallyDiedAbilityLocked003
+ * @tc.desc: test HandleAbnormallyDiedAbilityLocked, abnormallyDiedAbilityList is not empty
+ * @tc.type: FUNC
+ * @tc.require: I736XA
+ */
+HWTEST_F(SystemAbilityStateSchedulerTest, HandleAbnormallyDiedAbilityLocked003, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_NE(saMgr, nullptr);
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+    std::list<SaProfile> saProfiles;
+    saMgr->abilityStateScheduler_->Init(saProfiles);
+    std::shared_ptr<SystemAbilityContext> abilityContext = std::make_shared<SystemAbilityContext>();
+    std::shared_ptr<SystemProcessContext> processContext = std::make_shared<SystemProcessContext>();
+    abilityContext->isAutoRestart = true;
+    saMgr->abilityStateScheduler_->abilityContextMap_.clear();
+    abilityContext->ownProcessContext = processContext;
+    abilityContext->systemAbilityId = SAID;
+    saMgr->abilityStateScheduler_->abilityContextMap_[SAID] = abilityContext;
+    std::list<std::shared_ptr<SystemAbilityContext>> abnormallyDiedAbilityList;
+    abnormallyDiedAbilityList.emplace_back(abilityContext);
+
+    int32_t ret = saMgr->abilityStateScheduler_->HandleAbnormallyDiedAbilityLocked(
+        processContext, abnormallyDiedAbilityList);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
  * @tc.name: HandleAbilityDiedEvent001
  * @tc.desc: test HandleAbilityDiedEvent, with saId is valid
  * @tc.type: FUNC
@@ -2132,5 +2160,99 @@ HWTEST_F(SystemAbilityStateSchedulerTest, UnloadProcess001, TestSize.Level3)
     int32_t ret = systemAbilityStateScheduler->UnloadProcess(processList);
     EXPECT_NE(ret, TRANSIT_PROC_STATE_FAIL);
     DTEST_LOG<<"UnloadProcess001 END"<<std::endl;
+}
+
+/**
+ * @tc.name: GetRunningSystemProcess001
+ * @tc.desc: test GetRunningSystemProcess, If the specified process exists in the running process list,
+             the process information is correctly filled.
+ * @tc.type: FUNC
+ * @tc.require: I6FDNZ
+ */
+HWTEST_F(SystemAbilityStateSchedulerTest, GetRunningSystemProcess001, TestSize.Level3)
+{
+    DTEST_LOG<<"GetRunningSystemProcess001 BEGIN"<<std::endl;
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::u16string processName = u"test_process";
+    SystemProcessInfo expectedInfo;
+    expectedInfo.processName = "test_process";
+    expectedInfo.pid = 1234;
+    expectedInfo.uid = 5678;
+    {
+        std::unique_lock<samgr::shared_mutex> lock(systemAbilityStateScheduler->runningProcessListLock_);
+        systemAbilityStateScheduler->runningProcessList_.push_back(expectedInfo);
+    }
+    SystemProcessInfo actualInfo;
+    systemAbilityStateScheduler->GetRunningSystemProcess(processName, actualInfo);
+    EXPECT_EQ(expectedInfo.processName, actualInfo.processName);
+    EXPECT_EQ(expectedInfo.pid, actualInfo.pid);
+    EXPECT_EQ(expectedInfo.uid, actualInfo.uid);
+    DTEST_LOG<<"GetRunningSystemProcess001 END"<<std::endl;
+}
+
+/**
+ * @tc.name: GetRunningSystemProcess002
+ * @tc.desc: test GetRunningSystemProcess
+ * @tc.type: FUNC
+ * @tc.require: I6FDNZ
+ */
+HWTEST_F(SystemAbilityStateSchedulerTest, GetRunningSystemProcess002, TestSize.Level3)
+{
+    DTEST_LOG<<"GetRunningSystemProcess002 BEGIN"<<std::endl;
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>();
+    std::u16string processName = u"non_existent_process";
+    SystemProcessInfo actualInfo;
+    systemAbilityStateScheduler->GetRunningSystemProcess(processName, actualInfo);
+    EXPECT_EQ("non_existent_process", actualInfo.processName);
+    EXPECT_EQ(-1, actualInfo.pid);
+    EXPECT_EQ(-1, actualInfo.uid);
+    DTEST_LOG<<"GetRunningSystemProcess002 END"<<std::endl;
+}
+
+/**
+ * @tc.name: GetRunningSystemProcess003
+ * @tc.desc: test GetRunningSystemProcess,The expected result is returned correctly.
+ * @tc.type: FUNC
+ * @tc.require: I6FDNZ
+ */
+HWTEST_F(SystemAbilityStateSchedulerTest, GetRunningSystemProcess003, TestSize.Level3)
+{
+    DTEST_LOG<<"GetRunningSystemProcess003 BEGIN"<<std::endl;
+    SystemAbilityStateScheduler scheduler;
+    SystemProcessInfo info;
+    std::u16string testProcess = u"test_process";
+    info.pid = 123;
+    info.uid = 456;
+    info.processName = Str16ToStr8(testProcess);
+    scheduler.runningProcessList_.push_back(info);
+    SystemProcessInfo result;
+    scheduler.GetRunningSystemProcess(testProcess, result);
+    EXPECT_EQ(result.pid, 123);
+    EXPECT_EQ(result.uid, 456);
+    EXPECT_EQ(result.processName, Str16ToStr8(testProcess));
+    DTEST_LOG<<"GetRunningSystemProcess003 END"<<std::endl;
+}
+
+/**
+ * @tc.name: GetRunningSystemProcess004
+ * @tc.desc: test GetRunningSystemProcess.
+ * @tc.type: FUNC
+ * @tc.require: I6FDNZ
+ */
+HWTEST_F(SystemAbilityStateSchedulerTest, GetRunningSystemProcess004, TestSize.Level3)
+{
+    DTEST_LOG<<"GetRunningSystemProcess004 BEGIN"<<std::endl;
+    SystemAbilityStateScheduler scheduler;
+    std::u16string testProcess = u"non_existent_process";
+    SystemProcessInfo result;
+    result.pid = -1;
+    result.uid = -1;
+    scheduler.GetRunningSystemProcess(testProcess, result);
+    EXPECT_EQ(result.pid, -1);
+    EXPECT_EQ(result.uid, -1);
+    EXPECT_EQ(result.processName, Str16ToStr8(testProcess));
+    DTEST_LOG<<"GetRunningSystemProcess004 END"<<std::endl;
 }
 }

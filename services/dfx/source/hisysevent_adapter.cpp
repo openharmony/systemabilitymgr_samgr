@@ -52,6 +52,13 @@ constexpr const char* PROCESS_STOP_DURATION = "PROCESS_STOP_DURATION";
 constexpr const char* PROCESS_NAME = "PROCESS_NAME";
 constexpr const char* PID = "PID";
 constexpr const char* UID = "UID";
+constexpr const char* CALLING_PROCESS_NAME = "CALLING_PROCESS_NAME";
+constexpr const char* CALLING_PID = "CALLING_PID";
+constexpr const char* CALLING_UID = "CALLING_UID";
+constexpr const char* CALLEE_PROCESS_NAME = "CALLEE_PROCESS_NAME";
+constexpr const char* CALLEE_PID = "CALLEE_PID";
+constexpr const char* CALLEE_UID = "CALLEE_UID";
+constexpr const char* CALLEE_SAID = "CALLEE_SAID";
 constexpr const char* DURATION = "DURATION";
 constexpr const char* KEY_STAGE = "KEY_STAGE";
 constexpr int32_t CONTAINER_SA_MIN = 0x00010500; //66816
@@ -159,9 +166,24 @@ static void ReportProcessDuration(const std::string& eventName, const std::strin
     }
 }
 
-void ReportProcessStartDuration(const std::string& processName, int32_t pid, int32_t uid, int64_t duration)
+void ReportProcessStartDuration(ProcessStartDurationInfo& procStartDurInfo)
 {
-    ReportProcessDuration(PROCESS_START_DURATION, processName, pid, uid, duration);
+    int ret = HiSysEventWrite(HiSysEvent::Domain::SAMGR,
+        PROCESS_START_DURATION,
+        HiSysEvent::EventType::BEHAVIOR,
+        CALLEE_PROCESS_NAME, procStartDurInfo.calleeProcessName,
+        CALLEE_PID, procStartDurInfo.calleePid,
+        CALLEE_UID, procStartDurInfo.calleeUid,
+        CALLEE_SAID, procStartDurInfo.calleeSaId,
+        CALLING_PROCESS_NAME, procStartDurInfo.callingProcessName,
+        CALLING_PID, procStartDurInfo.callingPid,
+        CALLING_UID, procStartDurInfo.callingUid,
+        DURATION, procStartDurInfo.duration);
+    if (ret != 0) {
+        HILOGE("report event:%{public}s failed! process:%{public}s, said:%{public}d, ret:%{public}d.",
+            PROCESS_START_DURATION, procStartDurInfo.calleeProcessName.c_str(),
+            procStartDurInfo.calleeSaId, ret);
+    }
 }
 
 void ReportProcessStopDuration(const std::string& processName, int32_t pid, int32_t uid, int64_t duration)
@@ -209,15 +231,19 @@ void ReportSamgrSaLoadFail(int32_t said, int32_t pid, int32_t uid, const std::st
     }
 }
 
-void ReportSamgrSaLoad(int32_t said, int32_t pid, int32_t uid, int32_t eventId)
+void ReportSamgrSaLoad(SamgrSaLoadInfo& samgrSaLoadInfo)
 {
     int ret = HiSysEventWrite(HiSysEvent::Domain::SAMGR,
         ONDEMAND_SA_LOAD,
         HiSysEvent::EventType::BEHAVIOR,
-        SAID, said,
-        PID, pid,
-        UID, uid,
-        EVENT, eventId);
+        SAID, samgrSaLoadInfo.said,
+        CALLING_PROCESS_NAME, samgrSaLoadInfo.callingProcessName,
+        CALLING_PID, samgrSaLoadInfo.callingPid,
+        CALLING_UID, samgrSaLoadInfo.callingUid,
+        EVENT, samgrSaLoadInfo.eventId,
+        CALLEE_PROCESS_NAME, samgrSaLoadInfo.calleeProcessName,
+        CALLEE_PID, samgrSaLoadInfo.calleePid,
+        CALLEE_UID, samgrSaLoadInfo.calleeUid);
     if (ret != 0) {
         HILOGE("hisysevent report samgr sa load event failed! ret %{public}d.", ret);
     }

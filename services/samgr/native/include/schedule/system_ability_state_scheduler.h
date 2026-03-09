@@ -55,6 +55,7 @@ public:
     bool IsSystemAbilityUnloading(int32_t systemAbilityId);
 
     int32_t GetSystemProcessInfo(int32_t systemAbilityId, SystemProcessInfo& systemProcessInfo);
+    void GetRunningSystemProcess(const std::u16string& processName, SystemProcessInfo& systemProcessInfo);
     int32_t GetRunningSystemProcess(std::list<SystemProcessInfo>& systemProcessInfos);
     int32_t GetProcessNameByProcessId(int32_t pid, std::u16string& processName);
     void GetAllSystemAbilityInfo(std::string& result);

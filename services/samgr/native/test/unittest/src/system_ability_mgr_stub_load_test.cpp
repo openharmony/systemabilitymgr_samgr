@@ -851,7 +851,7 @@ HWTEST_F(SystemAbilityMgrStubLoadTest, AddSystemAbility005, TestSize.Level3)
     u16string name = u"test";
     string srcDeviceId;
     int64_t id = 1;
-    saMgr->startingProcessMap_[name] = id;
+    saMgr->startingProcessMap_[name].begin = id;
     saMgr->startingAbilityMap_.clear();
     sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
     saMgr->CleanCallbackForLoadFailed(SAID, name, srcDeviceId, callback);
@@ -967,7 +967,7 @@ HWTEST_F(SystemAbilityMgrStubLoadTest, StartingSystemProcess001, TestSize.Level1
     u16string procName = u"proTest";
     saMgr->startingProcessMap_.clear();
     int countNum = 2;
-    saMgr->startingProcessMap_[procName] = countNum;
+    saMgr->startingProcessMap_[procName].begin = countNum;
     OnDemandEvent defaultevent = {DEFAULT_EVENTID, DEFAULT_LOAD_NAME, ""};
     int32_t res = saMgr->StartingSystemProcess(procName, SAID, defaultevent);
     EXPECT_EQ(res, ERR_OK);
@@ -1073,7 +1073,7 @@ HWTEST_F(SystemAbilityMgrStubLoadTest, LoadSystemAbilityFromRpc004, TestSize.Lev
     saMgr->saProfileMap_[SAID] = saProfile;
     saMgr->abilityMap_[SAID] = saInfo;
     saMgr->startingAbilityMap_[SAID] = abilityItem;
-    saMgr->startingProcessMap_[procName] = countNum;
+    saMgr->startingProcessMap_[procName].begin = countNum;
     AddSystemAbilityContext(SAID, procName);
     bool res = saMgr->LoadSystemAbilityFromRpc(srcDeviceId, SAID, callback);
     saMgr->abilityStateScheduler_->processContextMap_.clear();
