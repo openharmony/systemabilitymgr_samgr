@@ -271,6 +271,7 @@ enum {
     MODULE_UPDATE_SERVICE_ID                         = 4103,
     SUBSYS_USB_SYS_ABILITY_ID_BEGIN                  = 4200,
     USB_SYSTEM_ABILITY_ID                            = 4201,
+    SERIAL_SYSTEM_ABILITY_ID                         = 4202,
     SUBSYS_WEARABLE_SYS_ABILITY_ID_BEGIN             = 4300,
     SUBSYS_WEARABLEHARDWARE_SYS_ABILITY_ID_BEGIN     = 4400,
     SUBSYS_IVI_SYS_ABILITY_ID_BEGIN                  = 4500,
