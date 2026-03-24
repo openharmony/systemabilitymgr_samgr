@@ -317,6 +317,8 @@ public:
         const std::vector<SystemAbilityOnDemandEvent>& sabilityOnDemandEvents) override;
     sptr<IRemoteObject> Recompute(int32_t systemAbilityId, int32_t code) override;
     int32_t GetOnDemandSystemAbilityIds(std::vector<int32_t>& systemAbilityIds) override;
+    int32_t SubscribeSystemAbilityInImage(int32_t systemAbilityId,
+        const sptr<ISystemAbilityStatusChange>& listener) override;
     int32_t SetSamgrIpcPrior(bool enable) override;
 private:
     sptr<IRemoteObject> GetSystemAbilityWrapper(int32_t systemAbilityId, const std::string& deviceId = "");
@@ -334,6 +336,8 @@ private:
     bool IsOnDemandSystemAbility(int32_t systemAbilityId);
     int32_t ListExtensionSendReq(const std::string& extension,
         SamgrInterfaceCode cmd, MessageParcel& reply, MessageOption& option);
+    int32_t SubscribeSystemAbilityInner(int32_t systemAbilityId,
+        const sptr<ISystemAbilityStatusChange>& listener, MessageOption& option);
 private:
     static inline BrokerDelegator<SystemAbilityManagerProxy> delegator_;
     std::set<int32_t> onDemandSystemAbilityIdsSet_;

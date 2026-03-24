@@ -201,6 +201,8 @@ public:
     int32_t UpdateOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
         const std::vector<SystemAbilityOnDemandEvent>& abilityOnDemandEvents) override;
     int32_t GetOnDemandSystemAbilityIds(std::vector<int32_t>& systemAbilityIds) override;
+    int32_t SubscribeSystemAbilityInImage(int32_t systemAbilityId,
+        const sptr<ISystemAbilityStatusChange>& listener) override;
     int32_t SendStrategy(int32_t type, std::vector<int32_t>& systemAbilityIds,
         int32_t level, std::string& action) override;
     int32_t SetSamgrIpcPrior(bool enable) override;

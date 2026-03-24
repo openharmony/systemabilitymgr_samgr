@@ -937,6 +937,12 @@ int32_t SystemAbilityManager::SubscribeSystemAbility(int32_t systemAbilityId,
     return ERR_OK;
 }
 
+int32_t SystemAbilityManager::SubscribeSystemAbilityInImage(int32_t systemAbilityId,
+    const sptr<ISystemAbilityStatusChange>& listener)
+{
+    return SubscribeSystemAbility(systemAbilityId, listener);
+}
+
 void SystemAbilityManager::UnSubscribeSystemAbilityLocked(
     std::list<SAListener>& listenerList, const sptr<IRemoteObject>& listener)
 {

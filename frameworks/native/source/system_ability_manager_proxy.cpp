@@ -210,7 +210,7 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbilityWrapper(int32_t
         return nullptr;
     }
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option{ MessageOption::TF_IMAGE };
     int32_t err = remote->SendRequest(code, data, reply, option);
     if (err != ERR_NONE) {
         errCode = err;
@@ -333,7 +333,7 @@ sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t system
     }
 
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option{ MessageOption::TF_IMAGE };
     int32_t err = remote->SendRequest(
         static_cast<uint32_t>(SamgrInterfaceCode::CHECK_SYSTEM_ABILITY_IMMEDIATELY_TRANSACTION), data, reply, option);
     if (err != ERR_NONE) {
@@ -497,10 +497,9 @@ std::vector<u16string> SystemAbilityManagerProxy::ListSystemAbilities(unsigned i
     return saNames;
 }
 
-int32_t SystemAbilityManagerProxy::SubscribeSystemAbility(int32_t systemAbilityId,
-    const sptr<ISystemAbilityStatusChange>& listener)
+int32_t SystemAbilityManagerProxy::SubscribeSystemAbilityInner(int32_t systemAbilityId,
+    const sptr<ISystemAbilityStatusChange>& listener, MessageOption& option)
 {
-    HILOGD("%{public}s called, SA:%{public}d", __func__, systemAbilityId);
     if (!CheckInputSysAbilityId(systemAbilityId) || listener == nullptr) {
         HILOGE("SubscribeSystemAbility SA:%{public}d or listener invalid!", systemAbilityId);
         return ERR_INVALID_VALUE;
@@ -529,7 +528,6 @@ int32_t SystemAbilityManagerProxy::SubscribeSystemAbility(int32_t systemAbilityI
     }
 
     MessageParcel reply;
-    MessageOption option;
     int32_t err = remote->SendRequest(
         static_cast<uint32_t>(SamgrInterfaceCode::SUBSCRIBE_SYSTEM_ABILITY_TRANSACTION), data, reply, option);
     if (err != ERR_NONE) {
@@ -545,6 +543,14 @@ int32_t SystemAbilityManagerProxy::SubscribeSystemAbility(int32_t systemAbilityI
     }
 
     return result;
+}
+
+int32_t SystemAbilityManagerProxy::SubscribeSystemAbility(int32_t systemAbilityId,
+    const sptr<ISystemAbilityStatusChange>& listener)
+{
+    HILOGD("%{public}s called, SA:%{public}d", __func__, systemAbilityId);
+    MessageOption option;
+    return SubscribeSystemAbilityInner(systemAbilityId, listener, option);
 }
 
 int32_t SystemAbilityManagerProxy::UnSubscribeSystemAbility(int32_t systemAbilityId,
@@ -652,7 +658,7 @@ int32_t SystemAbilityManagerProxy::LoadSystemAbility(int32_t systemAbilityId,
     }
 
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option{ MessageOption::TF_IMAGE };
     int32_t err = remote->SendRequest(
         static_cast<uint32_t>(SamgrInterfaceCode::LOAD_SYSTEM_ABILITY_TRANSACTION), data, reply, option);
     if (err != ERR_NONE) {
@@ -704,7 +710,7 @@ int32_t SystemAbilityManagerProxy::LoadSystemAbility(int32_t systemAbilityId, co
     }
 
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option{ MessageOption::TF_IMAGE };
     int32_t err = remote->SendRequest(
         static_cast<uint32_t>(SamgrInterfaceCode::LOAD_REMOTE_SYSTEM_ABILITY_TRANSACTION), data, reply, option);
     if (err != ERR_NONE) {
@@ -1496,7 +1502,7 @@ int32_t SystemAbilityManagerProxy::GetOnDemandSystemAbilityIds(std::vector<int32
     }
 
     MessageParcel reply;
-    MessageOption option;
+    MessageOption option{ MessageOption::TF_IMAGE };
     int32_t err = remote->SendRequest(
         static_cast<uint32_t>(SamgrInterfaceCode::GET_ONDEMAND_SYSTEM_ABILITY_IDS_TRANSACTION), data, reply, option);
     if (err != ERR_NONE) {
@@ -1854,5 +1860,13 @@ int32_t SystemAbilityManagerProxy::SetSamgrIpcPrior(bool enable)
     }
     HILOGD("SetSamgrIpcPrior SendRequest succeed");
     return ERR_OK;
+}
+
+int32_t SystemAbilityManagerProxy::SubscribeSystemAbilityInImage(int32_t systemAbilityId,
+    const sptr<ISystemAbilityStatusChange>& listener)
+{
+    HILOGD("%{public}s called, SA:%{public}d", __func__, systemAbilityId);
+    MessageOption option{ MessageOption::TF_IMAGE };
+    return SubscribeSystemAbilityInner(systemAbilityId, listener, option);
 }
 } // namespace OHOS

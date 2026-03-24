@@ -43,6 +43,12 @@ int32_t ISystemAbilityManagerMock::SubscribeSystemAbility(int32_t systemAbilityI
     return 0;
 }
 
+int32_t ISystemAbilityManagerMock::SubscribeSystemAbilityInImage(int32_t systemAbilityId,
+    const sptr<ISystemAbilityStatusChange>& listener)
+{
+    return 0;
+}
+
 int32_t ISystemAbilityManagerMock::UnSubscribeSystemAbility(int32_t systemAbilityId,
     const sptr<ISystemAbilityStatusChange>& listener)
 {
