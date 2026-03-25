@@ -261,6 +261,20 @@ HWTEST_F(SystemAbilityMgrProxyTest, SubscribeSystemAbility002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SubscribeSystemAbilityInImage001
+ * @tc.desc: SubscribeSystemAbilityInImage
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, SubscribeSystemAbilityInImage001, TestSize.Level1)
+{
+    DTEST_LOG << " SubscribeSystemAbilityInImage001 start " << std::endl;
+    sptr<ISystemAbilityManager> samgrMock = new ISystemAbilityManagerMock;
+    EXPECT_TRUE(samgrMock != nullptr);
+    int32_t ret = samgrMock->SubscribeSystemAbilityInImage(TEST_ID_VAILD, nullptr);
+    EXPECT_EQ(ret, 0);
+}
+
+/**
  * @tc.name: UnSubscribeSystemAbility001
  * @tc.desc: check UnSubscribeSystemAbility
  * @tc.type: FUNC
