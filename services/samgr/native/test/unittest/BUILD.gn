@@ -161,6 +161,9 @@ ohos_unittest("SystemAbilityMgrTest") {
   if (support_penglai_mode) {
     defines += [ "SUPPORT_PENGLAI_MODE" ]
   }
+  if (samgr_support_multi_instance) {
+    defines += [ "SUPPORT_MULTI_INSTANCE" ]
+  }
   defines += ["SAMGR_USE_FFRT"]
 }
 
@@ -300,6 +303,9 @@ ohos_unittest("SystemAbilityMgrCollectTest") {
   if (support_penglai_mode) {
     defines += [ "SUPPORT_PENGLAI_MODE" ]
   }
+  if (samgr_support_multi_instance) {
+    defines += [ "SUPPORT_MULTI_INSTANCE" ]
+  }
   defines += ["SAMGR_USE_FFRT"]
 }
 
@@ -408,6 +414,9 @@ ohos_unittest("SystemAbilityMgrDeviceNetworkingTest") {
 
   if (support_penglai_mode) {
     defines += [ "SUPPORT_PENGLAI_MODE" ]
+  }
+  if (samgr_support_multi_instance) {
+    defines += [ "SUPPORT_MULTI_INSTANCE" ]
   }
   defines += ["SAMGR_USE_FFRT"]
 }
@@ -715,6 +724,9 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
   if (support_penglai_mode) {
     defines += [ "SUPPORT_PENGLAI_MODE" ]
   }
+  if (samgr_support_multi_instance) {
+    defines += [ "SUPPORT_MULTI_INSTANCE" ]
+  }
   defines += ["SAMGR_USE_FFRT"]
 }
 
@@ -795,6 +807,9 @@ ohos_unittest("SystemAbilityMgrDumperTest") {
   if (support_penglai_mode) {
     defines += [ "SUPPORT_PENGLAI_MODE" ]
   }
+  if (samgr_support_multi_instance) {
+    defines += [ "SUPPORT_MULTI_INSTANCE" ]
+  }
   defines += ["SAMGR_USE_FFRT"]
 }
 
@@ -851,6 +866,9 @@ ohos_unittest("MockSystemAbilityManagerTest") {
     ]
     defines += [ "SUPPORT_ACCESS_TOKEN" ]
   }
+  if (samgr_support_multi_instance) {
+    defines += [ "SUPPORT_MULTI_INSTANCE" ]
+  }
   defines += ["SAMGR_USE_FFRT"]
 }
 
@@ -898,6 +916,9 @@ ohos_executable("manual_ondemand") {
       "access_token:libtokensetproc_shared",
     ]
     defines += [ "SUPPORT_ACCESS_TOKEN" ]
+  }
+  if (samgr_support_multi_instance) {
+    defines += [ "SUPPORT_MULTI_INSTANCE" ]
   }
   part_name = "samgr"
   subsystem_name = "systemabilitymgr"
@@ -947,6 +968,9 @@ ohos_executable("ondemand") {
       "access_token:libtokensetproc_shared",
     ]
     defines += [ "SUPPORT_ACCESS_TOKEN" ]
+  }
+  if (samgr_support_multi_instance) {
+    defines += [ "SUPPORT_MULTI_INSTANCE" ]
   }
   part_name = "samgr"
   subsystem_name = "systemabilitymgr"
@@ -1056,6 +1080,9 @@ ohos_executable("TestTool") {
   ]
   if (support_penglai_mode) {
     defines += [ "SUPPORT_PENGLAI_MODE" ]
+  }
+  if (samgr_support_multi_instance) {
+    defines += [ "SUPPORT_MULTI_INSTANCE" ]
   }
   defines += ["SAMGR_USE_FFRT"]
   part_name = "samgr"

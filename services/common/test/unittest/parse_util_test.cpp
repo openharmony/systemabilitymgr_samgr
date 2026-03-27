@@ -1372,5 +1372,122 @@ HWTEST_F(ParseUtilTest, GetOndemandPriorityPara001, TestSize.Level3)
     EXPECT_EQ(ret, static_cast<uint32_t>(LOW_PRIORITY));
 }
 
+#ifdef SUPPORT_MULTI_INSTANCE
+/**
+ * @tc.name: ParseMultiInstance001
+ * @tc.desc: parse json file with mixed multi-instance field, none should be added
+ *  because not all SAs in the process have multi-instance=true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseUtilTest, ParseMultiInstance001, TestSize.Level3)
+{
+    DTEST_LOG << " ParseMultiInstance001 BEGIN" << std::endl;
+    parser_->saProfiles_.clear();
+    parser_->multiInstanceSaIds_.clear();
+    bool ret = parser_->ParseSaProfiles(TEST_RESOURCE_PATH + "sa_profile_multi_instance.json");
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(parser_->saProfiles_.empty(), false);
+
+    const auto& multiInstanceSaIds = parser_->GetMultiInstanceSaIds();
+    EXPECT_EQ(multiInstanceSaIds.size(), 0);
+
+    DTEST_LOG << " ParseMultiInstance001 END" << std::endl;
+}
+
+/**
+ * @tc.name: ParseMultiInstance002
+ * @tc.desc: parse json file without multi-instance field
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseUtilTest, ParseMultiInstance002, TestSize.Level3)
+{
+    DTEST_LOG << " ParseMultiInstance002 BEGIN" << std::endl;
+    parser_->saProfiles_.clear();
+    parser_->multiInstanceSaIds_.clear();
+    bool ret = parser_->ParseSaProfiles(TEST_RESOURCE_PATH + "sa_profile.json");
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(parser_->saProfiles_.empty(), false);
+
+    const auto& multiInstanceSaIds = parser_->GetMultiInstanceSaIds();
+    EXPECT_EQ(multiInstanceSaIds.size(), 0);
+
+    DTEST_LOG << " ParseMultiInstance002 END" << std::endl;
+}
+
+/**
+ * @tc.name: ParseMultiInstance003
+ * @tc.desc: parse json file where all SAs have multi-instance=true,
+ *  all should be added to multi-instance set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseUtilTest, ParseMultiInstance003, TestSize.Level3)
+{
+    DTEST_LOG << " ParseMultiInstance003 BEGIN" << std::endl;
+    parser_->saProfiles_.clear();
+    parser_->multiInstanceSaIds_.clear();
+    bool ret = parser_->ParseSaProfiles(TEST_RESOURCE_PATH + "sa_profile_multi_instance_all_true.json");
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(parser_->saProfiles_.empty(), false);
+
+    const auto& multiInstanceSaIds = parser_->GetMultiInstanceSaIds();
+    EXPECT_EQ(multiInstanceSaIds.size(), 3);
+
+    auto find8001 = std::find(multiInstanceSaIds.begin(), multiInstanceSaIds.end(), 8001);
+    EXPECT_NE(find8001, multiInstanceSaIds.end());
+
+    auto find8002 = std::find(multiInstanceSaIds.begin(), multiInstanceSaIds.end(), 8002);
+    EXPECT_NE(find8002, multiInstanceSaIds.end());
+
+    auto find8003 = std::find(multiInstanceSaIds.begin(), multiInstanceSaIds.end(), 8003);
+    EXPECT_NE(find8003, multiInstanceSaIds.end());
+
+    DTEST_LOG << " ParseMultiInstance003 END" << std::endl;
+}
+
+/**
+ * @tc.name: ParseMultiInstance004
+ * @tc.desc: parse json file where all SAs have multi-instance=false,
+ *  none should be added to multi-instance set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseUtilTest, ParseMultiInstance004, TestSize.Level3)
+{
+    DTEST_LOG << " ParseMultiInstance004 BEGIN" << std::endl;
+    parser_->saProfiles_.clear();
+    parser_->multiInstanceSaIds_.clear();
+    bool ret = parser_->ParseSaProfiles(TEST_RESOURCE_PATH + "sa_profile_multi_instance_all_false.json");
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(parser_->saProfiles_.empty(), false);
+
+    const auto& multiInstanceSaIds = parser_->GetMultiInstanceSaIds();
+    EXPECT_EQ(multiInstanceSaIds.size(), 0);
+
+    DTEST_LOG << " ParseMultiInstance004 END" << std::endl;
+}
+
+/**
+ * @tc.name: ParseMultiInstance005
+ * @tc.desc: parse json file with single SA and multi-instance=true,
+ *  the SA should be added to multi-instance set
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParseUtilTest, ParseMultiInstance005, TestSize.Level3)
+{
+    DTEST_LOG << " ParseMultiInstance005 BEGIN" << std::endl;
+    parser_->saProfiles_.clear();
+    parser_->multiInstanceSaIds_.clear();
+    bool ret = parser_->ParseSaProfiles(TEST_RESOURCE_PATH + "sa_profile_multi_instance_single.json");
+    EXPECT_EQ(ret, true);
+    EXPECT_EQ(parser_->saProfiles_.empty(), false);
+
+    const auto& multiInstanceSaIds = parser_->GetMultiInstanceSaIds();
+    EXPECT_EQ(multiInstanceSaIds.size(), 1);
+
+    auto find6001 = std::find(multiInstanceSaIds.begin(), multiInstanceSaIds.end(), 6001);
+    EXPECT_NE(find6001, multiInstanceSaIds.end());
+
+    DTEST_LOG << " ParseMultiInstance005 END" << std::endl;
+}
+#endif
 } // namespace SAMGR
 } // namespace OHOS

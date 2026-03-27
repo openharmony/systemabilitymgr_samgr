@@ -83,6 +83,9 @@ private:
     static void ShowAllSystemAbilityInfoInState(const std::string& state,
         std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler, std::string& result);
     static void IllegalInput(std::string& result);
+#ifdef SUPPORT_MULTI_INSTANCE
+    static void ShowMultiInstanceSaIds(std::string& result);
+#endif
     static void DumpFfrtInfoInProc(
         std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler, int32_t pid, std::string& result);
     static int32_t SaveDumpResultToFd(int32_t fd, const std::string& result);

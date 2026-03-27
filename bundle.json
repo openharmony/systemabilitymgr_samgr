@@ -17,7 +17,8 @@
         "features": [
             "samgr_feature_coverage",
             "samgr_enable_extend_load_timeout",
-            "samgr_enable_delay_dbinder"
+            "samgr_enable_delay_dbinder",
+            "samgr_support_multi_instance"
         ],
         "adapted_system_type": [
             "standard"

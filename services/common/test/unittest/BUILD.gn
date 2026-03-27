@@ -12,6 +12,7 @@
 # limitations under the License.
 
 import("//build/test.gni")
+import("//foundation/systemabilitymgr/samgr/config.gni")
 
 module_output_path = "samgr/samgr"
 
@@ -41,6 +42,10 @@ ohos_unittest("ParseUtilTest") {
   cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
+  }
+
+  if (samgr_support_multi_instance) {
+    defines = [ "SUPPORT_MULTI_INSTANCE" ]
   }
 
   external_deps = [

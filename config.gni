@@ -18,6 +18,9 @@ declare_args() {
   # enable extend load sa timeout.
   samgr_enable_extend_load_timeout = false
 
+  # support multi-instance SA.
+  samgr_support_multi_instance = false
+
   # deps mksh
   samgr_mksh_enable = true
   if (defined(global_parts_info) && !defined(global_parts_info.thirdparty_mksh)) {

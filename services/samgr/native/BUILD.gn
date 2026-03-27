@@ -161,6 +161,10 @@ ohos_executable("samgr") {
     if (support_penglai_mode) {
       defines += [ "SUPPORT_PENGLAI_MODE" ]
     }
+
+    if (samgr_support_multi_instance) {
+      defines += [ "SUPPORT_MULTI_INSTANCE" ]
+    }
     part_name = "samgr"
   }
   if (use_musl) {

@@ -1,0 +1,29 @@
+{
+    "process": "multi_instance_all_true_test",
+    "systemability": [
+        {
+            "name": 8001,
+            "libpath": "libmulti_instance_sa1.z.so",
+            "run-on-create": true,
+            "distributed": false,
+            "dump-level": 1,
+            "multi-instance": true
+        },
+        {
+            "name": 8002,
+            "libpath": "libmulti_instance_sa2.z.so",
+            "run-on-create": true,
+            "distributed": false,
+            "dump-level": 1,
+            "multi-instance": true
+        },
+        {
+            "name": 8003,
+            "libpath": "libmulti_instance_sa3.z.so",
+            "run-on-create": false,
+            "distributed": false,
+            "dump-level": 1,
+            "multi-instance": true
+        }
+    ]
+}
