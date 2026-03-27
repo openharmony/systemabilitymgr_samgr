@@ -16,7 +16,7 @@ declare_args() {
   ressched_able = true
   support_device_manager = false
   support_common_event = false
-  support_softbus = true
+  support_softbus = false
   samgr_support_access_token = true
   support_penglai_mode = false
   if (defined(global_parts_info) &&
