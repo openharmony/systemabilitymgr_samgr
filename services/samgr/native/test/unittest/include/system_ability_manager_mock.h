@@ -33,9 +33,6 @@ public:
     int32_t SubscribeSystemAbility(int32_t systemAbilityId,
         const sptr<ISystemAbilityStatusChange>& listener) override;
 
-    int32_t SubscribeSystemAbilityInImage(int32_t systemAbilityId,
-        const sptr<ISystemAbilityStatusChange>& listener) override;
-
     int32_t UnSubscribeSystemAbility(int32_t systemAbilityId,
         const sptr<ISystemAbilityStatusChange>& listener) override;
 
