@@ -275,6 +275,20 @@ HWTEST_F(SystemAbilityMgrProxyTest, SubscribeSystemAbilityInImage001, TestSize.L
 }
 
 /**
+ * @tc.name: SubscribeSystemAbilityInImage002
+ * @tc.desc: SubscribeSystemAbilityInImage
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, SubscribeSystemAbilityInImage002, TestSize.Level1)
+{
+    DTEST_LOG << " SubscribeSystemAbilityInImage002 start " << std::endl;
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    EXPECT_NE(sm, nullptr);
+    int32_t ret = sm->SubscribeSystemAbilityInImage(TEST_ID_VAILD, nullptr);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
  * @tc.name: UnSubscribeSystemAbility001
  * @tc.desc: check UnSubscribeSystemAbility
  * @tc.type: FUNC
