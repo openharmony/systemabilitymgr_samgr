@@ -166,7 +166,7 @@ static void ReportProcessDuration(const std::string& eventName, const std::strin
     }
 }
 
-void ReportProcessStartDuration(ProcessStartDurationInfo& procStartDurInfo)
+void ReportProcessStartDuration(const ProcessStartDurationInfo& procStartDurInfo)
 {
     int ret = HiSysEventWrite(HiSysEvent::Domain::SAMGR,
         PROCESS_START_DURATION,
@@ -231,7 +231,7 @@ void ReportSamgrSaLoadFail(int32_t said, int32_t pid, int32_t uid, const std::st
     }
 }
 
-void ReportSamgrSaLoad(SamgrSaLoadInfo& samgrSaLoadInfo)
+void ReportSamgrSaLoad(const SamgrSaLoadInfo& samgrSaLoadInfo)
 {
     int ret = HiSysEventWrite(HiSysEvent::Domain::SAMGR,
         ONDEMAND_SA_LOAD,

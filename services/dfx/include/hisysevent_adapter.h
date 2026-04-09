@@ -53,7 +53,7 @@ void ReportSaCrash(int32_t saId);
 
 void ReportSamgrSaLoadFail(int32_t said, int32_t pid, int32_t uid, const std::string& reason);
 
-void ReportSamgrSaLoad(SamgrSaLoadInfo& samgrSaLoadInfo);
+void ReportSamgrSaLoad(const SamgrSaLoadInfo& samgrSaLoadInfo);
 
 void ReportSamgrSaUnload(int32_t said, int32_t pid, int32_t uid, int32_t eventId);
 
@@ -67,7 +67,7 @@ void ReportProcessStartFail(const std::string& processName, int32_t pid, int32_t
 
 void ReportProcessStopFail(const std::string& processName, int32_t pid, int32_t uid, const std::string& reason);
 
-void ReportProcessStartDuration(ProcessStartDurationInfo& procStartDurInfo);
+void ReportProcessStartDuration(const ProcessStartDurationInfo& procStartDurInfo);
 
 void ReportProcessStopDuration(const std::string& processName, int32_t pid, int32_t uid, int64_t duration);
 
