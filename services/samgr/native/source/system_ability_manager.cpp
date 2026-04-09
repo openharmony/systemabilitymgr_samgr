@@ -339,8 +339,22 @@ void SystemAbilityManager::InitSaProfile()
             onDemandSaIdsSet_.insert(saInfo.saId);
         }
     }
+#ifdef SUPPORT_MULTI_INSTANCE
+    {
+        lock_guard<samgr::mutex> autoLock(multiInstanceSaIdsLock_);
+        multiInstanceSaIds_ = parser->GetMultiInstanceSaIds();
+    }
+#endif
     KHILOGI("InitProfile spend %{public}" PRId64 "ms", GetTickCount() - begin);
 }
+
+#ifdef SUPPORT_MULTI_INSTANCE
+std::set<int32_t> SystemAbilityManager::GetMultiInstanceSaIds()
+{
+    lock_guard<samgr::mutex> autoLock(multiInstanceSaIdsLock_);
+    return multiInstanceSaIds_;
+}
+#endif
 
 void SystemAbilityManager::OndemandLoadForPerf()
 {

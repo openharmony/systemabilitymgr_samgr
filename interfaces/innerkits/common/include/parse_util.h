@@ -30,6 +30,7 @@ public:
     bool ParseSaProfiles(const std::string& profilePath);
     const std::list<SaProfile>& GetAllSaProfiles() const;
     bool GetProfile(int32_t saId, SaProfile& saProfile);
+    const std::set<int32_t>& GetMultiInstanceSaIds() const;
     void ClearResource();
     void OpenSo(uint32_t bootPhase);
     void CloseSo(int32_t systemAbilityId);
@@ -53,6 +54,7 @@ private:
     bool ParseSystemAbilityGetSaBaseInfo(SaProfile& saProfile, nlohmann::json& systemAbilityJson);
     bool ParseSystemAbilityGetSaExtInfo(SaProfile& saProfile, nlohmann::json& systemAbilityJson);
     bool ParseSystemAbility(SaProfile& saProfile, nlohmann::json& systemAbilityJson);
+    void ParseMultiInstanceSaIds(const nlohmann::json& systemAbilityJson);
     bool ParseJsonTag(const nlohmann::json& systemAbilityJson, const std::string& jsonTag,
         nlohmann::json& onDemandJson);
     void ParseOndemandTag(const nlohmann::json& onDemandJson, std::vector<OnDemandEvent>& onDemandEvents);
@@ -130,6 +132,7 @@ private:
     std::list<SaProfile> saProfiles_;
     std::u16string procName_;
     std::vector<std::string> updateVec_;
+    std::set<int32_t> multiInstanceSaIds_;
 };
 } // namespace OHOS
 

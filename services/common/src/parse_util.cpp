@@ -66,6 +66,9 @@ constexpr const char* SA_TAG_RECYCLE_STRATEGY = "recycle-strategy";
 constexpr const char* SA_TAG_EXTENSION = "extension";
 constexpr const char* SA_TAG_UNREF_UNLOAD = "unreferenced-unload";
 constexpr const char* SA_TAG_LONGTIMEUNUSED_UNLOAD = "longtimeunused-unload";
+#ifdef SUPPORT_MULTI_INSTANCE
+constexpr const char* SA_TAG_MULTI_INSTANCE = "multi-instance";
+#endif
 constexpr int32_t MAX_JSON_OBJECT_SIZE = 50 * 1024;
 constexpr int32_t MAX_JSON_STRING_LENGTH = 128;
 constexpr int32_t FIRST_SYS_ABILITY_ID = 0x00000000;
@@ -130,6 +133,9 @@ void ParseUtil::ClearResource()
 {
     CloseSo();
     saProfiles_.clear();
+#ifdef SUPPORT_MULTI_INSTANCE
+    multiInstanceSaIds_.clear();
+#endif
 }
 
 void ParseUtil::OpenSo(uint32_t bootPhase)
@@ -191,6 +197,32 @@ bool ParseUtil::LoadSaLib(int32_t systemAbilityId)
 const std::list<SaProfile>& ParseUtil::GetAllSaProfiles() const
 {
     return saProfiles_;
+}
+
+const std::set<int32_t>& ParseUtil::GetMultiInstanceSaIds() const
+{
+    return multiInstanceSaIds_;
+}
+
+void ParseUtil::ParseMultiInstanceSaIds(const nlohmann::json& systemAbilityJson)
+{
+#ifdef SUPPORT_MULTI_INSTANCE
+    std::set<int32_t> tmpSaIds;
+    for (size_t i = 0; i < systemAbilityJson.size(); i++) {
+        bool multiInstance = false;
+        GetBoolFromJson(systemAbilityJson[i], SA_TAG_MULTI_INSTANCE, multiInstance);
+        if (!multiInstance) {
+            return;
+        }
+        int32_t saId = 0;
+        GetInt32FromJson(systemAbilityJson[i], SA_TAG_NAME, saId);
+        tmpSaIds.insert(saId);
+    }
+    for (const auto& saId : tmpSaIds) {
+        multiInstanceSaIds_.insert(saId);
+        HILOGI("SA:%{public}d is multi-instance", saId);
+    }
+#endif
 }
 
 bool ParseUtil::GetProfile(int32_t saId, SaProfile& saProfile)
@@ -338,6 +370,9 @@ bool ParseUtil::ParseJsonFile(const string& realPath)
         }
         saProfiles_.emplace_back(saProfile);
     }
+#ifdef SUPPORT_MULTI_INSTANCE
+    ParseMultiInstanceSaIds(systemAbilityJson);
+#endif
     return !saProfiles_.empty();
 }
 

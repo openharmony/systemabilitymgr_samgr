@@ -22,6 +22,7 @@
 #include "test_log.h"
 #include <sam_mock_permission.h>
 #include <vector>
+#include <set>
 #define private public
 #include "system_ability_manager_dumper.h"
 #include "system_ability_manager.h"
@@ -1495,4 +1496,96 @@ HWTEST_F(SystemAbilityManagerDumperTest, GetListenerDumpProc002, TestSize.Level1
     result.clear();
     DTEST_LOG<<"GetListenerDumpProc002 END"<<std::endl;
 }
+
+#ifdef SUPPORT_MULTI_INSTANCE
+/**
+ * @tc.name: MultiInstanceDump001
+ * @tc.desc: test --multi-instance via Dump
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityManagerDumperTest, MultiInstanceDump001, TestSize.Level3)
+{
+    DTEST_LOG << " MultiInstanceDump001 BEGIN" << std::endl;
+    SamMockPermission::MockProcess("hidumper_service");
+    std::vector<std::string> args = { "--multi-instance" };
+    std::string result;
+    bool ret = SystemAbilityManagerDumper::Dump(nullptr, args, result);
+    EXPECT_EQ(ret, true);
+    EXPECT_FALSE(result.empty());
+    DTEST_LOG << " MultiInstanceDump001 END" << std::endl;
+}
+
+/**
+ * @tc.name: MultiInstanceDump002
+ * @tc.desc: test --multi-instance with actual multi-instance SAs
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityManagerDumperTest, MultiInstanceDump002, TestSize.Level3)
+{
+    DTEST_LOG << " MultiInstanceDump002 BEGIN" << std::endl;
+    SamMockPermission::MockProcess("hidumper_service");
+
+    auto saMgr = SystemAbilityManager::GetInstance();
+    if (saMgr == nullptr) {
+        DTEST_LOG << "saMgr is nullptr" << std::endl;
+        GTEST_FAIL();
+        return;
+    }
+
+    std::set<int32_t> originalSaIds = saMgr->multiInstanceSaIds_;
+
+    saMgr->multiInstanceSaIds_.clear();
+    saMgr->multiInstanceSaIds_.insert(1001);
+    saMgr->multiInstanceSaIds_.insert(1002);
+    saMgr->multiInstanceSaIds_.insert(1003);
+
+    std::vector<std::string> args = { "--multi-instance" };
+    std::string result;
+    bool ret = SystemAbilityManagerDumper::Dump(nullptr, args, result);
+    EXPECT_EQ(ret, true);
+    EXPECT_FALSE(result.empty());
+
+    EXPECT_NE(result.find("1001"), std::string::npos);
+    EXPECT_NE(result.find("1002"), std::string::npos);
+    EXPECT_NE(result.find("1003"), std::string::npos);
+    EXPECT_NE(result.find("Multi-instance SA IDs:"), std::string::npos);
+
+    saMgr->multiInstanceSaIds_ = originalSaIds;
+    DTEST_LOG << " MultiInstanceDump002 END" << std::endl;
+}
+
+/**
+ * @tc.name: MultiInstanceDump003
+ * @tc.desc: test --multi-instance with empty multi-instance SAs
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityManagerDumperTest, MultiInstanceDump003, TestSize.Level3)
+{
+    DTEST_LOG << " MultiInstanceDump003 BEGIN" << std::endl;
+    SamMockPermission::MockProcess("hidumper_service");
+
+    auto saMgr = SystemAbilityManager::GetInstance();
+    if (saMgr == nullptr) {
+        DTEST_LOG << "saMgr is nullptr" << std::endl;
+        GTEST_FAIL();
+        return;
+    }
+
+    std::set<int32_t> originalSaIds = saMgr->multiInstanceSaIds_;
+
+    saMgr->multiInstanceSaIds_.clear();
+
+    std::vector<std::string> args = { "--multi-instance" };
+    std::string result;
+    bool ret = SystemAbilityManagerDumper::Dump(nullptr, args, result);
+    EXPECT_EQ(ret, true);
+    EXPECT_FALSE(result.empty());
+
+    EXPECT_NE(result.find("(empty)"), std::string::npos);
+    EXPECT_NE(result.find("Multi-instance SA IDs:"), std::string::npos);
+
+    saMgr->multiInstanceSaIds_ = originalSaIds;
+    DTEST_LOG << " MultiInstanceDump003 END" << std::endl;
+}
+#endif
 }

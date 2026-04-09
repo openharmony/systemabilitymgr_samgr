@@ -35,6 +35,10 @@
             <option name="push" value="profile/sa_profile_long_libpath.json -> /data/test/resource/samgr/profile/" src="res"/>
             <option name="push" value="profile/sa_profile_long_process.json -> /data/test/resource/samgr/profile/" src="res"/>
             <option name="push" value="profile/sa_profile_extension.json -> /data/test/resource/samgr/profile/" src="res"/>
+            <option name="push" value="profile/sa_profile_multi_instance.json -> /data/test/resource/samgr/profile/" src="res"/>
+            <option name="push" value="profile/sa_profile_multi_instance_all_true.json -> /data/test/resource/samgr/profile/" src="res"/>
+            <option name="push" value="profile/sa_profile_multi_instance_all_false.json -> /data/test/resource/samgr/profile/" src="res"/>
+            <option name="push" value="profile/sa_profile_multi_instance_single.json -> /data/test/resource/samgr/profile/" src="res"/>
             <option name="push" value="systemabilitymgr/samgr/libmock_sa.z.so -> /data/test/" src="out"/>
         </preparer>
     </target>

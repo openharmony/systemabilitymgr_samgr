@@ -1945,3 +1945,77 @@ HWTEST_F(SystemAbilityMgrTest, SetSamgrIpcPrior007, TestSize.Level2)
     DTEST_LOG << "SetSamgrIpcPrior007 end" << std::endl;
 }
 } // namespace OHOS
+
+#ifdef SUPPORT_MULTI_INSTANCE
+namespace OHOS {
+namespace SAMGR {
+
+/**
+ * @tc.name: MultiInstanceSaIds001
+ * @tc.desc: test multi-instance SA IDs with all SAs configured as multi-instance
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, MultiInstanceSaIds001, TestSize.Level3)
+{
+    DTEST_LOG << " MultiInstanceSaIds001 BEGIN" << std::endl;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+
+    saMgr->multiInstanceSaIds_.insert(1001);
+    saMgr->multiInstanceSaIds_.insert(1002);
+    saMgr->multiInstanceSaIds_.insert(1003);
+
+    auto saIds = saMgr->GetMultiInstanceSaIds();
+    EXPECT_EQ(saIds.size(), 3);
+
+    auto find1001 = std::find(saIds.begin(), saIds.end(), 1001);
+    EXPECT_NE(find1001, saIds.end());
+
+    auto find1002 = std::find(saIds.begin(), saIds.end(), 1002);
+    EXPECT_NE(find1002, saIds.end());
+
+    auto find1003 = std::find(saIds.begin(), saIds.end(), 1003);
+    EXPECT_NE(find1003, saIds.end());
+
+    DTEST_LOG << " MultiInstanceSaIds001 END" << std::endl;
+}
+
+/**
+ * @tc.name: MultiInstanceSaIds002
+ * @tc.desc: test multi-instance SA IDs with empty set
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, MultiInstanceSaIds002, TestSize.Level3)
+{
+    DTEST_LOG << " MultiInstanceSaIds002 BEGIN" << std::endl;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+
+    auto saIds = saMgr->GetMultiInstanceSaIds();
+    EXPECT_EQ(saIds.size(), 0);
+
+    DTEST_LOG << " MultiInstanceSaIds002 END" << std::endl;
+}
+
+/**
+ * @tc.name: MultiInstanceSaIds003
+ * @tc.desc: test that when not all SAs in a process have multi-instance=true,
+ *  none are added to the set
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, MultiInstanceSaIds003, TestSize.Level3)
+{
+    DTEST_LOG << " MultiInstanceSaIds003 BEGIN" << std::endl;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+
+    saMgr->multiInstanceSaIds_.clear();
+    auto saIds = saMgr->GetMultiInstanceSaIds();
+    EXPECT_EQ(saIds.size(), 0);
+
+    DTEST_LOG << " MultiInstanceSaIds003 END" << std::endl;
+}
+
+} // namespace SAMGR
+} // namespace OHOS
+#endif

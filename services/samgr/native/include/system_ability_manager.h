@@ -150,6 +150,9 @@ public:
         }
     }
     int32_t Dump(int32_t fd, const std::vector<std::u16string>& args) override;
+#ifdef SUPPORT_MULTI_INSTANCE
+    std::set<int32_t> GetMultiInstanceSaIds();
+#endif
     void AddSamgrToAbilityMap();
 
     int32_t AddSystemProcess(const std::u16string& procName, const sptr<IRemoteObject>& procObject) override;
@@ -430,6 +433,10 @@ private:
 
     std::map<int32_t, CommonSaProfile> saProfileMap_;
     std::set<int32_t> onDemandSaIdsSet_;
+#ifdef SUPPORT_MULTI_INSTANCE
+    std::set<int32_t> multiInstanceSaIds_;
+    samgr::mutex multiInstanceSaIdsLock_;
+#endif
     samgr::mutex saProfileMapLock_;
     samgr::mutex loadRemoteLock_;
     std::map<std::string, std::list<sptr<ISystemAbilityLoadCallback>>> remoteCallbacks_; // key : said_deviceId

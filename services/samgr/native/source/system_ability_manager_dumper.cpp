@@ -693,6 +693,12 @@ bool SystemAbilityManagerDumper::Dump(std::shared_ptr<SystemAbilityStateSchedule
         return false;
     }
     if (args.size() == MIN_ARGS_SIZE) {
+#ifdef SUPPORT_MULTI_INSTANCE
+        if (args[0] == "--multi-instance") {
+            ShowMultiInstanceSaIds(result);
+            return true;
+        }
+#endif
         // -l
         if (args[0] == ARGS_QUERY_ALL) {
             ShowAllSystemAbilityInfo(abilityStateScheduler, result);
@@ -752,6 +758,9 @@ void SystemAbilityManagerDumper::ShowHelp(std::string& result)
         .append("  --ffrt [pid1|pid2]: query the FFRT dump infos of a process.\n")
         .append("  --ipc procname/all --start-stat/--stop-stat/--stat: start/stop/get")
         .append(" the IPC load statistics of a process.\n");
+#ifdef SUPPORT_MULTI_INSTANCE
+    result.append("  --multi-instance: query all multi-instance SA IDs.\n");
+#endif
 }
 
 void SystemAbilityManagerDumper::ShowAllSystemAbilityInfo(
@@ -793,6 +802,26 @@ void SystemAbilityManagerDumper::ShowAllSystemAbilityInfoInState(const std::stri
     }
     abilityStateScheduler->GetAllSystemAbilityInfoByState(state, result);
 }
+
+#ifdef SUPPORT_MULTI_INSTANCE
+void SystemAbilityManagerDumper::ShowMultiInstanceSaIds(std::string& result)
+{
+    auto saMgr = SystemAbilityManager::GetInstance();
+    if (saMgr == nullptr) {
+        HILOGE("saMgr is nullptr");
+        return;
+    }
+    auto dumpSaIds = saMgr->GetMultiInstanceSaIds();
+    result.append("Multi-instance SA IDs:\n");
+    if (dumpSaIds.empty()) {
+        result.append("  (empty)\n");
+        return;
+    }
+    for (const auto& saId : dumpSaIds) {
+        result.append("  ").append(std::to_string(saId)).append("\n");
+    }
+}
+#endif
 
 void SystemAbilityManagerDumper::IllegalInput(std::string& result)
 {
