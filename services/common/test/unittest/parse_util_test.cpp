@@ -1372,7 +1372,6 @@ HWTEST_F(ParseUtilTest, GetOndemandPriorityPara001, TestSize.Level3)
     EXPECT_EQ(ret, static_cast<uint32_t>(LOW_PRIORITY));
 }
 
-#ifdef SUPPORT_MULTI_INSTANCE
 /**
  * @tc.name: ParseMultiInstance001
  * @tc.desc: parse json file with mixed multi-instance field, none should be added
@@ -1394,6 +1393,7 @@ HWTEST_F(ParseUtilTest, ParseMultiInstance001, TestSize.Level3)
     DTEST_LOG << " ParseMultiInstance001 END" << std::endl;
 }
 
+#ifdef SUPPORT_MULTI_INSTANCE
 /**
  * @tc.name: ParseMultiInstance002
  * @tc.desc: parse json file without multi-instance field
