@@ -83,6 +83,10 @@ ohos_shared_library("samgr_proxy") {
     if (samgr_enable_extend_load_timeout) {
       defines += [ "SAMGR_ENABLE_EXTEND_LOAD_TIMEOUT" ]
     }
+
+    if (samgr_support_multi_instance) {
+      defines += [ "SUPPORT_MULTI_INSTANCE" ]
+    }
     part_name = "samgr"
   }
 

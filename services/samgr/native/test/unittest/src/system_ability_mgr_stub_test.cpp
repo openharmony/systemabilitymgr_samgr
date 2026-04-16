@@ -1280,4 +1280,103 @@ HWTEST_F(SystemAbilityMgrStubTest, OnStartSystemAbilityFailInner003, TestSize.Le
     int32_t ret = saMgr->OnStartSystemAbilityFailInner(data, reply);
     EXPECT_EQ(ret, ERR_OK);
 }
+
+#ifdef SUPPORT_MULTI_INSTANCE
+/**
+ * @tc.name: OnUserStateChangedInner001
+ * @tc.desc: test OnUserStateChangedInner, no interface token
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, OnUserStateChangedInner001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = saMgr->OnUserStateChangedInner(data, reply);
+    EXPECT_NE(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: OnUserStateChangedInner002
+ * @tc.desc: test OnUserStateChangedInner, invalid userState
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, OnUserStateChangedInner002, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_TRUE(data.WriteInt32(100));
+    EXPECT_TRUE(data.WriteInt32(-1));
+    int32_t ret = saMgr->OnUserStateChangedInner(data, reply);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: OnUserStateChangedInner003
+ * @tc.desc: test OnUserStateChangedInner, userState out of range
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, OnUserStateChangedInner003, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_TRUE(data.WriteInt32(100));
+    EXPECT_TRUE(data.WriteInt32(3));
+    int32_t ret = saMgr->OnUserStateChangedInner(data, reply);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: OnUserStateChanged001
+ * @tc.desc: test OnUserStateChanged, save and verify user state
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, OnUserStateChanged001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    int32_t ret = saMgr->OnUserStateChanged(100, USER_STATE_ACTIVATING);
+    EXPECT_EQ(ret, ERR_OK);
+    {
+        std::lock_guard<samgr::mutex> lock(saMgr->userStateLock_);
+        auto it = saMgr->userStateMap_.find(100);
+        EXPECT_TRUE(it != saMgr->userStateMap_.end());
+        EXPECT_EQ(it->second, USER_STATE_ACTIVATING);
+    }
+    ret = saMgr->OnUserStateChanged(100, USER_STATE_SWITCHING);
+    EXPECT_EQ(ret, ERR_OK);
+    {
+        std::lock_guard<samgr::mutex> lock(saMgr->userStateLock_);
+        auto it = saMgr->userStateMap_.find(100);
+        EXPECT_TRUE(it != saMgr->userStateMap_.end());
+        EXPECT_EQ(it->second, USER_STATE_SWITCHING);
+    }
+    ret = saMgr->OnUserStateChanged(200, USER_STATE_STOPPING);
+    EXPECT_EQ(ret, ERR_OK);
+    {
+        std::lock_guard<samgr::mutex> lock(saMgr->userStateLock_);
+        auto it = saMgr->userStateMap_.find(200);
+        EXPECT_TRUE(it != saMgr->userStateMap_.end());
+        EXPECT_EQ(it->second, USER_STATE_STOPPING);
+    }
+}
+
+/**
+ * @tc.name: OnUserStateChanged002
+ * @tc.desc: test OnUserStateChanged, overwrite existing state
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, OnUserStateChanged002, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    saMgr->OnUserStateChanged(100, USER_STATE_ACTIVATING);
+    saMgr->OnUserStateChanged(100, USER_STATE_STOPPING);
+    std::lock_guard<samgr::mutex> lock(saMgr->userStateLock_);
+    auto it = saMgr->userStateMap_.find(100);
+    EXPECT_TRUE(it != saMgr->userStateMap_.end());
+    EXPECT_EQ(it->second, USER_STATE_STOPPING);
+    EXPECT_EQ(static_cast<int32_t>(saMgr->userStateMap_.size()), 1);
+}
+#endif
 }
