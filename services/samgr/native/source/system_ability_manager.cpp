@@ -2298,4 +2298,14 @@ int32_t SystemAbilityManager::SetSamgrIpcPrior(bool enable)
     }
     return ERR_OK;
 }
+
+#ifdef SUPPORT_MULTI_INSTANCE
+int32_t SystemAbilityManager::OnUserStateChanged(int32_t userId, UserState userState)
+{
+    HILOGI("OnUserStateChanged userId:%{public}d, state:%{public}d", userId, userState);
+    std::lock_guard<samgr::mutex> lock(userStateLock_);
+    userStateMap_[userId] = userState;
+    return ERR_OK;
+}
+#endif
 } // namespace OHOS

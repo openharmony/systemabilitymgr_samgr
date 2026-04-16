@@ -1091,4 +1091,23 @@ void OnDemandHelper::GetCommonEventExtraId(int32_t saId, const std::string& even
     cout << endl;
     return;
 }
+
+int32_t OnDemandHelper::OnUserStateChanged(int32_t userId, UserState userState)
+{
+    SamMockPermission::MockProcess("accountmgr");
+    int64_t begin = GetTickCount();
+    sptr<ISystemAbilityManager> sm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (sm == nullptr) {
+        cout << "OnUserStateChanged samgr object null!" << endl;
+        return ERR_NULL_OBJECT;
+    }
+    int32_t result = sm->OnUserStateChanged(userId, userState);
+    if (result != ERR_OK) {
+        cout << "OnUserStateChanged failed, result code:" << result << endl;
+        return result;
+    }
+    cout << "OnUserStateChanged result:" << result << " spend:" << (GetTickCount() - begin) << " ms"
+        << " userId:" << userId << " userState:" << static_cast<int32_t>(userState) << endl;
+    return ERR_OK;
+}
 }

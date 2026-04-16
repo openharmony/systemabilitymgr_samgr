@@ -209,6 +209,9 @@ public:
     int32_t SendStrategy(int32_t type, std::vector<int32_t>& systemAbilityIds,
         int32_t level, std::string& action) override;
     int32_t SetSamgrIpcPrior(bool enable) override;
+#ifdef SUPPORT_MULTI_INSTANCE
+    int32_t OnUserStateChanged(int32_t userId, UserState userState) override;
+#endif
     bool CheckSaIsImmediatelyRecycle(int32_t systemAbilityId)
     {
         CommonSaProfile saProfile;
@@ -443,7 +446,10 @@ private:
 
     samgr::mutex saFrequencyLock_;
     std::map<uint64_t, int32_t> saFrequencyMap_; // {pid_said, count}
-
+#ifdef SUPPORT_MULTI_INSTANCE
+    samgr::mutex userStateLock_;
+    std::map<int32_t, UserState> userStateMap_;
+#endif
     std::unique_ptr<Utils::Timer> reportEventTimer_;
     std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler_;
     std::mutex priorRefCntLock_;

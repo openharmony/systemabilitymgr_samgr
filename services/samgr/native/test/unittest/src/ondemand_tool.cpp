@@ -636,6 +636,18 @@ static void TestSetPrior(OHOS::OnDemandHelper& ondemandHelper, char* argv[])
     }
 }
 
+static void TestUserState(OHOS::OnDemandHelper& ondemandHelper, char* argv[])
+{
+    int32_t userId = atoi(argv[SECOND_NUM]);
+    int32_t state = atoi(argv[THIRD_NUM]);
+    if (state < static_cast<int32_t>(USER_STATE_ACTIVATING) ||
+        state > static_cast<int32_t>(USER_STATE_STOPPING)) {
+        cout << "invalid userState, must be 0(ACTIVATING), 1(SWITCHING), 2(STOPPING)" << endl;
+        return;
+    }
+    ondemandHelper.OnUserStateChanged(userId, static_cast<UserState>(state));
+}
+
 static void TestIntCommand(OHOS::OnDemandHelper& ondemandHelper, char* argv[])
 {
     if (strcmp(argv[FIRST_NUM], "1") == 0) {
@@ -662,6 +674,8 @@ static void TestIntCommand(OHOS::OnDemandHelper& ondemandHelper, char* argv[])
         TestSetPrior(ondemandHelper, argv);
     } else if (strcmp(argv[FIRST_NUM], "12") == 0) {
         TestLowMemProcess(ondemandHelper, argv[SECOND_NUM]);
+    } else if (strcmp(argv[FIRST_NUM], "13") == 0) {
+        TestUserState(ondemandHelper, argv);
     } else {
         cout << "invalid input" << endl;
     }
@@ -693,6 +707,8 @@ static void TestStringCommand(OHOS::OnDemandHelper& ondemandHelper, char* argv[]
         TestSetPrior(ondemandHelper, argv);
     } else if (strcmp(argv[FIRST_NUM], "lowmem") == 0) {
         TestLowMemProcess(ondemandHelper, argv[SECOND_NUM]);
+    } else if (strcmp(argv[FIRST_NUM], "userstate") == 0) {
+        TestUserState(ondemandHelper, argv);
     } else {
         cout << "invalid input" << endl;
     }
@@ -704,7 +720,8 @@ int main(int argc, char* argv[])
     OHOS::OnDemandHelper& ondemandHelper = OnDemandHelper::GetInstance();
     ondemandHelper.argc_ = argc;
     cout << "please input operation(1-param/2-sa/3-proc/4-policy/5-getExtension)" << endl;
-    cout << "please input operation(6-getEvent/7-check/8-policy_time/9-test/10-memory/11-setPrior/12-lowmem)" << endl;
+    cout << "please input operation(6-getEvent/7-check/8-policy_time/9-test/10-memory)" << endl;
+    cout << "please input operation(11-setPrior/12-lowmem/13-userstate)" << endl;
     int32_t cmd = atoi(argv[FIRST_NUM]);
     if (cmd == 0) {
         TestStringCommand(ondemandHelper, argv);
