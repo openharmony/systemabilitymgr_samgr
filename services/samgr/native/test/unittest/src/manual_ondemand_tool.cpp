@@ -655,6 +655,22 @@ static void TestSetPrior(OHOS::OnDemandHelper& ondemandHelper)
     }
 }
 
+static void TestUserState(OHOS::OnDemandHelper& ondemandHelper)
+{
+    int32_t userId = 0;
+    int32_t state = 0;
+    cout << "please input userId" << endl;
+    cin >> userId;
+    cout << "please input userState(0-ACTIVATING/1-SWITCHING/2-STOPPING)" << endl;
+    cin >> state;
+    if (state < static_cast<int32_t>(USER_STATE_ACTIVATING) ||
+        state > static_cast<int32_t>(USER_STATE_STOPPING)) {
+        cout << "invalid userState, must be 0(ACTIVATING), 1(SWITCHING), 2(STOPPING)" << endl;
+        return;
+    }
+    ondemandHelper.OnUserStateChanged(userId, static_cast<UserState>(state));
+}
+
 static void TestLowMemProcess(OHOS::OnDemandHelper& ondemandHelper)
 {
     std::string cmd = "";
@@ -719,6 +735,8 @@ static void TestIntCommand(OHOS::OnDemandHelper& ondemandHelper, string& cmd)
         TestSetPrior(ondemandHelper);
     } else if (cmd == "12") {
         TestLowMemProcess(ondemandHelper);
+    } else if (cmd == "13") {
+        TestUserState(ondemandHelper);
     } else {
         cout << "invalid input" << endl;
     }
@@ -750,6 +768,8 @@ static void TestStringCommand(OHOS::OnDemandHelper& ondemandHelper, string& cmd)
         TestSetPrior(ondemandHelper);
     } else if (cmd == "lowmem") {
         TestLowMemProcess(ondemandHelper);
+    } else if (cmd == "userstate") {
+        TestUserState(ondemandHelper);
     } else {
         cout << "invalid input" << endl;
     }
@@ -762,8 +782,8 @@ int main(int argc, char* argv[])
     string cmd = "load";
     do {
         cout << "please input operation(1-param/2-sa/3-proc/4-policy/5-getExtension)" << endl;
-        cout << "please input operation(6-getEvent/7-check/8-policy_time/9-test/10-memory/11-setPrior/12-lowmem)"
-             << endl;
+        cout << "please input operation(6-getEvent/7-check/8-policy_time/9-test/10-memory)" << endl;
+        cout << "please input operation(11-setPrior/12-lowmem/13-userstate)" << endl;
         cmd.clear();
         cin.clear();
         cin >> cmd;

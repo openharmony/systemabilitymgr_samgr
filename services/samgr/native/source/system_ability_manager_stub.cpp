@@ -227,6 +227,10 @@ SystemAbilityManagerStub::SystemAbilityManagerStub()
         SystemAbilityManagerStub::LocalSetSamgrIpcPrior;
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::ONSTART_SYSTEM_ABILITY_FAIL_TRANSACTION)] =
         SystemAbilityManagerStub::LocalOnStartSystemAbilityFail;
+#ifdef SUPPORT_MULTI_INSTANCE
+    memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::ON_USER_STATE_CHANGED_TRANSACTION)] =
+        SystemAbilityManagerStub::LocalOnUserStateChanged;
+#endif
 }
 
 void SystemAbilityManagerStub::SetIpcPrior()
@@ -1584,4 +1588,41 @@ int32_t SystemAbilityManagerStub::SetSamgrIpcPriorInner(MessageParcel& data, Mes
     }
     return ERR_OK;
 }
+
+#ifdef SUPPORT_MULTI_INSTANCE
+int32_t SystemAbilityManagerStub::OnUserStateChangedInner(MessageParcel& data, MessageParcel& reply)
+{
+    if (!SamgrUtil::CheckCallerProcess("accountmgr")) {
+        HILOGE("OnUserStateChangedInner invalid caller process, only support for accountmgr");
+        return ERR_PERMISSION_DENIED;
+    }
+
+    int32_t userId = -1;
+    if (!data.ReadInt32(userId)) {
+        HILOGE("OnUserStateChangedInner read userId failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    int32_t userState = 0;
+    if (!data.ReadInt32(userState)) {
+        HILOGE("OnUserStateChangedInner read userState failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    if (userState < static_cast<int32_t>(USER_STATE_ACTIVATING) ||
+        userState > static_cast<int32_t>(USER_STATE_STOPPING)) {
+        HILOGE("OnUserStateChangedInner invalid userState:%{public}d", userState);
+        return ERR_INVALID_VALUE;
+    }
+
+    int32_t result = OnUserStateChanged(userId, static_cast<UserState>(userState));
+    HILOGI("OnUserStateChangedInner userId:%{public}d, state:%{public}d, result:%{public}d",
+        userId, userState, result);
+    if (!reply.WriteInt32(result)) {
+        HILOGE("OnUserStateChangedInner write result failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ERR_OK;
+}
+#endif
 } // namespace OHOS
