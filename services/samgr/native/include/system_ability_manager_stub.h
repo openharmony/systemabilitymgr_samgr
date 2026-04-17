@@ -221,6 +221,13 @@ private:
     {
         return stub->SetSamgrIpcPriorInner(data, reply);
     }
+#ifdef SUPPORT_MULTI_INSTANCE
+    static int32_t LocalOnUserStateChanged(SystemAbilityManagerStub* stub,
+        MessageParcel& data, MessageParcel& reply)
+    {
+        return stub->OnUserStateChangedInner(data, reply);
+    }
+#endif
     int32_t ListSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t SubsSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t UnSubsSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
@@ -258,6 +265,9 @@ private:
     int32_t GetCommonEventExtraDataIdlistInner(MessageParcel& data, MessageParcel& reply);
     int32_t GetLocalAbilityManagerProxyInner(MessageParcel& data, MessageParcel& reply);
     int32_t SetSamgrIpcPriorInner(MessageParcel& data, MessageParcel& reply);
+#ifdef SUPPORT_MULTI_INSTANCE
+    int32_t OnUserStateChangedInner(MessageParcel& data, MessageParcel& reply);
+#endif
     static int32_t GetHapIdMultiuser(int32_t uid);
     int32_t LoadSACheck(int32_t systemAbilityId);
     int32_t LoadRemoteSACheck(int32_t systemAbilityId);

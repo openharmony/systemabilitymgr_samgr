@@ -29,6 +29,11 @@
 #include "system_ability_on_demand_event.h"
 
 namespace OHOS {
+enum UserState {
+    USER_STATE_ACTIVATING = 0,
+    USER_STATE_SWITCHING,
+    USER_STATE_STOPPING,
+};
 
 struct IdleProcessInfo {
     int32_t pid = -1;
@@ -415,6 +420,21 @@ public:
     {
         (void)systemAbilityId;
         (void)listener;
+        return 0;
+    }
+
+    /**
+     * OnUserStateChanged, Notify samgr that user state has changed.
+     * Only accountmgr process is allowed to call this interface.
+     *
+     * @param userId, the id of the user whose state changed.
+     * @param userState, the new state of the user.
+     * @return ERR_OK indicates that the notification was successful.
+     */
+    virtual int32_t OnUserStateChanged(int32_t userId, UserState userState)
+    {
+        (void)userId;
+        (void)userState;
         return 0;
     }
 public:

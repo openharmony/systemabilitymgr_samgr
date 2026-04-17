@@ -19,6 +19,7 @@
 #include <condition_variable>
 #include <mutex>
 #include "refbase.h"
+#include "if_system_ability_manager.h"
 #include "system_ability_load_callback_stub.h"
 #include "system_ability_on_demand_event.h"
 #include "system_process_status_change_stub.h"
@@ -98,6 +99,7 @@ public:
     void GetCommonEventExtraId(int32_t saId, const std::string& eventName = "");
     int32_t GetExtensionSaIds(const std::string& extension, std::vector<int32_t> &saIds);
     int32_t GetExtensionRunningSaList(const std::string& extension, std::vector<sptr<IRemoteObject>>& saList);
+    int32_t OnUserStateChanged(int32_t userId, UserState userState);
     enum class ProcessStatusChangeEvent { None = 0, Start, Stop, Active, Idle };
     int WaitForProcessStatusChangeEvent(OnDemandHelper::ProcessStatusChangeEvent event, int32_t timeoutMs)
     {

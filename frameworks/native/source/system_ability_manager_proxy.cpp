@@ -1869,4 +1869,43 @@ int32_t SystemAbilityManagerProxy::SubscribeSystemAbilityInImage(int32_t systemA
     MessageOption option{ MessageOption::TF_IMAGE };
     return SubscribeSystemAbilityInner(systemAbilityId, listener, option);
 }
+
+int32_t SystemAbilityManagerProxy::OnUserStateChanged(int32_t userId, UserState userState)
+{
+#ifdef SUPPORT_MULTI_INSTANCE
+    HILOGD("OnUserStateChanged called, userId:%{public}d, state:%{public}d", userId, userState);
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("OnUserStateChanged remote is nullptr");
+        return ERR_INVALID_OPERATION;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        HILOGE("OnUserStateChanged write interface token failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(userId)) {
+        HILOGE("OnUserStateChanged write userId failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(static_cast<int32_t>(userState))) {
+        HILOGE("OnUserStateChanged write userState failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::ON_USER_STATE_CHANGED_TRANSACTION), data, reply, option);
+    if (err != ERR_NONE) {
+        HILOGE("OnUserStateChanged SendRequest error:%{public}d", err);
+        return err;
+    }
+    HILOGD("OnUserStateChanged SendRequest succeed");
+#else
+    HILOGD("OnUserStateChanged not support");
+#endif
+    return ERR_OK;
+}
 } // namespace OHOS
