@@ -43,6 +43,7 @@ enum {
     URI_PERMISSION_MGR_SERVICE_ID                    = 183,
     QUICK_FIX_MGR_SERVICE_ID                         = 184,
     AGENT_MGR_SERVICE_ID                             = 185,
+    CLI_TOOL_MGR_SERVICE_ID                          = 186,
     SUBSYS_AAFWK_SYS_ABILITY_ID_END                  = 199,
     SUBSYS_ACCOUNT_SYS_ABILITY_ID_BEGIN              = 200,
     SUBSYS_AI_SYS_ABILITY_ID_BEGIN                   = 300,
