@@ -35,6 +35,7 @@
 #include "system_ability_status_change_stub.h"
 
 #define private public
+#define protected public
 #include "system_ability_manager.h"
 
 using namespace OHOS;

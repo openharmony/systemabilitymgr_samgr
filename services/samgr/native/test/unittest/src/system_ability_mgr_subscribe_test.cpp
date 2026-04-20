@@ -31,6 +31,7 @@
 #include "ability_death_recipient.h"
 #include "test_log.h"
 #define private public
+#define protected public
 #include "ipc_skeleton.h"
 #ifdef SUPPORT_ACCESS_TOKEN
 #include "accesstoken_kit.h"

@@ -28,6 +28,7 @@
 
 #define private public
 #include "collect/device_switch_collect.h"
+#define protected public
 #include "system_ability_manager.h"
 
 using namespace std;

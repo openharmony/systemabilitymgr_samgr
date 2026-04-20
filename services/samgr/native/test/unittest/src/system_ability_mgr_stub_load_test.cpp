@@ -26,6 +26,7 @@
 #include "test_log.h"
 
 #define private public
+#define protected public
 #include "sa_status_change_mock.h"
 #include "system_ability_manager.h"
 
@@ -553,10 +554,10 @@ HWTEST_F(SystemAbilityMgrStubLoadTest, StartOnDemandAbilityInner001, TestSize.Le
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
     u16string procName = u"test";
-    SystemAbilityManager::AbilityItem abilityItem;
-    abilityItem.state = SystemAbilityManager::AbilityState::STARTING;
+    BaseSystemAbilityManager::AbilityItem abilityItem;
+    abilityItem.state = BaseSystemAbilityManager::AbilityState::STARTING;
     saMgr->StartOnDemandAbilityInner(procName, SAID, abilityItem);
-    EXPECT_EQ(abilityItem.state, SystemAbilityManager::AbilityState::STARTING);
+    EXPECT_EQ(abilityItem.state, BaseSystemAbilityManager::AbilityState::STARTING);
 }
 
 HWTEST_F(SystemAbilityMgrStubLoadTest, StartOnDemandAbilityInner002, TestSize.Level3)
@@ -564,10 +565,10 @@ HWTEST_F(SystemAbilityMgrStubLoadTest, StartOnDemandAbilityInner002, TestSize.Le
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
     u16string procName = u"";
-    SystemAbilityManager::AbilityItem abilityItem;
-    abilityItem.state = SystemAbilityManager::AbilityState::INIT;
+    BaseSystemAbilityManager::AbilityItem abilityItem;
+    abilityItem.state = BaseSystemAbilityManager::AbilityState::INIT;
     saMgr->StartOnDemandAbilityInner(procName, SAID, abilityItem);
-    EXPECT_EQ(abilityItem.state, SystemAbilityManager::AbilityState::INIT);
+    EXPECT_EQ(abilityItem.state, BaseSystemAbilityManager::AbilityState::INIT);
 }
 
 HWTEST_F(SystemAbilityMgrStubLoadTest, StartOnDemandAbilityInner003, TestSize.Level3)
@@ -575,8 +576,8 @@ HWTEST_F(SystemAbilityMgrStubLoadTest, StartOnDemandAbilityInner003, TestSize.Le
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
     u16string procName = u"";
-    SystemAbilityManager::AbilityItem abilityItem;
-    abilityItem.state = SystemAbilityManager::AbilityState::STARTING;
+    BaseSystemAbilityManager::AbilityItem abilityItem;
+    abilityItem.state = BaseSystemAbilityManager::AbilityState::STARTING;
     int32_t ret = saMgr->StartOnDemandAbilityInner(procName, SAID, abilityItem);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
@@ -586,8 +587,8 @@ HWTEST_F(SystemAbilityMgrStubLoadTest, StartOnDemandAbilityInner004, TestSize.Le
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
     u16string procName = u"";
-    SystemAbilityManager::AbilityItem abilityItem;
-    abilityItem.state = SystemAbilityManager::AbilityState::STARTED;
+    BaseSystemAbilityManager::AbilityItem abilityItem;
+    abilityItem.state = BaseSystemAbilityManager::AbilityState::STARTED;
     int32_t ret = saMgr->StartOnDemandAbilityInner(procName, SAID, abilityItem);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }

@@ -58,6 +58,7 @@ ohos_fuzztest("SystemAbilityManagerFuzzTest") {
     "${samgr_services_dir}/source/schedule/system_ability_event_handler.cpp",
     "${samgr_services_dir}/source/schedule/system_ability_state_machine.cpp",
     "${samgr_services_dir}/source/schedule/system_ability_state_scheduler.cpp",
+    "${samgr_services_dir}/source/base_system_ability_manager.cpp",
     "${samgr_services_dir}/source/system_ability_manager.cpp",
     "${samgr_services_dir}/source/system_ability_manager_dumper.cpp",
     "${samgr_services_dir}/source/system_ability_manager_stub.cpp",

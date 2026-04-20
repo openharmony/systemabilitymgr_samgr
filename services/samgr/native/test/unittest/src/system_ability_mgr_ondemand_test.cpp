@@ -31,6 +31,7 @@
 #include "ability_death_recipient.h"
 #include "test_log.h"
 #define private public
+#define protected public
 #include "ipc_skeleton.h"
 #ifdef SUPPORT_ACCESS_TOKEN
 #include "accesstoken_kit.h"
@@ -505,8 +506,8 @@ HWTEST_F(SystemAbilityMgrOnDemandTest, StartOnDemandAbilityInner001, TestSize.Le
     InitSaMgr(saMgr);
     const std::u16string procName;
     int32_t systemAbilityId = 0;
-    SystemAbilityManager::AbilityItem abilityItem;
-    abilityItem.state = SystemAbilityManager::AbilityState::STARTING;
+    BaseSystemAbilityManager::AbilityItem abilityItem;
+    abilityItem.state = BaseSystemAbilityManager::AbilityState::STARTING;
     int32_t ret = saMgr->StartOnDemandAbilityInner(procName, systemAbilityId, abilityItem);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }

@@ -26,6 +26,7 @@
 #include "test_log.h"
 
 #define private public
+#define protected public
 #include "sa_status_change_mock.h"
 #include "system_ability_manager.h"
 #include "device_param_collect.h"
@@ -205,8 +206,6 @@ HWTEST_F(SystemAbilityMgrStubUnLoadTest, UnSubscribeSystemAbility001, TestSize.L
     EXPECT_TRUE(saMgr != nullptr);
     sptr<SaStatusChangeMock> listener(new SaStatusChangeMock());
     int32_t res = saMgr->UnSubscribeSystemAbility(INVALID_SAID, listener);
-    u16string name = u"device_saname";
-    saMgr->NotifyRemoteSaDied(name);
     EXPECT_EQ(res, ERR_INVALID_VALUE);
 }
 
@@ -216,10 +215,6 @@ HWTEST_F(SystemAbilityMgrStubUnLoadTest, UnSubscribeSystemAbility002, TestSize.L
     EXPECT_TRUE(saMgr != nullptr);
     sptr<SaStatusChangeMock> listener(nullptr);
     int32_t res = saMgr->UnSubscribeSystemAbility(SAID, listener);
-    u16string name = u"deviceSaname";
-    saMgr->dBinderService_ = nullptr;
-    saMgr->NotifyRemoteSaDied(name);
-    saMgr->dBinderService_ = DBinderService::GetInstance();
     EXPECT_EQ(res, ERR_INVALID_VALUE);
 }
 
@@ -229,8 +224,6 @@ HWTEST_F(SystemAbilityMgrStubUnLoadTest, UnSubscribeSystemAbility003, TestSize.L
     EXPECT_TRUE(saMgr != nullptr);
     sptr<SaStatusChangeMock> listener(nullptr);
     int32_t res = saMgr->UnSubscribeSystemAbility(INVALID_SAID, listener);
-    string deviceId = "device";
-    saMgr->NotifyRemoteDeviceOffline(deviceId);
     EXPECT_EQ(res, ERR_INVALID_VALUE);
 }
 
@@ -243,10 +236,6 @@ HWTEST_F(SystemAbilityMgrStubUnLoadTest, UnSubscribeSystemAbility004, TestSize.L
     saMgr->abilityStatusDeath_ = nullptr;
     saMgr->subscribeCountMap_.clear();
     int32_t res = saMgr->UnSubscribeSystemAbility(SAID, listener);
-    saMgr->dBinderService_ = nullptr;
-    string deviceId = "device";
-    saMgr->NotifyRemoteDeviceOffline(deviceId);
-    saMgr->dBinderService_ = DBinderService::GetInstance();
     EXPECT_EQ(res, ERR_OK);
 }
 

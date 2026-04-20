@@ -30,6 +30,7 @@
 #include "system_process_status_change_proxy.h"
 #include "test_log.h"
 #define private public
+#define protected public
 #include "system_ability_manager.h"
 #ifdef SUPPORT_COMMON_EVENT
 #include "common_event_collect.h"
@@ -179,21 +180,6 @@ void SystemAbilityMgrNewTest::TearDown()
 }
 
 /**
- * @tc.name: GetLocalNodeId001
- * @tc.desc: test GetLocalNodeId
- * @tc.type: FUNC
- * @tc.require: I6NKWX
- */
-HWTEST_F(SystemAbilityMgrNewTest, GetLocalNodeId001, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
-    EXPECT_TRUE(saMgr != nullptr);
-    InitSaMgr(saMgr);
-    string ret = saMgr->GetLocalNodeId();
-    EXPECT_EQ(ret, "");
-}
-
-/**
  * @tc.name: ReportGetSAPeriodically001
  * @tc.desc: test ReportGetSAPeriodically with saFrequencyMap_ is not empty
  * @tc.type: FUNC
@@ -315,22 +301,6 @@ HWTEST_F(SystemAbilityMgrNewTest, GetSystemAbilityFromRemote004, TestSize.Level3
     int systemAbilityId = 1;
     auto ability = saMgr->GetSystemAbilityFromRemote(systemAbilityId);
     EXPECT_EQ(ability, nullptr);
-}
-
-/**
- * @tc.name: GetDBinder001
- * @tc.desc: GetDBinder, return null
- * @tc.type: FUNC
- * @tc.require: I7VEPG
- */
-
-HWTEST_F(SystemAbilityMgrNewTest, GetDBinder001, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
-    EXPECT_TRUE(saMgr != nullptr);
-    InitSaMgr(saMgr);
-    sptr<DBinderService> result = saMgr->GetDBinder();
-    EXPECT_TRUE(result == nullptr);
 }
 
 /**
@@ -535,7 +505,6 @@ HWTEST_F(SystemAbilityMgrNewTest, RemoveWhiteCommonEvent001, TestSize.Level3)
     saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
     saMgr->CleanFfrt();
     const std::u16string name;
-    saMgr->NotifyRemoteSaDied(name);
     saMgr->RemoveWhiteCommonEvent();
     EXPECT_TRUE(saMgr->collectManager_ != nullptr);
 }
