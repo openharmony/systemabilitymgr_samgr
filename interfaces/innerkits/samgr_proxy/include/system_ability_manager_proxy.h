@@ -319,7 +319,7 @@ public:
     int32_t GetOnDemandSystemAbilityIds(std::vector<int32_t>& systemAbilityIds) override;
     int32_t SubscribeSystemAbilityInImage(int32_t systemAbilityId,
         const sptr<ISystemAbilityStatusChange>& listener) override;
-    int32_t OnUserStateChanged(int32_t userId, UserState userState) override;
+    int32_t OnUserStateChanged(int32_t userId, SamgrUserState userState) override;
     int32_t SetSamgrIpcPrior(bool enable) override;
 private:
     sptr<IRemoteObject> GetSystemAbilityWrapper(int32_t systemAbilityId, const std::string& deviceId = "");

@@ -29,7 +29,7 @@
 #include "system_ability_on_demand_event.h"
 
 namespace OHOS {
-enum UserState {
+enum SamgrUserState {
     USER_STATE_ACTIVATING = 0,
     USER_STATE_SWITCHING,
     USER_STATE_STOPPING,
@@ -431,7 +431,7 @@ public:
      * @param userState, the new state of the user.
      * @return ERR_OK indicates that the notification was successful.
      */
-    virtual int32_t OnUserStateChanged(int32_t userId, UserState userState)
+    virtual int32_t OnUserStateChanged(int32_t userId, SamgrUserState userState)
     {
         (void)userId;
         (void)userState;
