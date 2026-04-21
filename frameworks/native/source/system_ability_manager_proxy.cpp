@@ -1870,7 +1870,7 @@ int32_t SystemAbilityManagerProxy::SubscribeSystemAbilityInImage(int32_t systemA
     return SubscribeSystemAbilityInner(systemAbilityId, listener, option);
 }
 
-int32_t SystemAbilityManagerProxy::OnUserStateChanged(int32_t userId, UserState userState)
+int32_t SystemAbilityManagerProxy::OnUserStateChanged(int32_t userId, SamgrUserState userState)
 {
 #ifdef SUPPORT_MULTI_INSTANCE
     HILOGD("OnUserStateChanged called, userId:%{public}d, state:%{public}d", userId, userState);

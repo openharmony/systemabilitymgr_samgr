@@ -525,6 +525,9 @@ ohos_unittest("SystemAbilityMgrStubTest") {
   if (support_penglai_mode) {
     defines += [ "SUPPORT_PENGLAI_MODE" ]
   }
+  if (samgr_support_multi_instance) {
+    defines += [ "SUPPORT_MULTI_INSTANCE" ]
+  }
   defines += ["SAMGR_USE_FFRT"]
 }
 
@@ -589,6 +592,9 @@ ohos_unittest("SystemAbilityMgrProxyTest") {
       "access_token:libtokensetproc_shared",
     ]
     defines += [ "SUPPORT_ACCESS_TOKEN" ]
+  }
+  if (samgr_support_multi_instance) {
+    defines += [ "SUPPORT_MULTI_INSTANCE" ]
   }
 }
 

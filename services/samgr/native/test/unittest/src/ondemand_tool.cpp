@@ -645,7 +645,7 @@ static void TestUserState(OHOS::OnDemandHelper& ondemandHelper, char* argv[])
         cout << "invalid userState, must be 0(ACTIVATING), 1(SWITCHING), 2(STOPPING)" << endl;
         return;
     }
-    ondemandHelper.OnUserStateChanged(userId, static_cast<UserState>(state));
+    ondemandHelper.OnUserStateChanged(userId, static_cast<SamgrUserState>(state));
 }
 
 static void TestIntCommand(OHOS::OnDemandHelper& ondemandHelper, char* argv[])

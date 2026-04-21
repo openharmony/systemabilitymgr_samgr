@@ -2016,6 +2016,110 @@ HWTEST_F(SystemAbilityMgrTest, MultiInstanceSaIds003, TestSize.Level3)
     DTEST_LOG << " MultiInstanceSaIds003 END" << std::endl;
 }
 
+/**
+ * @tc.name: OnUserStateChanged001
+ * @tc.desc: test OnUserStateChanged with USER_STATE_ACTIVATING
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, OnUserStateChanged001, TestSize.Level3)
+{
+    DTEST_LOG << " OnUserStateChanged001 BEGIN" << std::endl;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
+    int32_t ret = saMgr->OnUserStateChanged(100, USER_STATE_ACTIVATING);
+    EXPECT_EQ(ret, ERR_OK);
+    {
+        std::lock_guard<samgr::mutex> lock(saMgr->userStateLock_);
+        auto it = saMgr->userStateMap_.find(100);
+        EXPECT_TRUE(it != saMgr->userStateMap_.end());
+        EXPECT_EQ(it->second, USER_STATE_ACTIVATING);
+    }
+    DTEST_LOG << " OnUserStateChanged001 END" << std::endl;
+}
+
+/**
+ * @tc.name: OnUserStateChanged002
+ * @tc.desc: test OnUserStateChanged with USER_STATE_SWITCHING
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, OnUserStateChanged002, TestSize.Level3)
+{
+    DTEST_LOG << " OnUserStateChanged002 BEGIN" << std::endl;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
+    int32_t ret = saMgr->OnUserStateChanged(100, USER_STATE_SWITCHING);
+    EXPECT_EQ(ret, ERR_OK);
+    {
+        std::lock_guard<samgr::mutex> lock(saMgr->userStateLock_);
+        auto it = saMgr->userStateMap_.find(100);
+        EXPECT_TRUE(it != saMgr->userStateMap_.end());
+        EXPECT_EQ(it->second, USER_STATE_SWITCHING);
+    }
+    DTEST_LOG << " OnUserStateChanged002 END" << std::endl;
+}
+
+/**
+ * @tc.name: OnUserStateChanged003
+ * @tc.desc: test OnUserStateChanged with USER_STATE_STOPPING
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, OnUserStateChanged003, TestSize.Level3)
+{
+    DTEST_LOG << " OnUserStateChanged003 BEGIN" << std::endl;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
+    int32_t ret = saMgr->OnUserStateChanged(100, USER_STATE_STOPPING);
+    EXPECT_EQ(ret, ERR_OK);
+    {
+        std::lock_guard<samgr::mutex> lock(saMgr->userStateLock_);
+        auto it = saMgr->userStateMap_.find(100);
+        EXPECT_TRUE(it != saMgr->userStateMap_.end());
+        EXPECT_EQ(it->second, USER_STATE_STOPPING);
+    }
+    DTEST_LOG << " OnUserStateChanged003 END" << std::endl;
+}
+
+/**
+ * @tc.name: OnUserStateChanged004
+ * @tc.desc: test OnUserStateChanged overwrite existing state for same user
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, OnUserStateChanged004, TestSize.Level3)
+{
+    DTEST_LOG << " OnUserStateChanged004 BEGIN" << std::endl;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
+    saMgr->OnUserStateChanged(100, USER_STATE_ACTIVATING);
+    saMgr->OnUserStateChanged(100, USER_STATE_STOPPING);
+    std::lock_guard<samgr::mutex> lock(saMgr->userStateLock_);
+    auto it = saMgr->userStateMap_.find(100);
+    EXPECT_TRUE(it != saMgr->userStateMap_.end());
+    EXPECT_EQ(it->second, USER_STATE_STOPPING);
+    EXPECT_EQ(static_cast<int32_t>(saMgr->userStateMap_.size()), 1);
+    DTEST_LOG << " OnUserStateChanged004 END" << std::endl;
+}
+
+/**
+ * @tc.name: OnUserStateChanged005
+ * @tc.desc: test OnUserStateChanged with multiple users and different states
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, OnUserStateChanged005, TestSize.Level3)
+{
+    DTEST_LOG << " OnUserStateChanged005 BEGIN" << std::endl;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
+    saMgr->OnUserStateChanged(100, USER_STATE_ACTIVATING);
+    saMgr->OnUserStateChanged(200, USER_STATE_SWITCHING);
+    saMgr->OnUserStateChanged(300, USER_STATE_STOPPING);
+    std::lock_guard<samgr::mutex> lock(saMgr->userStateLock_);
+    EXPECT_EQ(static_cast<int32_t>(saMgr->userStateMap_.size()), 3);
+    EXPECT_EQ(saMgr->userStateMap_[100], USER_STATE_ACTIVATING);
+    EXPECT_EQ(saMgr->userStateMap_[200], USER_STATE_SWITCHING);
+    EXPECT_EQ(saMgr->userStateMap_[300], USER_STATE_STOPPING);
+    DTEST_LOG << " OnUserStateChanged005 END" << std::endl;
+}
+
 } // namespace SAMGR
 } // namespace OHOS
 #endif
