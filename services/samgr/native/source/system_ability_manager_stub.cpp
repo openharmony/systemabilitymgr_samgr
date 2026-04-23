@@ -1615,7 +1615,7 @@ int32_t SystemAbilityManagerStub::OnUserStateChangedInner(MessageParcel& data, M
         return ERR_INVALID_VALUE;
     }
 
-    int32_t result = OnUserStateChanged(userId, static_cast<UserState>(userState));
+    int32_t result = OnUserStateChanged(userId, static_cast<SamgrUserState>(userState));
     HILOGI("OnUserStateChangedInner userId:%{public}d, state:%{public}d, result:%{public}d",
         userId, userState, result);
     if (!reply.WriteInt32(result)) {
