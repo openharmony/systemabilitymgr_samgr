@@ -210,7 +210,7 @@ public:
         int32_t level, std::string& action) override;
     int32_t SetSamgrIpcPrior(bool enable) override;
 #ifdef SUPPORT_MULTI_INSTANCE
-    int32_t OnUserStateChanged(int32_t userId, UserState userState) override;
+    int32_t OnUserStateChanged(int32_t userId, SamgrUserState userState) override;
 #endif
     bool CheckSaIsImmediatelyRecycle(int32_t systemAbilityId)
     {
@@ -448,7 +448,7 @@ private:
     std::map<uint64_t, int32_t> saFrequencyMap_; // {pid_said, count}
 #ifdef SUPPORT_MULTI_INSTANCE
     samgr::mutex userStateLock_;
-    std::map<int32_t, UserState> userStateMap_;
+    std::map<int32_t, SamgrUserState> userStateMap_;
 #endif
     std::unique_ptr<Utils::Timer> reportEventTimer_;
     std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler_;
