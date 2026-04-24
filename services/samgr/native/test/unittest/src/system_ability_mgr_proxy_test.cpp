@@ -1734,6 +1734,21 @@ HWTEST_F(SystemAbilityMgrProxyTest, SubscribeLowMemSystemProcess004, TestSize.Le
 }
 
 /**
+ * @tc.name: SubscribeLowMemSystemProcess005
+ * @tc.desc: SubscribeLowMemSystemProcess base class method
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, SubscribeLowMemSystemProcess005, TestSize.Level3)
+{
+    DTEST_LOG << " SubscribeLowMemSystemProcess005 begin " << std::endl;
+    sptr<ISystemAbilityManager> samgrMock = new ISystemAbilityManagerMock;
+    EXPECT_TRUE(samgrMock != nullptr);
+    auto ret = samgrMock->SubscribeLowMemSystemProcess(nullptr);
+    EXPECT_TRUE(ret == 0);
+    DTEST_LOG << " SubscribeLowMemSystemProcess005 end " << std::endl;
+}
+
+/**
  * @tc.name: UnSubscribeLowMemSystemProcess001
  * @tc.desc: UnSubscribeLowMemSystemProcess with nullptr
  * @tc.type: FUNC
@@ -1807,4 +1822,20 @@ HWTEST_F(SystemAbilityMgrProxyTest, UnSubscribeLowMemSystemProcess004, TestSize.
     EXPECT_EQ(res, ERR_OK);
     DTEST_LOG << " UnSubscribeLowMemSystemProcess004 end " << std::endl;
 }
+
+/**
+ * @tc.name: UnSubscribeLowMemSystemProcess005
+ * @tc.desc: UnSubscribeLowMemSystemProcess base class method
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, UnSubscribeLowMemSystemProcess005, TestSize.Level3)
+{
+    DTEST_LOG << " UnSubscribeLowMemSystemProcess005 begin " << std::endl;
+    sptr<ISystemAbilityManager> samgrMock = new ISystemAbilityManagerMock;
+    EXPECT_TRUE(samgrMock != nullptr);
+    auto ret = samgrMock->UnSubscribeLowMemSystemProcess(nullptr);
+    EXPECT_TRUE(ret == 0);
+    DTEST_LOG << " UnSubscribeLowMemSystemProcess005 end " << std::endl;
+}
+
 }
