@@ -1838,4 +1838,52 @@ HWTEST_F(SystemAbilityMgrProxyTest, UnSubscribeLowMemSystemProcess005, TestSize.
     DTEST_LOG << " UnSubscribeLowMemSystemProcess005 end " << std::endl;
 }
 
+/**
+ * @tc.name: OnUserStateChanged001
+ * @tc.desc: Test OnUserStateChanged with mock
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, OnUserStateChanged001, TestSize.Level3)
+{
+    DTEST_LOG << " OnUserStateChanged001 begin " << std::endl;
+    sptr<ISystemAbilityManager> samgrMock = new ISystemAbilityManagerMock;
+    EXPECT_TRUE(samgrMock != nullptr);
+    int32_t ret = samgrMock->OnUserStateChanged(100, USER_STATE_SWITCHING);
+    EXPECT_TRUE(ret == 0);
+    DTEST_LOG << " OnUserStateChanged001 end " << std::endl;
+}
+
+/**
+ * @tc.name: OnUserStateChanged002
+ * @tc.desc: Test OnUserStateChanged with real proxy
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, OnUserStateChanged002, TestSize.Level3)
+{
+    DTEST_LOG << " OnUserStateChanged002 begin " << std::endl;
+    sptr<ISystemAbilityManager> samgrProxy = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    auto ret = samgrProxy->OnUserStateChanged(100, USER_STATE_ACTIVATING);
+    EXPECT_EQ(ret, ERR_OK);
+    DTEST_LOG << " OnUserStateChanged002 end " << std::endl;
+}
+
+#ifdef SUPPORT_MULTI_INSTANCE
+/**
+ * @tc.name: OnUserStateChanged003
+ * @tc.desc: Test OnUserStateChanged with remote nullptr
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, OnUserStateChanged003, TestSize.Level3)
+{
+    DTEST_LOG << " OnUserStateChanged003 begin " << std::endl;
+    sptr<ISystemAbilityManager> samgrProxy =
+        SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    static_cast<IRemoteProxy<ISystemAbilityManager>*>(samgrProxy.GetRefPtr())->beforeMagic_ = 0;
+    auto res = samgrProxy->OnUserStateChanged(100, USER_STATE_STOPPING);
+    static_cast<IRemoteProxy<ISystemAbilityManager>*>(samgrProxy.GetRefPtr())->beforeMagic_ = BEFORE_MAGIC;
+    EXPECT_EQ(res, ERR_INVALID_OPERATION);
+    DTEST_LOG << " OnUserStateChanged003 end " << std::endl;
+}
+#endif
+
 }
