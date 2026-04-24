@@ -29,6 +29,11 @@
 #include "system_ability_on_demand_event.h"
 
 namespace OHOS {
+#if defined(__GNUC__) && __GNUC__ >= 4
+    #define SAMGR_HIDDEN __attribute__((visibility("hidden")))
+#else
+    #define SAMGR_HIDDEN
+#endif
 enum SamgrUserState {
     USER_STATE_ACTIVATING = 0,
     USER_STATE_SWITCHING,
@@ -449,7 +454,7 @@ protected:
         }
         return false;
     }
-    static inline const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
+    SAMGR_HIDDEN static inline const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 };
 } // namespace OHOS
 
