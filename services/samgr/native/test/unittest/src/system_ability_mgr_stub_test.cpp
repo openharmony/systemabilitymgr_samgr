@@ -1293,7 +1293,7 @@ HWTEST_F(SystemAbilityMgrStubTest, OnUserStateChangedInner001, TestSize.Level3)
     MessageParcel data;
     MessageParcel reply;
     int32_t ret = saMgr->OnUserStateChangedInner(data, reply);
-    EXPECT_NE(ret, ERR_OK);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
 }
 
 /**
@@ -1304,6 +1304,7 @@ HWTEST_F(SystemAbilityMgrStubTest, OnUserStateChangedInner001, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrStubTest, OnUserStateChangedInner002, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    SamMockPermission::MockProcess("accountmgr");
     MessageParcel data;
     MessageParcel reply;
     EXPECT_TRUE(data.WriteInt32(100));
@@ -1320,12 +1321,97 @@ HWTEST_F(SystemAbilityMgrStubTest, OnUserStateChangedInner002, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrStubTest, OnUserStateChangedInner003, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    SamMockPermission::MockProcess("accountmgr");
     MessageParcel data;
     MessageParcel reply;
     EXPECT_TRUE(data.WriteInt32(100));
     EXPECT_TRUE(data.WriteInt32(3));
     int32_t ret = saMgr->OnUserStateChangedInner(data, reply);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: OnUserStateChangedInner004
+ * @tc.desc: test OnUserStateChangedInner with accountmgr process and valid ACTIVATING
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, OnUserStateChangedInner004, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    SamMockPermission::MockProcess("accountmgr");
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_TRUE(data.WriteInt32(100));
+    EXPECT_TRUE(data.WriteInt32(static_cast<int32_t>(USER_STATE_ACTIVATING)));
+    int32_t ret = saMgr->OnUserStateChangedInner(data, reply);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: OnUserStateChangedInner005
+ * @tc.desc: test OnUserStateChangedInner with accountmgr process and valid SWITCHING
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, OnUserStateChangedInner005, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    SamMockPermission::MockProcess("accountmgr");
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_TRUE(data.WriteInt32(100));
+    EXPECT_TRUE(data.WriteInt32(static_cast<int32_t>(USER_STATE_SWITCHING)));
+    int32_t ret = saMgr->OnUserStateChangedInner(data, reply);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: OnUserStateChangedInner006
+ * @tc.desc: test OnUserStateChangedInner with accountmgr process and valid STOPPING
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, OnUserStateChangedInner006, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    SamMockPermission::MockProcess("accountmgr");
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_TRUE(data.WriteInt32(100));
+    EXPECT_TRUE(data.WriteInt32(static_cast<int32_t>(USER_STATE_STOPPING)));
+    int32_t ret = saMgr->OnUserStateChangedInner(data, reply);
+    EXPECT_EQ(ret, ERR_OK);
+}
+
+/**
+ * @tc.name: OnUserStateChangedInner007
+ * @tc.desc: test OnUserStateChangedInner with invalid caller process
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, OnUserStateChangedInner007, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    SamMockPermission::MockProcess("invalid_process");
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_TRUE(data.WriteInt32(100));
+    EXPECT_TRUE(data.WriteInt32(static_cast<int32_t>(USER_STATE_ACTIVATING)));
+    int32_t ret = saMgr->OnUserStateChangedInner(data, reply);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: OnUserStateChangedInner008
+ * @tc.desc: test OnUserStateChangedInner with accountmgr process but missing userState
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, OnUserStateChangedInner008, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    SamMockPermission::MockProcess("accountmgr");
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_TRUE(data.WriteInt32(100));
+    int32_t ret = saMgr->OnUserStateChangedInner(data, reply);
+    EXPECT_EQ(ret, ERR_FLATTEN_OBJECT);
 }
 
 /**
@@ -1370,6 +1456,10 @@ HWTEST_F(SystemAbilityMgrStubTest, OnUserStateChanged001, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrStubTest, OnUserStateChanged002, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    {
+        std::lock_guard<samgr::mutex> lock(saMgr->userStateLock_);
+        saMgr->userStateMap_.clear();
+    }
     saMgr->OnUserStateChanged(100, USER_STATE_ACTIVATING);
     saMgr->OnUserStateChanged(100, USER_STATE_STOPPING);
     std::lock_guard<samgr::mutex> lock(saMgr->userStateLock_);

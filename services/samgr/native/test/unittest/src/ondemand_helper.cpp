@@ -1092,7 +1092,7 @@ void OnDemandHelper::GetCommonEventExtraId(int32_t saId, const std::string& even
     return;
 }
 
-int32_t OnDemandHelper::OnUserStateChanged(int32_t userId, UserState userState)
+int32_t OnDemandHelper::OnUserStateChanged(int32_t userId, SamgrUserState userState)
 {
     SamMockPermission::MockProcess("accountmgr");
     int64_t begin = GetTickCount();
