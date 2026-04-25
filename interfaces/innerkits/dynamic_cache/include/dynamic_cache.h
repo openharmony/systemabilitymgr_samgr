@@ -32,7 +32,15 @@ public:
     sptr<IRemoteObject> QueryResult(int32_t querySaId, int32_t code);
     bool CanUseCache(int32_t querySaId, char* waterLine, std::string defaultValue);
 
-    void ClearCache();
+    void __attribute__((no_sanitize("cfi"))) ClearCache()
+    {
+        std::lock_guard<std::mutex> autoLock(queryCacheLock_);
+        if (lastQuerySaProxy_ != nullptr) {
+            lastQuerySaProxy_->RemoveDeathRecipient(this);
+        }
+        lastQuerySaId_ = -1;
+        lastQuerySaProxy_ = nullptr;
+    }
 
     bool InvalidateCache();
     virtual sptr<IRemoteObject> Recompute(int32_t querySaId, int32_t code)
