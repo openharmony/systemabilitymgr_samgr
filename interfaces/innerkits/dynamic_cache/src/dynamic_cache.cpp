@@ -23,38 +23,6 @@
 
 using namespace std;
 namespace OHOS {
-extern "C" uintptr_t DFX_SetCrashObj(uint8_t type, uintptr_t addr);
-extern "C" void DFX_ResetCrashObj(uintptr_t crashObj);
-
-struct CrashObjDumper {
-public:
-    explicit CrashObjDumper(const char *str)
-    {
-        if (str == nullptr) {
-            return;
-        }
-        ptr_ = DFX_SetCrashObj(0, reinterpret_cast<uintptr_t>(str));
-    }
-    ~CrashObjDumper()
-    {
-        DFX_ResetCrashObj(ptr_);
-    }
-private:
-    uintptr_t ptr_ = 0;
-};
-
-void __attribute__((no_sanitize("cfi"))) DynamicCache::ClearCache()
-{
-    std::lock_guard<std::mutex> autoLock(queryCacheLock_);
-    if (lastQuerySaProxy_ != nullptr) {
-        std::string info = ToString(lastQuerySaId_) + "_" + Str16ToStr8(lastQuerySaProxy_->GetInterfaceDescriptor());
-        CrashObjDumper dumper(info.c_str());
-        lastQuerySaProxy_->RemoveDeathRecipient(this);
-    }
-    lastQuerySaId_ = -1;
-    lastQuerySaProxy_ = nullptr;
-}
-
 sptr<IRemoteObject> DynamicCache::QueryResult(int32_t querySaId, int32_t code)
 {
     int32_t waterLineLength = 128;
