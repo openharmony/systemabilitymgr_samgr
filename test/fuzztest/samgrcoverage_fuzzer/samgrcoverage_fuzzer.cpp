@@ -308,6 +308,18 @@ void FuzzNotifyRpcLoadCompleted(const uint8_t* data, size_t size)
     sptr<IRemoteObject> testAbility(nullptr);
     saMgr->NotifyRpcLoadCompleted("srcDeviceId", saId, testAbility);
 }
+
+void FuzzOnUserStateChanged(const uint8_t* data, size_t size)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    if (saMgr == nullptr) {
+        return;
+    }
+    FuzzedDataProvider fdp(data, size);
+    int32_t userId = fdp.ConsumeIntegral<int32_t>();
+    int32_t userState = fdp.ConsumeIntegralInRange<int32_t>(0, 2);
+    saMgr->OnUserStateChanged(userId, static_cast<SamgrUserState>(userState));
+}
 }
 }
 
@@ -332,6 +344,9 @@ extern "C" int LLVMFuzzerTestOneInput(const uint8_t* data, size_t size)
     OHOS::Samgr::FuzzDoLoadSystemAbilityFromRpc(data, size);
     OHOS::Samgr::FuzzDoUnloadSystemAbility(data, size);
     OHOS::Samgr::FuzzNotifyRpcLoadCompleted(data, size);
+#ifdef SUPPORT_MULTI_INSTANCE
+    OHOS::Samgr::FuzzOnUserStateChanged(data, size);
+#endif
     return 0;
 }
 

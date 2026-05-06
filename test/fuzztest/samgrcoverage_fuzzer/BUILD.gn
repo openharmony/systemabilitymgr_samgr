@@ -15,6 +15,7 @@
 import("//build/config/features.gni")
 import("//build/ohos.gni")
 import("//build/test.gni")
+import("../../../config.gni")
 import("../../../services/samgr/var.gni")
 module_output_path = "samgr/samgr"
 samgr_dir = "../../.."
@@ -115,6 +116,9 @@ ohos_fuzztest("SamgrCoverageFuzzTest") {
     defines += [ "SUPPORT_PENGLAI_MODE" ]
   }
   defines += ["SAMGR_USE_FFRT"]
+  if (samgr_support_multi_instance) {
+    defines += [ "SUPPORT_MULTI_INSTANCE" ]
+  }
 }
 
 group("fuzztest") {

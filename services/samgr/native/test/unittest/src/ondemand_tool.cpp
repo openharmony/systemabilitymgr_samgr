@@ -640,11 +640,6 @@ static void TestUserState(OHOS::OnDemandHelper& ondemandHelper, char* argv[])
 {
     int32_t userId = atoi(argv[SECOND_NUM]);
     int32_t state = atoi(argv[THIRD_NUM]);
-    if (state < static_cast<int32_t>(USER_STATE_ACTIVATING) ||
-        state > static_cast<int32_t>(USER_STATE_STOPPING)) {
-        cout << "invalid userState, must be 0(ACTIVATING), 1(SWITCHING), 2(STOPPING)" << endl;
-        return;
-    }
     ondemandHelper.OnUserStateChanged(userId, static_cast<SamgrUserState>(state));
 }
 
