@@ -81,6 +81,9 @@ void SystemAbilityStateScheduler::CleanFfrt()
     if (unloadEventHandler_ != nullptr) {
         unloadEventHandler_->CleanFfrt();
     }
+    if (restartProcessHandler_ != nullptr) {
+        restartProcessHandler_->CleanFfrt();
+    }
 }
 
 void SystemAbilityStateScheduler::SetFfrt()
@@ -90,6 +93,9 @@ void SystemAbilityStateScheduler::SetFfrt()
     }
     if (unloadEventHandler_ != nullptr) {
         unloadEventHandler_->SetFfrt();
+    }
+    if (restartProcessHandler_ != nullptr) {
+        restartProcessHandler_->SetFfrt("RestartProcessHandler");
     }
 }
 
@@ -537,12 +543,46 @@ int32_t SystemAbilityStateScheduler::PendLoadEventLocked(const std::shared_ptr<S
     if (count >= MAX_SUBSCRIBE_COUNT) {
         HILOGE("Scheduler SA:%{public}d pid:%{public}d overflow max callback count!",
             abilityContext->systemAbilityId, loadRequestInfo.callingPid);
-        return PEND_LOAD_EVENT_SIZE_LIMIT;
+        return HandleProcessOverload(abilityContext);
     }
     ++count;
     abilityContext->pendingLoadEventList.emplace_back(loadRequestInfo);
     abilityContext->pendingEvent = PendingEvent::LOAD_ABILITY_EVENT;
     return ERR_OK;
+}
+
+int32_t SystemAbilityStateScheduler::HandleProcessOverload(const std::shared_ptr<SystemAbilityContext>& abilityContext)
+{
+    if (restartProcessHandler_ == nullptr) {
+        restartProcessHandler_ = std::make_shared<FFRTHandler>("RestartProcessHandler");
+    }
+    auto task = [processContext = abilityContext->ownProcessContext] () {
+        {
+            std::lock_guard<samgr::mutex> autoLock(processContext->processLock);
+            if (processContext->state != SystemProcessState::STOPPING) {
+                HILOGW("Scheduler proc:%{public}s state %{public}d",
+                    Str16ToStr8(processContext->processName).c_str(), processContext->state);
+                return;
+            }
+        }
+        if (SamgrUtil::CheckSystemProcessState(processContext->processName)) {
+            auto result = ServiceControlWithExtra(Str16ToStr8(processContext->processName).c_str(),
+                ServiceAction::STOP, nullptr, 0);
+        } else {
+            auto obj = SystemAbilityManager::GetInstance()->GetSystemProcess(processContext->processName);
+            if (obj == nullptr) {
+                HILOGD("Scheduler SA:Remove proc %{public}s is null",
+                    Str16ToStr8(processContext->processName).c_str());
+                return;
+            }
+            SystemAbilityManager::GetInstance()->RemoveSystemProcess(obj);
+        }
+    };
+    bool ret = restartProcessHandler_->PostTask(task);
+    if (!ret) {
+        HILOGW("HandleProcessOverload PostTask fail");
+    }
+    return PEND_LOAD_EVENT_SIZE_LIMIT;
 }
 
 int32_t SystemAbilityStateScheduler::PendUnloadEventLocked(
