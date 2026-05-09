@@ -14,6 +14,7 @@
  */
 
 #include "system_ability_mgr_util_test.h"
+#define protected public
 #include "system_ability_manager.h"
 #include "system_ability_manager_util.h"
 #include "sam_mock_permission.h"

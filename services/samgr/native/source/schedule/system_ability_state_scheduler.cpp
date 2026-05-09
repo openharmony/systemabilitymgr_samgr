@@ -1429,7 +1429,7 @@ int32_t SystemAbilityStateScheduler::SubscribeSystemProcessList(const std::list<
 
         auto callingPid = IPCSkeleton::GetCallingPid();
         {
-            lock_guard<samgr::mutex> autoLock(procListenerMapLock_);
+            std::lock_guard<samgr::mutex> autoLock(procListenerMapLock_);
             auto& listeners = procListenerMap_[procName];
             if (std::find(listeners.cbegin(), listeners.cend(), listener) != listeners.cend()) {
                 continue;
@@ -1485,7 +1485,7 @@ int32_t SystemAbilityStateScheduler::UnSubscribeSystemProcessList(const std::lis
         HILOGD("UnSubscribeSystemProcessList processName %{public}s", processName.c_str());
         auto callingPid = IPCSkeleton::GetCallingPid();
         {
-            lock_guard<samgr::mutex> autoLock(procListenerMapLock_);
+            std::lock_guard<samgr::mutex> autoLock(procListenerMapLock_);
             if (!procListenerMap_.count(procName)) {
                 continue;
             }

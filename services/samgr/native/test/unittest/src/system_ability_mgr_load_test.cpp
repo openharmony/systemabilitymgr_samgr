@@ -30,6 +30,7 @@
 #include "system_ability_manager_util.h"
 #include "test_log.h"
 #define private public
+#define protected public
 #include "ipc_skeleton.h"
 #ifdef SUPPORT_ACCESS_TOKEN
 #include "accesstoken_kit.h"
@@ -900,11 +901,11 @@ HWTEST_F(SystemAbilityMgrLoadTest, DoUnloadSystemAbility001, TestSize.Level3)
     OnDemandEvent event;
     bool result = saMgr->DoUnloadSystemAbility(said, procName, event);
     sptr<ISystemAbilityLoadCallback> mockLoadCallback1 = new SystemAbilityLoadCallbackMock();
-    std::map<std::string, SystemAbilityManager::CallbackList> mockCallbackMap1 = {
+    std::map<std::string, BaseSystemAbilityManager::CallbackList> mockCallbackMap1 = {
         {"111111", {{mockLoadCallback1, 1}}}
     };
-    SystemAbilityManager::AbilityItem mockAbilityItem1 = {
-        SystemAbilityManager::AbilityState::INIT, mockCallbackMap1
+    BaseSystemAbilityManager::AbilityItem mockAbilityItem1 = {
+        BaseSystemAbilityManager::AbilityState::INIT, mockCallbackMap1
     };
     sptr<IRemoteObject> testAbility = new TestTransactionService();
     saMgr->RemoveStartingAbilityCallbackForDevice(

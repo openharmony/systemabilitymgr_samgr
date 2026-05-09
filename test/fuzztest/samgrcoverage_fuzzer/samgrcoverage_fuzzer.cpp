@@ -16,6 +16,7 @@
 #include "samgrcoverage_fuzzer.h"
 
 #define private public
+#define protected public
 #include <fuzzer/FuzzedDataProvider.h>
 #include "if_system_ability_manager.h"
 #include "itest_transaction_service.h"

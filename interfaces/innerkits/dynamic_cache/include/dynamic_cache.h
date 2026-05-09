@@ -42,7 +42,6 @@ public:
         lastQuerySaProxy_ = nullptr;
     }
 
-    bool InvalidateCache();
     virtual sptr<IRemoteObject> Recompute(int32_t querySaId, int32_t code)
     {
         std::lock_guard<std::mutex> autoLock(queryCacheLock_);

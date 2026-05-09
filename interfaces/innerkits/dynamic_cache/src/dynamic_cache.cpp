@@ -15,7 +15,6 @@
 
 #include "dynamic_cache.h"
 
-#include "datetime_ex.h"
 #include "parameter.h"
 #include "refbase.h"
 #include "sam_log.h"
@@ -62,16 +61,4 @@ bool DynamicCache::CanUseCache(int32_t querySaId, char* waterLine, string defaul
         lastQuerySaProxy_ != nullptr && !lastQuerySaProxy_->IsObjectDead();
 }
 
-bool DynamicCache::InvalidateCache()
-{
-    HILOGD("DynamicCache InvalidateCache Begin");
-    string tickCount = to_string(GetTickCount());
-    int32_t ret = SetParameter(key_.c_str(), tickCount.c_str());
-    if (ret != EC_SUCCESS) {
-        HILOGE("DynamicCache InvalidateCache SetParameter error:%{public}d!", ret);
-        return false;
-    }
-    HILOGD("DynamicCache InvalidateCache End");
-    return true;
-}
 } // namespace OHOS

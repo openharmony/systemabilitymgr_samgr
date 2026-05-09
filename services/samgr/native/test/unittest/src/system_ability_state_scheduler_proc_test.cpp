@@ -21,6 +21,7 @@
 #include "test_log.h"
 
 #define private public
+#define protected public
 #include "schedule/system_ability_state_scheduler.h"
 #include "system_ability_manager.h"
 

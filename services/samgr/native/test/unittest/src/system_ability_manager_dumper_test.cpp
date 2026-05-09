@@ -24,6 +24,7 @@
 #include <vector>
 #include <set>
 #define private public
+#define protected public
 #include "system_ability_manager_dumper.h"
 #include "system_ability_manager.h"
 #include "samgr_err_code.h"

@@ -69,6 +69,7 @@ ohos_unittest("SystemAbilityMgrTest") {
     "${samgr_services_dir}/source/schedule/system_ability_state_machine.cpp",
     "${samgr_services_dir}/source/schedule/system_ability_state_scheduler.cpp",
     "${samgr_services_dir}/source/system_ability_load_callback_proxy.cpp",
+    "${samgr_services_dir}/source/base_system_ability_manager.cpp",
     "${samgr_services_dir}/source/system_ability_manager.cpp",
     "${samgr_services_dir}/source/system_ability_manager_dumper.cpp",
     "${samgr_services_dir}/source/system_ability_manager_stub.cpp",
@@ -193,6 +194,7 @@ ohos_unittest("SystemAbilityMgrCollectTest") {
     "${samgr_services_dir}/source/schedule/system_ability_state_machine.cpp",
     "${samgr_services_dir}/source/schedule/system_ability_state_scheduler.cpp",
     "${samgr_services_dir}/source/system_ability_load_callback_proxy.cpp",
+    "${samgr_services_dir}/source/base_system_ability_manager.cpp",
     "${samgr_services_dir}/source/system_ability_manager.cpp",
     "${samgr_services_dir}/source/system_ability_manager_dumper.cpp",
     "${samgr_services_dir}/source/system_ability_manager_stub.cpp",
@@ -309,6 +311,113 @@ ohos_unittest("SystemAbilityMgrCollectTest") {
   defines += ["SAMGR_USE_FFRT"]
 }
 
+ohos_unittest("BaseSystemAbilityMgrTest") {
+  sanitize = {
+    cfi = true
+    cfi_cross_dso = true
+    debug = false
+    cfi_no_nvcall = true
+    blocklist = "../../../../../cfi_blocklist.txt"
+  }
+  module_out_path = module_output_path
+
+  sources = [
+    "${samgr_dir}/utils/native/source/tools.cpp",
+    "${samgr_services_dir}/source/ability_death_recipient.cpp",
+    "${samgr_services_dir}/source/collect/device_param_collect.cpp",
+    "${samgr_services_dir}/source/collect/device_status_collect_manager.cpp",
+    "${samgr_services_dir}/source/collect/device_timed_collect.cpp",
+    "${samgr_services_dir}/source/collect/icollect_plugin.cpp",
+    "${samgr_services_dir}/source/collect/ref_count_collect.cpp",
+    "${samgr_services_dir}/source/ffrt_handler.cpp",
+    "${samgr_services_dir}/source/memory_guard.cpp",
+    "${samgr_services_dir}/source/rpc_callback_imp.cpp",
+    "${samgr_services_dir}/source/samgr_time_handler.cpp",
+    "${samgr_services_dir}/source/schedule/system_ability_event_handler.cpp",
+    "${samgr_services_dir}/source/schedule/system_ability_state_machine.cpp",
+    "${samgr_services_dir}/source/schedule/system_ability_state_scheduler.cpp",
+    "${samgr_services_dir}/source/system_ability_load_callback_proxy.cpp",
+    "${samgr_services_dir}/source/base_system_ability_manager.cpp",
+    "${samgr_services_dir}/source/system_ability_manager.cpp",
+    "${samgr_services_dir}/source/system_ability_manager_dumper.cpp",
+    "${samgr_services_dir}/source/system_ability_manager_stub.cpp",
+    "${samgr_services_dir}/source/system_ability_manager_util.cpp",
+    "${samgr_services_dir}/source/system_ability_status_change_proxy.cpp",
+    "${samgr_services_dir}/source/system_process_status_change_proxy.cpp",
+    "${samgr_services_dir}/test/unittest/src/base_system_ability_mgr_test.cpp",
+    "${samgr_services_dir}/test/unittest/src/itest_transaction_service.cpp",
+    "${samgr_services_dir}/test/unittest/src/mock_accesstoken_kit.cpp",
+    "${samgr_services_dir}/test/unittest/src/mock_permission.cpp",
+    "${samgr_services_dir}/test/unittest/src/sa_status_change_mock.cpp",
+    "//foundation/systemabilitymgr/samgr/frameworks/native/source/system_process_status_change_stub.cpp",
+    "//foundation/systemabilitymgr/samgr/services/dfx/source/hisysevent_adapter.cpp",
+    "//foundation/systemabilitymgr/samgr/services/lsamgr/src/local_ability_manager_proxy.cpp",
+  ]
+
+  configs = [
+    ":sam_test_config",
+    "${samgr_dir}/services/samgr/native:sam_config",
+    "//foundation/systemabilitymgr/samgr/test/resource:coverage_flags",
+  ]
+
+  cflags = []
+  if (target_cpu == "arm") {
+    cflags += [ "-DBINDER_IPC_32BIT" ]
+  }
+
+  deps = [
+    ":samgr_proxy_tdd",
+    "${samgr_dir}/interfaces/innerkits/common:samgr_common",
+    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/dynamic_cache:dynamic_cache",
+  ]
+
+  external_deps = [
+    "access_token:libaccesstoken_sdk",
+    "c_utils:utils",
+    "config_policy:configpolicy_util",
+    "ffrt:libffrt",
+    "googletest:gtest_main",
+    "hilog:libhilog",
+    "hisysevent:libhisysevent",
+    "hitrace:hitrace_meter",
+    "init:libbeget_proxy",
+    "init:libbegetutil",
+    "ipc:ipc_core",
+    "ipc:libdbinder",
+    "json:nlohmann_json_static",
+    "safwk:system_ability_fwk",
+    "qos_manager:qos",
+    "qos_manager:concurrent_task_client",
+  ]
+  defines = []
+  if (use_musl) {
+    if (musl_use_jemalloc && musl_use_jemalloc_dfx_intf) {
+      defines += [ "CONFIG_USE_JEMALLOC_DFX_INTF" ]
+    }
+  }
+  if (samgr_support_access_token) {
+    external_deps += [
+      "access_token:libnativetoken_shared",
+      "access_token:libtokensetproc_shared",
+    ]
+    defines += [ "SUPPORT_ACCESS_TOKEN" ]
+  }
+  if (hicollie_able) {
+    external_deps += [ "hicollie:libhicollie" ]
+    defines += [ "HICOLLIE_ENABLE" ]
+  }
+  if (samgr_enable_delay_dbinder) {
+    defines += [ "SAMGR_ENABLE_DELAY_DBINDER" ]
+  }
+  if (support_penglai_mode) {
+    defines += [ "SUPPORT_PENGLAI_MODE" ]
+  }
+  if (samgr_support_multi_instance) {
+    defines += [ "SUPPORT_MULTI_INSTANCE" ]
+  }
+  defines += ["SAMGR_USE_FFRT"]
+}
+
 ohos_unittest("SystemAbilityMgrDeviceNetworkingTest") {
   sanitize = {
     cfi = true
@@ -334,6 +443,7 @@ ohos_unittest("SystemAbilityMgrDeviceNetworkingTest") {
     "${samgr_services_dir}/source/schedule/system_ability_state_machine.cpp",
     "${samgr_services_dir}/source/schedule/system_ability_state_scheduler.cpp",
     "${samgr_services_dir}/source/system_ability_load_callback_proxy.cpp",
+    "${samgr_services_dir}/source/base_system_ability_manager.cpp",
     "${samgr_services_dir}/source/system_ability_manager.cpp",
     "${samgr_services_dir}/source/system_ability_manager_dumper.cpp",
     "${samgr_services_dir}/source/system_ability_manager_stub.cpp",
@@ -446,6 +556,7 @@ ohos_unittest("SystemAbilityMgrStubTest") {
     "${samgr_services_dir}/source/schedule/system_ability_event_handler.cpp",
     "${samgr_services_dir}/source/schedule/system_ability_state_machine.cpp",
     "${samgr_services_dir}/source/schedule/system_ability_state_scheduler.cpp",
+    "${samgr_services_dir}/source/base_system_ability_manager.cpp",
     "${samgr_services_dir}/source/system_ability_manager.cpp",
     "${samgr_services_dir}/source/system_ability_manager_dumper.cpp",
     "${samgr_services_dir}/source/system_ability_manager_stub.cpp",
@@ -654,6 +765,7 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
     "${samgr_services_dir}/source/schedule/system_ability_event_handler.cpp",
     "${samgr_services_dir}/source/schedule/system_ability_state_machine.cpp",
     "${samgr_services_dir}/source/schedule/system_ability_state_scheduler.cpp",
+    "${samgr_services_dir}/source/base_system_ability_manager.cpp",
     "${samgr_services_dir}/source/system_ability_manager.cpp",
     "${samgr_services_dir}/source/system_ability_manager_dumper.cpp",
     "${samgr_services_dir}/source/system_ability_manager_stub.cpp",
@@ -758,6 +870,7 @@ ohos_unittest("SystemAbilityMgrDumperTest") {
     "${samgr_services_dir}/source/schedule/system_ability_event_handler.cpp",
     "${samgr_services_dir}/source/schedule/system_ability_state_machine.cpp",
     "${samgr_services_dir}/source/schedule/system_ability_state_scheduler.cpp",
+    "${samgr_services_dir}/source/base_system_ability_manager.cpp",
     "${samgr_services_dir}/source/system_ability_manager.cpp",
     "${samgr_services_dir}/source/system_ability_manager_dumper.cpp",
     "${samgr_services_dir}/source/system_ability_manager_stub.cpp",
@@ -1009,6 +1122,7 @@ ohos_executable("TestTool") {
     "${samgr_services_dir}/source/schedule/system_ability_state_machine.cpp",
     "${samgr_services_dir}/source/schedule/system_ability_state_scheduler.cpp",
     "${samgr_services_dir}/source/system_ability_load_callback_proxy.cpp",
+    "${samgr_services_dir}/source/base_system_ability_manager.cpp",
     "${samgr_services_dir}/source/system_ability_manager.cpp",
     "${samgr_services_dir}/source/system_ability_manager_dumper.cpp",
     "${samgr_services_dir}/source/system_ability_manager_stub.cpp",
@@ -1160,6 +1274,7 @@ group("unittest") {
   deps = [
     ":LocalAbilityManagerProxyTest",
     ":MockSystemAbilityManagerTest",
+    ":BaseSystemAbilityMgrTest",
     ":SystemAbilityMgrCollectTest",
     ":SystemAbilityMgrDeviceNetworkingTest",
     ":SystemAbilityMgrDumperTest",

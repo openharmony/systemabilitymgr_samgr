@@ -1568,11 +1568,11 @@ HWTEST_F(SystemAbilityMgrTest, RemoveSystemProcess001, TestSize.Level3)
     saMgr->abilityStateScheduler_ = nullptr;
     int32_t result = saMgr->RemoveSystemProcess(testAbility);
     sptr<ISystemAbilityLoadCallback> mockLoadCallback1 = new SystemAbilityLoadCallbackMock();
-    std::map<std::string, SystemAbilityManager::CallbackList> mockCallbackMap1 = {
+    std::map<std::string, BaseSystemAbilityManager::CallbackList> mockCallbackMap1 = {
         {"111111", {}}
     };
-    SystemAbilityManager::AbilityItem mockAbilityItem1 = {
-        SystemAbilityManager::AbilityState::INIT, mockCallbackMap1
+    BaseSystemAbilityManager::AbilityItem mockAbilityItem1 = {
+        BaseSystemAbilityManager::AbilityState::INIT, mockCallbackMap1
     };
     saMgr->RemoveStartingAbilityCallbackForDevice(
         mockAbilityItem1, testAbility);
@@ -1594,33 +1594,6 @@ HWTEST_F(SystemAbilityMgrTest, RemoveSystemProcess002, TestSize.Level3)
     saMgr->systemProcessMap_[u"test"] = testAbility;
     int32_t result = saMgr->RemoveSystemProcess(testAbility);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
-}
-
-/**
- * @tc.name: SetDeviceName001
- * @tc.desc: test SetDeviceName
- * @tc.type: FUNC
- * @tc.require: I6NKWX
- */
-HWTEST_F(SystemAbilityMgrTest, SetDeviceName001, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
-    saMgr->SetDeviceName(DEVICE_NAME);
-    EXPECT_EQ(saMgr->deviceName_, DEVICE_NAME);
-}
-
-/**
- * @tc.name: GetDeviceName001
- * @tc.desc: test GetDeviceName
- * @tc.type: FUNC
- * @tc.require: I6NKWX
- */
-HWTEST_F(SystemAbilityMgrTest, GetDeviceName001, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
-    saMgr->SetDeviceName(DEVICE_NAME);
-    auto ret = saMgr->GetDeviceName();
-    EXPECT_EQ(ret, DEVICE_NAME);
 }
 
 /**

@@ -26,6 +26,7 @@
 #include "test_log.h"
 
 #define private public
+#define protected public
 #include "sa_status_change_mock.h"
 #include "system_ability_manager.h"
 #include "system_ability_manager_util.h"

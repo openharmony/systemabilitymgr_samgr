@@ -17,6 +17,7 @@
 #include <sstream>
 #include <fstream>
 #include <string>
+#include "datetime_ex.h"
 #include "nlohmann/json.hpp"
 #include "system_ability_manager.h"
 #include "system_ability_manager_util.h"
@@ -63,6 +64,7 @@ constexpr const char* PENG_LAI = "penglai";
 constexpr const char* PENGLAI_PATH = "profile/penglai";
 constexpr const char* LOGGER_TRANSPROC_PATH = "/proc/transaction_proc";
 constexpr const char* SET_PRIOR_PARAM = "const.samgr.setprior.support";
+constexpr const char* SAMGR_CACHE_KEY = "samgr.cache.sa";
 #ifdef SUPPORT_DEVICE_MANAGER
 constexpr const char* PKG_NAME = "Samgr_Networking";
 #endif
@@ -258,7 +260,14 @@ void SamgrUtil::SendUpdateSaState(int32_t systemAbilityId, const std::string& up
 void SamgrUtil::InvalidateSACache()
 {
     auto invalidateCacheTask = [] () {
-        SystemAbilityManager::GetInstance()->InvalidateCache();
+        HILOGD("DynamicCache InvalidateCache Begin");
+        string tickCount = to_string(GetTickCount());
+        int32_t ret = SetParameter(SAMGR_CACHE_KEY, tickCount.c_str());
+        if (ret != 0) {
+            HILOGE("DynamicCache InvalidateCache SetParameter error:%{public}d!", ret);
+            return;
+        }
+        HILOGD("DynamicCache InvalidateCache End");
     };
     setParmHandler_->PostTask(invalidateCacheTask);
 }
