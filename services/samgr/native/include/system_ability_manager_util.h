@@ -59,7 +59,7 @@ public:
     static void InvalidateSACache();
     static void FilterCommonSaProfile(const SaProfile& oldProfile, CommonSaProfile& newProfile);
     static bool CheckPengLai();
-    static bool CheckSystemProcessState(const std::u16string& procName);
+    static bool CheckSystemProcessStarted(const std::u16string& procName);
     static bool CheckSupportSetPrior();
 #ifdef SUPPORT_PENGLAI_MODE
     static bool CheckPengLaiPermission(int32_t systemAbilityId);
