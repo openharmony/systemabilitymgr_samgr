@@ -30,33 +30,11 @@ public:
     int32_t Init(const std::list<SaProfile>& saProfiles);
     int32_t Destroy();
 
-    int32_t AddSystemAbility(int32_t systemAbilityId, const sptr<IRemoteObject>& ability,
-        const ISystemAbilityManager::SAExtraProp& extraProp) override;
-    sptr<IRemoteObject> GetSystemAbility(int32_t systemAbilityId) override;
-    sptr<IRemoteObject> CheckSystemAbility(int32_t systemAbilityId) override;
-    sptr<IRemoteObject> CheckSystemAbility(int32_t systemAbilityId, bool& isExist) override;
-    int32_t RemoveSystemAbility(int32_t systemAbilityId) override;
-    std::vector<std::u16string> ListSystemAbilities(uint32_t dumpFlags) override;
-
-    int32_t SubscribeSystemAbility(int32_t systemAbilityId,
-        const sptr<ISystemAbilityStatusChange>& listener) override;
-    int32_t UnSubscribeSystemAbility(int32_t systemAbilityId,
-        const sptr<ISystemAbilityStatusChange>& listener) override;
-
-    int32_t AddSystemProcess(const std::u16string& procName,
-        const sptr<IRemoteObject>& procObject) override;
-    int32_t AddOnDemandSystemAbilityInfo(int32_t systemAbilityId,
-        const std::u16string& procName);
-
-    void Dump(int32_t fd);
-    void GetAllSystemAbilityInfo(std::string& result);
+    int32_t StartDynamicSystemProcess(const std::u16string& name, int32_t systemAbilityId,
+        const OnDemandEvent& event) override;
 
 private:
-    std::u16string GetUserProcessName(const std::u16string& baseProcName) const;
-    bool IsUserMultiInstanceSa(int32_t systemAbilityId) const;
-
     int32_t userId_;
-    std::set<int32_t> userMultiInstanceSaIds_;
 };
 
 } // namespace OHOS
