@@ -102,6 +102,7 @@ private:
 
     int32_t PendLoadEventLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext,
         const LoadRequestInfo& loadRequestInfo);
+    int32_t HandlePendingLoadOverflow(const std::shared_ptr<SystemAbilityContext>& abilityContext);
     int32_t PendUnloadEventLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext,
         const std::shared_ptr<UnloadRequestInfo> unloadRequestInfo);
     int32_t RemovePendingUnloadEventLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext);
@@ -194,6 +195,7 @@ private:
     samgr::shared_mutex runningProcessListLock_;
     std::list<SystemProcessInfo> runningProcessList_;
     std::list<std::u16string> lowMemoryProcessList_;
+    std::shared_ptr<FFRTHandler> recoverHandler_;
 };
 } // namespace OHOS
 

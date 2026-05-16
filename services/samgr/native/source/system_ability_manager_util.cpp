@@ -292,6 +292,14 @@ bool SamgrUtil::CheckPengLai()
     return paramValue == PENG_LAI;
 }
 
+bool SamgrUtil::CheckSystemProcessStarted(const std::u16string& procName)
+{
+    std::string serviceName = "startup.service.ctl." + Str16ToStr8(procName);
+    std::string defaultValue = "-1";
+    std::string paramValue = system::GetParameter(serviceName, defaultValue);
+    return paramValue == ToString(ServiceStatus::SERVICE_STARTED);
+}
+
 bool SamgrUtil::CheckSupportSetPrior()
 {
     return system::GetBoolParameter(SET_PRIOR_PARAM, false);
