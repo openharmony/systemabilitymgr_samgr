@@ -190,7 +190,7 @@ protected:
         const OnDemandEvent& event);
     int32_t StartingSystemProcessLocked(const std::u16string& name, int32_t systemAbilityId,
         const OnDemandEvent& event);
-    int32_t StartDynamicSystemProcess(const std::u16string& name, int32_t systemAbilityId,
+    virtual int32_t StartDynamicSystemProcess(const std::u16string& name, int32_t systemAbilityId,
         const OnDemandEvent& event);
     bool IsInitBootFinished();
 
