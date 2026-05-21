@@ -336,6 +336,7 @@ enum {
     SELECTION_FWK_SA_ID                              = 8500,
     MECH_BODY_SA_ID                                  = 8550,
     XPERF_SERVICE_SA_ID                              = 8600,
+    WEB_NATIVE_MESSAGING_SERVICE_SA_ID               = 8610,
     COMPATIBILITY_CONFIG_CENTER_SA_ID                = 8620,
     FUSION_CONN_SYS_ABILITY_ID                       = 8630,
     DISK_MANAGER_SA_ID                               = 8640,
