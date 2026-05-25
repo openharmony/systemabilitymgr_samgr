@@ -106,7 +106,8 @@ public:
     bool LoadSystemAbilityFromRpc(const std::string& srcDeviceId, int32_t systemAbilityId,
         const sptr<ISystemAbilityLoadCallback>& callback);
     int32_t DoLoadSystemAbilityFromRpc(const std::string& srcDeviceId, int32_t systemAbilityId,
-        const std::u16string& procName, const sptr<ISystemAbilityLoadCallback>& callback, const OnDemandEvent& event);
+        const std::u16string& procName, const sptr<ISystemAbilityLoadCallback>& callback,
+        const OnDemandEvent& event) override;
     void NotifyRpcLoadCompleted(const std::string& srcDeviceId, int32_t systemAbilityId,
         const sptr<IRemoteObject>& remoteObject);
     int32_t GetOnDemandPolicy(int32_t systemAbilityId, OnDemandPolicyType type,
@@ -137,14 +138,9 @@ public:
         }
         return GetSystemProcess(saProfile.process);
     }
-    void RemoveWhiteCommonEvent()
-    {
-        if (collectManager_ != nullptr) {
-            collectManager_->RemoveWhiteCommonEvent();
-        }
-    }
+    using BaseSystemAbilityManager::RemoveWhiteCommonEvent;
 #ifdef SAMGR_ENABLE_DELAY_DBINDER
-    void InitDbinderService();
+    void InitDbinderService() override;
 #endif
 private:
     using BaseSystemAbilityManager::AbilityState;

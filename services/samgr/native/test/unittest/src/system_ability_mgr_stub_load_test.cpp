@@ -55,7 +55,10 @@ void SystemAbilityMgrStubLoadTest::SetUpTestCase()
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
-    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+    saMgr->selfPtr_ = std::shared_ptr<BaseSystemAbilityManager>(
+        saMgr.GetRefPtr(), [](BaseSystemAbilityManager*) {});
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>(
+        saMgr->weak_from_this());
     std::list<SaProfile> saProfiles;
     saMgr->abilityStateScheduler_->Init(saProfiles);
     DTEST_LOG << "SetUpTestCase" << std::endl;
@@ -1158,7 +1161,8 @@ HWTEST_F(SystemAbilityMgrStubLoadTest, LoadSystemAbility003, TestSize.Level1)
     sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
     list<sptr<ISystemAbilityLoadCallback>> callbacks;
     callbacks.push_back(callback);
-    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
+    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(
+        new RemoteCallbackDeathRecipient(std::weak_ptr<BaseSystemAbilityManager>{}));
     saMgr->RemoveRemoteCallbackLocked(callbacks, callback);
     int32_t res = saMgr->LoadSystemAbility(INVALID_SAID, nullptr);
     EXPECT_EQ(res, INVALID_INPUT_PARA);
@@ -1240,7 +1244,8 @@ HWTEST_F(SystemAbilityMgrStubLoadTest, LoadSystemAbility007, TestSize.Level3)
     sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
     string deviceId = "deviceId";
     saMgr->remoteCallbacks_.clear();
-    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
+    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(
+        new RemoteCallbackDeathRecipient(std::weak_ptr<BaseSystemAbilityManager>{}));
     int32_t res = saMgr->LoadSystemAbility(SAID, deviceId, callback);
     EXPECT_EQ(res, ERR_OK);
 }
@@ -1349,7 +1354,8 @@ HWTEST_F(SystemAbilityMgrStubLoadTest, DoMakeRemoteBinder002, TestSize.Level3)
     auto callingPid = IPCSkeleton::GetCallingPid();
     auto callingUid = IPCSkeleton::GetCallingUid();
     saMgr->dBinderService_ = nullptr;
-    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
+    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(
+        new RemoteCallbackDeathRecipient(std::weak_ptr<BaseSystemAbilityManager>{}));
     saMgr->DoLoadRemoteSystemAbility(SAID, callingPid, callingUid, deviceId, callback);
     sptr<DBinderServiceStub> res = saMgr->DoMakeRemoteBinder(SAID, callingPid, callingUid, deviceId);
     EXPECT_EQ(res, nullptr);

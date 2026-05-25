@@ -27,7 +27,8 @@
 namespace OHOS {
 class RefCountCollect : public ICollectPlugin {
 public:
-    explicit RefCountCollect(const sptr<IReport>& report);
+    explicit RefCountCollect(const sptr<IReport>& report,
+        const std::weak_ptr<BaseSystemAbilityManager>& manager = {});
     ~RefCountCollect() = default;
 
     int32_t OnStart() override;

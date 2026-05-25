@@ -16,49 +16,65 @@
 #ifndef SERVICES_SAMGR_NATIVE_INCLUDE_ABILITY_DEATH_RECIPIENT_H
 #define SERVICES_SAMGR_NATIVE_INCLUDE_ABILITY_DEATH_RECIPIENT_H
 
+#include <memory>
 #include "iremote_object.h"
 
 namespace OHOS {
+
+class BaseSystemAbilityManager;
+
 class AbilityDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
-    void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
-    AbilityDeathRecipient() = default;
+    explicit AbilityDeathRecipient(const std::weak_ptr<BaseSystemAbilityManager>& manager);
     ~AbilityDeathRecipient() override = default;
+    void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
+private:
+    std::weak_ptr<BaseSystemAbilityManager> manager_;
 };
 
 class SystemProcessDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
-    void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
-    SystemProcessDeathRecipient() = default;
+    explicit SystemProcessDeathRecipient(const std::weak_ptr<BaseSystemAbilityManager>& manager);
     ~SystemProcessDeathRecipient() override = default;
+    void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
+private:
+    std::weak_ptr<BaseSystemAbilityManager> manager_;
 };
 
 class AbilityStatusDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
-    void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
-    AbilityStatusDeathRecipient() = default;
+    explicit AbilityStatusDeathRecipient(const std::weak_ptr<BaseSystemAbilityManager>& manager);
     ~AbilityStatusDeathRecipient() override = default;
+    void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
+private:
+    std::weak_ptr<BaseSystemAbilityManager> manager_;
 };
 
 class AbilityCallbackDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
-    void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
-    AbilityCallbackDeathRecipient() = default;
+    explicit AbilityCallbackDeathRecipient(const std::weak_ptr<BaseSystemAbilityManager>& manager);
     ~AbilityCallbackDeathRecipient() override = default;
+    void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
+private:
+    std::weak_ptr<BaseSystemAbilityManager> manager_;
 };
 
 class RemoteCallbackDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
-    void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
-    RemoteCallbackDeathRecipient() = default;
+    explicit RemoteCallbackDeathRecipient(const std::weak_ptr<BaseSystemAbilityManager>& manager);
     ~RemoteCallbackDeathRecipient() override = default;
+    void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
+private:
+    std::weak_ptr<BaseSystemAbilityManager> manager_;
 };
 
 class SystemProcessListenerDeathRecipient : public IRemoteObject::DeathRecipient {
 public:
-    void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
-    SystemProcessListenerDeathRecipient() = default;
+    explicit SystemProcessListenerDeathRecipient(const std::weak_ptr<BaseSystemAbilityManager>& manager);
     ~SystemProcessListenerDeathRecipient() override = default;
+    void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
+private:
+    std::weak_ptr<BaseSystemAbilityManager> manager_;
 };
 } // namespace OHOS
 

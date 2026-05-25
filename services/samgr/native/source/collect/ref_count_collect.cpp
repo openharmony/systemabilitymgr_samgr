@@ -20,7 +20,9 @@ namespace {
 constexpr int32_t REF_ONDEMAND_TIMER_INTERVAL = 1000 * 60 * 1;
 }
 
-RefCountCollect::RefCountCollect(const sptr<IReport>& report) : ICollectPlugin(report), timer_(nullptr) {}
+RefCountCollect::RefCountCollect(const sptr<IReport>& report,
+    const std::weak_ptr<BaseSystemAbilityManager>& manager)
+    : ICollectPlugin(report, manager), timer_(nullptr) {}
 
 void RefCountCollect::Init(const std::list<SaProfile>& saProfiles)
 {
@@ -59,11 +61,11 @@ int32_t RefCountCollect::OnStop()
 
 void RefCountCollect::IdentifyUnrefOndemand()
 {
-    sptr<SystemAbilityManager> samgr = SystemAbilityManager::GetInstance();
+    auto strongManager = manager_.lock();
     std::list<SaControlInfo> saControlList;
 
     for (const auto& saId : unrefUnloadSaList_) {
-        sptr<IRemoteObject> object = samgr->CheckSystemAbility(saId);
+        sptr<IRemoteObject> object = strongManager != nullptr ? strongManager->CheckSystemAbility(saId) : nullptr;
         if (object == nullptr) {
             continue;
         }
@@ -83,9 +85,18 @@ void RefCountCollect::IdentifyUnrefOndemand()
         return;
     }
 
+    if (strongManager == nullptr) {
+        HILOGE("IdentifyUnrefOndemand manager is null");
+        return;
+    }
     OnDemandEvent event = { UNREF_EVENT };
-    auto callback = [event, saIdleList = std::move(saControlList)] () {
-        SystemAbilityManager::GetInstance()->ProcessOnDemandEvent(event, saIdleList);
+    auto weakManager = manager_;
+    auto callback = [event, saIdleList = std::move(saControlList), weakManager] () {
+        auto lockedManager = weakManager.lock();
+        if (lockedManager == nullptr) {
+            return;
+        }
+        lockedManager->ProcessOnDemandEvent(event, saIdleList);
     };
     PostTask(callback);
 }

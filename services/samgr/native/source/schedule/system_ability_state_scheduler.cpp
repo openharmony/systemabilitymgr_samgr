@@ -16,6 +16,7 @@
 #include <algorithm>
 
 #include "ability_death_recipient.h"
+#include "base_system_ability_manager.h"
 #include "datetime_ex.h"
 #include "ipc_skeleton.h"
 #include "memory_guard.h"
@@ -63,7 +64,7 @@ void SystemAbilityStateScheduler::Init(const std::list<SaProfile>& saProfiles)
     HILOGI("Scheduler:init start");
     InitStateContext(saProfiles);
     InitLowMemProcessList(saProfiles);
-    processListenerDeath_ = sptr<IRemoteObject::DeathRecipient>(new SystemProcessListenerDeathRecipient());
+    processListenerDeath_ = sptr<IRemoteObject::DeathRecipient>(new SystemProcessListenerDeathRecipient(manager_));
     unloadEventHandler_ = std::make_shared<UnloadEventHandler>(weak_from_this());
 
     auto listener =  std::dynamic_pointer_cast<SystemAbilityStateListener>(shared_from_this());
@@ -299,7 +300,12 @@ int32_t SystemAbilityStateScheduler::HandleLoadAbilityEvent(int32_t systemAbilit
     if (abilityContext->ownProcessContext->state == SystemProcessState::STARTED
         && abilityContext->state == SystemAbilityState::NOT_LOADED) {
         HILOGD("Scheduler SA:%{public}d handle load event by check start", systemAbilityId);
-        bool result = SystemAbilityManager::GetInstance()->DoLoadOnDemandAbility(systemAbilityId, isExist);
+        auto strongManager = manager_.lock();
+        if (strongManager == nullptr) {
+            HILOGE("Scheduler SA:%{public}d manager is null", systemAbilityId);
+            return ERR_INVALID_VALUE;
+        }
+        bool result = strongManager->DoLoadOnDemandAbility(systemAbilityId, isExist);
         if (result) {
             return stateMachine_->AbilityStateTransitionLocked(abilityContext, SystemAbilityState::LOADING);
         }
@@ -452,7 +458,12 @@ int32_t SystemAbilityStateScheduler::ActiveSystemAbilityLocked(
     const std::shared_ptr<SystemAbilityContext>& abilityContext,
     const nlohmann::json& activeReason)
 {
-    bool result = SystemAbilityManager::GetInstance()->ActiveSystemAbility(abilityContext->systemAbilityId,
+    auto strongManager = manager_.lock();
+    if (strongManager == nullptr) {
+        HILOGE("Scheduler SA:%{public}d manager is null", abilityContext->systemAbilityId);
+        return ACTIVE_SA_FAIL;
+    }
+    bool result = strongManager->ActiveSystemAbility(abilityContext->systemAbilityId,
         abilityContext->ownProcessContext->processName, activeReason);
     if (!result) {
         HILOGE("Scheduler SA:%{public}d active fail", abilityContext->systemAbilityId);
@@ -555,10 +566,21 @@ int32_t SystemAbilityStateScheduler::PendLoadEventLocked(const std::shared_ptr<S
 int32_t SystemAbilityStateScheduler::HandlePendingLoadOverflow(const std::shared_ptr<SystemAbilityContext>&
     abilityContext)
 {
+    auto strongManager = manager_.lock();
+    if (strongManager == nullptr) {
+        HILOGE("HandlePendingLoadOverflow manager is null");
+        return ERR_INVALID_VALUE;
+    }
     if (recoverHandler_ == nullptr) {
         recoverHandler_ = std::make_shared<FFRTHandler>("RestartProcessHandler");
     }
-    auto task = [abilityContext, processContext = abilityContext->ownProcessContext] () {
+    auto weakManager = manager_;
+    auto task = [abilityContext, processContext = abilityContext->ownProcessContext, weakManager] () {
+        auto strongManager = weakManager.lock();
+        if (strongManager == nullptr) {
+            HILOGE("HandlePendingLoadOverflow manager expired");
+            return;
+        }
         {
             std::lock_guard<samgr::mutex> autoLock(processContext->processLock);
             if (processContext->state != SystemProcessState::STOPPING) {
@@ -576,13 +598,13 @@ int32_t SystemAbilityStateScheduler::HandlePendingLoadOverflow(const std::shared
             KHILOGI("HandlePendingLoadOverflow:%{public}s kill pid:%{public}d_%{public}d",
                 Str16ToStr8(processContext->processName).c_str(), processContext->pid, result);
         } else {
-            auto obj = SystemAbilityManager::GetInstance()->GetSystemProcess(processContext->processName);
+            auto obj = strongManager->GetSystemProcess(processContext->processName);
             if (obj == nullptr) {
                 KHILOGW("HandlePendingLoadOverflow:%{public}s is removed",
                     Str16ToStr8(processContext->processName).c_str());
                 return;
             }
-            SystemAbilityManager::GetInstance()->RemoveSystemProcess(obj);
+            strongManager->RemoveSystemProcess(obj);
             KHILOGI("HandlePendingLoadOverflow:rmProc %{public}s",
                 Str16ToStr8(processContext->processName).c_str());
         }
@@ -651,14 +673,19 @@ int32_t SystemAbilityStateScheduler::DoLoadSystemAbilityLocked(
     const std::shared_ptr<SystemAbilityContext>& abilityContext, const LoadRequestInfo& loadRequestInfo)
 {
     int32_t result = ERR_OK;
+    auto strongManager = manager_.lock();
+    if (strongManager == nullptr) {
+        HILOGE("Scheduler SA:%{public}d manager is null", abilityContext->systemAbilityId);
+        return ERR_INVALID_VALUE;
+    }
     if (loadRequestInfo.deviceId == LOCAL_DEVICE) {
         HILOGD("Scheduler SA:%{public}d load ability from local start", abilityContext->systemAbilityId);
-        result = SystemAbilityManager::GetInstance()->DoLoadSystemAbility(abilityContext->systemAbilityId,
+        result = strongManager->DoLoadSystemAbility(abilityContext->systemAbilityId,
             abilityContext->ownProcessContext->processName, loadRequestInfo.callback, loadRequestInfo.callingPid,
             loadRequestInfo.loadEvent);
     } else {
         HILOGD("Scheduler SA:%{public}d load ability from remote start", abilityContext->systemAbilityId);
-        result = SystemAbilityManager::GetInstance()->DoLoadSystemAbilityFromRpc(loadRequestInfo.deviceId,
+        result = strongManager->DoLoadSystemAbilityFromRpc(loadRequestInfo.deviceId,
             abilityContext->systemAbilityId, abilityContext->ownProcessContext->processName, loadRequestInfo.callback,
             loadRequestInfo.loadEvent);
     }
@@ -746,8 +773,13 @@ bool SystemAbilityStateScheduler::IsProcessIdledLocked(const std::shared_ptr<Sys
 bool SystemAbilityStateScheduler::CheckSaIsImmediatelyRecycle(
     const std::shared_ptr<SystemProcessContext>& processContext)
 {
+    auto strongManager = manager_.lock();
+    if (strongManager == nullptr) {
+        HILOGE("Scheduler manager is null");
+        return false;
+    }
     for (auto& saId: processContext->saList) {
-        if (SystemAbilityManager::GetInstance()->CheckSaIsImmediatelyRecycle(saId)) {
+        if (strongManager->CheckSaIsImmediatelyRecycle(saId)) {
             return true;
         }
     }
@@ -874,7 +906,12 @@ int32_t SystemAbilityStateScheduler::DoUnloadSystemAbilityLocked(
     }
     int32_t result = ERR_OK;
     HILOGI("Scheduler SA:%{public}d unload start", abilityContext->systemAbilityId);
-    result = SystemAbilityManager::GetInstance()->DoUnloadSystemAbility(abilityContext->systemAbilityId,
+    auto strongManager = manager_.lock();
+    if (strongManager == nullptr) {
+        HILOGE("Scheduler SA:%{public}d manager is null", abilityContext->systemAbilityId);
+        return ERR_INVALID_VALUE;
+    }
+    result = strongManager->DoUnloadSystemAbility(abilityContext->systemAbilityId,
         abilityContext->ownProcessContext->processName, abilityContext->unloadRequest->unloadEvent);
     if (result == ERR_OK) {
         return stateMachine_->AbilityStateTransitionLocked(abilityContext, SystemAbilityState::UNLOADING);
@@ -1025,23 +1062,27 @@ int32_t SystemAbilityStateScheduler::GetAbnormallyDiedAbilityLocked(
         if (!GetSystemAbilityContext(saId, abilityContext)) {
             continue;
         }
-        if (abilityContext->state == SystemAbilityState::LOADED
-            || abilityContext->state == SystemAbilityState::LOADING) {
-            SamgrUtil::SendUpdateSaState(abilityContext->systemAbilityId, "crash");
-            HILOGI("Scheduler SA:%{public}d abnormally died", abilityContext->systemAbilityId);
-            if (abilityContext->systemAbilityId == SUBSYS_ACCOUNT_SYS_ABILITY_ID_BEGIN) {
-                SystemAbilityManager::GetInstance()->RemoveWhiteCommonEvent();
-            }
-            if (!abilityContext->isAutoRestart) {
-                continue;
-            }
-            if (system::GetBoolParameter("resourceschedule.memmgr.min.memmory.watermark", false)) {
-                HILOGW("restart fail,watermark=true");
-                continue;
-            }
-            HILOGI("Scheduler SA:%{public}d is auto restart", abilityContext->systemAbilityId);
-            abnormallyDiedAbilityList.emplace_back(abilityContext);
+        if (abilityContext->state != SystemAbilityState::LOADED
+            && abilityContext->state != SystemAbilityState::LOADING) {
+            continue;
         }
+        SamgrUtil::SendUpdateSaState(abilityContext->systemAbilityId, "crash");
+        HILOGI("Scheduler SA:%{public}d abnormally died", abilityContext->systemAbilityId);
+        if (abilityContext->systemAbilityId == SUBSYS_ACCOUNT_SYS_ABILITY_ID_BEGIN) {
+            auto strongManager = manager_.lock();
+            if (strongManager != nullptr) {
+                strongManager->RemoveWhiteCommonEvent();
+            }
+        }
+        if (!abilityContext->isAutoRestart) {
+            continue;
+        }
+        if (system::GetBoolParameter("resourceschedule.memmgr.min.memmory.watermark", false)) {
+            HILOGW("restart fail,watermark=true");
+            continue;
+        }
+        HILOGI("Scheduler SA:%{public}d is auto restart", abilityContext->systemAbilityId);
+        abnormallyDiedAbilityList.emplace_back(abilityContext);
     }
     return ERR_OK;
 }
@@ -1063,7 +1104,10 @@ int32_t SystemAbilityStateScheduler::HandleAbnormallyDiedAbilityLocked(
     sptr<ISystemAbilityLoadCallback> callback(new SystemAbilityLoadCallbackStub());
     for (auto& abilityContext : abnormallyDiedAbilityList) {
         // Actively remove SA to prevent restart failure if the death recipient of SA is not processed in time.
-        SystemAbilityManager::GetInstance()->RemoveDiedSystemAbility(abilityContext->systemAbilityId);
+        auto strongManager = manager_.lock();
+        if (strongManager != nullptr) {
+            strongManager->RemoveDiedSystemAbility(abilityContext->systemAbilityId);
+        }
         LoadRequestInfo loadRequestInfo = {LOCAL_DEVICE, callback,
             abilityContext->systemAbilityId, -1, onDemandEvent};
         HandleLoadAbilityEventLocked(abilityContext, loadRequestInfo);
@@ -1142,7 +1186,10 @@ void SystemAbilityStateScheduler::OnProcessNotStartedLocked(const std::u16string
     }
     NotifyProcessStopped(processContext);
     RemoveUnloadTimeoutTask(processContext);
-    SystemAbilityManager::GetInstance()->RemoveOnDemandSaInDiedProc(processContext);
+    auto strongManager = manager_.lock();
+    if (strongManager != nullptr) {
+        strongManager->RemoveOnDemandSaInDiedProc(processContext);
+    }
     
     std::list<std::shared_ptr<SystemAbilityContext>> abnormallyDiedAbilityList;
     GetAbnormallyDiedAbilityLocked(processContext, abnormallyDiedAbilityList);
@@ -1593,7 +1640,12 @@ int32_t SystemAbilityStateScheduler::ProcessDelayUnloadEventLocked(int32_t syste
     idleReason[KEY_NAME] = abilityContext->unloadRequest->unloadEvent.name;
     idleReason[KEY_VALUE] = abilityContext->unloadRequest->unloadEvent.value;
     idleReason[KEY_EXTRA_DATA_ID] = abilityContext->unloadRequest->unloadEvent.extraDataId;
-    bool result = SystemAbilityManager::GetInstance()->IdleSystemAbility(abilityContext->systemAbilityId,
+    auto strongManager = manager_.lock();
+    if (strongManager == nullptr) {
+        HILOGE("Scheduler SA:%{public}d manager is null", systemAbilityId);
+        return IDLE_SA_FAIL;
+    }
+    bool result = strongManager->IdleSystemAbility(abilityContext->systemAbilityId,
         abilityContext->ownProcessContext->processName, idleReason, delayTime);
     if (!result) {
         HILOGE("Scheduler SA:%{public}d idle fail", systemAbilityId);

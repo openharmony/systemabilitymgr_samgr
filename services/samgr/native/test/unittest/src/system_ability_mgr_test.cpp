@@ -80,14 +80,21 @@ const std::u16string DEVICE_NAME = u"test_name";
 
 void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
 {
-    saMgr->abilityDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityDeathRecipient());
-    saMgr->systemProcessDeath_ = sptr<IRemoteObject::DeathRecipient>(new SystemProcessDeathRecipient());
-    saMgr->abilityStatusDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityStatusDeathRecipient());
-    saMgr->abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityCallbackDeathRecipient());
-    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
+    std::weak_ptr<BaseSystemAbilityManager> weakMgr;
+    saMgr->abilityDeath_ = sptr<IRemoteObject::DeathRecipient>(
+        new AbilityDeathRecipient(weakMgr));
+    saMgr->systemProcessDeath_ = sptr<IRemoteObject::DeathRecipient>(
+        new SystemProcessDeathRecipient(weakMgr));
+    saMgr->abilityStatusDeath_ = sptr<IRemoteObject::DeathRecipient>(
+        new AbilityStatusDeathRecipient(weakMgr));
+    saMgr->abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(
+        new AbilityCallbackDeathRecipient(weakMgr));
+    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(
+        new RemoteCallbackDeathRecipient(weakMgr));
     saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
-    saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
-    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+    saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(
+        new DeviceStatusCollectManager(weakMgr));
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>(weakMgr);
 }
 }
 
@@ -221,7 +228,8 @@ HWTEST_F(SystemAbilityMgrTest, AddSystemAbility005, TestSize.Level1)
 HWTEST_F(SystemAbilityMgrTest, AddSystemAbility006, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
-    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>(
+    std::weak_ptr<BaseSystemAbilityManager>{});
     CommonSaProfile saProfile;
     saProfile.process = u"test";
     saProfile.distributed = true;
@@ -1616,11 +1624,13 @@ HWTEST_F(SystemAbilityMgrTest, OnRemoteDied002, TestSize.Level3)
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_TRUE(saMgr != nullptr);
     
-    saMgr->abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityDeathRecipient());
+    saMgr->abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(
+        new AbilityDeathRecipient(std::weak_ptr<BaseSystemAbilityManager>{}));
     EXPECT_NE(nullptr, saMgr->abilityCallbackDeath_);
     saMgr->abilityCallbackDeath_->OnRemoteDied(nullptr);
     
-    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
+    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(
+        new RemoteCallbackDeathRecipient(std::weak_ptr<BaseSystemAbilityManager>{}));
     EXPECT_NE(nullptr, saMgr->remoteCallbackDeath_);
     saMgr->remoteCallbackDeath_->OnRemoteDied(nullptr);
     DTEST_LOG<<"OnRemoteDied002 END";
@@ -1683,7 +1693,8 @@ HWTEST_F(SystemAbilityMgrTest, UnloadProcess001, TestSize.Level3)
     std::vector<std::u16string> processList;
     int32_t ret = saMgr->UnloadProcess(processList);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>(
+    std::weak_ptr<BaseSystemAbilityManager>{});
     ret = saMgr->UnloadProcess(processList);
     EXPECT_NE(ret, ERR_INVALID_VALUE);
     DTEST_LOG << "UnloadProcess001 END" << std::endl;

@@ -48,14 +48,21 @@ std::vector<std::string> mockDirFiles;
 
 void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
 {
-    saMgr->abilityDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityDeathRecipient());
-    saMgr->systemProcessDeath_ = sptr<IRemoteObject::DeathRecipient>(new SystemProcessDeathRecipient());
-    saMgr->abilityStatusDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityStatusDeathRecipient());
-    saMgr->abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityCallbackDeathRecipient());
-    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
+    std::weak_ptr<BaseSystemAbilityManager> weakMgr;
+    saMgr->abilityDeath_ = sptr<IRemoteObject::DeathRecipient>(
+        new AbilityDeathRecipient(weakMgr));
+    saMgr->systemProcessDeath_ = sptr<IRemoteObject::DeathRecipient>(
+        new SystemProcessDeathRecipient(weakMgr));
+    saMgr->abilityStatusDeath_ = sptr<IRemoteObject::DeathRecipient>(
+        new AbilityStatusDeathRecipient(weakMgr));
+    saMgr->abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(
+        new AbilityCallbackDeathRecipient(weakMgr));
+    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(
+        new RemoteCallbackDeathRecipient(weakMgr));
     saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
-    saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
-    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+    saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(
+        new DeviceStatusCollectManager(weakMgr));
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>(weakMgr);
 }
 
 void GetDirFiles(const char* path, std::vector<std::string>& files)

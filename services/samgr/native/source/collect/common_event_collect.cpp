@@ -20,6 +20,7 @@
 
 #include "common_event_collect.h"
 
+#include "base_system_ability_manager.h"
 #include "datetime_ex.h"
 #include "ability_death_recipient.h"
 #include "system_ability_manager_util.h"
@@ -61,8 +62,9 @@ constexpr const char* COMMON_RECENT_EVENT = "RECENT_EVENT";
 constexpr const char* COMMON_RECENT_CLEAR_ALL = "RECENT_CLEAR_ALL";
 }
 
-CommonEventCollect::CommonEventCollect(const sptr<IReport>& report)
-    : ICollectPlugin(report)
+CommonEventCollect::CommonEventCollect(const sptr<IReport>& report,
+    const std::weak_ptr<BaseSystemAbilityManager>& manager)
+    : ICollectPlugin(report, manager)
 {
 }
 
@@ -664,7 +666,13 @@ void CommonHandler::ProcessEvent(uint32_t eventId, int64_t extraDataId)
         return;
     }
     sptr<CommonEventListener> listener = new CommonEventListener(commonCollect);
-    SystemAbilityManager::GetInstance()->SubscribeSystemAbility(COMMON_EVENT_SERVICE_ID, listener);
+    auto collect = commonCollect_.promote();
+    if (collect != nullptr) {
+        auto strongManager = collect->GetManager().lock();
+        if (strongManager != nullptr) {
+            strongManager->SubscribeSystemAbility(COMMON_EVENT_SERVICE_ID, listener);
+        }
+    }
 }
 
 bool CommonHandler::SendEvent(uint32_t eventId)

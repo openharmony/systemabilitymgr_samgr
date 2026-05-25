@@ -60,14 +60,21 @@ const string ONDEMAND_PARAM = "persist.samgr.perf.ondemand";
 
 void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
 {
-    saMgr->abilityDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityDeathRecipient());
-    saMgr->systemProcessDeath_ = sptr<IRemoteObject::DeathRecipient>(new SystemProcessDeathRecipient());
-    saMgr->abilityStatusDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityStatusDeathRecipient());
-    saMgr->abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityCallbackDeathRecipient());
-    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
+    std::weak_ptr<BaseSystemAbilityManager> weakMgr;
+    saMgr->abilityDeath_ = sptr<IRemoteObject::DeathRecipient>(
+        new AbilityDeathRecipient(weakMgr));
+    saMgr->systemProcessDeath_ = sptr<IRemoteObject::DeathRecipient>(
+        new SystemProcessDeathRecipient(weakMgr));
+    saMgr->abilityStatusDeath_ = sptr<IRemoteObject::DeathRecipient>(
+        new AbilityStatusDeathRecipient(weakMgr));
+    saMgr->abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(
+        new AbilityCallbackDeathRecipient(weakMgr));
+    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(
+        new RemoteCallbackDeathRecipient(weakMgr));
     saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
-    saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
-    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+    saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(
+        new DeviceStatusCollectManager(weakMgr));
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>(weakMgr);
 }
 }
 
@@ -304,8 +311,6 @@ HWTEST_F(SystemAbilityMgrOnDemandTest, OndemandLoadForPerf001, TestSize.Level3)
     EXPECT_NE(saMgr, nullptr);
     InitSaMgr(saMgr);
     saMgr->SetFfrt();
-    saMgr->OndemandLoadForPerf();
-    saMgr->Init();
     saMgr->OndemandLoadForPerf();
     usleep(ONDEMAND_SLEEP_TIME);
     bool value = system::GetBoolParameter(ONDEMAND_PARAM, false);
@@ -606,7 +611,8 @@ HWTEST_F(SystemAbilityMgrOnDemandTest, GetOnDemandPolicy005, TestSize.Level3)
     saProfile.process = Str8ToStr16(nativeTokenInfo.processName);
     saProfile.startAllowUpdate = true;
     saMgr->saProfileMap_[1] = saProfile;
-    sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
+    sptr<DeviceStatusCollectManager> collectManager =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
     saMgr->collectManager_ = collectManager;
     std::vector<SystemAbilityOnDemandEvent> abilityOnDemandEvents;
     int32_t ret = saMgr->GetOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
@@ -633,7 +639,8 @@ HWTEST_F(SystemAbilityMgrOnDemandTest, GetOnDemandPolicy006, TestSize.Level3)
     onDemandEvents.push_back({ 1, "test" });
     saProfile.startOnDemand.onDemandEvents = onDemandEvents;
     SamgrUtil::FilterCommonSaProfile(saProfile,  saMgr->saProfileMap_[1]);
-    sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
+    sptr<DeviceStatusCollectManager> collectManager =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
     std::list<SaProfile> saProfiles;
     saProfiles.emplace_back(saProfile);
     collectManager->FilterOnDemandSaProfiles(saProfiles);
@@ -722,7 +729,8 @@ HWTEST_F(SystemAbilityMgrOnDemandTest, GetOnDemandReasonExtraData002, TestSize.L
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
     InitSaMgr(saMgr);
-    sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
+    sptr<DeviceStatusCollectManager> collectManager =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
     collectManager->collectPluginMap_.clear();
     saMgr->collectManager_ = collectManager;
     MessageParcel messageParcel;
@@ -742,7 +750,8 @@ HWTEST_F(SystemAbilityMgrOnDemandTest, GetOnDemandReasonExtraData003, TestSize.L
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
     InitSaMgr(saMgr);
-    sptr<DeviceStatusCollectManager> collectManager = new DeviceStatusCollectManager();
+    sptr<DeviceStatusCollectManager> collectManager =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
     saMgr->collectManager_ = collectManager;
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collectManager);
     commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
@@ -790,7 +799,8 @@ HWTEST_F(SystemAbilityMgrOnDemandTest, ProcessOnDemandEvent002, TestSize.Level3)
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
     InitSaMgr(saMgr);
-    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>(
+    std::weak_ptr<BaseSystemAbilityManager>{});
     saMgr->ProcessOnDemandEvent(event, saControlList);
     EXPECT_NE(saMgr, nullptr);
 }
@@ -847,7 +857,8 @@ HWTEST_F(SystemAbilityMgrOnDemandTest, ProcessOnDemandEvent005, TestSize.Level3)
     EXPECT_NE(saMgr, nullptr);
     InitSaMgr(saMgr);
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>();
+        std::make_shared<SystemAbilityStateScheduler>(
+    std::weak_ptr<BaseSystemAbilityManager>{});
     saMgr->abilityStateScheduler_ = systemAbilityStateScheduler;
     OnDemandEvent onDemandEvent;
     std::list<OnDemandEvent> onDemandList;
@@ -875,7 +886,8 @@ HWTEST_F(SystemAbilityMgrOnDemandTest, ProcessOnDemandEvent006, TestSize.Level3)
     EXPECT_NE(saMgr, nullptr);
     InitSaMgr(saMgr);
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>();
+        std::make_shared<SystemAbilityStateScheduler>(
+    std::weak_ptr<BaseSystemAbilityManager>{});
     saMgr->abilityStateScheduler_ = systemAbilityStateScheduler;
     OnDemandEvent onDemandEvent;
     std::list<OnDemandEvent> onDemandList;
@@ -907,7 +919,8 @@ HWTEST_F(SystemAbilityMgrOnDemandTest, ProcessOnDemandEvent007, TestSize.Level3)
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
     InitSaMgr(saMgr);
-    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>(
+    std::weak_ptr<BaseSystemAbilityManager>{});
     saMgr->ProcessOnDemandEvent(event, saControlList);
     EXPECT_NE(saMgr, nullptr);
 }
