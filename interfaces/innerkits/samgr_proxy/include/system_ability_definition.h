@@ -205,6 +205,7 @@ enum {
     MEDIA_KEY_SYSTEM_SERVICE_ID                      = 3012,
     MEDIA_MONITOR_SERVICE_ID                         = 3013,
     MIDI_SERVICE_ID                                  = 3014,
+    AUDIO_SUITE_SERVICE_ID                           = 3015,
     SUBSYS_MULTIMODAINPUT_SYS_ABILITY_ID_BEGIN       = 3100,
     MULTIMODAL_INPUT_SERVICE_ID                      = 3101,
     MULTIMODAL_CHANNEL_SERVICE_ID                    = 3102,
