@@ -1092,13 +1092,8 @@ HWTEST_F(SystemAbilityMgrOnDemandTest, OnStartSystemAbilityFailInner001, TestSiz
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
     InitSaMgr(saMgr);
-    CommonSaProfile saProfile = {u"test", TEST_OVERFLOW_SAID};
+    CommonSaProfile saProfile = {u"SystemAbilityMgrTest", TEST_OVERFLOW_SAID};
     saMgr->saProfileMap_[SAID] = saProfile;
-    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
-    Security::AccessToken::NativeTokenInfo nativeTokenInfo;
-    int32_t result = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
-    EXPECT_TRUE(result == ERR_OK);
-    saMgr->saProfileMap_[SAID].process = Str8ToStr16(nativeTokenInfo.processName);
     MessageParcel data;
     MessageParcel reply;
     EXPECT_TRUE(data.WriteInt32(SAID));
@@ -1132,11 +1127,7 @@ HWTEST_F(SystemAbilityMgrOnDemandTest, OnStartSystemAbilityFail001, TestSize.Lev
     ret = saMgr->OnStartSystemAbilityFail(TEST_OVERFLOW_SAID, -1);
     EXPECT_EQ(ret, INVALID_CALL_PROC);
 
-    uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
-    Security::AccessToken::NativeTokenInfo nativeTokenInfo;
-    int32_t result = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
-    EXPECT_TRUE(result == ERR_OK);
-    saMgr->saProfileMap_[TEST_OVERFLOW_SAID].process = Str8ToStr16(nativeTokenInfo.processName);
+    saMgr->saProfileMap_[TEST_OVERFLOW_SAID].process = u"SystemAbilityMgrTest";
     ret = saMgr->OnStartSystemAbilityFail(TEST_OVERFLOW_SAID, -1);
     EXPECT_EQ(ret, ERR_OK);
 

@@ -991,6 +991,10 @@ int32_t SystemAbilityManagerStub::GetLruIdleSystemAbilityProcInner(MessageParcel
 
 int32_t SystemAbilityManagerStub::OnStartSystemAbilityFailInner(MessageParcel& data, MessageParcel& reply)
 {
+    if (!CanRequest()) {
+        HILOGE("OnStartSystemAbilityFailInner PERMISSION DENIED!");
+        return ERR_PERMISSION_DENIED;
+    }
     int32_t systemAbilityId = -1;
     int32_t errCode = -1;
     bool ret = data.ReadInt32(systemAbilityId);
