@@ -1464,8 +1464,10 @@ int32_t BaseSystemAbilityManager::OnStartSystemAbilityFail(int32_t systemAbility
         HILOGW("OnStartSystemAbilityFail invalid SA: %{public}d", systemAbilityId);
         return ERR_INVALID_VALUE;
     }
-    if (!SamgrUtil::CheckCallerProcess(saProfile)) {
-        HILOGE("OnStartSystemAbilityFail invalid caller process, SA:%{public}d", systemAbilityId);
+    auto callingPid = IPCSkeleton::GetCallingPid();
+    auto callingProc = SamgrUtil::GetProcessNameFromCmdline(callingPid);
+    if (Str16ToStr8(saProfile.process) != callingProc) {
+        HILOGE("OnStartSystemAbilityFail invalid pid:%{public}d, SA:%{public}d", callingPid, systemAbilityId);
         return INVALID_CALL_PROC;
     }
     lock_guard<samgr::mutex> autoLock(onDemandLock_);

@@ -342,6 +342,22 @@ HWTEST_F(SystemAbilityMgrStubTest, GetCommonEventExtraDataIdlistInner001, TestSi
 #endif
 
 /**
+ * @tc.name: OnStartSystemAbilityFailInner004
+ * @tc.desc: test OnStartSystemAbilityFailInner with permission is denied
+ * @tc.type: FUNC
+ */
+#ifdef SUPPORT_ACCESS_TOKEN
+HWTEST_F(SystemAbilityMgrStubTest, OnStartSystemAbilityFailInner004, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    int32_t ret = saMgr->OnStartSystemAbilityFailInner(data, reply);
+    EXPECT_EQ(ret, ERR_PERMISSION_DENIED);
+}
+#endif
+
+/**
  * @tc.name: ListSystemAbilityInner002
  * @tc.desc: test ListSystemAbilityInner, read dumpflag failed!
  * @tc.type: FUNC
