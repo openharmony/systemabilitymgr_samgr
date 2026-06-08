@@ -599,6 +599,7 @@ static void TestCheckSystemAbility(OHOS::OnDemandHelper& ondemandHelper, char* i
         ondemandHelper.CheckSystemAbility(saId);
     } else if (strcmp(inputcmd, "remote") == 0) {
         std::string deviceId = ondemandHelper.GetFirstDevice();
+        SamMockPermission::MockProcess("ondemand");
         ondemandHelper.CheckSystemAbility(saId, deviceId);
     } else {
         cout << "invalid input" << endl;
