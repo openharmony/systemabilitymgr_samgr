@@ -32,8 +32,9 @@ constexpr uint32_t DM_DIED_EVENT = 11;
 constexpr uint64_t DELAY_TIME = 1000;
 constexpr int32_t DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID = 4802;
 }
-DeviceNetworkingCollect::DeviceNetworkingCollect(const sptr<IReport>& report)
-    : ICollectPlugin(report)
+DeviceNetworkingCollect::DeviceNetworkingCollect(const sptr<IReport>& report,
+    const std::weak_ptr<BaseSystemAbilityManager>& manager)
+    : ICollectPlugin(report, manager)
 {
 }
 
@@ -75,8 +76,9 @@ int32_t DeviceNetworkingCollect::OnStop()
 
 bool DeviceNetworkingCollect::IsDmReady()
 {
-    auto dmProxy = SystemAbilityManager::GetInstance()->CheckSystemAbility(
-        DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID);
+    auto strongManager = manager_.lock();
+    auto dmProxy = strongManager != nullptr ?
+        strongManager->CheckSystemAbility(DISTRIBUTED_HARDWARE_DEVICEMANAGER_SA_ID) : nullptr;
     if (dmProxy != nullptr) {
         IPCObjectProxy* proxy = reinterpret_cast<IPCObjectProxy*>(dmProxy.GetRefPtr());
         // make sure the proxy is not dead
@@ -194,7 +196,12 @@ void DeviceStateCallback::OnDeviceOnline(const DmDeviceInfo& deviceInfo)
 {
     HILOGI("DeviceNetworkingCollect OnDeviceOnline size %{public}zu", deviceOnlineSet_.size());
 #ifdef SAMGR_ENABLE_DELAY_DBINDER
-    SystemAbilityManager::GetInstance()->InitDbinderService();
+    if (collect_ != nullptr) {
+        auto strongManager = collect_->GetManager().lock();
+        if (strongManager != nullptr) {
+            strongManager->InitDbinderService();
+        }
+    }
 #endif
     {
         lock_guard<samgr::mutex> autoLock(deviceOnlineLock_);

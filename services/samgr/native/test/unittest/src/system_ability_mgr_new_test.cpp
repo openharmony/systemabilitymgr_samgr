@@ -145,14 +145,21 @@ void ProcMapObjTestPrevSet(sptr<SystemAbilityManager>& saMgr, int32_t maxLoop)
 
 void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
 {
-    saMgr->abilityDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityDeathRecipient());
-    saMgr->systemProcessDeath_ = sptr<IRemoteObject::DeathRecipient>(new SystemProcessDeathRecipient());
-    saMgr->abilityStatusDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityStatusDeathRecipient());
-    saMgr->abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityCallbackDeathRecipient());
-    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
+    std::weak_ptr<BaseSystemAbilityManager> weakMgr;
+    saMgr->abilityDeath_ = sptr<IRemoteObject::DeathRecipient>(
+        new AbilityDeathRecipient(weakMgr));
+    saMgr->systemProcessDeath_ = sptr<IRemoteObject::DeathRecipient>(
+        new SystemProcessDeathRecipient(weakMgr));
+    saMgr->abilityStatusDeath_ = sptr<IRemoteObject::DeathRecipient>(
+        new AbilityStatusDeathRecipient(weakMgr));
+    saMgr->abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(
+        new AbilityCallbackDeathRecipient(weakMgr));
+    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(
+        new RemoteCallbackDeathRecipient(weakMgr));
     saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
-    saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
-    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+    saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(
+        new DeviceStatusCollectManager(weakMgr));
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>(weakMgr);
 }
 }
 
@@ -249,7 +256,7 @@ HWTEST_F(SystemAbilityMgrNewTest, GetSystemAbilityFromRemote001, TestSize.Level3
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_TRUE(saMgr != nullptr);
-    saMgr->Init();
+    InitSaMgr(saMgr);
     auto ability = saMgr->GetSystemAbilityFromRemote(TEST_EXCEPTION_LOW_SA_ID);
     EXPECT_EQ(ability, nullptr);
 }
@@ -500,9 +507,11 @@ HWTEST_F(SystemAbilityMgrNewTest, RemoveWhiteCommonEvent001, TestSize.Level3)
     InitSaMgr(saMgr);
     saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
     saMgr->CleanFfrt();
-    saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
+    saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{}));
     saMgr->CleanFfrt();
-    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>(
+    std::weak_ptr<BaseSystemAbilityManager>{});
     saMgr->CleanFfrt();
     const std::u16string name;
     saMgr->RemoveWhiteCommonEvent();
@@ -1092,7 +1101,8 @@ HWTEST_F(SystemAbilityMgrNewTest, DoLoadForPerf001, TestSize.Level2)
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_TRUE(saMgr != nullptr);
     InitSaMgr(saMgr);
-    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>(
+    std::weak_ptr<BaseSystemAbilityManager>{});
     CommonSaProfile saProfile;
     saProfile.process = u"memmgrservice";
     saMgr->saProfileMap_[-1] = saProfile;
@@ -1134,7 +1144,6 @@ HWTEST_F(SystemAbilityMgrNewTest, RegisterDistribute001, TestSize.Level2)
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager();
     EXPECT_FALSE(saMgr == nullptr);
     InitSaMgr(saMgr);
-    saMgr->Init();
     saMgr->isDbinderServiceInit_ = false;
     saMgr->distributedSaList_.push_back(softBusServerSaID);
     saMgr->InitDbinderService();

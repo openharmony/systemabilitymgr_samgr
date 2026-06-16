@@ -17,6 +17,7 @@
 #define OHOS_SYSTEM_ABILITY_MANAGER_COLLECT_PLUGIN_INTERFACE_H
 
 #include <list>
+#include <memory>
 
 #include "errors.h"
 #include "ireport.h"
@@ -25,10 +26,16 @@
 #include "system_ability_ondemand_reason.h"
 
 namespace OHOS {
+
+class BaseSystemAbilityManager;
+
 class ICollectPlugin : public virtual RefBase {
 public:
-    explicit ICollectPlugin(const sptr<IReport>& report);
+    explicit ICollectPlugin(const sptr<IReport>& report,
+        const std::weak_ptr<BaseSystemAbilityManager>& manager = {});
     virtual ~ICollectPlugin() = default;
+
+    std::weak_ptr<BaseSystemAbilityManager> GetManager() const { return manager_; }
 
     virtual void CleanFfrt()
     {
@@ -85,6 +92,8 @@ public:
     void PostDelayTask(std::function<void()> callback, int32_t delayTime);
 private:
     sptr<IReport> report_;
+protected:
+    std::weak_ptr<BaseSystemAbilityManager> manager_;
 };
 } // namespace OHOS
 #endif // OHOS_SYSTEM_ABILITY_MANAGER_COLLECT_PLUGIN_INTERFACE_H

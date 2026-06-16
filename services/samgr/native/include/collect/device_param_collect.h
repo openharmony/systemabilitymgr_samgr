@@ -25,7 +25,8 @@
 namespace OHOS {
 class DeviceParamCollect : public ICollectPlugin {
 public:
-    explicit DeviceParamCollect(const sptr<IReport>& report);
+    explicit DeviceParamCollect(const sptr<IReport>& report,
+        const std::weak_ptr<BaseSystemAbilityManager>& manager = {});
     ~DeviceParamCollect() = default;
     void Init(const std::list<SaProfile>& saProfiles) override;
     void WatchParameters();

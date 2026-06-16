@@ -151,7 +151,8 @@ HWTEST_F(CommonEventCollectTest, init001, TestSize.Level3)
 HWTEST_F(CommonEventCollectTest, ProcessEvent001, TestSize.Level3)
 {
     DTEST_LOG << " ProcessEvent001 BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceStatusCollectManager> collect =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
     commonEventCollect->workHandler_ = nullptr;
     int32_t ret = commonEventCollect->SendEvent(COMMON_DIED_EVENT + 1);
@@ -177,7 +178,8 @@ HWTEST_F(CommonEventCollectTest, ProcessEvent001, TestSize.Level3)
 HWTEST_F(CommonEventCollectTest, ProcessEvent002, TestSize.Level3)
 {
     DTEST_LOG << "ProcessEvent002 begin" << std::endl;
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceStatusCollectManager> collect =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
     std::shared_ptr<CommonHandler> commonHandler = std::make_shared<CommonHandler>(commonEventCollect);
     commonHandler->ProcessEvent(COMMON_DIED_EVENT, 0);
@@ -194,7 +196,8 @@ HWTEST_F(CommonEventCollectTest, ProcessEvent002, TestSize.Level3)
 HWTEST_F(CommonEventCollectTest, ProcessEvent003, TestSize.Level3)
 {
     DTEST_LOG << "ProcessEvent003 begin" << std::endl;
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceStatusCollectManager> collect =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
     std::shared_ptr<CommonHandler> commonHandler = std::make_shared<CommonHandler>(commonEventCollect);
     EventFwk::MatchingSkills skill = EventFwk::MatchingSkills();
@@ -308,7 +311,8 @@ HWTEST_F(CommonEventCollectTest, RemoveUnusedEvent002, TestSize.Level3)
 HWTEST_F(CommonEventCollectTest, SaveOnDemandReasonExtraData001, TestSize.Level3)
 {
     DTEST_LOG << "SaveOnDemandReasonExtraData001 begin" << std::endl;
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceStatusCollectManager> collect =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
     commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
     EventFwk::CommonEventData eventData;
@@ -325,7 +329,8 @@ HWTEST_F(CommonEventCollectTest, SaveOnDemandReasonExtraData001, TestSize.Level3
 HWTEST_F(CommonEventCollectTest, SaveOnDemandReasonExtraData002, TestSize.Level3)
 {
     DTEST_LOG << "SaveOnDemandReasonExtraData002 begin" << std::endl;
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceStatusCollectManager> collect =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
     commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
     SaProfile saProfile;
@@ -368,7 +373,8 @@ HWTEST_F(CommonEventCollectTest, SaveOnDemandReasonExtraData002, TestSize.Level3
 HWTEST_F(CommonEventCollectTest, RemoveOnDemandReasonExtraData001, TestSize.Level3)
 {
     DTEST_LOG << "RemoveOnDemandReasonExtraData001 begin" << std::endl;
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceStatusCollectManager> collect =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
     commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
     EventFwk::CommonEventData eventData;
@@ -388,7 +394,8 @@ HWTEST_F(CommonEventCollectTest, RemoveOnDemandReasonExtraData001, TestSize.Leve
 HWTEST_F(CommonEventCollectTest, GetOnDemandReasonExtraData001, TestSize.Level3)
 {
     DTEST_LOG << "GetOnDemandReasonExtraData001 begin" << std::endl;
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceStatusCollectManager> collect =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
     commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
     commonEventCollect->extraDatas_.clear();
@@ -407,7 +414,8 @@ HWTEST_F(CommonEventCollectTest, GetOnDemandReasonExtraData001, TestSize.Level3)
 HWTEST_F(CommonEventCollectTest, GetOnDemandReasonExtraData002, TestSize.Level3)
 {
     DTEST_LOG << "GetOnDemandReasonExtraData002 begin" << std::endl;
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceStatusCollectManager> collect =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
     commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
     commonEventCollect->extraDatas_.clear();
@@ -427,7 +435,8 @@ HWTEST_F(CommonEventCollectTest, GetOnDemandReasonExtraData002, TestSize.Level3)
 HWTEST_F(CommonEventCollectTest, InitCommonEventState001, TestSize.Level3)
 {
     DTEST_LOG << "InitCommonEventState001 begin" << std::endl;
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceStatusCollectManager> collect =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
     commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
     
@@ -449,7 +458,8 @@ HWTEST_F(CommonEventCollectTest, InitCommonEventState001, TestSize.Level3)
 HWTEST_F(CommonEventCollectTest, InitCommonEventState002, TestSize.Level3)
 {
     DTEST_LOG << "InitCommonEventState002 begin" << std::endl;
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceStatusCollectManager> collect =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
     commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
     
@@ -478,7 +488,8 @@ HWTEST_F(CommonEventCollectTest, InitCommonEventState002, TestSize.Level3)
 HWTEST_F(CommonEventCollectTest, GetParamFromWant001, TestSize.Level3)
 {
     DTEST_LOG << "GetParamFromWant001 begin" << std::endl;
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceStatusCollectManager> collect =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
     commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
     AAFwk::Want want;
@@ -504,7 +515,8 @@ HWTEST_F(CommonEventCollectTest, GetParamFromWant001, TestSize.Level3)
 HWTEST_F(CommonEventCollectTest, GetExtraDataIdlist001, TestSize.Level3)
 {
     DTEST_LOG << "GetExtraDataIdlist001 begin" << std::endl;
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceStatusCollectManager> collect =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
     commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
     commonEventCollect->extraDatas_.clear();
@@ -554,7 +566,8 @@ HWTEST_F(CommonEventCollectTest, GetExtraDataIdlist001, TestSize.Level3)
 HWTEST_F(CommonEventCollectTest, GetExtraDataIdlist002, TestSize.Level3)
 {
     DTEST_LOG << "GetExtraDataIdlist002 begin" << std::endl;
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceStatusCollectManager> collect =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
     commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
     commonEventCollect->extraDatas_.clear();
@@ -609,7 +622,8 @@ HWTEST_F(CommonEventCollectTest, GetExtraDataIdlist002, TestSize.Level3)
 HWTEST_F(CommonEventCollectTest, CheckCondition001, TestSize.Level3)
 {
     DTEST_LOG << " CheckCondition001 BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceStatusCollectManager> collect =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
     commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
 
@@ -631,7 +645,8 @@ HWTEST_F(CommonEventCollectTest, CheckCondition001, TestSize.Level3)
 HWTEST_F(CommonEventCollectTest, CheckCondition002, TestSize.Level3)
 {
     DTEST_LOG << " CheckCondition002 BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceStatusCollectManager> collect =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
     commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
 
@@ -654,7 +669,8 @@ HWTEST_F(CommonEventCollectTest, CheckCondition002, TestSize.Level3)
 HWTEST_F(CommonEventCollectTest, CheckCondition003, TestSize.Level3)
 {
     DTEST_LOG << " CheckCondition003 BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceStatusCollectManager> collect =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
     commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
 
@@ -677,7 +693,8 @@ HWTEST_F(CommonEventCollectTest, CheckCondition003, TestSize.Level3)
 HWTEST_F(CommonEventCollectTest, CheckCondition004, TestSize.Level3)
 {
     DTEST_LOG << " CheckCondition004 BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceStatusCollectManager> collect =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
     commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
 
@@ -699,7 +716,8 @@ HWTEST_F(CommonEventCollectTest, CheckCondition004, TestSize.Level3)
 HWTEST_F(CommonEventCollectTest, CheckExtraMessage001, TestSize.Level3)
 {
     DTEST_LOG << " CheckExtraMessages001 BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceStatusCollectManager> collect =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
     commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
 
@@ -725,7 +743,8 @@ HWTEST_F(CommonEventCollectTest, CheckExtraMessage001, TestSize.Level3)
 HWTEST_F(CommonEventCollectTest, CheckExtraMessage002, TestSize.Level3)
 {
     DTEST_LOG << " CheckExtraMessages002 BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceStatusCollectManager> collect =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
     commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
 
@@ -751,7 +770,8 @@ HWTEST_F(CommonEventCollectTest, CheckExtraMessage002, TestSize.Level3)
 HWTEST_F(CommonEventCollectTest, CheckExtraMessage003, TestSize.Level3)
 {
     DTEST_LOG << " CheckExtraMessages003 BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceStatusCollectManager> collect =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
     commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
 
@@ -777,7 +797,8 @@ HWTEST_F(CommonEventCollectTest, CheckExtraMessage003, TestSize.Level3)
 HWTEST_F(CommonEventCollectTest, SaveOnDemandConditionExtraData001, TestSize.Level3)
 {
     DTEST_LOG << " SaveOnDemandConditionExtraData001 BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceStatusCollectManager> collect =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
     commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
 
@@ -802,7 +823,8 @@ HWTEST_F(CommonEventCollectTest, SaveOnDemandConditionExtraData001, TestSize.Lev
 HWTEST_F(CommonEventCollectTest, RemoveWhiteCommonEvent001, TestSize.Level3)
 {
     DTEST_LOG << " RemoveWhiteCommonEvent001 BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceStatusCollectManager> collect =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
     commonEventCollect->RemoveWhiteCommonEvent();
     EXPECT_NE(commonEventCollect, nullptr);
@@ -817,7 +839,8 @@ HWTEST_F(CommonEventCollectTest, RemoveWhiteCommonEvent001, TestSize.Level3)
 HWTEST_F(CommonEventCollectTest, CleanFailedEventLocked001, TestSize.Level3)
 {
     DTEST_LOG << " CleanFailedEventLocked001 BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceStatusCollectManager> collect =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
     EventFwk::MatchingSkills skill = EventFwk::MatchingSkills();
     EventFwk::CommonEventSubscribeInfo info(skill);
@@ -842,7 +865,8 @@ HWTEST_F(CommonEventCollectTest, CleanFailedEventLocked001, TestSize.Level3)
 HWTEST_F(CommonEventCollectTest, OnRemoveSystemAbility001, TestSize.Level3)
 {
     DTEST_LOG << " OnRemoveSystemAbility001 BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceStatusCollectManager> collect =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
     sptr<CommonEventListener> commonEventListener = new CommonEventListener(commonEventCollect);
     commonEventListener->OnRemoveSystemAbility(1, "test");
@@ -855,7 +879,8 @@ HWTEST_F(CommonEventCollectTest, OnRemoveSystemAbility001, TestSize.Level3)
 HWTEST_F(CommonEventCollectTest, StartReclaimIpcThreadWork001, TestSize.Level3)
 {
     DTEST_LOG<<"StartReclaimIpcThreadWork001 BEGIN"<< std::endl;
-    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
+    sptr<DeviceStatusCollectManager> collect =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
     sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(collect);
     commonEventCollect->workHandler_ = std::make_shared<CommonHandler>(commonEventCollect);
     EventFwk::CommonEventData eventData;

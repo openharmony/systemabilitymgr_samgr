@@ -30,10 +30,13 @@
 namespace OHOS {
 constexpr int32_t UNLOAD_DELAY_TIME = 20 * 1000;
 
+class BaseSystemAbilityManager;
+
 class SystemAbilityStateScheduler : public SystemAbilityStateListener,
     public std::enable_shared_from_this<SystemAbilityStateScheduler> {
 public:
-    SystemAbilityStateScheduler() = default;
+    explicit SystemAbilityStateScheduler(const std::weak_ptr<BaseSystemAbilityManager>& manager)
+        : manager_(manager) {}
     virtual ~SystemAbilityStateScheduler()
     {
         CleanResource();
@@ -196,6 +199,7 @@ private:
     std::list<SystemProcessInfo> runningProcessList_;
     std::list<std::u16string> lowMemoryProcessList_;
     std::shared_ptr<FFRTHandler> recoverHandler_;
+    std::weak_ptr<BaseSystemAbilityManager> manager_;
 };
 } // namespace OHOS
 

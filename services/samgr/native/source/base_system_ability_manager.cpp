@@ -46,6 +46,61 @@
 namespace fs = std::filesystem;
 using namespace std;
 
+// Override HILOG macros to include log prefix for multi-instance support
+#undef HILOGF
+#undef HILOGE
+#undef HILOGW
+#undef HILOGI
+#undef HILOGD
+#undef KHILOGF
+#undef KHILOGE
+#undef KHILOGW
+#undef KHILOGI
+#undef KHILOGD
+
+#define HILOGF(fmt, ...) HILOG_FATAL(LOG_CORE, "%{public}s" fmt, logPrefix_.c_str(), ##__VA_ARGS__)
+#define HILOGE(fmt, ...) HILOG_ERROR(LOG_CORE, "%{public}s" fmt, logPrefix_.c_str(), ##__VA_ARGS__)
+#define HILOGW(fmt, ...) HILOG_WARN(LOG_CORE, "%{public}s" fmt, logPrefix_.c_str(), ##__VA_ARGS__)
+#define HILOGI(fmt, ...) HILOG_INFO(LOG_CORE, "%{public}s" fmt, logPrefix_.c_str(), ##__VA_ARGS__)
+#define HILOGD(fmt, ...) HILOG_DEBUG(LOG_CORE, "%{public}s" fmt, logPrefix_.c_str(), ##__VA_ARGS__)
+
+#define KHILOGF(fmt, ...) \
+    do { \
+        (void)OHOS::HiviewDFX::HiLog::Fatal(OHOS::SYSTEM_ABLILITY_LABEL, "%{public}s" fmt, \
+            logPrefix_.c_str(), ##__VA_ARGS__); \
+        HILOG_FATAL(LOG_CORE, "%{public}s" fmt, logPrefix_.c_str(), ##__VA_ARGS__); \
+    } while (0)
+#define KHILOGE(fmt, ...) \
+    do { \
+        (void)OHOS::HiviewDFX::HiLog::Error(OHOS::SYSTEM_ABLILITY_LABEL, "%{public}s" fmt, \
+            logPrefix_.c_str(), ##__VA_ARGS__); \
+        HILOG_ERROR(LOG_CORE, "%{public}s" fmt, logPrefix_.c_str(), ##__VA_ARGS__); \
+    } while (0)
+#define KHILOGW(fmt, ...) \
+    do { \
+        (void)OHOS::HiviewDFX::HiLog::Warn(OHOS::SYSTEM_ABLILITY_LABEL, "%{public}s" fmt, \
+            logPrefix_.c_str(), ##__VA_ARGS__); \
+        HILOG_WARN(LOG_CORE, "%{public}s" fmt, logPrefix_.c_str(), ##__VA_ARGS__); \
+    } while (0)
+#define KHILOGI(fmt, ...) \
+    do { \
+        (void)OHOS::HiviewDFX::HiLog::Info(OHOS::SYSTEM_ABLILITY_LABEL, "%{public}s" fmt, \
+            logPrefix_.c_str(), ##__VA_ARGS__); \
+        HILOG_INFO(LOG_CORE, "%{public}s" fmt, logPrefix_.c_str(), ##__VA_ARGS__); \
+    } while (0)
+#define KHILOGD(fmt, ...) \
+    do { \
+        (void)OHOS::HiviewDFX::HiLog::Debug(OHOS::SYSTEM_ABLILITY_LABEL, "%{public}s" fmt, \
+            logPrefix_.c_str(), ##__VA_ARGS__); \
+        HILOG_DEBUG(LOG_CORE, "%{public}s" fmt, logPrefix_.c_str(), ##__VA_ARGS__); \
+    } while (0)
+
+// Lambda-safe HILOG macros (use inside lambdas with `self` variable)
+#define LHILOGE(fmt, ...) HILOG_ERROR(LOG_CORE, "%{public}s" fmt, self->logPrefix_.c_str(), ##__VA_ARGS__)
+#define LHILOGW(fmt, ...) HILOG_WARN(LOG_CORE, "%{public}s" fmt, self->logPrefix_.c_str(), ##__VA_ARGS__)
+#define LHILOGI(fmt, ...) HILOG_INFO(LOG_CORE, "%{public}s" fmt, self->logPrefix_.c_str(), ##__VA_ARGS__)
+#define LHILOGD(fmt, ...) HILOG_DEBUG(LOG_CORE, "%{public}s" fmt, self->logPrefix_.c_str(), ##__VA_ARGS__)
+
 namespace OHOS {
 namespace {
 constexpr const char* PREFIX = "profile";
@@ -72,24 +127,135 @@ constexpr int32_t KILL_TIMEOUT_TIME = 60; // s
 
 BaseSystemAbilityManager::~BaseSystemAbilityManager()
 {
+    Destroy();
+}
+
+void BaseSystemAbilityManager::RemoveAbilityDeathRecipients()
+{
+    unique_lock<samgr::shared_mutex> writeLock(abilityMapLock_);
+    for (auto& [saId, saInfo] : abilityMap_) {
+        if (saInfo.remoteObj != nullptr && abilityDeath_ != nullptr) {
+            saInfo.remoteObj->RemoveDeathRecipient(abilityDeath_);
+        }
+    }
+    abilityMap_.clear();
+}
+
+void BaseSystemAbilityManager::RemoveProcessDeathRecipients()
+{
+    lock_guard<samgr::mutex> autoLock(systemProcessMapLock_);
+    for (auto& [procName, procObj] : systemProcessMap_) {
+        if (procObj != nullptr && systemProcessDeath_ != nullptr) {
+            procObj->RemoveDeathRecipient(systemProcessDeath_);
+        }
+    }
+    systemProcessMap_.clear();
+}
+
+void BaseSystemAbilityManager::RemoveListenerDeathRecipients()
+{
+    lock_guard<samgr::mutex> autoLock(listenerMapLock_);
+    for (auto& [saId, listeners] : listenerMap_) {
+        for (auto& item : listeners) {
+            if (item.listener != nullptr && abilityStatusDeath_ != nullptr) {
+                item.listener->AsObject()->RemoveDeathRecipient(abilityStatusDeath_);
+            }
+        }
+    }
+    listenerMap_.clear();
+    subscribeCountMap_.clear();
+}
+
+void BaseSystemAbilityManager::RemoveOnDemandDeathRecipients()
+{
+    lock_guard<samgr::mutex> autoLock(onDemandLock_);
+    for (auto& [saId, abilityItem] : startingAbilityMap_) {
+        for (auto& [deviceId, callbacks] : abilityItem.callbackMap) {
+            RemoveCallbackDeathRecipients(callbacks, abilityCallbackDeath_);
+        }
+    }
+    startingAbilityMap_.clear();
+    onDemandAbilityMap_.clear();
+    startingProcessMap_.clear();
+    callbackCountMap_.clear();
+}
+
+void BaseSystemAbilityManager::RemoveCallbackDeathRecipients(
+    CallbackList& callbackList, const sptr<IRemoteObject::DeathRecipient>& deathRecipient)
+{
+    for (auto& [callback, saIdCb] : callbackList) {
+        if (callback != nullptr && deathRecipient != nullptr) {
+            callback->AsObject()->RemoveDeathRecipient(deathRecipient);
+        }
+    }
+}
+
+void BaseSystemAbilityManager::RemoveRemoteCallbackDeathRecipients()
+{
+    lock_guard<samgr::mutex> autoLock(loadRemoteLock_);
+    for (auto& [deviceId, callbacks] : remoteCallbacks_) {
+        for (auto& callback : callbacks) {
+            if (callback != nullptr && remoteCallbackDeath_ != nullptr) {
+                callback->AsObject()->RemoveDeathRecipient(remoteCallbackDeath_);
+            }
+        }
+    }
+    remoteCallbacks_.clear();
+}
+
+void BaseSystemAbilityManager::RemoveAllDeathRecipients()
+{
+    RemoveAbilityDeathRecipients();
+    RemoveProcessDeathRecipients();
+    RemoveListenerDeathRecipients();
+    RemoveOnDemandDeathRecipients();
+    RemoveRemoteCallbackDeathRecipients();
+
+    abilityDeath_ = nullptr;
+    systemProcessDeath_ = nullptr;
+    abilityStatusDeath_ = nullptr;
+    abilityCallbackDeath_ = nullptr;
+    remoteCallbackDeath_ = nullptr;
+}
+
+void BaseSystemAbilityManager::ReleaseSubSystems()
+{
+    if (collectManager_ != nullptr) {
+        collectManager_->UnInit();
+    }
+    collectManager_ = nullptr;
+    abilityStateScheduler_ = nullptr;
     if (reportEventTimer_ != nullptr) {
         reportEventTimer_->Shutdown();
     }
+    workHandler_ = nullptr;
+}
+
+void BaseSystemAbilityManager::Destroy()
+{
+    if (workHandler_ != nullptr) {
+        workHandler_->CleanFfrt();
+    }
+
+    RemoveAllDeathRecipients();
+    ReleaseSubSystems();
+    selfPtr_.reset();
 }
 
 void BaseSystemAbilityManager::Init()
 {
-    abilityDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityDeathRecipient());
-    systemProcessDeath_ = sptr<IRemoteObject::DeathRecipient>(new SystemProcessDeathRecipient());
-    abilityStatusDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityStatusDeathRecipient());
-    abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityCallbackDeathRecipient());
-    remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
+    selfPtr_ = std::shared_ptr<BaseSystemAbilityManager>(this, [](BaseSystemAbilityManager*) {});
+    abilityDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityDeathRecipient(weak_from_this()));
+    systemProcessDeath_ = sptr<IRemoteObject::DeathRecipient>(new SystemProcessDeathRecipient(weak_from_this()));
+    abilityStatusDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityStatusDeathRecipient(weak_from_this()));
+    abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityCallbackDeathRecipient(weak_from_this()));
+    remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient(weak_from_this()));
 
     if (workHandler_ == nullptr) {
         workHandler_ = make_shared<FFRTHandler>("workHandler");
     }
-    collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
-    abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+    collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager(weak_from_this()));
+    abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>(weak_from_this());
     InitSaProfile();
     reportEventTimer_ = std::make_unique<Utils::Timer>("DfxReporter", -1);
 }
@@ -386,15 +552,16 @@ int32_t BaseSystemAbilityManager::AddOnDemandSystemAbilityInfo(int32_t systemAbi
     }
     onDemandAbilityMap_[systemAbilityId] = procName;
     HILOGI("insert onDemand SA:%{public}d_%{public}zu", systemAbilityId, onDemandAbilityMap_.size());
-    if (startingAbilityMap_.count(systemAbilityId) != 0) {
-        if (workHandler_ != nullptr) {
-            auto pendingTask = [procName, systemAbilityId, this] () {
-                StartOnDemandAbility(procName, systemAbilityId);
-            };
-            bool ret = workHandler_->PostTask(pendingTask);
-            if (!ret) {
-                HILOGW("AddOnDemandSystemAbilityInfo PostTask failed!");
+    if (startingAbilityMap_.count(systemAbilityId) != 0 && workHandler_ != nullptr) {
+        auto pendingTask = [procName, systemAbilityId, weakThis = weak_from_this()]() {
+            auto self = weakThis.lock();
+            if (self == nullptr) {
+                return;
             }
+            self->StartOnDemandAbility(procName, systemAbilityId);
+        };
+        if (!workHandler_->PostTask(pendingTask)) {
+            HILOGW("AddOnDemandSystemAbilityInfo PostTask failed!");
         }
     }
     return ERR_OK;
@@ -578,8 +745,12 @@ void BaseSystemAbilityManager::NotifySystemAbilityAddedByAsync(int32_t systemAbi
         HILOGE("NotifySystemAbilityAddedByAsync workHandler is nullptr");
         return;
     } else {
-        auto listenerNotifyTask = [systemAbilityId, listener, this]() {
-            NotifySystemAbilityChanged(systemAbilityId, "",
+        auto listenerNotifyTask = [systemAbilityId, listener, weakThis = weak_from_this()]() {
+            auto self = weakThis.lock();
+            if (self == nullptr) {
+                return;
+            }
+            self->NotifySystemAbilityChanged(systemAbilityId, "",
                 static_cast<uint32_t>(SamgrInterfaceCode::ADD_SYSTEM_ABILITY_TRANSACTION), listener);
         };
         if (!workHandler_->PostTask(listenerNotifyTask)) {
@@ -962,11 +1133,15 @@ void BaseSystemAbilityManager::SendSystemAbilityAddedMsg(int32_t systemAbilityId
         HILOGE("SendSaAddedMsg work handler not init");
         return;
     }
-    auto notifyAddedTask = [systemAbilityId, remoteObject, this]() {
-        FindSystemAbilityNotify(systemAbilityId,
+    auto notifyAddedTask = [systemAbilityId, remoteObject, weakThis = weak_from_this()]() {
+        auto self = weakThis.lock();
+        if (self == nullptr) {
+            return;
+        }
+        self->FindSystemAbilityNotify(systemAbilityId,
             static_cast<uint32_t>(SamgrInterfaceCode::ADD_SYSTEM_ABILITY_TRANSACTION));
-        HILOGI("SendSaAddedMsg notify SA:%{public}d", systemAbilityId);
-        NotifySystemAbilityLoaded(systemAbilityId, remoteObject);
+        LHILOGI("SendSaAddedMsg notify SA:%{public}d", systemAbilityId);
+        self->NotifySystemAbilityLoaded(systemAbilityId, remoteObject);
     };
     bool ret = workHandler_->PostTask(notifyAddedTask);
     if (!ret) {
@@ -980,8 +1155,12 @@ void BaseSystemAbilityManager::SendSystemAbilityRemovedMsg(int32_t systemAbility
         HILOGE("SendSaRemovedMsg work handler not init");
         return;
     }
-    auto notifyRemovedTask = [systemAbilityId, this]() {
-        FindSystemAbilityNotify(systemAbilityId,
+    auto notifyRemovedTask = [systemAbilityId, weakThis = weak_from_this()]() {
+        auto self = weakThis.lock();
+        if (self == nullptr) {
+            return;
+        }
+        self->FindSystemAbilityNotify(systemAbilityId,
             static_cast<uint32_t>(SamgrInterfaceCode::REMOVE_SYSTEM_ABILITY_TRANSACTION));
     };
     bool ret = workHandler_->PostTask(notifyRemovedTask);
@@ -998,32 +1177,37 @@ void BaseSystemAbilityManager::SendCheckLoadedMsg(int32_t systemAbilityId, const
         return;
     }
 
-    auto delayTask = [systemAbilityId, name, srcDeviceId, callback, this]() {
-        if (workHandler_ != nullptr) {
-            HILOGD("SendCheckLoadedMsg deltask SA:%{public}d", systemAbilityId);
-            workHandler_->DelTask(ToString(systemAbilityId));
+    auto delayTask = [systemAbilityId, name, srcDeviceId, callback, weakThis = weak_from_this()]() {
+        auto self = weakThis.lock();
+        if (self == nullptr) {
+            return;
+        }
+        if (self->workHandler_ != nullptr) {
+            LHILOGD("SendCheckLoadedMsg deltask SA:%{public}d", systemAbilityId);
+            self->workHandler_->DelTask(ToString(systemAbilityId));
         } else {
-            HILOGE("SendCheckLoadedMsg workHandler_ is null");
+            LHILOGE("SendCheckLoadedMsg workHandler_ is null");
         }
-        if (CheckSystemAbility(systemAbilityId) != nullptr) {
-            HILOGI("SendCheckLoadedMsg SA:%{public}d loaded", systemAbilityId);
+        if (self->CheckSystemAbility(systemAbilityId) != nullptr) {
+            LHILOGI("SendCheckLoadedMsg SA:%{public}d loaded", systemAbilityId);
             return;
         }
-        HILOGI("SendCheckLoadedMsg handle for SA:%{public}d", systemAbilityId);
-        CleanCallbackForLoadFailed(systemAbilityId, name, srcDeviceId, callback);
-        if (abilityStateScheduler_ == nullptr) {
-            HILOGE("abilityStateScheduler is nullptr");
+        LHILOGI("SendCheckLoadedMsg handle for SA:%{public}d", systemAbilityId);
+        self->CleanCallbackForLoadFailed(systemAbilityId, name, srcDeviceId, callback);
+        if (self->abilityStateScheduler_ == nullptr) {
+            LHILOGE("abilityStateScheduler is nullptr");
             return;
         }
-        HILOGI("SendCheckLoadedMsg SA:%{public}d, load timeout", systemAbilityId);
+        LHILOGI("SendCheckLoadedMsg SA:%{public}d, load timeout", systemAbilityId);
         ReportSamgrSaLoadFail(systemAbilityId, IPCSkeleton::GetCallingPid(),
             IPCSkeleton::GetCallingUid(), "time out");
         SamgrUtil::SendUpdateSaState(systemAbilityId, "loadfail");
-        if (IsCacheCommonEvent(systemAbilityId) && collectManager_ != nullptr) {
-            collectManager_->ClearSaExtraDataId(systemAbilityId);
+        if (self->IsCacheCommonEvent(systemAbilityId) && self->collectManager_ != nullptr) {
+            self->collectManager_->ClearSaExtraDataId(systemAbilityId);
         }
-        abilityStateScheduler_->SendAbilityStateEvent(systemAbilityId, AbilityStateEvent::ABILITY_LOAD_FAILED_EVENT);
-        (void)GetSystemProcess(name);
+        self->abilityStateScheduler_->SendAbilityStateEvent(systemAbilityId,
+            AbilityStateEvent::ABILITY_LOAD_FAILED_EVENT);
+        (void)self->GetSystemProcess(name);
     };
     bool ret = workHandler_->PostTask(delayTask, ToString(systemAbilityId), CHECK_LOADED_DELAY_TIME);
     if (!ret) {
@@ -1050,21 +1234,26 @@ void BaseSystemAbilityManager::CleanCallbackForLoadFailed(int32_t systemAbilityI
     }
     auto& abilityItem = iter->second;
     for (auto& callbackItem : abilityItem.callbackMap[srcDeviceId]) {
-        if (callback->AsObject() == callbackItem.first->AsObject()) {
-            if (workHandler_ == nullptr) {
-                HILOGE("CleanCallbackForLoadFailed workHandler is nullptr");
+        if (callback->AsObject() != callbackItem.first->AsObject()) {
+            continue;
+        }
+        if (workHandler_ == nullptr) {
+            HILOGE("CleanCallbackForLoadFailed workHandler is nullptr");
+            return;
+        }
+        auto listenerNotifyTask = [systemAbilityId, callbackItem, weakThis = weak_from_this()]() {
+            auto self = weakThis.lock();
+            if (self == nullptr) {
                 return;
             }
-            auto listenerNotifyTask = [systemAbilityId, callbackItem, this]() {
-                NotifySystemAbilityLoadFail(systemAbilityId, callbackItem.first, LOAD_SA_TIMEOUT);
-            };
-            if (!workHandler_->PostTask(listenerNotifyTask)) {
-                HILOGE("Send NotifySaLoadFailMsg PostTask fail");
-            }
-            RemoveStartingAbilityCallbackLocked(callbackItem);
-            abilityItem.callbackMap[srcDeviceId].remove(callbackItem);
-            break;
+            self->NotifySystemAbilityLoadFail(systemAbilityId, callbackItem.first, LOAD_SA_TIMEOUT);
+        };
+        if (!workHandler_->PostTask(listenerNotifyTask)) {
+            HILOGE("Send NotifySaLoadFailMsg PostTask fail");
         }
+        RemoveStartingAbilityCallbackLocked(callbackItem);
+        abilityItem.callbackMap[srcDeviceId].remove(callbackItem);
+        break;
     }
     if (abilityItem.callbackMap[srcDeviceId].empty()) {
         HILOGI("CleanCallback startingAbilityMap remove SA:%{public}d. with deviceId", systemAbilityId);
@@ -1094,9 +1283,13 @@ void BaseSystemAbilityManager::SendLoadedSystemAbilityMsg(int32_t systemAbilityI
         HILOGE("SendLoadedSaMsg work handler not init");
         return;
     }
-    auto notifyLoadedTask = [systemAbilityId, remoteObject, callback, this]() {
-        HILOGI("SendLoadedSaMsg notify SA:%{public}d", systemAbilityId);
-        NotifySystemAbilityLoaded(systemAbilityId, remoteObject, callback);
+    auto notifyLoadedTask = [systemAbilityId, remoteObject, callback, weakThis = weak_from_this()]() {
+        auto self = weakThis.lock();
+        if (self == nullptr) {
+            return;
+        }
+        LHILOGI("SendLoadedSaMsg notify SA:%{public}d", systemAbilityId);
+        self->NotifySystemAbilityLoaded(systemAbilityId, remoteObject, callback);
     };
     bool ret = workHandler_->PostTask(notifyLoadedTask);
     if (!ret) {

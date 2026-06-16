@@ -48,6 +48,7 @@ constexpr int32_t OTHER_SAID = 1499;
 constexpr int32_t TEST_EXCEPTION_HIGH_SA_ID = LAST_SYS_ABILITY_ID + 1;
 const std::u16string PROCESS_NAME = u"test_process_name";
 constexpr int32_t MAX_SUBSCRIBE_COUNT = 256;
+constexpr int32_t MAX_WAIT_TIME = 8000;
 
 class MockLocalAbilityManager : public IRemoteStub<ILocalAbilityManager> {
 public:
@@ -69,16 +70,27 @@ public:
 
 void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
 {
-    saMgr->abilityDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityDeathRecipient());
-    saMgr->systemProcessDeath_ = sptr<IRemoteObject::DeathRecipient>(new SystemProcessDeathRecipient());
-    saMgr->abilityStatusDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityStatusDeathRecipient());
-    saMgr->abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityCallbackDeathRecipient());
-    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
+    std::weak_ptr<BaseSystemAbilityManager> weakMgr;
+    saMgr->abilityDeath_ = sptr<IRemoteObject::DeathRecipient>(
+        new AbilityDeathRecipient(weakMgr));
+    saMgr->systemProcessDeath_ = sptr<IRemoteObject::DeathRecipient>(
+        new SystemProcessDeathRecipient(weakMgr));
+    saMgr->abilityStatusDeath_ = sptr<IRemoteObject::DeathRecipient>(
+        new AbilityStatusDeathRecipient(weakMgr));
+    saMgr->abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(
+        new AbilityCallbackDeathRecipient(weakMgr));
+    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(
+        new RemoteCallbackDeathRecipient(weakMgr));
     saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
-    saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
-    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+    saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(
+        new DeviceStatusCollectManager(weakMgr));
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>(weakMgr);
 }
 } // namespace
+
+bool BaseSystemAbilityMgrTest::isCaseDone_ = false;
+std::mutex BaseSystemAbilityMgrTest::caseDoneLock_;
+std::condition_variable BaseSystemAbilityMgrTest::caseDoneCondition_;
 
 void BaseSystemAbilityMgrTest::SetUpTestCase()
 {
@@ -1703,5 +1715,622 @@ HWTEST_F(BaseSystemAbilityMgrTest, SendStrategy007, TestSize.Level1)
 
     saMgr->saProfileMap_.clear();
     saMgr->systemProcessMap_.clear();
+}
+
+/**
+ * @tc.name: InitWorkHandlerNonNull001
+ * @tc.desc: test workHandler_ is preserved when already initialized
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, InitWorkHandlerNonNull001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    auto originalHandler = saMgr->workHandler_;
+    ASSERT_NE(originalHandler, nullptr);
+    EXPECT_EQ(saMgr->workHandler_, originalHandler);
+}
+
+/**
+ * @tc.name: AddOnDemandStartingHandlerNull001
+ * @tc.desc: SA in startingAbilityMap_ but workHandler_ null, lambda not posted
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, AddOnDemandStartingHandlerNull001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    saMgr->workHandler_ = nullptr;
+    BaseSystemAbilityManager::AbilityItem abilityItem;
+    abilityItem.state = BaseSystemAbilityManager::AbilityState::STARTING;
+    saMgr->startingAbilityMap_[SAID] = abilityItem;
+    sptr<IRemoteObject> procObject = new TestTransactionService();
+    saMgr->systemProcessMap_[PROCESS_NAME] = procObject;
+    int32_t result = saMgr->AddOnDemandSystemAbilityInfo(SAID, PROCESS_NAME);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_TRUE(saMgr->onDemandAbilityMap_.count(SAID) > 0);
+}
+
+/**
+ * @tc.name: AddOnDemandNotStartingNoLambda001
+ * @tc.desc: SA NOT in startingAbilityMap_, no lambda posted
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, AddOnDemandNotStartingNoLambda001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    saMgr->startingAbilityMap_.clear();
+    sptr<IRemoteObject> procObject = new TestTransactionService();
+    saMgr->systemProcessMap_[PROCESS_NAME] = procObject;
+    int32_t result = saMgr->AddOnDemandSystemAbilityInfo(SAID, PROCESS_NAME);
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_TRUE(saMgr->onDemandAbilityMap_.count(SAID) > 0);
+}
+
+/**
+ * @tc.name: CleanCallbackSaNotInMap001
+ * @tc.desc: SA not in startingAbilityMap_, CleanCallbackForLoadFailed returns early
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, CleanCallbackSaNotInMap001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    saMgr->startingAbilityMap_.clear();
+    sptr<SystemAbilityLoadCallbackMock> cb = new SystemAbilityLoadCallbackMock();
+    ASSERT_NE(cb, nullptr);
+    saMgr->CleanCallbackForLoadFailed(SAID, PROCESS_NAME, "local", cb);
+    EXPECT_TRUE(saMgr->startingAbilityMap_.empty());
+}
+
+/**
+ * @tc.name: CleanCallbackEraseStartingProcess001
+ * @tc.desc: process in startingProcessMap_ gets erased during cleanup
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, CleanCallbackEraseStartingProcess001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    BaseSystemAbilityManager::StartingProcessInfo info;
+    info.procName = PROCESS_NAME;
+    saMgr->startingProcessMap_[PROCESS_NAME] = info;
+    EXPECT_TRUE(saMgr->startingProcessMap_.count(PROCESS_NAME) > 0);
+    BaseSystemAbilityManager::AbilityItem abilityItem;
+    saMgr->startingAbilityMap_[SAID] = abilityItem;
+    sptr<SystemAbilityLoadCallbackMock> cb = new SystemAbilityLoadCallbackMock();
+    ASSERT_NE(cb, nullptr);
+    saMgr->CleanCallbackForLoadFailed(SAID, PROCESS_NAME, "local", cb);
+    EXPECT_TRUE(saMgr->startingProcessMap_.find(PROCESS_NAME) == saMgr->startingProcessMap_.end());
+}
+
+/**
+ * @tc.name: CleanCallbackMismatchCallback001
+ * @tc.desc: non-matching callback in list, continue without removing
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, CleanCallbackMismatchCallback001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    saMgr->callbackCountMap_.clear();
+    sptr<SystemAbilityLoadCallbackMock> existingCb = new SystemAbilityLoadCallbackMock();
+    ASSERT_NE(existingCb, nullptr);
+    BaseSystemAbilityManager::AbilityItem abilityItem;
+    abilityItem.callbackMap["local"].push_back({existingCb, SAID});
+    saMgr->callbackCountMap_[SAID] = 1;
+    saMgr->startingAbilityMap_[SAID] = abilityItem;
+    sptr<SystemAbilityLoadCallbackMock> mismatchCb = new SystemAbilityLoadCallbackMock();
+    ASSERT_NE(mismatchCb, nullptr);
+    saMgr->CleanCallbackForLoadFailed(SAID, PROCESS_NAME, "local", mismatchCb);
+    auto& item = saMgr->startingAbilityMap_[SAID];
+    EXPECT_EQ(item.callbackMap["local"].size(), 1u);
+}
+
+/**
+ * @tc.name: CleanCallbackWorkHandlerNull001
+ * @tc.desc: matching callback found but workHandler_ is null, returns early
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, CleanCallbackWorkHandlerNull001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    saMgr->workHandler_ = nullptr;
+    saMgr->callbackCountMap_.clear();
+    sptr<SystemAbilityLoadCallbackMock> cb = new SystemAbilityLoadCallbackMock();
+    ASSERT_NE(cb, nullptr);
+    BaseSystemAbilityManager::AbilityItem abilityItem;
+    abilityItem.callbackMap["local"].push_back({cb, SAID});
+    saMgr->callbackCountMap_[SAID] = 1;
+    saMgr->startingAbilityMap_[SAID] = abilityItem;
+    saMgr->CleanCallbackForLoadFailed(SAID, PROCESS_NAME, "local", cb);
+    auto& item = saMgr->startingAbilityMap_[SAID];
+    EXPECT_EQ(item.callbackMap["local"].size(), 1u);
+}
+
+/**
+ * @tc.name: CleanCallbackCallbackMapCleanup001
+ * @tc.desc: matching callback removed, empty deviceId and SA entries erased
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, CleanCallbackCallbackMapCleanup001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    saMgr->callbackCountMap_.clear();
+    sptr<SystemAbilityLoadCallbackMock> cb = new SystemAbilityLoadCallbackMock();
+    ASSERT_NE(cb, nullptr);
+    if (saMgr->abilityCallbackDeath_ != nullptr) {
+        cb->AsObject()->AddDeathRecipient(saMgr->abilityCallbackDeath_);
+    }
+    BaseSystemAbilityManager::AbilityItem abilityItem;
+    abilityItem.callbackMap["local"].push_back({cb, SAID});
+    saMgr->callbackCountMap_[SAID] = 1;
+    saMgr->startingAbilityMap_[SAID] = abilityItem;
+    saMgr->CleanCallbackForLoadFailed(SAID, PROCESS_NAME, "local", cb);
+    EXPECT_TRUE(saMgr->startingAbilityMap_.find(SAID) == saMgr->startingAbilityMap_.end());
+}
+
+/**
+ * @tc.name: CleanCallbackMultiCallback001
+ * @tc.desc: multiple callbacks for same device, only matching one removed
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, CleanCallbackMultiCallback001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    saMgr->callbackCountMap_.clear();
+    sptr<SystemAbilityLoadCallbackMock> cb1 = new SystemAbilityLoadCallbackMock();
+    ASSERT_NE(cb1, nullptr);
+    sptr<SystemAbilityLoadCallbackMock> cb2 = new SystemAbilityLoadCallbackMock();
+    ASSERT_NE(cb2, nullptr);
+    if (saMgr->abilityCallbackDeath_ != nullptr) {
+        cb1->AsObject()->AddDeathRecipient(saMgr->abilityCallbackDeath_);
+        cb2->AsObject()->AddDeathRecipient(saMgr->abilityCallbackDeath_);
+    }
+    BaseSystemAbilityManager::AbilityItem abilityItem;
+    abilityItem.callbackMap["local"].push_back({cb1, SAID});
+    abilityItem.callbackMap["local"].push_back({cb2, SAID});
+    saMgr->callbackCountMap_[SAID] = 2;
+    saMgr->startingAbilityMap_[SAID] = abilityItem;
+    saMgr->CleanCallbackForLoadFailed(SAID, PROCESS_NAME, "local", cb1);
+    EXPECT_TRUE(saMgr->startingAbilityMap_.find(SAID) != saMgr->startingAbilityMap_.end());
+    auto& item = saMgr->startingAbilityMap_[SAID];
+    EXPECT_EQ(item.callbackMap["local"].size(), 1u);
+}
+
+/**
+ * @tc.name: CleanCallbackMultiDevice001
+ * @tc.desc: callbacks on different deviceIds, only matching deviceId erased
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, CleanCallbackMultiDevice001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    saMgr->callbackCountMap_.clear();
+    sptr<SystemAbilityLoadCallbackMock> localCb = new SystemAbilityLoadCallbackMock();
+    ASSERT_NE(localCb, nullptr);
+    sptr<SystemAbilityLoadCallbackMock> remoteCb = new SystemAbilityLoadCallbackMock();
+    ASSERT_NE(remoteCb, nullptr);
+    if (saMgr->abilityCallbackDeath_ != nullptr) {
+        localCb->AsObject()->AddDeathRecipient(saMgr->abilityCallbackDeath_);
+        remoteCb->AsObject()->AddDeathRecipient(saMgr->abilityCallbackDeath_);
+    }
+    BaseSystemAbilityManager::AbilityItem abilityItem;
+    abilityItem.callbackMap["local"].push_back({localCb, SAID});
+    abilityItem.callbackMap["remote"].push_back({remoteCb, SAID});
+    saMgr->callbackCountMap_[SAID] = 2;
+    saMgr->startingAbilityMap_[SAID] = abilityItem;
+    saMgr->CleanCallbackForLoadFailed(SAID, PROCESS_NAME, "local", localCb);
+    EXPECT_TRUE(saMgr->startingAbilityMap_.find(SAID) != saMgr->startingAbilityMap_.end());
+    auto& item = saMgr->startingAbilityMap_[SAID];
+    EXPECT_TRUE(item.callbackMap.find("local") == item.callbackMap.end());
+    EXPECT_EQ(item.callbackMap["remote"].size(), 1u);
+}
+
+/**
+ * @tc.name: SendSaAddedMsgPostTaskSuccess001
+ * @tc.desc: valid workHandler_, SendSystemAbilityAddedMsg posts task successfully
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, SendSaAddedMsgPostTaskSuccess001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    ASSERT_NE(saMgr->workHandler_, nullptr);
+    sptr<IRemoteObject> ability = new TestTransactionService();
+    ASSERT_NE(ability, nullptr);
+    saMgr->SendSystemAbilityAddedMsg(SAID, ability);
+}
+
+/**
+ * @tc.name: SendLoadedSaMsgPostTaskSuccess001
+ * @tc.desc: valid workHandler_, SendLoadedSystemAbilityMsg posts task successfully
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, SendLoadedSaMsgPostTaskSuccess001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    ASSERT_NE(saMgr->workHandler_, nullptr);
+    sptr<IRemoteObject> ability = new TestTransactionService();
+    ASSERT_NE(ability, nullptr);
+    sptr<SystemAbilityLoadCallbackMock> cb = new SystemAbilityLoadCallbackMock();
+    ASSERT_NE(cb, nullptr);
+    saMgr->SendLoadedSystemAbilityMsg(SAID, ability, cb);
+}
+
+/**
+ * @tc.name: DestructorWithTimer001
+ * @tc.desc: destructor with reportEventTimer_ set calls Shutdown without crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, DestructorWithTimer001, TestSize.Level1)
+{
+    {
+        sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+        InitSaMgr(saMgr);
+        saMgr->reportEventTimer_ = std::make_unique<Utils::Timer>("TestTimer", -1);
+        ASSERT_NE(saMgr->reportEventTimer_, nullptr);
+    }
+}
+
+/**
+ * @tc.name: DestructorWithWorkHandler001
+ * @tc.desc: destructor with workHandler_ cleans up without crash
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, DestructorWithWorkHandler001, TestSize.Level1)
+{
+    {
+        sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+        InitSaMgr(saMgr);
+        ASSERT_NE(saMgr->workHandler_, nullptr);
+    }
+}
+
+/**
+ * @tc.name: AbilityDeathNullManager001
+ * @tc.desc: test AbilityDeathRecipient OnRemoteDied with null manager
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, AbilityDeathNullManager001, TestSize.Level1)
+{
+    sptr<AbilityDeathRecipient> recipient = new AbilityDeathRecipient(std::weak_ptr<BaseSystemAbilityManager>{});
+    ASSERT_NE(recipient, nullptr);
+    sptr<IRemoteObject> remoteObj = new TestTransactionService();
+    ASSERT_NE(remoteObj, nullptr);
+    recipient->OnRemoteDied(remoteObj);
+}
+
+/**
+ * @tc.name: AbilityDeathWithManager001
+ * @tc.desc: test AbilityDeathRecipient OnRemoteDied with valid manager
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, AbilityDeathWithManager001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    sptr<AbilityDeathRecipient> recipient = new AbilityDeathRecipient(saMgr->weak_from_this());
+    ASSERT_NE(recipient, nullptr);
+    sptr<IRemoteObject> remoteObj = new TestTransactionService();
+    ASSERT_NE(remoteObj, nullptr);
+    recipient->OnRemoteDied(remoteObj);
+}
+
+/**
+ * @tc.name: SystemProcessDeathNullManager001
+ * @tc.desc: test SystemProcessDeathRecipient OnRemoteDied with null manager
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, SystemProcessDeathNullManager001, TestSize.Level1)
+{
+    sptr<SystemProcessDeathRecipient> recipient =
+        new SystemProcessDeathRecipient(std::weak_ptr<BaseSystemAbilityManager>{});
+    ASSERT_NE(recipient, nullptr);
+    sptr<IRemoteObject> remoteObj = new TestTransactionService();
+    ASSERT_NE(remoteObj, nullptr);
+    recipient->OnRemoteDied(remoteObj);
+}
+
+/**
+ * @tc.name: SystemProcessDeathWithManager001
+ * @tc.desc: test SystemProcessDeathRecipient OnRemoteDied with valid manager
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, SystemProcessDeathWithManager001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    sptr<SystemProcessDeathRecipient> recipient = new SystemProcessDeathRecipient(saMgr->weak_from_this());
+    ASSERT_NE(recipient, nullptr);
+    sptr<IRemoteObject> remoteObj = new TestTransactionService();
+    ASSERT_NE(remoteObj, nullptr);
+    recipient->OnRemoteDied(remoteObj);
+}
+
+/**
+ * @tc.name: AbilityStatusDeathNullManager001
+ * @tc.desc: test AbilityStatusDeathRecipient OnRemoteDied with null manager
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, AbilityStatusDeathNullManager001, TestSize.Level1)
+{
+    sptr<AbilityStatusDeathRecipient> recipient =
+        new AbilityStatusDeathRecipient(std::weak_ptr<BaseSystemAbilityManager>{});
+    ASSERT_NE(recipient, nullptr);
+    sptr<IRemoteObject> remoteObj = new TestTransactionService();
+    ASSERT_NE(remoteObj, nullptr);
+    recipient->OnRemoteDied(remoteObj);
+}
+
+/**
+ * @tc.name: AbilityStatusDeathWithManager001
+ * @tc.desc: test AbilityStatusDeathRecipient OnRemoteDied with valid manager
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, AbilityStatusDeathWithManager001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    sptr<AbilityStatusDeathRecipient> recipient = new AbilityStatusDeathRecipient(saMgr->weak_from_this());
+    ASSERT_NE(recipient, nullptr);
+    sptr<IRemoteObject> remoteObj = new TestTransactionService();
+    ASSERT_NE(remoteObj, nullptr);
+    recipient->OnRemoteDied(remoteObj);
+}
+
+/**
+ * @tc.name: AbilityCallbackDeathNullManager001
+ * @tc.desc: test AbilityCallbackDeathRecipient OnRemoteDied with null manager
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, AbilityCallbackDeathNullManager001, TestSize.Level1)
+{
+    sptr<AbilityCallbackDeathRecipient> recipient =
+        new AbilityCallbackDeathRecipient(std::weak_ptr<BaseSystemAbilityManager>{});
+    ASSERT_NE(recipient, nullptr);
+    sptr<IRemoteObject> remoteObj = new TestTransactionService();
+    ASSERT_NE(remoteObj, nullptr);
+    recipient->OnRemoteDied(remoteObj);
+}
+
+/**
+ * @tc.name: AbilityCallbackDeathWithManager001
+ * @tc.desc: test AbilityCallbackDeathRecipient OnRemoteDied with valid manager
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, AbilityCallbackDeathWithManager001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    sptr<AbilityCallbackDeathRecipient> recipient = new AbilityCallbackDeathRecipient(saMgr->weak_from_this());
+    ASSERT_NE(recipient, nullptr);
+    sptr<IRemoteObject> remoteObj = new TestTransactionService();
+    ASSERT_NE(remoteObj, nullptr);
+    recipient->OnRemoteDied(remoteObj);
+}
+
+/**
+ * @tc.name: RemoteCallbackDeathNullManager001
+ * @tc.desc: test RemoteCallbackDeathRecipient OnRemoteDied with null manager
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, RemoteCallbackDeathNullManager001, TestSize.Level1)
+{
+    sptr<RemoteCallbackDeathRecipient> recipient = new RemoteCallbackDeathRecipient(
+    std::weak_ptr<BaseSystemAbilityManager>{});
+    ASSERT_NE(recipient, nullptr);
+    sptr<IRemoteObject> remoteObj = new TestTransactionService();
+    ASSERT_NE(remoteObj, nullptr);
+    recipient->OnRemoteDied(remoteObj);
+}
+
+/**
+ * @tc.name: RemoteCallbackDeathWithManager001
+ * @tc.desc: test RemoteCallbackDeathRecipient OnRemoteDied with valid manager
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, RemoteCallbackDeathWithManager001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    sptr<RemoteCallbackDeathRecipient> recipient = new RemoteCallbackDeathRecipient(saMgr->weak_from_this());
+    ASSERT_NE(recipient, nullptr);
+    sptr<IRemoteObject> remoteObj = new TestTransactionService();
+    ASSERT_NE(remoteObj, nullptr);
+    recipient->OnRemoteDied(remoteObj);
+}
+
+/**
+ * @tc.name: SystemProcessListenerDeathNullManager001
+ * @tc.desc: test SystemProcessListenerDeathRecipient OnRemoteDied with null manager
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, SystemProcessListenerDeathNullManager001, TestSize.Level1)
+{
+    sptr<SystemProcessListenerDeathRecipient> recipient =
+        new SystemProcessListenerDeathRecipient(std::weak_ptr<BaseSystemAbilityManager>{});
+    ASSERT_NE(recipient, nullptr);
+    sptr<IRemoteObject> remoteObj = new TestTransactionService();
+    ASSERT_NE(remoteObj, nullptr);
+    recipient->OnRemoteDied(remoteObj);
+}
+
+/**
+ * @tc.name: SystemProcessListenerDeathWithManager001
+ * @tc.desc: test SystemProcessListenerDeathRecipient OnRemoteDied with valid manager
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, SystemProcessListenerDeathWithManager001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    sptr<SystemProcessListenerDeathRecipient> recipient =
+        new SystemProcessListenerDeathRecipient(saMgr->weak_from_this());
+    ASSERT_NE(recipient, nullptr);
+    sptr<IRemoteObject> remoteObj = new TestTransactionService();
+    ASSERT_NE(remoteObj, nullptr);
+    recipient->OnRemoteDied(remoteObj);
+}
+
+/**
+ * @tc.name: DestructorWithoutInit001
+ * @tc.desc: test destructor when Init() not called (workHandler_ and timer both null)
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, DestructorWithoutInit001, TestSize.Level1)
+{
+    {
+        sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+        ASSERT_EQ(saMgr->workHandler_, nullptr);
+        ASSERT_EQ(saMgr->reportEventTimer_, nullptr);
+    }
+}
+
+/**
+ * @tc.name: SendSaAddedMsgLambdaExec001
+ * @tc.desc: test SendSystemAbilityAddedMsg lambda executes with valid self
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, SendSaAddedMsgLambdaExec001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    ASSERT_NE(saMgr->workHandler_, nullptr);
+    sptr<IRemoteObject> ability = new TestTransactionService();
+    saMgr->SendSystemAbilityAddedMsg(SAID, ability);
+    auto doneTask = []() {
+        std::lock_guard<std::mutex> autoLock(caseDoneLock_);
+        isCaseDone_ = true;
+        caseDoneCondition_.notify_all();
+    };
+    saMgr->workHandler_->PostTask(doneTask);
+    std::unique_lock<std::mutex> lock(caseDoneLock_);
+    caseDoneCondition_.wait_for(lock, std::chrono::milliseconds(MAX_WAIT_TIME),
+        [&] () { return isCaseDone_; });
+    isCaseDone_ = false;
+    EXPECT_NE(saMgr->workHandler_, nullptr);
+    saMgr->workHandler_->CleanFfrt();
+}
+
+/**
+ * @tc.name: SendLoadedSaMsgLambdaExec001
+ * @tc.desc: test SendLoadedSystemAbilityMsg lambda executes with valid self
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, SendLoadedSaMsgLambdaExec001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    ASSERT_NE(saMgr->workHandler_, nullptr);
+    sptr<IRemoteObject> ability = new TestTransactionService();
+    sptr<SystemAbilityLoadCallbackMock> cb = new SystemAbilityLoadCallbackMock();
+    ASSERT_NE(cb, nullptr);
+    saMgr->SendLoadedSystemAbilityMsg(SAID, ability, cb);
+    auto doneTask = []() {
+        std::lock_guard<std::mutex> autoLock(caseDoneLock_);
+        isCaseDone_ = true;
+        caseDoneCondition_.notify_all();
+    };
+    saMgr->workHandler_->PostTask(doneTask);
+    std::unique_lock<std::mutex> lock(caseDoneLock_);
+    caseDoneCondition_.wait_for(lock, std::chrono::milliseconds(MAX_WAIT_TIME),
+        [&] () { return isCaseDone_; });
+    isCaseDone_ = false;
+    EXPECT_NE(saMgr->workHandler_, nullptr);
+    saMgr->workHandler_->CleanFfrt();
+}
+
+/**
+ * @tc.name: SendRemovedMsgLambdaExec001
+ * @tc.desc: test SendSystemAbilityRemovedMsg lambda executes with valid self
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, SendRemovedMsgLambdaExec001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    ASSERT_NE(saMgr->workHandler_, nullptr);
+    saMgr->SendSystemAbilityRemovedMsg(SAID);
+    auto doneTask = []() {
+        std::lock_guard<std::mutex> autoLock(caseDoneLock_);
+        isCaseDone_ = true;
+        caseDoneCondition_.notify_all();
+    };
+    saMgr->workHandler_->PostTask(doneTask);
+    std::unique_lock<std::mutex> lock(caseDoneLock_);
+    caseDoneCondition_.wait_for(lock, std::chrono::milliseconds(MAX_WAIT_TIME),
+        [&] () { return isCaseDone_; });
+    isCaseDone_ = false;
+    EXPECT_NE(saMgr->workHandler_, nullptr);
+    saMgr->workHandler_->CleanFfrt();
+}
+
+/**
+ * @tc.name: AddOnDemandPendingTaskLambdaExec001
+ * @tc.desc: test AddOnDemandSystemAbilityInfo pendingTask lambda executes
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, AddOnDemandPendingTaskLambdaExec001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    sptr<IRemoteObject> procObject = new TestTransactionService();
+    saMgr->systemProcessMap_[PROCESS_NAME] = procObject;
+    saMgr->startingAbilityMap_[SAID] = BaseSystemAbilityManager::AbilityItem();
+    int32_t ret = saMgr->AddOnDemandSystemAbilityInfo(SAID, PROCESS_NAME);
+    EXPECT_EQ(ret, ERR_OK);
+    auto doneTask = []() {
+        std::lock_guard<std::mutex> autoLock(caseDoneLock_);
+        isCaseDone_ = true;
+        caseDoneCondition_.notify_all();
+    };
+    saMgr->workHandler_->PostTask(doneTask);
+    std::unique_lock<std::mutex> lock(caseDoneLock_);
+    caseDoneCondition_.wait_for(lock, std::chrono::milliseconds(MAX_WAIT_TIME),
+        [&] () { return isCaseDone_; });
+    isCaseDone_ = false;
+    EXPECT_TRUE(saMgr->onDemandAbilityMap_.find(SAID) != saMgr->onDemandAbilityMap_.end());
+    saMgr->workHandler_->CleanFfrt();
+}
+
+/**
+ * @tc.name: CleanCallbackListenerNotifyLambdaExec001
+ * @tc.desc: test CleanCallbackForLoadFailed listenerNotifyTask lambda executes
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, CleanCallbackListenerNotifyLambdaExec001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    saMgr->callbackCountMap_.clear();
+    sptr<SystemAbilityLoadCallbackMock> cb1 = new SystemAbilityLoadCallbackMock();
+    ASSERT_NE(cb1, nullptr);
+    if (saMgr->abilityCallbackDeath_ != nullptr) {
+        cb1->AsObject()->AddDeathRecipient(saMgr->abilityCallbackDeath_);
+    }
+    BaseSystemAbilityManager::AbilityItem abilityItem;
+    abilityItem.callbackMap["local"].push_back({cb1, SAID});
+    saMgr->callbackCountMap_[SAID] = 1;
+    saMgr->startingAbilityMap_[SAID] = abilityItem;
+    saMgr->CleanCallbackForLoadFailed(SAID, PROCESS_NAME, "local", cb1);
+    auto doneTask = []() {
+        std::lock_guard<std::mutex> autoLock(caseDoneLock_);
+        isCaseDone_ = true;
+        caseDoneCondition_.notify_all();
+    };
+    saMgr->workHandler_->PostTask(doneTask);
+    std::unique_lock<std::mutex> lock(caseDoneLock_);
+    caseDoneCondition_.wait_for(lock, std::chrono::milliseconds(MAX_WAIT_TIME),
+        [&] () { return isCaseDone_; });
+    isCaseDone_ = false;
+    EXPECT_TRUE(saMgr->startingAbilityMap_.find(SAID) == saMgr->startingAbilityMap_.end());
+    saMgr->workHandler_->CleanFfrt();
 }
 } // namespace OHOS

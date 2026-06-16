@@ -46,7 +46,10 @@ void SystemAbilityMgrStubUnLoadTest::SetUpTestCase()
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
-    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
+    saMgr->selfPtr_ = std::shared_ptr<BaseSystemAbilityManager>(
+        saMgr.GetRefPtr(), [](BaseSystemAbilityManager*) {});
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>(
+        saMgr->weak_from_this());
     std::list<SaProfile> saProfiles;
     saMgr->abilityStateScheduler_->Init(saProfiles);
     DTEST_LOG << "SetUpTestCase" << std::endl;
@@ -550,7 +553,8 @@ HWTEST_F(SystemAbilityMgrStubUnLoadTest, GetLruIdleSystemAbilityProcInner001, Te
 {
     DTEST_LOG << "GetLruIdleSystemAbilityProcInner001 begin" << std::endl;
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    sptr<DeviceStatusCollectManager> pCollect = new DeviceStatusCollectManager();
+    sptr<DeviceStatusCollectManager> pCollect =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
     saMgr->collectManager_ = pCollect;
     sptr<DeviceParamCollect> deviceParamCollect = new DeviceParamCollect(pCollect);
     deviceParamCollect->lowMemPrepareList_.push_back(INVALID_SAID);

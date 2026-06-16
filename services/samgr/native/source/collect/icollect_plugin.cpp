@@ -14,10 +14,13 @@
  */
 
 #include "icollect_plugin.h"
+#include "base_system_ability_manager.h"
 #include "sam_log.h"
 
 namespace OHOS {
-ICollectPlugin::ICollectPlugin(const sptr<IReport>& report) : report_(report)
+ICollectPlugin::ICollectPlugin(const sptr<IReport>& report,
+    const std::weak_ptr<BaseSystemAbilityManager>& manager)
+    : report_(report), manager_(manager)
 {
 }
 

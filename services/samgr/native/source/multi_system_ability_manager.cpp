@@ -25,6 +25,7 @@ namespace OHOS {
 MultiSystemAbilityManager::MultiSystemAbilityManager(int32_t userId)
     : userId_(userId)
 {
+    logPrefix_ = "[U" + std::to_string(userId_) + "] ";
 }
 
 MultiSystemAbilityManager::~MultiSystemAbilityManager() {}
@@ -58,12 +59,12 @@ int32_t MultiSystemAbilityManager::Init(const std::list<SaProfile>& saProfiles)
 
     abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
     if (abilityStateScheduler_ != nullptr) {
-        abilityStateScheduler_->Init(filteredProfiles);
+        abilityStateScheduler_->Init(this, filteredProfiles);
     }
 
     collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
     if (collectManager_ != nullptr) {
-        collectManager_->Init(filteredProfiles);
+        collectManager_->Init(this, filteredProfiles);
     }
 
     HILOGI("MultiSAManager Init done, userId:%{public}d, saCount:%{public}zu",
@@ -74,32 +75,7 @@ int32_t MultiSystemAbilityManager::Init(const std::list<SaProfile>& saProfiles)
 int32_t MultiSystemAbilityManager::Destroy()
 {
     HILOGI("MultiSAManager Destroy for userId:%{public}d", userId_);
-    {
-        unique_lock<samgr::shared_mutex> writeLock(abilityMapLock_);
-        for (auto& [saId, saInfo] : abilityMap_) {
-            if (saInfo.remoteObj != nullptr && abilityDeath_ != nullptr) {
-                saInfo.remoteObj->RemoveDeathRecipient(abilityDeath_);
-            }
-        }
-    }
-    {
-        lock_guard<samgr::mutex> autoLock(systemProcessMapLock_);
-        for (auto& [procName, procObj] : systemProcessMap_) {
-            if (procObj != nullptr && systemProcessDeath_ != nullptr) {
-                procObj->RemoveDeathRecipient(systemProcessDeath_);
-            }
-        }
-    }
-    {
-        lock_guard<samgr::mutex> autoLock(listenerMapLock_);
-        for (auto& [saId, listeners] : listenerMap_) {
-            for (auto& item : listeners) {
-                if (item.listener != nullptr && abilityStatusDeath_ != nullptr) {
-                    item.listener->AsObject()->RemoveDeathRecipient(abilityStatusDeath_);
-                }
-            }
-        }
-    }
+    BaseSystemAbilityManager::Destroy();
     HILOGI("MultiSAManager Destroy done for userId:%{public}d", userId_);
     return ERR_OK;
 }
