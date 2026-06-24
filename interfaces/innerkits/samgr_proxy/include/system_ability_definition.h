@@ -340,6 +340,7 @@ enum {
     WEB_NATIVE_MESSAGING_SERVICE_SA_ID               = 8610,
     COMPATIBILITY_CONFIG_CENTER_SA_ID                = 8620,
     FUSION_CONN_SYS_ABILITY_ID                       = 8630,
+    FUSION_RANGING_SYS_ABILITY_ID                    = 8631,
     DISK_MANAGER_SA_ID                               = 8640,
     STORAGE_SPACE_MANAGER_SA_ID                      = 8650,
     // reserved for vendor
