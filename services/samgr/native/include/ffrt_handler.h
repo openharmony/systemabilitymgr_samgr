@@ -27,7 +27,7 @@ namespace OHOS {
 class FFRTHandler {
 public:
     explicit FFRTHandler(const std::string& name);
-    ~FFRTHandler() = default;
+    ~FFRTHandler();
     bool PostTask(std::function<void()> func);
     bool PostTask(std::function<void()> func, uint64_t delayTime);
     bool PostTask(std::function<void()> func, const std::string& name, uint64_t delayTime);
@@ -40,7 +40,7 @@ public:
 private:
     samgr::shared_mutex mutex_;
     std::map<std::string, std::queue<ffrt::task_handle>> taskMap_;
-    std::shared_ptr<ffrt::queue> queue_;
+    ffrt_queue_t queue_ = nullptr;
 };
 } // namespace OHOS
 #endif // OHOS_SAMGR_FFRT_HANDLER_H

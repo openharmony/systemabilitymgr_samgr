@@ -67,7 +67,7 @@ ohos_fuzztest("SamgrParallelizeFuzzTest") {
     "${samgr_services_dir}/source/system_ability_manager_stub.cpp",
     "${samgr_services_dir}/source/system_ability_manager_util.cpp",
     "${samgr_services_dir}/test/unittest/src/mock_dbinder_service.cpp",
-    "${samgr_services_dir}/test/unittest/src/mock_ffrt_handler.cpp",
+    "${samgr_services_dir}/source/ffrt_handler.cpp",
     "${samgr_services_dir}/test/unittest/src/mock_permission.cpp",
     "${samgr_services_dir}/test/unittest/src/sa_status_change_mock.cpp",
     "samgrparallelize_fuzzer.cpp",

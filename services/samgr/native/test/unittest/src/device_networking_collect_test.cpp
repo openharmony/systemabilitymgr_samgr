@@ -743,6 +743,7 @@ HWTEST_F(DeviceNetworkingCollectTest, IsDmReadyWithManager001, TestSize.Level3)
     ASSERT_NE(networkingCollect, nullptr);
     EXPECT_FALSE(networkingCollect->GetManager().expired());
     EXPECT_FALSE(networkingCollect->IsDmReady());
+    saMgr->CleanFfrt();
     DTEST_LOG << "IsDmReadyWithManager001 end" << std::endl;
 }
 } // namespace OHOS

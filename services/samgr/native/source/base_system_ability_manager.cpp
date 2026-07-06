@@ -233,9 +233,7 @@ void BaseSystemAbilityManager::ReleaseSubSystems()
 
 void BaseSystemAbilityManager::Destroy()
 {
-    if (workHandler_ != nullptr) {
-        workHandler_->CleanFfrt();
-    }
+    CleanFfrt();
 
     RemoveAllDeathRecipients();
     ReleaseSubSystems();
