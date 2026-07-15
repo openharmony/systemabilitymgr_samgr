@@ -25,6 +25,7 @@ ohos_static_library("samgr_rust_cpp") {
     cfi_no_nvcall = true
     blocklist = "../../../cfi_blocklist.txt"
   }
+  branch_protector_ret = "pac_ret"
 
   sources = [
     "src/cxx/status_change_wrapper.cpp",
