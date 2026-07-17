@@ -239,6 +239,7 @@ void DeviceStatusCollectManager::UnInit()
     collectPluginMap_.clear();
 
     if (collectHandler_ != nullptr) {
+        collectHandler_->CleanFfrt();
         collectHandler_ = nullptr;
     }
 }

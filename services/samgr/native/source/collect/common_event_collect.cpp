@@ -114,6 +114,7 @@ int32_t CommonEventCollect::OnStart()
 
 int32_t CommonEventCollect::OnStop()
 {
+    CleanFfrt();
     if (workHandler_ != nullptr) {
         workHandler_ = nullptr;
     }

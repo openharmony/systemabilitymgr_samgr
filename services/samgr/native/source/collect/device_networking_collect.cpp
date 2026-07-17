@@ -65,6 +65,7 @@ int32_t DeviceNetworkingCollect::OnStart()
 int32_t DeviceNetworkingCollect::OnStop()
 {
     DeviceManager::GetInstance().UnRegisterDevStateCallback(PKG_NAME);
+    CleanFfrt();
     if (workHandler_ != nullptr) {
         workHandler_ = nullptr;
     }

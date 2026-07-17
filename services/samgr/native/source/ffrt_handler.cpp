@@ -19,6 +19,7 @@
 #include <limits>
 
 #include "sam_log.h"
+#include "samgr_xcollie.h"
 
 namespace OHOS {
 using namespace ffrt;
@@ -28,38 +29,52 @@ namespace {
 
 FFRTHandler::FFRTHandler(const std::string& name)
 {
-    queue_ = std::make_shared<queue>(name.c_str());
+    queue_ = ffrt_queue_create(ffrt_queue_serial, name.c_str(), nullptr);
+}
+
+FFRTHandler::~FFRTHandler()
+{
+    CleanFfrt();
 }
 
 void FFRTHandler::CleanFfrt()
 {
-    std::unique_lock<samgr::shared_mutex> lock(mutex_);
-    if (queue_ == nullptr) {
-        return;
-    }
-    for (auto iter = taskMap_.begin(); iter != taskMap_.end(); ++iter) {
-        HILOGI("CleanFfrt taskMap_ %{public}s", iter->first.c_str());
-        auto& handlerQueue = iter->second;
-        while (!handlerQueue.empty()) {
-            auto& handler = handlerQueue.front();
-            handlerQueue.pop();
-            if (handler == nullptr) {
-                continue;
-            }
-            auto ret = queue_->cancel(handler);
-            if (ret != 0) {
-                HILOGE("cancel task failed, error code %{public}d", ret);
-            }
+    ffrt_queue_t queueHandle = nullptr;
+    {
+        std::unique_lock<samgr::shared_mutex> lock(mutex_);
+        if (queue_ == nullptr) {
+            return;
         }
+        for (auto iter = taskMap_.begin(); iter != taskMap_.end(); ++iter) {
+            HILOGI("CleanFfrt taskMap_ %{public}s", iter->first.c_str());
+        }
+        taskMap_.clear();
+        queueHandle = queue_;
+        queue_ = nullptr;
     }
-    taskMap_.clear();
-    queue_.reset();
+    SamgrXCollie samgrXCollie("samgr--CleanFfrt_queue_destroy");
+    ffrt_queue_destroy(queueHandle);
 }
 
 void FFRTHandler::SetFfrt(const std::string& name)
 {
-    std::unique_lock<samgr::shared_mutex> lock(mutex_);
-    queue_ = std::make_shared<queue>(name.c_str());
+    ffrt_queue_t queueHandle = nullptr;
+    {
+        std::unique_lock<samgr::shared_mutex> lock(mutex_);
+        for (auto iter = taskMap_.begin(); iter != taskMap_.end(); ++iter) {
+            HILOGI("SetFfrt taskMap_ %{public}s", iter->first.c_str());
+        }
+        taskMap_.clear();
+        if (queue_ != nullptr) {
+            queueHandle = queue_;
+            queue_ = nullptr;
+        }
+        queue_ = ffrt_queue_create(ffrt_queue_serial, name.c_str(), nullptr);
+    }
+    if (queueHandle != nullptr) {
+        SamgrXCollie samgrXCollie("samgr--SetFfrt_queue_destroy");
+        ffrt_queue_destroy(queueHandle);
+    }
 }
 
 bool FFRTHandler::PostTask(std::function<void()> func)
@@ -68,7 +83,12 @@ bool FFRTHandler::PostTask(std::function<void()> func)
         HILOGE("FFRTHandler post task failed, func is null");
         return false;
     }
-    task_handle handler = queue_->submit_h(func);
+    std::unique_lock<samgr::shared_mutex> lock(mutex_);
+    if (queue_ == nullptr) {
+        return false;
+    }
+    task_handle handler = ffrt_queue_submit_h(queue_,
+        create_function_wrapper(func, ffrt_function_kind_queue), nullptr);
     if (handler == nullptr) {
         HILOGE("FFRTHandler post task failed");
         return false;
@@ -86,7 +106,13 @@ bool FFRTHandler::PostTask(std::function<void()> func, uint64_t delayTime)
         HILOGE("invalid delay time");
         return false;
     }
-    task_handle handler = queue_->submit_h(func, task_attr().delay(delayTime * CONVERSION_FACTOR));
+    std::unique_lock<samgr::shared_mutex> lock(mutex_);
+    if (queue_ == nullptr) {
+        return false;
+    }
+    task_handle handler = ffrt_queue_submit_h(queue_,
+        create_function_wrapper(func, ffrt_function_kind_queue),
+        &task_attr().delay(delayTime * CONVERSION_FACTOR));
     if (handler == nullptr) {
         HILOGE("FFRTHandler post task failed");
         return false;
@@ -105,7 +131,12 @@ bool FFRTHandler::PostTask(std::function<void()> func, const std::string& name, 
         return false;
     }
     std::unique_lock<samgr::shared_mutex> lock(mutex_);
-    task_handle handler = queue_->submit_h(func, task_attr().delay(delayTime * CONVERSION_FACTOR));
+    if (queue_ == nullptr) {
+        return false;
+    }
+    task_handle handler = ffrt_queue_submit_h(queue_,
+        create_function_wrapper(func, ffrt_function_kind_queue),
+        &task_attr().delay(delayTime * CONVERSION_FACTOR));
     if (handler == nullptr) {
         HILOGE("FFRTHandler post task failed");
         return false;
@@ -127,7 +158,7 @@ void FFRTHandler::RemoveTask(const std::string& name)
     while (!handlerQueue.empty()) {
         auto& handler = handlerQueue.front();
         if (handler != nullptr) {
-            auto ret = queue_->cancel(handler);
+            auto ret = ffrt_queue_cancel(handler);
             if (ret != 0) {
                 HILOGE("cancel task failed, error code %{public}d", ret);
             }
