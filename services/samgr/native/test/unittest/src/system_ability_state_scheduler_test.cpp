@@ -46,21 +46,14 @@ const std::string SA_TAG_DEVICE_ON_LINE = "deviceonline";
 
 void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
 {
-    std::weak_ptr<BaseSystemAbilityManager> weakMgr;
-    saMgr->abilityDeath_ = sptr<IRemoteObject::DeathRecipient>(
-        new AbilityDeathRecipient(weakMgr));
-    saMgr->systemProcessDeath_ = sptr<IRemoteObject::DeathRecipient>(
-        new SystemProcessDeathRecipient(weakMgr));
-    saMgr->abilityStatusDeath_ = sptr<IRemoteObject::DeathRecipient>(
-        new AbilityStatusDeathRecipient(weakMgr));
-    saMgr->abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(
-        new AbilityCallbackDeathRecipient(weakMgr));
-    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(
-        new RemoteCallbackDeathRecipient(weakMgr));
+    saMgr->abilityDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityDeathRecipient());
+    saMgr->systemProcessDeath_ = sptr<IRemoteObject::DeathRecipient>(new SystemProcessDeathRecipient());
+    saMgr->abilityStatusDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityStatusDeathRecipient());
+    saMgr->abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityCallbackDeathRecipient());
+    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
     saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
-    saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(
-        new DeviceStatusCollectManager(weakMgr));
-    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>(weakMgr);
+    saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
 }
 }
 
@@ -105,8 +98,7 @@ void SystemAbilityStateSchedulerTest::TearDown()
 HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemAbilityContext001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -124,8 +116,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemAbilityContext001, TestSize.L
 HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemAbilityContext002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -144,8 +135,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemAbilityContext002, TestSize.L
 HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemAbilityContext003, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -164,8 +154,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemAbilityContext003, TestSize.L
 HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemAbilityContext004, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -210,8 +199,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemAbilityContext005, TestSize.L
 {
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     for (int i = 0; i < 100; i++) {
-        saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
         std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
         saMgr->abilityStateScheduler_->abilityContextMap_[SAID] = systemAbilityContext;
         auto getSystemAbilityContextTask = [saMgr] {
@@ -242,8 +230,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemAbilityContext005, TestSize.L
 HWTEST_F(SystemAbilityStateSchedulerTest, IsSystemAbilityUnloading001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     systemAbilityStateScheduler->abilityContextMap_.clear();
@@ -261,8 +248,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, IsSystemAbilityUnloading001, TestSize.
 HWTEST_F(SystemAbilityStateSchedulerTest, IsSystemAbilityUnloading002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -284,8 +270,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, IsSystemAbilityUnloading002, TestSize.
 HWTEST_F(SystemAbilityStateSchedulerTest, IsSystemAbilityUnloading003, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -307,8 +292,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, IsSystemAbilityUnloading003, TestSize.
 HWTEST_F(SystemAbilityStateSchedulerTest, IsSystemAbilityUnloading004, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -331,8 +315,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, IsSystemAbilityUnloading004, TestSize.
 HWTEST_F(SystemAbilityStateSchedulerTest, HandleLoadAbilityEvent001, TestSize.Level0)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     systemAbilityStateScheduler->abilityContextMap_.clear();
@@ -350,8 +333,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleLoadAbilityEvent001, TestSize.Le
 HWTEST_F(SystemAbilityStateSchedulerTest, HandleLoadAbilityEvent002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -375,8 +357,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleLoadAbilityEvent002, TestSize.Le
 HWTEST_F(SystemAbilityStateSchedulerTest, HandleLoadAbilityEvent003, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -399,8 +380,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleLoadAbilityEvent003, TestSize.Le
 HWTEST_F(SystemAbilityStateSchedulerTest, HandleLoadAbilityEvent004, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -424,8 +404,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleLoadAbilityEvent004, TestSize.Le
 HWTEST_F(SystemAbilityStateSchedulerTest, HandleLoadAbilityEvent005, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     LoadRequestInfo loadRequestInfo;
@@ -445,8 +424,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleLoadAbilityEvent005, TestSize.Le
 HWTEST_F(SystemAbilityStateSchedulerTest, HandleLoadAbilityEvent006, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -471,8 +449,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleLoadAbilityEvent006, TestSize.Le
 HWTEST_F(SystemAbilityStateSchedulerTest, HandleLoadAbilityEvent007, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -496,8 +473,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleLoadAbilityEvent007, TestSize.Le
 HWTEST_F(SystemAbilityStateSchedulerTest, HandleLoadAbilityEvent008, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -521,8 +497,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleLoadAbilityEvent008, TestSize.Le
 HWTEST_F(SystemAbilityStateSchedulerTest, HandleLoadAbilityEventLocked001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
 
@@ -548,8 +523,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleLoadAbilityEventLocked001, TestS
 HWTEST_F(SystemAbilityStateSchedulerTest, HandleLoadAbilityEventLocked003, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     
@@ -563,7 +537,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleLoadAbilityEventLocked003, TestS
     loadRequestInfo.callback = new SystemAbilityLoadCallbackMock();
     systemAbilityContext->state = SystemAbilityState::LOADING;
     int32_t ret = systemAbilityStateScheduler->HandleLoadAbilityEventLocked(systemAbilityContext, loadRequestInfo);
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, ERR_OK);
 }
 
 /**
@@ -575,8 +549,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleLoadAbilityEventLocked003, TestS
 HWTEST_F(SystemAbilityStateSchedulerTest, HandleUnloadAbilityEvent001, TestSize.Level0)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -599,8 +572,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleUnloadAbilityEvent001, TestSize.
 HWTEST_F(SystemAbilityStateSchedulerTest, HandleUnloadAbilityEvent002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -625,8 +597,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleUnloadAbilityEvent002, TestSize.
 HWTEST_F(SystemAbilityStateSchedulerTest, HandleUnloadAbilityEvent003, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -651,8 +622,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleUnloadAbilityEvent003, TestSize.
 HWTEST_F(SystemAbilityStateSchedulerTest, HandleUnloadAbilityEvent004, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -676,8 +646,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleUnloadAbilityEvent004, TestSize.
 HWTEST_F(SystemAbilityStateSchedulerTest, HandleUnloadAbilityEvent005, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     systemAbilityStateScheduler->unloadEventHandler_ = nullptr;
@@ -704,8 +673,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleUnloadAbilityEvent005, TestSize.
 HWTEST_F(SystemAbilityStateSchedulerTest, HandleUnloadAbilityEventLock001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
     int32_t ret = systemAbilityStateScheduler->HandleUnloadAbilityEventLocked(systemAbilityContext, nullptr);
     EXPECT_EQ(ret, UNLOAD_REQUEST_NULL);
@@ -720,8 +688,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleUnloadAbilityEventLock001, TestS
 HWTEST_F(SystemAbilityStateSchedulerTest, HandleCancelUnloadAbilityEvent001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -739,8 +706,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleCancelUnloadAbilityEvent001, Tes
 HWTEST_F(SystemAbilityStateSchedulerTest, HandleCancelUnloadAbilityEvent002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -762,8 +728,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleCancelUnloadAbilityEvent002, Tes
 HWTEST_F(SystemAbilityStateSchedulerTest, HandleCancelUnloadAbilityEvent003, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -785,8 +750,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleCancelUnloadAbilityEvent003, Tes
 HWTEST_F(SystemAbilityStateSchedulerTest, SendDelayUnloadEventLocked001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     systemAbilityStateScheduler->unloadEventHandler_ = nullptr;
@@ -803,8 +767,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, SendDelayUnloadEventLocked001, TestSiz
 HWTEST_F(SystemAbilityStateSchedulerTest, SendDelayUnloadEventLocked002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     systemAbilityStateScheduler->SendDelayUnloadEventLocked(SAID, DELAY_TIME);
@@ -822,8 +785,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, SendDelayUnloadEventLocked002, TestSiz
 HWTEST_F(SystemAbilityStateSchedulerTest, SendDelayUnloadEventLocked003, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     int32_t ret = systemAbilityStateScheduler->SendDelayUnloadEventLocked(SAID, DELAY_TIME);
@@ -840,8 +802,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, SendDelayUnloadEventLocked003, TestSiz
 HWTEST_F(SystemAbilityStateSchedulerTest, RemoveDelayUnloadEventLocked001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     systemAbilityStateScheduler->unloadEventHandler_ = nullptr;
@@ -858,8 +819,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, RemoveDelayUnloadEventLocked001, TestS
 HWTEST_F(SystemAbilityStateSchedulerTest, RemoveDelayUnloadEventLocked002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     systemAbilityStateScheduler->SendDelayUnloadEventLocked(SAID, DELAY_TIME);
@@ -876,8 +836,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, RemoveDelayUnloadEventLocked002, TestS
 HWTEST_F(SystemAbilityStateSchedulerTest, RemoveDelayUnloadEventLocked003, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     int32_t ret = systemAbilityStateScheduler->RemoveDelayUnloadEventLocked(SAID);
@@ -893,8 +852,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, RemoveDelayUnloadEventLocked003, TestS
 HWTEST_F(SystemAbilityStateSchedulerTest, PendLoadEventLocked001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
 
@@ -915,8 +873,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, PendLoadEventLocked001, TestSize.Level
 HWTEST_F(SystemAbilityStateSchedulerTest, PendLoadEventLocked002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
 
@@ -937,8 +894,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, PendLoadEventLocked002, TestSize.Level
 HWTEST_F(SystemAbilityStateSchedulerTest, PendLoadEventLocked003, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
 
@@ -960,8 +916,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, PendLoadEventLocked003, TestSize.Level
 HWTEST_F(SystemAbilityStateSchedulerTest, PendLoadEventLocked004, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
     LoadRequestInfo loadRequestInfo;
     int32_t ret = systemAbilityStateScheduler->PendLoadEventLocked(systemAbilityContext, loadRequestInfo);
@@ -977,8 +932,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, PendLoadEventLocked004, TestSize.Level
 HWTEST_F(SystemAbilityStateSchedulerTest, SendAbilityStateEvent001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -997,8 +951,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, SendAbilityStateEvent001, TestSize.Lev
 HWTEST_F(SystemAbilityStateSchedulerTest, RemovePendingUnloadEventLocked001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -1016,8 +969,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, RemovePendingUnloadEventLocked001, Tes
 HWTEST_F(SystemAbilityStateSchedulerTest, HandlePendingLoadEventLocked001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -1035,8 +987,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandlePendingLoadEventLocked001, TestS
 HWTEST_F(SystemAbilityStateSchedulerTest, HandlePendingLoadEventLocked002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -1054,8 +1005,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandlePendingLoadEventLocked002, TestS
 HWTEST_F(SystemAbilityStateSchedulerTest, HandlePendingUnloadEventLocked001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -1076,8 +1026,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandlePendingUnloadEventLocked001, Tes
 HWTEST_F(SystemAbilityStateSchedulerTest, HandlePendingUnloadEventLocked002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -1098,8 +1047,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandlePendingUnloadEventLocked002, Tes
 HWTEST_F(SystemAbilityStateSchedulerTest, HandlePendingUnloadEventLocked003, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -1119,8 +1067,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandlePendingUnloadEventLocked003, Tes
 HWTEST_F(SystemAbilityStateSchedulerTest, TryUnloadAllSystemAbility001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     int32_t ret = systemAbilityStateScheduler->TryUnloadAllSystemAbility(nullptr);
@@ -1136,8 +1083,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, TryUnloadAllSystemAbility001, TestSize
 HWTEST_F(SystemAbilityStateSchedulerTest, TryUnloadAllSystemAbility002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemProcessContext> systemProcessContext = std::make_shared<SystemProcessContext>();
@@ -1145,7 +1091,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, TryUnloadAllSystemAbility002, TestSize
     systemProcessContext->abilityStateCountMap.clear();
     systemProcessContext->abilityStateCountMap[SystemAbilityState::UNLOADABLE] = 1;
     int32_t ret = systemAbilityStateScheduler->TryUnloadAllSystemAbility(systemProcessContext);
-    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(ret, TRANSIT_PROC_STATE_FAIL);
 }
 
 /**
@@ -1157,8 +1103,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, TryUnloadAllSystemAbility002, TestSize
 HWTEST_F(SystemAbilityStateSchedulerTest, CanUnloadAllSystemAbility001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemProcessContext> systemProcessContext = std::make_shared<SystemProcessContext>();
@@ -1176,8 +1121,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, CanUnloadAllSystemAbility001, TestSize
 HWTEST_F(SystemAbilityStateSchedulerTest, CanUnloadAllSystemAbility002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemProcessContext> systemProcessContext = std::make_shared<SystemProcessContext>();
@@ -1196,8 +1140,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, CanUnloadAllSystemAbility002, TestSize
 HWTEST_F(SystemAbilityStateSchedulerTest, CanUnloadAllSystemAbility003, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemProcessContext> systemProcessContext = std::make_shared<SystemProcessContext>();
@@ -1205,7 +1148,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, CanUnloadAllSystemAbility003, TestSize
     systemProcessContext->abilityStateCountMap.clear();
     systemProcessContext->abilityStateCountMap[SystemAbilityState::UNLOADABLE] = 1;
     bool ret = systemAbilityStateScheduler->CanUnloadAllSystemAbility(systemProcessContext);
-    EXPECT_FALSE(ret);
+    EXPECT_TRUE(ret);
 }
 
 /**
@@ -1217,8 +1160,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, CanUnloadAllSystemAbility003, TestSize
 HWTEST_F(SystemAbilityStateSchedulerTest, UnloadAllSystemAbilityLocked001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemProcessContext> systemProcessContext = std::make_shared<SystemProcessContext>();
@@ -1237,8 +1179,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, UnloadAllSystemAbilityLocked001, TestS
 HWTEST_F(SystemAbilityStateSchedulerTest, UnloadAllSystemAbilityLocked002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -1261,8 +1202,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, UnloadAllSystemAbilityLocked002, TestS
 HWTEST_F(SystemAbilityStateSchedulerTest, UnloadAllSystemAbilityLocked003, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -1285,8 +1225,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, UnloadAllSystemAbilityLocked003, TestS
 HWTEST_F(SystemAbilityStateSchedulerTest, TryKillSystemProcess001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     int32_t ret = systemAbilityStateScheduler->TryKillSystemProcess(nullptr);
@@ -1302,8 +1241,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, TryKillSystemProcess001, TestSize.Leve
 HWTEST_F(SystemAbilityStateSchedulerTest, OnAbilityNotLoadedLocked001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -1321,8 +1259,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, OnAbilityNotLoadedLocked001, TestSize.
 HWTEST_F(SystemAbilityStateSchedulerTest, OnAbilityNotLoadedLocked002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -1344,8 +1281,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, OnAbilityNotLoadedLocked002, TestSize.
 HWTEST_F(SystemAbilityStateSchedulerTest, OnAbilityLoadedLocked001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -1364,8 +1300,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, OnAbilityLoadedLocked001, TestSize.Lev
 HWTEST_F(SystemAbilityStateSchedulerTest, OnAbilityUnloadableLocked001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -1385,8 +1320,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, OnAbilityUnloadableLocked001, TestSize
 HWTEST_F(SystemAbilityStateSchedulerTest, OnAbilityUnloadableLocked002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -1415,8 +1349,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, CheckStartEnableOnce001, TestSize.Leve
     SaControlInfo saControl = { START_ON_DEMAND, TEST_SYSTEM_ABILITY1};
     sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     int32_t result = systemAbilityStateScheduler->CheckStartEnableOnce(event1, saControl, callback);
     EXPECT_EQ(result, GET_SA_CONTEXT_FAIL);
     saMgr->RemoveSystemAbility(TEST_SYSTEM_ABILITY1);
@@ -1440,8 +1373,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, CheckStartEnableOnce002, TestSize.Leve
     SaControlInfo saControl = { START_ON_DEMAND, TEST_SYSTEM_ABILITY1, true};
     sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     int32_t result = systemAbilityStateScheduler->CheckStartEnableOnce(event, saControl, callback);
     EXPECT_EQ(result, GET_SA_CONTEXT_FAIL);
     saMgr->RemoveSystemAbility(TEST_SYSTEM_ABILITY1);
@@ -1465,8 +1397,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, CheckStartEnableOnce003, TestSize.Leve
     SaControlInfo saControl = { START_ON_DEMAND, TEST_SYSTEM_ABILITY1, true};
     sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     systemAbilityStateScheduler->startEnableOnceMap_[saControl.saId].emplace_back(event);
     int32_t result = systemAbilityStateScheduler->CheckStartEnableOnce(event, saControl, callback);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
@@ -1487,8 +1418,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, CheckStartEnableOnce004, TestSize.Leve
     OnDemandEvent event;
     sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     systemAbilityStateScheduler->startEnableOnceMap_[saControl.saId].emplace_back(event);
     int32_t result = systemAbilityStateScheduler->CheckStartEnableOnce(event, saControl, callback);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
@@ -1503,8 +1433,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, CheckStartEnableOnce004, TestSize.Leve
 HWTEST_F(SystemAbilityStateSchedulerTest, CheckStartEnableOnce005, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     OnDemandEvent onDemandEvent;
     std::list<OnDemandEvent> onDemandList;
     onDemandList.emplace_back(onDemandEvent);
@@ -1531,8 +1460,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, CheckStartEnableOnce006, TestSize.Leve
     EXPECT_NE(saMgr, nullptr);
     InitSaMgr(saMgr);
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     OnDemandEvent onDemandEvent;
     SaControlInfo saControlInfo;
     saControlInfo.saId = SAID;
@@ -1555,8 +1483,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, CheckStartEnableOnce007, TestSize.Leve
     EXPECT_NE(saMgr, nullptr);
     InitSaMgr(saMgr);
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     OnDemandEvent anotherOnDemandEvent;
     OnDemandEvent onDemandEvent;
     std::list<OnDemandEvent> onDemandList;
@@ -1583,8 +1510,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, CheckStartEnableOnce008, TestSize.Leve
     EXPECT_NE(saMgr, nullptr);
     InitSaMgr(saMgr);
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     OnDemandEvent onDemandEvent;
     systemAbilityStateScheduler->startEnableOnceMap_.clear();
     SaControlInfo saControlInfo;
@@ -1610,8 +1536,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, CheckStopEnableOnce001, TestSize.Level
     EXPECT_FALSE(strEvent.empty());
     SaControlInfo saControl = { STOP_ON_DEMAND, TEST_SYSTEM_ABILITY1};
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     int32_t result = systemAbilityStateScheduler->CheckStopEnableOnce(event, saControl);
     EXPECT_EQ(result, GET_SA_CONTEXT_FAIL);
     saMgr->RemoveSystemAbility(TEST_SYSTEM_ABILITY1);
@@ -1634,8 +1559,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, CheckStopEnableOnce002, TestSize.Level
     EXPECT_FALSE(strEvent.empty());
     SaControlInfo saControl = { STOP_ON_DEMAND, TEST_SYSTEM_ABILITY1, true};
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     int32_t result = systemAbilityStateScheduler->CheckStopEnableOnce(event, saControl);
     EXPECT_EQ(result, GET_SA_CONTEXT_FAIL);
     saMgr->RemoveSystemAbility(TEST_SYSTEM_ABILITY1);
@@ -1658,8 +1582,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, CheckStopEnableOnce003, TestSize.Level
     EXPECT_FALSE(strEvent.empty());
     SaControlInfo saControl = { STOP_ON_DEMAND, TEST_SYSTEM_ABILITY1, true};
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     systemAbilityStateScheduler->stopEnableOnceMap_[saControl.saId].emplace_back(event);
     int32_t result = systemAbilityStateScheduler->CheckStopEnableOnce(event, saControl);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
@@ -1675,8 +1598,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, CheckStopEnableOnce003, TestSize.Level
 HWTEST_F(SystemAbilityStateSchedulerTest, HandleAbnormallyDiedAbilityLocked001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> abilityContext = std::make_shared<SystemAbilityContext>();
@@ -1701,8 +1623,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleAbnormallyDiedAbilityLocked001, 
 HWTEST_F(SystemAbilityStateSchedulerTest, HandleAbnormallyDiedAbilityLocked002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> abilityContext = std::make_shared<SystemAbilityContext>();
@@ -1730,8 +1651,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleAbnormallyDiedAbilityLocked003, 
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_NE(saMgr, nullptr);
-    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     saMgr->abilityStateScheduler_->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> abilityContext = std::make_shared<SystemAbilityContext>();
@@ -1758,8 +1678,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleAbnormallyDiedAbilityLocked003, 
 HWTEST_F(SystemAbilityStateSchedulerTest, HandleAbilityDiedEvent001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::shared_ptr<SystemAbilityContext> abilityContext = std::make_shared<SystemAbilityContext>();
     abilityContext->systemAbilityId = SAID;
     int32_t ret = systemAbilityStateScheduler->HandleAbilityDiedEvent(abilityContext->systemAbilityId);
@@ -1775,8 +1694,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, HandleAbilityDiedEvent001, TestSize.Le
 HWTEST_F(SystemAbilityStateSchedulerTest, LimitDelayUnloadTime001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     int32_t ret = systemAbilityStateScheduler->LimitDelayUnloadTime(INVALID_DELAY_TIME);
     EXPECT_EQ(ret, 0);
 }
@@ -1790,8 +1708,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, LimitDelayUnloadTime001, TestSize.Leve
 HWTEST_F(SystemAbilityStateSchedulerTest, LimitDelayUnloadTime002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     int32_t ret = systemAbilityStateScheduler->LimitDelayUnloadTime(BEYOND_DELAY_TIME_TEST);
     EXPECT_EQ(ret, MAX_DELAY_TIME_TEST);
 }
@@ -1805,8 +1722,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, LimitDelayUnloadTime002, TestSize.Leve
 HWTEST_F(SystemAbilityStateSchedulerTest, UpdateLimitDelayUnloadTimeTask001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::shared_ptr<SystemAbilityContext> abilityContext = std::make_shared<SystemAbilityContext>();
     abilityContext->systemAbilityId = -1;
     abilityContext->lastStartTime = 0;
@@ -1823,8 +1739,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, UpdateLimitDelayUnloadTimeTask001, Tes
 HWTEST_F(SystemAbilityStateSchedulerTest, UpdateLimitDelayUnloadTimeTask002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     int said = 401;
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
@@ -1849,8 +1764,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, UpdateLimitDelayUnloadTimeTask002, Tes
 HWTEST_F(SystemAbilityStateSchedulerTest, UpdateLimitDelayUnloadTimeTask003, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     int said = 401;
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
@@ -1874,8 +1788,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, UpdateLimitDelayUnloadTimeTask003, Tes
 HWTEST_F(SystemAbilityStateSchedulerTest, PostUnloadTimeoutTask001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::shared_ptr<SystemProcessContext> systemProcessContext = std::make_shared<SystemProcessContext>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
@@ -1893,8 +1806,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, PostUnloadTimeoutTask001, TestSize.Lev
 HWTEST_F(SystemAbilityStateSchedulerTest, PostUnloadTimeoutTask002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::shared_ptr<SystemProcessContext> systemProcessContext = std::make_shared<SystemProcessContext>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
@@ -1912,8 +1824,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, PostUnloadTimeoutTask002, TestSize.Lev
 HWTEST_F(SystemAbilityStateSchedulerTest, GetAllSystemAbilityInfo001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -1935,8 +1846,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetAllSystemAbilityInfo001, TestSize.L
 HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemAbilityInfo001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     string result;
     int32_t invalidSaid = 101;
     systemAbilityStateScheduler->GetSystemAbilityInfo(invalidSaid, result);
@@ -1952,8 +1862,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemAbilityInfo001, TestSize.Leve
 HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemAbilityInfo002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     int said = 401;
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
@@ -1976,8 +1885,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetSystemAbilityInfo002, TestSize.Leve
 HWTEST_F(SystemAbilityStateSchedulerTest, GetAllSystemAbilityInfoByState001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     int said = 401;
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
@@ -1997,8 +1905,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, SetFfrt001, TestSize.Level3)
 {
     DTEST_LOG<<"SetFfrt001 BEGIN"<<std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-    std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+    std::make_shared<SystemAbilityStateScheduler>();
     systemAbilityStateScheduler->unloadEventHandler_ =
         std::make_shared<SystemAbilityStateScheduler::UnloadEventHandler>(systemAbilityStateScheduler);
     
@@ -2017,8 +1924,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetIdleProcessInfo001, TestSize.Level3
 {
     DTEST_LOG<<"GetIdleProcessInfo001 BEGIN"<<std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-    std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+    std::make_shared<SystemAbilityStateScheduler>();
     int32_t invalidSaId = -1;
     IdleProcessInfo idleInfo;
     bool result = systemAbilityStateScheduler->GetIdleProcessInfo(invalidSaId, idleInfo);
@@ -2036,8 +1942,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetIdleProcessInfo002, TestSize.Level3
 {
     DTEST_LOG<<"GetIdleProcessInfo002 BEGIN"<<std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-    std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+    std::make_shared<SystemAbilityStateScheduler>();
     IdleProcessInfo idleInfo;
     int saId = 123;
 
@@ -2063,8 +1968,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetIdleProcessInfo003, TestSize.Level3
 {
     DTEST_LOG<<"GetIdleProcessInfo003 BEGIN"<<std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-    std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+    std::make_shared<SystemAbilityStateScheduler>();
     IdleProcessInfo idleInfo;
     int saId = 123;
 
@@ -2090,8 +1994,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetIdleProcessInfo004, TestSize.Level3
 {
     DTEST_LOG<<"GetIdleProcessInfo004 BEGIN"<<std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-    std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+    std::make_shared<SystemAbilityStateScheduler>();
     IdleProcessInfo idleInfo;
     int saId = 123;
 
@@ -2118,8 +2021,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetIdleProcessInfo005, TestSize.Level3
 {
     DTEST_LOG<<"GetIdleProcessInfo005 BEGIN"<<std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-    std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+    std::make_shared<SystemAbilityStateScheduler>();
     IdleProcessInfo idleInfo;
     int32_t saId = 123;
     std::u16string expectedName = u"test_process";
@@ -2155,8 +2057,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetIdleProcessInfo006, TestSize.Level3
 {
     DTEST_LOG<<"GetIdleProcessInfo006 BEGIN"<<std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-    std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+    std::make_shared<SystemAbilityStateScheduler>();
     IdleProcessInfo idleInfo;
     int32_t saId = 123;
 
@@ -2183,8 +2084,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, IsSystemProcessCanUnload001, TestSize.
 {
     DTEST_LOG<<"IsSystemProcessCanUnload001 BEGIN"<<std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::u16string processName = u"test_process";
     bool result = systemAbilityStateScheduler->IsSystemProcessCanUnload(processName);
     EXPECT_FALSE(result);
@@ -2201,8 +2101,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, IsSystemProcessCanUnload002, TestSize.
 {
     DTEST_LOG<<"IsSystemProcessCanUnload002 BEGIN"<<std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::u16string processName = u"test_process";
 
     auto processContext = std::make_shared<SystemProcessContext>();
@@ -2227,8 +2126,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, IsSystemProcessCanUnload003, TestSize.
 {
     DTEST_LOG<<"IsSystemProcessCanUnload003 BEGIN"<<std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::u16string processName = u"test_process";
 
     auto processContext = std::make_shared<SystemProcessContext>();
@@ -2253,8 +2151,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, UnloadProcess001, TestSize.Level3)
 {
     DTEST_LOG<<"UnloadProcess001 BEGIN"<<std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     systemAbilityStateScheduler->processContextMap_[u"satest"] =
@@ -2277,8 +2174,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetRunningSystemProcess001, TestSize.L
 {
     DTEST_LOG<<"GetRunningSystemProcess001 BEGIN"<<std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::u16string processName = u"test_process";
     SystemProcessInfo expectedInfo;
     expectedInfo.processName = "test_process";
@@ -2306,8 +2202,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetRunningSystemProcess002, TestSize.L
 {
     DTEST_LOG<<"GetRunningSystemProcess002 BEGIN"<<std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::u16string processName = u"non_existent_process";
     SystemProcessInfo actualInfo;
     systemAbilityStateScheduler->GetRunningSystemProcess(processName, actualInfo);
@@ -2326,7 +2221,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetRunningSystemProcess002, TestSize.L
 HWTEST_F(SystemAbilityStateSchedulerTest, GetRunningSystemProcess003, TestSize.Level3)
 {
     DTEST_LOG<<"GetRunningSystemProcess003 BEGIN"<<std::endl;
-    SystemAbilityStateScheduler scheduler(std::weak_ptr<BaseSystemAbilityManager>{});
+    SystemAbilityStateScheduler scheduler;
     SystemProcessInfo info;
     std::u16string testProcess = u"test_process";
     info.pid = 123;
@@ -2350,7 +2245,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, GetRunningSystemProcess003, TestSize.L
 HWTEST_F(SystemAbilityStateSchedulerTest, GetRunningSystemProcess004, TestSize.Level3)
 {
     DTEST_LOG<<"GetRunningSystemProcess004 BEGIN"<<std::endl;
-    SystemAbilityStateScheduler scheduler(std::weak_ptr<BaseSystemAbilityManager>{});
+    SystemAbilityStateScheduler scheduler;
     std::u16string testProcess = u"non_existent_process";
     SystemProcessInfo result;
     result.pid = -1;

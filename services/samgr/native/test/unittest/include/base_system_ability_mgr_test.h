@@ -17,8 +17,6 @@
 #define SAMGR_TEST_UNITTEST_INCLUDE_BASE_SYSTEM_ABILITY_MGR_TEST_H
 
 #include "gtest/gtest.h"
-#include <mutex>
-#include <condition_variable>
 namespace OHOS {
 class BaseSystemAbilityMgrTest : public testing::Test {
 public:
@@ -26,10 +24,6 @@ public:
     static void TearDownTestCase();
     void SetUp();
     void TearDown();
-protected:
-    static bool isCaseDone_;
-    static std::mutex caseDoneLock_;
-    static std::condition_variable caseDoneCondition_;
 };
 } // OHOS
 #endif /* SAMGR_TEST_UNITTEST_INCLUDE_BASE_SYSTEM_ABILITY_MGR_TEST_H */

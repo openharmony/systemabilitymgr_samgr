@@ -86,8 +86,7 @@ void SamgrDumperFuzzTest(const uint8_t* data, size_t size)
         argsWithStr16.emplace_back(Str8ToStr16(args[i]));
     }
     std::string result;
-    std::shared_ptr<SystemAbilityStateScheduler> scheduler = std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+    std::shared_ptr<SystemAbilityStateScheduler> scheduler = std::make_shared<SystemAbilityStateScheduler>();
     int32_t fd = -1;
     SystemAbilityManagerDumper::FfrtDumpProc(scheduler, fd, args);
     SystemAbilityManagerDumper::Dump(scheduler, args, result);
@@ -104,8 +103,7 @@ void SamgrDumperFuzzTest(const uint8_t* data, size_t size)
     SystemAbilityManagerDumper::DumpFfrtInfoInProc(scheduler, pid, result);
 
     std::shared_ptr<SystemAbilityManager> manager = std::make_shared<SystemAbilityManager>();
-    manager->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+    manager->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
     manager->Dump(fd, argsWithStr16);
     manager->IpcDumpProc(fd, args);
     manager->IpcDumpAllProcess(fd, cmd);
@@ -159,8 +157,7 @@ void FuzzListenerDumpProc()
 void FuzzFfrtLoadMetrics()
 {
     int32_t pid = GetData<int32_t>();
-    std::shared_ptr<SystemAbilityStateScheduler> scheduler = std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+    std::shared_ptr<SystemAbilityStateScheduler> scheduler = std::make_shared<SystemAbilityStateScheduler>();
     int32_t fd = -1;
     std::vector<std::string> args;
     args.push_back("--ffrt");

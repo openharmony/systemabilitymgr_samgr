@@ -28,8 +28,7 @@ namespace OHOS {
 class CommonHandler;
 class CommonEventCollect : public ICollectPlugin {
 public:
-    explicit CommonEventCollect(const sptr<IReport>& report,
-        const std::weak_ptr<BaseSystemAbilityManager>& manager = {});
+    explicit CommonEventCollect(const sptr<IReport>& report);
     ~CommonEventCollect() = default;
 
     void CleanFfrt() override;

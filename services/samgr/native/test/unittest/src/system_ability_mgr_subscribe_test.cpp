@@ -54,21 +54,14 @@ constexpr int32_t TEST_OVERFLOW_SAID = 99999;
 
 void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
 {
-    std::weak_ptr<BaseSystemAbilityManager> weakMgr;
-    saMgr->abilityDeath_ = sptr<IRemoteObject::DeathRecipient>(
-        new AbilityDeathRecipient(weakMgr));
-    saMgr->systemProcessDeath_ = sptr<IRemoteObject::DeathRecipient>(
-        new SystemProcessDeathRecipient(weakMgr));
-    saMgr->abilityStatusDeath_ = sptr<IRemoteObject::DeathRecipient>(
-        new AbilityStatusDeathRecipient(weakMgr));
-    saMgr->abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(
-        new AbilityCallbackDeathRecipient(weakMgr));
-    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(
-        new RemoteCallbackDeathRecipient(weakMgr));
+    saMgr->abilityDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityDeathRecipient());
+    saMgr->systemProcessDeath_ = sptr<IRemoteObject::DeathRecipient>(new SystemProcessDeathRecipient());
+    saMgr->abilityStatusDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityStatusDeathRecipient());
+    saMgr->abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityCallbackDeathRecipient());
+    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
     saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
-    saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(
-        new DeviceStatusCollectManager(weakMgr));
-    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>(weakMgr);
+    saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
 }
 }
 
@@ -184,8 +177,7 @@ HWTEST_F(SystemAbilityMgrSubscribeTest, SubscribeSystemProcess001, TestSize.Leve
     EXPECT_NE(saMgr, nullptr);
     InitSaMgr(saMgr);
     sptr<ISystemProcessStatusChange> systemProcessStatusChange = new SystemProcessStatusChange();
-    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
     int32_t ret = saMgr->SubscribeSystemProcess(systemProcessStatusChange);
     EXPECT_EQ(ret, ERR_OK);
 }
@@ -255,8 +247,7 @@ HWTEST_F(SystemAbilityMgrSubscribeTest, UnSubscribeSystemProcess002, TestSize.Le
     EXPECT_NE(saMgr, nullptr);
     InitSaMgr(saMgr);
     sptr<ISystemProcessStatusChange> systemProcessStatusChange = new SystemProcessStatusChange();
-    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
     int32_t ret = saMgr->UnSubscribeSystemProcess(systemProcessStatusChange);
     EXPECT_EQ(ret, ERR_OK);
 }
@@ -291,8 +282,7 @@ HWTEST_F(SystemAbilityMgrSubscribeTest, SubscribeLowMemSystemProcess001, TestSiz
     EXPECT_NE(saMgr, nullptr);
     InitSaMgr(saMgr);
     sptr<ISystemProcessStatusChange> systemProcessStatusChange = new SystemProcessStatusChange();
-    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
     int32_t ret = saMgr->SubscribeLowMemSystemProcess(systemProcessStatusChange);
     EXPECT_EQ(ret, ERR_OK);
 }
@@ -326,8 +316,7 @@ HWTEST_F(SystemAbilityMgrSubscribeTest, UnSubscribeLowMemSystemProcess001, TestS
     EXPECT_NE(saMgr, nullptr);
     InitSaMgr(saMgr);
     sptr<ISystemProcessStatusChange> systemProcessStatusChange = new SystemProcessStatusChange();
-    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
     int32_t ret = saMgr->UnSubscribeLowMemSystemProcess(systemProcessStatusChange);
     EXPECT_EQ(ret, ERR_OK);
 }

@@ -52,8 +52,7 @@ class DeviceInitCallBack : public DistributedHardware::DmInitCallback {
 
 class DeviceNetworkingCollect : public ICollectPlugin {
 public:
-    explicit DeviceNetworkingCollect(const sptr<IReport>& report,
-        const std::weak_ptr<BaseSystemAbilityManager>& manager = {});
+    explicit DeviceNetworkingCollect(const sptr<IReport>& report);
     ~DeviceNetworkingCollect() = default;
 
     void CleanFfrt() override;

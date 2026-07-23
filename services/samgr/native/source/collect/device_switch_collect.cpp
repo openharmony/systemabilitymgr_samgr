@@ -35,9 +35,8 @@ constexpr int32_t BLUETOOTH_STATE_TURN_OFF = 3;
 constexpr int32_t COMMON_EVENT_SERVICE_ID = 3299;
 }
 
-DeviceSwitchCollect::DeviceSwitchCollect(const sptr<IReport>& report,
-    const std::weak_ptr<BaseSystemAbilityManager>& manager)
-    : ICollectPlugin(report, manager)
+DeviceSwitchCollect::DeviceSwitchCollect(const sptr<IReport>& report)
+    : ICollectPlugin(report)
 {
 }
 
@@ -97,11 +96,8 @@ int32_t DeviceSwitchCollect::OnStart()
         return ERR_OK;
     }
     sptr<CesStateListener> cesStateListener = new CesStateListener(this);
-    auto strongManager = manager_.lock();
-    if (strongManager != nullptr) {
-        return strongManager->SubscribeSystemAbility(COMMON_EVENT_SERVICE_ID, cesStateListener);
-    }
-    return ERR_INVALID_VALUE;
+    return SystemAbilityManager::GetInstance()->SubscribeSystemAbility(COMMON_EVENT_SERVICE_ID,
+        cesStateListener);
 }
 
 int32_t DeviceSwitchCollect::OnStop()

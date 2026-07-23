@@ -45,21 +45,14 @@ constexpr int LISTENER_BASE_INDEX = 1;
 }
 void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
 {
-    std::weak_ptr<BaseSystemAbilityManager> weakMgr;
-    saMgr->abilityDeath_ = sptr<IRemoteObject::DeathRecipient>(
-        new AbilityDeathRecipient(weakMgr));
-    saMgr->systemProcessDeath_ = sptr<IRemoteObject::DeathRecipient>(
-        new SystemProcessDeathRecipient(weakMgr));
-    saMgr->abilityStatusDeath_ = sptr<IRemoteObject::DeathRecipient>(
-        new AbilityStatusDeathRecipient(weakMgr));
-    saMgr->abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(
-        new AbilityCallbackDeathRecipient(weakMgr));
-    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(
-        new RemoteCallbackDeathRecipient(weakMgr));
+    saMgr->abilityDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityDeathRecipient());
+    saMgr->systemProcessDeath_ = sptr<IRemoteObject::DeathRecipient>(new SystemProcessDeathRecipient());
+    saMgr->abilityStatusDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityStatusDeathRecipient());
+    saMgr->abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityCallbackDeathRecipient());
+    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
     saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
-    saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(
-        new DeviceStatusCollectManager(weakMgr));
-    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>(weakMgr);
+    saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
 }
 void SystemAbilityManagerDumperTest::SetUpTestCase()
 {
@@ -128,8 +121,7 @@ HWTEST_F(SystemAbilityManagerDumperTest, FfrtDumpProc002, TestSize.Level0)
     DTEST_LOG << "FfrtDumpProc002 begin" << std::endl;
     SamMockPermission::MockProcess("hidumper_service");
     std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     int32_t fd = -1;
     std::vector<std::string> args;
     auto ret = SystemAbilityManagerDumper::FfrtDumpProc(abilityStateScheduler, fd, args);
@@ -156,8 +148,7 @@ HWTEST_F(SystemAbilityManagerDumperTest, FfrtDumpProc003, TestSize.Level3)
     DTEST_LOG << "FfrtDumpProc003 begin" << std::endl;
     SamMockPermission::MockProcess("hidumper_service");
     std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     int32_t fd = -1;
     std::vector<std::string> args;
     args.emplace_back("--ffrt");
@@ -180,8 +171,7 @@ HWTEST_F(SystemAbilityManagerDumperTest, FfrtDumpProc004, TestSize.Level3)
     DTEST_LOG << "FfrtDumpProc004 begin" << std::endl;
     SamMockPermission::MockProcess("hidumper_service");
     std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     int32_t fd = -1;
     std::vector<std::string> args;
     args.emplace_back("--ffrt");
@@ -203,8 +193,7 @@ HWTEST_F(SystemAbilityManagerDumperTest, GetFfrtLoadMetrics001, TestSize.Level3)
 {
     DTEST_LOG << "GetFfrtLoadMetrics001 begin" << std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     int32_t fd = -1;
     std::vector<std::string> args;
     args.emplace_back("--ffrt");
@@ -225,8 +214,7 @@ HWTEST_F(SystemAbilityManagerDumperTest, GetFfrtLoadMetrics002, TestSize.Level3)
 {
     DTEST_LOG << "GetFfrtLoadMetrics002 begin" << std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     int32_t fd = -1;
     std::vector<std::string> args;
     args.emplace_back("--ffrt");
@@ -248,8 +236,7 @@ HWTEST_F(SystemAbilityManagerDumperTest, GetFfrtLoadMetrics003, TestSize.Level3)
 {
     DTEST_LOG << "GetFfrtLoadMetrics003 begin" << std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     int32_t fd = -1;
     std::vector<std::string> args;
     args.emplace_back("--ffrt");
@@ -347,8 +334,7 @@ HWTEST_F(SystemAbilityManagerDumperTest, CollectFfrtMetricInfoInProcs001, TestSi
 {
     DTEST_LOG << "CollectFfrtMetricInfoInProcs001 begin" << std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     int32_t fd = -1;
     std::vector<int32_t> processIds;
     processIds.emplace_back(getpid());
@@ -428,8 +414,7 @@ HWTEST_F(SystemAbilityManagerDumperTest, ShowAllSystemAbilityInfo001, TestSize.L
 {
     DTEST_LOG << "ShowAllSystemAbilityInfo001 begin" << std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     string result;
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
@@ -474,8 +459,7 @@ HWTEST_F(SystemAbilityManagerDumperTest, ShowSystemAbilityInfo001, TestSize.Leve
     string result;
     int32_t said = 401;
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
@@ -517,8 +501,7 @@ HWTEST_F(SystemAbilityManagerDumperTest, ShowProcessInfo001, TestSize.Level3)
     string result;
     string processName = "deviceprofile";
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemProcessContext> systemProcessContext = std::make_shared<SystemProcessContext>();
@@ -561,8 +544,7 @@ HWTEST_F(SystemAbilityManagerDumperTest, ShowAllSystemAbilityInfoInState001, Tes
     string state = "LOADED";
     int32_t said = 401;
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     std::shared_ptr<SystemProcessContext> systemProcessContext = std::make_shared<SystemProcessContext>();
@@ -1330,8 +1312,7 @@ HWTEST_F(SystemAbilityManagerDumperTest, GetFfrtDumpInfoProc001, TestSize.Level2
 {
     DTEST_LOG << "GetFfrtDumpInfoProc001 begin" << std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::vector<std::string> args;
     args.emplace_back("--ffrt");
     args.emplace_back("");
@@ -1351,8 +1332,7 @@ HWTEST_F(SystemAbilityManagerDumperTest, GetFfrtDumpInfoProc002, TestSize.Level2
 {
     DTEST_LOG << "GetFfrtDumpInfoProc002 begin" << std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::vector<std::string> args;
     args.emplace_back("--ffrt");
     args.emplace_back("12k");
@@ -1372,8 +1352,7 @@ HWTEST_F(SystemAbilityManagerDumperTest, GetFfrtDumpInfoProc003, TestSize.Level2
 {
     DTEST_LOG << "GetFfrtDumpInfoProc003 begin" << std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
     InitSaMgr(saMgr);
@@ -1396,8 +1375,7 @@ HWTEST_F(SystemAbilityManagerDumperTest, GetFfrtDumpInfoProc004, TestSize.Level1
 {
     DTEST_LOG << "GetFfrtDumpInfoProc004 begin" << std::endl;
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     EXPECT_NE(saMgr, nullptr);
     InitSaMgr(saMgr);

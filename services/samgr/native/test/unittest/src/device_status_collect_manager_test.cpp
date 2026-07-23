@@ -66,7 +66,7 @@ void DeviceStatusCollectManagerTest::TearDownTestCase()
 
 void DeviceStatusCollectManagerTest::SetUp()
 {
-    collect = new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    collect = new DeviceStatusCollectManager();
     DTEST_LOG << "SetUp" << std::endl;
 }
 
@@ -224,8 +224,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, UnInit001, TestSize.Level3)
     EXPECT_EQ(true, collect->collectPluginMap_.empty());
 
     std::function<void()> callback = [] () {};
-    sptr<DeviceStatusCollectManager> pCollect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> pCollect = new DeviceStatusCollectManager();
     sptr<ICollectPlugin> pNetworkingCollect = new DeviceNetworkingCollect(pCollect);
     pCollect->collectHandler_ = std::make_shared<FFRTHandler>("WorkHandler");
     sptr<ICollectPlugin> collectPlugin = pNetworkingCollect;
@@ -505,8 +504,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, ReportEvent002, TestSize.Level3)
 {
     DTEST_LOG << " ReportEvent002 BEGIN" << std::endl;
     std::list<SaProfile> saProfiles;
-    sptr<DeviceStatusCollectManager> collectMgr =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collectMgr = new DeviceStatusCollectManager();
     EXPECT_EQ(true, collectMgr != nullptr);
     collectMgr->Init(saProfiles);
     OnDemandEvent event;
@@ -527,8 +525,7 @@ HWTEST_F(DeviceStatusCollectManagerTest, ReportEvent003, TestSize.Level3)
 {
     DTEST_LOG << " ReportEvent003 BEGIN" << std::endl;
     std::list<SaProfile> saProfiles;
-    sptr<DeviceStatusCollectManager> collectMgr =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collectMgr = new DeviceStatusCollectManager();
     EXPECT_EQ(true, collectMgr != nullptr);
     collectMgr->Init(saProfiles);
     OnDemandEvent event = { DEVICE_ONLINE, SA_TAG_DEVICE_ON_LINE, "on" };

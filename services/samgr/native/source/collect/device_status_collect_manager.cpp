@@ -15,7 +15,6 @@
 
 #include "device_status_collect_manager.h"
 
-#include "base_system_ability_manager.h"
 #include "datetime_ex.h"
 #include "device_timed_collect.h"
 #ifdef SUPPORT_DEVICE_MANAGER
@@ -42,27 +41,27 @@ void DeviceStatusCollectManager::Init(const std::list<SaProfile>& saProfiles)
     HILOGI("DeviceStaMgr Init begin");
     FilterOnDemandSaProfiles(saProfiles);
     collectHandler_ = std::make_shared<FFRTHandler>("collect");
-    sptr<ICollectPlugin> deviceParamCollect = new DeviceParamCollect(this, manager_);
+    sptr<ICollectPlugin> deviceParamCollect = new DeviceParamCollect(this);
     deviceParamCollect->Init(saProfiles);
     collectPluginMap_[PARAM] = deviceParamCollect;
 #ifdef SUPPORT_DEVICE_MANAGER
-    sptr<ICollectPlugin> networkingCollect = new DeviceNetworkingCollect(this, manager_);
+    sptr<ICollectPlugin> networkingCollect = new DeviceNetworkingCollect(this);
     collectPluginMap_[DEVICE_ONLINE] = networkingCollect;
 #endif
 #ifdef SUPPORT_COMMON_EVENT
-    sptr<ICollectPlugin> eventStatuscollect = new CommonEventCollect(this, manager_);
+    sptr<ICollectPlugin> eventStatuscollect = new CommonEventCollect(this);
     eventStatuscollect->Init(saProfiles);
     collectPluginMap_[COMMON_EVENT] = eventStatuscollect;
 #endif
 #ifdef SUPPORT_SWITCH_COLLECT
-    sptr<ICollectPlugin> deviceSwitchCollect = new DeviceSwitchCollect(this, manager_);
+    sptr<ICollectPlugin> deviceSwitchCollect = new DeviceSwitchCollect(this);
     deviceSwitchCollect->Init(saProfiles);
     collectPluginMap_[SETTING_SWITCH] = deviceSwitchCollect;
 #endif
     sptr<ICollectPlugin> timedCollect = new DeviceTimedCollect(this);
     timedCollect->Init(saProfiles);
     collectPluginMap_[TIMED_EVENT] = timedCollect;
-    sptr<ICollectPlugin> refCountCollect = new RefCountCollect(this, manager_);
+    sptr<ICollectPlugin> refCountCollect = new RefCountCollect(this);
     refCountCollect->Init(saProfiles);
     collectPluginMap_[UNREF_EVENT] = refCountCollect;
 
@@ -299,10 +298,7 @@ void DeviceStatusCollectManager::ReportEvent(const OnDemandEvent& event)
             }
             return;
         }
-        auto strongManager = manager_.lock();
-        if (strongManager != nullptr) {
-            strongManager->ProcessOnDemandEvent(event, saControlList);
-        }
+        SystemAbilityManager::GetInstance()->ProcessOnDemandEvent(event, saControlList);
     };
     collectHandler_->PostTask(callback);
 }

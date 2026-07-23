@@ -57,8 +57,7 @@ private:
 
 class DeviceSwitchCollect : public ICollectPlugin {
 public:
-    explicit DeviceSwitchCollect(const sptr<IReport>& report,
-        const std::weak_ptr<BaseSystemAbilityManager>& manager = {});
+    explicit DeviceSwitchCollect(const sptr<IReport>& report);
     ~DeviceSwitchCollect() = default;
     void Init(const std::list<SaProfile>& saProfiles) override;
     int32_t OnStart() override;

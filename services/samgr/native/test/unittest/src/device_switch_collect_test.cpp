@@ -52,21 +52,14 @@ static const std::string WIFI_NAME = "wifi_status";
 
 void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
 {
-    std::weak_ptr<BaseSystemAbilityManager> weakMgr;
-    saMgr->abilityDeath_ = sptr<IRemoteObject::DeathRecipient>(
-        new AbilityDeathRecipient(weakMgr));
-    saMgr->systemProcessDeath_ = sptr<IRemoteObject::DeathRecipient>(
-        new SystemProcessDeathRecipient(weakMgr));
-    saMgr->abilityStatusDeath_ = sptr<IRemoteObject::DeathRecipient>(
-        new AbilityStatusDeathRecipient(weakMgr));
-    saMgr->abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(
-        new AbilityCallbackDeathRecipient(weakMgr));
-    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(
-        new RemoteCallbackDeathRecipient(weakMgr));
+    saMgr->abilityDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityDeathRecipient());
+    saMgr->systemProcessDeath_ = sptr<IRemoteObject::DeathRecipient>(new SystemProcessDeathRecipient());
+    saMgr->abilityStatusDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityStatusDeathRecipient());
+    saMgr->abilityCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new AbilityCallbackDeathRecipient());
+    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
     saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
-    saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(
-        new DeviceStatusCollectManager(weakMgr));
-    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>(weakMgr);
+    saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager());
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
 }
 }
 
@@ -100,8 +93,7 @@ void DeviceSwitchCollectTest::TearDown()
 HWTEST_F(DeviceSwitchCollectTest, InitCommonEventSubscriber001, TestSize.Level3)
 {
     DTEST_LOG << "InitCommonEventSubscriber001 begin" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     deviceSwitchCollect->InitCommonEventSubscriber();
@@ -122,8 +114,7 @@ HWTEST_F(DeviceSwitchCollectTest, CheckSwitchEvent001, TestSize.Level3)
     OnDemandEvent onDemandEvent;
     onDemandEvent.eventId = SETTING_SWITCH;
     onDemandEvent.name = WIFI_NAME;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     int32_t result = deviceSwitchCollect->CheckSwitchEvent(onDemandEvent);
@@ -159,8 +150,7 @@ HWTEST_F(DeviceSwitchCollectTest, DeviceSwitchCollectInit001, TestSize.Level3)
     saProfile.startOnDemand.onDemandEvents.emplace_back(onDemandEvent);
     saProfile.stopOnDemand.onDemandEvents.emplace_back(onDemandEvent);
     saProfiles.emplace_back(saProfile);
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     deviceSwitchCollect->Init(saProfiles);
@@ -178,8 +168,7 @@ HWTEST_F(DeviceSwitchCollectTest, DeviceSwitchCollectInit001, TestSize.Level3)
 HWTEST_F(DeviceSwitchCollectTest, CollectSubscribeSwitchEvent001, TestSize.Level3)
 {
     DTEST_LOG << "CollectSubscribeSwitchEvent001 begin" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     deviceSwitchCollect->switchEventSubscriber_ = nullptr;
@@ -198,8 +187,7 @@ HWTEST_F(DeviceSwitchCollectTest, CollectSubscribeSwitchEvent001, TestSize.Level
 HWTEST_F(DeviceSwitchCollectTest, CollectSubscribeSwitchEvent002, TestSize.Level3)
 {
     DTEST_LOG << "CollectSubscribeSwitchEvent002 begin" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     deviceSwitchCollect->InitCommonEventSubscriber();
@@ -218,8 +206,7 @@ HWTEST_F(DeviceSwitchCollectTest, CollectSubscribeSwitchEvent002, TestSize.Level
 HWTEST_F(DeviceSwitchCollectTest, CollectSubscribeSwitchEvent003, TestSize.Level3)
 {
     DTEST_LOG << "CollectSubscribeSwitchEvent003 begin" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     deviceSwitchCollect->InitCommonEventSubscriber();
@@ -242,8 +229,7 @@ HWTEST_F(DeviceSwitchCollectTest, CollectSubscribeSwitchEvent003, TestSize.Level
 HWTEST_F(DeviceSwitchCollectTest, OnStart001, TestSize.Level0)
 {
     DTEST_LOG << "OnStart001 begin" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
@@ -265,18 +251,17 @@ HWTEST_F(DeviceSwitchCollectTest, OnStart001, TestSize.Level0)
 HWTEST_F(DeviceSwitchCollectTest, OnStart002, TestSize.Level3)
 {
     DTEST_LOG << "OnStart002 begin" << std::endl;
-    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
-    EXPECT_NE(saMgr, nullptr);
-    InitSaMgr(saMgr);
-    saMgr->subscribeCountMap_.clear();
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     deviceSwitchCollect->InitCommonEventSubscriber();
     deviceSwitchCollect->needListenSwitchEvent_ = true;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
+    saMgr->subscribeCountMap_.clear();
     int32_t ret = deviceSwitchCollect->OnStart();
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "OnStart002 end" << std::endl;
 }
 
@@ -290,8 +275,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnStart002, TestSize.Level3)
 HWTEST_F(DeviceSwitchCollectTest, OnStop001, TestSize.Level0)
 {
     DTEST_LOG << "OnStop001 begin" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     int32_t ret = deviceSwitchCollect->OnStop();
@@ -309,8 +293,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnStop001, TestSize.Level0)
 HWTEST_F(DeviceSwitchCollectTest, OnStop002, TestSize.Level3)
 {
     DTEST_LOG << "OnStop002 begin" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     deviceSwitchCollect->InitCommonEventSubscriber();
@@ -330,8 +313,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnStop002, TestSize.Level3)
 HWTEST_F(DeviceSwitchCollectTest, OnStop003, TestSize.Level3)
 {
     DTEST_LOG << "OnStop003 begin" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     deviceSwitchCollect->InitCommonEventSubscriber();
@@ -355,8 +337,7 @@ HWTEST_F(DeviceSwitchCollectTest, AddCollectEvent001, TestSize.Level3)
     std::vector<OnDemandEvent> events;
     events.emplace_back(onDemandEvent);
     events.emplace_back(event2);
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     int32_t ret = deviceSwitchCollect->AddCollectEvent(events);
@@ -379,8 +360,7 @@ HWTEST_F(DeviceSwitchCollectTest, AddCollectEvent002, TestSize.Level3)
     std::vector<OnDemandEvent> events;
     events.emplace_back(onDemandEvent);
     events.emplace_back(event2);
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     deviceSwitchCollect->InitCommonEventSubscriber();
@@ -425,8 +405,7 @@ HWTEST_F(DeviceSwitchCollectTest, SubscribeSwitchEvent001, TestSize.Level3)
     OnDemandEvent onDemandEvent = {SETTING_SWITCH, WIFI_NAME, "on"};
     saProfile.startOnDemand.onDemandEvents.emplace_back(onDemandEvent);
     saProfiles.emplace_back(saProfile);
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     deviceSwitchCollect->Init(saProfiles);
@@ -450,8 +429,7 @@ HWTEST_F(DeviceSwitchCollectTest, UnSubscribeSwitchEvent001, TestSize.Level3)
     OnDemandEvent onDemandEvent = {SETTING_SWITCH, WIFI_NAME, "on"};
     saProfile.startOnDemand.onDemandEvents.emplace_back(onDemandEvent);
     saProfiles.emplace_back(saProfile);
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     deviceSwitchCollect->Init(saProfiles);
@@ -471,8 +449,7 @@ HWTEST_F(DeviceSwitchCollectTest, ReportEvent001, TestSize.Level3)
 {
     DTEST_LOG << "ReportEvent001 begin" << std::endl;
     OnDemandEvent onDemandEvent = {SETTING_SWITCH, WIFI_NAME, "on"};
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     deviceSwitchCollect->InitCommonEventSubscriber();
@@ -491,8 +468,7 @@ HWTEST_F(DeviceSwitchCollectTest, ReportEvent001, TestSize.Level3)
 HWTEST_F(DeviceSwitchCollectTest, OnReceiveWifiEvent001, TestSize.Level3)
 {
     DTEST_LOG << "OnReceiveWifiEvent001 begin" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     deviceSwitchCollect->InitCommonEventSubscriber();
@@ -516,8 +492,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnReceiveWifiEvent001, TestSize.Level3)
 HWTEST_F(DeviceSwitchCollectTest, OnReceiveWifiEvent002, TestSize.Level3)
 {
     DTEST_LOG << "OnReceiveWifiEvent002 begin" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     deviceSwitchCollect->InitCommonEventSubscriber();
@@ -541,8 +516,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnReceiveWifiEvent002, TestSize.Level3)
 HWTEST_F(DeviceSwitchCollectTest, OnReceiveWifiEvent003, TestSize.Level3)
 {
     DTEST_LOG << "OnReceiveWifiEvent003 begin" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     deviceSwitchCollect->InitCommonEventSubscriber();
@@ -566,8 +540,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnReceiveWifiEvent003, TestSize.Level3)
 HWTEST_F(DeviceSwitchCollectTest, OnReceiveBluetoothEvent001, TestSize.Level3)
 {
     DTEST_LOG << "OnReceiveBluetoothEvent001 begin" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     deviceSwitchCollect->InitCommonEventSubscriber();
@@ -591,8 +564,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnReceiveBluetoothEvent001, TestSize.Level3)
 HWTEST_F(DeviceSwitchCollectTest, OnReceiveBluetoothEvent002, TestSize.Level3)
 {
     DTEST_LOG << "OnReceiveBluetoothEvent002 begin" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     deviceSwitchCollect->InitCommonEventSubscriber();
@@ -616,8 +588,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnReceiveBluetoothEvent002, TestSize.Level3)
 HWTEST_F(DeviceSwitchCollectTest, OnReceiveBluetoothEvent003, TestSize.Level3)
 {
     DTEST_LOG << "OnReceiveBluetoothEvent003 begin" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     deviceSwitchCollect->InitCommonEventSubscriber();
@@ -641,8 +612,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnReceiveBluetoothEvent003, TestSize.Level3)
 HWTEST_F(DeviceSwitchCollectTest, OnReceiveEvent001, TestSize.Level3)
 {
     DTEST_LOG << "OnReceiveEvent001 begin" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     deviceSwitchCollect->InitCommonEventSubscriber();
@@ -666,8 +636,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnReceiveEvent001, TestSize.Level3)
 HWTEST_F(DeviceSwitchCollectTest, OnReceiveEvent002, TestSize.Level3)
 {
     DTEST_LOG << "OnReceiveEvent002 begin" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     deviceSwitchCollect->InitCommonEventSubscriber();
@@ -691,8 +660,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnReceiveEvent002, TestSize.Level3)
 HWTEST_F(DeviceSwitchCollectTest, OnReceiveEvent003, TestSize.Level3)
 {
     DTEST_LOG << "OnReceiveEvent003 begin" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceSwitchCollect> deviceSwitchCollect =
         new DeviceSwitchCollect(collect);
     deviceSwitchCollect->InitCommonEventSubscriber();
