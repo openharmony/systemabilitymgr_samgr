@@ -25,13 +25,9 @@
 #include "system_ability_on_demand_event.h"
 
 namespace OHOS {
-
-class BaseSystemAbilityManager;
-
 class DeviceStatusCollectManager : public IReport {
 public:
-    explicit DeviceStatusCollectManager(const std::weak_ptr<BaseSystemAbilityManager>& manager)
-        : manager_(manager) {}
+    DeviceStatusCollectManager() = default;
     ~DeviceStatusCollectManager() = default;
     void Init(const std::list<SaProfile>& saProfiles);
     void UnInit();
@@ -76,7 +72,6 @@ private:
     int32_t RemoveUnusedEventsLocked(const std::vector<OnDemandEvent>& events);
     std::map<int32_t, sptr<ICollectPlugin>> collectPluginMap_;
     std::shared_ptr<FFRTHandler> collectHandler_;
-    std::weak_ptr<BaseSystemAbilityManager> manager_;
     samgr::shared_mutex saProfilesLock_;
     std::list<CollMgrSaProfile> onDemandSaProfiles_;
 };

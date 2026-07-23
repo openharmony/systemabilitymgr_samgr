@@ -153,8 +153,7 @@ void FuzzNotifySystemAbilityLoaded(const uint8_t* data, size_t size)
     sptr<SystemAbilityLoadCallbackMock> callback2 = new SystemAbilityLoadCallbackMock();
     std::list<sptr<ISystemAbilityLoadCallback>> callbacks;
     callbacks.push_back(callback2);
-    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(
-    new RemoteCallbackDeathRecipient(std::weak_ptr<BaseSystemAbilityManager>{}));
+    saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(new RemoteCallbackDeathRecipient());
     saMgr->RemoveRemoteCallbackLocked(callbacks, callback2);
 }
 

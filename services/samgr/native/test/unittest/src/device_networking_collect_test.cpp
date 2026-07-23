@@ -22,7 +22,6 @@
 
 #define private public
 #include "device_networking_collect.h"
-#include "system_ability_manager.h"
 
 using namespace std;
 using namespace testing;
@@ -107,8 +106,7 @@ HWTEST_F(DeviceNetworkingCollectTest, OnStart001, TestSize.Level0)
 HWTEST_F(DeviceNetworkingCollectTest, OnStart002, TestSize.Level3)
 {
     DTEST_LOG << " OnStart002 BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
     networkingCollect->OnStart();
     auto initDoneTask = []() {
@@ -138,8 +136,7 @@ HWTEST_F(DeviceNetworkingCollectTest, OnStart002, TestSize.Level3)
 HWTEST_F(DeviceNetworkingCollectTest, OnRemoteDied001, TestSize.Level3)
 {
     DTEST_LOG << " OnRemoteDied001 BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
     networkingCollect->OnStart();
     auto initDoneTask = []() {
@@ -171,8 +168,7 @@ HWTEST_F(DeviceNetworkingCollectTest, OnRemoteDied001, TestSize.Level3)
 HWTEST_F(DeviceNetworkingCollectTest, OnDeviceOnline001, TestSize.Level3)
 {
     DTEST_LOG << " OnDeviceOnline001 BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
     networkingCollect->OnStart();
     auto initDoneTask = []() {
@@ -210,8 +206,7 @@ HWTEST_F(DeviceNetworkingCollectTest, OnDeviceOnline001, TestSize.Level3)
 HWTEST_F(DeviceNetworkingCollectTest, OnDeviceOffline001, TestSize.Level3)
 {
     DTEST_LOG << " OnDeviceOffline001 BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
     networkingCollect->OnStart();
     auto initDoneTask = []() {
@@ -246,8 +241,7 @@ HWTEST_F(DeviceNetworkingCollectTest, OnDeviceOffline001, TestSize.Level3)
 HWTEST_F(DeviceNetworkingCollectTest, OnDeviceOffline002, TestSize.Level3)
 {
     DTEST_LOG << " OnDeviceOffline002 BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
     networkingCollect->OnStart();
     auto initDoneTask = []() {
@@ -283,8 +277,7 @@ HWTEST_F(DeviceNetworkingCollectTest, OnDeviceOffline002, TestSize.Level3)
 HWTEST_F(DeviceNetworkingCollectTest, ProcessEvent001, TestSize.Level3)
 {
     DTEST_LOG << " ProcessEvent001 BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
     networkingCollect->OnStart();
     auto initDoneTask = []() {
@@ -320,8 +313,7 @@ HWTEST_F(DeviceNetworkingCollectTest, ProcessEvent001, TestSize.Level3)
 HWTEST_F(DeviceNetworkingCollectTest, AddDeviceChangeListener001, TestSize.Level3)
 {
     DTEST_LOG << " AddDeviceChangeListener001 BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
     networkingCollect->initCallback_ = nullptr;
     bool result = networkingCollect->AddDeviceChangeListener();
@@ -339,8 +331,7 @@ HWTEST_F(DeviceNetworkingCollectTest, AddDeviceChangeListener001, TestSize.Level
 HWTEST_F(DeviceNetworkingCollectTest, CheckCondition001, TestSize.Level3)
 {
     DTEST_LOG << " CheckCondition001 BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
     OnDemandCondition condition;
     condition.value = "on";
@@ -361,8 +352,7 @@ HWTEST_F(DeviceNetworkingCollectTest, CheckCondition001, TestSize.Level3)
 HWTEST_F(DeviceNetworkingCollectTest, CheckCondition002, TestSize.Level3)
 {
     DTEST_LOG << " CheckCondition002 BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
     OnDemandCondition condition;
     condition.value = "on";
@@ -381,8 +371,7 @@ HWTEST_F(DeviceNetworkingCollectTest, CheckCondition002, TestSize.Level3)
 HWTEST_F(DeviceNetworkingCollectTest, CheckCondition003, TestSize.Level3)
 {
     DTEST_LOG << " CheckCondition003 BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
     OnDemandCondition condition;
     condition.value = "off";
@@ -403,8 +392,7 @@ HWTEST_F(DeviceNetworkingCollectTest, CheckCondition003, TestSize.Level3)
 HWTEST_F(DeviceNetworkingCollectTest, CheckCondition004, TestSize.Level3)
 {
     DTEST_LOG << " CheckCondition004 BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
     OnDemandCondition condition;
     condition.value = "off";
@@ -423,8 +411,7 @@ HWTEST_F(DeviceNetworkingCollectTest, CheckCondition004, TestSize.Level3)
 HWTEST_F(DeviceNetworkingCollectTest, CheckCondition005, TestSize.Level3)
 {
     DTEST_LOG << " CheckCondition005 BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
     OnDemandCondition condition;
     condition.value = "invalid";
@@ -445,8 +432,7 @@ HWTEST_F(DeviceNetworkingCollectTest, CheckCondition005, TestSize.Level3)
 HWTEST_F(DeviceNetworkingCollectTest, CheckCondition006, TestSize.Level3)
 {
     DTEST_LOG << " CheckCondition006 BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
     OnDemandCondition condition;
     condition.value = "invalid";
@@ -465,8 +451,7 @@ HWTEST_F(DeviceNetworkingCollectTest, CheckCondition006, TestSize.Level3)
 HWTEST_F(DeviceNetworkingCollectTest, ffrt001, TestSize.Level3)
 {
     DTEST_LOG << " test ffrt001 BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
     networkingCollect->OnStart();
     networkingCollect->SetFfrt();
@@ -485,8 +470,7 @@ HWTEST_F(DeviceNetworkingCollectTest, ffrt001, TestSize.Level3)
 HWTEST_F(DeviceNetworkingCollectTest, ReportMissedEvents001, TestSize.Level3)
 {
     DTEST_LOG << " test ReportMissedEvents BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
     networkingCollect->OnStart();
     auto initDoneTask = []() {
@@ -517,8 +501,7 @@ HWTEST_F(DeviceNetworkingCollectTest, ReportMissedEvents001, TestSize.Level3)
 HWTEST_F(DeviceNetworkingCollectTest, UpdateDeviceOnlineSet001, TestSize.Level3)
 {
     DTEST_LOG << " test UpdateDeviceOnlineSet BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
     networkingCollect->OnStart();
     auto initDoneTask = []() {
@@ -546,8 +529,7 @@ HWTEST_F(DeviceNetworkingCollectTest, UpdateDeviceOnlineSet001, TestSize.Level3)
 HWTEST_F(DeviceNetworkingCollectTest, ClearDeviceOnlineSet001, TestSize.Level3)
 {
     DTEST_LOG << " test ClearDeviceOnlineSet BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
     networkingCollect->OnStart();
     auto initDoneTask = []() {
@@ -575,8 +557,7 @@ HWTEST_F(DeviceNetworkingCollectTest, ClearDeviceOnlineSet001, TestSize.Level3)
 HWTEST_F(DeviceNetworkingCollectTest, OnRemoteDied002, TestSize.Level3)
 {
     DTEST_LOG << " test OnRemoteDied BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
     networkingCollect->OnStart();
     auto initDoneTask = []() {
@@ -604,8 +585,7 @@ HWTEST_F(DeviceNetworkingCollectTest, OnRemoteDied002, TestSize.Level3)
 HWTEST_F(DeviceNetworkingCollectTest, OnDeviceOnline002, TestSize.Level3)
 {
     DTEST_LOG << " test OnDeviceOnline BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
     networkingCollect->OnStart();
     auto initDoneTask = []() {
@@ -637,8 +617,7 @@ HWTEST_F(DeviceNetworkingCollectTest, OnDeviceOnline002, TestSize.Level3)
 HWTEST_F(DeviceNetworkingCollectTest, OnDeviceOffline003, TestSize.Level3)
 {
     DTEST_LOG << " OnDeviceOffline003 BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
     networkingCollect->OnStart();
     auto initDoneTask = []() {
@@ -667,8 +646,7 @@ HWTEST_F(DeviceNetworkingCollectTest, OnDeviceOffline003, TestSize.Level3)
 HWTEST_F(DeviceNetworkingCollectTest, ProcessEvent002, TestSize.Level3)
 {
     DTEST_LOG << " ProcessEvent002 BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
     networkingCollect->workHandler_ = std::make_shared<WorkHandler>(nullptr);
     EXPECT_TRUE(collect != nullptr);
@@ -691,8 +669,7 @@ HWTEST_F(DeviceNetworkingCollectTest, ProcessEvent002, TestSize.Level3)
 HWTEST_F(DeviceNetworkingCollectTest, SendEvent001, TestSize.Level3)
 {
     DTEST_LOG << " SendEvent001 BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
     networkingCollect->workHandler_ = std::make_shared<WorkHandler>(networkingCollect);
     EXPECT_TRUE(collect != nullptr);
@@ -709,8 +686,7 @@ HWTEST_F(DeviceNetworkingCollectTest, SendEvent001, TestSize.Level3)
 HWTEST_F(DeviceNetworkingCollectTest, SendEvent002, TestSize.Level3)
 {
     DTEST_LOG << " SendEvent002 BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> collect = new DeviceStatusCollectManager();
     sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect);
     networkingCollect->workHandler_ = std::make_shared<WorkHandler>(networkingCollect);
     EXPECT_TRUE(collect != nullptr);
@@ -719,30 +695,5 @@ HWTEST_F(DeviceNetworkingCollectTest, SendEvent002, TestSize.Level3)
     bool bRet = networkingCollect->workHandler_->SendEvent(DM_DIED_EVENT, DELAY_TIME);
     EXPECT_EQ(true, bRet);
     DTEST_LOG << " SendEvent002 END" << std::endl;
-}
-
-HWTEST_F(DeviceNetworkingCollectTest, IsDmReadyNullManager001, TestSize.Level3)
-{
-    DTEST_LOG << "IsDmReadyNullManager001 begin" << std::endl;
-    sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(nullptr);
-    ASSERT_NE(networkingCollect, nullptr);
-    EXPECT_FALSE(networkingCollect->IsDmReady());
-    EXPECT_TRUE(networkingCollect->GetManager().expired());
-    DTEST_LOG << "IsDmReadyNullManager001 end" << std::endl;
-}
-
-HWTEST_F(DeviceNetworkingCollectTest, IsDmReadyWithManager001, TestSize.Level3)
-{
-    DTEST_LOG << "IsDmReadyWithManager001 begin" << std::endl;
-    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    ASSERT_NE(saMgr, nullptr);
-    saMgr->Init();
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
-    sptr<DeviceNetworkingCollect> networkingCollect = new DeviceNetworkingCollect(collect, saMgr->weak_from_this());
-    ASSERT_NE(networkingCollect, nullptr);
-    EXPECT_FALSE(networkingCollect->GetManager().expired());
-    EXPECT_FALSE(networkingCollect->IsDmReady());
-    DTEST_LOG << "IsDmReadyWithManager001 end" << std::endl;
 }
 } // namespace OHOS

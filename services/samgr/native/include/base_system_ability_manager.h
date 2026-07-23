@@ -58,11 +58,7 @@ struct SAListener {
         :listener(lst), callingPid(cpid), state(sta) {}
 };
 
-// Inherit enable_shared_from_this to support weak_from_this() for safe lambda captures.
-// - MultiSystemAbilityManager: managed by std::shared_ptr, weak_from_this() works naturally.
-// - SystemAbilityManager: singleton (never destroyed), weak_from_this() returns empty.
-//   Callers use a raw pointer fallback when weak_from_this() is expired at capture time.
-class BaseSystemAbilityManager : public std::enable_shared_from_this<BaseSystemAbilityManager> {
+class BaseSystemAbilityManager {
 public:
     virtual ~BaseSystemAbilityManager();
 
@@ -130,35 +126,14 @@ public:
         const std::string& eventName = "");
 
     void Init();
-    virtual void Destroy();
     void CleanFfrt();
     void SetFfrt();
-    void RemoveAllDeathRecipients();
-    void RemoveAbilityDeathRecipients();
-    void RemoveProcessDeathRecipients();
-    void RemoveListenerDeathRecipients();
-    void RemoveOnDemandDeathRecipients();
-    void RemoveRemoteCallbackDeathRecipients();
-    void ReleaseSubSystems();
     bool GetSaProfile(int32_t saId, CommonSaProfile& saProfile);
     bool IsDistributedSystemAbility(int32_t systemAbilityId);
     bool CheckSaIsImmediatelyRecycle(int32_t systemAbilityId);
     bool IsCacheCommonEvent(int32_t systemAbilityId);
     bool IsModuleUpdate(int32_t systemAbilityId);
     void RemoveOnDemandSaInDiedProc(std::shared_ptr<SystemProcessContext>& processContext);
-    void RemoveWhiteCommonEvent()
-    {
-        if (collectManager_ != nullptr) {
-            collectManager_->RemoveWhiteCommonEvent();
-        }
-    }
-    virtual int32_t DoLoadSystemAbilityFromRpc(const std::string& srcDeviceId, int32_t systemAbilityId,
-        const std::u16string& procName, const sptr<ISystemAbilityLoadCallback>& callback,
-        const OnDemandEvent& event)
-    {
-        return ERR_INVALID_VALUE;
-    }
-    virtual void InitDbinderService() {}
 #ifdef SUPPORT_MULTI_INSTANCE
     std::set<int32_t> GetMultiInstanceSaIds();
 #endif
@@ -248,8 +223,6 @@ protected:
 
     void RemoveStartingAbilityCallback(CallbackList& callbackList,
         const sptr<IRemoteObject>& remoteObject);
-    void RemoveCallbackDeathRecipients(
-        CallbackList& callbackList, const sptr<IRemoteObject::DeathRecipient>& deathRecipient);
     void RemoveStartingAbilityCallbackForDevice(AbilityItem& abilityItem,
         const sptr<IRemoteObject>& remoteObject);
     void RemoveStartingAbilityCallbackLocked(
@@ -299,10 +272,6 @@ protected:
     std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler_;
 
     sptr<DeviceStatusCollectManager> collectManager_;
-
-    std::string logPrefix_;
-
-    std::shared_ptr<BaseSystemAbilityManager> selfPtr_;
 
     std::unique_ptr<Utils::Timer> reportEventTimer_;
 

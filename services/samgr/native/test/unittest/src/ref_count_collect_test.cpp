@@ -49,8 +49,7 @@ void RefCountCollectTest::TearDown()
  */
 HWTEST_F(RefCountCollectTest, Init001, TestSize.Level1)
 {
-    sptr<DeviceStatusCollectManager> manager =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> manager = new DeviceStatusCollectManager();
     sptr<RefCountCollect> collect = new RefCountCollect(manager);
     std::list<SaProfile> saProfiles;
     {
@@ -77,8 +76,7 @@ HWTEST_F(RefCountCollectTest, Init001, TestSize.Level1)
  */
 HWTEST_F(RefCountCollectTest, Init003, TestSize.Level1)
 {
-    sptr<DeviceStatusCollectManager> manager =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> manager = new DeviceStatusCollectManager();
     sptr<RefCountCollect> collect = new RefCountCollect(manager);
     std::list<SaProfile> saProfiles;
     SaProfile saProfile;
@@ -98,8 +96,7 @@ HWTEST_F(RefCountCollectTest, Init003, TestSize.Level1)
  */
 HWTEST_F(RefCountCollectTest, OnStart001, TestSize.Level1)
 {
-    sptr<DeviceStatusCollectManager> manager =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> manager = new DeviceStatusCollectManager();
     sptr<RefCountCollect> collect = new RefCountCollect(manager);
     collect->unrefUnloadSaList_.push_back(1);
     auto ret = collect->OnStart();
@@ -116,8 +113,7 @@ HWTEST_F(RefCountCollectTest, OnStart001, TestSize.Level1)
  */
 HWTEST_F(RefCountCollectTest, OnStart003, TestSize.Level1)
 {
-    sptr<DeviceStatusCollectManager> manager =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> manager = new DeviceStatusCollectManager();
     sptr<RefCountCollect> collect = new RefCountCollect(manager);
     collect->unrefUnloadSaList_.clear();
     auto ret = collect->OnStart();
@@ -134,8 +130,7 @@ HWTEST_F(RefCountCollectTest, OnStart003, TestSize.Level1)
  */
 HWTEST_F(RefCountCollectTest, OnStop001, TestSize.Level1)
 {
-    sptr<DeviceStatusCollectManager> manager =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> manager = new DeviceStatusCollectManager();
     sptr<RefCountCollect> collect = new RefCountCollect(manager);
     collect->timer_ = nullptr;
     auto ret = collect->OnStop();
@@ -145,8 +140,7 @@ HWTEST_F(RefCountCollectTest, OnStop001, TestSize.Level1)
 HWTEST_F(RefCountCollectTest, IdentifyUnrefOndemand001, TestSize.Level1)
 {
     DTEST_LOG<<"IdentifyUnrefOndemand001 BEGIN"<<std::endl;
-    sptr<DeviceStatusCollectManager> manager =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceStatusCollectManager> manager = new DeviceStatusCollectManager();
     sptr<RefCountCollect> statuCollect = new RefCountCollect(manager);
     uint32_t timerId = 0;
     statuCollect->timer_ = std::make_unique<Utils::Timer>("refCountCollectTimer");
@@ -161,16 +155,4 @@ HWTEST_F(RefCountCollectTest, IdentifyUnrefOndemand001, TestSize.Level1)
     DTEST_LOG<<"IdentifyUnrefOndemand001 END"<<std::endl;
 }
 
-HWTEST_F(RefCountCollectTest, IdentifyUnrefOndemandNullManager001, TestSize.Level1)
-{
-    DTEST_LOG << "IdentifyUnrefOndemandNullManager001 BEGIN" << std::endl;
-    sptr<DeviceStatusCollectManager> manager =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
-    sptr<RefCountCollect> collect = new RefCountCollect(manager);
-    ASSERT_NE(collect, nullptr);
-    collect->unrefUnloadSaList_.push_back(1);
-    collect->IdentifyUnrefOndemand();
-    EXPECT_EQ(collect->unrefUnloadSaList_.size(), 1u);
-    DTEST_LOG << "IdentifyUnrefOndemandNullManager001 END" << std::endl;
-}
 } // namespace OHOS

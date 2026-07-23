@@ -93,8 +93,7 @@ void SystemAbilityStateSchedulerLowMemTest::TearDown()
 HWTEST_F(SystemAbilityStateSchedulerLowMemTest, InitLowMemProcessList001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     systemAbilityStateScheduler->processContextMap_.clear();
@@ -106,8 +105,7 @@ HWTEST_F(SystemAbilityStateSchedulerLowMemTest, InitLowMemProcessList001, TestSi
 HWTEST_F(SystemAbilityStateSchedulerLowMemTest, InitLowMemProcessList002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     SaProfile lowMemProf{};
     lowMemProf.process = u"test_process";
@@ -138,8 +136,7 @@ HWTEST_F(SystemAbilityStateSchedulerLowMemTest, InitLowMemProcessList002, TestSi
 HWTEST_F(SystemAbilityStateSchedulerLowMemTest, InitLowMemProcessList003, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
     systemAbilityStateScheduler->processContextMap_.clear();
@@ -154,8 +151,7 @@ HWTEST_F(SystemAbilityStateSchedulerLowMemTest, InitLowMemProcessList003, TestSi
 HWTEST_F(SystemAbilityStateSchedulerLowMemTest, IsProcessActivatedLocked001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
 
@@ -170,8 +166,7 @@ HWTEST_F(SystemAbilityStateSchedulerLowMemTest, IsProcessActivatedLocked001, Tes
 HWTEST_F(SystemAbilityStateSchedulerLowMemTest, IsProcessActivatedLocked002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
 
@@ -189,8 +184,7 @@ HWTEST_F(SystemAbilityStateSchedulerLowMemTest, IsProcessActivatedLocked002, Tes
 HWTEST_F(SystemAbilityStateSchedulerLowMemTest, IsProcessActivatedLocked003, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
 
@@ -208,8 +202,7 @@ HWTEST_F(SystemAbilityStateSchedulerLowMemTest, IsProcessActivatedLocked003, Tes
 HWTEST_F(SystemAbilityStateSchedulerLowMemTest, IsProcessIdledLocked001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
 
@@ -225,8 +218,7 @@ HWTEST_F(SystemAbilityStateSchedulerLowMemTest, IsProcessIdledLocked001, TestSiz
 HWTEST_F(SystemAbilityStateSchedulerLowMemTest, IsProcessIdledLocked002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
 
@@ -245,8 +237,7 @@ HWTEST_F(SystemAbilityStateSchedulerLowMemTest, IsProcessIdledLocked002, TestSiz
 HWTEST_F(SystemAbilityStateSchedulerLowMemTest, IsProcessIdledLocked003, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
 
@@ -265,8 +256,7 @@ HWTEST_F(SystemAbilityStateSchedulerLowMemTest, IsProcessIdledLocked003, TestSiz
 HWTEST_F(SystemAbilityStateSchedulerLowMemTest, IsProcessIdledLocked004, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
 
@@ -285,8 +275,7 @@ HWTEST_F(SystemAbilityStateSchedulerLowMemTest, IsProcessIdledLocked004, TestSiz
 HWTEST_F(SystemAbilityStateSchedulerLowMemTest, NotifyProcessActivated001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
 
@@ -305,8 +294,7 @@ HWTEST_F(SystemAbilityStateSchedulerLowMemTest, NotifyProcessActivated001, TestS
 HWTEST_F(SystemAbilityStateSchedulerLowMemTest, NotifyProcessActivated002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
 
@@ -322,8 +310,7 @@ HWTEST_F(SystemAbilityStateSchedulerLowMemTest, NotifyProcessActivated002, TestS
 HWTEST_F(SystemAbilityStateSchedulerLowMemTest, NotifyProcessIdled001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
 
@@ -342,8 +329,7 @@ HWTEST_F(SystemAbilityStateSchedulerLowMemTest, NotifyProcessIdled001, TestSize.
 HWTEST_F(SystemAbilityStateSchedulerLowMemTest, NotifyProcessIdled002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
 
@@ -359,8 +345,7 @@ HWTEST_F(SystemAbilityStateSchedulerLowMemTest, NotifyProcessIdled002, TestSize.
 HWTEST_F(SystemAbilityStateSchedulerLowMemTest, SubscribeLowMemSystemProcess001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
 
@@ -372,8 +357,7 @@ HWTEST_F(SystemAbilityStateSchedulerLowMemTest, SubscribeLowMemSystemProcess001,
 HWTEST_F(SystemAbilityStateSchedulerLowMemTest, SubscribeLowMemSystemProcess002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
 
@@ -392,8 +376,7 @@ HWTEST_F(SystemAbilityStateSchedulerLowMemTest, SubscribeLowMemSystemProcess002,
 HWTEST_F(SystemAbilityStateSchedulerLowMemTest, UnSubscribeLowMemSystemProcess001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
 
@@ -405,8 +388,7 @@ HWTEST_F(SystemAbilityStateSchedulerLowMemTest, UnSubscribeLowMemSystemProcess00
 HWTEST_F(SystemAbilityStateSchedulerLowMemTest, UnSubscribeLowMemSystemProcess002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
 
@@ -427,8 +409,7 @@ HWTEST_F(SystemAbilityStateSchedulerLowMemTest, UnSubscribeLowMemSystemProcess00
 HWTEST_F(SystemAbilityStateSchedulerLowMemTest, SubscribeSystemProcessList001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
 
@@ -441,8 +422,7 @@ HWTEST_F(SystemAbilityStateSchedulerLowMemTest, SubscribeSystemProcessList001, T
 HWTEST_F(SystemAbilityStateSchedulerLowMemTest, SubscribeSystemProcessList002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
 
@@ -461,8 +441,7 @@ HWTEST_F(SystemAbilityStateSchedulerLowMemTest, SubscribeSystemProcessList002, T
 HWTEST_F(SystemAbilityStateSchedulerLowMemTest, SubscribeSystemProcessList003, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
 
@@ -487,8 +466,7 @@ HWTEST_F(SystemAbilityStateSchedulerLowMemTest, SubscribeSystemProcessList003, T
 HWTEST_F(SystemAbilityStateSchedulerLowMemTest, SubscribeSystemProcessList004, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
 
@@ -509,8 +487,7 @@ HWTEST_F(SystemAbilityStateSchedulerLowMemTest, SubscribeSystemProcessList004, T
 HWTEST_F(SystemAbilityStateSchedulerLowMemTest, SubscribeSystemProcessList005, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
 
@@ -533,8 +510,7 @@ HWTEST_F(SystemAbilityStateSchedulerLowMemTest, SubscribeSystemProcessList005, T
 HWTEST_F(SystemAbilityStateSchedulerLowMemTest, SubscribeSystemProcessList006, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
 
@@ -547,8 +523,7 @@ HWTEST_F(SystemAbilityStateSchedulerLowMemTest, SubscribeSystemProcessList006, T
 HWTEST_F(SystemAbilityStateSchedulerLowMemTest, UnSubscribeSystemProcessList001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
 
@@ -561,8 +536,7 @@ HWTEST_F(SystemAbilityStateSchedulerLowMemTest, UnSubscribeSystemProcessList001,
 HWTEST_F(SystemAbilityStateSchedulerLowMemTest, UnSubscribeSystemProcessList002, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
 
@@ -583,8 +557,7 @@ HWTEST_F(SystemAbilityStateSchedulerLowMemTest, UnSubscribeSystemProcessList002,
 HWTEST_F(SystemAbilityStateSchedulerLowMemTest, UnSubscribeSystemProcessList003, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
 
@@ -611,8 +584,7 @@ HWTEST_F(SystemAbilityStateSchedulerLowMemTest, UnSubscribeSystemProcessList003,
 HWTEST_F(SystemAbilityStateSchedulerLowMemTest, UnSubscribeSystemProcessList004, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
 
@@ -625,8 +597,7 @@ HWTEST_F(SystemAbilityStateSchedulerLowMemTest, UnSubscribeSystemProcessList004,
 HWTEST_F(SystemAbilityStateSchedulerLowMemTest, UnSubscribeSystemProcessList005, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
 
@@ -646,8 +617,7 @@ HWTEST_F(SystemAbilityStateSchedulerLowMemTest, UnSubscribeSystemProcessList005,
 HWTEST_F(SystemAbilityStateSchedulerLowMemTest, OnAbilityLoadedLockedWithActivation001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
 
@@ -675,8 +645,7 @@ HWTEST_F(SystemAbilityStateSchedulerLowMemTest, OnAbilityLoadedLockedWithActivat
 HWTEST_F(SystemAbilityStateSchedulerLowMemTest, OnAbilityUnloadableLockedWithIdled001, TestSize.Level3)
 {
     std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+        std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     systemAbilityStateScheduler->Init(saProfiles);
 

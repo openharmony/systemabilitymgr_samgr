@@ -79,10 +79,7 @@ void SystemAbilityMgrStubTest::SetUpTestCase()
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     EXPECT_TRUE(saMgr != nullptr);
-    saMgr->selfPtr_ = std::shared_ptr<BaseSystemAbilityManager>(
-        saMgr.GetRefPtr(), [](BaseSystemAbilityManager*) {});
-    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>(
-        saMgr->weak_from_this());
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
     std::list<SaProfile> saProfiles;
     saMgr->abilityStateScheduler_->Init(saProfiles);
     DTEST_LOG << "SetUpTestCase" << std::endl;
@@ -864,8 +861,7 @@ HWTEST_F(SystemAbilityMgrStubTest, AddSystemAbilityInner004, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrStubTest, AddSystemAbilityInner005, TestSize.Level1)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>();
     sptr<IRemoteObject> testAbility(new SaStatusChangeMock());
     EXPECT_TRUE(saMgr != nullptr);
     SystemAbilityManager::SAExtraProp extraProp;
