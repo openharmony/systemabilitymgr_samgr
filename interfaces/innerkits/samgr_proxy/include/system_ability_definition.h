@@ -343,6 +343,7 @@ enum {
     FUSION_RANGING_SYS_ABILITY_ID                    = 8631,
     DISK_MANAGER_SA_ID                               = 8640,
     STORAGE_SPACE_MANAGER_SA_ID                      = 8650,
+    ASSESSMENT_SERVICE_ID                            = 8660,
     // reserved for vendor
     VENDOR_SYS_ABILITY_ID_BEGIN                      = 0x00010000,  // 65536
     VENDOR_SYS_ABILITY_ID_END                        = 0x00020000,  // 131072
