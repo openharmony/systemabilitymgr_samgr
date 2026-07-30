@@ -65,6 +65,7 @@ constexpr const char* PENGLAI_PATH = "profile/penglai";
 constexpr const char* LOGGER_TRANSPROC_PATH = "/proc/transaction_proc";
 constexpr const char* SET_PRIOR_PARAM = "const.samgr.setprior.support";
 constexpr const char* SAMGR_CACHE_KEY = "samgr.cache.sa";
+constexpr const char* CONST_LOCK_PRIORITY_INHERIT = "const.samgr.lock.priority.inherit.enable";
 #ifdef SUPPORT_DEVICE_MANAGER
 constexpr const char* PKG_NAME = "Samgr_Networking";
 #endif
@@ -510,4 +511,11 @@ bool SamgrUtil::KillProcessByPid(int32_t pid, int32_t tid)
         (ret != 0) ? "failed" : "success", peerBinderPid, processName.c_str());
     return (ret == 0);
 }
+
+bool SamgrUtil::CheckLockPriorityInheritEnable()
+{
+    static bool enable = system::GetBoolParameter(CONST_LOCK_PRIORITY_INHERIT, false);
+    return enable;
+}
+
 }
