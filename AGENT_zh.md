@@ -24,13 +24,15 @@ utils/native/              # tools.h, test_log.h
 etc/                       # samgr.para, samgr_standard.cfg
 ```
 
-| 构建目标 | 类型 | 产物 |
-|---|---|---|
-| `services/samgr/native:samgr` | 可执行文件 | `/system/bin/samgr` |
-| `interfaces/innerkits/samgr_proxy:samgr_proxy` | 共享库 | 其他子系统依赖的SDK |
-| `interfaces/innerkits/common:samgr_common` | 共享库 | Profile解析、错误码 |
-| `interfaces/innerkits/dynamic_cache:dynamic_cache` | 共享库 | SA查询缓存 |
-| `interfaces/innerkits/rust:samgr_rust` | Rust crate | Rust绑定 |
+> 若子目录包含自己的 `AGENTS.md`，则该目录范围内的任务以子目录文档为准。
+
+| 构建目标　　　　　　　　　　　　　　　　　　　　　 | 类型　　　 | 产物　　　　　　　　|
+| ----------------------------------------------------| ------------| ---------------------|
+| `services/samgr/native:samgr`　　　　　　　　　　　| 可执行文件 | `/system/bin/samgr` |
+| `interfaces/innerkits/samgr_proxy:samgr_proxy`　　 | 共享库　　 | 其他子系统依赖的SDK |
+| `interfaces/innerkits/common:samgr_common`　　　　 | 共享库　　 | Profile解析、错误码 |
+| `interfaces/innerkits/dynamic_cache:dynamic_cache` | 共享库　　 | SA查询缓存　　　　　|
+| `interfaces/innerkits/rust:samgr_rust`　　　　　　 | Rust crate | Rust绑定　　　　　　|
 
 ## 知识路由
 
@@ -50,6 +52,18 @@ etc/                       # samgr.para, samgr_standard.cfg
 
 **关键术语**: `said`（SA ID，范围0x1–0x00ffffff）、ondemand（按需加载/卸载）、LSA（进程内LocalAbilityManager）、BootPhase（启动优先级: BootStart > CoreStart > OtherStart）、dbinder（跨设备RPC）。
 
+**按任务类型定位**:
+
+| 任务 | 起点 |
+|---|---|
+| 新增/注册SA | `system_ability_definition.h` → `if_system_ability_manager.h` |
+| 修复IPC分发bug | `samgr_ipc_interface_code.h` → `system_ability_manager_stub.cpp` |
+| 新增按需事件采集器 | `collect/icollect_plugin.h` → `collect/device_status_collect_manager.cpp` |
+| 修改状态机逻辑 | `schedule/system_ability_state_machine.cpp` → `schedule/system_ability_state_scheduler.cpp` |
+| 新增HiSysEvent | `hisysevent.yaml` → `services/dfx/include/hisysevent_adapter.h` |
+
+**编辑任何文件前，先声明**: (1) 任务类别、(2) 已读文档、(3) 适用约束。
+
 ## 专家约束
 
 1. **SA ID三处同步**: 新增SA ID必须同时更新 `system_ability_definition.h`、`hidumper/dump_utils.cpp`、`rust/cxx/definition.rs`。
@@ -62,6 +76,9 @@ etc/                       # samgr.para, samgr_standard.cfg
 8. **safwk ↔ samgr 双向依赖**（设计如此）: samgr → safwk `system_ability_ondemand_reason`；safwk → samgr `samgr_proxy` + `samgr_common`。通过静态库/动态库分层解耦。
 9. **samgr禁止include业务SA头文件** — 只通过 `IRemoteObject` + said 交互。
 10. **所有写状态的 OnRemoteRequest 路径必须做 AccessToken 校验**。
+11. **IPC接口码稳定性（修改前需确认）**: 禁止新增、删除或重排 `SamgrInterfaceCode` 枚举中的已有项。新码只能追加到枚举末尾。重排会静默破坏全系统跨进程IPC。
+12. **生成文件**: Rust绑定(`interfaces/innerkits/rust/src/cxx/`)、hidumper saNameMap_(`base/hiviewdfx/hidumper/`)、`hisysevent.yaml`生成配置均为派生产物 — 编辑源文件，禁止直接修改生成输出。
+13. **DFX必填**: 新增SA加载/卸载/错误路径必须调用HiSysEvent适配器(`services/dfx/include/hisysevent_adapter.h`)。新增阻塞型IPC或调度操作必须用 `SamgrXCollie`(`samgr_xcollie.h`，默认60秒)包裹。事件名/参数必须与 `hisysevent.yaml` schema一致。
 
 **反模式**: 硬编码SA ID而非用枚举 · `GetSystemAbility`返回值不判空 · 新增Collector不在`DeviceStatusCollectManager`注册 · 不加锁直接操作`abilityMap_`。
 
@@ -90,4 +107,20 @@ etc/                       # samgr.para, samgr_standard.cfg
 
 **特性开关** (`config.gni`): `samgr_enable_delay_dbinder`(T)、`samgr_enable_extend_load_timeout`(F)、`samgr_support_multi_instance`(F)。
 
-**设备调试**: `hidumper -s 0 -a "-l"`（列出所有SA）· `hilog | grep -i samgr` · `param get | grep samgr`。
+**设备调试**（均通过 `hidumper -s 0 -a "<参数>"`，SA ID 0 = samgr）:
+```bash
+hidumper -s 0 -a "-l"                          # 列出所有SA状态
+hidumper -s 0 -a "-sa <said>"                  # 查询指定SA状态
+hidumper -s 0 -a "-sm <ACTIVE|IDLE|NOT_LOADED>" # 按状态筛选SA
+hidumper -s 0 -a "-p <进程名>"                  # 查询进程状态
+hidumper -s 0 -a "--listener -l -sa"           # 所有SA监听关系
+hidumper -s 0 -a "--listener -sa <said>"       # 谁在监听此SA
+hidumper -s 0 -a "--ipc <进程名|all> --start-stat"  # 启动IPC统计（后接 --stat / --stop-stat）
+hidumper -s 0 -a "--ffrt <pid1|pid2> --start-stat"  # 启动FFRT统计（后接 --stat / --stop-stat）
+hilog -T SAMGR                                 # hilog标签: SAMGR，domain: 0xD001800
+param get bootevent.samgr.ready                # "true" = samgr初始化完成
+```
+
+**静态分析**: CFI(`cfi=true`、`cfi_cross_dso=true`)和PAC(`branch_protector_ret="pac_ret"`)在每个BUILD.gn的 `sanitize` 块中强制开启。编译出现CFI链接错误时，仅限有充分理由时添加到 `cfi_blocklist.txt`。ASAN调试构建: `./build.sh --product-name {product} --gn-args is_asan=true --build-target samgr`。
+
+**完成标准**: 报告完成前: (1) 展示编译退出码0、(2) 展示至少受影响的 `SystemAbilityMgr*` 测试套通过、(3) 若修改了DFX路径，验证HiSysEvent适配器调用与 `hisysevent.yaml` schema一致、(4) 若无法运行验证，明确说明已验证和未验证项并列出残留风险。
