@@ -31,9 +31,14 @@ namespace OHOS {
 // Mock the system::GetParameter function
 namespace system {
     std::string mockValue;
+    bool g_mockBoolValue = false;
     std::string GetParameter(const std::string& key, const std::string& defaultValue)
     {
         return mockValue;
+    }
+    bool GetBoolParameter(const std::string& key, bool defaultValue)
+    {
+        return g_mockBoolValue;
     }
 }
 const std::u16string PROCESS_NAME = u"test_process_name";
@@ -89,6 +94,7 @@ void SamgrUtilTest::SetUp()
 {
     SamMockPermission::MockPermission();
     system::mockValue = "";
+    system::g_mockBoolValue = false;
     mockDirFiles.clear();
     g_mockCfgFiles = nullptr;
     DTEST_LOG << "SetUp" << std::endl;
@@ -592,5 +598,39 @@ HWTEST_F(SamgrUtilTest, KillProcessByPid001, TestSize.Level3)
     bool ret = SamgrUtil::KillProcessByPid(pid, tid);
     EXPECT_EQ(ret, false);
     DTEST_LOG << "KillProcessByPid001 end" << std::endl;
+}
+
+/**
+ * @tc.name: RegisterSAListener001
+ * @tc.desc: test RegisterSAListener, SET_PRIOR_PARAM is false, skip SubscribeSystemAbility
+ * @tc.type: FUNC
+ */
+HWTEST_F(SamgrUtilTest, RegisterSAListener001, TestSize.Level3)
+{
+    DTEST_LOG << " RegisterSAListener001 " << std::endl;
+    system::g_mockBoolValue = false;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    ASSERT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
+    saMgr->listenerMap_.clear();
+    SamgrUtil::RegisterSAListener();
+    EXPECT_FALSE(SamgrUtil::CheckSupportSetPrior());
+}
+
+/**
+ * @tc.name: RegisterSAListener002
+ * @tc.desc: test RegisterSAListener, SET_PRIOR_PARAM is true, SubscribeSystemAbility is called
+ * @tc.type: FUNC
+ */
+HWTEST_F(SamgrUtilTest, RegisterSAListener002, TestSize.Level3)
+{
+    DTEST_LOG << " RegisterSAListener002 " << std::endl;
+    system::g_mockBoolValue = true;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    ASSERT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
+    saMgr->listenerMap_.clear();
+    SamgrUtil::RegisterSAListener();
+    EXPECT_TRUE(SamgrUtil::CheckSupportSetPrior());
 }
 }
