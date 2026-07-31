@@ -564,7 +564,7 @@ void SystemAbilityManagerDumper::DumpFfrtInfoInProc(
 {
     sptr<ILocalAbilityManager> obj = GetProcByProcessId(abilityStateScheduler, pid);
     if (obj == nullptr) {
-        HILOGE("DumpFfrtInfoInProc GetSystemProcess failed");
+        HILOGD("DumpFfrtInfoInProc GetSystemProcess failed");
         result.append("process " + std::to_string(pid) + " not found!\n");
         return;
     }
