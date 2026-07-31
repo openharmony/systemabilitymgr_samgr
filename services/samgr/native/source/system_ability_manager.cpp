@@ -231,7 +231,7 @@ int32_t SystemAbilityManager::Dump(int32_t fd, const std::vector<std::u16string>
     if ((argsWithStr8.size() > 0) && (argsWithStr8[FIRST_DUMP_INDEX] == ARGS_LISTENER_PARAM)) {
         std::map<int32_t, std::list<SAListener>> dumpListeners;
         {
-            lock_guard<samgr::mutex> autoLock(listenerMapLock_);
+            lock_guard<PiMutex::PiMutex<std::mutex>> autoLock(listenerMapLock_);
             dumpListeners = listenerMap_;
         }
         return SystemAbilityManagerDumper::ListenerDumpProc(dumpListeners, fd, argsWithStr8);
