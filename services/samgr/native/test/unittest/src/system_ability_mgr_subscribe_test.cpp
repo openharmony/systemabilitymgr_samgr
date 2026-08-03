@@ -544,4 +544,25 @@ HWTEST_F(SystemAbilityMgrSubscribeTest, SendRequestInner003, TestSize.Level3)
     g_enableMock = false;
 }
 
+/**
+ * @tc.name: UnSubscribeSystemProcess004
+ * @tc.desc: test UnSubscribeSystemProcess with nullptr listener
+ * @tc.type: FUNC
+ * @tc.require: I6NKWX
+ */
+HWTEST_F(SystemAbilityMgrSubscribeTest, UnSubscribeSystemProcess004, TestSize.Level3)
+{
+    DTEST_LOG << " UnSubscribeSystemProcess004" << std::endl;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
+    saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>(
+        std::weak_ptr<BaseSystemAbilityManager>{});
+
+    // Test nullptr listener case (simulate death callback with failed weak_ptr promotion)
+    sptr<ISystemProcessStatusChange> nullListener = nullptr;
+    int32_t ret = saMgr->UnSubscribeSystemProcess(nullListener);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+}
+
 } // namespace OHOS
