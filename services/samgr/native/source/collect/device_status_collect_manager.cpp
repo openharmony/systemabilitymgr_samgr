@@ -29,7 +29,6 @@
 #endif
 #include "device_param_collect.h"
 #include "ref_count_collect.h"
-#include "memory_guard.h"
 #include "sam_log.h"
 #include "system_ability_manager.h"
 

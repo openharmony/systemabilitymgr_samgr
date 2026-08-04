@@ -24,7 +24,6 @@
 #include "hitrace_meter.h"
 #include "ipc_skeleton.h"
 #include "ipc_types.h"
-#include "memory_guard.h"
 #include "sam_log.h"
 #include "string_ex.h"
 #include "hisysevent_adapter.h"
@@ -269,7 +268,6 @@ int32_t SystemAbilityManagerStub::OnRemoteRequest(uint32_t code,
 {
     HILOGD("SAMStub::OnReceived, code = %{public}u, callerPid = %{public}d",
         code, IPCSkeleton::GetCallingPid());
-    Samgr::MemoryGuard cacheGuard;
     if (!EnforceInterceToken(data)) {
         HILOGE("SAMStub::OnReceived, code = %{public}u, check interfaceToken failed", code);
         return ERR_PERMISSION_DENIED;

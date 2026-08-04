@@ -31,7 +31,6 @@
 #include "if_local_ability_manager.h"
 #include "ipc_skeleton.h"
 #include "local_ability_manager_proxy.h"
-#include "memory_guard.h"
 #include "parse_util.h"
 #include "parameter.h"
 #include "parameters.h"

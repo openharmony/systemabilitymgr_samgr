@@ -26,7 +26,6 @@
 #include "hisysevent_adapter.h"
 #include "hitrace_meter.h"
 #include "ipc_skeleton.h"
-#include "memory_guard.h"
 #include "parameter.h"
 #include "parameters.h"
 #include "sam_log.h"
@@ -497,7 +496,6 @@ int32_t SystemAbilityManager::LoadSystemAbility(int32_t systemAbilityId, const s
 void SystemAbilityManager::DoLoadRemoteSystemAbility(int32_t systemAbilityId, int32_t callingPid,
     int32_t callingUid, const std::string& deviceId, const sptr<ISystemAbilityLoadCallback>& callback)
 {
-    Samgr::MemoryGuard cacheGuard;
     pthread_setname_np(pthread_self(), ONDEMAND_WORKER);
     sptr<DBinderServiceStub> remoteBinder = DoMakeRemoteBinder(systemAbilityId, callingPid, callingUid, deviceId);
 
