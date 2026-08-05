@@ -231,17 +231,16 @@ bool DeviceStatusCollectManager::CheckExtraMessages(const OnDemandEvent& ev1, co
 
 void DeviceStatusCollectManager::UnInit()
 {
+    if (collectHandler_ != nullptr) {
+        collectHandler_->CleanFfrt();
+        collectHandler_ = nullptr;
+    }
     for (auto& iter : collectPluginMap_) {
         if (iter.second != nullptr) {
             iter.second->OnStop();
         }
     }
     collectPluginMap_.clear();
-
-    if (collectHandler_ != nullptr) {
-        collectHandler_->CleanFfrt();
-        collectHandler_ = nullptr;
-    }
 }
 
 void DeviceStatusCollectManager::CleanFfrt()

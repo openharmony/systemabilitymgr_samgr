@@ -37,7 +37,7 @@ void RefCountCollect::Init(const std::list<SaProfile>& saProfiles)
 int32_t RefCountCollect::OnStart()
 {
     uint32_t timerId = 0;
-    timer_ = std::make_unique<Utils::Timer>("RefCountCollectTimer", -1);
+    timer_ = std::make_unique<Utils::Timer>("RefCountCollectTimer");
     timer_->Setup();
 
     if (!unrefUnloadSaList_.empty()) {
@@ -54,7 +54,8 @@ int32_t RefCountCollect::OnStop()
 {
     if (timer_ != nullptr) {
         HILOGI("RefCountCollect stop timer");
-        timer_->Shutdown(false);
+        timer_->Shutdown(true);
+        timer_.reset();
     }
     return ERR_OK;
 }
