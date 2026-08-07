@@ -100,6 +100,7 @@ ohos_unittest("SystemAbilityMgrTest") {
   deps = [
     ":samgr_proxy_tdd",
     "${samgr_dir}/interfaces/innerkits/common:samgr_common",
+    "${samgr_dir}/interfaces/innerkits/dynamic_cache:dynamic_cache",
   ]
 
   external_deps = [
@@ -117,7 +118,6 @@ ohos_unittest("SystemAbilityMgrTest") {
     "ipc:libdbinder",
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
-    "samgr:dynamic_cache",
     "qos_manager:qos",
     "qos_manager:concurrent_task_client",
   ]
@@ -231,6 +231,7 @@ ohos_unittest("SystemAbilityMgrCollectTest") {
   deps = [
     ":samgr_proxy_tdd",
     "${samgr_dir}/interfaces/innerkits/common:samgr_common",
+    "${samgr_dir}/interfaces/innerkits/dynamic_cache:dynamic_cache",
   ]
 
   external_deps = [
@@ -248,7 +249,6 @@ ohos_unittest("SystemAbilityMgrCollectTest") {
     "ipc:libdbinder",
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
-    "samgr:dynamic_cache",
     "qos_manager:qos",
     "qos_manager:concurrent_task_client",
   ]
@@ -478,6 +478,7 @@ ohos_unittest("SystemAbilityMgrDeviceNetworkingTest") {
   deps = [
     ":samgr_proxy_tdd",
     "${samgr_dir}/interfaces/innerkits/common:samgr_common",
+    "${samgr_dir}/interfaces/innerkits/dynamic_cache:dynamic_cache",
   ]
 
   external_deps = [
@@ -496,7 +497,6 @@ ohos_unittest("SystemAbilityMgrDeviceNetworkingTest") {
     "ipc:libdbinder",
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
-    "samgr:dynamic_cache",
     "qos_manager:qos",
     "qos_manager:concurrent_task_client",
   ]
@@ -592,6 +592,7 @@ ohos_unittest("SystemAbilityMgrStubTest") {
   deps = [
     ":samgr_proxy_tdd",
     "${samgr_dir}/interfaces/innerkits/common:samgr_common",
+    "${samgr_dir}/interfaces/innerkits/dynamic_cache:dynamic_cache",
   ]
 
   external_deps = [
@@ -609,7 +610,6 @@ ohos_unittest("SystemAbilityMgrStubTest") {
     "ipc:libdbinder",
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
-    "samgr:dynamic_cache",
     "qos_manager:qos",
     "qos_manager:concurrent_task_client",
   ]
@@ -810,6 +810,7 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
   deps = [
     ":samgr_proxy_tdd",
     "${samgr_dir}/interfaces/innerkits/common:samgr_common",
+    "${samgr_dir}/interfaces/innerkits/dynamic_cache:dynamic_cache",
   ]
 
   external_deps = [
@@ -828,7 +829,6 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
     "ipc:libdbinder",
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
-    "samgr:dynamic_cache",
     "qos_manager:qos",
     "qos_manager:concurrent_task_client",
   ]
@@ -901,7 +901,10 @@ ohos_unittest("SystemAbilityMgrDumperTest") {
     cflags = [ "-DBINDER_IPC_32BIT" ]
   }
 
-  deps = [ ":samgr_proxy_tdd" ]
+  deps = [
+    ":samgr_proxy_tdd",
+    "${samgr_dir}/interfaces/innerkits/dynamic_cache:dynamic_cache",
+  ]
 
   external_deps = [
     "access_token:libaccesstoken_sdk",
@@ -919,7 +922,6 @@ ohos_unittest("SystemAbilityMgrDumperTest") {
     "ipc:libdbinder",
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
-    "samgr:dynamic_cache",
     "qos_manager:qos",
     "qos_manager:concurrent_task_client",
   ]
@@ -967,7 +969,10 @@ ohos_unittest("MockSystemAbilityManagerTest") {
     cflags = [ "-DBINDER_IPC_32BIT" ]
   }
 
-  deps = [ ":samgr_proxy_tdd" ]
+  deps = [
+    ":samgr_proxy_tdd",
+    "${samgr_dir}/interfaces/innerkits/dynamic_cache:dynamic_cache",
+  ]
 
   external_deps = [
     "access_token:libaccesstoken_sdk",
@@ -984,7 +989,6 @@ ohos_unittest("MockSystemAbilityManagerTest") {
     "ipc:libdbinder",
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
-    "samgr:dynamic_cache",
   ]
   defines = []
   if (samgr_support_access_token) {
@@ -1196,6 +1200,7 @@ ohos_executable("TestTool") {
   deps = [
     ":samgr_proxy_tdd",
     "${samgr_dir}/interfaces/innerkits/common:samgr_common",
+    "${samgr_dir}/interfaces/innerkits/dynamic_cache:dynamic_cache",
   ]
   external_deps = [ "hilog:libhilog" ]
 
@@ -1247,7 +1252,6 @@ ohos_executable("TestTool") {
     "ipc:libdbinder",
     "json:nlohmann_json_static",
     "safwk:system_ability_fwk",
-    "samgr:dynamic_cache",
     "qos_manager:qos",
     "qos_manager:concurrent_task_client",
   ]
