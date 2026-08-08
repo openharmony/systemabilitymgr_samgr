@@ -42,6 +42,7 @@ ohos_shared_library("samgr_common") {
     blocklist = "../../../cfi_blocklist.txt"
   }
   branch_protector_ret = "pac_ret"
+  branch_protector_frt = "bti"
 
   sources = [
     "//foundation/systemabilitymgr/samgr/services/common/src/parse_util.cpp",
