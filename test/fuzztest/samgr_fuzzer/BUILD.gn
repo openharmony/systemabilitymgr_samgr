@@ -169,7 +169,11 @@ foreach(item, samgr_fuzztests) {
       "src/fuzztest_utils.cpp",
       item.source,
     ]
-    deps = [ "//foundation/systemabilitymgr/samgr/interfaces/innerkits/dynamic_cache:dynamic_cache" ]
+    deps = [
+      "${samgr_dir}/interfaces/innerkits/common:samgr_common",
+      "${samgr_dir}/interfaces/innerkits/dynamic_cache:dynamic_cache",
+      "${samgr_dir}/interfaces/innerkits/samgr_proxy:samgr_proxy",
+    ]
 
     external_deps = [
       "access_token:libaccesstoken_sdk",
@@ -185,8 +189,6 @@ foreach(item, samgr_fuzztests) {
       "ipc:libdbinder",
       "json:nlohmann_json_static",
       "safwk:system_ability_fwk",
-      "samgr:samgr_common",
-      "samgr:samgr_proxy",
       "qos_manager:qos",
       "qos_manager:concurrent_task_client",
     ]
