@@ -127,7 +127,7 @@ int32_t SystemAbilityStateMachine::ProcessStateTransitionLocked(const std::share
         return TRANSIT_PROC_STATE_FAIL;
     }
     context->state = nextState;
-    HILOGI("Scheduler proc:%{public}s state %{public}d to %{public}d",
+    HILOGD("Scheduler proc:%{public}s state %{public}d to %{public}d",
         Str16ToStr8(context->processName).c_str(), currentState, nextState);
     handler->OnEnter(context);
     return ERR_OK;

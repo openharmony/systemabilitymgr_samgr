@@ -1106,7 +1106,7 @@ void SystemAbilityStateScheduler::NotifyProcessActivated(const std::shared_ptr<S
             listener->OnSystemProcessActivated(systemProcessInfo);
         }
     }
-    HILOGI("process %{public}s is active", Str16ToStr8(processContext->processName).c_str());
+    HILOGD("process %{public}s is active", Str16ToStr8(processContext->processName).c_str());
 }
 
 void SystemAbilityStateScheduler::NotifyProcessIdled(const std::shared_ptr<SystemProcessContext>& processContext)
@@ -1120,7 +1120,7 @@ void SystemAbilityStateScheduler::NotifyProcessIdled(const std::shared_ptr<Syste
             listener->OnSystemProcessIdled(systemProcessInfo);
         }
     }
-    HILOGI("process %{public}s is idle", Str16ToStr8(processContext->processName).c_str());
+    HILOGD("process %{public}s is idle", Str16ToStr8(processContext->processName).c_str());
 }
 
 void SystemAbilityStateScheduler::OnProcessStartedLocked(const std::u16string& processName)

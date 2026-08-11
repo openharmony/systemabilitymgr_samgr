@@ -336,7 +336,7 @@ int32_t BaseSystemAbilityManager::StartOnDemandAbilityInner(const std::u16string
     sptr<ILocalAbilityManager> procObject =
         iface_cast<ILocalAbilityManager>(GetSystemProcess(procName));
     if (procObject == nullptr) {
-        HILOGI("get process:%{public}s fail", Str16ToStr8(procName).c_str());
+        HILOGD("get process:%{public}s fail", Str16ToStr8(procName).c_str());
         return ERR_INVALID_VALUE;
     }
     auto event = abilityItem.event;
@@ -353,7 +353,7 @@ bool BaseSystemAbilityManager::StopOnDemandAbilityInner(const std::u16string& pr
     sptr<ILocalAbilityManager> procObject =
         iface_cast<ILocalAbilityManager>(GetSystemProcess(procName));
     if (procObject == nullptr) {
-        HILOGI("get process:%{public}s fail", Str16ToStr8(procName).c_str());
+        HILOGD("get process:%{public}s fail", Str16ToStr8(procName).c_str());
         return false;
     }
     auto eventStr = SamgrUtil::EventToStr(event);
@@ -675,7 +675,7 @@ void BaseSystemAbilityManager::UnSubscribeSystemAbilityLocked(
         }
     }
     listenerList.erase(item);
-    HILOGI("rm SAListener %{public}d,%{public}zu", callpid, listenerList.size());
+    HILOGD("rm SAListener %{public}d,%{public}zu", callpid, listenerList.size());
 }
 
 int32_t BaseSystemAbilityManager::UnSubscribeSystemAbility(int32_t systemAbilityId,
@@ -965,7 +965,7 @@ void BaseSystemAbilityManager::SendSystemAbilityAddedMsg(int32_t systemAbilityId
     auto notifyAddedTask = [systemAbilityId, remoteObject, this]() {
         FindSystemAbilityNotify(systemAbilityId,
             static_cast<uint32_t>(SamgrInterfaceCode::ADD_SYSTEM_ABILITY_TRANSACTION));
-        HILOGI("SendSaAddedMsg notify SA:%{public}d", systemAbilityId);
+        HILOGD("SendSaAddedMsg notify SA:%{public}d", systemAbilityId);
         NotifySystemAbilityLoaded(systemAbilityId, remoteObject);
     };
     bool ret = workHandler_->PostTask(notifyAddedTask);
@@ -1009,7 +1009,7 @@ void BaseSystemAbilityManager::SendCheckLoadedMsg(int32_t systemAbilityId, const
             HILOGI("SendCheckLoadedMsg SA:%{public}d loaded", systemAbilityId);
             return;
         }
-        HILOGI("SendCheckLoadedMsg handle for SA:%{public}d", systemAbilityId);
+        HILOGD("SendCheckLoadedMsg handle for SA:%{public}d", systemAbilityId);
         CleanCallbackForLoadFailed(systemAbilityId, name, srcDeviceId, callback);
         if (abilityStateScheduler_ == nullptr) {
             HILOGE("abilityStateScheduler is nullptr");
@@ -1067,12 +1067,12 @@ void BaseSystemAbilityManager::CleanCallbackForLoadFailed(int32_t systemAbilityI
         }
     }
     if (abilityItem.callbackMap[srcDeviceId].empty()) {
-        HILOGI("CleanCallback startingAbilityMap remove SA:%{public}d. with deviceId", systemAbilityId);
+        HILOGD("CleanCallback startingAbilityMap remove SA:%{public}d. with deviceId", systemAbilityId);
         abilityItem.callbackMap.erase(srcDeviceId);
     }
 
     if (abilityItem.callbackMap.empty()) {
-        HILOGI("CleanCallback startingAbilityMap remove SA:%{public}d.", systemAbilityId);
+        HILOGD("CleanCallback startingAbilityMap remove SA:%{public}d.", systemAbilityId);
         startingAbilityMap_.erase(iter);
     }
 }
@@ -1095,7 +1095,7 @@ void BaseSystemAbilityManager::SendLoadedSystemAbilityMsg(int32_t systemAbilityI
         return;
     }
     auto notifyLoadedTask = [systemAbilityId, remoteObject, callback, this]() {
-        HILOGI("SendLoadedSaMsg notify SA:%{public}d", systemAbilityId);
+        HILOGD("SendLoadedSaMsg notify SA:%{public}d", systemAbilityId);
         NotifySystemAbilityLoaded(systemAbilityId, remoteObject, callback);
     };
     bool ret = workHandler_->PostTask(notifyLoadedTask);
@@ -1506,7 +1506,7 @@ bool BaseSystemAbilityManager::IdleSystemAbility(int32_t systemAbilityId, const 
     sptr<ILocalAbilityManager> procObject =
         iface_cast<ILocalAbilityManager>(GetSystemProcess(procName));
     if (procObject == nullptr) {
-        HILOGE("get process:%{public}s fail", Str16ToStr8(procName).c_str());
+        HILOGD("get process:%{public}s fail", Str16ToStr8(procName).c_str());
         return false;
     }
     HILOGI("IdleSA:%{public}d", systemAbilityId);
@@ -1530,7 +1530,7 @@ bool BaseSystemAbilityManager::ActiveSystemAbility(int32_t systemAbilityId, cons
     sptr<ILocalAbilityManager> procObject =
         iface_cast<ILocalAbilityManager>(GetSystemProcess(procName));
     if (procObject == nullptr) {
-        HILOGE("get process:%{public}s fail", Str16ToStr8(procName).c_str());
+        HILOGD("get process:%{public}s fail", Str16ToStr8(procName).c_str());
         return false;
     }
     HILOGI("ActiveSA:%{public}d", systemAbilityId);
@@ -1592,7 +1592,7 @@ void BaseSystemAbilityManager::RemoveStartingAbilityCallback(CallbackList& callb
 
 void BaseSystemAbilityManager::OnAbilityCallbackDied(const sptr<IRemoteObject>& remoteObject)
 {
-    HILOGI("OnAbilityCallbackDied received remoteObject died message!");
+    HILOGD("OnAbilityCallbackDied received remoteObject died message!");
     if (remoteObject == nullptr) {
         return;
     }
@@ -1693,7 +1693,7 @@ int32_t BaseSystemAbilityManager::SendStrategy(int32_t type, std::vector<int32_t
         sptr<ILocalAbilityManager> procObject =
             iface_cast<ILocalAbilityManager>(GetSystemProcess(procName));
         if (procObject == nullptr) {
-            HILOGW("get process:%{public}s fail", Str16ToStr8(procName).c_str());
+            HILOGD("get process:%{public}s fail", Str16ToStr8(procName).c_str());
             return ERR_INVALID_VALUE;
         }
         procObject->SendStrategyToSA(type, saId, level, action);
