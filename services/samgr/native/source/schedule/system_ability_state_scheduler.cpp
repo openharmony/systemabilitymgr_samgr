@@ -226,8 +226,14 @@ void SystemAbilityStateScheduler::UpdateLimitDelayUnloadTime(int32_t systemAbili
         HILOGE("UpdateLimitDelayUnloadTime process handler not init");
         return;
     }
-    auto UpdateDelayUnloadTimeTask = [systemAbilityId, this]() {
-        UpdateLimitDelayUnloadTimeTask(systemAbilityId);
+    auto weak = weak_from_this();
+    auto UpdateDelayUnloadTimeTask = [weak, systemAbilityId]() {
+        auto strong = weak.lock();
+        if (!strong) {
+            HILOGW("SystemAbilityStateScheduler is null");
+            return;
+        }
+        strong->UpdateLimitDelayUnloadTimeTask(systemAbilityId);
     };
     bool ret = processHandler_->PostTask(UpdateDelayUnloadTimeTask);
     if (!ret) {
@@ -1232,13 +1238,19 @@ void SystemAbilityStateScheduler::OnAbilityNotLoadedLocked(int32_t systemAbility
 void SystemAbilityStateScheduler::OnAbilityLoadedLocked(int32_t systemAbilityId)
 {
     HILOGI("Scheduler SA:%{public}d loaded", systemAbilityId);
-    auto pendingUnloadTask = [systemAbilityId, this]() {
+    auto weak = weak_from_this();
+    auto pendingUnloadTask = [weak, systemAbilityId]() {
+        auto strong = weak.lock();
+        if (!strong) {
+            HILOGW("SystemAbilityStateScheduler is null");
+            return;
+        }
         std::shared_ptr<SystemAbilityContext> abilityContext;
-        if (!GetSystemAbilityContext(systemAbilityId, abilityContext)) {
+        if (!strong->GetSystemAbilityContext(systemAbilityId, abilityContext)) {
             return;
         }
         std::lock_guard<samgr::mutex> autoLock(abilityContext->ownProcessContext->processLock);
-        HandlePendingUnloadEventLocked(abilityContext);
+        strong->HandlePendingUnloadEventLocked(abilityContext);
     };
     if (processHandler_ != nullptr) {
         processHandler_->PostTask(pendingUnloadTask);
