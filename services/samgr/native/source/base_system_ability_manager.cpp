@@ -289,7 +289,7 @@ void BaseSystemAbilityManager::NotifySystemAbilityChanged(int32_t systemAbilityI
 int32_t BaseSystemAbilityManager::FindSystemAbilityNotify(int32_t systemAbilityId, const std::string& deviceId,
     int32_t code)
 {
-    lock_guard<samgr::mutex> autoLock(listenerMapLock_);
+    lock_guard<PiMutex::PiMutex<std::mutex>> autoLock(listenerMapLock_);
     HILOGI("FindSaNotify SA:%{public}d,%{public}d_%{public}zu", systemAbilityId, code, listenerMap_.size());
     auto iter = listenerMap_.find(systemAbilityId);
     if (iter == listenerMap_.end()) {
@@ -595,7 +595,7 @@ void BaseSystemAbilityManager::CheckListenerNotify(int32_t systemAbilityId,
     if (targetObject == nullptr) {
         return;
     }
-    lock_guard<samgr::mutex> autoLock(listenerMapLock_);
+    lock_guard<PiMutex::PiMutex<std::mutex>> autoLock(listenerMapLock_);
     auto& listeners = listenerMap_[systemAbilityId];
     for (auto& itemListener : listeners) {
         if (listener->AsObject() == itemListener.listener->AsObject()) {
@@ -624,7 +624,7 @@ int32_t BaseSystemAbilityManager::SubscribeSystemAbility(int32_t systemAbilityId
 
     auto callingPid = IPCSkeleton::GetCallingPid();
     {
-        lock_guard<samgr::mutex> autoLock(listenerMapLock_);
+        lock_guard<PiMutex::PiMutex<std::mutex>> autoLock(listenerMapLock_);
         auto& listeners = listenerMap_[systemAbilityId];
         for (const auto& itemListener : listeners) {
             if (listener->AsObject() == itemListener.listener->AsObject()) {
@@ -687,7 +687,7 @@ int32_t BaseSystemAbilityManager::UnSubscribeSystemAbility(int32_t systemAbility
     }
 
     auto callingPid = IPCSkeleton::GetCallingPid();
-    lock_guard<samgr::mutex> autoLock(listenerMapLock_);
+    lock_guard<PiMutex::PiMutex<std::mutex>> autoLock(listenerMapLock_);
     auto& listeners = listenerMap_[systemAbilityId];
     UnSubscribeSystemAbilityLocked(listeners, listener->AsObject());
     if (abilityStatusDeath_ != nullptr) {
@@ -699,7 +699,7 @@ int32_t BaseSystemAbilityManager::UnSubscribeSystemAbility(int32_t systemAbility
 
 void BaseSystemAbilityManager::UnSubscribeSystemAbility(const sptr<IRemoteObject>& remoteObject)
 {
-    lock_guard<samgr::mutex> autoLock(listenerMapLock_);
+    lock_guard<PiMutex::PiMutex<std::mutex>> autoLock(listenerMapLock_);
     HILOGD("UnSubscribeSA remote object dead! size:%{public}zu", listenerMap_.size());
     for (auto& item : listenerMap_) {
         auto& listeners = item.second;
@@ -712,7 +712,7 @@ void BaseSystemAbilityManager::UnSubscribeSystemAbility(const sptr<IRemoteObject
 
 void BaseSystemAbilityManager::RefreshListenerState(int32_t systemAbilityId)
 {
-    lock_guard<samgr::mutex> autoLock(listenerMapLock_);
+    lock_guard<PiMutex::PiMutex<std::mutex>> autoLock(listenerMapLock_);
     auto iter = listenerMap_.find(systemAbilityId);
     if (iter != listenerMap_.end()) {
         auto& listeners = iter->second;
