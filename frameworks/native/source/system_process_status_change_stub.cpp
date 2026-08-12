@@ -78,7 +78,7 @@ int32_t SystemProcessStatusChangeStub::OnSystemProcessStartedInner(MessageParcel
     if (!ReadProcessInfo(data, systemProcessInfo)) {
         return ERR_NULL_OBJECT;
     }
-    HILOGI("onProcStart,pid:%{public}d", systemProcessInfo.pid);
+    HILOGD("onProcStart,pid:%{public}d", systemProcessInfo.pid);
     OnSystemProcessStarted(systemProcessInfo);
     return ERR_NONE;
 }
@@ -89,7 +89,7 @@ int32_t SystemProcessStatusChangeStub::OnSystemProcessStoppedInner(MessageParcel
     if (!ReadProcessInfo(data, systemProcessInfo)) {
         return ERR_NULL_OBJECT;
     }
-    HILOGI("onProcStop,pid:%{public}d", systemProcessInfo.pid);
+    HILOGD("onProcStop,pid:%{public}d", systemProcessInfo.pid);
     OnSystemProcessStopped(systemProcessInfo);
     return ERR_NONE;
 }

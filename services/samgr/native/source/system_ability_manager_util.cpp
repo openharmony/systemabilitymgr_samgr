@@ -78,7 +78,10 @@ SamgrUtilListener::SamgrUtilListener()
 void SamgrUtilListener::OnAddSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
 {
     HILOGI("SamgrUtilListener OnAddSystemAbility systemAbilityId:%{public}d", systemAbilityId);
-    SamgrUtil::RequestAuth();
+    auto requestAuthTask = []() {
+        SamgrUtil::RequestAuth();
+    };
+    setParmHandler_->PostTask(requestAuthTask);
 }
 
 void SamgrUtilListener::OnRemoveSystemAbility(int32_t systemAbilityId, const std::string& deviceId)
@@ -383,6 +386,9 @@ void SamgrUtil::GetFilesByPriority(const std::string& path, std::vector<std::str
 
 void SamgrUtil::RegisterSAListener()
 {
+    if (!CheckSupportSetPrior()) {
+        return;
+    }
     sptr<SamgrUtilListener> listener = new SamgrUtilListener();
     SystemAbilityManager::GetInstance()->SubscribeSystemAbility(CONCURRENT_TASK_SERVICE_ID, listener);
 }
