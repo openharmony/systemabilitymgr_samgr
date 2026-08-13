@@ -20,7 +20,6 @@
 #include <list>
 #include <map>
 #include <memory>
-#include <mutex>
 #include <set>
 #include <string>
 #include <utility>
@@ -36,7 +35,6 @@
 #include "rpc_callback_imp.h"
 #include "sa_profiles.h"
 #include "schedule/system_ability_state_scheduler.h"
-#include "pi_mutex.h"
 #include "samgr_ffrt_api.h"
 #include "timer.h"
 
@@ -267,7 +265,7 @@ protected:
     samgr::shared_mutex abilityMapLock_;
     std::map<int32_t, SAInfo> abilityMap_;
 
-    PiMutex::PiMutex<std::mutex> listenerMapLock_;
+    samgr::mutex listenerMapLock_;
     std::map<int32_t, std::list<SAListener>> listenerMap_;
     std::map<int32_t, int32_t> subscribeCountMap_;
 

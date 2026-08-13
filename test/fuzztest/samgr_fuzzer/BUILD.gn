@@ -162,7 +162,6 @@ foreach(item, samgr_fuzztests) {
       "${samgr_services_dir}/source/system_ability_manager_dumper.cpp",
       "${samgr_services_dir}/source/system_ability_manager_stub.cpp",
       "${samgr_services_dir}/source/system_ability_manager_util.cpp",
-      "${samgr_services_dir}/source/pi_mutex.cpp",
       "${samgr_services_dir}/test/unittest/src/mock_accesstoken_kit.cpp",
       "${samgr_services_dir}/source/ffrt_handler.cpp",
       "${samgr_services_dir}/test/unittest/src/mock_permission.cpp",
