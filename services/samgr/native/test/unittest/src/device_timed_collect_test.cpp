@@ -1027,4 +1027,35 @@ HWTEST_F(DeviceTimedCollectTest, SamgrTimeHandlerTest002, TestSize.Level3)
     EXPECT_TRUE(bRet);
     DTEST_LOG << " SamgrTimeHandlerTest002 end" << std::endl;
 }
+
+#ifdef PREFERENCES_ENABLE
+/**
+ * @tc.name: ProcessPersistenceTasks001
+ * @tc.desc: test ProcessPersistenceTasks, mixed long and string entries, string skipped
+ * @tc.type: FUNC
+ */
+HWTEST_F(DeviceTimedCollectTest, ProcessPersistenceTasks001, TestSize.Level3)
+{
+    DTEST_LOG << " ProcessPersistenceTasks001 begin" << std::endl;
+    std::shared_ptr<PreferencesUtil> preferencesUtil = PreferencesUtil::GetInstance();
+    sptr<DeviceStatusCollectManager> collect =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    collect->collectHandler_ = std::make_shared<FFRTHandler>("collect");
+    sptr<DeviceTimedCollect> deviceTimedCollect = new DeviceTimedCollect(collect);
+    EXPECT_NE(deviceTimedCollect, nullptr);
+    deviceTimedCollect->preferencesUtil_ = preferencesUtil;
+
+    int64_t currentTime = TimeUtils::GetTimestamp();
+    std::string stringKey = "2025-01-01-00:00:00";
+    preferencesUtil->SaveString(stringKey, "1");
+    preferencesUtil->SaveLong("99999", currentTime + 1000);
+    deviceTimedCollect->ProcessPersistenceTasks();
+    EXPECT_TRUE(preferencesUtil->IsExist(stringKey));
+
+    preferencesUtil->Remove("99999");
+    preferencesUtil->Remove("2025-01-01-00:00:00");
+    deviceTimedCollect->timeInfos_.clear();
+    DTEST_LOG << " ProcessPersistenceTasks001 end" << std::endl;
+}
+#endif
 }

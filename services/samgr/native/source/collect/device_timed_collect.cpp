@@ -67,12 +67,17 @@ void DeviceTimedCollect::ProcessPersistenceTasks()
         if (strInterval.find("_") != std::string::npos) {
             continue;
         }
-        int64_t disTime = static_cast<int64_t>(triggerTime) - currentTime;
+        if (!triggerTime.IsLong()) {
+            HILOGW("DeviceTimedCollect skip non-long value, key: %{public}s", strInterval.c_str());
+            continue;
+        }
+        int64_t triggerTimeValue = static_cast<int64_t>(triggerTime);
+        int64_t disTime = triggerTimeValue - currentTime;
         if (strInterval.find(':') != string::npos) {
             ProcessPersistenceTimedTask(disTime, strInterval);
             return;
         }
-        ProcessPersistenceLoopTask(disTime, static_cast<int64_t>(triggerTime), strInterval);
+        ProcessPersistenceLoopTask(disTime, triggerTimeValue, strInterval);
     }
 #endif
 }
