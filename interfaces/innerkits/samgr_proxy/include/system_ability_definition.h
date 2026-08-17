@@ -27,7 +27,7 @@ And for vendor, should be a number between VENDOR_SYS_ABILITY_ID_BEGIN and VENDO
 If a new SA definition is added, it is necessary to synchronously add a mapping in the hidumper and
 synchronously add a mapping in the rust definition.
 The path of hidumper is "\base\hiviewdfx\hidumper\frameworks\native\dump_utils.cpp", and map name is "saNameMap_"
-The path of definition.rs is "\foundation\systemabilitymgr\samgr\interfaces\innerkits\rust\src\cxx\definition.rs"
+The path of definition.rs is "\foundation\systemabilitymgr\samgr\interfaces\innerkits\rust\src\definition.rs"
 */
 enum {
     SAMGR_DUMP_SAID                                  = 0,

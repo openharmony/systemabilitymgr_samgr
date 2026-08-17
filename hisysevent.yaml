@@ -26,10 +26,14 @@ PROCESS_STOP_DURATION:
 
 PROCESS_START_DURATION:
   __BASE: {type: BEHAVIOR, level: CRITICAL, desc: ondemand process start time cost}
-  PROCESS_NAME: {type: STRING, desc: process name}
-  PID: {type: INT32, desc: caller pid}
-  UID: {type: INT32, desc: caller uid}
   DURATION: {type: INT64, desc: process start time cost}
+  CALLEE_PROCESS_NAME: {type: STRING, desc: callee process name}
+  CALLEE_PID: {type: INT32, desc: callee pid}
+  CALLEE_UID: {type: INT32, desc: callee uid}
+  CALLEE_SAID: {type: INT32, desc: callee system ability id}
+  CALLING_PROCESS_NAME: {type: STRING, desc: caller process name}
+  CALLING_PID: {type: INT32, desc: caller pid}
+  CALLING_UID: {type: INT32, desc: caller uid}
 
 PROCESS_STOP_FAIL:
   __BASE: {type: FAULT, level: CRITICAL, desc: ondemand process stop failed event}
@@ -78,9 +82,13 @@ ONDEMAND_SA_LOAD_FAIL:
 ONDEMAND_SA_LOAD:
   __BASE: {type: BEHAVIOR, level: CRITICAL, desc: samgr sa load event}
   SAID: {type: INT32, desc: system ability id}
-  PID: {type: INT32, desc: caller pid}
-  UID: {type: INT32, desc: caller uid}
   EVENT: {type: INT32, desc: load event id}
+  CALLING_PROCESS_NAME: {type: STRING, desc: caller process name}
+  CALLING_PID: {type: INT32, desc: caller pid}
+  CALLING_UID: {type: INT32, desc: caller uid}
+  CALLEE_PROCESS_NAME: {type: STRING, desc: callee process name}
+  CALLEE_PID: {type: INT32, desc: callee pid}
+  CALLEE_UID: {type: INT32, desc: callee uid}
 
 ONDEMAND_SA_UNLOAD:
   __BASE: {type: BEHAVIOR, level: CRITICAL, desc: samgr sa unload event}
