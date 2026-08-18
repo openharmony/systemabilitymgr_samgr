@@ -19,7 +19,6 @@
 #include "base_system_ability_manager.h"
 #include "datetime_ex.h"
 #include "ipc_skeleton.h"
-#include "memory_guard.h"
 #include "sam_log.h"
 #include "hisysevent_adapter.h"
 #include "schedule/system_ability_state_scheduler.h"
