@@ -26,6 +26,9 @@
 #include "dbinder_service_stub.h"
 #include "rpc_callback_imp.h"
 #include "system_ability_manager_stub.h"
+#ifdef SUPPORT_MULTI_INSTANCE
+#include "user_lifecycle_manager.h"
+#endif
 
 namespace OHOS {
 
@@ -122,6 +125,53 @@ public:
     int32_t SetSamgrIpcPrior(bool enable) override;
 #ifdef SUPPORT_MULTI_INSTANCE
     int32_t OnUserStateChanged(int32_t userId, SamgrUserState userState) override;
+    int32_t GetForegroundUserId() const
+    {
+        return userLifecycleManager_.GetForegroundUserId();
+    }
+    bool IsValidUser(int32_t userId) const
+    {
+        return userLifecycleManager_.IsValidUser(userId);
+    }
+    std::shared_ptr<MultiSystemAbilityManager> GetMultiUserManager(int32_t userId) const
+    {
+        return userLifecycleManager_.GetMultiUserManager(userId);
+    }
+    std::shared_ptr<MultiSystemAbilityManager> GetStoppingMultiUserManager(int32_t userId) const
+    {
+        return userLifecycleManager_.GetStoppingMultiUserManager(userId);
+    }
+    UserLifecycleManager& GetUserLifecycleManager()
+    {
+        return userLifecycleManager_;
+    }
+
+    int32_t GetCallingUserId() const;
+    bool IsValidCallingUserId(int32_t userId) const;
+    int32_t RouteForUser(int32_t saId, int32_t caller);
+    int32_t RouteForSa(int32_t saId, int32_t caller);
+    bool IsMultiInstanceSaId(int32_t saId);
+
+    // Explicit-user APIs are available only to Base callers and require an active target user.
+    sptr<IRemoteObject> GetSystemAbility(int32_t systemAbilityId, int32_t userId) override;
+    sptr<IRemoteObject> CheckSystemAbility(int32_t systemAbilityId, int32_t userId) override;
+    sptr<IRemoteObject> CheckSystemAbilityByUserId(
+        int32_t systemAbilityId, bool& isExist, int32_t userId) override;
+    int32_t GetSystemProcessInfo(int32_t systemAbilityId, SystemProcessInfo& systemProcessInfo,
+        int32_t userId) override;
+    sptr<IRemoteObject> GetLocalAbilityManagerProxy(int32_t systemAbilityId, int32_t userId) override;
+    sptr<IRemoteObject> LoadSystemAbility(int32_t systemAbilityId, int32_t timeout, int32_t userId) override
+    {
+        return nullptr;
+    }
+    int32_t LoadSystemAbility(int32_t systemAbilityId, const sptr<ISystemAbilityLoadCallback>& callback,
+        int32_t userId) override;
+    int32_t SubscribeSystemAbility(int32_t systemAbilityId,
+        const sptr<ISystemAbilityStatusChange>& listener, int32_t userId) override;
+    int32_t UnSubscribeSystemAbility(int32_t systemAbilityId,
+        const sptr<ISystemAbilityStatusChange>& listener, int32_t userId) override;
+    int32_t SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener, int32_t userId) override;
+    int32_t UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener, int32_t userId) override;
 #endif
     int32_t GetRunningSaExtensionInfoList(const std::string& extension,
         std::vector<SaExtensionInfo>& infoList) override;
@@ -129,15 +179,7 @@ public:
     int32_t GetExtensionRunningSaList(const std::string& extension, std::vector<sptr<IRemoteObject>>& saList) override;
     int32_t GetCommonEventExtraDataIdlist(int32_t saId, std::vector<int64_t>& extraDataIdList,
         const std::string& eventName = "") override;
-    sptr<IRemoteObject> GetLocalAbilityManagerProxy(int32_t systemAbilityId) override
-    {
-        CommonSaProfile saProfile;
-        if (!GetSaProfile(systemAbilityId, saProfile)) {
-            HILOGD("SA:%{public}d no profile!", systemAbilityId);
-            return nullptr;
-        }
-        return GetSystemProcess(saProfile.process);
-    }
+    sptr<IRemoteObject> GetLocalAbilityManagerProxy(int32_t systemAbilityId) override;
     using BaseSystemAbilityManager::RemoveWhiteCommonEvent;
 #ifdef SAMGR_ENABLE_DELAY_DBINDER
     void InitDbinderService() override;
@@ -170,6 +212,10 @@ private:
     void RegisterDistribute(int32_t said, bool isDistributed);
     void OnSystemAbilityRegistered(int32_t systemAbilityId, bool isDistributed) override;
     void FlushResetPriorTask();
+#ifdef SUPPORT_MULTI_INSTANCE
+    int32_t SendStrategyToUsers(int32_t type, std::vector<int32_t>& systemAbilityIds,
+        int32_t level, std::string& action, bool& dispatched);
+#endif
 
     static sptr<SystemAbilityManager> instance;
     static samgr::mutex instanceLock;
@@ -183,8 +229,7 @@ private:
 #endif
 
 #ifdef SUPPORT_MULTI_INSTANCE
-    samgr::mutex userStateLock_;
-    std::map<int32_t, SamgrUserState> userStateMap_;
+    UserLifecycleManager userLifecycleManager_;
 #endif
     std::mutex priorRefCntLock_;
     int32_t priorRefCnt_ = 0;

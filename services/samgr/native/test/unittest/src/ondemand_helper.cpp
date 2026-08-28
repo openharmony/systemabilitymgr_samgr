@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,8 +16,10 @@
 #include "ondemand_helper.h"
 
 #include <iostream>
+#include <list>
 #include <memory>
 #include <thread>
+#include <vector>
 #include <unistd.h>
 
 #include "datetime_ex.h"
@@ -52,6 +54,87 @@ constexpr int32_t MOCK_ONDEMAND_ABILITY_C = 1499;
 constexpr int32_t SLEEP_1_SECONDS = 1 * 1000 * 1000;
 constexpr int32_t SLEEP_3_SECONDS = 3 * 1000 * 1000;
 constexpr int32_t SLEEP_6_SECONDS = 6 * 1000 * 1000;
+
+#ifdef SUPPORT_MULTI_INSTANCE
+constexpr int32_t LOAD_CALLBACK_TIMEOUT_MS = 5000;
+constexpr char LISTEN_PROCESS_NAME[] = "listen_test";
+constexpr char MULTI_INSTANCE_PROCESS_NAME[] = "multi_instance_test_probe";
+
+enum class TestSaRequestCode : uint32_t {
+    TRIGGER_UNLOAD = 3,
+    TRIGGER_UNLOAD_CANCEL = 4,
+    UPDATE_ON_DEMAND_POLICY = 5,
+    GET_ON_DEMAND_POLICY = 6,
+};
+
+class WaitableLoadCallback final : public SystemAbilityLoadCallbackStub {
+public:
+    explicit WaitableLoadCallback(int32_t targetSaId) : targetSaId_(targetSaId) {}
+
+    void OnLoadSystemAbilitySuccess(int32_t saId, const sptr<IRemoteObject>& remoteObject) override
+    {
+        if (saId != targetSaId_) {
+            return;
+        }
+        std::lock_guard<std::mutex> lock(mutex_);
+        remoteObject_ = remoteObject;
+        completed_ = true;
+        condition_.notify_all();
+    }
+
+    void OnLoadSystemAbilityFail(int32_t saId) override
+    {
+        if (saId != targetSaId_) {
+            return;
+        }
+        std::lock_guard<std::mutex> lock(mutex_);
+        completed_ = true;
+        condition_.notify_all();
+    }
+
+    void OnLoadSACompleteForRemote(const std::string& deviceId, int32_t saId,
+        const sptr<IRemoteObject>& remoteObject) override
+    {
+        (void)deviceId;
+        OnLoadSystemAbilitySuccess(saId, remoteObject);
+    }
+
+    sptr<IRemoteObject> WaitForResult()
+    {
+        std::unique_lock<std::mutex> lock(mutex_);
+        bool ready = condition_.wait_for(lock, std::chrono::milliseconds(LOAD_CALLBACK_TIMEOUT_MS),
+            [this]() { return completed_; });
+        return ready ? remoteObject_ : nullptr;
+    }
+
+private:
+    const int32_t targetSaId_;
+    bool completed_ = false;
+    sptr<IRemoteObject> remoteObject_;
+    std::mutex mutex_;
+    std::condition_variable condition_;
+};
+
+sptr<ISystemAbilityManager> GetSystemAbilityManager()
+{
+    return SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+}
+
+const char* GetTestProcessName(int32_t saId)
+{
+    return saId == DISTRIBUTED_SCHED_TEST_LISTEN_ID ? LISTEN_PROCESS_NAME : MULTI_INSTANCE_PROCESS_NAME;
+}
+
+int32_t SendTestRequest(const sptr<IRemoteObject>& target, TestSaRequestCode code, MessageParcel& data,
+    MessageParcel& reply)
+{
+    if (target == nullptr) {
+        return ERR_NULL_OBJECT;
+    }
+    MessageOption option;
+    return target->SendRequest(static_cast<uint32_t>(code), data, reply, option);
+}
+#endif
 }
 
 OnDemandHelper::OnDemandHelper()
@@ -1110,4 +1193,319 @@ int32_t OnDemandHelper::OnUserStateChanged(int32_t userId, SamgrUserState userSt
         << " userId:" << userId << " userState:" << static_cast<int32_t>(userState) << endl;
     return ERR_OK;
 }
+
+#ifdef SUPPORT_MULTI_INSTANCE
+sptr<IRemoteObject> OnDemandHelper::GetSystemAbility(int32_t systemAbilityId, int32_t userId)
+{
+    sptr<ISystemAbilityManager> manager = GetSystemAbilityManager();
+    sptr<IRemoteObject> object = manager == nullptr ? nullptr : manager->GetSystemAbility(systemAbilityId, userId);
+    cout << "GetSystemAbility systemAbilityId:" << systemAbilityId << " userId:" << userId
+        << " result:" << (object == nullptr ? "failed" : "success") << endl;
+    return object;
+}
+
+sptr<IRemoteObject> OnDemandHelper::CheckSystemAbility(int32_t systemAbilityId, bool& isExist)
+{
+    sptr<ISystemAbilityManager> manager = GetSystemAbilityManager();
+    sptr<IRemoteObject> object = manager == nullptr ? nullptr : manager->CheckSystemAbility(systemAbilityId, isExist);
+    cout << "CheckSystemAbility isExist:" << isExist << " systemAbilityId:" << systemAbilityId
+        << " result:" << (object == nullptr ? "failed" : "success") << endl;
+    return object;
+}
+
+sptr<IRemoteObject> OnDemandHelper::CheckSystemAbility(int32_t systemAbilityId, int32_t userId)
+{
+    sptr<ISystemAbilityManager> manager = GetSystemAbilityManager();
+    sptr<IRemoteObject> object = manager == nullptr ? nullptr : manager->CheckSystemAbility(systemAbilityId, userId);
+    cout << "CheckSystemAbility systemAbilityId:" << systemAbilityId << " userId:" << userId
+        << " result:" << (object == nullptr ? "failed" : "success") << endl;
+    return object;
+}
+
+sptr<IRemoteObject> OnDemandHelper::CheckSystemAbilityByUserId(int32_t systemAbilityId, bool& isExist,
+    int32_t userId)
+{
+    sptr<ISystemAbilityManager> manager = GetSystemAbilityManager();
+    sptr<IRemoteObject> object = manager == nullptr ? nullptr :
+        manager->CheckSystemAbilityByUserId(systemAbilityId, isExist, userId);
+    cout << "CheckSystemAbility isExist:" << isExist << " systemAbilityId:" << systemAbilityId
+        << " userId:" << userId << " result:" << (object == nullptr ? "failed" : "success") << endl;
+    return object;
+}
+
+int32_t OnDemandHelper::LoadSystemAbility(int32_t systemAbilityId,
+    const sptr<ISystemAbilityLoadCallback>& callback, int32_t userId)
+{
+    sptr<ISystemAbilityManager> manager = GetSystemAbilityManager();
+    return manager == nullptr ? ERR_NULL_OBJECT : manager->LoadSystemAbility(systemAbilityId, callback, userId);
+}
+
+sptr<IRemoteObject> OnDemandHelper::LoadSystemAbility(int32_t systemAbilityId, int32_t timeoutSeconds)
+{
+    sptr<ISystemAbilityManager> manager = GetSystemAbilityManager();
+    sptr<IRemoteObject> object = manager == nullptr ? nullptr : manager->LoadSystemAbility(systemAbilityId,
+        timeoutSeconds);
+    cout << "SyncLoadSystemAbility saId:" << systemAbilityId << " timeout:" << timeoutSeconds
+        << " result:" << (object == nullptr ? "failed" : "success") << endl;
+    return object;
+}
+
+sptr<IRemoteObject> OnDemandHelper::LoadSystemAbility(int32_t systemAbilityId, int32_t timeoutSeconds, int32_t userId)
+{
+    sptr<ISystemAbilityManager> manager = GetSystemAbilityManager();
+    sptr<IRemoteObject> object = manager == nullptr ? nullptr :
+        manager->LoadSystemAbility(systemAbilityId, timeoutSeconds, userId);
+    cout << "SyncLoadSystemAbility saId:" << systemAbilityId << " userId:" << userId
+        << " timeout:" << timeoutSeconds << " result:" << (object == nullptr ? "failed" : "success") << endl;
+    return object;
+}
+
+int32_t OnDemandHelper::LoadSystemAbilityByCallback(int32_t systemAbilityId)
+{
+    sptr<WaitableLoadCallback> callback = new WaitableLoadCallback(systemAbilityId);
+    int32_t result = LoadSystemAbility(systemAbilityId, callback);
+    if (result != ERR_OK) {
+        return result;
+    }
+    int32_t callbackResult = callback->WaitForResult() == nullptr ? ERR_NULL_OBJECT : ERR_OK;
+    cout << "LoadSystemAbility(callback) saId:" << systemAbilityId << " result:" << callbackResult << endl;
+    return callbackResult;
+}
+
+int32_t OnDemandHelper::LoadSystemAbilityByCallback(int32_t systemAbilityId, int32_t userId)
+{
+    sptr<WaitableLoadCallback> callback = new WaitableLoadCallback(systemAbilityId);
+    int32_t result = LoadSystemAbility(systemAbilityId, callback, userId);
+    if (result != ERR_OK) {
+        return result;
+    }
+    int32_t callbackResult = callback->WaitForResult() == nullptr ? ERR_NULL_OBJECT : ERR_OK;
+    cout << "LoadSystemAbility(callback) saId:" << systemAbilityId << " userId:" << userId
+        << " result:" << callbackResult << endl;
+    return callbackResult;
+}
+
+int32_t OnDemandHelper::GetSystemProcessInfo(int32_t systemAbilityId, SystemProcessInfo& processInfo)
+{
+    sptr<ISystemAbilityManager> manager = GetSystemAbilityManager();
+    int32_t result = manager == nullptr ? ERR_NULL_OBJECT : manager->GetSystemProcessInfo(systemAbilityId, processInfo);
+    cout << "GetSystemProcessInfo saId:" << systemAbilityId << " processName:" << processInfo.processName
+        << " pid:" << processInfo.pid << " result:" << result << endl;
+    return result;
+}
+
+int32_t OnDemandHelper::GetSystemProcessInfo(int32_t systemAbilityId, SystemProcessInfo& processInfo, int32_t userId)
+{
+    sptr<ISystemAbilityManager> manager = GetSystemAbilityManager();
+    int32_t result = manager == nullptr ? ERR_NULL_OBJECT :
+        manager->GetSystemProcessInfo(systemAbilityId, processInfo, userId);
+    cout << "GetSystemProcessInfo saId:" << systemAbilityId << " userId:" << userId
+        << " processName:" << processInfo.processName << " pid:" << processInfo.pid << " result:" << result << endl;
+    return result;
+}
+
+sptr<IRemoteObject> OnDemandHelper::GetLocalAbilityManagerProxy(int32_t systemAbilityId)
+{
+    sptr<ISystemAbilityManager> manager = GetSystemAbilityManager();
+    sptr<IRemoteObject> object = manager == nullptr ? nullptr : manager->GetLocalAbilityManagerProxy(systemAbilityId);
+    cout << "GetLocalAbilityManagerProxy saId:" << systemAbilityId
+        << " result:" << (object == nullptr ? "null" : "ok") << endl;
+    return object;
+}
+
+sptr<IRemoteObject> OnDemandHelper::GetLocalAbilityManagerProxy(int32_t systemAbilityId, int32_t userId)
+{
+    sptr<ISystemAbilityManager> manager = GetSystemAbilityManager();
+    sptr<IRemoteObject> object = manager == nullptr ? nullptr :
+        manager->GetLocalAbilityManagerProxy(systemAbilityId, userId);
+    cout << "GetLocalAbilityManagerProxy saId:" << systemAbilityId << " userId:" << userId
+        << " result:" << (object == nullptr ? "null" : "ok") << endl;
+    return object;
+}
+
+int32_t OnDemandHelper::SubscribeSystemAbility(int32_t systemAbilityId,
+    const sptr<ISystemAbilityStatusChange>& listener)
+{
+    sptr<ISystemAbilityManager> manager = GetSystemAbilityManager();
+    return manager == nullptr ? ERR_NULL_OBJECT : manager->SubscribeSystemAbility(systemAbilityId, listener);
+}
+
+int32_t OnDemandHelper::SubscribeSystemAbility(int32_t systemAbilityId,
+    const sptr<ISystemAbilityStatusChange>& listener, int32_t userId)
+{
+    sptr<ISystemAbilityManager> manager = GetSystemAbilityManager();
+    return manager == nullptr ? ERR_NULL_OBJECT : manager->SubscribeSystemAbility(systemAbilityId, listener, userId);
+}
+
+int32_t OnDemandHelper::UnSubscribeSystemAbility(int32_t systemAbilityId,
+    const sptr<ISystemAbilityStatusChange>& listener)
+{
+    sptr<ISystemAbilityManager> manager = GetSystemAbilityManager();
+    return manager == nullptr ? ERR_NULL_OBJECT : manager->UnSubscribeSystemAbility(systemAbilityId, listener);
+}
+
+int32_t OnDemandHelper::UnSubscribeSystemAbility(int32_t systemAbilityId,
+    const sptr<ISystemAbilityStatusChange>& listener, int32_t userId)
+{
+    sptr<ISystemAbilityManager> manager = GetSystemAbilityManager();
+    return manager == nullptr ? ERR_NULL_OBJECT : manager->UnSubscribeSystemAbility(systemAbilityId, listener, userId);
+}
+
+int32_t OnDemandHelper::SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener)
+{
+    sptr<ISystemAbilityManager> manager = GetSystemAbilityManager();
+    return manager == nullptr ? ERR_NULL_OBJECT : manager->SubscribeSystemProcess(listener);
+}
+
+int32_t OnDemandHelper::SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener, int32_t userId)
+{
+    sptr<ISystemAbilityManager> manager = GetSystemAbilityManager();
+    return manager == nullptr ? ERR_NULL_OBJECT : manager->SubscribeSystemProcess(listener, userId);
+}
+
+int32_t OnDemandHelper::UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener)
+{
+    sptr<ISystemAbilityManager> manager = GetSystemAbilityManager();
+    return manager == nullptr ? ERR_NULL_OBJECT : manager->UnSubscribeSystemProcess(listener);
+}
+
+int32_t OnDemandHelper::UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener, int32_t userId)
+{
+    sptr<ISystemAbilityManager> manager = GetSystemAbilityManager();
+    return manager == nullptr ? ERR_NULL_OBJECT : manager->UnSubscribeSystemProcess(listener, userId);
+}
+
+int32_t OnDemandHelper::RemoveSystemAbility(int32_t systemAbilityId)
+{
+    SamMockPermission::MockProcess(GetTestProcessName(systemAbilityId));
+    sptr<ISystemAbilityManager> manager = GetSystemAbilityManager();
+    int32_t result = manager == nullptr ? ERR_NULL_OBJECT : manager->RemoveSystemAbility(systemAbilityId);
+    cout << "RemoveSystemAbility systemAbilityId:" << systemAbilityId << " result:" << result << endl;
+    return result;
+}
+
+int32_t OnDemandHelper::CancelUnloadSystemAbility(int32_t systemAbilityId)
+{
+    SamMockPermission::MockProcess(GetTestProcessName(systemAbilityId));
+    sptr<ISystemAbilityManager> manager = GetSystemAbilityManager();
+    int32_t result = manager == nullptr ? ERR_NULL_OBJECT : manager->CancelUnloadSystemAbility(systemAbilityId);
+    cout << "CancelUnloadSystemAbility systemAbilityId:" << systemAbilityId << " result:" << result << endl;
+    return result;
+}
+
+int32_t OnDemandHelper::AddOnDemandSystemAbilityInfo(int32_t systemAbilityId, const std::string& processName)
+{
+    sptr<ISystemAbilityManager> manager = GetSystemAbilityManager();
+    int32_t result = manager == nullptr ? ERR_NULL_OBJECT :
+        manager->AddOnDemandSystemAbilityInfo(systemAbilityId, Str8ToStr16(processName));
+    cout << "AddOnDemandSystemAbilityInfo saId:" << systemAbilityId << " processName:" << processName
+        << " result:" << result << endl;
+    return result;
+}
+
+int32_t OnDemandHelper::TriggerUnloadSystemAbility(const OnDemandTarget& target, bool cancelUnload)
+{
+    sptr<IRemoteObject> object = target.useUserIdApi ? GetSystemAbility(target.saId, target.userId) :
+        GetSystemAbility(target.saId);
+    if (object == nullptr) {
+        cout << "TriggerUnloadSystemAbility saId:" << target.saId << " userId:" << target.userId
+            << " cancelUnload:" << cancelUnload << " result:" << ERR_NULL_OBJECT << endl;
+        return ERR_NULL_OBJECT;
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    TestSaRequestCode code = cancelUnload ? TestSaRequestCode::TRIGGER_UNLOAD_CANCEL :
+        TestSaRequestCode::TRIGGER_UNLOAD;
+    int32_t sendResult = SendTestRequest(object, code, data, reply);
+    int32_t result = sendResult == ERR_OK ? reply.ReadInt32() : sendResult;
+    cout << "TriggerUnloadSystemAbility accepted, saId:" << target.saId;
+    cout << " userId:" << target.userId;
+    cout << " cancelUnload:" << cancelUnload << " result:" << result << endl;
+    return result;
+}
+
+int32_t OnDemandHelper::GetRunningSystemProcess(std::list<SystemProcessInfo>& processInfos)
+{
+    sptr<ISystemAbilityManager> manager = GetSystemAbilityManager();
+    int32_t result = manager == nullptr ? ERR_NULL_OBJECT : manager->GetRunningSystemProcess(processInfos);
+    cout << "GetRunningSystemProcess size:" << processInfos.size() << " result:" << result << endl;
+    for (const auto& processInfo : processInfos) {
+        cout << "processName:" << processInfo.processName << " pid:" << processInfo.pid
+            << " uid:" << processInfo.uid << endl;
+    }
+    return result;
+}
+
+int32_t OnDemandHelper::SendStrategy(int32_t type, std::vector<int32_t>& systemAbilityIds, int32_t level,
+    const std::string& action)
+{
+    sptr<ISystemAbilityManager> manager = GetSystemAbilityManager();
+    if (manager == nullptr) {
+        return ERR_NULL_OBJECT;
+    }
+    std::string mutableAction = action;
+    int32_t result = manager->SendStrategy(type, systemAbilityIds, level, mutableAction);
+    cout << "SendStrategy result:" << result << " saCount:" << systemAbilityIds.size() << endl;
+    return result;
+}
+
+int32_t OnDemandHelper::GetRunningSaExtensionInfoList(const std::string& extension,
+    std::vector<ISystemAbilityManager::SaExtensionInfo>& infoList)
+{
+    SamMockPermission::MockPermission();
+    sptr<ISystemAbilityManager> manager = GetSystemAbilityManager();
+    int32_t result = manager == nullptr ? ERR_NULL_OBJECT : manager->GetRunningSaExtensionInfoList(extension, infoList);
+    cout << "GetRunningSaExtensionInfoList extension:" << extension << " size:" << infoList.size()
+        << " result:" << result << endl;
+    for (size_t index = 0; index < infoList.size(); ++index) {
+        cout << "[" << index << "] saId:" << infoList[index].saId << " processObj:"
+            << (infoList[index].processObj == nullptr ? "null" : "valid") << endl;
+    }
+    return result;
+}
+
+int32_t OnDemandHelper::UpdateOnDemandPolicyBySa(const PolicyUpdateRequest& request)
+{
+    sptr<IRemoteObject> target = GetSystemAbility(request.target.saId);
+    if (request.target.useUserIdApi) {
+        target = GetSystemAbility(request.target.saId, request.target.userId);
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    bool written = data.WriteInt32(static_cast<int32_t>(request.policyType)) &&
+        data.WriteInt32(static_cast<int32_t>(request.event.eventId)) && data.WriteString(request.event.name) &&
+        data.WriteString(request.event.value) && data.WriteBool(request.event.persistence);
+    int32_t sendResult = written ? SendTestRequest(target, TestSaRequestCode::UPDATE_ON_DEMAND_POLICY, data, reply) :
+        ERR_FLATTEN_OBJECT;
+    int32_t result = sendResult == ERR_OK ? reply.ReadInt32() : sendResult;
+    std::cout << "SA_INTERNAL_POLICY_UPDATE saId=" << request.target.saId
+              << " userId=" << request.target.userId
+              << " type=" << static_cast<int32_t>(request.policyType)
+              << " event=" << request.event.name << " result=" << result << std::endl;
+    return result;
+}
+
+int32_t OnDemandHelper::GetOnDemandPolicyBySa(const PolicyQueryRequest& request)
+{
+    sptr<IRemoteObject> target = GetSystemAbility(request.target.saId);
+    if (request.target.useUserIdApi) {
+        target = GetSystemAbility(request.target.saId, request.target.userId);
+    }
+    MessageParcel data;
+    MessageParcel reply;
+    bool written = data.WriteInt32(static_cast<int32_t>(request.policyType));
+    int32_t sendResult = written ? SendTestRequest(target, TestSaRequestCode::GET_ON_DEMAND_POLICY, data, reply) :
+        ERR_FLATTEN_OBJECT;
+    if (sendResult != ERR_OK) {
+        return sendResult;
+    }
+    int32_t result = reply.ReadInt32();
+    std::string policy = reply.ReadString();
+    std::cout << "SA_INTERNAL_POLICY_GET saId=" << request.target.saId
+              << " userId=" << request.target.userId
+              << " type=" << static_cast<int32_t>(request.policyType)
+              << " policy=" << policy << " result=" << result << std::endl;
+    return result;
+}
+#endif
 }

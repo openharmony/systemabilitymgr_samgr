@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -51,6 +51,10 @@ ohos_unittest("SystemAbilityMgrTest") {
     cfi_no_nvcall = true
     blocklist = "../../../../../cfi_blocklist.txt"
   }
+  cflags = [
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
   module_out_path = module_output_path
 
   sources = [
@@ -91,7 +95,6 @@ ohos_unittest("SystemAbilityMgrTest") {
     "//foundation/systemabilitymgr/samgr/test/resource:coverage_flags",
   ]
 
-  cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
@@ -133,6 +136,11 @@ ohos_unittest("SystemAbilityMgrTest") {
     ]
     defines += [ "SUPPORT_ACCESS_TOKEN" ]
   }
+  if (preferences_enable) {
+    sources += [ "${samgr_services_dir}/source/collect/device_timed_collect_tool.cpp" ]
+    external_deps += [ "preferences:native_preferences" ]
+    defines += [ "PREFERENCES_ENABLE" ]
+  }
   if (hicollie_able) {
     external_deps += [ "hicollie:libhicollie" ]
     defines += [ "HICOLLIE_ENABLE" ]
@@ -163,7 +171,15 @@ ohos_unittest("SystemAbilityMgrTest") {
     defines += [ "SUPPORT_PENGLAI_MODE" ]
   }
   if (samgr_support_multi_instance) {
-    defines += [ "SUPPORT_MULTI_INSTANCE" ]
+    sources += [
+      "${samgr_services_dir}/source/multi_system_ability_manager.cpp",
+      "${samgr_services_dir}/source/user_lifecycle_manager.cpp",
+      "${samgr_services_dir}/test/unittest/src/user_lifecycle_manager_test.cpp",
+    ]
+    defines += [
+      "SUPPORT_MULTI_INSTANCE",
+      "SUPPORT_SA_MULTI_USER",
+    ]
   }
   defines += ["SAMGR_USE_FFRT"]
 }
@@ -306,7 +322,14 @@ ohos_unittest("SystemAbilityMgrCollectTest") {
     defines += [ "SUPPORT_PENGLAI_MODE" ]
   }
   if (samgr_support_multi_instance) {
-    defines += [ "SUPPORT_MULTI_INSTANCE" ]
+    sources += [
+      "${samgr_services_dir}/source/multi_system_ability_manager.cpp",
+      "${samgr_services_dir}/source/user_lifecycle_manager.cpp",
+    ]
+    defines += [
+      "SUPPORT_MULTI_INSTANCE",
+      "SUPPORT_SA_MULTI_USER",
+    ]
   }
   defines += ["SAMGR_USE_FFRT"]
 }
@@ -319,6 +342,10 @@ ohos_unittest("BaseSystemAbilityMgrTest") {
     cfi_no_nvcall = true
     blocklist = "../../../../../cfi_blocklist.txt"
   }
+  cflags = [
+    "-Dprivate=public",
+    "-Dprotected=public",
+  ]
   module_out_path = module_output_path
 
   sources = [
@@ -360,7 +387,6 @@ ohos_unittest("BaseSystemAbilityMgrTest") {
     "//foundation/systemabilitymgr/samgr/test/resource:coverage_flags",
   ]
 
-  cflags = []
   if (target_cpu == "arm") {
     cflags += [ "-DBINDER_IPC_32BIT" ]
   }
@@ -368,7 +394,7 @@ ohos_unittest("BaseSystemAbilityMgrTest") {
   deps = [
     ":samgr_proxy_tdd",
     "${samgr_dir}/interfaces/innerkits/common:samgr_common",
-    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/dynamic_cache:dynamic_cache",
+    "//foundation/systemabilitymgr/samgr/interfaces/innerkits/dynamic_cache",
   ]
 
   external_deps = [
@@ -402,6 +428,11 @@ ohos_unittest("BaseSystemAbilityMgrTest") {
     ]
     defines += [ "SUPPORT_ACCESS_TOKEN" ]
   }
+  if (preferences_enable) {
+    sources += [ "${samgr_services_dir}/source/collect/device_timed_collect_tool.cpp" ]
+    external_deps += [ "preferences:native_preferences" ]
+    defines += [ "PREFERENCES_ENABLE" ]
+  }
   if (hicollie_able) {
     external_deps += [ "hicollie:libhicollie" ]
     defines += [ "HICOLLIE_ENABLE" ]
@@ -413,7 +444,15 @@ ohos_unittest("BaseSystemAbilityMgrTest") {
     defines += [ "SUPPORT_PENGLAI_MODE" ]
   }
   if (samgr_support_multi_instance) {
-    defines += [ "SUPPORT_MULTI_INSTANCE" ]
+    sources += [
+      "${samgr_services_dir}/source/multi_system_ability_manager.cpp",
+      "${samgr_services_dir}/source/user_lifecycle_manager.cpp",
+      "${samgr_services_dir}/test/unittest/src/multi_system_ability_manager_test.cpp",
+    ]
+    defines += [
+      "SUPPORT_MULTI_INSTANCE",
+      "SUPPORT_SA_MULTI_USER",
+    ]
   }
   defines += ["SAMGR_USE_FFRT"]
 }
@@ -527,7 +566,14 @@ ohos_unittest("SystemAbilityMgrDeviceNetworkingTest") {
     defines += [ "SUPPORT_PENGLAI_MODE" ]
   }
   if (samgr_support_multi_instance) {
-    defines += [ "SUPPORT_MULTI_INSTANCE" ]
+    sources += [
+      "${samgr_services_dir}/source/multi_system_ability_manager.cpp",
+      "${samgr_services_dir}/source/user_lifecycle_manager.cpp",
+    ]
+    defines += [
+      "SUPPORT_MULTI_INSTANCE",
+      "SUPPORT_SA_MULTI_USER",
+    ]
   }
   defines += ["SAMGR_USE_FFRT"]
 }
@@ -633,12 +679,24 @@ ohos_unittest("SystemAbilityMgrStubTest") {
     ]
     defines += [ "SUPPORT_ACCESS_TOKEN" ]
   }
+  if (preferences_enable) {
+    sources += [ "${samgr_services_dir}/source/collect/device_timed_collect_tool.cpp" ]
+    external_deps += [ "preferences:native_preferences" ]
+    defines += [ "PREFERENCES_ENABLE" ]
+  }
 
   if (support_penglai_mode) {
     defines += [ "SUPPORT_PENGLAI_MODE" ]
   }
   if (samgr_support_multi_instance) {
-    defines += [ "SUPPORT_MULTI_INSTANCE" ]
+    sources += [
+      "${samgr_services_dir}/source/multi_system_ability_manager.cpp",
+      "${samgr_services_dir}/source/user_lifecycle_manager.cpp",
+    ]
+    defines += [
+      "SUPPORT_MULTI_INSTANCE",
+      "SUPPORT_SA_MULTI_USER",
+    ]
   }
   defines += ["SAMGR_USE_FFRT"]
 }
@@ -706,7 +764,10 @@ ohos_unittest("SystemAbilityMgrProxyTest") {
     defines += [ "SUPPORT_ACCESS_TOKEN" ]
   }
   if (samgr_support_multi_instance) {
-    defines += [ "SUPPORT_MULTI_INSTANCE" ]
+    defines += [
+      "SUPPORT_MULTI_INSTANCE",
+      "SUPPORT_SA_MULTI_USER",
+    ]
   }
 }
 
@@ -758,7 +819,9 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
     "${samgr_services_dir}/source/ability_death_recipient.cpp",
     "${samgr_services_dir}/source/collect/device_param_collect.cpp",
     "${samgr_services_dir}/source/collect/device_status_collect_manager.cpp",
+    "${samgr_services_dir}/source/collect/device_timed_collect.cpp",
     "${samgr_services_dir}/source/collect/icollect_plugin.cpp",
+    "${samgr_services_dir}/source/collect/ref_count_collect.cpp",
     "${samgr_services_dir}/source/ffrt_handler.cpp",
     "${samgr_services_dir}/source/memory_guard.cpp",
     "${samgr_services_dir}/source/rpc_callback_imp.cpp",
@@ -836,6 +899,8 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
   }
 
   if (support_device_manager) {
+    sources +=
+        [ "${samgr_services_dir}/source/collect/device_networking_collect.cpp" ]
     external_deps += [ "device_manager:devicemanagersdk" ]
     defines += [ "SUPPORT_DEVICE_MANAGER" ]
   }
@@ -844,7 +909,14 @@ ohos_unittest("SystemAbilityStateSchedulerTest") {
     defines += [ "SUPPORT_PENGLAI_MODE" ]
   }
   if (samgr_support_multi_instance) {
-    defines += [ "SUPPORT_MULTI_INSTANCE" ]
+    sources += [
+      "${samgr_services_dir}/source/multi_system_ability_manager.cpp",
+      "${samgr_services_dir}/source/user_lifecycle_manager.cpp",
+    ]
+    defines += [
+      "SUPPORT_MULTI_INSTANCE",
+      "SUPPORT_SA_MULTI_USER",
+    ]
   }
   defines += ["SAMGR_USE_FFRT"]
 }
@@ -862,8 +934,11 @@ ohos_unittest("SystemAbilityMgrDumperTest") {
   sources = [
     "${samgr_dir}/utils/native/source/tools.cpp",
     "${samgr_services_dir}/source/ability_death_recipient.cpp",
+    "${samgr_services_dir}/source/collect/device_param_collect.cpp",
     "${samgr_services_dir}/source/collect/device_status_collect_manager.cpp",
+    "${samgr_services_dir}/source/collect/device_timed_collect.cpp",
     "${samgr_services_dir}/source/collect/icollect_plugin.cpp",
+    "${samgr_services_dir}/source/collect/ref_count_collect.cpp",
     "${samgr_services_dir}/source/ffrt_handler.cpp",
     "${samgr_services_dir}/source/memory_guard.cpp",
     "${samgr_services_dir}/source/rpc_callback_imp.cpp",
@@ -930,7 +1005,14 @@ ohos_unittest("SystemAbilityMgrDumperTest") {
     defines += [ "SUPPORT_PENGLAI_MODE" ]
   }
   if (samgr_support_multi_instance) {
-    defines += [ "SUPPORT_MULTI_INSTANCE" ]
+    sources += [
+      "${samgr_services_dir}/source/multi_system_ability_manager.cpp",
+      "${samgr_services_dir}/source/user_lifecycle_manager.cpp",
+    ]
+    defines += [
+      "SUPPORT_MULTI_INSTANCE",
+      "SUPPORT_SA_MULTI_USER",
+    ]
   }
   defines += ["SAMGR_USE_FFRT"]
 }
@@ -992,7 +1074,10 @@ ohos_unittest("MockSystemAbilityManagerTest") {
     defines += [ "SUPPORT_ACCESS_TOKEN" ]
   }
   if (samgr_support_multi_instance) {
-    defines += [ "SUPPORT_MULTI_INSTANCE" ]
+    defines += [
+      "SUPPORT_MULTI_INSTANCE",
+      "SUPPORT_SA_MULTI_USER",
+    ]
   }
   defines += ["SAMGR_USE_FFRT"]
 }
@@ -1105,12 +1190,13 @@ ohos_executable("ondemand") {
     "${samgr_services_dir}/test/unittest/src/mock_permission.cpp",
     "./src/ondemand_helper.cpp",
     "./src/ondemand_tool.cpp",
+    "./src/sa_status_change_mock.cpp",
   ]
   configs = [
     ":sam_test_config",
     "//foundation/systemabilitymgr/samgr/test/resource:coverage_flags",
   ]
-  deps = [ ":samgr_proxy_tdd" ]
+  deps = [ "${samgr_dir}/interfaces/innerkits/samgr_proxy" ]
 
   cflags = []
   if (target_cpu == "arm") {
@@ -1138,6 +1224,10 @@ ohos_executable("ondemand") {
     defines += [ "SUPPORT_ACCESS_TOKEN" ]
   }
   if (samgr_support_multi_instance) {
+    sources += [
+      "./src/ondemand_command.cpp",
+      "./src/ondemand_flow.cpp",
+    ]
     defines += [ "SUPPORT_MULTI_INSTANCE" ]
   }
   part_name = "samgr"
@@ -1251,7 +1341,14 @@ ohos_executable("TestTool") {
     defines += [ "SUPPORT_PENGLAI_MODE" ]
   }
   if (samgr_support_multi_instance) {
-    defines += [ "SUPPORT_MULTI_INSTANCE" ]
+    sources += [
+      "${samgr_services_dir}/source/multi_system_ability_manager.cpp",
+      "${samgr_services_dir}/source/user_lifecycle_manager.cpp",
+    ]
+    defines += [
+      "SUPPORT_MULTI_INSTANCE",
+      "SUPPORT_SA_MULTI_USER",
+    ]
   }
   defines += ["SAMGR_USE_FFRT"]
   part_name = "samgr"
@@ -1338,4 +1435,7 @@ group("unittest") {
 
     #":rust_samgr_test_client",
   ]
+  if (is_standard_system && samgr_support_multi_instance) {
+    deps += [ "//foundation/systemabilitymgr/samgr/interfaces/innerkits/rust/examples:samgr_rust_basic" ]
+  }
 }

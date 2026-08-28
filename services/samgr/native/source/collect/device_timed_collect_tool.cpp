@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,10 +26,43 @@
 using namespace std;
 
 namespace OHOS {
+namespace {
+constexpr char PREFERENCES_PATH[] = "/data/samgr/samgr.xml";
+constexpr char MULTI_USER_PREFERENCES_PATH_PREFIX[] = "/data/samgr/samgr_";
+constexpr char PREFERENCES_PATH_SUFFIX[] = ".xml";
+}
+
+PreferencesUtil::PreferencesUtil() : path_(GetPathForUser(BASE_USER)) {}
+
+PreferencesUtil::PreferencesUtil(int32_t userId) : path_(GetPathForUser(userId)) {}
+
 shared_ptr<PreferencesUtil> PreferencesUtil::GetInstance()
 {
     static std::shared_ptr<PreferencesUtil> instance = make_shared<PreferencesUtil>();
     return instance;
+}
+
+std::string PreferencesUtil::GetPathForUser(int32_t userId)
+{
+    if (userId == BASE_USER) {
+        return PREFERENCES_PATH;
+    }
+    return std::string(MULTI_USER_PREFERENCES_PATH_PREFIX) + std::to_string(userId) + PREFERENCES_PATH_SUFFIX;
+}
+
+int32_t PreferencesUtil::DeleteUserPreferences(int32_t userId)
+{
+    if (userId == BASE_USER || userId == SAMGR_INVALID_USER_ID) {
+        HILOGE("DeleteUserPreferences invalid userId:%{public}d", userId);
+        return ERR_INVALID_VALUE;
+    }
+    int32_t ret = NativePreferences::PreferencesHelper::DeletePreferences(GetPathForUser(userId));
+    if (ret != NativePreferences::E_OK) {
+        HILOGE("DeleteUserPreferences failed, userId:%{public}d, ret:%{public}d", userId, ret);
+        return ERR_INVALID_OPERATION;
+    }
+    HILOGD("DeleteUserPreferences done, userId:%{public}d", userId);
+    return ERR_OK;
 }
 
 bool PreferencesUtil::GetPreference()
@@ -37,9 +70,8 @@ bool PreferencesUtil::GetPreference()
     if (ptr_ != nullptr) {
         return true;
     }
-    std::string path = "/data/samgr/samgr.xml";
     int32_t errCode = ERR_INVALID_VALUE;
-    ptr_ = NativePreferences::PreferencesHelper::GetPreferences(path, errCode);
+    ptr_ = NativePreferences::PreferencesHelper::GetPreferences(path_, errCode);
     if (ptr_ == nullptr) {
         HILOGE("GetPreference error code is %{public}d", errCode);
         return false;

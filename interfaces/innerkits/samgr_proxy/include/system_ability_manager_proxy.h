@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -320,6 +320,26 @@ public:
     int32_t SubscribeSystemAbilityInImage(int32_t systemAbilityId,
         const sptr<ISystemAbilityStatusChange>& listener) override;
     int32_t OnUserStateChanged(int32_t userId, SamgrUserState userState) override;
+#ifdef SUPPORT_MULTI_INSTANCE
+    sptr<IRemoteObject> GetSystemAbility(int32_t systemAbilityId, int32_t userId) override;
+    sptr<IRemoteObject> CheckSystemAbility(int32_t systemAbilityId, int32_t userId) override;
+    sptr<IRemoteObject> CheckSystemAbilityByUserId(
+        int32_t systemAbilityId, bool& isExist, int32_t userId) override;
+    int32_t GetSystemProcessInfo(int32_t systemAbilityId, SystemProcessInfo& systemProcessInfo,
+        int32_t userId) override;
+    sptr<IRemoteObject> GetLocalAbilityManagerProxy(int32_t systemAbilityId, int32_t userId) override;
+    sptr<IRemoteObject> LoadSystemAbility(int32_t systemAbilityId, int32_t timeout, int32_t userId) override;
+    int32_t LoadSystemAbility(int32_t systemAbilityId, const sptr<ISystemAbilityLoadCallback>& callback,
+        int32_t userId) override;
+    int32_t SubscribeSystemAbility(int32_t systemAbilityId,
+        const sptr<ISystemAbilityStatusChange>& listener, int32_t userId) override;
+    int32_t UnSubscribeSystemAbility(int32_t systemAbilityId,
+        const sptr<ISystemAbilityStatusChange>& listener, int32_t userId) override;
+    int32_t SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener,
+        int32_t userId) override;
+    int32_t UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener,
+        int32_t userId) override;
+#endif
     int32_t SetSamgrIpcPrior(bool enable) override;
 private:
     sptr<IRemoteObject> GetSystemAbilityWrapper(int32_t systemAbilityId, const std::string& deviceId = "");

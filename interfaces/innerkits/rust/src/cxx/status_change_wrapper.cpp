@@ -1,4 +1,4 @@
-// Copyright (C) 2024 Huawei Device Co., Ltd.
+// Copyright (C) 2024-2026 Huawei Device Co., Ltd.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -40,10 +40,9 @@ void SystemAbilityStatusChangeWrapper::OnRemoveSystemAbility(int32_t systemAbili
     onRemove_(systemAbilityId, deviceId);
 }
 
-SystemProcessStatusChangeWrapper::SystemProcessStatusChangeWrapper(const sptr<IRemoteObject> &impl,
+SystemProcessStatusChangeWrapper::SystemProcessStatusChangeWrapper(
     const rust::Fn<void(const OHOS::SamgrRust::SystemProcessInfo &systemProcessInfo)> onStart,
     const rust::Fn<void(const OHOS::SamgrRust::SystemProcessInfo &systemProcessInfo)> onStop)
-    : IRemoteProxy<ISystemProcessStatusChange>(impl)
 {
     this->onStart_ = onStart;
     this->onStop_ = onStop;
@@ -80,6 +79,17 @@ void UnSubscribeSystemAbilityHandler::UnSubscribe()
     SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager()->UnSubscribeSystemAbility(said_, listener_);
 }
 
+#ifdef SUPPORT_MULTI_INSTANCE
+int32_t UnSubscribeSystemAbilityHandler::UnSubscribeSystemAbilityByUserId(int32_t userId)
+{
+    auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (sysm == nullptr) {
+        return -1;
+    }
+    return sysm->UnSubscribeSystemAbility(said_, listener_, userId);
+}
+#endif
+
 UnSubscribeSystemProcessHandler::UnSubscribeSystemProcessHandler(sptr<ISystemProcessStatusChange> listener)
 {
     this->listener_ = listener;
@@ -89,6 +99,17 @@ void UnSubscribeSystemProcessHandler::UnSubscribe()
 {
     SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager()->UnSubscribeSystemProcess(listener_);
 }
+
+#ifdef SUPPORT_MULTI_INSTANCE
+int32_t UnSubscribeSystemProcessHandler::UnSubscribeSystemProcessByUserId(int32_t userId)
+{
+    auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (sysm == nullptr) {
+        return -1;
+    }
+    return sysm->UnSubscribeSystemProcess(listener_, userId);
+}
+#endif
 
 } // namespace SamgrRust
 } // namespace OHOS

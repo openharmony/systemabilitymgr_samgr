@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -43,6 +43,65 @@ constexpr int32_t TEST_ID_VAILD = 9999;
 constexpr int32_t TEST_ID_INVAILD = 9990;
 constexpr int32_t TEST_SAID_INVALID = 54321;
 constexpr int64_t EXTRA_DATA_ID = 1;
+
+#ifdef SUPPORT_MULTI_INSTANCE
+constexpr int32_t TEST_USER_ID = 100;
+constexpr int32_t TEST_PROCESS_PID = 1000;
+constexpr int32_t TEST_PROCESS_UID = 1001;
+constexpr int32_t TEST_TIMEOUT_ABOVE_MAX = 100;
+const std::string TEST_PROCESS_NAME = "samgr_test_process";
+
+class MultiUserProxyRemoteStub : public MockIroSendrequesteStub {
+public:
+    MultiUserProxyRemoteStub()
+    {
+        remoteObject_ = new TestTransactionService();
+    }
+
+    int32_t OnRemoteRequest(uint32_t code, MessageParcel& data, MessageParcel& reply, MessageOption&) override
+    {
+        lastCode_ = code;
+        if (requestResult_ != ERR_NONE) {
+            return requestResult_;
+        }
+        if (!writeReply_) {
+            return ERR_NONE;
+        }
+        switch (static_cast<SamgrInterfaceCode>(code)) {
+            case SamgrInterfaceCode::GET_SYSTEM_ABILITY_WITH_USERID_TRANSACTION:
+            case SamgrInterfaceCode::CHECK_SYSTEM_ABILITY_WITH_USERID_TRANSACTION:
+            case SamgrInterfaceCode::GET_LOCAL_ABILITY_MANAGER_PROXY_WITH_USERID_TRANSACTION:
+                return reply.WriteRemoteObject(remoteObject_) ? ERR_NONE : ERR_FLATTEN_OBJECT;
+            case SamgrInterfaceCode::CHECK_SYSTEM_ABILITY_BY_USERID_TRANSACTION:
+                return reply.WriteRemoteObject(remoteObject_) &&
+                    (!writeExist_ || reply.WriteBool(true)) ? ERR_NONE : ERR_FLATTEN_OBJECT;
+            case SamgrInterfaceCode::GET_SYSTEM_PROCESS_INFO_WITH_USERID_TRANSACTION:
+                if (!writeProcessInfoFields_) {
+                    return reply.WriteInt32(responseResult_) ? ERR_NONE : ERR_FLATTEN_OBJECT;
+                }
+                return reply.WriteInt32(responseResult_) && reply.WriteString(TEST_PROCESS_NAME) &&
+                    reply.WriteInt32(TEST_PROCESS_PID) && reply.WriteInt32(TEST_PROCESS_UID) ?
+                    ERR_NONE : ERR_FLATTEN_OBJECT;
+            case SamgrInterfaceCode::LOAD_SYSTEM_ABILITY_WITH_USERID_TRANSACTION:
+            case SamgrInterfaceCode::SUBSCRIBE_SYSTEM_ABILITY_WITH_USERID_TRANSACTION:
+            case SamgrInterfaceCode::UNSUBSCRIBE_SYSTEM_ABILITY_WITH_USERID_TRANSACTION:
+            case SamgrInterfaceCode::SUBSCRIBE_SYSTEM_PROCESS_WITH_USERID_TRANSACTION:
+            case SamgrInterfaceCode::UNSUBSCRIBE_SYSTEM_PROCESS_WITH_USERID_TRANSACTION:
+                return reply.WriteInt32(responseResult_) ? ERR_NONE : ERR_FLATTEN_OBJECT;
+            default:
+                return ERR_INVALID_VALUE;
+        }
+    }
+
+    sptr<IRemoteObject> remoteObject_;
+    int32_t requestResult_ = ERR_NONE;
+    int32_t responseResult_ = ERR_OK;
+    uint32_t lastCode_ = 0;
+    bool writeReply_ = true;
+    bool writeExist_ = true;
+    bool writeProcessInfoFields_ = true;
+};
+#endif
 }
 void SystemProcessStatusChange::OnSystemProcessStarted(SystemProcessInfo& systemProcessInfo)
 {
@@ -1434,7 +1493,7 @@ HWTEST_F(SystemAbilityMgrProxyTest, GetRunningSaExtensionInfoList001, TestSize.L
 
     std::vector<ISystemAbilityManager::SaExtensionInfo> infoList;
     int32_t ret = samgrProxy->GetRunningSaExtensionInfoList("backup_test", infoList);
-    EXPECT_EQ(ret, 1);
+    EXPECT_EQ(ret, ERR_OK);
     EXPECT_EQ(infoList.size(), 0);
 }
 
@@ -1869,6 +1928,315 @@ HWTEST_F(SystemAbilityMgrProxyTest, OnUserStateChanged002, TestSize.Level3)
 
 #ifdef SUPPORT_MULTI_INSTANCE
 /**
+ * @tc.name: MultiUserProxy001
+ * @tc.desc: Test multi-user proxy APIs reject invalid system ability IDs
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, MultiUserProxy001, TestSize.Level3)
+{
+    constexpr int32_t testUserId = 100;
+    sptr<SystemAbilityManagerProxy> proxy = new SystemAbilityManagerProxy(nullptr);
+    bool isExist = false;
+    SystemProcessInfo processInfo;
+
+    EXPECT_EQ(proxy->GetSystemAbility(TEST_ID_NORANGE_SAID, testUserId), nullptr);
+    EXPECT_EQ(proxy->CheckSystemAbility(TEST_ID_NORANGE_SAID, testUserId), nullptr);
+    EXPECT_EQ(proxy->CheckSystemAbilityByUserId(TEST_ID_NORANGE_SAID, isExist, testUserId), nullptr);
+    EXPECT_EQ(proxy->GetSystemProcessInfo(TEST_ID_NORANGE_SAID, processInfo, testUserId), ERR_INVALID_VALUE);
+    EXPECT_EQ(proxy->GetLocalAbilityManagerProxy(TEST_ID_NORANGE_SAID, testUserId), nullptr);
+    EXPECT_EQ(proxy->LoadSystemAbility(TEST_ID_NORANGE_SAID, nullptr, testUserId), ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: MultiUserProxy002
+ * @tc.desc: Test multi-user subscription APIs validate null listeners
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, MultiUserProxy002, TestSize.Level3)
+{
+    constexpr int32_t testUserId = 100;
+    sptr<SystemAbilityManagerProxy> proxy = new SystemAbilityManagerProxy(nullptr);
+    sptr<ISystemAbilityStatusChange> nullSaListener = nullptr;
+    sptr<ISystemProcessStatusChange> nullProcessListener = nullptr;
+
+    EXPECT_EQ(proxy->SubscribeSystemAbility(TEST_ID_VAILD, nullSaListener, testUserId), ERR_INVALID_VALUE);
+    EXPECT_EQ(proxy->UnSubscribeSystemAbility(TEST_ID_VAILD, nullSaListener, testUserId), ERR_INVALID_VALUE);
+    EXPECT_EQ(proxy->SubscribeSystemProcess(nullProcessListener, testUserId), ERR_INVALID_VALUE);
+    EXPECT_EQ(proxy->UnSubscribeSystemProcess(nullProcessListener, testUserId), ERR_INVALID_VALUE);
+    EXPECT_EQ(proxy->LoadSystemAbility(TEST_ID_VAILD, nullptr, testUserId), ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: MultiUserProxy003
+ * @tc.desc: Test multi-user proxy APIs reject a null remote endpoint
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, MultiUserProxy003, TestSize.Level3)
+{
+    constexpr int32_t testUserId = 100;
+    sptr<SystemAbilityManagerProxy> proxy = new SystemAbilityManagerProxy(nullptr);
+    SystemProcessInfo processInfo;
+    sptr<ISystemAbilityStatusChange> saListener = new SaStatusChangeMock();
+    sptr<ISystemProcessStatusChange> processListener = new SystemProcessStatusChange();
+
+    EXPECT_EQ(proxy->GetSystemAbility(TEST_ID_VAILD, testUserId), nullptr);
+    EXPECT_EQ(proxy->CheckSystemAbility(TEST_ID_VAILD, testUserId), nullptr);
+    EXPECT_EQ(proxy->GetSystemProcessInfo(TEST_ID_VAILD, processInfo, testUserId), ERR_INVALID_OPERATION);
+    EXPECT_EQ(proxy->GetLocalAbilityManagerProxy(TEST_ID_VAILD, testUserId), nullptr);
+    EXPECT_EQ(proxy->SubscribeSystemAbility(TEST_ID_VAILD, saListener, testUserId), ERR_INVALID_OPERATION);
+    EXPECT_EQ(proxy->UnSubscribeSystemAbility(TEST_ID_VAILD, saListener, testUserId), ERR_INVALID_OPERATION);
+    EXPECT_EQ(proxy->SubscribeSystemProcess(processListener, testUserId), ERR_INVALID_OPERATION);
+    EXPECT_EQ(proxy->UnSubscribeSystemProcess(processListener, testUserId), ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: MultiUserProxy004
+ * @tc.desc: Test multi-user proxy IPC requests and reply decoding
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, MultiUserProxy004, TestSize.Level3)
+{
+    sptr<MultiUserProxyRemoteStub> remote = new MultiUserProxyRemoteStub();
+    sptr<SystemAbilityManagerProxy> proxy = new SystemAbilityManagerProxy(remote);
+    sptr<ISystemAbilityStatusChange> saListener = new SaStatusChangeMock();
+    sptr<ISystemProcessStatusChange> processListener = new SystemProcessStatusChange();
+    sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
+    SystemProcessInfo processInfo;
+    bool isExist = false;
+
+    EXPECT_EQ(proxy->GetSystemAbility(TEST_ID_VAILD, TEST_USER_ID), remote->remoteObject_);
+    EXPECT_EQ(remote->lastCode_, static_cast<uint32_t>(SamgrInterfaceCode::GET_SYSTEM_ABILITY_WITH_USERID_TRANSACTION));
+    EXPECT_EQ(proxy->CheckSystemAbility(TEST_ID_VAILD, TEST_USER_ID), remote->remoteObject_);
+    EXPECT_EQ(remote->lastCode_,
+        static_cast<uint32_t>(SamgrInterfaceCode::CHECK_SYSTEM_ABILITY_WITH_USERID_TRANSACTION));
+    EXPECT_EQ(proxy->CheckSystemAbilityByUserId(TEST_ID_VAILD, isExist, TEST_USER_ID), remote->remoteObject_);
+    EXPECT_TRUE(isExist);
+    EXPECT_EQ(remote->lastCode_, static_cast<uint32_t>(SamgrInterfaceCode::CHECK_SYSTEM_ABILITY_BY_USERID_TRANSACTION));
+    EXPECT_EQ(proxy->GetSystemProcessInfo(TEST_ID_VAILD, processInfo, TEST_USER_ID), ERR_OK);
+    EXPECT_EQ(processInfo.processName, TEST_PROCESS_NAME);
+    EXPECT_EQ(processInfo.pid, TEST_PROCESS_PID);
+    EXPECT_EQ(processInfo.uid, TEST_PROCESS_UID);
+    EXPECT_EQ(remote->lastCode_,
+        static_cast<uint32_t>(SamgrInterfaceCode::GET_SYSTEM_PROCESS_INFO_WITH_USERID_TRANSACTION));
+    EXPECT_EQ(proxy->GetLocalAbilityManagerProxy(TEST_ID_VAILD, TEST_USER_ID), remote->remoteObject_);
+    EXPECT_EQ(remote->lastCode_,
+        static_cast<uint32_t>(SamgrInterfaceCode::GET_LOCAL_ABILITY_MANAGER_PROXY_WITH_USERID_TRANSACTION));
+    EXPECT_EQ(proxy->LoadSystemAbility(TEST_ID_VAILD, callback, TEST_USER_ID), ERR_OK);
+    EXPECT_EQ(remote->lastCode_,
+        static_cast<uint32_t>(SamgrInterfaceCode::LOAD_SYSTEM_ABILITY_WITH_USERID_TRANSACTION));
+    EXPECT_EQ(proxy->SubscribeSystemAbility(TEST_ID_VAILD, saListener, TEST_USER_ID), ERR_OK);
+    EXPECT_EQ(remote->lastCode_,
+        static_cast<uint32_t>(SamgrInterfaceCode::SUBSCRIBE_SYSTEM_ABILITY_WITH_USERID_TRANSACTION));
+    EXPECT_EQ(proxy->UnSubscribeSystemAbility(TEST_ID_VAILD, saListener, TEST_USER_ID), ERR_OK);
+    EXPECT_EQ(remote->lastCode_,
+        static_cast<uint32_t>(SamgrInterfaceCode::UNSUBSCRIBE_SYSTEM_ABILITY_WITH_USERID_TRANSACTION));
+    EXPECT_EQ(proxy->SubscribeSystemProcess(processListener, TEST_USER_ID), ERR_OK);
+    EXPECT_EQ(remote->lastCode_,
+        static_cast<uint32_t>(SamgrInterfaceCode::SUBSCRIBE_SYSTEM_PROCESS_WITH_USERID_TRANSACTION));
+    EXPECT_EQ(proxy->UnSubscribeSystemProcess(processListener, TEST_USER_ID), ERR_OK);
+    EXPECT_EQ(remote->lastCode_,
+        static_cast<uint32_t>(SamgrInterfaceCode::UNSUBSCRIBE_SYSTEM_PROCESS_WITH_USERID_TRANSACTION));
+}
+
+/**
+ * @tc.name: MultiUserProxy005
+ * @tc.desc: Test multi-user proxy propagates IPC request failures
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, MultiUserProxy005, TestSize.Level3)
+{
+    sptr<MultiUserProxyRemoteStub> remote = new MultiUserProxyRemoteStub();
+    remote->requestResult_ = ERR_INVALID_OPERATION;
+    sptr<SystemAbilityManagerProxy> proxy = new SystemAbilityManagerProxy(remote);
+    sptr<ISystemAbilityStatusChange> saListener = new SaStatusChangeMock();
+    sptr<ISystemProcessStatusChange> processListener = new SystemProcessStatusChange();
+    sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
+    SystemProcessInfo processInfo;
+    bool isExist = false;
+
+    EXPECT_EQ(proxy->GetSystemAbility(TEST_ID_VAILD, TEST_USER_ID), nullptr);
+    EXPECT_EQ(proxy->CheckSystemAbility(TEST_ID_VAILD, TEST_USER_ID), nullptr);
+    EXPECT_EQ(proxy->CheckSystemAbilityByUserId(TEST_ID_VAILD, isExist, TEST_USER_ID), nullptr);
+    EXPECT_EQ(proxy->GetSystemProcessInfo(TEST_ID_VAILD, processInfo, TEST_USER_ID), ERR_INVALID_OPERATION);
+    EXPECT_EQ(proxy->GetLocalAbilityManagerProxy(TEST_ID_VAILD, TEST_USER_ID), nullptr);
+    EXPECT_EQ(proxy->LoadSystemAbility(TEST_ID_VAILD, callback, TEST_USER_ID), ERR_INVALID_OPERATION);
+    EXPECT_EQ(proxy->SubscribeSystemAbility(TEST_ID_VAILD, saListener, TEST_USER_ID), ERR_INVALID_OPERATION);
+    EXPECT_EQ(proxy->UnSubscribeSystemAbility(TEST_ID_VAILD, saListener, TEST_USER_ID), ERR_INVALID_OPERATION);
+    EXPECT_EQ(proxy->SubscribeSystemProcess(processListener, TEST_USER_ID), ERR_INVALID_OPERATION);
+    EXPECT_EQ(proxy->UnSubscribeSystemProcess(processListener, TEST_USER_ID), ERR_INVALID_OPERATION);
+}
+
+/**
+ * @tc.name: MultiUserProxy006
+ * @tc.desc: Test multi-user proxy rejects malformed IPC replies
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, MultiUserProxy006, TestSize.Level3)
+{
+    sptr<MultiUserProxyRemoteStub> remote = new MultiUserProxyRemoteStub();
+    remote->writeReply_ = false;
+    sptr<SystemAbilityManagerProxy> proxy = new SystemAbilityManagerProxy(remote);
+    sptr<ISystemAbilityStatusChange> saListener = new SaStatusChangeMock();
+    sptr<ISystemProcessStatusChange> processListener = new SystemProcessStatusChange();
+    sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
+    SystemProcessInfo processInfo;
+    bool isExist = false;
+
+    EXPECT_EQ(proxy->GetSystemAbility(TEST_ID_VAILD, TEST_USER_ID), nullptr);
+    EXPECT_EQ(proxy->CheckSystemAbility(TEST_ID_VAILD, TEST_USER_ID), nullptr);
+    EXPECT_EQ(proxy->CheckSystemAbilityByUserId(TEST_ID_VAILD, isExist, TEST_USER_ID), nullptr);
+    EXPECT_EQ(proxy->GetSystemProcessInfo(TEST_ID_VAILD, processInfo, TEST_USER_ID), ERR_FLATTEN_OBJECT);
+    EXPECT_EQ(proxy->GetLocalAbilityManagerProxy(TEST_ID_VAILD, TEST_USER_ID), nullptr);
+    EXPECT_EQ(proxy->LoadSystemAbility(TEST_ID_VAILD, callback, TEST_USER_ID), ERR_FLATTEN_OBJECT);
+    EXPECT_EQ(proxy->SubscribeSystemAbility(TEST_ID_VAILD, saListener, TEST_USER_ID), ERR_FLATTEN_OBJECT);
+    EXPECT_EQ(proxy->UnSubscribeSystemAbility(TEST_ID_VAILD, saListener, TEST_USER_ID), ERR_FLATTEN_OBJECT);
+    EXPECT_EQ(proxy->SubscribeSystemProcess(processListener, TEST_USER_ID), ERR_FLATTEN_OBJECT);
+    EXPECT_EQ(proxy->UnSubscribeSystemProcess(processListener, TEST_USER_ID), ERR_FLATTEN_OBJECT);
+}
+
+/**
+ * @tc.name: MultiUserProxy007
+ * @tc.desc: Test multi-user process-info proxy returns a service error from its reply
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, MultiUserProxy007, TestSize.Level3)
+{
+    sptr<MultiUserProxyRemoteStub> remote = new MultiUserProxyRemoteStub();
+    remote->responseResult_ = ERR_INVALID_VALUE;
+    sptr<SystemAbilityManagerProxy> proxy = new SystemAbilityManagerProxy(remote);
+    SystemProcessInfo processInfo;
+
+    EXPECT_EQ(proxy->GetSystemProcessInfo(TEST_ID_VAILD, processInfo, TEST_USER_ID), ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: MultiUserProxy008
+ * @tc.desc: Test multi-user check proxy rejects a reply without the existence flag
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, MultiUserProxy008, TestSize.Level3)
+{
+    sptr<MultiUserProxyRemoteStub> remote = new MultiUserProxyRemoteStub();
+    remote->writeExist_ = false;
+    sptr<SystemAbilityManagerProxy> proxy = new SystemAbilityManagerProxy(remote);
+    bool isExist = false;
+
+    EXPECT_EQ(proxy->CheckSystemAbilityByUserId(TEST_ID_VAILD, isExist, TEST_USER_ID), nullptr);
+}
+
+/**
+ * @tc.name: MultiUserProxy009
+ * @tc.desc: Test synchronous multi-user load timeout normalization and request failure
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, MultiUserProxy009, TestSize.Level3)
+{
+    sptr<MultiUserProxyRemoteStub> remote = new MultiUserProxyRemoteStub();
+    remote->responseResult_ = ERR_INVALID_OPERATION;
+    sptr<SystemAbilityManagerProxy> proxy = new SystemAbilityManagerProxy(remote);
+
+    EXPECT_EQ(proxy->LoadSystemAbility(TEST_ID_VAILD, -1, TEST_USER_ID), nullptr);
+    EXPECT_EQ(proxy->LoadSystemAbility(TEST_ID_VAILD, 0, TEST_USER_ID), nullptr);
+    EXPECT_EQ(proxy->LoadSystemAbility(TEST_ID_VAILD, TEST_TIMEOUT_ABOVE_MAX, TEST_USER_ID), nullptr);
+}
+
+/**
+ * @tc.name: MultiUserProxy010
+ * @tc.desc: Test synchronous multi-user load returns null when the callback times out
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, MultiUserProxy010, TestSize.Level3)
+{
+    sptr<MultiUserProxyRemoteStub> remote = new MultiUserProxyRemoteStub();
+    sptr<SystemAbilityManagerProxy> proxy = new SystemAbilityManagerProxy(remote);
+
+    EXPECT_EQ(proxy->LoadSystemAbility(TEST_ID_VAILD, 0, TEST_USER_ID), nullptr);
+}
+
+/**
+ * @tc.name: MultiUserProxy011
+ * @tc.desc: Test multi-user proxy handles replies without a remote object.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, MultiUserProxy011, TestSize.Level3)
+{
+    sptr<MultiUserProxyRemoteStub> remote = new MultiUserProxyRemoteStub();
+    remote->remoteObject_ = nullptr;
+    sptr<SystemAbilityManagerProxy> proxy = new SystemAbilityManagerProxy(remote);
+    bool isExist = false;
+
+    EXPECT_EQ(proxy->GetSystemAbility(TEST_ID_VAILD, TEST_USER_ID), nullptr);
+    EXPECT_EQ(proxy->CheckSystemAbility(TEST_ID_VAILD, TEST_USER_ID), nullptr);
+    EXPECT_EQ(proxy->CheckSystemAbilityByUserId(TEST_ID_VAILD, isExist, TEST_USER_ID), nullptr);
+    EXPECT_EQ(proxy->GetLocalAbilityManagerProxy(TEST_ID_VAILD, TEST_USER_ID), nullptr);
+    EXPECT_EQ(proxy->LoadSystemAbility(TEST_ID_VAILD, nullptr, TEST_USER_ID), ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: MultiUserProxy012
+ * @tc.desc: Test multi-user process-info proxy rejects incomplete process data.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, MultiUserProxy012, TestSize.Level3)
+{
+    sptr<MultiUserProxyRemoteStub> remote = new MultiUserProxyRemoteStub();
+    remote->writeProcessInfoFields_ = false;
+    sptr<SystemAbilityManagerProxy> proxy = new SystemAbilityManagerProxy(remote);
+    SystemProcessInfo processInfo;
+
+    EXPECT_EQ(proxy->GetSystemProcessInfo(TEST_ID_VAILD, processInfo, TEST_USER_ID), ERR_FLATTEN_OBJECT);
+}
+
+/**
+ * @tc.name: MultiUserProxy013
+ * @tc.desc: Test multi-user proxy rejects listeners and callbacks without remote objects.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, MultiUserProxy013, TestSize.Level3)
+{
+    class NullRemoteSaListener final : public SaStatusChangeMock {
+    public:
+        sptr<IRemoteObject> AsObject() override { return nullptr; }
+    };
+    class NullRemoteProcessListener final : public SystemProcessStatusChange {
+    public:
+        sptr<IRemoteObject> AsObject() override { return nullptr; }
+    };
+    class NullRemoteLoadCallback final : public SystemAbilityLoadCallbackMock {
+    public:
+        sptr<IRemoteObject> AsObject() override { return nullptr; }
+    };
+    sptr<MultiUserProxyRemoteStub> remote = new MultiUserProxyRemoteStub();
+    sptr<SystemAbilityManagerProxy> proxy = new SystemAbilityManagerProxy(remote);
+    sptr<ISystemAbilityStatusChange> saListener = new NullRemoteSaListener();
+    sptr<ISystemProcessStatusChange> processListener = new NullRemoteProcessListener();
+    sptr<ISystemAbilityLoadCallback> callback = new NullRemoteLoadCallback();
+
+    EXPECT_EQ(proxy->LoadSystemAbility(TEST_ID_VAILD, callback, TEST_USER_ID), ERR_FLATTEN_OBJECT);
+    EXPECT_EQ(proxy->SubscribeSystemAbility(TEST_ID_VAILD, saListener, TEST_USER_ID), ERR_FLATTEN_OBJECT);
+    EXPECT_EQ(proxy->UnSubscribeSystemAbility(TEST_ID_VAILD, saListener, TEST_USER_ID), ERR_FLATTEN_OBJECT);
+    EXPECT_EQ(proxy->SubscribeSystemProcess(processListener, TEST_USER_ID), ERR_FLATTEN_OBJECT);
+    EXPECT_EQ(proxy->UnSubscribeSystemProcess(processListener, TEST_USER_ID), ERR_FLATTEN_OBJECT);
+}
+
+/**
+ * @tc.name: MultiUserProxy014
+ * @tc.desc: Test multi-user proxy validates an invalid ability ID before a valid callback or listener.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, MultiUserProxy014, TestSize.Level3)
+{
+    sptr<MultiUserProxyRemoteStub> remote = new MultiUserProxyRemoteStub();
+    sptr<SystemAbilityManagerProxy> proxy = new SystemAbilityManagerProxy(remote);
+    sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
+    sptr<ISystemAbilityStatusChange> listener = new SaStatusChangeMock();
+
+    EXPECT_EQ(proxy->LoadSystemAbility(TEST_ID_NORANGE_SAID, callback, TEST_USER_ID), ERR_INVALID_VALUE);
+    EXPECT_EQ(proxy->SubscribeSystemAbility(TEST_ID_NORANGE_SAID, listener, TEST_USER_ID), ERR_INVALID_VALUE);
+    EXPECT_EQ(proxy->UnSubscribeSystemAbility(TEST_ID_NORANGE_SAID, listener, TEST_USER_ID), ERR_INVALID_VALUE);
+}
+
+/**
  * @tc.name: OnUserStateChanged003
  * @tc.desc: Test OnUserStateChanged with remote nullptr
  * @tc.type: FUNC
@@ -1883,6 +2251,22 @@ HWTEST_F(SystemAbilityMgrProxyTest, OnUserStateChanged003, TestSize.Level3)
     static_cast<IRemoteProxy<ISystemAbilityManager>*>(samgrProxy.GetRefPtr())->beforeMagic_ = BEFORE_MAGIC;
     EXPECT_EQ(res, ERR_INVALID_OPERATION);
     DTEST_LOG << " OnUserStateChanged003 end " << std::endl;
+}
+
+/**
+ * @tc.name: MultiUserRemoteMissing001
+ * @tc.desc: Verify user-aware proxy APIs reject an absent remote object.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrProxyTest, MultiUserRemoteMissing001, TestSize.Level3)
+{
+    sptr<SystemAbilityManagerProxy> proxy = new SystemAbilityManagerProxy(nullptr);
+    ASSERT_NE(proxy, nullptr);
+    bool isExist = false;
+    EXPECT_EQ(proxy->GetSystemAbility(TEST_ID_VAILD, TEST_USER_ID), nullptr);
+    EXPECT_EQ(proxy->CheckSystemAbility(TEST_ID_VAILD, TEST_USER_ID), nullptr);
+    EXPECT_EQ(proxy->CheckSystemAbilityByUserId(TEST_ID_VAILD, isExist, TEST_USER_ID), nullptr);
+    EXPECT_EQ(proxy->GetLocalAbilityManagerProxy(TEST_ID_VAILD, TEST_USER_ID), nullptr);
 }
 #endif
 

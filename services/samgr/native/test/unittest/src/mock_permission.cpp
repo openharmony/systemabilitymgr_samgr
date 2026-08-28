@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,12 +26,13 @@ void SamMockPermission::MockPermission()
 #ifdef SUPPORT_ACCESS_TOKEN
     static const char *PERMS[] = {
         "ohos.permission.DISTRIBUTED_DATASYNC",
-        "ohos.permission.ACCESS_EXT_SYSTEM_ABILITY"
+        "ohos.permission.ACCESS_EXT_SYSTEM_ABILITY",
+        "ohos.permission.CONTROL_SVC_CMD"
     };
     uint64_t tokenId;
     NativeTokenInfoParams infoInstance = {
         .dcapsNum = 0,
-        .permsNum = 1,
+        .permsNum = 3,
         .aclsNum = 0,
         .dcaps = nullptr,
         .perms = PERMS,

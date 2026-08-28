@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,9 @@
 #include "base_system_ability_manager.h"
 #include "datetime_ex.h"
 #include "device_timed_collect.h"
+#ifdef PREFERENCES_ENABLE
+#include "device_timed_collect_tool.h"
+#endif
 #ifdef SUPPORT_DEVICE_MANAGER
 #include "device_networking_collect.h"
 #endif
@@ -59,7 +62,7 @@ void DeviceStatusCollectManager::Init(const std::list<SaProfile>& saProfiles)
     deviceSwitchCollect->Init(saProfiles);
     collectPluginMap_[SETTING_SWITCH] = deviceSwitchCollect;
 #endif
-    sptr<ICollectPlugin> timedCollect = new DeviceTimedCollect(this);
+    sptr<DeviceTimedCollect> timedCollect = new DeviceTimedCollect(this, manager_);
     timedCollect->Init(saProfiles);
     collectPluginMap_[TIMED_EVENT] = timedCollect;
     sptr<ICollectPlugin> refCountCollect = new RefCountCollect(this, manager_);
@@ -99,7 +102,7 @@ void DeviceStatusCollectManager::GetSaControlListByPersistEvent(const OnDemandEv
     std::list<SaControlInfo>& saControlList)
 {
 #ifdef PREFERENCES_ENABLE
-    std::shared_ptr<PreferencesUtil> preferencesUtil = PreferencesUtil::GetInstance();
+    std::shared_ptr<PreferencesUtil> preferencesUtil = CreatePreferencesUtil();
     if (preferencesUtil == nullptr) {
         HILOGW("GetSaControlListByPersistEvent preferencesUtil is nullptr");
         return;
@@ -508,7 +511,7 @@ void DeviceStatusCollectManager::PersistOnDemandEvent(int32_t systemAbilityId, O
     const std::vector<OnDemandEvent>& events)
 {
 #ifdef PREFERENCES_ENABLE
-    std::shared_ptr<PreferencesUtil> preferencesUtil = PreferencesUtil::GetInstance();
+    std::shared_ptr<PreferencesUtil> preferencesUtil = CreatePreferencesUtil();
     if (preferencesUtil == nullptr) {
         return;
     }
@@ -603,4 +606,16 @@ const std::vector<int32_t>& DeviceStatusCollectManager::GetLowMemPrepareList()
 {
     return collectPluginMap_[PARAM]->GetLowMemPrepareList();
 }
+
+#ifdef PREFERENCES_ENABLE
+std::shared_ptr<PreferencesUtil> DeviceStatusCollectManager::CreatePreferencesUtil() const
+{
+    auto manager = manager_.lock();
+    if (manager == nullptr) {
+        HILOGW("DeviceStatusCollectManager manager is nullptr");
+        return nullptr;
+    }
+    return std::make_shared<PreferencesUtil>(manager->GetUserId());
+}
+#endif
 }  // namespace OHOS

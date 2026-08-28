@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -227,6 +227,56 @@ private:
     {
         return stub->OnUserStateChangedInner(data, reply);
     }
+    static int32_t LocalGetSystemAbilityWithUserId(SystemAbilityManagerStub* stub,
+        MessageParcel& data, MessageParcel& reply)
+    {
+        return stub->GetSystemAbilityWithUserIdInner(data, reply);
+    }
+    static int32_t LocalCheckSystemAbilityWithUserId(SystemAbilityManagerStub* stub,
+        MessageParcel& data, MessageParcel& reply)
+    {
+        return stub->CheckSystemAbilityWithUserIdInner(data, reply);
+    }
+    static int32_t LocalCheckSystemAbilityByUserId(SystemAbilityManagerStub* stub,
+        MessageParcel& data, MessageParcel& reply)
+    {
+        return stub->CheckSystemAbilityByUserIdInner(data, reply);
+    }
+    static int32_t LocalGetSystemProcessInfoWithUserId(SystemAbilityManagerStub* stub,
+        MessageParcel& data, MessageParcel& reply)
+    {
+        return stub->GetSystemProcessInfoWithUserIdInner(data, reply);
+    }
+    static int32_t LocalGetLocalAbilityManagerProxyWithUserId(SystemAbilityManagerStub* stub,
+        MessageParcel& data, MessageParcel& reply)
+    {
+        return stub->GetLocalAbilityManagerProxyWithUserIdInner(data, reply);
+    }
+    static int32_t LocalLoadSystemAbilityWithUserId(SystemAbilityManagerStub* stub,
+        MessageParcel& data, MessageParcel& reply)
+    {
+        return stub->LoadSystemAbilityWithUserIdInner(data, reply);
+    }
+    static int32_t LocalSubsSystemAbilityWithUserId(SystemAbilityManagerStub* stub,
+        MessageParcel& data, MessageParcel& reply)
+    {
+        return stub->SubsSystemAbilityWithUserIdInner(data, reply);
+    }
+    static int32_t LocalUnSubsSystemAbilityWithUserId(SystemAbilityManagerStub* stub,
+        MessageParcel& data, MessageParcel& reply)
+    {
+        return stub->UnSubsSystemAbilityWithUserIdInner(data, reply);
+    }
+    static int32_t LocalSubscribeSystemProcessWithUserId(SystemAbilityManagerStub* stub,
+        MessageParcel& data, MessageParcel& reply)
+    {
+        return stub->SubscribeSystemProcessWithUserIdInner(data, reply);
+    }
+    static int32_t LocalUnSubscribeSystemProcessWithUserId(SystemAbilityManagerStub* stub,
+        MessageParcel& data, MessageParcel& reply)
+    {
+        return stub->UnSubscribeSystemProcessWithUserIdInner(data, reply);
+    }
 #endif
     int32_t ListSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
     int32_t SubsSystemAbilityInner(MessageParcel& data, MessageParcel& reply);
@@ -267,6 +317,16 @@ private:
     int32_t SetSamgrIpcPriorInner(MessageParcel& data, MessageParcel& reply);
 #ifdef SUPPORT_MULTI_INSTANCE
     int32_t OnUserStateChangedInner(MessageParcel& data, MessageParcel& reply);
+    int32_t GetSystemAbilityWithUserIdInner(MessageParcel& data, MessageParcel& reply);
+    int32_t CheckSystemAbilityWithUserIdInner(MessageParcel& data, MessageParcel& reply);
+    int32_t CheckSystemAbilityByUserIdInner(MessageParcel& data, MessageParcel& reply);
+    int32_t GetSystemProcessInfoWithUserIdInner(MessageParcel& data, MessageParcel& reply);
+    int32_t GetLocalAbilityManagerProxyWithUserIdInner(MessageParcel& data, MessageParcel& reply);
+    int32_t LoadSystemAbilityWithUserIdInner(MessageParcel& data, MessageParcel& reply);
+    int32_t SubsSystemAbilityWithUserIdInner(MessageParcel& data, MessageParcel& reply);
+    int32_t UnSubsSystemAbilityWithUserIdInner(MessageParcel& data, MessageParcel& reply);
+    int32_t SubscribeSystemProcessWithUserIdInner(MessageParcel& data, MessageParcel& reply);
+    int32_t UnSubscribeSystemProcessWithUserIdInner(MessageParcel& data, MessageParcel& reply);
 #endif
     static int32_t GetHapIdMultiuser(int32_t uid);
     int32_t LoadSACheck(int32_t systemAbilityId);
@@ -278,6 +338,7 @@ private:
 #endif
     void SetAbilityFuncMap();
     void SetProcessFuncMap();
+    void SetMultiInstanceFuncMap();
 
     using SystemAbilityManagerStubFunc =
         int32_t (*)(SystemAbilityManagerStub* stub, MessageParcel& data, MessageParcel& reply);

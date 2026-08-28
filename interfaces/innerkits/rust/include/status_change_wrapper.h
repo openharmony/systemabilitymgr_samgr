@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,11 +17,13 @@
 #define INTERFACES_INNERKITS_SAMGR_INCLUDE_STATUS_CHANGE_WRAPPER_H
 
 #include <memory>
+#include <cstdint>
 
 #include "cxx.h"
 #include "if_system_ability_manager.h"
 #include "ipc_object_stub.h"
 #include "system_ability_status_change_stub.h"
+#include "system_process_status_change_stub.h"
 
 namespace OHOS {
 namespace SamgrRust {
@@ -39,9 +41,9 @@ private:
     rust::Fn<void(int32_t systemAbilityId, const rust::str deviceId)> onRemove_;
 };
 
-class SystemProcessStatusChangeWrapper : public IRemoteProxy<ISystemProcessStatusChange> {
+class SystemProcessStatusChangeWrapper : public SystemProcessStatusChangeStub {
 public:
-    SystemProcessStatusChangeWrapper(const sptr<IRemoteObject> &impl,
+    SystemProcessStatusChangeWrapper(
         const rust::Fn<void(const OHOS::SamgrRust::SystemProcessInfo &systemProcessInfo)> onStart,
         const rust::Fn<void(const OHOS::SamgrRust::SystemProcessInfo &systemProcessInfo)> onStop);
     ~SystemProcessStatusChangeWrapper() = default;
@@ -58,6 +60,9 @@ class UnSubscribeSystemAbilityHandler {
 public:
     UnSubscribeSystemAbilityHandler(int32_t systemAbilityId, sptr<ISystemAbilityStatusChange> listener);
     void UnSubscribe();
+#ifdef SUPPORT_MULTI_INSTANCE
+    int32_t UnSubscribeSystemAbilityByUserId(int32_t userId);
+#endif
 
 private:
     int32_t said_;
@@ -68,6 +73,9 @@ class UnSubscribeSystemProcessHandler {
 public:
     UnSubscribeSystemProcessHandler(sptr<ISystemProcessStatusChange> listener);
     void UnSubscribe();
+#ifdef SUPPORT_MULTI_INSTANCE
+    int32_t UnSubscribeSystemProcessByUserId(int32_t userId);
+#endif
 
 private:
     sptr<ISystemProcessStatusChange> listener_;

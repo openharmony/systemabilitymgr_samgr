@@ -28,6 +28,7 @@
 #include "test_log.h"
 #define private public
 #define protected public
+#include "device_param_collect.h"
 #include "ipc_skeleton.h"
 #ifdef SUPPORT_ACCESS_TOKEN
 #include "accesstoken_kit.h"
@@ -49,6 +50,8 @@ constexpr int32_t TEST_EXCEPTION_HIGH_SA_ID = LAST_SYS_ABILITY_ID + 1;
 const std::u16string PROCESS_NAME = u"test_process_name";
 constexpr int32_t MAX_SUBSCRIBE_COUNT = 256;
 constexpr int32_t MAX_WAIT_TIME = 8000;
+constexpr int32_t USER_ID_1 = 100;
+
 
 class MockLocalAbilityManager : public IRemoteStub<ILocalAbilityManager> {
 public:
@@ -66,6 +69,14 @@ public:
         SystemAbilityExtensionPara* callback, bool isAsync) override { return ERR_OK; }
     int32_t ServiceControlCmd(int32_t fd, int32_t systemAbilityId,
         const std::vector<std::u16string>& args) override { return ERR_OK; }
+};
+
+class NonBaseUserAbilityManager final : public BaseSystemAbilityManager {
+public:
+    int32_t GetUserId() const override
+    {
+        return USER_ID_1;
+    }
 };
 
 void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
@@ -568,6 +579,51 @@ HWTEST_F(BaseSystemAbilityMgrTest, LoadSystemAbilityNoProfile001, TestSize.Level
 }
 
 /**
+ * @tc.name: LoadSystemAbilitySchedulerNull001
+ * @tc.desc: load system ability with a valid profile and no scheduler returns STATE_SCHEDULER_NULL
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, LoadSystemAbilitySchedulerNull001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    CommonSaProfile saProfile;
+    saProfile.process = PROCESS_NAME;
+    saProfile.distributed = false;
+    saProfile.saId = SAID;
+    saMgr->saProfileMap_[SAID] = saProfile;
+    saMgr->abilityStateScheduler_ = nullptr;
+    sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
+
+    int32_t result = saMgr->LoadSystemAbility(SAID, callback);
+
+    EXPECT_EQ(result, STATE_SCHEDULER_NULL);
+    saMgr->saProfileMap_.erase(SAID);
+}
+
+/**
+ * @tc.name: LoadSystemAbilitySchedulerInitialized001
+ * @tc.desc: load system ability with an initialized scheduler and no context returns GET_SA_CONTEXT_FAIL
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, LoadSystemAbilitySchedulerInitialized001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    CommonSaProfile saProfile;
+    saProfile.process = PROCESS_NAME;
+    saProfile.distributed = false;
+    saProfile.saId = SAID;
+    saMgr->saProfileMap_[SAID] = saProfile;
+    sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
+
+    int32_t result = saMgr->LoadSystemAbility(SAID, callback);
+
+    EXPECT_EQ(result, GET_SA_CONTEXT_FAIL);
+    saMgr->saProfileMap_.erase(SAID);
+}
+
+/**
  * @tc.name: UnloadSystemAbilityNoProfile001
  * @tc.desc: unload system ability with no profile returns PROFILE_NOT_EXIST
  * @tc.type: FUNC
@@ -639,6 +695,61 @@ HWTEST_F(BaseSystemAbilityMgrTest, GetOnDemandReasonExtraDataNull001, TestSize.L
     MessageParcel extraDataParcel;
     int32_t result = saMgr->GetOnDemandReasonExtraData(1, extraDataParcel);
     EXPECT_EQ(result, ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: GetLruIdleSystemAbilityProcCollectManagerNull001
+ * @tc.desc: get LRU idle process with no collect manager returns ERR_INVALID_VALUE
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, GetLruIdleSystemAbilityProcCollectManagerNull001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    saMgr->collectManager_ = nullptr;
+    std::vector<IdleProcessInfo> processInfos;
+
+    int32_t result = saMgr->GetLruIdleSystemAbilityProc(processInfos);
+
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_TRUE(processInfos.empty());
+}
+
+/**
+ * @tc.name: GetLruIdleSystemAbilityProcSchedulerNull001
+ * @tc.desc: get LRU idle process with no scheduler returns ERR_INVALID_VALUE
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, GetLruIdleSystemAbilityProcSchedulerNull001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    saMgr->abilityStateScheduler_ = nullptr;
+    std::vector<IdleProcessInfo> processInfos;
+
+    int32_t result = saMgr->GetLruIdleSystemAbilityProc(processInfos);
+
+    EXPECT_EQ(result, ERR_INVALID_VALUE);
+    EXPECT_TRUE(processInfos.empty());
+}
+
+/**
+ * @tc.name: GetLruIdleSystemAbilityProcInitialized001
+ * @tc.desc: get LRU idle process with non-null subsystems and no low-memory abilities returns ERR_OK
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, GetLruIdleSystemAbilityProcInitialized001, TestSize.Level1)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    sptr<DeviceParamCollect> deviceParamCollect = new DeviceParamCollect(saMgr->collectManager_);
+    saMgr->collectManager_->collectPluginMap_[PARAM] = deviceParamCollect;
+    std::vector<IdleProcessInfo> processInfos;
+
+    int32_t result = saMgr->GetLruIdleSystemAbilityProc(processInfos);
+
+    EXPECT_EQ(result, ERR_OK);
+    EXPECT_TRUE(processInfos.empty());
 }
 
 /**
@@ -2333,4 +2444,98 @@ HWTEST_F(BaseSystemAbilityMgrTest, CleanCallbackListenerNotifyLambdaExec001, Tes
     EXPECT_TRUE(saMgr->startingAbilityMap_.find(SAID) == saMgr->startingAbilityMap_.end());
     saMgr->workHandler_->CleanFfrt();
 }
+
+/**
+ * @tc.name: GetLocalAbilityManagerProxyMissingProfile001
+ * @tc.desc: Verify local manager lookup rejects an unknown system ability profile.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, GetLocalAbilityManagerProxyMissingProfile001, TestSize.Level1)
+{
+    auto manager = std::make_shared<BaseSystemAbilityManager>();
+    ASSERT_NE(manager, nullptr);
+    EXPECT_EQ(manager->GetLocalAbilityManagerProxy(OTHER_SAID), nullptr);
+}
+
+/**
+ * @tc.name: GetLocalAbilityManagerProxyProcessLookup001
+ * @tc.desc: Verify local manager lookup returns the registered process object.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, GetLocalAbilityManagerProxyProcessLookup001, TestSize.Level1)
+{
+    auto manager = std::make_shared<BaseSystemAbilityManager>();
+    ASSERT_NE(manager, nullptr);
+    constexpr int32_t systemAbilityId = 2230;
+    CommonSaProfile profile;
+    profile.saId = systemAbilityId;
+    profile.process = PROCESS_NAME;
+    manager->saProfileMap_[systemAbilityId] = profile;
+    sptr<IRemoteObject> process = new TestTransactionService();
+    manager->systemProcessMap_[PROCESS_NAME] = process;
+
+    EXPECT_EQ(manager->GetLocalAbilityManagerProxy(systemAbilityId), process);
+}
+
+HWTEST_F(BaseSystemAbilityMgrTest, SubscribeSystemAbilityInputValidation001, TestSize.Level1)
+{
+    auto manager = std::make_shared<BaseSystemAbilityManager>();
+    ASSERT_NE(manager, nullptr);
+    sptr<ISystemAbilityStatusChange> listener = new SaStatusChangeMock();
+    EXPECT_EQ(manager->SubscribeSystemAbility(-1, listener), ERR_INVALID_VALUE);
+    EXPECT_EQ(manager->SubscribeSystemAbility(SAID, nullptr), ERR_INVALID_VALUE);
+}
+
+HWTEST_F(BaseSystemAbilityMgrTest, UnSubscribeSystemProcessWithoutScheduler001, TestSize.Level1)
+{
+    auto manager = std::make_shared<BaseSystemAbilityManager>();
+    ASSERT_NE(manager, nullptr);
+    manager->abilityStateScheduler_ = nullptr;
+    manager->UnSubscribeSystemProcess(sptr<IRemoteObject>());
+    EXPECT_EQ(manager->abilityStateScheduler_, nullptr);
+}
+
+HWTEST_F(BaseSystemAbilityMgrTest, UnSubscribeSystemProcessWithScheduler001, TestSize.Level1)
+{
+    auto manager = std::make_shared<BaseSystemAbilityManager>();
+    ASSERT_NE(manager, nullptr);
+    manager->abilityStateScheduler_ =
+        std::make_shared<SystemAbilityStateScheduler>(std::weak_ptr<BaseSystemAbilityManager>{});
+    manager->UnSubscribeSystemProcess(sptr<IRemoteObject>());
+    EXPECT_NE(manager->abilityStateScheduler_, nullptr);
+    EXPECT_TRUE(manager->abilityStateScheduler_->processListeners_.empty());
+}
+
+HWTEST_F(BaseSystemAbilityMgrTest, IdleAndActiveBaseUserBranches001, TestSize.Level1)
+{
+    auto manager = std::make_shared<BaseSystemAbilityManager>();
+    ASSERT_NE(manager, nullptr);
+    sptr<IRemoteObject> ability = new TestTransactionService();
+    sptr<MockLocalAbilityManager> localManager = new MockLocalAbilityManager();
+    manager->abilityMap_[SAID].remoteObj = ability;
+    manager->systemProcessMap_[PROCESS_NAME] = localManager->AsObject();
+    int32_t delayTime = 0;
+
+    EXPECT_TRUE(manager->IdleSystemAbility(SAID, PROCESS_NAME, nlohmann::json::object(), delayTime));
+    EXPECT_TRUE(manager->ActiveSystemAbility(SAID, PROCESS_NAME, nlohmann::json::object()));
+    EXPECT_EQ(manager->GetUserId(), BASE_USER);
+}
+
+HWTEST_F(BaseSystemAbilityMgrTest, IdleAndActiveNonBaseUserBranches001, TestSize.Level1)
+{
+    auto manager = std::make_shared<NonBaseUserAbilityManager>();
+    ASSERT_NE(manager, nullptr);
+    sptr<IRemoteObject> ability = new TestTransactionService();
+    sptr<MockLocalAbilityManager> localManager = new MockLocalAbilityManager();
+    ASSERT_NE(ability, nullptr);
+    ASSERT_NE(localManager, nullptr);
+    manager->abilityMap_[SAID].remoteObj = ability;
+    manager->systemProcessMap_[PROCESS_NAME] = localManager->AsObject();
+    int32_t delayTime = 0;
+
+    EXPECT_TRUE(manager->IdleSystemAbility(SAID, PROCESS_NAME, nlohmann::json::object(), delayTime));
+    EXPECT_TRUE(manager->ActiveSystemAbility(SAID, PROCESS_NAME, nlohmann::json::object()));
+    EXPECT_EQ(manager->GetUserId(), 100);
+}
+
 } // namespace OHOS

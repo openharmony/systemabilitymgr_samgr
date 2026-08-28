@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,9 @@
 #define private public
 #include "common_event_collect.h"
 #include "device_status_collect_manager.h"
+#ifdef SUPPORT_MULTI_INSTANCE
+#include "multi_system_ability_manager.h"
+#endif
 #undef private
 
 using namespace std;
@@ -35,7 +38,7 @@ namespace OHOS {
 namespace {
 constexpr uint32_t COMMON_DIED_EVENT = 11;
 constexpr const char* COMMON_EVENT_ACTION_NAME = "common_event_action_name";
-constexpr const char* TEST_CPU_STAT_FILE = "test_cpu_stat";
+constexpr const char* TEST_CPU_STAT_FILE = "/data/local/tmp/test_cpu_stat";
 }
 
 
@@ -121,6 +124,42 @@ HWTEST_F(CommonEventCollectTest, OnStop002, TestSize.Level3)
     EXPECT_EQ(ERR_OK, ret);
     DTEST_LOG << " OnStop002 END" << std::endl;
 }
+
+#ifdef SUPPORT_MULTI_INSTANCE
+/**
+ * @tc.name: MultiUserMonitorRouting001
+ * @tc.desc: verify monitor lifecycle is skipped for a non-base user
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonEventCollectTest, MultiUserMonitorRouting001, TestSize.Level3)
+{
+    auto manager = std::make_shared<MultiSystemAbilityManager>(100);
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr, manager);
+    commonEventCollect->commonEventNames_.insert("multi_user_event");
+    EXPECT_EQ(ERR_OK, commonEventCollect->OnStart());
+    EXPECT_NE(commonEventCollect->workHandler_, nullptr);
+    EXPECT_EQ(ERR_OK, commonEventCollect->OnStop());
+    EXPECT_EQ(commonEventCollect->workHandler_, nullptr);
+}
+
+/**
+ * @tc.name: MultiUserReclaimRouting001
+ * @tc.desc: verify IPC reclaim is skipped for a non-base user
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonEventCollectTest, MultiUserReclaimRouting001, TestSize.Level3)
+{
+    auto manager = std::make_shared<MultiSystemAbilityManager>(100);
+    sptr<CommonEventCollect> commonEventCollect = new CommonEventCollect(nullptr, manager);
+    ASSERT_NE(commonEventCollect, nullptr);
+    EventFwk::CommonEventData eventData;
+    auto want = eventData.GetWant();
+    want.SetAction(EventFwk::CommonEventSupport::COMMON_EVENT_SCREEN_OFF);
+    eventData.SetWant(want);
+    commonEventCollect->StartReclaimIpcThreadWork(eventData);
+    EXPECT_FALSE(commonEventCollect->isTriggerTaskStart_.load());
+}
+#endif
 
 /**
  * @tc.name: init001
@@ -1003,4 +1042,106 @@ HWTEST_F(CommonEventCollectTest, GetCpuUsageWork003, TestSize.Level3) {
     EXPECT_TRUE(usage == 0.0f);
     DTEST_LOG<<"GetCpuUsageWork003 END"<< std::endl;
 }
+
+#ifdef SUPPORT_MULTI_INSTANCE
+/**
+ * @tc.name: MultiUserMonitorThread001
+ * @tc.desc: test multi-user collector does not start the CPU monitor thread
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonEventCollectTest, MultiUserMonitorThread001, TestSize.Level3)
+{
+    constexpr int32_t testUserId = 100;
+    auto manager = std::make_shared<MultiSystemAbilityManager>(testUserId);
+    sptr<CommonEventCollect> collect = new CommonEventCollect(nullptr, manager);
+    collect->commonEventNames_.insert("test");
+
+    EXPECT_EQ(collect->OnStart(), ERR_OK);
+    EXPECT_FALSE(collect->keepRunning_.load());
+    EXPECT_EQ(collect->OnStop(), ERR_OK);
+    EXPECT_FALSE(collect->keepRunning_.load());
+}
+
+/**
+ * @tc.name: MultiUserMonitorThread002
+ * @tc.desc: Test a base-user collector retains the monitor-thread lifecycle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonEventCollectTest, MultiUserMonitorThread002, TestSize.Level3)
+{
+    auto manager = std::make_shared<MultiSystemAbilityManager>(BASE_USER);
+    sptr<CommonEventCollect> collect = new CommonEventCollect(nullptr, manager);
+    ASSERT_NE(collect, nullptr);
+    collect->commonEventNames_.insert("test");
+
+    EXPECT_EQ(collect->OnStart(), ERR_OK);
+    EXPECT_TRUE(collect->keepRunning_.load());
+    EXPECT_EQ(collect->OnStop(), ERR_OK);
+    EXPECT_FALSE(collect->keepRunning_.load());
+}
+
+/**
+ * @tc.name: MultiUserReclaimIpc001
+ * @tc.desc: Test multi-user collector skips common-event IPC reclaim work.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonEventCollectTest, MultiUserReclaimIpc001, TestSize.Level3)
+{
+    constexpr int32_t testUserId = 100;
+    auto manager = std::make_shared<MultiSystemAbilityManager>(testUserId);
+    sptr<CommonEventCollect> collect = new CommonEventCollect(nullptr, manager);
+    EventFwk::CommonEventData eventData;
+    AAFwk::Want want;
+    want.SetAction("RECENT_EVENT");
+    eventData.SetWant(want);
+
+    collect->StartReclaimIpcThreadWork(eventData);
+    EXPECT_EQ(collect->workHandler_, nullptr);
+}
+
+/**
+ * @tc.name: MultiUserMonitorNullManager001
+ * @tc.desc: Verify base monitor lifecycle without an owning manager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonEventCollectTest, MultiUserMonitorNullManager001, TestSize.Level3)
+{
+    sptr<CommonEventCollect> collect = new CommonEventCollect(nullptr);
+    ASSERT_NE(collect, nullptr);
+    collect->commonEventNames_.insert("test");
+    EXPECT_EQ(collect->OnStart(), ERR_OK);
+    EXPECT_EQ(collect->OnStop(), ERR_OK);
+    EXPECT_FALSE(collect->keepRunning_.load());
+}
+
+/**
+ * @tc.name: MultiUserReclaimBaseManager001
+ * @tc.desc: Verify base-user reclaim path does not take the multi-user shortcut.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonEventCollectTest, MultiUserReclaimBaseManager001, TestSize.Level3)
+{
+    auto manager = std::make_shared<MultiSystemAbilityManager>(BASE_USER);
+    sptr<CommonEventCollect> collect = new CommonEventCollect(nullptr, manager);
+    ASSERT_NE(collect, nullptr);
+    EventFwk::CommonEventData eventData;
+    collect->StartReclaimIpcThreadWork(eventData);
+    EXPECT_FALSE(collect->isTriggerTaskStart_.load());
+}
+
+/**
+ * @tc.name: MultiUserEmptyEventLifecycle001
+ * @tc.desc: Verify empty event configuration exits before worker creation.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CommonEventCollectTest, MultiUserEmptyEventLifecycle001, TestSize.Level3)
+{
+    auto manager = std::make_shared<MultiSystemAbilityManager>(100);
+    sptr<CommonEventCollect> collect = new CommonEventCollect(nullptr, manager);
+    ASSERT_NE(collect, nullptr);
+    EXPECT_EQ(collect->OnStart(), ERR_OK);
+    EXPECT_EQ(collect->workHandler_, nullptr);
+    EXPECT_EQ(collect->OnStop(), ERR_OK);
+}
+#endif
 } // namespace OHOS

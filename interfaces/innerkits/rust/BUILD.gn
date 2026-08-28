@@ -1,4 +1,4 @@
-# Copyright (C) 2023 Huawei Device Co., Ltd.
+# Copyright (C) 2023-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -12,9 +12,16 @@
 # limitations under the License.
 
 import("//build/ohos.gni")
+import("../../../config.gni")
 
 rust_cxx("samgr_cxx_gen") {
   sources = [ "src/wrapper.rs" ]
+}
+
+if (samgr_support_multi_instance) {
+  rust_cxx("samgr_multi_instance_cxx_gen") {
+    sources = [ "src/multi_instance_wrapper.rs" ]
+  }
 }
 
 ohos_static_library("samgr_rust_cpp") {
@@ -33,6 +40,10 @@ ohos_static_library("samgr_rust_cpp") {
   ]
 
   sources += get_target_outputs(":samgr_cxx_gen")
+  defines = []
+  if (samgr_support_multi_instance) {
+    defines += [ "SUPPORT_MULTI_INSTANCE" ]
+  }
   include_dirs = [
     "${target_gen_dir}/src",
     "include",
@@ -41,6 +52,11 @@ ohos_static_library("samgr_rust_cpp") {
     ":samgr_cxx_gen",
     "../samgr_proxy:samgr_proxy",
   ]
+
+  if (samgr_support_multi_instance) {
+    sources += get_target_outputs(":samgr_multi_instance_cxx_gen")
+    deps += [ ":samgr_multi_instance_cxx_gen" ]
+  }
 
   external_deps = [
     "c_utils:utils",
@@ -57,6 +73,9 @@ ohos_rust_shared_library("samgr_rust") {
   sources = [ "src/lib.rs" ]
 
   rustflags = [ "-Zstack-protector=all" ]
+  if (samgr_support_multi_instance) {
+    rustflags += [ "--cfg=multi_instance" ]
+  }
 
   external_deps = [
     "hilog:hilog_rust",

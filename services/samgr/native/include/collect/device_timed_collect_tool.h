@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,9 +23,12 @@
 namespace OHOS {
 class PreferencesUtil {
 public:
+    PreferencesUtil();
+    explicit PreferencesUtil(int32_t userId);
     static std::shared_ptr<PreferencesUtil> GetInstance();
-    PreferencesUtil() = default;
     ~PreferencesUtil() = default;
+
+    static int32_t DeleteUserPreferences(int32_t userId);
 
     bool SaveLong(const std::string& key, int64_t value);
     bool SaveString(const std::string& key, std::string value);
@@ -37,6 +40,7 @@ public:
     bool IsExist(const std::string& key);
     bool Remove(const std::string &key);
 private:
+    static std::string GetPathForUser(int32_t userId);
     bool GetPreference();
     bool RefreshSync();
 
@@ -56,6 +60,7 @@ private:
     std::string ObtainInner(
         std::shared_ptr<NativePreferences::Preferences> ptr, const std::string& key, const std::string& defValue);
     std::shared_ptr<NativePreferences::Preferences> ptr_ = nullptr;
+    std::string path_;
 };
 
 class TimeUtils {

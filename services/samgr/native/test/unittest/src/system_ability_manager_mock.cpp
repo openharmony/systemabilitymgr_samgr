@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -188,6 +188,73 @@ int32_t ISystemAbilityManagerMock::GetOnDemandSystemAbilityIds(std::vector<int32
 {
     return 0;
 }
+
+#ifdef SUPPORT_MULTI_INSTANCE
+sptr<IRemoteObject> ISystemAbilityManagerMock::GetSystemAbility(int32_t systemAbilityId, int32_t userId)
+{
+    return nullptr;
+}
+
+sptr<IRemoteObject> ISystemAbilityManagerMock::CheckSystemAbility(int32_t systemAbilityId, int32_t userId)
+{
+    return nullptr;
+}
+
+sptr<IRemoteObject> ISystemAbilityManagerMock::CheckSystemAbilityByUserId(
+    int32_t systemAbilityId, bool& isExist, int32_t userId)
+{
+    isExist = false;
+    return nullptr;
+}
+
+int32_t ISystemAbilityManagerMock::GetSystemProcessInfo(int32_t systemAbilityId,
+    SystemProcessInfo& systemProcessInfo, int32_t userId)
+{
+    return 0;
+}
+
+sptr<IRemoteObject> ISystemAbilityManagerMock::GetLocalAbilityManagerProxy(
+    int32_t systemAbilityId, int32_t userId)
+{
+    return nullptr;
+}
+
+sptr<IRemoteObject> ISystemAbilityManagerMock::LoadSystemAbility(
+    int32_t systemAbilityId, int32_t timeout, int32_t userId)
+{
+    return nullptr;
+}
+
+int32_t ISystemAbilityManagerMock::LoadSystemAbility(int32_t systemAbilityId,
+    const sptr<ISystemAbilityLoadCallback>& callback, int32_t userId)
+{
+    return 0;
+}
+
+int32_t ISystemAbilityManagerMock::SubscribeSystemAbility(int32_t systemAbilityId,
+    const sptr<ISystemAbilityStatusChange>& listener, int32_t userId)
+{
+    return 0;
+}
+
+int32_t ISystemAbilityManagerMock::UnSubscribeSystemAbility(int32_t systemAbilityId,
+    const sptr<ISystemAbilityStatusChange>& listener, int32_t userId)
+{
+    return 0;
+}
+
+int32_t ISystemAbilityManagerMock::SubscribeSystemProcess(
+    const sptr<ISystemProcessStatusChange>& listener, int32_t userId)
+{
+    return 0;
+}
+
+int32_t ISystemAbilityManagerMock::UnSubscribeSystemProcess(
+    const sptr<ISystemProcessStatusChange>& listener, int32_t userId)
+{
+    return 0;
+}
+#endif
 
 sptr<IRemoteObject> ISystemAbilityManagerMock::AsObject()
 {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,6 +17,7 @@
 
 #include <chrono>
 #include <condition_variable>
+#include <list>
 #include <mutex>
 #include "refbase.h"
 #include "if_system_ability_manager.h"
@@ -26,6 +27,34 @@
 #include "string_ex.h"
 
 namespace OHOS {
+
+#ifdef SUPPORT_MULTI_INSTANCE
+constexpr int32_t ONDEMAND_BASE_USER_ID = 0;
+
+struct OnDemandTarget {
+    int32_t saId = 0;
+    int32_t userId = ONDEMAND_BASE_USER_ID;
+    bool useUserIdApi = false;
+};
+
+struct PolicyEventSpec {
+    OnDemandEventId eventId = OnDemandEventId::COMMON_EVENT;
+    std::string name;
+    std::string value;
+    bool persistence = false;
+};
+
+struct PolicyUpdateRequest {
+    OnDemandTarget target;
+    OnDemandPolicyType policyType = OnDemandPolicyType::START_POLICY;
+    PolicyEventSpec event;
+};
+
+struct PolicyQueryRequest {
+    OnDemandTarget target;
+    OnDemandPolicyType policyType = OnDemandPolicyType::START_POLICY;
+};
+#endif
 
 enum class TimeEventId {
     LOOP_EVENT = 1,
@@ -115,6 +144,43 @@ public:
         }
         systemProcessStatusChange_->ConsumeEvent();
     }
+    sptr<IRemoteObject> CheckSystemAbility(int32_t systemAbilityId, bool& isExist);
+    sptr<IRemoteObject> LoadSystemAbility(int32_t systemAbilityId, int32_t timeoutSeconds);
+    int32_t LoadSystemAbilityByCallback(int32_t systemAbilityId);
+    int32_t GetSystemProcessInfo(int32_t systemAbilityId, SystemProcessInfo& processInfo);
+    sptr<IRemoteObject> GetLocalAbilityManagerProxy(int32_t systemAbilityId);
+    int32_t SubscribeSystemAbility(int32_t systemAbilityId, const sptr<ISystemAbilityStatusChange>& listener);
+    int32_t UnSubscribeSystemAbility(int32_t systemAbilityId, const sptr<ISystemAbilityStatusChange>& listener);
+    int32_t SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener);
+    int32_t UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener);
+#ifdef SUPPORT_MULTI_INSTANCE
+    sptr<IRemoteObject> GetSystemAbility(int32_t systemAbilityId, int32_t userId);
+    sptr<IRemoteObject> CheckSystemAbility(int32_t systemAbilityId, int32_t userId);
+    sptr<IRemoteObject> CheckSystemAbilityByUserId(int32_t systemAbilityId, bool& isExist, int32_t userId);
+    int32_t LoadSystemAbility(int32_t systemAbilityId, const sptr<ISystemAbilityLoadCallback>& callback,
+        int32_t userId);
+    sptr<IRemoteObject> LoadSystemAbility(int32_t systemAbilityId, int32_t timeoutSeconds, int32_t userId);
+    int32_t LoadSystemAbilityByCallback(int32_t systemAbilityId, int32_t userId);
+    int32_t GetSystemProcessInfo(int32_t systemAbilityId, SystemProcessInfo& processInfo, int32_t userId);
+    sptr<IRemoteObject> GetLocalAbilityManagerProxy(int32_t systemAbilityId, int32_t userId);
+    int32_t SubscribeSystemAbility(int32_t systemAbilityId, const sptr<ISystemAbilityStatusChange>& listener,
+        int32_t userId);
+    int32_t UnSubscribeSystemAbility(int32_t systemAbilityId, const sptr<ISystemAbilityStatusChange>& listener,
+        int32_t userId);
+    int32_t SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener, int32_t userId);
+    int32_t UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener, int32_t userId);
+    int32_t RemoveSystemAbility(int32_t systemAbilityId);
+    int32_t CancelUnloadSystemAbility(int32_t systemAbilityId);
+    int32_t AddOnDemandSystemAbilityInfo(int32_t systemAbilityId, const std::string& processName);
+    int32_t TriggerUnloadSystemAbility(const OnDemandTarget& target, bool cancelUnload);
+    int32_t GetRunningSystemProcess(std::list<SystemProcessInfo>& processInfos);
+    int32_t SendStrategy(int32_t type, std::vector<int32_t>& systemAbilityIds, int32_t level,
+        const std::string& action);
+    int32_t GetRunningSaExtensionInfoList(const std::string& extension,
+        std::vector<ISystemAbilityManager::SaExtensionInfo>& infoList);
+    int32_t UpdateOnDemandPolicyBySa(const PolicyUpdateRequest& request);
+    int32_t GetOnDemandPolicyBySa(const PolicyQueryRequest& request);
+#endif
     int argc_;
 protected:
     class OnDemandLoadCallback : public SystemAbilityLoadCallbackStub {

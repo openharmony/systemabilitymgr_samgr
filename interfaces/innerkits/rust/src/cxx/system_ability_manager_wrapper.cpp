@@ -1,4 +1,4 @@
-// Copyright (C) 2024 Huawei Device Co., Ltd.
+// Copyright (C) 2024-2026 Huawei Device Co., Ltd.
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -208,6 +208,103 @@ std::unique_ptr<UnSubscribeSystemAbilityHandler> SubscribeSystemAbility(int32_t 
     return std::make_unique<UnSubscribeSystemAbilityHandler>(systemAbilityId, listener);
 }
 
+#ifdef SUPPORT_MULTI_INSTANCE
+int32_t LoadSystemAbilityWithCallbackByUserId(int32_t systemAbilityId, rust::Fn<void()> on_success,
+    rust::Fn<void()> on_fail, int32_t userId)
+{
+    auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (sysm == nullptr) {
+        return -1;
+    }
+    auto callback = sptr<LoadCallbackWrapper>::MakeSptr(on_success, on_fail);
+    return sysm->LoadSystemAbility(systemAbilityId, callback, userId);
+}
+
+std::unique_ptr<SptrIRemoteObject> GetSystemAbilityByUserId(int32_t systemAbilityId, int32_t userId)
+{
+    auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (sysm == nullptr) {
+        return nullptr;
+    }
+    auto ability = sysm->GetSystemAbility(systemAbilityId, userId);
+    if (ability == nullptr) {
+        return nullptr;
+    }
+    return std::make_unique<SptrIRemoteObject>(std::move(ability));
+}
+
+std::unique_ptr<SptrIRemoteObject> CheckSystemAbilityByUserId(int32_t systemAbilityId, int32_t userId)
+{
+    auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (sysm == nullptr) {
+        return nullptr;
+    }
+    auto ability = sysm->CheckSystemAbility(systemAbilityId, userId);
+    if (ability == nullptr) {
+        return nullptr;
+    }
+    return std::make_unique<SptrIRemoteObject>(std::move(ability));
+}
+
+std::unique_ptr<SptrIRemoteObject> LoadSystemAbilityByUserId(
+    int32_t systemAbilityId, int32_t timeout, int32_t userId)
+{
+    auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (sysm == nullptr) {
+        return nullptr;
+    }
+    auto ability = sysm->LoadSystemAbility(systemAbilityId, timeout, userId);
+    if (ability == nullptr) {
+        return nullptr;
+    }
+    return std::make_unique<SptrIRemoteObject>(std::move(ability));
+}
+
+std::unique_ptr<UnSubscribeSystemAbilityHandler> SubscribeSystemAbilityByUserId(int32_t systemAbilityId,
+    rust::Fn<void(int32_t systemAbilityId, const rust::str deviceId)> onAdd,
+    rust::Fn<void(int32_t systemAbilityId, const rust::str deviceId)> onRemove, int32_t userId)
+{
+    auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (sysm == nullptr) {
+        return nullptr;
+    }
+    sptr<ISystemAbilityStatusChange> listener = new SystemAbilityStatusChangeWrapper(onAdd, onRemove);
+    if (sysm->SubscribeSystemAbility(systemAbilityId, listener, userId) != ERR_OK) {
+        return nullptr;
+    }
+    return std::make_unique<UnSubscribeSystemAbilityHandler>(systemAbilityId, listener);
+}
+
+SystemProcessInfo GetSystemProcessInfoByUserId(int32_t systemAbilityId, int32_t userId)
+{
+    OHOS::SystemProcessInfo info;
+    auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (sysm != nullptr) {
+        sysm->GetSystemProcessInfo(systemAbilityId, info, userId);
+    }
+    return SystemProcessInfo{
+        .processName = info.processName.data(),
+        .pid = info.pid,
+        .uid = info.uid,
+    };
+}
+
+std::unique_ptr<UnSubscribeSystemProcessHandler> SubscribeSystemProcessByUserId(
+    rust::Fn<void(const OHOS::SamgrRust::SystemProcessInfo &systemProcessInfo)> onStart_,
+    rust::Fn<void(const OHOS::SamgrRust::SystemProcessInfo &systemProcessInfo)> onStop_, int32_t userId)
+{
+    auto sysm = SystemAbilityManagerClient::GetInstance().GetSystemAbilityManager();
+    if (sysm == nullptr) {
+        return nullptr;
+    }
+    sptr<ISystemProcessStatusChange> listener = new SystemProcessStatusChangeWrapper(onStart_, onStop_);
+    if (sysm->SubscribeSystemProcess(listener, userId) != ERR_OK) {
+        return nullptr;
+    }
+    return std::make_unique<UnSubscribeSystemProcessHandler>(listener);
+}
+#endif
+
 int32_t AddOnDemandSystemAbilityInfo(int32_t systemAbilityId, const rust::str localAbilityManagerName)
 {
     if (localAbilityManagerName.length() > MAX_RUST_STR_LEN) {
@@ -330,7 +427,7 @@ std::unique_ptr<UnSubscribeSystemProcessHandler> SubscribeSystemProcess(
     if (sysm == nullptr) {
         return nullptr;
     }
-    sptr<ISystemProcessStatusChange> listener = new SystemProcessStatusChangeWrapper(nullptr, onStart_, onStop_);
+    sptr<ISystemProcessStatusChange> listener = new SystemProcessStatusChangeWrapper(onStart_, onStop_);
     sysm->SubscribeSystemProcess(listener);
     return std::make_unique<UnSubscribeSystemProcessHandler>(listener);
 }

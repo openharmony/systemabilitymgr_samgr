@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1908,4 +1908,458 @@ int32_t SystemAbilityManagerProxy::OnUserStateChanged(int32_t userId, SamgrUserS
 #endif
     return ERR_OK;
 }
+
+#ifdef SUPPORT_MULTI_INSTANCE
+
+sptr<IRemoteObject> SystemAbilityManagerProxy::GetSystemAbility(int32_t systemAbilityId, int32_t userId)
+{
+    HILOGD("%{public}s called, SA:%{public}d, userId:%{public}d", __func__, systemAbilityId, userId);
+    if (!CheckInputSysAbilityId(systemAbilityId)) {
+        HILOGW("SA:%{public}d invalid!", systemAbilityId);
+        return nullptr;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("remote is nullptr");
+        return nullptr;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        HILOGW("GetSystemAbility(userId) write interface token failed");
+        return nullptr;
+    }
+    if (!data.WriteInt32(systemAbilityId) || !data.WriteInt32(userId)) {
+        HILOGW("GetSystemAbility(userId) write params failed!");
+        return nullptr;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::GET_SYSTEM_ABILITY_WITH_USERID_TRANSACTION),
+        data, reply, option);
+    if (err != ERR_NONE) {
+        HILOGE("GetSystemAbility(userId) SendRequest error:%{public}d", err);
+        return nullptr;
+    }
+    return reply.ReadRemoteObject();
+}
+
+sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbility(int32_t systemAbilityId, int32_t userId)
+{
+    HILOGD("%{public}s called, SA:%{public}d, userId:%{public}d", __func__, systemAbilityId, userId);
+    if (!CheckInputSysAbilityId(systemAbilityId)) {
+        HILOGW("SA:%{public}d invalid!", systemAbilityId);
+        return nullptr;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("remote is nullptr");
+        return nullptr;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        HILOGW("CheckSystemAbility(userId) write interface token failed");
+        return nullptr;
+    }
+    if (!data.WriteInt32(systemAbilityId) || !data.WriteInt32(userId)) {
+        HILOGW("CheckSystemAbility(userId) write params failed!");
+        return nullptr;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::CHECK_SYSTEM_ABILITY_WITH_USERID_TRANSACTION),
+        data, reply, option);
+    if (err != ERR_NONE) {
+        HILOGE("CheckSystemAbility(CheckSystemAbility) SendRequest error:%{public}d", err);
+        return nullptr;
+    }
+    return reply.ReadRemoteObject();
+}
+
+sptr<IRemoteObject> SystemAbilityManagerProxy::CheckSystemAbilityByUserId(int32_t systemAbilityId, bool& isExist,
+    int32_t userId)
+{
+    HILOGD("%{public}s called, SA:%{public}d, userId:%{public}d", __func__, systemAbilityId, userId);
+    if (!CheckInputSysAbilityId(systemAbilityId)) {
+        HILOGW("SA:%{public}d invalid!", systemAbilityId);
+        return nullptr;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("remote is nullptr");
+        return nullptr;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        HILOGW("CheckSystemAbilityByUserId write interface token failed");
+        return nullptr;
+    }
+    if (!data.WriteInt32(systemAbilityId) || !data.WriteBool(isExist) || !data.WriteInt32(userId)) {
+        HILOGW("CheckSystemAbility(isExist, userId) write params failed!");
+        return nullptr;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::CHECK_SYSTEM_ABILITY_BY_USERID_TRANSACTION),
+        data, reply, option);
+    if (err != ERR_NONE) {
+        HILOGE("CheckSystemAbility(isExist, userId) SendRequest error:%{public}d", err);
+        return nullptr;
+    }
+    sptr<IRemoteObject> remoteObject = reply.ReadRemoteObject();
+    if (remoteObject == nullptr) {
+        HILOGW("CheckSystemAbility(isExist, userId) read remote object failed");
+        return nullptr;
+    }
+    bool ret = reply.ReadBool(isExist);
+    if (!ret) {
+        HILOGW("CheckSystemAbility(isExist, userId) read isExist failed");
+        return nullptr;
+    }
+    return remoteObject;
+}
+
+int32_t SystemAbilityManagerProxy::GetSystemProcessInfo(int32_t systemAbilityId,
+    SystemProcessInfo& systemProcessInfo, int32_t userId)
+{
+    HILOGD("%{public}s called, SA:%{public}d, userId:%{public}d", __func__, systemAbilityId, userId);
+    if (!CheckInputSysAbilityId(systemAbilityId)) {
+        HILOGW("SA:%{public}d invalid!", systemAbilityId);
+        return ERR_INVALID_VALUE;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("remote is nullptr");
+        return ERR_INVALID_OPERATION;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        HILOGW("GetSystemProcessInfo(userId) write interface token failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(systemAbilityId) || !data.WriteInt32(userId)) {
+        HILOGW("GetSystemProcessInfo(userId) write params failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::GET_SYSTEM_PROCESS_INFO_WITH_USERID_TRANSACTION),
+        data, reply, option);
+    if (err != ERR_NONE) {
+        HILOGE("GetSystemProcessInfo(userId) SendRequest error:%{public}d", err);
+        return err;
+    }
+    int32_t result = 0;
+    bool ret = reply.ReadInt32(result);
+    if (!ret) {
+        HILOGW("GetSystemProcessInfo(userId) Read result failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (result != ERR_OK) {
+        HILOGE("GetSystemProcessInfo(userId) failed: %{public}d!", result);
+        return result;
+    }
+    result = ReadProcessInfoFromParcel(reply, systemProcessInfo);
+    return result;
+}
+
+sptr<IRemoteObject> SystemAbilityManagerProxy::GetLocalAbilityManagerProxy(int32_t systemAbilityId, int32_t userId)
+{
+    HILOGD("%{public}s called, SA:%{public}d, userId:%{public}d", __func__, systemAbilityId, userId);
+    if (!CheckInputSysAbilityId(systemAbilityId)) {
+        HILOGW("SA:%{public}d invalid!", systemAbilityId);
+        return nullptr;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("remote is nullptr");
+        return nullptr;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        HILOGW("GetLocalAbilityManagerProxy(userId) write interface token failed");
+        return nullptr;
+    }
+    if (!data.WriteInt32(systemAbilityId) || !data.WriteInt32(userId)) {
+        HILOGW("GetLocalAbilityManagerProxy(userId) write params failed!");
+        return nullptr;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::GET_LOCAL_ABILITY_MANAGER_PROXY_WITH_USERID_TRANSACTION),
+        data, reply, option);
+    if (err != ERR_NONE) {
+        HILOGE("GetLocalAbilityManagerProxy(userId) SendRequest error:%{public}d", err);
+        return nullptr;
+    }
+    return reply.ReadRemoteObject();
+}
+
+sptr<IRemoteObject> SystemAbilityManagerProxy::LoadSystemAbility(int32_t systemAbilityId, int32_t timeout,
+    int32_t userId)
+{
+    if (timeout < MIN_TIMEOUT) {
+        timeout = MIN_TIMEOUT;
+    } else if (timeout > MAX_TIMEOUT) {
+        timeout = MAX_TIMEOUT;
+    }
+    sptr<SystemAbilityProxyCallback> callback = new SystemAbilityProxyCallback();
+    std::unique_lock<std::mutex> lock(callback->callbackLock_);
+    int32_t ret = LoadSystemAbility(systemAbilityId, callback, userId);
+    if (ret != ERR_OK) {
+        HILOGE("LoadSystemAbility failed, SA:%{public}d, userId:%{public}d", systemAbilityId, userId);
+        return nullptr;
+    }
+    auto waitStatus = callback->cv_.wait_for(lock, std::chrono::seconds(timeout),
+        [&callback]() { return callback->loadproxy_ != nullptr; });
+    if (!waitStatus) {
+        HILOGE("LoadSystemAbility SA:%{public}d timeout, userId:%{public}d", systemAbilityId, userId);
+        return nullptr;
+    }
+    return callback->loadproxy_;
+}
+
+int32_t SystemAbilityManagerProxy::LoadSystemAbility(int32_t systemAbilityId,
+    const sptr<ISystemAbilityLoadCallback>& callback, int32_t userId)
+    __attribute__((no_sanitize("cfi")))
+{
+    if (!CheckInputSysAbilityId(systemAbilityId) || callback == nullptr) {
+        HILOGE("LoadSystemAbility SA:%{public}d or callback invalid, userId:%{public}d!", systemAbilityId, userId);
+        return ERR_INVALID_VALUE;
+    }
+
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("LoadSystemAbility remote is null!");
+        return ERR_INVALID_OPERATION;
+    }
+
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        HILOGW("LoadSystemAbility Write interface token failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    bool ret = data.WriteInt32(systemAbilityId);
+    if (!ret) {
+        HILOGW("LoadSystemAbility Write SAId failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    ret = data.WriteRemoteObject(callback->AsObject());
+    if (!ret) {
+        HILOGW("LoadSystemAbility Write callback failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    ret = data.WriteInt32(userId);
+    if (!ret) {
+        HILOGW("LoadSystemAbility Write userId failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+
+    MessageParcel reply;
+    MessageOption option{ MessageOption::TF_IMAGE };
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::LOAD_SYSTEM_ABILITY_WITH_USERID_TRANSACTION),
+        data, reply, option);
+    if (err != ERR_NONE) {
+        HILOGE("Load SA failed, SA:%{public}d, error:%{public}d, userId:%{public}d", systemAbilityId, err, userId);
+        return err;
+    }
+    int32_t result = 0;
+    ret = reply.ReadInt32(result);
+    if (!ret) {
+        HILOGW("LoadSystemAbility Read reply failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
+int32_t SystemAbilityManagerProxy::SubscribeSystemAbility(int32_t systemAbilityId,
+    const sptr<ISystemAbilityStatusChange>& listener, int32_t userId)
+{
+    HILOGD("%{public}s called, SA:%{public}d, userId:%{public}d", __func__, systemAbilityId, userId);
+    if (!CheckInputSysAbilityId(systemAbilityId) || listener == nullptr) {
+        HILOGW("SubscribeSystemAbility(userId) params invalid!");
+        return ERR_INVALID_VALUE;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("remote is nullptr");
+        return ERR_INVALID_OPERATION;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        HILOGW("SubscribeSystemAbility(userId) write interface token failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(systemAbilityId)) {
+        HILOGW("SubscribeSystemAbility(userId) write SAId failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteRemoteObject(listener->AsObject())) {
+        HILOGW("SubscribeSystemAbility(userId) write listener failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(userId)) {
+        HILOGW("SubscribeSystemAbility(userId) write userId failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::SUBSCRIBE_SYSTEM_ABILITY_WITH_USERID_TRANSACTION),
+        data, reply, option);
+    if (err != ERR_NONE) {
+        HILOGE("SubscribeSystemAbility(userId) SendRequest error:%{public}d", err);
+        return err;
+    }
+    int32_t result = 0;
+    bool ret = reply.ReadInt32(result);
+    if (!ret) {
+        HILOGW("SubscribeSystemAbility Read result failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
+int32_t SystemAbilityManagerProxy::UnSubscribeSystemAbility(int32_t systemAbilityId,
+    const sptr<ISystemAbilityStatusChange>& listener, int32_t userId)
+{
+    HILOGD("%{public}s called, SA:%{public}d, userId:%{public}d", __func__, systemAbilityId, userId);
+    if (!CheckInputSysAbilityId(systemAbilityId) || listener == nullptr) {
+        HILOGW("UnSubscribeSystemAbility(userId) params invalid!");
+        return ERR_INVALID_VALUE;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("remote is nullptr");
+        return ERR_INVALID_OPERATION;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        HILOGW("UnSubscribeSystemAbility(userId) write interface token failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(systemAbilityId)) {
+        HILOGW("UnSubscribeSystemAbility(userId) write SAId failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteRemoteObject(listener->AsObject())) {
+        HILOGW("UnSubscribeSystemAbility(userId) write listener failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(userId)) {
+        HILOGW("UnSubscribeSystemAbility(userId) write userId failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::UNSUBSCRIBE_SYSTEM_ABILITY_WITH_USERID_TRANSACTION),
+        data, reply, option);
+    if (err != ERR_NONE) {
+        HILOGE("UnSubscribeSystemAbility(userId) SendRequest error:%{public}d", err);
+        return err;
+    }
+    int32_t result = 0;
+    bool ret = reply.ReadInt32(result);
+    if (!ret) {
+        HILOGW("UnSubscribeSystemAbility Read result failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
+int32_t SystemAbilityManagerProxy::SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener,
+    int32_t userId)
+{
+    HILOGD("%{public}s called, userId:%{public}d", __func__, userId);
+    if (listener == nullptr) {
+        HILOGW("SubscribeSystemProcess(userId) listener is null!");
+        return ERR_INVALID_VALUE;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("remote is nullptr");
+        return ERR_INVALID_OPERATION;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        HILOGW("SubscribeSystemProcess(userId) write interface token failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteRemoteObject(listener->AsObject())) {
+        HILOGW("SubscribeSystemProcess(userId) write listener failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(userId)) {
+        HILOGW("SubscribeSystemProcess(userId) write userId failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::SUBSCRIBE_SYSTEM_PROCESS_WITH_USERID_TRANSACTION),
+        data, reply, option);
+    if (err != ERR_NONE) {
+        HILOGE("SubscribeSystemProcess(userId) SendRequest error:%{public}d", err);
+        return err;
+    }
+    int32_t result = 0;
+    bool ret = reply.ReadInt32(result);
+    if (!ret) {
+        HILOGW("SubscribeSystemProcess Read result failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
+int32_t SystemAbilityManagerProxy::UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener,
+    int32_t userId)
+{
+    HILOGD("%{public}s called, userId:%{public}d", __func__, userId);
+    if (listener == nullptr) {
+        HILOGW("UnSubscribeSystemProcess(userId) listener is null!");
+        return ERR_INVALID_VALUE;
+    }
+    sptr<IRemoteObject> remote = Remote();
+    if (remote == nullptr) {
+        HILOGE("remote is nullptr");
+        return ERR_INVALID_OPERATION;
+    }
+    MessageParcel data;
+    if (!data.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN)) {
+        HILOGW("UnSubscribeSystemProcess(userId) write interface token failed");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteRemoteObject(listener->AsObject())) {
+        HILOGW("UnSubscribeSystemProcess(userId) write listener failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (!data.WriteInt32(userId)) {
+        HILOGW("UnSubscribeSystemProcess(userId) write userId failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    MessageParcel reply;
+    MessageOption option;
+    int32_t err = remote->SendRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::UNSUBSCRIBE_SYSTEM_PROCESS_WITH_USERID_TRANSACTION),
+        data, reply, option);
+    if (err != ERR_NONE) {
+        HILOGE("UnSubscribeSystemProcess(userId) SendRequest error:%{public}d", err);
+        return err;
+    }
+    int32_t result = 0;
+    bool ret = reply.ReadInt32(result);
+    if (!ret) {
+        HILOGW("UnSubscribeSystemProcess Read result failed!");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+#endif
+
 } // namespace OHOS

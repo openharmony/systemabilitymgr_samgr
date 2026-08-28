@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,9 @@
 #include "string_ex.h"
 #include "system_ability_definition.h"
 #include "test_log.h"
+#ifdef SUPPORT_ACCESS_TOKEN
+#include "token_setproc.h"
+#endif
 
 #define private public
 #define protected public
@@ -43,7 +46,740 @@ const std::u16string SAMANAGER_INTERFACE_TOKEN = u"ohos.samgr.accessToken";
 const string DEFAULT_LOAD_NAME = "loadevent";
 constexpr uint32_t SAID = 1499;
 constexpr int32_t INVALID_SAID = -1;
-constexpr uint32_t INVALID_CODE = 50;
+constexpr uint32_t INVALID_CODE = UINT32_MAX;
+#ifdef SUPPORT_ACCESS_TOKEN
+void RestoreDefaultToken()
+{
+    SetSelfTokenID(0);
+}
+#endif
+#ifdef SUPPORT_MULTI_INSTANCE
+/**
+ * @tc.name: MultiInstanceFuncMap001
+ * @tc.desc: test all multi-instance transaction handlers are registered
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, MultiInstanceFuncMap001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    EXPECT_NE(saMgr, nullptr);
+    const uint32_t codes[] = {
+        static_cast<uint32_t>(SamgrInterfaceCode::GET_SYSTEM_ABILITY_WITH_USERID_TRANSACTION),
+        static_cast<uint32_t>(SamgrInterfaceCode::CHECK_SYSTEM_ABILITY_WITH_USERID_TRANSACTION),
+        static_cast<uint32_t>(SamgrInterfaceCode::CHECK_SYSTEM_ABILITY_BY_USERID_TRANSACTION),
+        static_cast<uint32_t>(SamgrInterfaceCode::GET_SYSTEM_PROCESS_INFO_WITH_USERID_TRANSACTION),
+        static_cast<uint32_t>(SamgrInterfaceCode::GET_LOCAL_ABILITY_MANAGER_PROXY_WITH_USERID_TRANSACTION),
+        static_cast<uint32_t>(SamgrInterfaceCode::LOAD_SYSTEM_ABILITY_WITH_USERID_TRANSACTION),
+        static_cast<uint32_t>(SamgrInterfaceCode::SUBSCRIBE_SYSTEM_ABILITY_WITH_USERID_TRANSACTION),
+        static_cast<uint32_t>(SamgrInterfaceCode::UNSUBSCRIBE_SYSTEM_ABILITY_WITH_USERID_TRANSACTION),
+        static_cast<uint32_t>(SamgrInterfaceCode::SUBSCRIBE_SYSTEM_PROCESS_WITH_USERID_TRANSACTION),
+        static_cast<uint32_t>(SamgrInterfaceCode::UNSUBSCRIBE_SYSTEM_PROCESS_WITH_USERID_TRANSACTION),
+    };
+    for (const auto code : codes) {
+        EXPECT_NE(saMgr->memberFuncMap_.find(code), saMgr->memberFuncMap_.end());
+    }
+}
+
+/**
+ * @tc.name: GetSystemAbilityWithUserIdInner001
+ * @tc.desc: Test multi-user get-system-ability parcel validation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, GetSystemAbilityWithUserIdInner001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(saMgr->GetSystemAbilityWithUserIdInner(data, reply), ERR_NULL_OBJECT);
+
+    EXPECT_TRUE(data.WriteInt32(INVALID_SAID));
+    EXPECT_EQ(saMgr->GetSystemAbilityWithUserIdInner(data, reply), ERR_NULL_OBJECT);
+}
+
+/**
+ * @tc.name: CheckSystemAbilityWithUserIdInner001
+ * @tc.desc: Test multi-user check-system-ability parcel validation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, CheckSystemAbilityWithUserIdInner001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(saMgr->CheckSystemAbilityWithUserIdInner(data, reply), ERR_NULL_OBJECT);
+
+    EXPECT_TRUE(data.WriteInt32(INVALID_SAID));
+    EXPECT_EQ(saMgr->CheckSystemAbilityWithUserIdInner(data, reply), ERR_NULL_OBJECT);
+}
+
+/**
+ * @tc.name: CheckSystemAbilityByUserIdInner001
+ * @tc.desc: Test multi-user check-system-ability-by-user parcel validation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, CheckSystemAbilityByUserIdInner001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(saMgr->CheckSystemAbilityByUserIdInner(data, reply), ERR_NULL_OBJECT);
+
+    EXPECT_TRUE(data.WriteInt32(INVALID_SAID));
+    EXPECT_EQ(saMgr->CheckSystemAbilityByUserIdInner(data, reply), ERR_NULL_OBJECT);
+}
+
+/**
+ * @tc.name: MultiUserParcelRead001
+ * @tc.desc: Test multi-user query handlers reject truncated parcels after a valid SA ID
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, MultiUserParcelRead001, TestSize.Level3)
+{
+    SamMockPermission::MockPermission();
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel reply;
+    MessageParcel getData;
+    EXPECT_TRUE(getData.WriteInt32(SAID));
+    EXPECT_EQ(saMgr->GetSystemAbilityWithUserIdInner(getData, reply), ERR_NULL_OBJECT);
+
+    MessageParcel checkData;
+    EXPECT_TRUE(checkData.WriteInt32(SAID));
+    EXPECT_EQ(saMgr->CheckSystemAbilityWithUserIdInner(checkData, reply), ERR_NULL_OBJECT);
+
+    MessageParcel existData;
+    EXPECT_TRUE(existData.WriteInt32(SAID));
+    EXPECT_EQ(saMgr->CheckSystemAbilityByUserIdInner(existData, reply), ERR_FLATTEN_OBJECT);
+#ifdef SUPPORT_ACCESS_TOKEN
+    RestoreDefaultToken();
+#endif
+}
+
+/**
+ * @tc.name: MultiUserSubscriptionParcel001
+ * @tc.desc: Test multi-user SA subscription handlers reject a missing listener
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, MultiUserSubscriptionParcel001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel reply;
+    MessageParcel subscribeData;
+    EXPECT_TRUE(subscribeData.WriteInt32(SAID));
+    EXPECT_EQ(saMgr->SubsSystemAbilityWithUserIdInner(subscribeData, reply), ERR_NULL_OBJECT);
+
+    MessageParcel unsubscribeData;
+    EXPECT_TRUE(unsubscribeData.WriteInt32(SAID));
+    EXPECT_EQ(saMgr->UnSubsSystemAbilityWithUserIdInner(unsubscribeData, reply), ERR_NULL_OBJECT);
+}
+
+/**
+ * @tc.name: LoadSystemAbilityWithUserIdInner001
+ * @tc.desc: Test multi-user load-system-ability parcel validation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbilityWithUserIdInner001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(saMgr->LoadSystemAbilityWithUserIdInner(data, reply), ERR_INVALID_VALUE);
+
+    EXPECT_TRUE(data.WriteInt32(SAID));
+    EXPECT_EQ(saMgr->LoadSystemAbilityWithUserIdInner(data, reply), ERR_INVALID_VALUE);
+}
+
+#ifdef SUPPORT_MULTI_INSTANCE
+/**
+ * @tc.name: LoadSystemAbilityWithUserIdInner002
+ * @tc.desc: Test load-system-ability rejects an incompatible callback object and missing user ID.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, LoadSystemAbilityWithUserIdInner002, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel reply;
+
+    MessageParcel invalidCallback;
+    ASSERT_TRUE(invalidCallback.WriteInt32(SAID));
+    ASSERT_TRUE(invalidCallback.WriteRemoteObject(new TestTransactionService()));
+    EXPECT_EQ(saMgr->LoadSystemAbilityWithUserIdInner(invalidCallback, reply), ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: SubsSystemAbilityWithUserIdInner001
+ * @tc.desc: Test multi-user subscribe-system-ability parcel validation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, SubsSystemAbilityWithUserIdInner001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(saMgr->SubsSystemAbilityWithUserIdInner(data, reply), ERR_NULL_OBJECT);
+
+    EXPECT_TRUE(data.WriteInt32(INVALID_SAID));
+    EXPECT_EQ(saMgr->SubsSystemAbilityWithUserIdInner(data, reply), ERR_NULL_OBJECT);
+}
+
+/**
+ * @tc.name: SubsSystemAbilityWithUserIdInner002
+ * @tc.desc: Test subscribe-system-ability rejects an incompatible listener and missing user ID.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, SubsSystemAbilityWithUserIdInner002, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel reply;
+
+    MessageParcel invalidListener;
+    ASSERT_TRUE(invalidListener.WriteInt32(SAID));
+    ASSERT_TRUE(invalidListener.WriteRemoteObject(new TestTransactionService()));
+    EXPECT_EQ(saMgr->SubsSystemAbilityWithUserIdInner(invalidListener, reply), ERR_NULL_OBJECT);
+}
+
+/**
+ * @tc.name: MultiUserValidObjectTruncatedParcel001
+ * @tc.desc: Test multi-user handlers reject parcels missing user ID after a valid remote object.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, MultiUserValidObjectTruncatedParcel001, TestSize.Level3)
+{
+    SamMockPermission::MockPermission();
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityLoadCallbackMock> loadCallback = new SystemAbilityLoadCallbackMock();
+    sptr<SaStatusChangeMock> abilityListener = new SaStatusChangeMock();
+    sptr<SystemProcessStatusChange> processListener = new SystemProcessStatusChange();
+    MessageParcel reply;
+
+    MessageParcel loadData;
+    ASSERT_TRUE(loadData.WriteInt32(SAID));
+    ASSERT_TRUE(loadData.WriteRemoteObject(loadCallback->AsObject()));
+    EXPECT_EQ(saMgr->LoadSystemAbilityWithUserIdInner(loadData, reply), ERR_INVALID_VALUE);
+
+    MessageParcel subscribeAbilityData;
+    ASSERT_TRUE(subscribeAbilityData.WriteInt32(SAID));
+    ASSERT_TRUE(subscribeAbilityData.WriteRemoteObject(abilityListener->AsObject()));
+    EXPECT_EQ(saMgr->SubsSystemAbilityWithUserIdInner(subscribeAbilityData, reply), ERR_NULL_OBJECT);
+
+    MessageParcel unsubscribeAbilityData;
+    ASSERT_TRUE(unsubscribeAbilityData.WriteInt32(SAID));
+    ASSERT_TRUE(unsubscribeAbilityData.WriteRemoteObject(abilityListener->AsObject()));
+    EXPECT_EQ(saMgr->UnSubsSystemAbilityWithUserIdInner(unsubscribeAbilityData, reply), ERR_NULL_OBJECT);
+
+    MessageParcel subscribeProcessData;
+    ASSERT_TRUE(subscribeProcessData.WriteRemoteObject(processListener->AsObject()));
+    EXPECT_EQ(saMgr->SubscribeSystemProcessWithUserIdInner(subscribeProcessData, reply), ERR_NULL_OBJECT);
+
+    MessageParcel unsubscribeProcessData;
+    ASSERT_TRUE(unsubscribeProcessData.WriteRemoteObject(processListener->AsObject()));
+    EXPECT_EQ(saMgr->UnSubscribeSystemProcessWithUserIdInner(unsubscribeProcessData, reply), ERR_NULL_OBJECT);
+
+    MessageParcel checkExistData;
+    ASSERT_TRUE(checkExistData.WriteInt32(SAID));
+    ASSERT_TRUE(checkExistData.WriteBool(false));
+    EXPECT_EQ(saMgr->CheckSystemAbilityByUserIdInner(checkExistData, reply), ERR_NULL_OBJECT);
+#ifdef SUPPORT_ACCESS_TOKEN
+    RestoreDefaultToken();
+#endif
+}
+
+/**
+ * @tc.name: MultiUserInvalidTargetUserQuery001
+ * @tc.desc: Test complete multi-user query parcels propagate invalid target-user results.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, MultiUserInvalidTargetUserQuery001, TestSize.Level3)
+{
+    SamMockPermission::MockPermission();
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel reply;
+
+    MessageParcel getData;
+    ASSERT_TRUE(getData.WriteInt32(SAID));
+    ASSERT_TRUE(getData.WriteInt32(SAMGR_INVALID_USER_ID));
+    EXPECT_EQ(saMgr->GetSystemAbilityWithUserIdInner(getData, reply), ERR_NULL_OBJECT);
+
+    MessageParcel checkData;
+    ASSERT_TRUE(checkData.WriteInt32(SAID));
+    ASSERT_TRUE(checkData.WriteInt32(SAMGR_INVALID_USER_ID));
+    EXPECT_EQ(saMgr->CheckSystemAbilityWithUserIdInner(checkData, reply), ERR_NULL_OBJECT);
+
+    MessageParcel checkExistData;
+    ASSERT_TRUE(checkExistData.WriteInt32(SAID));
+    ASSERT_TRUE(checkExistData.WriteBool(false));
+    ASSERT_TRUE(checkExistData.WriteInt32(SAMGR_INVALID_USER_ID));
+    EXPECT_EQ(saMgr->CheckSystemAbilityByUserIdInner(checkExistData, reply), ERR_NULL_OBJECT);
+
+    MessageParcel processInfoData;
+    ASSERT_TRUE(processInfoData.WriteInt32(SAID));
+    ASSERT_TRUE(processInfoData.WriteInt32(SAMGR_INVALID_USER_ID));
+    EXPECT_EQ(saMgr->GetSystemProcessInfoWithUserIdInner(processInfoData, reply), ERR_OK);
+
+    MessageParcel localProxyData;
+    ASSERT_TRUE(localProxyData.WriteInt32(SAID));
+    ASSERT_TRUE(localProxyData.WriteInt32(SAMGR_INVALID_USER_ID));
+    EXPECT_EQ(saMgr->GetLocalAbilityManagerProxyWithUserIdInner(localProxyData, reply), ERR_NULL_OBJECT);
+#ifdef SUPPORT_ACCESS_TOKEN
+    RestoreDefaultToken();
+#endif
+}
+
+/**
+ * @tc.name: MultiUserInvalidTargetUserOperation001
+ * @tc.desc: Test complete multi-user operation parcels propagate invalid target-user results.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, MultiUserInvalidTargetUserOperation001, TestSize.Level3)
+{
+    SamMockPermission::MockPermission();
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    sptr<SystemAbilityLoadCallbackMock> loadCallback = new SystemAbilityLoadCallbackMock();
+    sptr<SaStatusChangeMock> abilityListener = new SaStatusChangeMock();
+    sptr<SystemProcessStatusChange> processListener = new SystemProcessStatusChange();
+    MessageParcel reply;
+    MessageParcel loadData;
+    ASSERT_TRUE(loadData.WriteInt32(SAID));
+    ASSERT_TRUE(loadData.WriteRemoteObject(loadCallback->AsObject()));
+    ASSERT_TRUE(loadData.WriteInt32(SAMGR_INVALID_USER_ID));
+    EXPECT_EQ(saMgr->LoadSystemAbilityWithUserIdInner(loadData, reply), INVALID_CALLING_USER_ID);
+
+    MessageParcel subscribeAbilityData;
+    ASSERT_TRUE(subscribeAbilityData.WriteInt32(SAID));
+    ASSERT_TRUE(subscribeAbilityData.WriteRemoteObject(abilityListener->AsObject()));
+    ASSERT_TRUE(subscribeAbilityData.WriteInt32(SAMGR_INVALID_USER_ID));
+    EXPECT_EQ(saMgr->SubsSystemAbilityWithUserIdInner(subscribeAbilityData, reply), INVALID_CALLING_USER_ID);
+
+    MessageParcel unsubscribeAbilityData;
+    ASSERT_TRUE(unsubscribeAbilityData.WriteInt32(SAID));
+    ASSERT_TRUE(unsubscribeAbilityData.WriteRemoteObject(abilityListener->AsObject()));
+    ASSERT_TRUE(unsubscribeAbilityData.WriteInt32(SAMGR_INVALID_USER_ID));
+    EXPECT_EQ(saMgr->UnSubsSystemAbilityWithUserIdInner(unsubscribeAbilityData, reply), INVALID_CALLING_USER_ID);
+
+    MessageParcel subscribeProcessData;
+    ASSERT_TRUE(subscribeProcessData.WriteRemoteObject(processListener->AsObject()));
+    ASSERT_TRUE(subscribeProcessData.WriteInt32(SAMGR_INVALID_USER_ID));
+    EXPECT_EQ(saMgr->SubscribeSystemProcessWithUserIdInner(subscribeProcessData, reply), INVALID_CALLING_USER_ID);
+
+    MessageParcel unsubscribeProcessData;
+    ASSERT_TRUE(unsubscribeProcessData.WriteRemoteObject(processListener->AsObject()));
+    ASSERT_TRUE(unsubscribeProcessData.WriteInt32(SAMGR_INVALID_USER_ID));
+    EXPECT_EQ(saMgr->UnSubscribeSystemProcessWithUserIdInner(unsubscribeProcessData, reply), INVALID_CALLING_USER_ID);
+#ifdef SUPPORT_ACCESS_TOKEN
+    RestoreDefaultToken();
+#endif
+}
+
+/**
+ * @tc.name: MultiUserQuerySuccess001
+ * @tc.desc: Test multi-user query handlers serialize an existing ability.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, MultiUserQuerySuccess001, TestSize.Level3)
+{
+    constexpr int32_t userId = 120;
+    SamMockPermission::MockPermission();
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    ASSERT_NE(saMgr, nullptr);
+    saMgr->userLifecycleManager_.SetSaProfiles(&saMgr->allSaProfiles_);
+    ASSERT_EQ(saMgr->OnUserStateChanged(userId, USER_STATE_ACTIVATING), ERR_OK);
+    auto manager = saMgr->GetMultiUserManager(userId);
+    ASSERT_NE(manager, nullptr);
+    sptr<IRemoteObject> ability = new TestTransactionService();
+    manager->abilityMap_[SAID] = {ability, false};
+
+    MessageParcel getData;
+    MessageParcel getReply;
+    ASSERT_TRUE(getData.WriteInt32(SAID));
+    ASSERT_TRUE(getData.WriteInt32(userId));
+    EXPECT_EQ(saMgr->GetSystemAbilityWithUserIdInner(getData, getReply), ERR_NONE);
+    EXPECT_EQ(getReply.ReadRemoteObject(), ability);
+
+    MessageParcel checkData;
+    MessageParcel checkReply;
+    ASSERT_TRUE(checkData.WriteInt32(SAID));
+    ASSERT_TRUE(checkData.WriteInt32(userId));
+    EXPECT_EQ(saMgr->CheckSystemAbilityWithUserIdInner(checkData, checkReply), ERR_NONE);
+    EXPECT_EQ(checkReply.ReadRemoteObject(), ability);
+
+    MessageParcel existData;
+    MessageParcel existReply;
+    ASSERT_TRUE(existData.WriteInt32(SAID));
+    ASSERT_TRUE(existData.WriteBool(false));
+    ASSERT_TRUE(existData.WriteInt32(userId));
+    EXPECT_EQ(saMgr->CheckSystemAbilityByUserIdInner(existData, existReply), ERR_NONE);
+    EXPECT_EQ(existReply.ReadRemoteObject(), ability);
+    EXPECT_TRUE(existReply.ReadBool());
+#ifdef SUPPORT_ACCESS_TOKEN
+    RestoreDefaultToken();
+#endif
+    EXPECT_EQ(saMgr->OnUserStateChanged(userId, USER_STATE_STOPPING), ERR_OK);
+}
+
+/**
+ * @tc.name: MultiUserProcessInfoSuccess001
+ * @tc.desc: Test the multi-user process-info handler serializes process fields.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, MultiUserProcessInfoSuccess001, TestSize.Level3)
+{
+    constexpr int32_t userId = 121;
+    constexpr int32_t processPid = 321;
+    constexpr int32_t processUid = 654;
+    const std::u16string processName = u"multi_user_process";
+    SamMockPermission::MockPermission();
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    ASSERT_NE(saMgr, nullptr);
+    saMgr->userLifecycleManager_.SetSaProfiles(&saMgr->allSaProfiles_);
+    ASSERT_EQ(saMgr->OnUserStateChanged(userId, USER_STATE_ACTIVATING), ERR_OK);
+    auto manager = saMgr->GetMultiUserManager(userId);
+    ASSERT_NE(manager, nullptr);
+    auto abilityContext = std::make_shared<SystemAbilityContext>();
+    auto processContext = std::make_shared<SystemProcessContext>();
+    processContext->processName = processName;
+    processContext->pid = processPid;
+    processContext->uid = processUid;
+    abilityContext->ownProcessContext = processContext;
+    manager->abilityStateScheduler_->abilityContextMap_[SAID] = abilityContext;
+
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE(data.WriteInt32(SAID));
+    ASSERT_TRUE(data.WriteInt32(userId));
+    EXPECT_EQ(saMgr->GetSystemProcessInfoWithUserIdInner(data, reply), ERR_OK);
+    EXPECT_EQ(reply.ReadInt32(), ERR_OK);
+    EXPECT_EQ(reply.ReadString(), Str16ToStr8(processName));
+    EXPECT_EQ(reply.ReadInt32(), processPid);
+    EXPECT_EQ(reply.ReadInt32(), processUid);
+#ifdef SUPPORT_ACCESS_TOKEN
+    RestoreDefaultToken();
+#endif
+    EXPECT_EQ(saMgr->OnUserStateChanged(userId, USER_STATE_STOPPING), ERR_OK);
+}
+
+/**
+ * @tc.name: MultiUserLocalProxySuccess001
+ * @tc.desc: Test the multi-user local-manager handler serializes the process object.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, MultiUserLocalProxySuccess001, TestSize.Level3)
+{
+    constexpr int32_t userId = 122;
+    const std::u16string processName = u"multi_user_local_process";
+    SamMockPermission::MockPermission();
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    ASSERT_NE(saMgr, nullptr);
+    saMgr->userLifecycleManager_.SetSaProfiles(&saMgr->allSaProfiles_);
+    ASSERT_EQ(saMgr->OnUserStateChanged(userId, USER_STATE_ACTIVATING), ERR_OK);
+    auto manager = saMgr->GetMultiUserManager(userId);
+    ASSERT_NE(manager, nullptr);
+    CommonSaProfile profile;
+    profile.process = processName;
+    manager->saProfileMap_[SAID] = profile;
+    sptr<IRemoteObject> process = new TestTransactionService();
+    manager->systemProcessMap_[processName] = process;
+
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE(data.WriteInt32(SAID));
+    ASSERT_TRUE(data.WriteInt32(userId));
+    EXPECT_EQ(saMgr->GetLocalAbilityManagerProxyWithUserIdInner(data, reply), ERR_NONE);
+    EXPECT_EQ(reply.ReadRemoteObject(), process);
+#ifdef SUPPORT_ACCESS_TOKEN
+    RestoreDefaultToken();
+#endif
+    EXPECT_EQ(saMgr->OnUserStateChanged(userId, USER_STATE_STOPPING), ERR_OK);
+}
+
+/**
+ * @tc.name: MultiUserSubscriptionSuccess001
+ * @tc.desc: Test multi-user ability and process subscriptions complete a round trip.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, MultiUserSubscriptionSuccess001, TestSize.Level3)
+{
+    constexpr int32_t userId = 123;
+    SamMockPermission::MockPermission();
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    ASSERT_NE(saMgr, nullptr);
+    saMgr->userLifecycleManager_.SetSaProfiles(&saMgr->allSaProfiles_);
+    ASSERT_EQ(saMgr->OnUserStateChanged(userId, USER_STATE_ACTIVATING), ERR_OK);
+    sptr<SaStatusChangeMock> abilityListener = new SaStatusChangeMock();
+    sptr<SystemProcessStatusChange> processListener = new SystemProcessStatusChange();
+
+    MessageParcel subscribeAbility;
+    MessageParcel subscribeAbilityReply;
+    ASSERT_TRUE(subscribeAbility.WriteInt32(SAID));
+    ASSERT_TRUE(subscribeAbility.WriteRemoteObject(abilityListener->AsObject()));
+    ASSERT_TRUE(subscribeAbility.WriteInt32(userId));
+    EXPECT_EQ(saMgr->SubsSystemAbilityWithUserIdInner(subscribeAbility, subscribeAbilityReply), ERR_OK);
+
+    MessageParcel unsubscribeAbility;
+    MessageParcel unsubscribeAbilityReply;
+    ASSERT_TRUE(unsubscribeAbility.WriteInt32(SAID));
+    ASSERT_TRUE(unsubscribeAbility.WriteRemoteObject(abilityListener->AsObject()));
+    ASSERT_TRUE(unsubscribeAbility.WriteInt32(userId));
+    EXPECT_EQ(saMgr->UnSubsSystemAbilityWithUserIdInner(unsubscribeAbility, unsubscribeAbilityReply), ERR_OK);
+
+    MessageParcel subscribeProcess;
+    MessageParcel subscribeProcessReply;
+    ASSERT_TRUE(subscribeProcess.WriteRemoteObject(processListener->AsObject()));
+    ASSERT_TRUE(subscribeProcess.WriteInt32(userId));
+    EXPECT_EQ(saMgr->SubscribeSystemProcessWithUserIdInner(subscribeProcess, subscribeProcessReply), ERR_OK);
+
+    MessageParcel unsubscribeProcess;
+    MessageParcel unsubscribeProcessReply;
+    ASSERT_TRUE(unsubscribeProcess.WriteRemoteObject(processListener->AsObject()));
+    ASSERT_TRUE(unsubscribeProcess.WriteInt32(userId));
+    EXPECT_EQ(saMgr->UnSubscribeSystemProcessWithUserIdInner(unsubscribeProcess, unsubscribeProcessReply), ERR_OK);
+#ifdef SUPPORT_ACCESS_TOKEN
+    RestoreDefaultToken();
+#endif
+    EXPECT_EQ(saMgr->OnUserStateChanged(userId, USER_STATE_STOPPING), ERR_OK);
+}
+
+/**
+ * @tc.name: MultiUserInvalidListenerType001
+ * @tc.desc: Test multi-user handlers reject incompatible listener object types.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, MultiUserInvalidListenerType001, TestSize.Level3)
+{
+    SamMockPermission::MockPermission();
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    ASSERT_NE(saMgr, nullptr);
+    sptr<IRemoteObject> invalidListener = new TestTransactionService();
+    MessageParcel reply;
+
+    MessageParcel unsubscribeAbility;
+    ASSERT_TRUE(unsubscribeAbility.WriteInt32(SAID));
+    ASSERT_TRUE(unsubscribeAbility.WriteRemoteObject(invalidListener));
+    EXPECT_EQ(saMgr->UnSubsSystemAbilityWithUserIdInner(unsubscribeAbility, reply), ERR_NULL_OBJECT);
+
+    MessageParcel subscribeProcess;
+    ASSERT_TRUE(subscribeProcess.WriteRemoteObject(invalidListener));
+    EXPECT_EQ(saMgr->SubscribeSystemProcessWithUserIdInner(subscribeProcess, reply), ERR_NULL_OBJECT);
+
+    MessageParcel unsubscribeProcess;
+    ASSERT_TRUE(unsubscribeProcess.WriteRemoteObject(invalidListener));
+    int32_t result = saMgr->UnSubscribeSystemProcessWithUserIdInner(unsubscribeProcess, reply);
+#ifdef SUPPORT_ACCESS_TOKEN
+    RestoreDefaultToken();
+#endif
+    EXPECT_EQ(result, ERR_NULL_OBJECT);
+}
+
+#ifdef SUPPORT_ACCESS_TOKEN
+/**
+ * @tc.name: MultiUserNativeCallerGuard001
+ * @tc.desc: Test process-related multi-user handlers reject a HAP caller.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, MultiUserNativeCallerGuard001, TestSize.Level3)
+{
+    constexpr uint32_t hapTokenId = (1U << 29U) | 1U;
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    ASSERT_NE(saMgr, nullptr);
+    SetSelfTokenID(hapTokenId);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(saMgr->GetSystemProcessInfoWithUserIdInner(data, reply), ERR_PERMISSION_DENIED);
+    EXPECT_EQ(saMgr->SubscribeSystemProcessWithUserIdInner(data, reply), ERR_PERMISSION_DENIED);
+    int32_t result = saMgr->UnSubscribeSystemProcessWithUserIdInner(data, reply);
+    RestoreDefaultToken();
+    EXPECT_EQ(result, ERR_PERMISSION_DENIED);
+}
+#endif
+
+/**
+ * @tc.name: MultiUserMissingUserIdQuery001
+ * @tc.desc: Test process-info and local-proxy handlers reject a missing user ID.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, MultiUserMissingUserIdQuery001, TestSize.Level3)
+{
+    SamMockPermission::MockPermission();
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    ASSERT_NE(saMgr, nullptr);
+    MessageParcel reply;
+    MessageParcel processInfoData;
+    ASSERT_TRUE(processInfoData.WriteInt32(SAID));
+    EXPECT_EQ(saMgr->GetSystemProcessInfoWithUserIdInner(processInfoData, reply), ERR_NULL_OBJECT);
+
+    MessageParcel localProxyData;
+    ASSERT_TRUE(localProxyData.WriteInt32(SAID));
+    int32_t result = saMgr->GetLocalAbilityManagerProxyWithUserIdInner(localProxyData, reply);
+#ifdef SUPPORT_ACCESS_TOKEN
+    RestoreDefaultToken();
+#endif
+    EXPECT_EQ(result, ERR_NULL_OBJECT);
+}
+
+/**
+ * @tc.name: MultiUserLoadInvalidSaId001
+ * @tc.desc: Test the multi-user load handler rejects an invalid system ability ID.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, MultiUserLoadInvalidSaId001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    ASSERT_NE(saMgr, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE(data.WriteInt32(INVALID_SAID));
+    EXPECT_EQ(saMgr->LoadSystemAbilityWithUserIdInner(data, reply), ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: MultiUserStateMissingUserId001
+ * @tc.desc: Test the user-state handler rejects a parcel without a user ID.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, MultiUserStateMissingUserId001, TestSize.Level3)
+{
+    SamMockPermission::MockProcess("accountmgr");
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    ASSERT_NE(saMgr, nullptr);
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(saMgr->OnUserStateChangedInner(data, reply), ERR_FLATTEN_OBJECT);
+}
+
+/**
+ * @tc.name: MultiUserLoadSuccess001
+ * @tc.desc: Test the multi-user load handler returns success for an already loaded ability.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, MultiUserLoadSuccess001, TestSize.Level3)
+{
+    constexpr int32_t userId = 125;
+    const std::u16string processName = u"multi_user_loaded_process";
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    ASSERT_NE(saMgr, nullptr);
+    saMgr->userLifecycleManager_.SetSaProfiles(&saMgr->allSaProfiles_);
+    ASSERT_EQ(saMgr->OnUserStateChanged(userId, USER_STATE_ACTIVATING), ERR_OK);
+    auto manager = saMgr->GetMultiUserManager(userId);
+    ASSERT_NE(manager, nullptr);
+    CommonSaProfile profile;
+    profile.process = processName;
+    manager->saProfileMap_[SAID] = profile;
+    sptr<IRemoteObject> ability = new TestTransactionService();
+    manager->abilityMap_[SAID] = {ability, false};
+    auto abilityContext = std::make_shared<SystemAbilityContext>();
+    auto processContext = std::make_shared<SystemProcessContext>();
+    processContext->processName = processName;
+    processContext->state = SystemProcessState::STARTED;
+    abilityContext->systemAbilityId = SAID;
+    abilityContext->state = SystemAbilityState::LOADED;
+    abilityContext->ownProcessContext = processContext;
+    manager->abilityStateScheduler_->abilityContextMap_[SAID] = abilityContext;
+
+    sptr<SystemAbilityLoadCallbackMock> callback = new SystemAbilityLoadCallbackMock();
+    MessageParcel data;
+    MessageParcel reply;
+    ASSERT_TRUE(data.WriteInt32(SAID));
+    ASSERT_TRUE(data.WriteRemoteObject(callback->AsObject()));
+    ASSERT_TRUE(data.WriteInt32(userId));
+    EXPECT_EQ(saMgr->LoadSystemAbilityWithUserIdInner(data, reply), ERR_OK);
+    EXPECT_EQ(reply.ReadInt32(), ERR_OK);
+    EXPECT_EQ(saMgr->OnUserStateChanged(userId, USER_STATE_STOPPING), ERR_OK);
+}
+#endif
+
+/**
+ * @tc.name: UnSubsSystemAbilityWithUserIdInner001
+ * @tc.desc: Test multi-user unsubscribe-system-ability parcel validation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, UnSubsSystemAbilityWithUserIdInner001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(saMgr->UnSubsSystemAbilityWithUserIdInner(data, reply), ERR_NULL_OBJECT);
+
+    EXPECT_TRUE(data.WriteInt32(INVALID_SAID));
+    EXPECT_EQ(saMgr->UnSubsSystemAbilityWithUserIdInner(data, reply), ERR_NULL_OBJECT);
+}
+
+/**
+ * @tc.name: GetSystemProcessInfoWithUserIdInner001
+ * @tc.desc: Test multi-user process-info parcel validation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, GetSystemProcessInfoWithUserIdInner001, TestSize.Level3)
+{
+    SamMockPermission::MockPermission();
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(saMgr->GetSystemProcessInfoWithUserIdInner(data, reply), ERR_NULL_OBJECT);
+
+    EXPECT_TRUE(data.WriteInt32(INVALID_SAID));
+    EXPECT_EQ(saMgr->GetSystemProcessInfoWithUserIdInner(data, reply), ERR_NULL_OBJECT);
+#ifdef SUPPORT_ACCESS_TOKEN
+    RestoreDefaultToken();
+#endif
+}
+
+/**
+ * @tc.name: GetLocalAbilityManagerProxyWithUserIdInner001
+ * @tc.desc: Test multi-user local-manager proxy parcel validation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, GetLocalAbilityManagerProxyWithUserIdInner001, TestSize.Level3)
+{
+    SamMockPermission::MockPermission();
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(saMgr->GetLocalAbilityManagerProxyWithUserIdInner(data, reply), ERR_NULL_OBJECT);
+
+    EXPECT_TRUE(data.WriteInt32(INVALID_SAID));
+    EXPECT_EQ(saMgr->GetLocalAbilityManagerProxyWithUserIdInner(data, reply), ERR_NULL_OBJECT);
+#ifdef SUPPORT_ACCESS_TOKEN
+    RestoreDefaultToken();
+#endif
+}
+
+/**
+ * @tc.name: SubscribeSystemProcessWithUserIdInner001
+ * @tc.desc: Test multi-user process subscription parcel validation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, SubscribeSystemProcessWithUserIdInner001, TestSize.Level3)
+{
+    SamMockPermission::MockPermission();
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(saMgr->SubscribeSystemProcessWithUserIdInner(data, reply), ERR_NULL_OBJECT);
+#ifdef SUPPORT_ACCESS_TOKEN
+    RestoreDefaultToken();
+#endif
+}
+
+/**
+ * @tc.name: UnSubscribeSystemProcessWithUserIdInner001
+ * @tc.desc: Test multi-user process unsubscription parcel validation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, UnSubscribeSystemProcessWithUserIdInner001, TestSize.Level3)
+{
+    SamMockPermission::MockPermission();
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_EQ(saMgr->UnSubscribeSystemProcessWithUserIdInner(data, reply), ERR_NULL_OBJECT);
+#ifdef SUPPORT_ACCESS_TOKEN
+    RestoreDefaultToken();
+#endif
+}
+
+void InitUserLifecycleManager(const sptr<SystemAbilityManager>& saMgr)
+{
+    saMgr->userLifecycleManager_.SetSaProfiles(&saMgr->allSaProfiles_);
+}
+#endif
 }
 #ifdef SUPPORT_PENGLAI_MODE
 bool g_permissionRet = false;
@@ -140,6 +876,49 @@ HWTEST_F(SystemAbilityMgrStubTest, OnRemoteRequest001, TestSize.Level4)
     MessageOption option;
     int32_t result = saMgr->OnRemoteRequest(INVALID_CODE, data, reply, option);
     EXPECT_EQ(result, IPC_STUB_UNKNOW_TRANS_ERR);
+}
+
+/**
+ * @tc.name: OnRemoteRequestToken001
+ * @tc.desc: Test request rejection before dispatch when the interface token is absent or invalid.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, OnRemoteRequestToken001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    ASSERT_NE(saMgr, nullptr);
+    MessageParcel reply;
+    MessageOption option;
+    MessageParcel emptyTokenData;
+    EXPECT_EQ(saMgr->OnRemoteRequest(INVALID_CODE, emptyTokenData, reply, option), ERR_PERMISSION_DENIED);
+
+    MessageParcel invalidTokenData;
+    ASSERT_TRUE(invalidTokenData.WriteInterfaceToken(u"ohos.samgr.invalid"));
+    EXPECT_EQ(saMgr->OnRemoteRequest(INVALID_CODE, invalidTokenData, reply, option), ERR_PERMISSION_DENIED);
+}
+
+/**
+ * @tc.name: OnRemoteRequestDispatch001
+ * @tc.desc: Test valid-token dispatch rejects truncated requests for SA query handlers.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, OnRemoteRequestDispatch001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    ASSERT_NE(saMgr, nullptr);
+    MessageParcel reply;
+    MessageOption option;
+    MessageParcel getData;
+    ASSERT_TRUE(getData.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN));
+    EXPECT_EQ(saMgr->OnRemoteRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::GET_SYSTEM_ABILITY_TRANSACTION), getData, reply, option),
+        ERR_NULL_OBJECT);
+
+    MessageParcel checkData;
+    ASSERT_TRUE(checkData.WriteInterfaceToken(SAMANAGER_INTERFACE_TOKEN));
+    EXPECT_EQ(saMgr->OnRemoteRequest(
+        static_cast<uint32_t>(SamgrInterfaceCode::CHECK_SYSTEM_ABILITY_TRANSACTION), checkData, reply, option),
+        ERR_NULL_OBJECT);
 }
 
 #ifdef SUPPORT_ACCESS_TOKEN
@@ -1360,12 +2139,15 @@ HWTEST_F(SystemAbilityMgrStubTest, OnUserStateChangedInner004, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     SamMockPermission::MockProcess("accountmgr");
+    InitUserLifecycleManager(saMgr);
     MessageParcel data;
     MessageParcel reply;
-    EXPECT_TRUE(data.WriteInt32(100));
+    constexpr int32_t userId = 104;
+    EXPECT_TRUE(data.WriteInt32(userId));
     EXPECT_TRUE(data.WriteInt32(static_cast<int32_t>(USER_STATE_ACTIVATING)));
     int32_t ret = saMgr->OnUserStateChangedInner(data, reply);
     EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(saMgr->OnUserStateChanged(userId, USER_STATE_STOPPING), ERR_OK);
 }
 
 /**
@@ -1377,12 +2159,16 @@ HWTEST_F(SystemAbilityMgrStubTest, OnUserStateChangedInner005, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     SamMockPermission::MockProcess("accountmgr");
+    InitUserLifecycleManager(saMgr);
+    constexpr int32_t userId = 105;
+    ASSERT_EQ(saMgr->OnUserStateChanged(userId, USER_STATE_ACTIVATING), ERR_OK);
     MessageParcel data;
     MessageParcel reply;
-    EXPECT_TRUE(data.WriteInt32(100));
+    EXPECT_TRUE(data.WriteInt32(userId));
     EXPECT_TRUE(data.WriteInt32(static_cast<int32_t>(USER_STATE_SWITCHING)));
     int32_t ret = saMgr->OnUserStateChangedInner(data, reply);
     EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(saMgr->OnUserStateChanged(userId, USER_STATE_STOPPING), ERR_OK);
 }
 
 /**
@@ -1394,9 +2180,12 @@ HWTEST_F(SystemAbilityMgrStubTest, OnUserStateChangedInner006, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
     SamMockPermission::MockProcess("accountmgr");
+    InitUserLifecycleManager(saMgr);
+    constexpr int32_t userId = 106;
+    ASSERT_EQ(saMgr->OnUserStateChanged(userId, USER_STATE_ACTIVATING), ERR_OK);
     MessageParcel data;
     MessageParcel reply;
-    EXPECT_TRUE(data.WriteInt32(100));
+    EXPECT_TRUE(data.WriteInt32(userId));
     EXPECT_TRUE(data.WriteInt32(static_cast<int32_t>(USER_STATE_STOPPING)));
     int32_t ret = saMgr->OnUserStateChangedInner(data, reply);
     EXPECT_EQ(ret, ERR_OK);
@@ -1436,6 +2225,24 @@ HWTEST_F(SystemAbilityMgrStubTest, OnUserStateChangedInner008, TestSize.Level3)
 }
 
 /**
+ * @tc.name: OnUserStateChangedInner009
+ * @tc.desc: test OnUserStateChangedInner forwards the user ID sentinel to service validation
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, OnUserStateChangedInner009, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    SamMockPermission::MockProcess("accountmgr");
+    MessageParcel data;
+    MessageParcel reply;
+    EXPECT_TRUE(data.WriteInt32(SAMGR_INVALID_USER_ID));
+    EXPECT_TRUE(data.WriteInt32(static_cast<int32_t>(USER_STATE_ACTIVATING)));
+    int32_t ret = saMgr->OnUserStateChangedInner(data, reply);
+    EXPECT_EQ(ret, ERR_OK);
+    EXPECT_EQ(reply.ReadInt32(), ERR_INVALID_VALUE);
+}
+
+/**
  * @tc.name: OnUserStateChanged001
  * @tc.desc: test OnUserStateChanged, save and verify user state
  * @tc.type: FUNC
@@ -1443,51 +2250,68 @@ HWTEST_F(SystemAbilityMgrStubTest, OnUserStateChangedInner008, TestSize.Level3)
 HWTEST_F(SystemAbilityMgrStubTest, OnUserStateChanged001, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
-    int32_t ret = saMgr->OnUserStateChanged(100, USER_STATE_ACTIVATING);
+    InitUserLifecycleManager(saMgr);
+    constexpr int32_t userId = 110;
+    int32_t ret = saMgr->OnUserStateChanged(userId, USER_STATE_ACTIVATING);
     EXPECT_EQ(ret, ERR_OK);
     {
-        std::lock_guard<samgr::mutex> lock(saMgr->userStateLock_);
-        auto it = saMgr->userStateMap_.find(100);
-        EXPECT_TRUE(it != saMgr->userStateMap_.end());
+        std::shared_lock<samgr::shared_mutex> lock(saMgr->userLifecycleManager_.userStateLock_);
+        auto it = saMgr->userLifecycleManager_.userStateMap_.find(userId);
+        EXPECT_TRUE(it != saMgr->userLifecycleManager_.userStateMap_.end());
         EXPECT_EQ(it->second, USER_STATE_ACTIVATING);
     }
-    ret = saMgr->OnUserStateChanged(100, USER_STATE_SWITCHING);
+    ret = saMgr->OnUserStateChanged(userId, USER_STATE_SWITCHING);
     EXPECT_EQ(ret, ERR_OK);
     {
-        std::lock_guard<samgr::mutex> lock(saMgr->userStateLock_);
-        auto it = saMgr->userStateMap_.find(100);
-        EXPECT_TRUE(it != saMgr->userStateMap_.end());
+        std::shared_lock<samgr::shared_mutex> lock(saMgr->userLifecycleManager_.userStateLock_);
+        auto it = saMgr->userLifecycleManager_.userStateMap_.find(userId);
+        EXPECT_TRUE(it != saMgr->userLifecycleManager_.userStateMap_.end());
         EXPECT_EQ(it->second, USER_STATE_SWITCHING);
     }
-    ret = saMgr->OnUserStateChanged(200, USER_STATE_STOPPING);
+    ret = saMgr->OnUserStateChanged(userId, USER_STATE_STOPPING);
     EXPECT_EQ(ret, ERR_OK);
     {
-        std::lock_guard<samgr::mutex> lock(saMgr->userStateLock_);
-        auto it = saMgr->userStateMap_.find(200);
-        EXPECT_TRUE(it != saMgr->userStateMap_.end());
-        EXPECT_EQ(it->second, USER_STATE_STOPPING);
+        std::shared_lock<samgr::shared_mutex> lock(saMgr->userLifecycleManager_.userStateLock_);
+        auto it = saMgr->userLifecycleManager_.userStateMap_.find(userId);
+        EXPECT_EQ(it, saMgr->userLifecycleManager_.userStateMap_.end());
     }
 }
 
 /**
  * @tc.name: OnUserStateChanged002
- * @tc.desc: test OnUserStateChanged, overwrite existing state
+ * @tc.desc: test repeated user activation is idempotent
  * @tc.type: FUNC
  */
 HWTEST_F(SystemAbilityMgrStubTest, OnUserStateChanged002, TestSize.Level3)
 {
     sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    InitUserLifecycleManager(saMgr);
+    constexpr int32_t userId = 111;
+    ASSERT_EQ(saMgr->OnUserStateChanged(userId, USER_STATE_ACTIVATING), ERR_OK);
+    EXPECT_EQ(saMgr->OnUserStateChanged(userId, USER_STATE_ACTIVATING), ERR_OK);
     {
-        std::lock_guard<samgr::mutex> lock(saMgr->userStateLock_);
-        saMgr->userStateMap_.clear();
+        std::shared_lock<samgr::shared_mutex> lock(saMgr->userLifecycleManager_.userStateLock_);
+        auto it = saMgr->userLifecycleManager_.userStateMap_.find(userId);
+        EXPECT_TRUE(it != saMgr->userLifecycleManager_.userStateMap_.end());
+        EXPECT_EQ(it->second, USER_STATE_ACTIVATING);
     }
-    saMgr->OnUserStateChanged(100, USER_STATE_ACTIVATING);
-    saMgr->OnUserStateChanged(100, USER_STATE_STOPPING);
-    std::lock_guard<samgr::mutex> lock(saMgr->userStateLock_);
-    auto it = saMgr->userStateMap_.find(100);
-    EXPECT_TRUE(it != saMgr->userStateMap_.end());
-    EXPECT_EQ(it->second, USER_STATE_STOPPING);
-    EXPECT_EQ(static_cast<int32_t>(saMgr->userStateMap_.size()), 1);
+    EXPECT_EQ(saMgr->OnUserStateChanged(userId, USER_STATE_STOPPING), ERR_OK);
+}
+
+/**
+ * @tc.name: MultiUserMissingFields001
+ * @tc.desc: Verify user-aware handlers reject parcels missing required fields.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrStubTest, MultiUserMissingFields001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = SystemAbilityManager::GetInstance();
+    ASSERT_NE(saMgr, nullptr);
+    MessageParcel reply;
+    MessageParcel data;
+    EXPECT_EQ(saMgr->GetSystemAbilityWithUserIdInner(data, reply), ERR_NULL_OBJECT);
+    EXPECT_EQ(saMgr->CheckSystemAbilityByUserIdInner(data, reply), ERR_NULL_OBJECT);
+    EXPECT_EQ(saMgr->LoadSystemAbilityWithUserIdInner(data, reply), ERR_INVALID_VALUE);
 }
 #endif
 }

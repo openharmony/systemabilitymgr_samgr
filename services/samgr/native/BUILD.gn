@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -163,7 +163,14 @@ ohos_executable("samgr") {
     }
 
     if (samgr_support_multi_instance) {
-      defines += [ "SUPPORT_MULTI_INSTANCE" ]
+      sources += [
+        "//foundation/systemabilitymgr/samgr/services/samgr/native/source/multi_system_ability_manager.cpp",
+        "//foundation/systemabilitymgr/samgr/services/samgr/native/source/user_lifecycle_manager.cpp",
+      ]
+      defines += [
+        "SUPPORT_MULTI_INSTANCE",
+        "SUPPORT_SA_MULTI_USER",
+      ]
     }
     part_name = "samgr"
   }
