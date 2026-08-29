@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,10 @@
  */
 
 #include "ondemand_helper.h"
+
+#ifdef SUPPORT_MULTI_INSTANCE
+#include "ondemand_command.h"
+#endif
 
 #include <iostream>
 #include <memory>
@@ -714,6 +718,12 @@ int main(int argc, char* argv[])
 {
     SamMockPermission::MockPermission();
     OHOS::OnDemandHelper& ondemandHelper = OnDemandHelper::GetInstance();
+#ifdef SUPPORT_MULTI_INSTANCE
+    int32_t extendedCommandExitCode = 0;
+    if (OHOS::TryRunOnDemandCommand(argc, argv, ondemandHelper, extendedCommandExitCode)) {
+        return extendedCommandExitCode;
+    }
+#endif
     ondemandHelper.argc_ = argc;
     cout << "please input operation(1-param/2-sa/3-proc/4-policy/5-getExtension)" << endl;
     cout << "please input operation(6-getEvent/7-check/8-policy_time/9-test/10-memory)" << endl;

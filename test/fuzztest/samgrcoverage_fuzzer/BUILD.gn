@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -54,6 +54,7 @@ ohos_fuzztest("SamgrCoverageFuzzTest") {
     "${samgr_services_dir}/source/collect/device_param_collect.cpp",
     "${samgr_services_dir}/source/collect/device_status_collect_manager.cpp",
     "${samgr_services_dir}/source/collect/device_timed_collect.cpp",
+    "${samgr_services_dir}/source/collect/ref_count_collect.cpp",
     "${samgr_services_dir}/source/collect/icollect_plugin.cpp",
     "${samgr_services_dir}/source/rpc_callback_imp.cpp",
     "${samgr_services_dir}/source/samgr_time_handler.cpp",
@@ -119,7 +120,14 @@ ohos_fuzztest("SamgrCoverageFuzzTest") {
   }
   defines += ["SAMGR_USE_FFRT"]
   if (samgr_support_multi_instance) {
-    defines += [ "SUPPORT_MULTI_INSTANCE" ]
+    sources += [
+      "${samgr_services_dir}/source/multi_system_ability_manager.cpp",
+      "${samgr_services_dir}/source/user_lifecycle_manager.cpp",
+    ]
+    defines += [
+      "SUPPORT_MULTI_INSTANCE",
+      "SUPPORT_SA_MULTI_USER",
+    ]
   }
 }
 

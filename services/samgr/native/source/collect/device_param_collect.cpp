@@ -82,10 +82,8 @@ int32_t DeviceParamCollect::OnStart()
     HILOGI("DeviceParamCollect OnStart called");
     sptr<SystemAbilityStatusChange> statusChangeListener = new SystemAbilityStatusChange();
     statusChangeListener->Init(this);
-    auto strongManager = manager_.lock();
-    if (strongManager != nullptr) {
-        strongManager->SubscribeSystemAbility(PARAM_WATCHER_DISTRIBUTED_SERVICE_ID, statusChangeListener);
-    }
+    SystemAbilityManager::GetInstance()->SubscribeSystemAbility(PARAM_WATCHER_DISTRIBUTED_SERVICE_ID,
+        statusChangeListener);
     return ERR_OK;
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include "ffrt_handler.h"
 #include "isystem_process_status_change.h"
 #include "if_system_ability_manager.h"
+#include "service_control.h"
 #include "nlohmann/json.hpp"
 #include "sa_profiles.h"
 #include "schedule/system_ability_event_handler.h"
@@ -66,7 +67,10 @@ public:
     void GetProcessInfo(const std::string& processName, std::string& result);
     void GetAllSystemAbilityInfoByState(const std::string& state, std::string& result);
     int32_t SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener);
+    int32_t SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener, bool foregroundOnly);
     int32_t UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener);
+    int32_t UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener, bool foregroundOnly);
+    void UnSubscribeSystemProcess(const sptr<IRemoteObject>& remoteObject);
     int32_t SubscribeLowMemSystemProcess(const sptr<ISystemProcessStatusChange>& listener);
     int32_t UnSubscribeLowMemSystemProcess(const sptr<ISystemProcessStatusChange>& listener);
     int32_t SubscribeSystemProcessList(const std::list<std::u16string>& procNames,
@@ -106,6 +110,9 @@ private:
     int32_t PendLoadEventLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext,
         const LoadRequestInfo& loadRequestInfo);
     int32_t HandlePendingLoadOverflow(const std::shared_ptr<SystemAbilityContext>& abilityContext);
+    void ProcessPendingLoadOverflow(const std::shared_ptr<SystemAbilityContext>& abilityContext,
+        const std::shared_ptr<SystemProcessContext>& processContext,
+        const std::weak_ptr<BaseSystemAbilityManager>& weakManager);
     int32_t PendUnloadEventLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext,
         const std::shared_ptr<UnloadRequestInfo> unloadRequestInfo);
     int32_t RemovePendingUnloadEventLocked(const std::shared_ptr<SystemAbilityContext>& abilityContext);
@@ -188,8 +195,21 @@ private:
     samgr::mutex procListenerMapLock_;
     std::map<std::u16string, std::list<sptr<ISystemProcessStatusChange>>> procListenerMap_;
     std::map<int32_t, int32_t> subscribeProcCountMap_;
+    struct ProcessListener {
+        sptr<ISystemProcessStatusChange> listener;
+        bool hasDirectSubscription = false;
+        bool hasForegroundSubscription = false;
+        ProcessListener(const sptr<ISystemProcessStatusChange>& processListener, bool foregroundOnly = false)
+            : listener(processListener), hasDirectSubscription(!foregroundOnly),
+              hasForegroundSubscription(foregroundOnly) {}
+    };
     samgr::shared_mutex listenerSetLock_;
-    std::list<sptr<ISystemProcessStatusChange>> processListeners_;
+    std::list<ProcessListener> processListeners_;
+
+    int32_t GetUserId();
+    int32_t ServiceControl(const std::string& name, ServiceAction action,
+        const char** extra = nullptr, int32_t cnt = 0);
+    bool CheckProcessStarted(const std::u16string& procName);
     sptr<IRemoteObject::DeathRecipient> processListenerDeath_;
     samgr::mutex startEnableOnceLock_;
     std::map<int32_t, std::list<OnDemandEvent>> startEnableOnceMap_;

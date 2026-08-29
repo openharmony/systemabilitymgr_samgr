@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -580,45 +580,57 @@ int32_t SystemAbilityStateScheduler::HandlePendingLoadOverflow(const std::shared
         recoverHandler_ = std::make_shared<FFRTHandler>("RestartProcessHandler");
     }
     auto weakManager = manager_;
-    auto task = [abilityContext, processContext = abilityContext->ownProcessContext, weakManager] () {
-        auto strongManager = weakManager.lock();
-        if (strongManager == nullptr) {
-            HILOGE("HandlePendingLoadOverflow manager expired");
+    auto weakScheduler = weak_from_this();
+    auto task = [abilityContext, processContext = abilityContext->ownProcessContext, weakScheduler, weakManager] () {
+        auto scheduler = weakScheduler.lock();
+        if (scheduler == nullptr) {
+            HILOGE("HandlePendingLoadOverflow scheduler expired");
             return;
         }
-        {
-            std::lock_guard<samgr::mutex> autoLock(processContext->processLock);
-            if (processContext->state != SystemProcessState::STOPPING) {
-                HILOGW("Scheduler proc:%{public}s state %{public}d",
-                    Str16ToStr8(processContext->processName).c_str(), processContext->state);
-                return;
-            }
-            abilityContext->pendingLoadEventList.clear();
-            abilityContext->pendingLoadEventCountMap.clear();
-            HILOGI("HandlePendingLoadOverflow:clear SA:%{public}d pendingLoadEvent", abilityContext->systemAbilityId);
-        }
-        if (SamgrUtil::CheckSystemProcessStarted(processContext->processName)) {
-            auto result = ServiceControlWithExtra(Str16ToStr8(processContext->processName).c_str(),
-                ServiceAction::STOP, nullptr, 0);
-            KHILOGI("HandlePendingLoadOverflow:%{public}s kill pid:%{public}d_%{public}d",
-                Str16ToStr8(processContext->processName).c_str(), processContext->pid, result);
-        } else {
-            auto obj = strongManager->GetSystemProcess(processContext->processName);
-            if (obj == nullptr) {
-                KHILOGW("HandlePendingLoadOverflow:%{public}s is removed",
-                    Str16ToStr8(processContext->processName).c_str());
-                return;
-            }
-            strongManager->RemoveSystemProcess(obj);
-            KHILOGI("HandlePendingLoadOverflow:rmProc %{public}s",
-                Str16ToStr8(processContext->processName).c_str());
-        }
+        scheduler->ProcessPendingLoadOverflow(abilityContext, processContext, weakManager);
     };
     bool ret = recoverHandler_->PostTask(task);
     if (!ret) {
         HILOGW("HandlePendingLoadOverflow PostTask fail");
     }
     return PEND_LOAD_EVENT_SIZE_LIMIT;
+}
+
+void SystemAbilityStateScheduler::ProcessPendingLoadOverflow(
+    const std::shared_ptr<SystemAbilityContext>& abilityContext,
+    const std::shared_ptr<SystemProcessContext>& processContext,
+    const std::weak_ptr<BaseSystemAbilityManager>& weakManager)
+{
+    auto strongManager = weakManager.lock();
+    if (strongManager == nullptr) {
+        HILOGE("HandlePendingLoadOverflow manager expired");
+        return;
+    }
+    {
+        std::lock_guard<samgr::mutex> autoLock(processContext->processLock);
+        if (processContext->state != SystemProcessState::STOPPING) {
+            HILOGW("Scheduler proc:%{public}s state %{public}d",
+                Str16ToStr8(processContext->processName).c_str(), processContext->state);
+            return;
+        }
+        abilityContext->pendingLoadEventList.clear();
+        abilityContext->pendingLoadEventCountMap.clear();
+        HILOGI("HandlePendingLoadOverflow:clear SA:%{public}d pendingLoadEvent", abilityContext->systemAbilityId);
+    }
+    if (CheckProcessStarted(processContext->processName)) {
+        auto result = ServiceControl(Str16ToStr8(processContext->processName), ServiceAction::STOP);
+        KHILOGI("HandlePendingLoadOverflow:%{public}s kill pid:%{public}d_%{public}d",
+            Str16ToStr8(processContext->processName).c_str(), processContext->pid, result);
+        return;
+    }
+    auto obj = strongManager->GetSystemProcess(processContext->processName);
+    if (obj == nullptr) {
+        KHILOGW("HandlePendingLoadOverflow:%{public}s is removed",
+            Str16ToStr8(processContext->processName).c_str());
+        return;
+    }
+    strongManager->RemoveSystemProcess(obj);
+    KHILOGI("HandlePendingLoadOverflow:rmProc %{public}s", Str16ToStr8(processContext->processName).c_str());
 }
 
 int32_t SystemAbilityStateScheduler::PendUnloadEventLocked(
@@ -1016,8 +1028,7 @@ int32_t SystemAbilityStateScheduler::KillSystemProcessLocked(
     int32_t result = ERR_OK;
     {
         SamgrXCollie samgrXCollie("samgr--killProccess_" + Str16ToStr8(processContext->processName));
-        result = ServiceControlWithExtra(Str16ToStr8(processContext->processName).c_str(),
-            ServiceAction::STOP, nullptr, 0);
+        result = ServiceControl(Str16ToStr8(processContext->processName), ServiceAction::STOP);
     }
 
     int64_t duration = GetTickCount() - begin;
@@ -1122,25 +1133,65 @@ int32_t SystemAbilityStateScheduler::HandleAbnormallyDiedAbilityLocked(
 
 void SystemAbilityStateScheduler::NotifyProcessStarted(const std::shared_ptr<SystemProcessContext>& processContext)
 {
-    std::shared_lock<samgr::shared_mutex> readLock(listenerSetLock_);
-    for (auto& listener : processListeners_) {
-        if (listener->AsObject() != nullptr) {
-            SystemProcessInfo systemProcessInfo = {Str16ToStr8(processContext->processName), processContext->pid,
-                processContext->uid};
-            listener->OnSystemProcessStarted(systemProcessInfo);
+    bool isForegroundUser = true;
+    int32_t userId = BASE_USER;
+#ifdef SUPPORT_MULTI_INSTANCE
+    userId = GetUserId();
+    if (userId != BASE_USER) {
+        auto samgr = SystemAbilityManager::GetInstance();
+        isForegroundUser = userId != SAMGR_INVALID_USER_ID && samgr != nullptr &&
+            userId == samgr->GetForegroundUserId();
+    }
+#endif
+    std::vector<sptr<ISystemProcessStatusChange>> listeners;
+    {
+        std::shared_lock<samgr::shared_mutex> readLock(listenerSetLock_);
+        for (const auto& item : processListeners_) {
+            if (!item.hasDirectSubscription && item.hasForegroundSubscription && !isForegroundUser) {
+                HILOGD("NotifyProcStarted skip foreground-only listener, userId:%{public}d", userId);
+                continue;
+            }
+            if (item.listener != nullptr && item.listener->AsObject() != nullptr) {
+                listeners.push_back(item.listener);
+            }
         }
+    }
+    SystemProcessInfo systemProcessInfo = {Str16ToStr8(processContext->processName), processContext->pid,
+        processContext->uid};
+    for (const auto& listener : listeners) {
+        listener->OnSystemProcessStarted(systemProcessInfo);
     }
 }
 
 void SystemAbilityStateScheduler::NotifyProcessStopped(const std::shared_ptr<SystemProcessContext>& processContext)
 {
-    std::shared_lock<samgr::shared_mutex> readLock(listenerSetLock_);
-    for (auto& listener : processListeners_) {
-        if (listener->AsObject() != nullptr) {
-            SystemProcessInfo systemProcessInfo = {Str16ToStr8(processContext->processName), processContext->pid,
-                processContext->uid};
-            listener->OnSystemProcessStopped(systemProcessInfo);
+    bool isForegroundUser = true;
+    int32_t userId = BASE_USER;
+#ifdef SUPPORT_MULTI_INSTANCE
+    userId = GetUserId();
+    if (userId != BASE_USER) {
+        auto samgr = SystemAbilityManager::GetInstance();
+        isForegroundUser = userId != SAMGR_INVALID_USER_ID && samgr != nullptr &&
+            userId == samgr->GetForegroundUserId();
+    }
+#endif
+    std::vector<sptr<ISystemProcessStatusChange>> listeners;
+    {
+        std::shared_lock<samgr::shared_mutex> readLock(listenerSetLock_);
+        for (const auto& item : processListeners_) {
+            if (!item.hasDirectSubscription && item.hasForegroundSubscription && !isForegroundUser) {
+                HILOGD("NotifyProcStopped skip foreground-only listener, userId:%{public}d", userId);
+                continue;
+            }
+            if (item.listener != nullptr && item.listener->AsObject() != nullptr) {
+                listeners.push_back(item.listener);
+            }
         }
+    }
+    SystemProcessInfo systemProcessInfo = {Str16ToStr8(processContext->processName), processContext->pid,
+        processContext->uid};
+    for (const auto& listener : listeners) {
+        listener->OnSystemProcessStopped(systemProcessInfo);
     }
 }
 
@@ -1464,18 +1515,33 @@ void SystemAbilityStateScheduler::GetAllSystemAbilityInfoByState(const std::stri
 
 int32_t SystemAbilityStateScheduler::SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener)
 {
+    return SubscribeSystemProcess(listener, false);
+}
+
+int32_t SystemAbilityStateScheduler::SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener,
+    bool foregroundOnly)
+{
+    if (listener == nullptr || listener->AsObject() == nullptr) {
+        HILOGE("SubscribeSystemProcess listener is invalid");
+        return ERR_INVALID_VALUE;
+    }
     std::unique_lock<samgr::shared_mutex> writeLock(listenerSetLock_);
     auto iter = std::find_if(processListeners_.begin(), processListeners_.end(),
-        [listener](sptr<ISystemProcessStatusChange>& item) {
-        return item->AsObject() == listener->AsObject();
+        [listener](ProcessListener& item) {
+        return item.listener->AsObject() == listener->AsObject();
     });
     if (iter == processListeners_.end()) {
         if (processListenerDeath_ != nullptr) {
             bool ret = listener->AsObject()->AddDeathRecipient(processListenerDeath_);
             HILOGI("SubscribeSystemProcess AddDeathRecipient %{public}s", ret ? "succeed" : "failed");
         }
-        processListeners_.emplace_back(listener);
+        processListeners_.emplace_back(listener, foregroundOnly);
     } else {
+        if (foregroundOnly) {
+            iter->hasForegroundSubscription = true;
+        } else {
+            iter->hasDirectSubscription = true;
+        }
         HILOGI("SubscribeSystemProcess listener already exists");
     }
     return ERR_OK;
@@ -1483,25 +1549,52 @@ int32_t SystemAbilityStateScheduler::SubscribeSystemProcess(const sptr<ISystemPr
 
 int32_t SystemAbilityStateScheduler::UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener)
 {
-    if (listener == nullptr) {
+    return UnSubscribeSystemProcess(listener, false);
+}
+
+int32_t SystemAbilityStateScheduler::UnSubscribeSystemProcess(
+    const sptr<ISystemProcessStatusChange>& listener, bool foregroundOnly)
+{
+    if (listener == nullptr || listener->AsObject() == nullptr) {
         HILOGE("UnSubscribeSystemProcess listener is invalid");
         return ERR_INVALID_VALUE;
     }
+
     std::unique_lock<samgr::shared_mutex> writeLock(listenerSetLock_);
     auto iter = std::find_if(processListeners_.begin(), processListeners_.end(),
-        [listener](sptr<ISystemProcessStatusChange>& item) {
-        return item->AsObject() == listener->AsObject();
+        [listener](ProcessListener& item) {
+        return item.listener->AsObject() == listener->AsObject();
     });
     if (iter != processListeners_.end()) {
-        if (processListenerDeath_ != nullptr) {
-            listener->AsObject()->RemoveDeathRecipient(processListenerDeath_);
+        if (foregroundOnly) {
+            iter->hasForegroundSubscription = false;
+        } else {
+            iter->hasDirectSubscription = false;
         }
-        processListeners_.erase(iter);
-        HILOGI("UnSubscribeSystemProcess listener remove success");
+        if (!iter->hasDirectSubscription && !iter->hasForegroundSubscription) {
+            if (processListenerDeath_ != nullptr) {
+                listener->AsObject()->RemoveDeathRecipient(processListenerDeath_);
+            }
+            processListeners_.erase(iter);
+            HILOGI("UnSubscribeSystemProcess listener remove success");
+        } else {
+            HILOGI("UnSubscribeSystemProcess listener keeps another subscription source");
+        }
     } else {
         HILOGI("UnSubscribeSystemProcess listener not exists");
     }
     return ERR_OK;
+}
+
+void SystemAbilityStateScheduler::UnSubscribeSystemProcess(const sptr<IRemoteObject>& remoteObject)
+{
+    if (remoteObject == nullptr) {
+        return;
+    }
+    std::unique_lock<samgr::shared_mutex> writeLock(listenerSetLock_);
+    processListeners_.remove_if([remoteObject](const auto& item) {
+        return item.listener == nullptr || item.listener->AsObject() == remoteObject;
+    });
 }
 
 int32_t SystemAbilityStateScheduler::SubscribeLowMemSystemProcess(const sptr<ISystemProcessStatusChange>& listener)
@@ -1905,6 +1998,38 @@ void SystemAbilityStateScheduler::UnloadEventHandler::SetFfrt()
     if (handler_ != nullptr) {
         handler_->SetFfrt("UnloadEventHandler");
     }
+}
+
+int32_t SystemAbilityStateScheduler::GetUserId()
+{
+    auto mgr = manager_.lock();
+    return (mgr != nullptr) ? mgr->GetUserId() : SAMGR_INVALID_USER_ID;
+}
+
+int32_t SystemAbilityStateScheduler::ServiceControl(const std::string& name, ServiceAction action,
+    const char** extra, int32_t cnt)
+{
+    int32_t userId = GetUserId();
+#ifdef SUPPORT_MULTI_INSTANCE
+    if (userId == SAMGR_INVALID_USER_ID) {
+        HILOGE("ServiceControl manager expired, proc:%{public}s", name.c_str());
+        return ERR_INVALID_VALUE;
+    }
+    if (userId != BASE_USER) {
+        return ServiceControlWithExtraByUserId(name.c_str(), action, userId, extra, cnt);
+    }
+#endif
+    return ServiceControlWithExtra(name.c_str(), action, extra, cnt);
+}
+
+bool SystemAbilityStateScheduler::CheckProcessStarted(const std::u16string& procName)
+{
+    int32_t userId = GetUserId();
+    if (userId == SAMGR_INVALID_USER_ID) {
+        HILOGE("CheckProcessStarted manager expired, proc:%{public}s", Str16ToStr8(procName).c_str());
+        return false;
+    }
+    return SamgrUtil::CheckSystemProcessStarted(procName, userId);
 }
 
 }  // namespace OHOS

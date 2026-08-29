@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef INTERFACES_INNERKITS_SAMGR_INCLUDE_IF_SYSTEM_ABILITY_MANAGER_H
 #define INTERFACES_INNERKITS_SAMGR_INCLUDE_IF_SYSTEM_ABILITY_MANAGER_H
 
+#include <cstdint>
 #include <string>
 #include <list>
 
@@ -39,6 +40,9 @@ enum SamgrUserState {
     USER_STATE_SWITCHING,
     USER_STATE_STOPPING,
 };
+
+constexpr int32_t SAMGR_INVALID_USER_ID = -1;
+constexpr int32_t BASE_USER = 0;
 
 struct IdleProcessInfo {
     int32_t pid = -1;
@@ -442,6 +446,30 @@ public:
         (void)userState;
         return 0;
     }
+#ifdef SUPPORT_MULTI_INSTANCE
+    /**
+     * The explicit-user APIs are available only to Base-user callers and target an active Multi manager.
+     * The userId must identify an active user.
+     */
+    virtual sptr<IRemoteObject> GetSystemAbility(int32_t systemAbilityId, int32_t userId) = 0;
+    virtual sptr<IRemoteObject> CheckSystemAbility(int32_t systemAbilityId, int32_t userId) = 0;
+    virtual sptr<IRemoteObject> CheckSystemAbilityByUserId(
+        int32_t systemAbilityId, bool& isExist, int32_t userId) = 0;
+    virtual int32_t GetSystemProcessInfo(int32_t systemAbilityId, SystemProcessInfo& systemProcessInfo,
+        int32_t userId) = 0;
+    virtual sptr<IRemoteObject> GetLocalAbilityManagerProxy(int32_t systemAbilityId, int32_t userId) = 0;
+    virtual sptr<IRemoteObject> LoadSystemAbility(int32_t systemAbilityId, int32_t timeout, int32_t userId) = 0;
+    virtual int32_t LoadSystemAbility(int32_t systemAbilityId, const sptr<ISystemAbilityLoadCallback>& callback,
+        int32_t userId) = 0;
+    virtual int32_t SubscribeSystemAbility(int32_t systemAbilityId,
+        const sptr<ISystemAbilityStatusChange>& listener, int32_t userId) = 0;
+    virtual int32_t UnSubscribeSystemAbility(int32_t systemAbilityId,
+        const sptr<ISystemAbilityStatusChange>& listener, int32_t userId) = 0;
+    virtual int32_t SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener,
+        int32_t userId) = 0;
+    virtual int32_t UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener,
+        int32_t userId) = 0;
+#endif
 public:
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ISystemAbilityManager");
 protected:

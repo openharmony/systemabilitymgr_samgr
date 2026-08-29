@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -60,6 +60,7 @@ public:
     static void FilterCommonSaProfile(const SaProfile& oldProfile, CommonSaProfile& newProfile);
     static bool CheckPengLai();
     static bool CheckSystemProcessStarted(const std::u16string& procName);
+    static bool CheckSystemProcessStarted(const std::u16string& procName, int32_t userId);
     static bool CheckSupportSetPrior();
 #ifdef SUPPORT_PENGLAI_MODE
     static bool CheckPengLaiPermission(int32_t systemAbilityId);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,6 +49,35 @@ static const std::string DEVICE_ID = "local";
 static const std::string INVALID_ACTION = "test";
 static const std::string UNRELATED_NAME = "test";
 static const std::string WIFI_NAME = "wifi_status";
+
+class CapturingSwitchReport final : public IReport {
+public:
+    void ReportEvent(const OnDemandEvent& event) override
+    {
+        lastEvent_ = event;
+        reportCount_++;
+    }
+
+    void PostTask(std::function<void()> callback) override
+    {
+        task_ = std::move(callback);
+        postCount_++;
+    }
+
+    void PostDelayTask(std::function<void()> callback, int32_t delayTime) override
+    {
+        task_ = std::move(callback);
+        delayTime_ = delayTime;
+        postDelayCount_++;
+    }
+
+    OnDemandEvent lastEvent_;
+    std::function<void()> task_;
+    uint32_t reportCount_ = 0;
+    uint32_t postCount_ = 0;
+    uint32_t postDelayCount_ = 0;
+    int32_t delayTime_ = -1;
+};
 
 void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
 {
@@ -168,6 +197,17 @@ HWTEST_F(DeviceSwitchCollectTest, DeviceSwitchCollectInit001, TestSize.Level3)
     DTEST_LOG << "DeviceSwitchCollectInit001 end" << std::endl;
 }
 
+HWTEST_F(DeviceSwitchCollectTest, DeviceSwitchCollectInitStopEvent001, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceSwitchCollect> plugin = new DeviceSwitchCollect(collect);
+    SaProfile profile;
+    profile.stopOnDemand.onDemandEvents.emplace_back(OnDemandEvent {SETTING_SWITCH, BLUETOOTH_NAME, "off"});
+    plugin->Init({profile});
+    EXPECT_TRUE(plugin->needListenSwitchEvent_);
+}
+
 /**
  * @tc.name: CollectSubscribeSwitchEvent001
  * @tc.desc: test SubscribeSwitchEvent with switchEventSubscriber_ is nullptr
@@ -276,7 +316,7 @@ HWTEST_F(DeviceSwitchCollectTest, OnStart002, TestSize.Level3)
     deviceSwitchCollect->InitCommonEventSubscriber();
     deviceSwitchCollect->needListenSwitchEvent_ = true;
     int32_t ret = deviceSwitchCollect->OnStart();
-    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    EXPECT_EQ(ret, ERR_OK);
     DTEST_LOG << "OnStart002 end" << std::endl;
 }
 
@@ -393,6 +433,21 @@ HWTEST_F(DeviceSwitchCollectTest, AddCollectEvent002, TestSize.Level3)
     DTEST_LOG << "AddCollectEvent002 end" << std::endl;
 }
 
+HWTEST_F(DeviceSwitchCollectTest, AddCollectEventWithoutSubscriber001, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceSwitchCollect> plugin = new DeviceSwitchCollect(collect);
+    ASSERT_NE(plugin, nullptr);
+    ASSERT_EQ(plugin->switchEventSubscriber_, nullptr);
+
+    std::vector<OnDemandEvent> events {
+        OnDemandEvent {SETTING_SWITCH, WIFI_NAME, "on"},
+    };
+    EXPECT_EQ(plugin->AddCollectEvent(events), ERR_INVALID_VALUE);
+    EXPECT_EQ(plugin->switchEventSubscriber_, nullptr);
+}
+
 /**
  * @tc.name: OnAddSystemAbility002
  * @tc.desc: test OnAddSystemAbility with deviceSwitchCollect is nullptr
@@ -408,6 +463,57 @@ HWTEST_F(DeviceSwitchCollectTest, OnAddSystemAbility002, TestSize.Level3)
     auto deviceSwitchCollect = cesStateListener->deviceSwitchCollect_.promote();
     EXPECT_EQ(deviceSwitchCollect, nullptr);
     DTEST_LOG << "OnAddSystemAbility002 end" << std::endl;
+}
+
+HWTEST_F(DeviceSwitchCollectTest, OnAddSystemAbilityInvalidId001, TestSize.Level3)
+{
+    sptr<CesStateListener> listener = new CesStateListener(nullptr);
+    listener->OnAddSystemAbility(INVALID_SAID, DEVICE_ID);
+    EXPECT_EQ(listener->deviceSwitchCollect_.promote(), nullptr);
+}
+
+HWTEST_F(DeviceSwitchCollectTest, OnAddSystemAbilityDelayedTaskAlive001, TestSize.Level3)
+{
+    sptr<CapturingSwitchReport> report = new CapturingSwitchReport();
+    sptr<DeviceSwitchCollect> plugin = new DeviceSwitchCollect(report);
+    sptr<CesStateListener> listener = new CesStateListener(plugin);
+    ASSERT_NE(report, nullptr);
+    ASSERT_NE(plugin, nullptr);
+    ASSERT_NE(listener, nullptr);
+    plugin->InitCommonEventSubscriber();
+
+    listener->OnAddSystemAbility(COMMON_EVENT_ID, DEVICE_ID);
+    ASSERT_EQ(report->postDelayCount_, 1U);
+    ASSERT_EQ(report->delayTime_, 0);
+    ASSERT_TRUE(static_cast<bool>(report->task_));
+    auto task = std::move(report->task_);
+    task();
+
+    EXPECT_NE(listener->deviceSwitchCollect_.promote(), nullptr);
+    EXPECT_EQ(report->postDelayCount_, 1U);
+}
+
+HWTEST_F(DeviceSwitchCollectTest, OnAddSystemAbilityDelayedTaskExpired001, TestSize.Level3)
+{
+    sptr<CapturingSwitchReport> report = new CapturingSwitchReport();
+    sptr<DeviceSwitchCollect> plugin = new DeviceSwitchCollect(report);
+    sptr<CesStateListener> listener = new CesStateListener(plugin);
+    ASSERT_NE(report, nullptr);
+    ASSERT_NE(plugin, nullptr);
+    ASSERT_NE(listener, nullptr);
+
+    listener->OnAddSystemAbility(COMMON_EVENT_ID, DEVICE_ID);
+    ASSERT_EQ(report->postDelayCount_, 1U);
+    ASSERT_TRUE(static_cast<bool>(report->task_));
+    auto task = std::move(report->task_);
+    report->task_ = nullptr;
+    plugin = nullptr;
+    ASSERT_EQ(listener->deviceSwitchCollect_.promote(), nullptr);
+    task();
+
+    EXPECT_EQ(listener->deviceSwitchCollect_.promote(), nullptr);
+    EXPECT_EQ(report->postDelayCount_, 1U);
+    EXPECT_EQ(report->task_, nullptr);
 }
 
 /**
@@ -433,6 +539,18 @@ HWTEST_F(DeviceSwitchCollectTest, SubscribeSwitchEvent001, TestSize.Level3)
     deviceSwitchCollect->switchEventSubscriber_->SubscribeSwitchEvent();
     EXPECT_NE(deviceSwitchCollect->switchEventSubscriber_, nullptr);
     DTEST_LOG << "SubscribeSwitchEvent001 end" << std::endl;
+}
+
+HWTEST_F(DeviceSwitchCollectTest, SubscribeSwitchEventInvalidSkills001, TestSize.Level3)
+{
+    EventFwk::MatchingSkills skills;
+    EventFwk::CommonEventSubscribeInfo info(skills);
+    auto subscriber = std::make_shared<SwitchEventSubscriber>(info, nullptr);
+    ASSERT_NE(subscriber, nullptr);
+    ASSERT_FALSE(subscriber->isListenSwitchEvent_);
+
+    EXPECT_EQ(subscriber->SubscribeSwitchEvent(), ERR_INVALID_VALUE);
+    EXPECT_FALSE(subscriber->isListenSwitchEvent_);
 }
 
 /**
@@ -556,6 +674,18 @@ HWTEST_F(DeviceSwitchCollectTest, OnReceiveWifiEvent003, TestSize.Level3)
     DTEST_LOG << "OnReceiveWifiEvent003 end" << std::endl;
 }
 
+HWTEST_F(DeviceSwitchCollectTest, OnReceiveWifiEventUnknownCode001, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceSwitchCollect> plugin = new DeviceSwitchCollect(collect);
+    plugin->InitCommonEventSubscriber();
+    EventFwk::CommonEventData data;
+    data.SetCode(INVALID_SAID);
+    plugin->switchEventSubscriber_->OnReceiveWifiEvent(data);
+    EXPECT_EQ(plugin->switchEventSubscriber_->deviceSwitchCollect_.promote(), plugin);
+}
+
 /**
  * @tc.name: OnReceiveBluetoothEvent001
  * @tc.desc: test OnReceiveBluetoothEvent with bluetooth is turn on
@@ -629,6 +759,36 @@ HWTEST_F(DeviceSwitchCollectTest, OnReceiveBluetoothEvent003, TestSize.Level3)
     deviceSwitchCollect->switchEventSubscriber_->OnReceiveBluetoothEvent(data);
     EXPECT_NE(deviceSwitchCollect->switchEventSubscriber_->deviceSwitchCollect_, nullptr);
     DTEST_LOG << "OnReceiveBluetoothEvent003 end" << std::endl;
+}
+
+HWTEST_F(DeviceSwitchCollectTest, OnReceiveBluetoothEventUnknownCode001, TestSize.Level3)
+{
+    sptr<DeviceStatusCollectManager> collect =
+        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+    sptr<DeviceSwitchCollect> plugin = new DeviceSwitchCollect(collect);
+    plugin->InitCommonEventSubscriber();
+    EventFwk::CommonEventData data;
+    data.SetCode(INVALID_SAID);
+    plugin->switchEventSubscriber_->OnReceiveBluetoothEvent(data);
+    EXPECT_EQ(plugin->switchEventSubscriber_->deviceSwitchCollect_.promote(), plugin);
+}
+
+HWTEST_F(DeviceSwitchCollectTest, ReportEventExpiredPlugin001, TestSize.Level3)
+{
+    EventFwk::MatchingSkills skills;
+    EventFwk::CommonEventSubscribeInfo info(skills);
+    std::shared_ptr<SwitchEventSubscriber> subscriber;
+    {
+        sptr<DeviceStatusCollectManager> collect =
+            new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
+        sptr<DeviceSwitchCollect> plugin = new DeviceSwitchCollect(collect);
+        subscriber = std::make_shared<SwitchEventSubscriber>(info, plugin);
+        ASSERT_NE(subscriber, nullptr);
+        EXPECT_NE(subscriber->deviceSwitchCollect_.promote(), nullptr);
+    }
+
+    subscriber->ReportEvent(OnDemandEvent {SETTING_SWITCH, WIFI_NAME, "on"});
+    EXPECT_EQ(subscriber->deviceSwitchCollect_.promote(), nullptr);
 }
 
 /**

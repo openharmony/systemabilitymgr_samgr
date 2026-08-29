@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,12 +15,22 @@
 
 #include "device_timed_collect_test.h"
 
+#include <atomic>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #include "sa_profiles.h"
 #include "test_log.h"
 
 #define private public
+#ifdef PREFERENCES_ENABLE
+#include "base_system_ability_manager.h"
+#endif
 #include "device_status_collect_manager.h"
 #include "device_timed_collect.h"
+#ifdef SUPPORT_MULTI_INSTANCE
+#include "multi_system_ability_manager.h"
+#endif
 #include "samgr_time_handler.h"
 #ifdef PREFERENCES_ENABLE
 #include "preferences_errno.h"
@@ -35,6 +45,42 @@ using namespace testing::ext;
 using namespace OHOS;
 
 namespace OHOS {
+namespace {
+#ifdef PREFERENCES_ENABLE
+class TimedTestBaseManager final : public BaseSystemAbilityManager {
+public:
+    TimedTestBaseManager() = default;
+};
+#endif
+
+class CapturingTimedReport final : public IReport {
+public:
+    void ReportEvent(const OnDemandEvent&) override
+    {
+        reportCount_++;
+    }
+
+    void PostTask(std::function<void()>) override
+    {
+        postCount_++;
+    }
+
+    void PostDelayTask(std::function<void()> callback, int32_t delayTime) override
+    {
+        callback_ = std::move(callback);
+        delayTime_ = delayTime;
+        postDelayCount_++;
+    }
+
+    std::function<void()> callback_;
+    std::atomic<uint32_t> reportCount_ {0};
+    std::atomic<uint32_t> postCount_ {0};
+    std::atomic<uint32_t> postDelayCount_ {0};
+    int32_t delayTime_ = -1;
+};
+
+}
+
 void DeviceTimedCollectTest::SetUpTestCase()
 {
     DTEST_LOG << "SetUpTestCase" << std::endl;
@@ -741,6 +787,23 @@ HWTEST_F(DeviceTimedCollectTest, ObtainLong001, TestSize.Level3)
 }
 
 #ifdef PREFERENCES_ENABLE
+HWTEST_F(DeviceTimedCollectTest, InitPreferencesUtilManagerBranches001, TestSize.Level3)
+{
+    sptr<DeviceTimedCollect> emptyManager = new DeviceTimedCollect(nullptr);
+    ASSERT_NE(emptyManager, nullptr);
+    emptyManager->InitPreferencesUtil();
+    ASSERT_NE(emptyManager->preferencesUtil_, nullptr);
+    EXPECT_EQ(emptyManager->preferencesUtil_->path_, "/data/samgr/samgr.xml");
+
+    auto manager = std::make_shared<TimedTestBaseManager>();
+    ASSERT_NE(manager, nullptr);
+    sptr<DeviceTimedCollect> validManager = new DeviceTimedCollect(nullptr, manager);
+    ASSERT_NE(validManager, nullptr);
+    validManager->InitPreferencesUtil();
+    ASSERT_NE(validManager->preferencesUtil_, nullptr);
+    EXPECT_EQ(validManager->preferencesUtil_->path_, "/data/samgr/samgr.xml");
+}
+
 HWTEST_F(DeviceTimedCollectTest, ProcessPersistenceTimedTask001, TestSize.Level3)
 {
     DTEST_LOG << "ProcessPersistenceTimedTask001 begin" << std::endl;
@@ -756,6 +819,7 @@ HWTEST_F(DeviceTimedCollectTest, ProcessPersistenceTimedTask001, TestSize.Level3
     EXPECT_NE(disTime, 0);
     DTEST_LOG << "ProcessPersistenceTimedTask001 end" << std::endl;
 }
+
 #endif
 
 #ifdef PREFERENCES_ENABLE
@@ -1029,33 +1093,208 @@ HWTEST_F(DeviceTimedCollectTest, SamgrTimeHandlerTest002, TestSize.Level3)
 }
 
 #ifdef PREFERENCES_ENABLE
+HWTEST_F(DeviceTimedCollectTest, PreferencesUtilBasePathAndInvalidDelete001, TestSize.Level3)
+{
+    constexpr int32_t baseUserId = 0;
+    constexpr int32_t invalidUserId = -1;
+    constexpr int32_t missingUserId = 9877;
+    PreferencesUtil preferences;
+    EXPECT_EQ(preferences.path_, "/data/samgr/samgr.xml");
+    EXPECT_EQ(PreferencesUtil::DeleteUserPreferences(baseUserId), ERR_INVALID_VALUE);
+    EXPECT_EQ(PreferencesUtil::DeleteUserPreferences(invalidUserId), ERR_INVALID_VALUE);
+    EXPECT_EQ(PreferencesUtil::DeleteUserPreferences(missingUserId), ERR_OK);
+}
+
+HWTEST_F(DeviceTimedCollectTest, PreferencesUtilDeleteFailure001, TestSize.Level3)
+{
+    constexpr int32_t testUserId = 9878;
+    const std::string path = PreferencesUtil::GetPathForUser(testUserId);
+    const std::string childPath = path + "/child";
+    (void)rmdir(childPath.c_str());
+    (void)unlink(path.c_str());
+    (void)rmdir(path.c_str());
+    ASSERT_EQ(mkdir(path.c_str(), S_IRWXU), 0);
+    ASSERT_EQ(mkdir(childPath.c_str(), S_IRWXU), 0);
+
+    EXPECT_EQ(PreferencesUtil::DeleteUserPreferences(testUserId), ERR_INVALID_OPERATION);
+    EXPECT_EQ(rmdir(childPath.c_str()), 0);
+    EXPECT_EQ(rmdir(path.c_str()), 0);
+}
+#endif
+
+#ifdef SUPPORT_MULTI_INSTANCE
 /**
- * @tc.name: ProcessPersistenceTasks001
- * @tc.desc: test ProcessPersistenceTasks, mixed long and string entries, string skipped
+ * @tc.name: MultiUserTimedTaskRouting001
+ * @tc.desc: Test multi-user timed tasks bypass the global timer handler.
  * @tc.type: FUNC
  */
-HWTEST_F(DeviceTimedCollectTest, ProcessPersistenceTasks001, TestSize.Level3)
+HWTEST_F(DeviceTimedCollectTest, MultiUserTimedTaskRouting001, TestSize.Level3)
 {
-    DTEST_LOG << " ProcessPersistenceTasks001 begin" << std::endl;
-    std::shared_ptr<PreferencesUtil> preferencesUtil = PreferencesUtil::GetInstance();
-    sptr<DeviceStatusCollectManager> collect =
-        new DeviceStatusCollectManager(std::weak_ptr<BaseSystemAbilityManager>{});
-    collect->collectHandler_ = std::make_shared<FFRTHandler>("collect");
-    sptr<DeviceTimedCollect> deviceTimedCollect = new DeviceTimedCollect(collect);
-    EXPECT_NE(deviceTimedCollect, nullptr);
-    deviceTimedCollect->preferencesUtil_ = preferencesUtil;
+    constexpr int32_t testUserId = 100;
+    auto manager = std::make_shared<MultiSystemAbilityManager>(testUserId);
+    sptr<DeviceTimedCollect> timedCollect = new DeviceTimedCollect(nullptr, manager);
+    ASSERT_NE(timedCollect, nullptr);
 
-    int64_t currentTime = TimeUtils::GetTimestamp();
-    std::string stringKey = "2025-01-01-00:00:00";
-    preferencesUtil->SaveString(stringKey, "1");
-    preferencesUtil->SaveLong("99999", currentTime + 1000);
-    deviceTimedCollect->ProcessPersistenceTasks();
-    EXPECT_TRUE(preferencesUtil->IsExist(stringKey));
-
-    preferencesUtil->Remove("99999");
-    preferencesUtil->Remove("2025-01-01-00:00:00");
-    deviceTimedCollect->timeInfos_.clear();
-    DTEST_LOG << " ProcessPersistenceTasks001 end" << std::endl;
+    TimeInfo timeInfo;
+    timeInfo.awake = true;
+    timedCollect->timeInfos_[1] = timeInfo;
+    timedCollect->PostDelayTaskByTimeInfo([] () {}, 1, 1);
+    timedCollect->PostNonPersistenceTimedTaskLocked("multi_user_task", 1);
+#ifdef PREFERENCES_ENABLE
+    timedCollect->preferencesUtil_ = std::make_shared<PreferencesUtil>(testUserId);
+    timedCollect->PostPersistenceTimedTaskLocked("multi_user_task", 1);
+#endif
+    EXPECT_TRUE(timedCollect->IsMultiUser());
 }
+
+#ifdef PREFERENCES_ENABLE
+HWTEST_F(DeviceTimedCollectTest, MultiUserPersistenceTimedTaskRouting001, TestSize.Level3)
+{
+    constexpr int32_t testUserId = 100;
+    auto manager = std::make_shared<MultiSystemAbilityManager>(testUserId);
+    sptr<CapturingTimedReport> report = new CapturingTimedReport();
+    sptr<DeviceTimedCollect> timedCollect = new DeviceTimedCollect(report, manager);
+    ASSERT_NE(report, nullptr);
+    ASSERT_NE(timedCollect, nullptr);
+    timedCollect->preferencesUtil_ = std::make_shared<PreferencesUtil>(testUserId);
+
+    timedCollect->ProcessPersistenceTimedTask(60, "multi_user:task");
+
+    EXPECT_TRUE(timedCollect->IsMultiUser());
+    EXPECT_EQ(report->reportCount_.load(), 0U);
+    EXPECT_EQ(report->postDelayCount_.load(), 1U);
+    EXPECT_EQ(report->delayTime_, 60);
+    EXPECT_TRUE(static_cast<bool>(report->callback_));
+}
+#endif
+
+/**
+ * @tc.name: MultiUserTimedCollectBasePath001
+ * @tc.desc: Test base-user and multi-user routing decisions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DeviceTimedCollectTest, MultiUserTimedCollectBasePath001, TestSize.Level3)
+{
+    auto baseManager = std::make_shared<MultiSystemAbilityManager>(BASE_USER);
+    auto userManager = std::make_shared<MultiSystemAbilityManager>(100);
+    sptr<DeviceTimedCollect> baseCollect = new DeviceTimedCollect(nullptr, baseManager);
+    sptr<DeviceTimedCollect> userCollect = new DeviceTimedCollect(nullptr, userManager);
+    ASSERT_NE(baseCollect, nullptr);
+    ASSERT_NE(userCollect, nullptr);
+    EXPECT_FALSE(baseCollect->IsMultiUser());
+    EXPECT_TRUE(userCollect->IsMultiUser());
+}
+
+/**
+ * @tc.name: MultiUserTimedCollectNullManager001
+ * @tc.desc: Verify timed collection falls back to base-user behavior without a manager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DeviceTimedCollectTest, MultiUserTimedCollectNullManager001, TestSize.Level3)
+{
+    sptr<DeviceTimedCollect> timedCollect = new DeviceTimedCollect(nullptr);
+    ASSERT_NE(timedCollect, nullptr);
+    EXPECT_FALSE(timedCollect->IsMultiUser());
+}
+
+#ifdef PREFERENCES_ENABLE
+/**
+ * @tc.name: MultiUserTimedCollectPreferences001
+ * @tc.desc: Test preference initialization for missing and valid managers.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DeviceTimedCollectTest, MultiUserTimedCollectPreferences001, TestSize.Level3)
+{
+    auto manager = std::make_shared<MultiSystemAbilityManager>(100);
+    sptr<DeviceTimedCollect> noManager = new DeviceTimedCollect(nullptr);
+    sptr<DeviceTimedCollect> withManager = new DeviceTimedCollect(nullptr, manager);
+    ASSERT_NE(noManager, nullptr);
+    ASSERT_NE(withManager, nullptr);
+    noManager->InitPreferencesUtil();
+    withManager->InitPreferencesUtil();
+    ASSERT_NE(noManager->preferencesUtil_, nullptr);
+    EXPECT_NE(withManager->preferencesUtil_, nullptr);
+}
+#endif
+
+#ifdef PREFERENCES_ENABLE
+/**
+ * @tc.name: UserPersistencePath001
+ * @tc.desc: Test persistence paths are isolated by user and reject base-user deletion
+ * @tc.type: FUNC
+ */
+HWTEST_F(DeviceTimedCollectTest, UserPersistencePath001, TestSize.Level3)
+{
+    constexpr int32_t testUserId = 100;
+    constexpr int32_t missingUserId = 9876;
+    PreferencesUtil basePreferences;
+    EXPECT_EQ(basePreferences.path_, "/data/samgr/samgr.xml");
+
+    PreferencesUtil multiUserPreferences(testUserId);
+    EXPECT_EQ(multiUserPreferences.path_, "/data/samgr/samgr_100.xml");
+    EXPECT_EQ(PreferencesUtil::DeleteUserPreferences(BASE_USER), ERR_INVALID_VALUE);
+    EXPECT_EQ(PreferencesUtil::DeleteUserPreferences(SAMGR_INVALID_USER_ID), ERR_INVALID_VALUE);
+    EXPECT_EQ(PreferencesUtil::DeleteUserPreferences(missingUserId), ERR_OK);
+}
+
+/**
+ * @tc.name: PersistenceTaskValueValidation001
+ * @tc.desc: Verify non-long persisted values are ignored safely.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DeviceTimedCollectTest, PersistenceTaskValueValidation001, TestSize.Level3)
+{
+    auto timedCollect = new DeviceTimedCollect(nullptr);
+    ASSERT_NE(timedCollect, nullptr);
+    timedCollect->preferencesUtil_ = std::make_shared<PreferencesUtil>();
+    ASSERT_TRUE(timedCollect->preferencesUtil_->SaveString("invalid_value", "text"));
+    timedCollect->ProcessPersistenceTasks();
+    EXPECT_TRUE(timedCollect->preferencesUtil_->IsExist("invalid_value"));
+}
+
+/**
+ * @tc.name: PersistenceLoopDuplicate001
+ * @tc.desc: Verify duplicate persisted loop tasks are not scheduled twice.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DeviceTimedCollectTest, PersistenceLoopDuplicate001, TestSize.Level3)
+{
+    auto timedCollect = new DeviceTimedCollect(nullptr);
+    ASSERT_NE(timedCollect, nullptr);
+    timedCollect->preferencesUtil_ = std::make_shared<PreferencesUtil>();
+    timedCollect->persitenceLoopTasks_[60] = [] {};
+    timedCollect->ProcessPersistenceLoopTask(1, 100, "60");
+    EXPECT_EQ(timedCollect->persitenceLoopTasks_.size(), 1U);
+}
+
+/**
+ * @tc.name: PersistenceTimedExpired001
+ * @tc.desc: Verify expired persisted timed tasks are removed after reporting.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DeviceTimedCollectTest, PersistenceTimedExpired001, TestSize.Level3)
+{
+    auto timedCollect = new DeviceTimedCollect(nullptr);
+    ASSERT_NE(timedCollect, nullptr);
+    timedCollect->preferencesUtil_ = std::make_shared<PreferencesUtil>();
+    ASSERT_TRUE(timedCollect->preferencesUtil_->SaveLong("expired:task", 1));
+    timedCollect->ProcessPersistenceTimedTask(0, "expired:task");
+    EXPECT_FALSE(timedCollect->preferencesUtil_->IsExist("expired:task"));
+}
+
+/**
+ * @tc.name: PersistenceInitNullManager001
+ * @tc.desc: Verify preference initialization falls back when manager is expired.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DeviceTimedCollectTest, PersistenceInitNullManager001, TestSize.Level3)
+{
+    auto timedCollect = new DeviceTimedCollect(nullptr);
+    ASSERT_NE(timedCollect, nullptr);
+    timedCollect->Init({});
+    EXPECT_NE(timedCollect->preferencesUtil_, nullptr);
+}
+#endif
+
 #endif
 }

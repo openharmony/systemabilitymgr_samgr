@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -229,6 +229,33 @@ SystemAbilityManagerStub::SystemAbilityManagerStub()
 #ifdef SUPPORT_MULTI_INSTANCE
     memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::ON_USER_STATE_CHANGED_TRANSACTION)] =
         SystemAbilityManagerStub::LocalOnUserStateChanged;
+    SetMultiInstanceFuncMap();
+#endif
+}
+
+void SystemAbilityManagerStub::SetMultiInstanceFuncMap()
+{
+#ifdef SUPPORT_MULTI_INSTANCE
+    memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_SYSTEM_ABILITY_WITH_USERID_TRANSACTION)] =
+        SystemAbilityManagerStub::LocalGetSystemAbilityWithUserId;
+    memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::CHECK_SYSTEM_ABILITY_WITH_USERID_TRANSACTION)] =
+        SystemAbilityManagerStub::LocalCheckSystemAbilityWithUserId;
+    memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::CHECK_SYSTEM_ABILITY_BY_USERID_TRANSACTION)] =
+        SystemAbilityManagerStub::LocalCheckSystemAbilityByUserId;
+    memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_SYSTEM_PROCESS_INFO_WITH_USERID_TRANSACTION)] =
+        SystemAbilityManagerStub::LocalGetSystemProcessInfoWithUserId;
+    memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::GET_LOCAL_ABILITY_MANAGER_PROXY_WITH_USERID_TRANSACTION)] =
+        SystemAbilityManagerStub::LocalGetLocalAbilityManagerProxyWithUserId;
+    memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::LOAD_SYSTEM_ABILITY_WITH_USERID_TRANSACTION)] =
+        SystemAbilityManagerStub::LocalLoadSystemAbilityWithUserId;
+    memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::SUBSCRIBE_SYSTEM_ABILITY_WITH_USERID_TRANSACTION)] =
+        SystemAbilityManagerStub::LocalSubsSystemAbilityWithUserId;
+    memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::UNSUBSCRIBE_SYSTEM_ABILITY_WITH_USERID_TRANSACTION)] =
+        SystemAbilityManagerStub::LocalUnSubsSystemAbilityWithUserId;
+    memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::SUBSCRIBE_SYSTEM_PROCESS_WITH_USERID_TRANSACTION)] =
+        SystemAbilityManagerStub::LocalSubscribeSystemProcessWithUserId;
+    memberFuncMap_[static_cast<uint32_t>(SamgrInterfaceCode::UNSUBSCRIBE_SYSTEM_PROCESS_WITH_USERID_TRANSACTION)] =
+        SystemAbilityManagerStub::LocalUnSubscribeSystemProcessWithUserId;
 #endif
 }
 
@@ -1599,12 +1626,11 @@ int32_t SystemAbilityManagerStub::OnUserStateChangedInner(MessageParcel& data, M
         return ERR_PERMISSION_DENIED;
     }
 
-    int32_t userId = -1;
+    int32_t userId = SAMGR_INVALID_USER_ID;
     if (!data.ReadInt32(userId)) {
         HILOGE("OnUserStateChangedInner read userId failed!");
         return ERR_FLATTEN_OBJECT;
     }
-
     int32_t userState = 0;
     if (!data.ReadInt32(userState)) {
         HILOGE("OnUserStateChangedInner read userState failed!");
@@ -1625,6 +1651,405 @@ int32_t SystemAbilityManagerStub::OnUserStateChangedInner(MessageParcel& data, M
         return ERR_FLATTEN_OBJECT;
     }
     return ERR_OK;
+}
+
+int32_t SystemAbilityManagerStub::GetSystemAbilityWithUserIdInner(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t systemAbilityId = -1;
+    int32_t userId = SAMGR_INVALID_USER_ID;
+    bool ret = data.ReadInt32(systemAbilityId);
+    if (!ret) {
+        return ERR_NULL_OBJECT;
+    }
+    if (!CheckInputSysAbilityId(systemAbilityId)) {
+        HILOGW("GetSystemAbilityWithUserIdInner read SAId failed!");
+        return ERR_NULL_OBJECT;
+    }
+
+#ifdef SUPPORT_PENGLAI_MODE
+    if (isPengLai_ && !SamgrUtil::CheckPengLaiPermission(systemAbilityId)) {
+        HILOGW("GetSAWithUserId CheckPengLaiPermission denied! SA:%{public}d,callUid:%{public}d",
+            systemAbilityId, OHOS::IPCSkeleton::GetCallingUid());
+        return ERR_PERMISSION_DENIED;
+    }
+#endif
+
+    if (!CheckGetSAPermission(systemAbilityId)) {
+        HILOGE("GetSystemAbilityWithUserIdInner selinux permission denied! "
+            "SA:%{public}d,callSid:%{public}s", systemAbilityId,
+            OHOS::IPCSkeleton::GetCallingSid().c_str());
+        return ERR_PERMISSION_DENIED;
+    }
+    ret = data.ReadInt32(userId);
+    if (!ret) {
+        HILOGW("GetSystemAbilityWithUserIdInner read userId failed!");
+        return ERR_NULL_OBJECT;
+    }
+    sptr<IRemoteObject> remoteObject = GetSystemAbility(systemAbilityId, userId);
+    if (remoteObject == nullptr) {
+        return ERR_NULL_OBJECT;
+    }
+    ret = reply.WriteRemoteObject(remoteObject);
+    if (!ret) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ERR_NONE;
+}
+
+int32_t SystemAbilityManagerStub::CheckSystemAbilityWithUserIdInner(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t systemAbilityId = -1;
+    int32_t userId = SAMGR_INVALID_USER_ID;
+    bool ret = data.ReadInt32(systemAbilityId);
+    if (!ret) {
+        return ERR_NULL_OBJECT;
+    }
+    if (!CheckInputSysAbilityId(systemAbilityId)) {
+        HILOGW("CheckSystemAbilityWithUserIdInner read SAId failed!");
+        return ERR_NULL_OBJECT;
+    }
+
+#ifdef SUPPORT_PENGLAI_MODE
+    if (isPengLai_ && !SamgrUtil::CheckPengLaiPermission(systemAbilityId)) {
+        HILOGW("CheckSAWithUserId CheckPengLaiPermission denied! SA:%{public}d,callUid:%{public}d",
+            systemAbilityId, OHOS::IPCSkeleton::GetCallingUid());
+        return ERR_PERMISSION_DENIED;
+    }
+#endif
+
+    if (!CheckGetSAPermission(systemAbilityId)) {
+        HILOGD("CheckSystemAbilityWithUserIdInner selinux permission denied! "
+            "SA:%{public}d,callSid:%{public}s", systemAbilityId,
+            OHOS::IPCSkeleton::GetCallingSid().c_str());
+        return ERR_PERMISSION_DENIED;
+    }
+    ret = data.ReadInt32(userId);
+    if (!ret) {
+        HILOGW("CheckSystemAbilityWithUserIdInner read userId failed!");
+        return ERR_NULL_OBJECT;
+    }
+    sptr<IRemoteObject> remoteObject = CheckSystemAbility(systemAbilityId, userId);
+    if (remoteObject == nullptr) {
+        return ERR_NULL_OBJECT;
+    }
+    ret = reply.WriteRemoteObject(remoteObject);
+    if (!ret) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ERR_NONE;
+}
+
+int32_t SystemAbilityManagerStub::CheckSystemAbilityByUserIdInner(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t systemAbilityId = -1;
+    int32_t userId = SAMGR_INVALID_USER_ID;
+    bool ret = data.ReadInt32(systemAbilityId);
+    if (!ret) {
+        return ERR_NULL_OBJECT;
+    }
+    if (!CheckInputSysAbilityId(systemAbilityId)) {
+        HILOGW("CheckSystemAbilityByUserIdInner read SAId failed!");
+        return ERR_NULL_OBJECT;
+    }
+
+#ifdef SUPPORT_PENGLAI_MODE
+    if (isPengLai_ && !SamgrUtil::CheckPengLaiPermission(systemAbilityId)) {
+        HILOGW("CheckSAByUserId CheckPengLaiPermission denied! SA:%{public}d,callUid:%{public}d",
+            systemAbilityId, OHOS::IPCSkeleton::GetCallingUid());
+        return ERR_PERMISSION_DENIED;
+    }
+#endif
+
+    if (!CheckGetSAPermission(systemAbilityId)) {
+        HILOGD("CheckSystemAbilityByUserIdInner selinux permission denied! "
+            "SA:%{public}d,callSid:%{public}s", systemAbilityId,
+            OHOS::IPCSkeleton::GetCallingSid().c_str());
+        return ERR_PERMISSION_DENIED;
+    }
+    bool isExist = false;
+    ret = data.ReadBool(isExist);
+    if (!ret) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    ret = data.ReadInt32(userId);
+    if (!ret) {
+        HILOGW("CheckSystemAbilityByUserIdInner read userId failed!");
+        return ERR_NULL_OBJECT;
+    }
+    SamgrXCollie samgrXCollie("samgr--CheckSAByUserId_" + ToString(systemAbilityId));
+    sptr<IRemoteObject> remoteObject = CheckSystemAbilityByUserId(systemAbilityId, isExist, userId);
+    if (remoteObject == nullptr) {
+        return ERR_NULL_OBJECT;
+    }
+    ret = reply.WriteRemoteObject(remoteObject);
+    if (!ret) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    ret = reply.WriteBool(isExist);
+    if (!ret) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ERR_NONE;
+}
+
+int32_t SystemAbilityManagerStub::GetSystemProcessInfoWithUserIdInner(MessageParcel& data, MessageParcel& reply)
+{
+    if (!CanRequest()) {
+        HILOGE("GetSystemProcessInfoWithUserIdInner PERMISSION DENIED!");
+        return ERR_PERMISSION_DENIED;
+    }
+    int32_t systemAbilityId = -1;
+    int32_t userId = SAMGR_INVALID_USER_ID;
+    bool ret = data.ReadInt32(systemAbilityId);
+    if (!ret) {
+        return ERR_NULL_OBJECT;
+    }
+    if (!CheckInputSysAbilityId(systemAbilityId)) {
+        HILOGW("GetSystemProcessInfoWithUserIdInner read SAId failed!");
+        return ERR_NULL_OBJECT;
+    }
+    ret = data.ReadInt32(userId);
+    if (!ret) {
+        HILOGW("GetSystemProcessInfoWithUserIdInner read userId failed!");
+        return ERR_NULL_OBJECT;
+    }
+    SystemProcessInfo processInfo;
+    int32_t result = GetSystemProcessInfo(systemAbilityId, processInfo, userId);
+    ret = reply.WriteInt32(result);
+    if (!ret) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    if (result != ERR_OK) {
+        return ERR_OK;
+    }
+    ret = reply.WriteString(processInfo.processName);
+    if (!ret) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    ret = reply.WriteInt32(processInfo.pid);
+    if (!ret) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    ret = reply.WriteInt32(processInfo.uid);
+    if (!ret) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ERR_OK;
+}
+
+int32_t SystemAbilityManagerStub::GetLocalAbilityManagerProxyWithUserIdInner(MessageParcel& data, MessageParcel& reply)
+{
+    if (!CheckPermission(PERMISSION_SVC)) {
+        HILOGE("GetLocalAbilityManagerProxyWithUserIdInner permission denied! CallSid:%{public}s",
+            OHOS::IPCSkeleton::GetCallingSid().c_str());
+        return ERR_PERMISSION_DENIED;
+    }
+
+    int32_t systemAbilityId = -1;
+    int32_t userId = SAMGR_INVALID_USER_ID;
+    bool ret = data.ReadInt32(systemAbilityId);
+    if (!ret || !CheckInputSysAbilityId(systemAbilityId)) {
+        HILOGW("GetLocalAbilityManagerProxyWithUserIdInner read SAId failed!");
+        return ERR_NULL_OBJECT;
+    }
+    ret = data.ReadInt32(userId);
+    if (!ret) {
+        HILOGW("GetLocalAbilityManagerProxyWithUserIdInner read userId failed!");
+        return ERR_NULL_OBJECT;
+    }
+    sptr<IRemoteObject> remoteObject = GetLocalAbilityManagerProxy(systemAbilityId, userId);
+    if (remoteObject == nullptr) {
+        return ERR_NULL_OBJECT;
+    }
+    ret = reply.WriteRemoteObject(remoteObject);
+    if (!ret) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    return ERR_NONE;
+}
+
+int32_t SystemAbilityManagerStub::LoadSystemAbilityWithUserIdInner(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t systemAbilityId = -1;
+    int32_t userId = SAMGR_INVALID_USER_ID;
+    bool ret = false;
+    sptr<ISystemAbilityLoadCallback> callback = nullptr;
+    {
+        SamgrXCollie samgrXCollie("samgrStub--loadSaWithUserId_readData");
+        ret = data.ReadInt32(systemAbilityId);
+        if (!ret) {
+            HILOGW("LoadSystemAbilityWithUserIdInner read SAId failed!");
+            return ERR_INVALID_VALUE;
+        }
+        int32_t checkRet = LoadSACheck(systemAbilityId);
+        if (checkRet != ERR_OK) {
+            return checkRet;
+        }
+        sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
+        if (remoteObject == nullptr) {
+            HILOGW("LoadSystemAbilityWithUserIdInner read callback failed!");
+            return ERR_INVALID_VALUE;
+        }
+        callback = iface_cast<ISystemAbilityLoadCallback>(remoteObject);
+        if (callback == nullptr) {
+            HILOGW("LoadSystemAbilityWithUserIdInner iface_cast failed!");
+            return ERR_INVALID_VALUE;
+        }
+        ret = data.ReadInt32(userId);
+        if (!ret) {
+            HILOGW("LoadSystemAbilityWithUserIdInner read userId failed!");
+            return ERR_INVALID_VALUE;
+        }
+    }
+
+    std::string loadSystemAbilityTag = ToString(systemAbilityId) + "_LoadSystemAbilityWithUserId";
+    HitraceScopedEx samgrHitrace(HITRACE_LEVEL_INFO, HITRACE_TAG_SAMGR, loadSystemAbilityTag.c_str());
+    int32_t result = LoadSystemAbility(systemAbilityId, callback, userId);
+    if (result != ERR_OK) {
+        ReportSamgrSaLoadFail(systemAbilityId, IPCSkeleton::GetCallingPid(), IPCSkeleton::GetCallingUid(),
+            "interface load err:" + ToString(result));
+        HILOGE("loadSaWithUserIdInner fail ret:%{public}d", result);
+    }
+    {
+        SamgrXCollie samgrXCollie("samgrStub--loadSaWithUserId_writeResult_" + ToString(systemAbilityId));
+        ret = reply.WriteInt32(result);
+    }
+    if (!ret) {
+        HILOGW("LoadSystemAbilityWithUserIdInner write reply failed.");
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
+int32_t SystemAbilityManagerStub::SubsSystemAbilityWithUserIdInner(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t systemAbilityId = -1;
+    int32_t userId = SAMGR_INVALID_USER_ID;
+    bool ret = data.ReadInt32(systemAbilityId);
+    if (!ret) {
+        return ERR_NULL_OBJECT;
+    }
+    if (!CheckInputSysAbilityId(systemAbilityId)) {
+        HILOGW("SubsSystemAbilityWithUserIdInner read SAId failed!");
+        return ERR_NULL_OBJECT;
+    }
+    sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
+    if (remoteObject == nullptr) {
+        HILOGW("SubsSystemAbilityWithUserIdInner read listener failed!");
+        return ERR_NULL_OBJECT;
+    }
+    sptr<ISystemAbilityStatusChange> listener = iface_cast<ISystemAbilityStatusChange>(remoteObject);
+    if (listener == nullptr) {
+        HILOGW("SubsSystemAbilityWithUserIdInner iface_cast failed!");
+        return ERR_NULL_OBJECT;
+    }
+    ret = data.ReadInt32(userId);
+    if (!ret) {
+        HILOGW("SubsSystemAbilityWithUserIdInner read userId failed!");
+        return ERR_NULL_OBJECT;
+    }
+    SamgrXCollie samgrXCollie("samgr--SubsSAWithUserId_" + ToString(systemAbilityId));
+    int32_t result = SubscribeSystemAbility(systemAbilityId, listener, userId);
+    ret = reply.WriteInt32(result);
+    if (!ret) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
+int32_t SystemAbilityManagerStub::UnSubsSystemAbilityWithUserIdInner(MessageParcel& data, MessageParcel& reply)
+{
+    int32_t systemAbilityId = -1;
+    int32_t userId = SAMGR_INVALID_USER_ID;
+    bool ret = data.ReadInt32(systemAbilityId);
+    if (!ret) {
+        return ERR_NULL_OBJECT;
+    }
+    if (!CheckInputSysAbilityId(systemAbilityId)) {
+        HILOGW("UnSubsSystemAbilityWithUserIdInner read SAId failed!");
+        return ERR_NULL_OBJECT;
+    }
+    sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
+    if (remoteObject == nullptr) {
+        HILOGW("UnSubsSystemAbilityWithUserIdInner read listener failed!");
+        return ERR_NULL_OBJECT;
+    }
+    sptr<ISystemAbilityStatusChange> listener = iface_cast<ISystemAbilityStatusChange>(remoteObject);
+    if (listener == nullptr) {
+        HILOGW("UnSubsSystemAbilityWithUserIdInner iface_cast failed!");
+        return ERR_NULL_OBJECT;
+    }
+    ret = data.ReadInt32(userId);
+    if (!ret) {
+        HILOGW("UnSubsSystemAbilityWithUserIdInner read userId failed!");
+        return ERR_NULL_OBJECT;
+    }
+    int32_t result = UnSubscribeSystemAbility(systemAbilityId, listener, userId);
+    ret = reply.WriteInt32(result);
+    if (!ret) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
+int32_t SystemAbilityManagerStub::SubscribeSystemProcessWithUserIdInner(MessageParcel& data, MessageParcel& reply)
+{
+    if (!CanRequest()) {
+        HILOGE("SubscribeSystemProcessWithUserIdInner PERMISSION DENIED!");
+        return ERR_PERMISSION_DENIED;
+    }
+    sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
+    if (remoteObject == nullptr) {
+        HILOGW("SubscribeSystemProcessWithUserIdInner read listener failed!");
+        return ERR_NULL_OBJECT;
+    }
+    sptr<ISystemProcessStatusChange> listener = iface_cast<ISystemProcessStatusChange>(remoteObject);
+    if (listener == nullptr) {
+        HILOGW("SubscribeSystemProcessWithUserIdInner iface_cast failed!");
+        return ERR_NULL_OBJECT;
+    }
+    int32_t userId = SAMGR_INVALID_USER_ID;
+    bool ret = data.ReadInt32(userId);
+    if (!ret) {
+        HILOGW("SubscribeSystemProcessWithUserIdInner read userId failed!");
+        return ERR_NULL_OBJECT;
+    }
+    int32_t result = SubscribeSystemProcess(listener, userId);
+    ret = reply.WriteInt32(result);
+    if (!ret) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
+}
+
+int32_t SystemAbilityManagerStub::UnSubscribeSystemProcessWithUserIdInner(MessageParcel& data, MessageParcel& reply)
+{
+    if (!CanRequest()) {
+        HILOGE("UnSubscribeSystemProcessWithUserIdInner PERMISSION DENIED!");
+        return ERR_PERMISSION_DENIED;
+    }
+    sptr<IRemoteObject> remoteObject = data.ReadRemoteObject();
+    if (remoteObject == nullptr) {
+        HILOGW("UnSubscribeSystemProcessWithUserIdInner read listener failed!");
+        return ERR_NULL_OBJECT;
+    }
+    sptr<ISystemProcessStatusChange> listener = iface_cast<ISystemProcessStatusChange>(remoteObject);
+    if (listener == nullptr) {
+        HILOGW("UnSubscribeSystemProcessWithUserIdInner iface_cast failed!");
+        return ERR_NULL_OBJECT;
+    }
+    int32_t userId = SAMGR_INVALID_USER_ID;
+    bool ret = data.ReadInt32(userId);
+    if (!ret) {
+        HILOGW("UnSubscribeSystemProcessWithUserIdInner read userId failed!");
+        return ERR_NULL_OBJECT;
+    }
+    int32_t result = UnSubscribeSystemProcess(listener, userId);
+    ret = reply.WriteInt32(result);
+    if (!ret) {
+        return ERR_FLATTEN_OBJECT;
+    }
+    return result;
 }
 #endif
 } // namespace OHOS

@@ -36,6 +36,9 @@
 #include "parameters.h"
 #include "sam_log.h"
 #include "service_control.h"
+#ifdef SUPPORT_MULTI_INSTANCE
+#include "system_ability_manager.h"
+#endif
 #include "string_ex.h"
 #include "system_ability_manager_util.h"
 #include "system_ability_manager_dumper.h"
@@ -109,7 +112,6 @@ constexpr const char* RESOURCE_SCHEDULE_PROCESS_NAME = "resource_schedule_servic
 constexpr const char* BOOT_INIT_TIME_PARAM = "ohos.boot.time.init";
 constexpr const char* DEFAULT_BOOT_INIT_TIME = "0";
 
-constexpr int32_t MAX_SUBSCRIBE_COUNT = 256;
 constexpr int32_t MAX_SA_FREQUENCY_COUNT = INT32_MAX - 1000000;
 
 constexpr int32_t DEVICE_INFO_SERVICE_SA = 3902;
@@ -223,7 +225,7 @@ void BaseSystemAbilityManager::ReleaseSubSystems()
         collectManager_->UnInit();
     }
     collectManager_ = nullptr;
-    abilityStateScheduler_ = nullptr;
+        abilityStateScheduler_ = nullptr;
     if (reportEventTimer_ != nullptr) {
         reportEventTimer_->Shutdown();
     }
@@ -274,6 +276,17 @@ void BaseSystemAbilityManager::InitSaProfile()
         parser->ParseSaProfiles(file);
     }
     std::list<SaProfile> saInfos = parser->GetAllSaProfiles();
+#ifdef SUPPORT_MULTI_INSTANCE
+    std::set<int32_t> multiInstanceSaIds = parser->GetMultiInstanceSaIds();
+    {
+        lock_guard<samgr::mutex> autoLock(multiInstanceSaIdsLock_);
+        multiInstanceSaIds_ = multiInstanceSaIds;
+    }
+    allSaProfiles_ = saInfos;
+    saInfos.remove_if([&multiInstanceSaIds](const auto& saInfo) {
+        return multiInstanceSaIds.count(saInfo.saId) > 0;
+    });
+#endif
     if (abilityStateScheduler_ != nullptr) {
         abilityStateScheduler_->Init(saInfos);
     }
@@ -291,12 +304,6 @@ void BaseSystemAbilityManager::InitSaProfile()
             onDemandSaIdsSet_.insert(saInfo.saId);
         }
     }
-#ifdef SUPPORT_MULTI_INSTANCE
-    {
-        lock_guard<samgr::mutex> autoLock(multiInstanceSaIdsLock_);
-        multiInstanceSaIds_ = parser->GetMultiInstanceSaIds();
-    }
-#endif
     KHILOGI("InitProfile spend %{public}" PRId64 "ms", GetTickCount() - begin);
 }
 
@@ -305,6 +312,16 @@ std::set<int32_t> BaseSystemAbilityManager::GetMultiInstanceSaIds()
 {
     lock_guard<samgr::mutex> autoLock(multiInstanceSaIdsLock_);
     return multiInstanceSaIds_;
+}
+
+std::vector<std::u16string> BaseSystemAbilityManager::GetSystemProcessNames() const
+{
+    std::vector<std::u16string> procNames;
+    lock_guard<samgr::mutex> autoLock(systemProcessMapLock_);
+    for (const auto& [procName, procObject] : systemProcessMap_) {
+        procNames.push_back(procName);
+    }
+    return procNames;
 }
 #endif
 
@@ -452,6 +469,16 @@ void BaseSystemAbilityManager::NotifySystemAbilityChanged(int32_t systemAbilityI
 int32_t BaseSystemAbilityManager::FindSystemAbilityNotify(int32_t systemAbilityId, const std::string& deviceId,
     int32_t code)
 {
+#ifdef SUPPORT_MULTI_INSTANCE
+    int32_t userId = GetUserId();
+    if (userId != BASE_USER) {
+        auto samgr = SystemAbilityManager::GetInstance();
+        if (samgr != nullptr && userId != samgr->GetForegroundUserId()) {
+            HILOGD("FindSaNotify skip bg userId:%{public}d", userId);
+            return ERR_OK;
+        }
+    }
+#endif
     lock_guard<samgr::mutex> autoLock(listenerMapLock_);
     HILOGI("FindSaNotify SA:%{public}d,%{public}d_%{public}zu", systemAbilityId, code, listenerMap_.size());
     auto iter = listenerMap_.find(systemAbilityId);
@@ -785,12 +812,17 @@ void BaseSystemAbilityManager::CheckListenerNotify(int32_t systemAbilityId,
 int32_t BaseSystemAbilityManager::SubscribeSystemAbility(int32_t systemAbilityId,
     const sptr<ISystemAbilityStatusChange>& listener)
 {
+    return SubscribeSystemAbilityInner(systemAbilityId, listener, IPCSkeleton::GetCallingPid());
+}
+
+int32_t BaseSystemAbilityManager::SubscribeSystemAbilityInner(int32_t systemAbilityId,
+    const sptr<ISystemAbilityStatusChange>& listener, int32_t callingPid)
+{
     if (!CheckInputSysAbilityId(systemAbilityId) || listener == nullptr) {
         HILOGW("SubscribeSystemAbility SAId or listener invalid!");
         return ERR_INVALID_VALUE;
     }
 
-    auto callingPid = IPCSkeleton::GetCallingPid();
     {
         lock_guard<samgr::mutex> autoLock(listenerMapLock_);
         auto& listeners = listenerMap_[systemAbilityId];
@@ -1051,6 +1083,18 @@ sptr<IRemoteObject> BaseSystemAbilityManager::GetSystemProcess(const u16string& 
     return nullptr;
 }
 
+sptr<IRemoteObject> BaseSystemAbilityManager::GetLocalAbilityManagerProxy(int32_t systemAbilityId)
+{
+    CommonSaProfile saProfile;
+    if (!GetSaProfile(systemAbilityId, saProfile)) {
+        HILOGW("Base GetLocalAbilityManagerProxy no profile, SA:%{public}d, userId:%{public}d",
+            systemAbilityId, GetUserId());
+        return nullptr;
+    }
+    sptr<IRemoteObject> process = GetSystemProcess(saProfile.process);
+    return process;
+}
+
 int32_t BaseSystemAbilityManager::GetSystemProcessInfo(int32_t systemAbilityId, SystemProcessInfo& systemProcessInfo)
 {
     if (abilityStateScheduler_ == nullptr) {
@@ -1085,6 +1129,15 @@ int32_t BaseSystemAbilityManager::UnSubscribeSystemProcess(const sptr<ISystemPro
         return ERR_INVALID_VALUE;
     }
     return abilityStateScheduler_->UnSubscribeSystemProcess(listener);
+}
+
+void BaseSystemAbilityManager::UnSubscribeSystemProcess(const sptr<IRemoteObject>& remoteObject)
+{
+    if (abilityStateScheduler_ == nullptr) {
+        HILOGE("abilityStateScheduler is nullptr");
+        return;
+    }
+    abilityStateScheduler_->UnSubscribeSystemProcess(remoteObject);
 }
 
 int32_t BaseSystemAbilityManager::SubscribeLowMemSystemProcess(const sptr<ISystemProcessStatusChange>& listener)
@@ -1524,6 +1577,10 @@ int32_t BaseSystemAbilityManager::LoadSystemAbility(int32_t systemAbilityId,
     auto callingPid = IPCSkeleton::GetCallingPid();
     OnDemandEvent onDemandEvent = {INTERFACE_CALL, "load"};
     LoadRequestInfo loadRequestInfo = {LOCAL_DEVICE, callback, systemAbilityId, callingPid, onDemandEvent};
+    if (abilityStateScheduler_ == nullptr) {
+        HILOGE("abilityStateScheduler is nullptr");
+        return STATE_SCHEDULER_NULL;
+    }
     return abilityStateScheduler_->HandleLoadAbilityEvent(loadRequestInfo);
 }
 
@@ -1617,6 +1674,10 @@ int32_t BaseSystemAbilityManager::UnloadProcess(const std::vector<std::u16string
 
 int32_t BaseSystemAbilityManager::GetLruIdleSystemAbilityProc(std::vector<IdleProcessInfo>& processInfos)
 {
+    if (collectManager_ == nullptr || abilityStateScheduler_ == nullptr) {
+        HILOGE("subsystem is nullptr");
+        return ERR_INVALID_VALUE;
+    }
     std::vector<int32_t> saIds = collectManager_->GetLowMemPrepareList();
     std::map<std::u16string, IdleProcessInfo> procInfos;
     for (const auto& saId : saIds) {
@@ -1701,9 +1762,19 @@ bool BaseSystemAbilityManager::IdleSystemAbility(int32_t systemAbilityId, const 
     }
     HILOGI("IdleSA:%{public}d", systemAbilityId);
     int curTid = gettid();
-    auto killPeerTask = [curTid, systemAbilityId, procName](void *) {
-        (void)SamgrUtil::KillProcessByPid(getpid(), curTid);
-        ReportSaAbnormallyFrozen(systemAbilityId, Str16ToStr8(procName), "IdleSa timeout");
+    int32_t userId = GetUserId();
+    std::string procNameStr = Str16ToStr8(procName);
+    if (userId != BASE_USER) {
+        procNameStr += std::to_string(userId);
+    }
+    auto killPeerTask = [curTid, systemAbilityId, procNameStr, userId](void *) {
+        if (userId == BASE_USER) {
+            bool killed = SamgrUtil::KillProcessByPid(getpid(), curTid);
+            HILOG_WARN(LOG_CORE, "IdleSA timeout KillProcessByPid result:%{public}d", killed);
+        }
+        HILOG_WARN(LOG_CORE, "IdleSA timeout, SA:%{public}d, proc:%{public}s, userId:%{public}d",
+            systemAbilityId, procNameStr.c_str(), userId);
+        ReportSaAbnormallyFrozen(systemAbilityId, procNameStr, "IdleSa timeout");
     };
     SamgrXCollie samgrXCollie("samgr--IdleSa_" + ToString(systemAbilityId), KILL_TIMEOUT_TIME, killPeerTask);
     return procObject->IdleAbility(systemAbilityId, idleReason, delayTime);
@@ -1725,9 +1796,19 @@ bool BaseSystemAbilityManager::ActiveSystemAbility(int32_t systemAbilityId, cons
     }
     HILOGI("ActiveSA:%{public}d", systemAbilityId);
     int curTid = gettid();
-    auto killPeerTask = [curTid, systemAbilityId, procName](void *) {
-        (void)SamgrUtil::KillProcessByPid(getpid(), curTid);
-        ReportSaAbnormallyFrozen(systemAbilityId, Str16ToStr8(procName), "ActiveSa timeout");
+    int32_t userId = GetUserId();
+    std::string procNameStr = Str16ToStr8(procName);
+    if (userId != BASE_USER) {
+        procNameStr += std::to_string(userId);
+    }
+    auto killPeerTask = [curTid, systemAbilityId, procNameStr, userId](void *) {
+        if (userId == BASE_USER) {
+            bool killed = SamgrUtil::KillProcessByPid(getpid(), curTid);
+            HILOG_WARN(LOG_CORE, "ActiveSA timeout KillProcessByPid result:%{public}d", killed);
+        }
+        HILOG_WARN(LOG_CORE, "ActiveSA timeout, SA:%{public}d, proc:%{public}s, userId:%{public}d",
+            systemAbilityId, procNameStr.c_str(), userId);
+        ReportSaAbnormallyFrozen(systemAbilityId, procNameStr, "ActiveSa timeout");
     };
     SamgrXCollie samgrXCollie("samgr--ActiveSa_" + ToString(systemAbilityId), KILL_TIMEOUT_TIME, killPeerTask);
     return procObject->ActiveAbility(systemAbilityId, activeReason);

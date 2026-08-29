@@ -20,11 +20,17 @@ use crate::wrapper::{
     AbilityStub, AddOnDemandSystemAbilityInfo, AddSystemAbility, AddSystemAbilityConfig,
     CancelUnloadSystemAbility, CheckSystemAbility, CheckSystemAbilityWithDeviceId,
     GetContextManager, GetOnDemandReasonExtraData, GetRunningSystemProcess, GetSystemAbility,
-    GetSystemAbilityWithDeviceId, GetSystemProcessInfo, ListSystemAbilities,
-    ListSystemAbilitiesWithDumpFlag, LoadSystemAbility, LoadSystemAbilityWithCallback,
-    RemoveSystemAbility, SendStrategy, SubscribeSystemAbility, SubscribeSystemProcess,
-    SystemProcessInfo, UnSubscribeSystemAbilityHandler, UnSubscribeSystemProcessHandler,
-    UnloadAllIdleSystemAbility, UnloadSystemAbility,
+    GetSystemAbilityWithDeviceId, GetSystemProcessInfo, ListSystemAbilities, ListSystemAbilitiesWithDumpFlag,
+    LoadSystemAbility, LoadSystemAbilityWithCallback, RemoveSystemAbility, SendStrategy,
+    SubscribeSystemAbility, SubscribeSystemProcess, SystemProcessInfo, UnSubscribeSystemAbilityHandler,
+    UnSubscribeSystemProcessHandler, UnloadAllIdleSystemAbility, UnloadSystemAbility,
+};
+
+#[cfg(multi_instance)]
+use crate::multi_instance_wrapper::{
+    CheckSystemAbilityByUserId, GetSystemAbilityByUserId, GetSystemProcessInfoByUserId,
+    LoadSystemAbilityByUserId, LoadSystemAbilityWithCallbackByUserId,
+    SubscribeSystemAbilityByUserId, SubscribeSystemProcessByUserId,
 };
 use crate::DumpFlagPriority;
 
@@ -77,6 +83,12 @@ impl SystemAbilityManager {
         RemoteObj::from_sptr(GetSystemAbility(said))
     }
 
+    #[cfg(multi_instance)]
+    pub fn get_system_ability_by_user_id(said: i32, user_id: i32) -> Option<RemoteObj> {
+        debug!("get system ability {} for user {}", said, user_id);
+        RemoteObj::from_sptr(GetSystemAbilityByUserId(said, user_id))
+    }
+
     /// # Example
     /// ```rust
     /// use samgr::manage::SystemAbilityManager;
@@ -98,6 +110,12 @@ impl SystemAbilityManager {
         debug!("check system ability {}", said);
 
         RemoteObj::from_sptr(CheckSystemAbility(said))
+    }
+
+    #[cfg(multi_instance)]
+    pub fn check_system_ability_by_user_id(said: i32, user_id: i32) -> Option<RemoteObj> {
+        debug!("check system ability {} for user {}", said, user_id);
+        RemoteObj::from_sptr(CheckSystemAbilityByUserId(said, user_id))
     }
 
     pub fn check_system_ability_with_ability(said: i32, device_id: &str) -> Option<RemoteObj> {
@@ -165,9 +183,26 @@ impl SystemAbilityManager {
         RemoteObj::from_sptr(LoadSystemAbility(said, timeout))
     }
 
+    #[cfg(multi_instance)]
+    pub fn load_system_ability_by_user_id(said: i32, timeout: i32, user_id: i32) -> Option<RemoteObj> {
+        debug!("load system ability {} for user {}", said, user_id);
+        RemoteObj::from_sptr(LoadSystemAbilityByUserId(said, timeout, user_id))
+    }
+
     pub fn load_system_ability_with_callback(said: i32, on_success: fn(), on_fail: fn()) -> i32 {
         debug!("load system ability {}", said);
         LoadSystemAbilityWithCallback(said, on_success, on_fail)
+    }
+
+    #[cfg(multi_instance)]
+    pub fn load_system_ability_with_callback_by_user_id(
+        said: i32,
+        on_success: fn(),
+        on_fail: fn(),
+        user_id: i32,
+    ) -> i32 {
+        debug!("load system ability {} for user {}", said, user_id);
+        LoadSystemAbilityWithCallbackByUserId(said, on_success, on_fail, user_id)
     }
 
     pub fn subscribe_system_ability(
@@ -179,6 +214,20 @@ impl SystemAbilityManager {
         UnsubscribeHandler::new(Unsubscribe::Ability(SubscribeSystemAbility(
             said, on_add, on_remove,
         )))
+    }
+
+    #[cfg(multi_instance)]
+    pub fn subscribe_system_ability_by_user_id(
+        said: i32,
+        on_add: fn(i32, &str),
+        on_remove: fn(i32, &str),
+        user_id: i32,
+    ) -> UnsubscribeHandler {
+        debug!("subscribe system ability {} for user {}", said, user_id);
+        UnsubscribeHandler::new(Unsubscribe::AbilityByUserId(
+            SubscribeSystemAbilityByUserId(said, on_add, on_remove, user_id),
+            user_id,
+        ))
     }
 
     /// # Example
@@ -220,6 +269,12 @@ impl SystemAbilityManager {
         GetSystemProcessInfo(said)
     }
 
+    #[cfg(multi_instance)]
+    pub fn get_system_process_info_by_user_id(said: i32, user_id: i32) -> SystemProcessInfo {
+        debug!("get system ability {} process info for user {}", said, user_id);
+        GetSystemProcessInfoByUserId(said, user_id)
+    }
+
     pub fn get_running_system_process() -> Vec<SystemProcessInfo> {
         info!("get running system ability process info");
         GetRunningSystemProcess()
@@ -245,6 +300,18 @@ impl SystemAbilityManager {
         )))
     }
 
+    #[cfg(multi_instance)]
+    pub fn subscribe_system_process_by_user_id(
+        on_start: fn(&SystemProcessInfo),
+        on_stop: fn(&SystemProcessInfo),
+        user_id: i32,
+    ) -> UnsubscribeHandler {
+        UnsubscribeHandler::new(Unsubscribe::ProcessByUserId(
+            SubscribeSystemProcessByUserId(on_start, on_stop, user_id),
+            user_id,
+        ))
+    }
+
     pub fn get_on_demand_reason_extra_date(extra_data_id: i64, parcel: &mut MsgParcel) -> i32 {
         GetOnDemandReasonExtraData(extra_data_id, parcel.pin_mut().unwrap())
     }
@@ -253,6 +320,10 @@ impl SystemAbilityManager {
 enum Unsubscribe {
     Ability(UniquePtr<UnSubscribeSystemAbilityHandler>),
     Process(UniquePtr<UnSubscribeSystemProcessHandler>),
+    #[cfg(multi_instance)]
+    AbilityByUserId(UniquePtr<UnSubscribeSystemAbilityHandler>, i32),
+    #[cfg(multi_instance)]
+    ProcessByUserId(UniquePtr<UnSubscribeSystemProcessHandler>, i32),
 }
 
 pub struct UnsubscribeHandler {
@@ -268,6 +339,37 @@ impl UnsubscribeHandler {
         match self.inner {
             Unsubscribe::Ability(mut p) => p.pin_mut().UnSubscribe(),
             Unsubscribe::Process(mut p) => p.pin_mut().UnSubscribe(),
+            #[cfg(multi_instance)]
+            Unsubscribe::AbilityByUserId(mut handler, user_id) => {
+                if !handler.is_null() {
+                    let _ = handler.pin_mut().UnSubscribeSystemAbilityByUserId(user_id);
+                }
+            }
+            #[cfg(multi_instance)]
+            Unsubscribe::ProcessByUserId(mut handler, user_id) => {
+                if !handler.is_null() {
+                    let _ = handler.pin_mut().UnSubscribeSystemProcessByUserId(user_id);
+                }
+            }
+        }
+    }
+
+    #[cfg(multi_instance)]
+    pub fn unsubscribe_by_user_id(self) -> i32 {
+        match self.inner {
+            Unsubscribe::AbilityByUserId(mut handler, user_id) => {
+                if handler.is_null() {
+                    return -1;
+                }
+                handler.pin_mut().UnSubscribeSystemAbilityByUserId(user_id)
+            }
+            Unsubscribe::ProcessByUserId(mut handler, user_id) => {
+                if handler.is_null() {
+                    return -1;
+                }
+                handler.pin_mut().UnSubscribeSystemProcessByUserId(user_id)
+            }
+            Unsubscribe::Ability(_) | Unsubscribe::Process(_) => -1,
         }
     }
 }

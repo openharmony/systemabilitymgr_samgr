@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,7 +31,8 @@ struct TimeInfo {
 };
 class DeviceTimedCollect : public ICollectPlugin {
 public:
-    explicit DeviceTimedCollect(const sptr<IReport>& report);
+    explicit DeviceTimedCollect(const sptr<IReport>& report,
+        const std::weak_ptr<BaseSystemAbilityManager>& manager = {});
     ~DeviceTimedCollect() = default;
 
     int32_t OnStart() override;
@@ -40,6 +41,8 @@ public:
     int32_t AddCollectEvent(const std::vector<OnDemandEvent>& events) override;
     int32_t RemoveUnusedEvent(const OnDemandEvent& event) override;
 private:
+    void InitPreferencesUtil();
+    bool IsMultiUser() const;
     void SaveTimedEvent(const OnDemandEvent& onDemandEvent);
     void SaveTimedInfos(const OnDemandEvent& onDemandEvent, int32_t interval);
     void ReportEventByTimeInfo(int32_t interval, bool persistence);

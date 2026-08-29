@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,7 @@
 namespace OHOS {
 
 class BaseSystemAbilityManager;
+class PreferencesUtil;
 
 class DeviceStatusCollectManager : public IReport {
 public:
@@ -57,6 +58,7 @@ public:
     void RemoveWhiteCommonEvent();
     const std::vector<int32_t>& GetLowMemPrepareList();
 private:
+    std::shared_ptr<PreferencesUtil> CreatePreferencesUtil() const;
     bool NeedPersistOnDemandEvent(const OnDemandEvent& event);
     void PersistOnDemandEvent(int32_t systemAbilityId, OnDemandPolicyType type,
         const std::vector<OnDemandEvent>& events);

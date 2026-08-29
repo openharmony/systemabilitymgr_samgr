@@ -1353,6 +1353,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, OnAbilityLoadedLocked001, TestSize.Lev
     systemAbilityStateScheduler->abilityContextMap_[SAID] = systemAbilityContext;
     systemAbilityStateScheduler->OnAbilityLoadedLocked(SAID_INVALID);
     EXPECT_EQ(systemAbilityStateScheduler->abilityContextMap_.count(SAID_INVALID), 0);
+    systemAbilityStateScheduler->CleanFfrt();
 }
 
 /**
@@ -1394,6 +1395,7 @@ HWTEST_F(SystemAbilityStateSchedulerTest, OnAbilityUnloadableLocked002, TestSize
     systemAbilityStateScheduler->abilityContextMap_[SAID] = systemAbilityContext;
     systemAbilityStateScheduler->OnAbilityLoadedLocked(SAID);
     EXPECT_EQ(systemAbilityStateScheduler->abilityContextMap_.count(SAID), 1);
+    systemAbilityStateScheduler->CleanFfrt();
 }
 
 /**

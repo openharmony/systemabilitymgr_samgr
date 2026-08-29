@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include <algorithm>
 
 #ifdef PREFERENCES_ENABLE
+#include "device_timed_collect_tool.h"
 #include "preferences_errno.h"
 #include "preferences_helper.h"
 #include "preferences_value.h"
@@ -39,13 +40,30 @@ constexpr int32_t MIN_INTERVAL = 30;
 constexpr int32_t MIN_AWAKE_INTERVAL = 3600;
 }
 
-DeviceTimedCollect::DeviceTimedCollect(const sptr<IReport>& report)
-    : ICollectPlugin(report)
+DeviceTimedCollect::DeviceTimedCollect(const sptr<IReport>& report,
+    const std::weak_ptr<BaseSystemAbilityManager>& manager)
+    : ICollectPlugin(report, manager)
 {
+}
+
+bool DeviceTimedCollect::IsMultiUser() const
+{
+#ifdef SUPPORT_MULTI_INSTANCE
+    auto manager = manager_.lock();
+    if (manager != nullptr && manager->GetUserId() != BASE_USER) {
+        HILOGI("DeviceTimedCollect multi-user skips SamgrTimeHandler, userId:%{public}d", manager->GetUserId());
+        return true;
+    }
+#endif
+    HILOGI("DeviceTimedCollect base user uses SamgrTimeHandler");
+    return false;
 }
 
 void DeviceTimedCollect::Init(const std::list<SaProfile>& saProfiles)
 {
+#ifdef PREFERENCES_ENABLE
+    InitPreferencesUtil();
+#endif
     for (auto& saProfile : saProfiles) {
         for (auto& onDemandEvent : saProfile.startOnDemand.onDemandEvents) {
             SaveTimedEvent(onDemandEvent);
@@ -57,10 +75,25 @@ void DeviceTimedCollect::Init(const std::list<SaProfile>& saProfiles)
     HILOGD("DeviceTimedCollect timedSet count: %{public}zu", nonPersitenceLoopEventSet_.size());
 }
 
+#ifdef PREFERENCES_ENABLE
+void DeviceTimedCollect::InitPreferencesUtil()
+{
+    auto manager = manager_.lock();
+    if (manager == nullptr) {
+        HILOGW("DeviceTimedCollect manager is nullptr, use base user preferences");
+        preferencesUtil_ = std::make_shared<PreferencesUtil>();
+        return;
+    }
+    preferencesUtil_ = std::make_shared<PreferencesUtil>(manager->GetUserId());
+}
+#endif
+
 void DeviceTimedCollect::ProcessPersistenceTasks()
 {
 #ifdef PREFERENCES_ENABLE
-    preferencesUtil_ = PreferencesUtil::GetInstance();
+    if (preferencesUtil_ == nullptr) {
+        InitPreferencesUtil();
+    }
     std::map<std::string, NativePreferences::PreferencesValue> allData = preferencesUtil_->ObtainAll();
     int64_t currentTime = TimeUtils::GetTimestamp();
     for (const auto& [strInterval, triggerTime] : allData) {
@@ -96,7 +129,7 @@ void DeviceTimedCollect::ProcessPersistenceTimedTask(int64_t disTime, std::strin
         ReportEvent(event);
         preferencesUtil_->Remove(timeString);
     };
-    if (!SamgrTimeHandler::GetInstance()->PostTask(timedTask, disTime)) {
+    if (IsMultiUser() || !SamgrTimeHandler::GetInstance()->PostTask(timedTask, disTime)) {
         PostDelayTask(timedTask, disTime);
     }
 #endif
@@ -251,7 +284,7 @@ void DeviceTimedCollect::PostDelayTaskByTimeInfo(std::function<void()> callback,
         return;
     }
     if (timeInfos_[interval].awake) {
-        if (!SamgrTimeHandler::GetInstance()->PostTask(callback, disTime)) {
+        if (IsMultiUser() || !SamgrTimeHandler::GetInstance()->PostTask(callback, disTime)) {
             PostDelayTask(callback, disTime);
         }
     } else {
@@ -328,7 +361,7 @@ void DeviceTimedCollect::PostPersistenceTimedTaskLocked(std::string timeString, 
     int64_t currentTime = TimeUtils::GetTimestamp();
     int64_t upgradeTime = currentTime + timeGap;
     preferencesUtil_->SaveLong(timeString, upgradeTime);
-    if (!SamgrTimeHandler::GetInstance()->PostTask(timedTask, timeGap)) {
+    if (IsMultiUser() || !SamgrTimeHandler::GetInstance()->PostTask(timedTask, timeGap)) {
         PostDelayTask(timedTask, timeGap);
     }
 #endif
@@ -344,7 +377,7 @@ void DeviceTimedCollect::PostNonPersistenceTimedTaskLocked(std::string timeStrin
         HILOGE("PostNonPersistenceTimedTask invalid timeGap: %{public}" PRId64 "ms", timeGap);
         return;
     }
-    if (!SamgrTimeHandler::GetInstance()->PostTask(timedTask, timeGap)) {
+    if (IsMultiUser() || !SamgrTimeHandler::GetInstance()->PostTask(timedTask, timeGap)) {
         PostDelayTask(timedTask, timeGap);
     }
 }

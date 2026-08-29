@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -108,6 +108,14 @@ int32_t CommonEventCollect::OnStart()
     workHandler_ = std::make_shared<CommonHandler>(this);
     unsubHandler_ = std::make_shared<CommonHandler>(this);
     workHandler_->SendEvent(INIT_EVENT);
+#ifdef SUPPORT_MULTI_INSTANCE
+    auto manager = GetManager().lock();
+    if (manager != nullptr && manager->GetUserId() != BASE_USER) {
+        HILOGI("CommonEventCollect multi-user skips monitor thread start, userId:%{public}d", manager->GetUserId());
+        return ERR_OK;
+    }
+    HILOGI("CommonEventCollect starts monitor thread");
+#endif
     StartMonitorThread();
     return ERR_OK;
 }
@@ -121,6 +129,14 @@ int32_t CommonEventCollect::OnStop()
     if (unsubHandler_ != nullptr) {
         unsubHandler_ = nullptr;
     }
+#ifdef SUPPORT_MULTI_INSTANCE
+    auto manager = GetManager().lock();
+    if (manager != nullptr && manager->GetUserId() != BASE_USER) {
+        HILOGI("CommonEventCollect multi-user skips monitor thread stop, userId:%{public}d", manager->GetUserId());
+        return ERR_OK;
+    }
+    HILOGI("CommonEventCollect stops monitor thread");
+#endif
     StopMonitorThread();
     return ERR_OK;
 }
@@ -552,6 +568,14 @@ int32_t CommonEventCollect::RemoveUnusedEvent(const OnDemandEvent& event)
 
 void CommonEventCollect::StartReclaimIpcThreadWork(const EventFwk::CommonEventData& data)
 {
+#ifdef SUPPORT_MULTI_INSTANCE
+    auto manager = GetManager().lock();
+    if (manager != nullptr && manager->GetUserId() != BASE_USER) {
+        HILOGI("CommonEventCollect multi-user skips IPC reclaim, userId:%{public}d", manager->GetUserId());
+        return;
+    }
+#endif
+    HILOGI("StartReclaimIpcThreadWork begins");
     bool isTrigger = false;
     std::string eventName = data.GetWant().GetAction();
     std::string eventType = data.GetData();
@@ -667,13 +691,7 @@ void CommonHandler::ProcessEvent(uint32_t eventId, int64_t extraDataId)
         return;
     }
     sptr<CommonEventListener> listener = new CommonEventListener(commonCollect);
-    auto collect = commonCollect_.promote();
-    if (collect != nullptr) {
-        auto strongManager = collect->GetManager().lock();
-        if (strongManager != nullptr) {
-            strongManager->SubscribeSystemAbility(COMMON_EVENT_SERVICE_ID, listener);
-        }
-    }
+    SystemAbilityManager::GetInstance()->SubscribeSystemAbility(COMMON_EVENT_SERVICE_ID, listener);
 }
 
 bool CommonHandler::SendEvent(uint32_t eventId)

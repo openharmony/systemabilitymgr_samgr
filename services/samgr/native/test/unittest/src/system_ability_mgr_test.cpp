@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,6 +78,40 @@ const unsigned int DUMP_FLAG_PROTO = 1 << SHEEFT_PROTO;
 const std::u16string PROCESS_NAME = u"test_process_name";
 const std::u16string DEVICE_NAME = u"test_name";
 
+class DumpLocalAbilityManager final : public IRemoteStub<ILocalAbilityManager> {
+public:
+    bool StartAbility(int32_t systemAbilityId, const std::string& eventStr) override { return true; }
+    bool StopAbility(int32_t systemAbilityId, const std::string& eventStr) override { return true; }
+    bool ActiveAbility(int32_t systemAbilityId, const nlohmann::json& activeReason) override { return true; }
+    bool IdleAbility(int32_t systemAbilityId, const nlohmann::json& idleReason, int32_t& delayTime) override
+    {
+        return true;
+    }
+    bool SendStrategyToSA(int32_t type, int32_t systemAbilityId, int32_t level, std::string& action) override
+    {
+        return true;
+    }
+    bool IpcStatCmdProc(int32_t fd, int32_t cmd) override
+    {
+        ++ipcStatCallCount_;
+        return true;
+    }
+    bool FfrtStatCmdProc(int32_t fd, int32_t cmd) override { return true; }
+    bool FfrtDumperProc(std::string& result) override { return true; }
+    int32_t SystemAbilityExtProc(const std::string& extension, int32_t said,
+        SystemAbilityExtensionPara* callback, bool isAsync) override
+    {
+        return ERR_OK;
+    }
+    int32_t ServiceControlCmd(int32_t fd, int32_t systemAbilityId,
+        const std::vector<std::u16string>& args) override
+    {
+        return ERR_OK;
+    }
+
+    int32_t ipcStatCallCount_ = 0;
+};
+
 void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
 {
     std::weak_ptr<BaseSystemAbilityManager> weakMgr;
@@ -96,6 +130,13 @@ void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
         new DeviceStatusCollectManager(weakMgr));
     saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>(weakMgr);
 }
+
+#ifdef SUPPORT_MULTI_INSTANCE
+void InitUserLifecycleManager(const sptr<SystemAbilityManager>& saMgr)
+{
+    saMgr->userLifecycleManager_.SetSaProfiles(&saMgr->allSaProfiles_);
+}
+#endif
 }
 
 void SystemProcessStatusChange::OnSystemProcessStarted(SystemProcessInfo& systemProcessInfo)
@@ -1932,178 +1973,571 @@ HWTEST_F(SystemAbilityMgrTest, SetSamgrIpcPrior007, TestSize.Level2)
 
 #ifdef SUPPORT_MULTI_INSTANCE
 namespace OHOS {
-namespace SAMGR {
-
 /**
- * @tc.name: MultiInstanceSaIds001
- * @tc.desc: test multi-instance SA IDs with all SAs configured as multi-instance
+ * @tc.name: MultiUserExplicitQuery001
+ * @tc.desc: Test explicit-user query APIs with an active multi-user manager.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, MultiInstanceSaIds001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrTest, MultiUserExplicitQuery001, TestSize.Level3)
 {
-    DTEST_LOG << " MultiInstanceSaIds001 BEGIN" << std::endl;
+    constexpr int32_t testUserId = 100;
+    constexpr int32_t testSaId = 2235;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     InitSaMgr(saMgr);
+    InitUserLifecycleManager(saMgr);
+    ASSERT_EQ(saMgr->OnUserStateChanged(testUserId, USER_STATE_ACTIVATING), ERR_OK);
+    ASSERT_EQ(saMgr->OnUserStateChanged(testUserId, USER_STATE_SWITCHING), ERR_OK);
 
-    saMgr->multiInstanceSaIds_.insert(1001);
-    saMgr->multiInstanceSaIds_.insert(1002);
-    saMgr->multiInstanceSaIds_.insert(1003);
+    bool isExist = true;
+    SystemProcessInfo processInfo;
+    EXPECT_EQ(saMgr->GetSystemAbility(testSaId, testUserId), nullptr);
+    EXPECT_EQ(saMgr->CheckSystemAbility(testSaId, testUserId), nullptr);
+    EXPECT_EQ(saMgr->CheckSystemAbilityByUserId(testSaId, isExist, testUserId), nullptr);
+    EXPECT_FALSE(isExist);
+    EXPECT_EQ(saMgr->GetSystemProcessInfo(testSaId, processInfo, testUserId), ERR_INVALID_VALUE);
+    EXPECT_EQ(saMgr->GetLocalAbilityManagerProxy(testSaId, testUserId), nullptr);
 
-    auto saIds = saMgr->GetMultiInstanceSaIds();
-    EXPECT_EQ(saIds.size(), 3);
+    sptr<ISystemAbilityLoadCallback> loadCallback = nullptr;
+    sptr<ISystemAbilityStatusChange> statusListener = nullptr;
+    sptr<ISystemProcessStatusChange> processListener = nullptr;
+    EXPECT_NE(saMgr->LoadSystemAbility(testSaId, loadCallback, testUserId), ERR_INVALID_VALUE);
+    EXPECT_EQ(saMgr->SubscribeSystemAbility(testSaId, statusListener, testUserId), ERR_INVALID_VALUE);
+    EXPECT_EQ(saMgr->UnSubscribeSystemAbility(testSaId, statusListener, testUserId), ERR_INVALID_VALUE);
+    EXPECT_EQ(saMgr->SubscribeSystemProcess(processListener, testUserId), ERR_INVALID_VALUE);
+    EXPECT_EQ(saMgr->UnSubscribeSystemProcess(processListener, testUserId), ERR_INVALID_VALUE);
 
-    auto find1001 = std::find(saIds.begin(), saIds.end(), 1001);
-    EXPECT_NE(find1001, saIds.end());
+    auto manager = saMgr->GetMultiUserManager(testUserId);
+    ASSERT_NE(manager, nullptr);
+    manager->Destroy();
+    saMgr->userLifecycleManager_.multiUserManagers_.clear();
 
-    auto find1002 = std::find(saIds.begin(), saIds.end(), 1002);
-    EXPECT_NE(find1002, saIds.end());
-
-    auto find1003 = std::find(saIds.begin(), saIds.end(), 1003);
-    EXPECT_NE(find1003, saIds.end());
-
-    DTEST_LOG << " MultiInstanceSaIds001 END" << std::endl;
+    saMgr->userLifecycleManager_.validUserIds_.insert(testUserId);
+    EXPECT_EQ(saMgr->GetSystemAbility(testSaId, testUserId), nullptr);
+    EXPECT_EQ(saMgr->CheckSystemAbility(testSaId, testUserId), nullptr);
+    isExist = true;
+    EXPECT_EQ(saMgr->CheckSystemAbilityByUserId(testSaId, isExist, testUserId), nullptr);
+    EXPECT_FALSE(isExist);
+    EXPECT_EQ(saMgr->GetSystemProcessInfo(testSaId, processInfo, testUserId), ERR_INVALID_VALUE);
+    EXPECT_EQ(saMgr->GetLocalAbilityManagerProxy(testSaId, testUserId), nullptr);
+    EXPECT_EQ(saMgr->LoadSystemAbility(testSaId, loadCallback, testUserId), ERR_INVALID_VALUE);
+    EXPECT_EQ(saMgr->SubscribeSystemAbility(testSaId, statusListener, testUserId), ERR_INVALID_VALUE);
+    EXPECT_EQ(saMgr->UnSubscribeSystemAbility(testSaId, statusListener, testUserId), ERR_INVALID_VALUE);
+    EXPECT_EQ(saMgr->SubscribeSystemProcess(processListener, testUserId), ERR_INVALID_VALUE);
+    EXPECT_EQ(saMgr->UnSubscribeSystemProcess(processListener, testUserId), ERR_INVALID_VALUE);
 }
 
 /**
- * @tc.name: MultiInstanceSaIds002
- * @tc.desc: test multi-instance SA IDs with empty set
+ * @tc.name: MultiUserExplicitInvalidUser001
+ * @tc.desc: Test explicit-user APIs reject an invalid target user before manager lookup.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, MultiInstanceSaIds002, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrTest, MultiUserExplicitInvalidUser001, TestSize.Level3)
 {
-    DTEST_LOG << " MultiInstanceSaIds002 BEGIN" << std::endl;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     InitSaMgr(saMgr);
+    sptr<ISystemAbilityLoadCallback> loadCallback = new SystemAbilityLoadCallbackMock();
+    sptr<ISystemAbilityStatusChange> abilityListener = new SaStatusChangeMock();
+    sptr<ISystemProcessStatusChange> processListener = new SystemProcessStatusChange();
+    SystemProcessInfo processInfo;
+    bool isExist = true;
 
-    auto saIds = saMgr->GetMultiInstanceSaIds();
-    EXPECT_EQ(saIds.size(), 0);
-
-    DTEST_LOG << " MultiInstanceSaIds002 END" << std::endl;
+    EXPECT_EQ(saMgr->GetSystemAbility(SAID, SAMGR_INVALID_USER_ID), nullptr);
+    EXPECT_EQ(saMgr->CheckSystemAbility(SAID, SAMGR_INVALID_USER_ID), nullptr);
+    EXPECT_EQ(saMgr->CheckSystemAbilityByUserId(SAID, isExist, SAMGR_INVALID_USER_ID), nullptr);
+    EXPECT_FALSE(isExist);
+    EXPECT_EQ(saMgr->GetSystemProcessInfo(SAID, processInfo, SAMGR_INVALID_USER_ID), INVALID_CALLING_USER_ID);
+    EXPECT_EQ(saMgr->GetLocalAbilityManagerProxy(SAID, SAMGR_INVALID_USER_ID), nullptr);
+    EXPECT_EQ(saMgr->LoadSystemAbility(SAID, loadCallback, SAMGR_INVALID_USER_ID), INVALID_CALLING_USER_ID);
+    EXPECT_EQ(saMgr->SubscribeSystemAbility(SAID, abilityListener, SAMGR_INVALID_USER_ID), INVALID_CALLING_USER_ID);
+    EXPECT_EQ(saMgr->UnSubscribeSystemAbility(SAID, abilityListener, SAMGR_INVALID_USER_ID), INVALID_CALLING_USER_ID);
+    EXPECT_EQ(saMgr->SubscribeSystemProcess(processListener, SAMGR_INVALID_USER_ID), INVALID_CALLING_USER_ID);
+    EXPECT_EQ(saMgr->UnSubscribeSystemProcess(processListener, SAMGR_INVALID_USER_ID), INVALID_CALLING_USER_ID);
 }
 
 /**
- * @tc.name: MultiInstanceSaIds003
- * @tc.desc: test that when not all SAs in a process have multi-instance=true,
- *  none are added to the set
+ * @tc.name: MultiUserRoutingDecision001
+ * @tc.desc: Test base-user and explicit-user routing for multi-instance abilities.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, MultiInstanceSaIds003, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrTest, MultiUserRoutingDecision001, TestSize.Level3)
 {
-    DTEST_LOG << " MultiInstanceSaIds003 BEGIN" << std::endl;
+    constexpr int32_t userId = 124;
+    constexpr int32_t multiInstanceSaId = 2236;
+    constexpr int32_t regularSaId = 2237;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    ASSERT_NE(saMgr, nullptr);
+    saMgr->multiInstanceSaIds_.insert(multiInstanceSaId);
+    saMgr->userLifecycleManager_.validUserIds_.insert(userId);
+    saMgr->userLifecycleManager_.foregroundUserId_.store(userId);
+
+    EXPECT_TRUE(saMgr->IsValidCallingUserId(BASE_USER));
+    EXPECT_TRUE(saMgr->IsValidCallingUserId(userId));
+    EXPECT_FALSE(saMgr->IsValidCallingUserId(SAMGR_INVALID_USER_ID));
+    EXPECT_EQ(saMgr->RouteForUser(regularSaId, userId), BASE_USER);
+    EXPECT_EQ(saMgr->RouteForUser(multiInstanceSaId, BASE_USER), userId);
+    EXPECT_EQ(saMgr->RouteForUser(multiInstanceSaId, userId), userId);
+    EXPECT_EQ(saMgr->RouteForSa(multiInstanceSaId, BASE_USER), SA_OPERATION_NOT_ALLOWED);
+    EXPECT_EQ(saMgr->RouteForSa(regularSaId, BASE_USER), SAMGR_OK);
+    EXPECT_EQ(saMgr->RouteForSa(multiInstanceSaId, userId), SAMGR_OK);
+    EXPECT_EQ(saMgr->RouteForSa(regularSaId, userId), SA_OPERATION_NOT_ALLOWED);
+}
+
+/**
+ * @tc.name: MultiUserImplicitQueryRouting001
+ * @tc.desc: Test base-user implicit queries route multi-instance abilities to the foreground user.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, MultiUserImplicitQueryRouting001, TestSize.Level3)
+{
+    constexpr int32_t userId = 125;
+    constexpr int32_t multiInstanceSaId = 2238;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     InitSaMgr(saMgr);
+    InitUserLifecycleManager(saMgr);
+    saMgr->multiInstanceSaIds_.insert(multiInstanceSaId);
+    ASSERT_EQ(saMgr->OnUserStateChanged(userId, USER_STATE_ACTIVATING), ERR_OK);
+    ASSERT_EQ(saMgr->OnUserStateChanged(userId, USER_STATE_SWITCHING), ERR_OK);
 
-    saMgr->multiInstanceSaIds_.clear();
-    auto saIds = saMgr->GetMultiInstanceSaIds();
-    EXPECT_EQ(saIds.size(), 0);
-
-    DTEST_LOG << " MultiInstanceSaIds003 END" << std::endl;
+    bool isExist = true;
+    SystemProcessInfo processInfo;
+    sptr<ISystemAbilityLoadCallback> callback = nullptr;
+    EXPECT_EQ(saMgr->GetSystemAbility(multiInstanceSaId), nullptr);
+    EXPECT_EQ(saMgr->CheckSystemAbility(multiInstanceSaId), nullptr);
+    EXPECT_EQ(saMgr->CheckSystemAbility(multiInstanceSaId, isExist), nullptr);
+    EXPECT_FALSE(isExist);
+    EXPECT_EQ(saMgr->GetSystemProcessInfo(multiInstanceSaId, processInfo), ERR_INVALID_VALUE);
+    EXPECT_EQ(saMgr->GetLocalAbilityManagerProxy(multiInstanceSaId), nullptr);
+    EXPECT_NE(saMgr->LoadSystemAbility(multiInstanceSaId, callback), ERR_OK);
+    EXPECT_EQ(saMgr->OnUserStateChanged(userId, USER_STATE_STOPPING), ERR_OK);
 }
 
 /**
- * @tc.name: OnUserStateChanged001
- * @tc.desc: test OnUserStateChanged with USER_STATE_ACTIVATING
+ * @tc.name: MultiUserGlobalSubscriptionRouting001
+ * @tc.desc: Test base-user subscriptions are propagated to an active multi-user manager.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, OnUserStateChanged001, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrTest, MultiUserGlobalSubscriptionRouting001, TestSize.Level3)
 {
-    DTEST_LOG << " OnUserStateChanged001 BEGIN" << std::endl;
+    constexpr int32_t userId = 126;
+    constexpr int32_t multiInstanceSaId = 2239;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
-    EXPECT_TRUE(saMgr != nullptr);
-    int32_t ret = saMgr->OnUserStateChanged(100, USER_STATE_ACTIVATING);
-    EXPECT_EQ(ret, ERR_OK);
-    {
-        std::lock_guard<samgr::mutex> lock(saMgr->userStateLock_);
-        auto it = saMgr->userStateMap_.find(100);
-        EXPECT_TRUE(it != saMgr->userStateMap_.end());
-        EXPECT_EQ(it->second, USER_STATE_ACTIVATING);
-    }
-    DTEST_LOG << " OnUserStateChanged001 END" << std::endl;
+    InitSaMgr(saMgr);
+    InitUserLifecycleManager(saMgr);
+    saMgr->multiInstanceSaIds_.insert(multiInstanceSaId);
+    sptr<ISystemAbilityStatusChange> saListener = new SaStatusChangeMock();
+    sptr<ISystemProcessStatusChange> processListener = new SystemProcessStatusChange();
+    ASSERT_EQ(saMgr->OnUserStateChanged(userId, USER_STATE_ACTIVATING), ERR_OK);
+
+    EXPECT_EQ(saMgr->SubscribeSystemAbility(multiInstanceSaId, saListener), ERR_OK);
+    EXPECT_EQ(saMgr->UnSubscribeSystemAbility(multiInstanceSaId, saListener), ERR_OK);
+    EXPECT_EQ(saMgr->SubscribeSystemProcess(processListener), ERR_OK);
+    EXPECT_EQ(saMgr->UnSubscribeSystemProcess(processListener), ERR_OK);
+    EXPECT_EQ(saMgr->OnUserStateChanged(userId, USER_STATE_STOPPING), ERR_OK);
 }
 
 /**
- * @tc.name: OnUserStateChanged002
- * @tc.desc: test OnUserStateChanged with USER_STATE_SWITCHING
+ * @tc.name: MultiUserSendStrategyRouting001
+ * @tc.desc: Test strategy dispatch separates base and multi-instance ability IDs.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, OnUserStateChanged002, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrTest, MultiUserSendStrategyRouting001, TestSize.Level3)
 {
-    DTEST_LOG << " OnUserStateChanged002 BEGIN" << std::endl;
+    constexpr int32_t userId = 128;
+    constexpr int32_t multiInstanceSaId = 2240;
+    constexpr int32_t regularSaId = 2241;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
-    EXPECT_TRUE(saMgr != nullptr);
-    int32_t ret = saMgr->OnUserStateChanged(100, USER_STATE_SWITCHING);
-    EXPECT_EQ(ret, ERR_OK);
-    {
-        std::lock_guard<samgr::mutex> lock(saMgr->userStateLock_);
-        auto it = saMgr->userStateMap_.find(100);
-        EXPECT_TRUE(it != saMgr->userStateMap_.end());
-        EXPECT_EQ(it->second, USER_STATE_SWITCHING);
-    }
-    DTEST_LOG << " OnUserStateChanged002 END" << std::endl;
+    InitSaMgr(saMgr);
+    InitUserLifecycleManager(saMgr);
+    saMgr->multiInstanceSaIds_.insert(multiInstanceSaId);
+    ASSERT_EQ(saMgr->OnUserStateChanged(userId, USER_STATE_ACTIVATING), ERR_OK);
+    SamMockPermission::MockProcess("resource_schedule_service");
+    std::vector<int32_t> emptyIds;
+    std::vector<int32_t> mixedIds { regularSaId, multiInstanceSaId };
+    std::vector<int32_t> unknownIds { 2242 };
+    std::string action = "strategy";
+
+    EXPECT_EQ(saMgr->SendStrategy(0, emptyIds, 0, action), ERR_OK);
+    EXPECT_EQ(saMgr->SendStrategy(0, mixedIds, 0, action), ERR_INVALID_VALUE);
+    EXPECT_EQ(saMgr->SendStrategy(0, unknownIds, 0, action), ERR_INVALID_VALUE);
+    EXPECT_EQ(saMgr->OnUserStateChanged(userId, USER_STATE_STOPPING), ERR_OK);
 }
 
 /**
- * @tc.name: OnUserStateChanged003
- * @tc.desc: test OnUserStateChanged with USER_STATE_STOPPING
+ * @tc.name: MultiUserExplicitApiInvalidUser001
+ * @tc.desc: Verify explicit user APIs reject an unknown target user consistently.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, OnUserStateChanged003, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrTest, MultiUserExplicitApiInvalidUser001, TestSize.Level3)
 {
-    DTEST_LOG << " OnUserStateChanged003 BEGIN" << std::endl;
+    constexpr int32_t invalidUserId = -1;
+    constexpr int32_t systemAbilityId = 2243;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
-    EXPECT_TRUE(saMgr != nullptr);
-    int32_t ret = saMgr->OnUserStateChanged(100, USER_STATE_STOPPING);
-    EXPECT_EQ(ret, ERR_OK);
-    {
-        std::lock_guard<samgr::mutex> lock(saMgr->userStateLock_);
-        auto it = saMgr->userStateMap_.find(100);
-        EXPECT_TRUE(it != saMgr->userStateMap_.end());
-        EXPECT_EQ(it->second, USER_STATE_STOPPING);
-    }
-    DTEST_LOG << " OnUserStateChanged003 END" << std::endl;
+    sptr<ISystemAbilityStatusChange> statusListener = new SaStatusChangeMock();
+    sptr<ISystemProcessStatusChange> processListener = new SystemProcessStatusChange();
+    sptr<ISystemAbilityLoadCallback> callback = nullptr;
+    SystemProcessInfo processInfo;
+    bool isExist = true;
+    ASSERT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
+    InitUserLifecycleManager(saMgr);
+
+    EXPECT_EQ(saMgr->OnUserStateChanged(invalidUserId, USER_STATE_ACTIVATING), ERR_INVALID_VALUE);
+    EXPECT_EQ(saMgr->GetSystemAbility(systemAbilityId, invalidUserId), nullptr);
+    EXPECT_EQ(saMgr->CheckSystemAbility(systemAbilityId, invalidUserId), nullptr);
+    EXPECT_EQ(saMgr->CheckSystemAbilityByUserId(systemAbilityId, isExist, invalidUserId), nullptr);
+    EXPECT_FALSE(isExist);
+    EXPECT_EQ(saMgr->GetSystemProcessInfo(systemAbilityId, processInfo, invalidUserId), INVALID_CALLING_USER_ID);
+    EXPECT_EQ(saMgr->GetLocalAbilityManagerProxy(systemAbilityId, invalidUserId), nullptr);
+    EXPECT_EQ(saMgr->LoadSystemAbility(systemAbilityId, callback, invalidUserId), INVALID_CALLING_USER_ID);
+    EXPECT_EQ(saMgr->SubscribeSystemAbility(systemAbilityId, statusListener, invalidUserId), INVALID_CALLING_USER_ID);
+    EXPECT_EQ(saMgr->UnSubscribeSystemAbility(systemAbilityId, statusListener, invalidUserId), INVALID_CALLING_USER_ID);
+    EXPECT_EQ(saMgr->SubscribeSystemProcess(processListener, invalidUserId), INVALID_CALLING_USER_ID);
+    EXPECT_EQ(saMgr->UnSubscribeSystemProcess(processListener, invalidUserId), INVALID_CALLING_USER_ID);
 }
 
 /**
- * @tc.name: OnUserStateChanged004
- * @tc.desc: test OnUserStateChanged overwrite existing state for same user
+ * @tc.name: MultiUserExplicitApiMissingManager001
+ * @tc.desc: Verify explicit user APIs reject a valid user whose manager has been removed.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, OnUserStateChanged004, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrTest, MultiUserExplicitApiMissingManager001, TestSize.Level3)
 {
-    DTEST_LOG << " OnUserStateChanged004 BEGIN" << std::endl;
+    constexpr int32_t userId = 129;
+    constexpr int32_t systemAbilityId = 2244;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
-    EXPECT_TRUE(saMgr != nullptr);
-    saMgr->OnUserStateChanged(100, USER_STATE_ACTIVATING);
-    saMgr->OnUserStateChanged(100, USER_STATE_STOPPING);
-    std::lock_guard<samgr::mutex> lock(saMgr->userStateLock_);
-    auto it = saMgr->userStateMap_.find(100);
-    EXPECT_TRUE(it != saMgr->userStateMap_.end());
-    EXPECT_EQ(it->second, USER_STATE_STOPPING);
-    EXPECT_EQ(static_cast<int32_t>(saMgr->userStateMap_.size()), 1);
-    DTEST_LOG << " OnUserStateChanged004 END" << std::endl;
+    sptr<ISystemAbilityStatusChange> statusListener = new SaStatusChangeMock();
+    sptr<ISystemProcessStatusChange> processListener = new SystemProcessStatusChange();
+    sptr<ISystemAbilityLoadCallback> callback = nullptr;
+    SystemProcessInfo processInfo;
+    bool isExist = true;
+    ASSERT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
+    InitUserLifecycleManager(saMgr);
+    ASSERT_EQ(saMgr->OnUserStateChanged(userId, USER_STATE_ACTIVATING), ERR_OK);
+    saMgr->userLifecycleManager_.multiUserManagers_.erase(userId);
+
+    EXPECT_EQ(saMgr->GetSystemAbility(systemAbilityId, userId), nullptr);
+    EXPECT_EQ(saMgr->CheckSystemAbility(systemAbilityId, userId), nullptr);
+    EXPECT_EQ(saMgr->CheckSystemAbilityByUserId(systemAbilityId, isExist, userId), nullptr);
+    EXPECT_FALSE(isExist);
+    EXPECT_EQ(saMgr->GetSystemProcessInfo(systemAbilityId, processInfo, userId), ERR_INVALID_VALUE);
+    EXPECT_EQ(saMgr->GetLocalAbilityManagerProxy(systemAbilityId, userId), nullptr);
+    EXPECT_EQ(saMgr->LoadSystemAbility(systemAbilityId, callback, userId), ERR_INVALID_VALUE);
+    EXPECT_EQ(saMgr->SubscribeSystemAbility(systemAbilityId, statusListener, userId), ERR_INVALID_VALUE);
+    EXPECT_EQ(saMgr->UnSubscribeSystemAbility(systemAbilityId, statusListener, userId), ERR_INVALID_VALUE);
+    EXPECT_EQ(saMgr->SubscribeSystemProcess(processListener, userId), ERR_INVALID_VALUE);
+    EXPECT_EQ(saMgr->UnSubscribeSystemProcess(processListener, userId), ERR_INVALID_VALUE);
 }
 
 /**
- * @tc.name: OnUserStateChanged005
- * @tc.desc: test OnUserStateChanged with multiple users and different states
+ * @tc.name: MultiUserExplicitQuerySuccess002
+ * @tc.desc: Verify explicit-user query APIs forward to an active user manager.
  * @tc.type: FUNC
  */
-HWTEST_F(SystemAbilityMgrTest, OnUserStateChanged005, TestSize.Level3)
+HWTEST_F(SystemAbilityMgrTest, MultiUserExplicitQuerySuccess002, TestSize.Level3)
 {
-    DTEST_LOG << " OnUserStateChanged005 BEGIN" << std::endl;
+    constexpr int32_t userId = 130;
+    constexpr int32_t processPid = 321;
+    constexpr int32_t processUid = 654;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
-    EXPECT_TRUE(saMgr != nullptr);
-    saMgr->OnUserStateChanged(100, USER_STATE_ACTIVATING);
-    saMgr->OnUserStateChanged(200, USER_STATE_SWITCHING);
-    saMgr->OnUserStateChanged(300, USER_STATE_STOPPING);
-    std::lock_guard<samgr::mutex> lock(saMgr->userStateLock_);
-    EXPECT_EQ(static_cast<int32_t>(saMgr->userStateMap_.size()), 3);
-    EXPECT_EQ(saMgr->userStateMap_[100], USER_STATE_ACTIVATING);
-    EXPECT_EQ(saMgr->userStateMap_[200], USER_STATE_SWITCHING);
-    EXPECT_EQ(saMgr->userStateMap_[300], USER_STATE_STOPPING);
-    DTEST_LOG << " OnUserStateChanged005 END" << std::endl;
+    auto manager = std::make_shared<MultiSystemAbilityManager>(userId);
+    ASSERT_NE(saMgr, nullptr);
+    ASSERT_NE(manager, nullptr);
+    manager->Init({});
+    saMgr->userLifecycleManager_.validUserIds_.insert(userId);
+    saMgr->userLifecycleManager_.multiUserManagers_[userId] = manager;
+    sptr<IRemoteObject> ability = new TestTransactionService();
+    manager->abilityMap_[SAID] = {ability, false};
+    CommonSaProfile profile;
+    profile.process = PROCESS_NAME;
+    manager->saProfileMap_[SAID] = profile;
+    manager->systemProcessMap_[PROCESS_NAME] = ability;
+    auto abilityContext = std::make_shared<SystemAbilityContext>();
+    abilityContext->ownProcessContext = std::make_shared<SystemProcessContext>();
+    abilityContext->ownProcessContext->pid = processPid;
+    abilityContext->ownProcessContext->uid = processUid;
+    manager->abilityStateScheduler_->abilityContextMap_[SAID] = abilityContext;
+    bool isExist = false;
+    SystemProcessInfo processInfo;
+    EXPECT_EQ(saMgr->GetSystemAbility(SAID, userId), ability);
+    EXPECT_EQ(saMgr->CheckSystemAbility(SAID, userId), ability);
+    EXPECT_EQ(saMgr->CheckSystemAbilityByUserId(SAID, isExist, userId), ability);
+    EXPECT_TRUE(isExist);
+    EXPECT_EQ(saMgr->GetSystemProcessInfo(SAID, processInfo, userId), ERR_OK);
+    EXPECT_EQ(saMgr->GetLocalAbilityManagerProxy(SAID, userId), ability);
+    manager->Destroy();
 }
 
-} // namespace SAMGR
+/**
+ * @tc.name: MultiUserExplicitSubscriptionSuccess002
+ * @tc.desc: Verify explicit-user subscription APIs forward successfully.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, MultiUserExplicitSubscriptionSuccess002, TestSize.Level3)
+{
+    constexpr int32_t userId = 131;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    auto manager = std::make_shared<MultiSystemAbilityManager>(userId);
+    ASSERT_NE(saMgr, nullptr);
+    ASSERT_NE(manager, nullptr);
+    ASSERT_EQ(manager->Init({}), ERR_OK);
+    saMgr->userLifecycleManager_.validUserIds_.insert(userId);
+    saMgr->userLifecycleManager_.multiUserManagers_[userId] = manager;
+    sptr<ISystemAbilityStatusChange> abilityListener = new SaStatusChangeMock();
+    sptr<ISystemProcessStatusChange> processListener = new SystemProcessStatusChange();
+    EXPECT_EQ(saMgr->SubscribeSystemAbility(SAID, abilityListener, userId), ERR_OK);
+    EXPECT_EQ(saMgr->UnSubscribeSystemAbility(SAID, abilityListener, userId), ERR_OK);
+    EXPECT_EQ(saMgr->SubscribeSystemProcess(processListener, userId), ERR_OK);
+    EXPECT_EQ(saMgr->UnSubscribeSystemProcess(processListener, userId), ERR_OK);
+    manager->Destroy();
+    EXPECT_TRUE(manager->listenerMap_[SAID].empty());
+}
+
+/**
+ * @tc.name: MultiUserImplicitQuerySuccess002
+ * @tc.desc: Verify implicit multi-instance queries route to the foreground manager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, MultiUserImplicitQuerySuccess002, TestSize.Level3)
+{
+    constexpr int32_t userId = 132;
+    constexpr int32_t multiInstanceSaId = 2245;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    auto manager = std::make_shared<MultiSystemAbilityManager>(userId);
+    ASSERT_NE(saMgr, nullptr);
+    ASSERT_NE(manager, nullptr);
+    ASSERT_EQ(manager->Init({}), ERR_OK);
+    saMgr->multiInstanceSaIds_.insert(multiInstanceSaId);
+    saMgr->userLifecycleManager_.validUserIds_.insert(userId);
+    saMgr->userLifecycleManager_.foregroundUserId_.store(userId);
+    saMgr->userLifecycleManager_.multiUserManagers_[userId] = manager;
+    sptr<IRemoteObject> ability = new TestTransactionService();
+    manager->abilityMap_[multiInstanceSaId] = {ability, false};
+    bool isExist = false;
+    EXPECT_EQ(saMgr->GetSystemAbility(multiInstanceSaId), ability);
+    EXPECT_EQ(saMgr->CheckSystemAbility(multiInstanceSaId), ability);
+    EXPECT_EQ(saMgr->CheckSystemAbility(multiInstanceSaId, isExist), ability);
+    EXPECT_TRUE(isExist);
+}
+
+/**
+ * @tc.name: MultiUserAggregateQueryBranches003
+ * @tc.desc: Verify aggregate queries include an active multi-user manager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, MultiUserAggregateQueryBranches003, TestSize.Level3)
+{
+    constexpr int32_t userId = 133;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    auto manager = std::make_shared<MultiSystemAbilityManager>(userId);
+    ASSERT_NE(saMgr, nullptr);
+    ASSERT_NE(manager, nullptr);
+    InitSaMgr(saMgr);
+    ASSERT_EQ(manager->Init({}), ERR_OK);
+    saMgr->userLifecycleManager_.validUserIds_.insert(userId);
+    saMgr->userLifecycleManager_.multiUserManagers_[userId] = manager;
+    std::list<SystemProcessInfo> processInfos;
+    std::vector<sptr<IRemoteObject>> abilityList;
+    std::vector<ISystemAbilityManager::SaExtensionInfo> extensionInfos;
+    EXPECT_EQ(saMgr->GetRunningSystemProcess(processInfos), ERR_OK);
+    EXPECT_EQ(saMgr->GetExtensionRunningSaList("test", abilityList), ERR_OK);
+    EXPECT_EQ(saMgr->GetRunningSaExtensionInfoList("test", extensionInfos), ERR_OK);
+    manager->Destroy();
+    EXPECT_TRUE(processInfos.empty());
+}
+
+/**
+ * @tc.name: MultiUserExplicitLoadSuccess003
+ * @tc.desc: Verify explicit-user loading forwards an already loaded ability.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, MultiUserExplicitLoadSuccess003, TestSize.Level3)
+{
+    constexpr int32_t userId = 134;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    auto manager = std::make_shared<MultiSystemAbilityManager>(userId);
+    ASSERT_NE(saMgr, nullptr);
+    ASSERT_NE(manager, nullptr);
+    ASSERT_EQ(manager->Init({}), ERR_OK);
+    saMgr->userLifecycleManager_.validUserIds_.insert(userId);
+    saMgr->userLifecycleManager_.multiUserManagers_[userId] = manager;
+    sptr<IRemoteObject> ability = new TestTransactionService();
+    manager->abilityMap_[SAID] = {ability, false};
+    CommonSaProfile profile;
+    profile.process = PROCESS_NAME;
+    manager->saProfileMap_[SAID] = profile;
+    auto abilityContext = std::make_shared<SystemAbilityContext>();
+    abilityContext->systemAbilityId = SAID;
+    abilityContext->state = SystemAbilityState::LOADED;
+    abilityContext->ownProcessContext = std::make_shared<SystemProcessContext>();
+    abilityContext->ownProcessContext->state = SystemProcessState::STARTED;
+    manager->abilityStateScheduler_->abilityContextMap_[SAID] = abilityContext;
+    sptr<ISystemAbilityLoadCallback> callback = new SystemAbilityLoadCallbackMock();
+    EXPECT_EQ(saMgr->LoadSystemAbility(SAID, callback, userId), ERR_OK);
+    EXPECT_EQ(manager->abilityMap_[SAID].remoteObj, ability);
+    manager->Destroy();
+}
+
+/**
+ * @tc.name: MultiUserUnloadProcess004
+ * @tc.desc: Verify process unloading visits an active user manager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, MultiUserUnloadProcess004, TestSize.Level3)
+{
+    constexpr int32_t userId = 135;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    auto manager = std::make_shared<MultiSystemAbilityManager>(userId);
+    ASSERT_NE(saMgr, nullptr);
+    ASSERT_NE(manager, nullptr);
+    InitSaMgr(saMgr);
+    ASSERT_EQ(manager->Init({}), ERR_OK);
+    saMgr->userLifecycleManager_.validUserIds_.insert(userId);
+    saMgr->userLifecycleManager_.multiUserManagers_[userId] = manager;
+    std::vector<std::u16string> processList;
+    EXPECT_EQ(saMgr->UnloadProcess(processList), ERR_OK);
+    manager->Destroy();
+    EXPECT_TRUE(processList.empty());
+}
+
+/**
+ * @tc.name: MultiUserBaseLifecycleGuard005
+ * @tc.desc: Verify base and invalid user IDs are rejected before lifecycle dispatch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, MultiUserBaseLifecycleGuard005, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    ASSERT_NE(saMgr, nullptr);
+
+    EXPECT_EQ(saMgr->OnUserStateChanged(BASE_USER, USER_STATE_ACTIVATING), ERR_INVALID_VALUE);
+    EXPECT_EQ(saMgr->OnUserStateChanged(SAMGR_INVALID_USER_ID, USER_STATE_ACTIVATING), ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: MultiUserMissingManagerAggregation006
+ * @tc.desc: Verify aggregate operations skip valid users whose manager is absent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, MultiUserMissingManagerAggregation006, TestSize.Level3)
+{
+    constexpr int32_t userId = 136;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    ASSERT_NE(saMgr, nullptr);
+    InitSaMgr(saMgr);
+    saMgr->userLifecycleManager_.validUserIds_.insert(userId);
+    std::list<SystemProcessInfo> processInfos;
+    std::vector<sptr<IRemoteObject>> abilityList;
+    std::vector<ISystemAbilityManager::SaExtensionInfo> extensionInfos;
+
+    EXPECT_EQ(saMgr->GetRunningSystemProcess(processInfos), ERR_OK);
+    EXPECT_EQ(saMgr->GetExtensionRunningSaList("missing", abilityList), ERR_OK);
+    EXPECT_EQ(saMgr->GetRunningSaExtensionInfoList("missing", extensionInfos), ERR_OK);
+    bool dispatched = false;
+    std::vector<int32_t> systemAbilityIds = {SAID};
+    std::string action;
+    EXPECT_EQ(saMgr->SendStrategyToUsers(0, systemAbilityIds, 0, action, dispatched), ERR_OK);
+    EXPECT_FALSE(dispatched);
+}
+
+/**
+ * @tc.name: MultiUserStrategyErrorAggregation007
+ * @tc.desc: Verify a user strategy error is retained after dispatch to an active manager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, MultiUserStrategyErrorAggregation007, TestSize.Level3)
+{
+    constexpr int32_t userId = 137;
+    auto manager = std::make_shared<MultiSystemAbilityManager>(userId);
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    ASSERT_NE(manager, nullptr);
+    ASSERT_NE(saMgr, nullptr);
+    ASSERT_EQ(manager->Init({}), ERR_OK);
+    saMgr->userLifecycleManager_.validUserIds_.insert(userId);
+    saMgr->userLifecycleManager_.multiUserManagers_[userId] = manager;
+    std::vector<int32_t> systemAbilityIds = {SAID};
+    std::string action;
+    bool dispatched = false;
+
+    EXPECT_EQ(saMgr->SendStrategyToUsers(0, systemAbilityIds, 0, action, dispatched), ERR_PERMISSION_DENIED);
+    EXPECT_TRUE(dispatched);
+    manager->Destroy();
+}
+
 } // namespace OHOS
 #endif
+
+
+namespace OHOS {
+/**
+ * @tc.name: SystemAbilityManagerRemoteAndDump001
+ * @tc.desc: Test remote SA visibility, on-demand enumeration, and listener dump dispatch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, SystemAbilityManagerRemoteAndDump001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    constexpr int32_t remoteSaId = 2234;
+    sptr<IRemoteObject> remoteObject = new TestTransactionService();
+
+    EXPECT_EQ(saMgr->GetSystemAbilityFromRemote(-1), nullptr);
+    saMgr->abilityMap_[remoteSaId] = {remoteObject, false};
+    EXPECT_EQ(saMgr->GetSystemAbilityFromRemote(remoteSaId), nullptr);
+    saMgr->abilityMap_[remoteSaId].isDistributed = true;
+    EXPECT_EQ(saMgr->GetSystemAbilityFromRemote(remoteSaId), remoteObject);
+
+    CommonSaProfile profile;
+    profile.saId = remoteSaId + 1;
+    saMgr->saProfileMap_[profile.saId] = profile;
+    std::list<int32_t> ondemandSaIds = saMgr->GetAllOndemandSa();
+    EXPECT_EQ(ondemandSaIds.size(), 1U);
+    EXPECT_EQ(ondemandSaIds.front(), profile.saId);
+
+    SamMockPermission::MockProcess("hidumper_service");
+    sptr<ISystemAbilityStatusChange> listener = new SaStatusChangeMock();
+    saMgr->listenerMap_[remoteSaId].emplace_back(listener, IPCSkeleton::GetCallingPid(), ListenerState::INIT);
+    std::vector<std::u16string> dumpArgs {u"--listener", u"-l", u"-sa"};
+    EXPECT_EQ(saMgr->Dump(STDOUT_FILENO, dumpArgs), ERR_OK);
+    EXPECT_FALSE(saMgr->IpcStatSamgrProc(-1, IPC_STAT_CMD_START));
+    std::vector<std::u16string> emptyDumpArgs;
+    EXPECT_EQ(saMgr->Dump(-1, emptyDumpArgs), ERR_INVALID_VALUE);
+}
+
+/**
+ * @tc.name: SystemAbilityManagerIpcDumpProcess001
+ * @tc.desc: Test IPC dump dispatch for populated local system processes.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, SystemAbilityManagerIpcDumpProcess001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    InitSaMgr(saMgr);
+    sptr<DumpLocalAbilityManager> localManager = new DumpLocalAbilityManager();
+    ASSERT_NE(localManager, nullptr);
+    const std::u16string processName = u"samgr_dump_process";
+    saMgr->systemProcessMap_[processName] = localManager;
+
+    saMgr->IpcDumpAllProcess(STDOUT_FILENO, IPC_STAT_CMD_START);
+    EXPECT_EQ(localManager->ipcStatCallCount_, 1);
+    saMgr->IpcDumpSingleProcess(STDOUT_FILENO, IPC_STAT_CMD_STOP, "samgr_dump_process");
+    EXPECT_EQ(localManager->ipcStatCallCount_, 2);
+}
+
+/**
+ * @tc.name: SystemAbilityManagerGuardPath001
+ * @tc.desc: Test manager guard paths before optional helpers are initialized.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrTest, SystemAbilityManagerGuardPath001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    ASSERT_NE(saMgr, nullptr);
+
+    saMgr->OndemandLoadForPerf();
+    saMgr->NotifyRpcLoadCompleted("device", 2236, nullptr);
+    saMgr->AddSamgrToAbilityMap();
+    ASSERT_EQ(saMgr->abilityMap_.count(0), 1U);
+    EXPECT_EQ(saMgr->GetSystemAbilityFromRemote(0), nullptr);
+}
+} // namespace OHOS

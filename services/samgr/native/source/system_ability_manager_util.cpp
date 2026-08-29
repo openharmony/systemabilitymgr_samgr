@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -300,6 +300,17 @@ bool SamgrUtil::CheckSystemProcessStarted(const std::u16string& procName)
     std::string serviceName = "startup.service.ctl." + Str16ToStr8(procName);
     std::string defaultValue = "-1";
     std::string paramValue = system::GetParameter(serviceName, defaultValue);
+    return paramValue == ToString(ServiceStatus::SERVICE_STARTED);
+}
+
+bool SamgrUtil::CheckSystemProcessStarted(const std::u16string& procName, int32_t userId)
+{
+    if (userId == BASE_USER) {
+        return CheckSystemProcessStarted(procName);
+    }
+    std::string serviceName = "startup.service.ctl." + Str16ToStr8(procName) +
+        ".userid." + std::to_string(userId);
+    std::string paramValue = system::GetParameter(serviceName, "-1");
     return paramValue == ToString(ServiceStatus::SERVICE_STARTED);
 }
 

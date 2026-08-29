@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -633,4 +633,30 @@ HWTEST_F(SamgrUtilTest, RegisterSAListener002, TestSize.Level3)
     SamgrUtil::RegisterSAListener();
     EXPECT_TRUE(SamgrUtil::CheckSupportSetPrior());
 }
+
+/**
+ * @tc.name: CheckSystemProcessStartedByUser001
+ * @tc.desc: Test base-user process status lookup delegates to the legacy path.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SamgrUtilTest, CheckSystemProcessStartedByUser001, TestSize.Level3)
+{
+    system::mockValue = "started";
+    ASSERT_EQ(system::mockValue, "started");
+    EXPECT_FALSE(SamgrUtil::CheckSystemProcessStarted(PROCESS_NAME, BASE_USER));
+}
+
+/**
+ * @tc.name: CheckSystemProcessStartedByUser002
+ * @tc.desc: Test explicit-user process status lookup.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SamgrUtilTest, CheckSystemProcessStartedByUser002, TestSize.Level3)
+{
+    system::mockValue = "invalid";
+    ASSERT_FALSE(SamgrUtil::CheckSystemProcessStarted(PROCESS_NAME, 100));
+    system::mockValue = ToString(ServiceStatus::SERVICE_STARTED);
+    EXPECT_TRUE(SamgrUtil::CheckSystemProcessStarted(PROCESS_NAME, 100));
+}
+
 }

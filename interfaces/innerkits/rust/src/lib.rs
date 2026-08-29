@@ -25,6 +25,8 @@ mod dump_flag;
 pub mod manage;
 pub use dump_flag::DumpFlagPriority;
 mod wrapper;
+#[cfg(multi_instance)]
+mod multi_instance_wrapper;
 
 pub const LOG_LABEL: hilog_rust::HiLogLabel = hilog_rust::HiLogLabel {
     log_type: hilog_rust::LogType::LogCore,

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,9 @@
 #include "test_log.h"
 
 #define private public
+#ifdef PREFERENCES_ENABLE
+#include "base_system_ability_manager.h"
+#endif
 #include "common_event_collect.h"
 #include "device_status_collect_manager.h"
 #include "device_param_collect.h"
@@ -36,6 +39,9 @@
 #ifdef SUPPORT_SWITCH_COLLECT
 #include "device_switch_collect.h"
 #endif
+#if defined(PREFERENCES_ENABLE) && defined(SUPPORT_MULTI_INSTANCE)
+#include "multi_system_ability_manager.h"
+#endif
 
 using namespace std;
 using namespace testing;
@@ -43,6 +49,29 @@ using namespace testing::ext;
 using namespace OHOS;
 
 namespace OHOS {
+#ifdef PREFERENCES_ENABLE
+class TestBaseSystemAbilityManager final : public BaseSystemAbilityManager {
+public:
+    TestBaseSystemAbilityManager() = default;
+};
+#endif
+
+#ifdef PREFERENCES_ENABLE
+HWTEST_F(DeviceStatusCollectManagerTest, CreatePreferencesUtilBaseManager001, TestSize.Level3)
+{
+    auto emptyManager = std::make_shared<DeviceStatusCollectManager>(
+        std::weak_ptr<BaseSystemAbilityManager>{});
+    ASSERT_NE(emptyManager, nullptr);
+    EXPECT_EQ(emptyManager->CreatePreferencesUtil(), nullptr);
+
+    auto manager = std::make_shared<TestBaseSystemAbilityManager>();
+    ASSERT_NE(manager, nullptr);
+    auto collectManager = std::make_shared<DeviceStatusCollectManager>(manager);
+    ASSERT_NE(collectManager, nullptr);
+    EXPECT_NE(collectManager->CreatePreferencesUtil(), nullptr);
+}
+#endif
+
 namespace {
 constexpr int32_t MAX_WAIT_TIME = 10000;
 constexpr int64_t EXTRA_ID = 1;
@@ -122,6 +151,22 @@ HWTEST_F(DeviceStatusCollectManagerTest, FilterOnDemandSaProfiles001, TestSize.L
     EXPECT_EQ(false, collect->onDemandSaProfiles_.empty());
     DTEST_LOG << " FilterOnDemandSaProfiles001 END" << std::endl;
 }
+
+#if defined(PREFERENCES_ENABLE) && defined(SUPPORT_MULTI_INSTANCE)
+/**
+ * @tc.name: CreatePreferencesUtil001
+ * @tc.desc: verify preference creation handles manager state
+ * @tc.type: FUNC
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, CreatePreferencesUtil001, TestSize.Level3)
+{
+    EXPECT_EQ(collect->CreatePreferencesUtil(), nullptr);
+    auto manager = std::make_shared<MultiSystemAbilityManager>(100);
+    collect->manager_ = manager;
+    auto preferences = collect->CreatePreferencesUtil();
+    EXPECT_NE(preferences, nullptr);
+}
+#endif
 
 /**
  * @tc.name: GetSaControlListByEvent001
@@ -1121,5 +1166,21 @@ HWTEST_F(DeviceStatusCollectManagerTest, GetSaControlListByPersistEventd001, Tes
     EXPECT_NE(nullptr, collect);
     DTEST_LOG << " GetSaControlListByPersistEventd001 BEGIN" << std::endl;
 }
+
+#ifdef SUPPORT_MULTI_INSTANCE
+/**
+ * @tc.name: CreatePreferencesUtilManager001
+ * @tc.desc: Verify preference utility creation uses the owning user.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DeviceStatusCollectManagerTest, CreatePreferencesUtilManager001, TestSize.Level3)
+{
+    auto manager = std::make_shared<MultiSystemAbilityManager>(100);
+    auto plugin = std::make_shared<DeviceStatusCollectManager>(manager);
+    ASSERT_NE(plugin, nullptr);
+    auto preferences = plugin->CreatePreferencesUtil();
+    EXPECT_NE(preferences, nullptr);
+}
+#endif
 #endif
 } // namespace OHOS

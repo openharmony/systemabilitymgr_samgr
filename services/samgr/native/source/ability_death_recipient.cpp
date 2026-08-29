@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -106,10 +106,10 @@ void SystemProcessListenerDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>
     HILOGD("SystemProcessListenerDeathRecipient called!");
     std::string OnRemoteDiedTag = "SystemProcessListenerDeath";
     HitraceScopedEx samgrHitrace(HITRACE_LEVEL_INFO, HITRACE_TAG_SAMGR, OnRemoteDiedTag.c_str());
-    sptr<ISystemProcessStatusChange> listener = iface_cast<ISystemProcessStatusChange>(remote.promote());
+    sptr<IRemoteObject> remoteObject = remote.promote();
     auto manager = manager_.lock();
     if (manager != nullptr) {
-        manager->UnSubscribeSystemProcess(listener);
+        manager->UnSubscribeSystemProcess(remoteObject);
     }
     HILOGD("SystemProcessListenerDeathRecipient death notice success");
 }

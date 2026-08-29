@@ -64,6 +64,8 @@ struct SAListener {
 //   Callers use a raw pointer fallback when weak_from_this() is expired at capture time.
 class BaseSystemAbilityManager : public std::enable_shared_from_this<BaseSystemAbilityManager> {
 public:
+    static constexpr int32_t MAX_SUBSCRIBE_COUNT = 256;
+
     virtual ~BaseSystemAbilityManager();
 
     virtual int32_t AddSystemAbility(int32_t systemAbilityId, const sptr<IRemoteObject>& ability,
@@ -76,12 +78,13 @@ public:
     virtual sptr<IRemoteObject> GetSystemAbility(int32_t systemAbilityId);
     virtual sptr<IRemoteObject> CheckSystemAbility(int32_t systemAbilityId);
     virtual sptr<IRemoteObject> CheckSystemAbility(int32_t systemAbilityId, bool& isExist);
+    sptr<IRemoteObject> GetLocalAbilityManagerProxy(int32_t systemAbilityId);
 
     virtual int32_t SubscribeSystemAbility(int32_t systemAbilityId,
         const sptr<ISystemAbilityStatusChange>& listener);
     virtual int32_t UnSubscribeSystemAbility(int32_t systemAbilityId,
         const sptr<ISystemAbilityStatusChange>& listener);
-    void UnSubscribeSystemAbility(const sptr<IRemoteObject>& remoteObject);
+    virtual void UnSubscribeSystemAbility(const sptr<IRemoteObject>& remoteObject);
 
     int32_t AddOnDemandSystemAbilityInfo(int32_t systemAbilityId, const std::u16string& procName);
     bool DoLoadOnDemandAbility(int32_t systemAbilityId, bool& isExist);
@@ -108,6 +111,7 @@ public:
     virtual int32_t GetRunningSystemProcess(std::list<SystemProcessInfo>& systemProcessInfos);
     virtual int32_t SubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener);
     virtual int32_t UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener);
+    void UnSubscribeSystemProcess(const sptr<IRemoteObject>& remoteObject);
     virtual int32_t SubscribeLowMemSystemProcess(const sptr<ISystemProcessStatusChange>& listener);
     virtual int32_t UnSubscribeLowMemSystemProcess(const sptr<ISystemProcessStatusChange>& listener);
 
@@ -159,8 +163,13 @@ public:
         return ERR_INVALID_VALUE;
     }
     virtual void InitDbinderService() {}
+    virtual int32_t GetUserId() const
+    {
+        return BASE_USER;
+    }
 #ifdef SUPPORT_MULTI_INSTANCE
     std::set<int32_t> GetMultiInstanceSaIds();
+    std::vector<std::u16string> GetSystemProcessNames() const;
 #endif
 
     void OnAbilityCallbackDied(const sptr<IRemoteObject>& remoteObject);
@@ -169,6 +178,9 @@ public:
 protected:
     BaseSystemAbilityManager() = default;
     virtual void OnSystemAbilityRegistered(int32_t systemAbilityId, bool isDistributed) {}
+
+    int32_t SubscribeSystemAbilityInner(int32_t systemAbilityId,
+        const sptr<ISystemAbilityStatusChange>& listener, int32_t callingPid);
 
     static bool CheckInputSysAbilityId(int32_t sysAbilityId)
     {
@@ -221,10 +233,10 @@ protected:
 
     void RefreshListenerState(int32_t systemAbilityId);
     int32_t FindSystemAbilityNotify(int32_t systemAbilityId, int32_t code);
-    int32_t FindSystemAbilityNotify(int32_t systemAbilityId, const std::string& deviceId, int32_t code);
+    virtual int32_t FindSystemAbilityNotify(int32_t systemAbilityId, const std::string& deviceId, int32_t code);
     void CheckListenerNotify(int32_t systemAbilityId,
         const sptr<ISystemAbilityStatusChange>& listener);
-    void NotifySystemAbilityChanged(int32_t systemAbilityId, const std::string& deviceId, int32_t code,
+    virtual void NotifySystemAbilityChanged(int32_t systemAbilityId, const std::string& deviceId, int32_t code,
         const sptr<ISystemAbilityStatusChange>& listener);
     void NotifySystemAbilityAddedByAsync(int32_t systemAbilityId,
         const sptr<ISystemAbilityStatusChange>& listener);
@@ -273,7 +285,7 @@ protected:
     std::map<int32_t, std::u16string> onDemandAbilityMap_;
     std::map<int32_t, AbilityItem> startingAbilityMap_;
 
-    samgr::mutex systemProcessMapLock_;
+    mutable samgr::mutex systemProcessMapLock_;
     std::map<std::u16string, sptr<IRemoteObject>> systemProcessMap_;
 
     samgr::mutex startingProcessMapLock_;
@@ -292,6 +304,7 @@ protected:
 #ifdef SUPPORT_MULTI_INSTANCE
     samgr::mutex multiInstanceSaIdsLock_;
     std::set<int32_t> multiInstanceSaIds_;
+    std::list<SaProfile> allSaProfiles_;
 #endif
 
     std::shared_ptr<FFRTHandler> workHandler_;
