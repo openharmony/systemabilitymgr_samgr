@@ -1425,6 +1425,10 @@ int32_t SystemAbilityStateScheduler::SubscribeSystemProcess(const sptr<ISystemPr
 
 int32_t SystemAbilityStateScheduler::UnSubscribeSystemProcess(const sptr<ISystemProcessStatusChange>& listener)
 {
+    if (listener == nullptr) {
+        HILOGE("UnSubscribeSystemProcess listener is invalid");
+        return ERR_INVALID_VALUE;
+    }
     std::unique_lock<samgr::shared_mutex> writeLock(listenerSetLock_);
     auto iter = std::find_if(processListeners_.begin(), processListeners_.end(),
         [listener](sptr<ISystemProcessStatusChange>& item) {
