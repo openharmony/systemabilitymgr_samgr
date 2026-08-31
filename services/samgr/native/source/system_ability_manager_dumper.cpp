@@ -15,6 +15,7 @@
 
 #include "system_ability_manager_dumper.h"
 
+#include "parse_dump_int.h"
 #include "accesstoken_kit.h"
 #include "ffrt_inner.h"
 #include "file_ex.h"
@@ -111,13 +112,23 @@ void SystemAbilityManagerDumper::GetListenerDumpProc(map<int32_t, list<SAListene
         }
         // -sa said
         if (args[LISTENER_BASE_INDEX] == ARGS_QUERY_SA) {
-            int said = atoi(args[LISTENER_BASE_INDEX + 1].c_str());
+            int32_t said = 0;
+            if (!ParseDumpInt32(args[LISTENER_BASE_INDEX + 1], said)) {
+                HILOGE("parse said failed, arg %{public}s", args[LISTENER_BASE_INDEX + 1].c_str());
+                IllegalInput(result);
+                return;
+            }
             ShowCallingPidBySA(listeners, said, result);
             return;
         }
         // -p pid
         if (args[LISTENER_BASE_INDEX] == ARGS_QUERY_PROCESS) {
-            int callingPid = atoi(args[LISTENER_BASE_INDEX + 1].c_str());
+            int32_t callingPid = 0;
+            if (!ParseDumpInt32(args[LISTENER_BASE_INDEX + 1], callingPid)) {
+                HILOGE("parse pid failed, arg %{public}s", args[LISTENER_BASE_INDEX + 1].c_str());
+                IllegalInput(result);
+                return;
+            }
             ShowSAByCallingPid(listeners, callingPid, result);
             return;
         }
@@ -713,7 +724,12 @@ bool SystemAbilityManagerDumper::Dump(std::shared_ptr<SystemAbilityStateSchedule
     if (args.size() == MAX_ARGS_SIZE) {
         // -sa said
         if (args[0] == ARGS_QUERY_SA) {
-            int said = atoi(args[1].c_str());
+            int32_t said = 0;
+            if (!ParseDumpInt32(args[1], said)) {
+                HILOGE("parse said failed, arg %{public}s", args[1].c_str());
+                IllegalInput(result);
+                return false;
+            }
             ShowSystemAbilityInfo(said, abilityStateScheduler, result);
             return true;
         }
