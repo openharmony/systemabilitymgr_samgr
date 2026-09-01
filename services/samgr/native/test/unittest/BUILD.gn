@@ -161,6 +161,7 @@ ohos_unittest("SystemAbilityMgrTest") {
     ]
     external_deps += [
       "ability_base:want",
+      "bounds_checking_function:libsec_shared",
       "common_event_service:cesfwk_innerkits",
     ]
     defines += [ "SUPPORT_COMMON_EVENT" ]
@@ -298,6 +299,7 @@ ohos_unittest("SystemAbilityMgrCollectTest") {
     ]
     external_deps += [
       "ability_base:want",
+      "bounds_checking_function:libsec_shared",
       "common_event_service:cesfwk_innerkits",
     ]
     defines += [ "SUPPORT_COMMON_EVENT" ]
