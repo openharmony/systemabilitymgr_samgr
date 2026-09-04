@@ -73,6 +73,7 @@ void SystemAbilityManager::RegisterDistribute(int32_t systemAbilityId, bool isDi
         std::shared_lock<samgr::shared_mutex> readLock(dBinderServiceLock_);
         if (dBinderService_ != nullptr) {
             u16string strName = Str8ToStr16(to_string(systemAbilityId));
+            SamgrXCollie samgrXCollie("samgr--RegisterRemoteProxy_" + ToString(systemAbilityId));
             dBinderService_->RegisterRemoteProxy(strName, systemAbilityId);
             HILOGI("AddSystemAbility RegisterRemoteProxy, SA:%{public}d", systemAbilityId);
         } else {
@@ -84,6 +85,7 @@ void SystemAbilityManager::RegisterDistribute(int32_t systemAbilityId, bool isDi
     if (systemAbilityId == SOFTBUS_SERVER_SA_ID) {
         std::shared_lock<samgr::shared_mutex> readLock(dBinderServiceLock_);
         if (dBinderService_ != nullptr && rpcCallbackImp_ != nullptr) {
+            SamgrXCollie samgrXCollie("samgr--StartDBinderService");
             bool ret = dBinderService_->StartDBinderService(rpcCallbackImp_);
             HILOGI("start result is %{public}s", ret ? "succeed" : "fail");
         }
@@ -91,11 +93,13 @@ void SystemAbilityManager::RegisterDistribute(int32_t systemAbilityId, bool isDi
 #else
     u16string strName = Str8ToStr16(to_string(systemAbilityId));
     if (isDistributed && dBinderService_ != nullptr) {
+        SamgrXCollie samgrXCollie("samgr--RegisterRemoteProxy_" + ToString(systemAbilityId));
         dBinderService_->RegisterRemoteProxy(strName, systemAbilityId);
         HILOGI("AddSystemAbility RegisterRemoteProxy, SA:%{public}d", systemAbilityId);
     }
     if (systemAbilityId == SOFTBUS_SERVER_SA_ID) {
         if (dBinderService_ != nullptr && rpcCallbackImp_ != nullptr) {
+            SamgrXCollie samgrXCollie("samgr--StartDBinderService");
             bool ret = dBinderService_->StartDBinderService(rpcCallbackImp_);
             HILOGI("start result is %{public}s", ret? "succeed" : "fail");
         }
@@ -113,6 +117,7 @@ void SystemAbilityManager::InitDbinderService()
         if (dBinderService_ != nullptr) {
             for (auto said : distributedSaList_) {
                 u16string strName = Str8ToStr16(to_string(said));
+                SamgrXCollie samgrXCollie("samgr--RegisterRemoteProxy_" + ToString(said));
                 dBinderService_->RegisterRemoteProxy(strName, said);
                 HILOGI("AddSystemAbility RegisterRemoteProxy, SA:%{public}d", said);
             }
@@ -122,6 +127,7 @@ void SystemAbilityManager::InitDbinderService()
     }
     if (CheckSystemAbility(SOFTBUS_SERVER_SA_ID) != nullptr) {
         if (dBinderService_ != nullptr && rpcCallbackImp_ != nullptr) {
+            SamgrXCollie samgrXCollie("samgr--StartDBinderService");
             bool ret = dBinderService_->StartDBinderService(rpcCallbackImp_);
             HILOGI("start result is %{public}s", ret ? "succeed" : "fail");
         }
@@ -184,6 +190,7 @@ void SystemAbilityManager::IpcDumpAllProcess(int32_t fd, int32_t cmd)
     for (auto iter = systemProcessMap_.begin(); iter != systemProcessMap_.end(); iter++) {
         sptr<ILocalAbilityManager> obj = iface_cast<ILocalAbilityManager>(iter->second);
         if (obj != nullptr) {
+            SamgrXCollie samgrXCollie("samgr--IpcStatCmdProc_" + Str16ToStr8(iter->first));
             obj->IpcStatCmdProc(fd, cmd);
         }
     }
@@ -200,6 +207,7 @@ void SystemAbilityManager::IpcDumpSingleProcess(int32_t fd, int32_t cmd, const s
 {
     sptr<ILocalAbilityManager> obj = iface_cast<ILocalAbilityManager>(GetSystemProcess(Str8ToStr16(processName)));
     if (obj != nullptr) {
+        SamgrXCollie samgrXCollie("samgr--IpcStatCmdProc_" + processName);
         obj->IpcStatCmdProc(fd, cmd);
     }
 }

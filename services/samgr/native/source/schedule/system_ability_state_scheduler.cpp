@@ -37,6 +37,7 @@ constexpr int64_t RESTART_TIME_INTERVAL_LIMIT = 20 * 1000;
 constexpr int32_t RESTART_TIMES_LIMIT = 4;
 constexpr int32_t MAX_SUBSCRIBE_COUNT = 256;
 constexpr int32_t MAX_PENDING_LOAD_COUNT = 50;
+constexpr int64_t PENDING_LOAD_TIMEOUT_MS = 60 * 1000;
 constexpr int32_t UNLOAD_TIMEOUT_TIME = 5 * 1000;
 constexpr const char* LOCAL_DEVICE = "local";
 constexpr int32_t MAX_DELAY_TIME = 5 * 60 * 1000;
@@ -71,6 +72,7 @@ void SystemAbilityStateScheduler::Init(const std::list<SaProfile>& saProfiles)
     stateEventHandler_ = std::make_shared<SystemAbilityEventHandler>(stateMachine_);
 
     processHandler_ = std::make_shared<FFRTHandler>("ProcessHandler");
+    recoverHandler_ = std::make_shared<FFRTHandler>("RestartProcessHandler");
     HILOGI("Scheduler:init end");
 }
 
@@ -548,6 +550,10 @@ int32_t SystemAbilityStateScheduler::PendLoadEventLocked(const std::shared_ptr<S
         HILOGW("Scheduler:callback invalid!");
         return CALLBACK_NULL;
     }
+    if (abilityContext->pendingLoadFirstTimestamp == 0) {
+        abilityContext->pendingLoadFirstTimestamp = GetTickCount();
+    }
+    int64_t elapsed = GetTickCount() - abilityContext->pendingLoadFirstTimestamp;
     bool isExist = std::any_of(abilityContext->pendingLoadEventList.begin(),
         abilityContext->pendingLoadEventList.end(), [&loadRequestInfo](const auto& loadEventItem) {
             return loadRequestInfo.callback->AsObject() == loadEventItem.callback->AsObject();
@@ -557,9 +563,9 @@ int32_t SystemAbilityStateScheduler::PendLoadEventLocked(const std::shared_ptr<S
         return ERR_OK;
     }
     auto& count = abilityContext->pendingLoadEventCountMap[loadRequestInfo.callingPid];
-    if (count >= MAX_PENDING_LOAD_COUNT) {
-        HILOGE("Scheduler SA:%{public}d pid:%{public}d overflow max pending load event count!",
-            abilityContext->systemAbilityId, loadRequestInfo.callingPid);
+    if (count >= MAX_PENDING_LOAD_COUNT || elapsed >= PENDING_LOAD_TIMEOUT_MS) {
+        HILOGE("Scheduler SA:%{public}d pid:%{public}d overflow, count:%{public}d elapsed:%{public}" PRId64 "ms",
+            abilityContext->systemAbilityId, loadRequestInfo.callingPid, count, elapsed);
         return HandlePendingLoadOverflow(abilityContext);
     }
     ++count;
@@ -575,9 +581,6 @@ int32_t SystemAbilityStateScheduler::HandlePendingLoadOverflow(const std::shared
     if (strongManager == nullptr) {
         HILOGE("HandlePendingLoadOverflow manager is null");
         return ERR_INVALID_VALUE;
-    }
-    if (recoverHandler_ == nullptr) {
-        recoverHandler_ = std::make_shared<FFRTHandler>("RestartProcessHandler");
     }
     auto weakManager = manager_;
     auto weakScheduler = weak_from_this();
@@ -615,9 +618,11 @@ void SystemAbilityStateScheduler::ProcessPendingLoadOverflow(
         }
         abilityContext->pendingLoadEventList.clear();
         abilityContext->pendingLoadEventCountMap.clear();
+        abilityContext->pendingLoadFirstTimestamp = 0;
         HILOGI("HandlePendingLoadOverflow:clear SA:%{public}d pendingLoadEvent", abilityContext->systemAbilityId);
     }
     if (CheckProcessStarted(processContext->processName)) {
+        SamgrXCollie samgrXCollie("samgr--stopProccess_" + Str16ToStr8(processContext->processName));
         auto result = ServiceControl(Str16ToStr8(processContext->processName), ServiceAction::STOP);
         KHILOGI("HandlePendingLoadOverflow:%{public}s kill pid:%{public}d_%{public}d",
             Str16ToStr8(processContext->processName).c_str(), processContext->pid, result);
