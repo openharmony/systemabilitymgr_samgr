@@ -25,6 +25,11 @@
 #include "system_ability_load_callback_stub.h"
 
 namespace OHOS {
+#if defined(__GNUC__) && __GNUC__ >= 4
+    #define SAMGR_HIDDEN __attribute__((visibility("hidden")))
+#else
+    #define SAMGR_HIDDEN
+#endif
 class SystemAbilityManagerProxy :
     public DynamicCache, public IRemoteProxy<ISystemAbilityManager> {
 public:
@@ -360,7 +365,7 @@ private:
     int32_t SubscribeSystemAbilityInner(int32_t systemAbilityId,
         const sptr<ISystemAbilityStatusChange>& listener, MessageOption& option);
 private:
-    static inline BrokerDelegator<SystemAbilityManagerProxy> delegator_;
+    SAMGR_HIDDEN static inline BrokerDelegator<SystemAbilityManagerProxy> delegator_;
     std::set<int32_t> onDemandSystemAbilityIdsSet_;
     std::mutex onDemandSaLock_;
 };

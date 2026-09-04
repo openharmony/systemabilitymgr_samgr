@@ -24,6 +24,11 @@
 #include "refbase.h"
 
 namespace OHOS {
+#if defined(__GNUC__) && __GNUC__ >= 4
+    #define SAMGR_HIDDEN __attribute__((visibility("hidden")))
+#else
+    #define SAMGR_HIDDEN
+#endif
 class LocalAbilityManagerProxy : public IRemoteProxy<ILocalAbilityManager> {
 public:
     explicit LocalAbilityManagerProxy(const sptr<IRemoteObject>& impl)
@@ -44,7 +49,7 @@ public:
         SystemAbilityExtensionPara* callback, bool isAsync = false);
     int32_t ServiceControlCmd(int32_t fd, int32_t systemAbilityId, const std::vector<std::u16string>& args);
 private:
-    static inline BrokerDelegator<LocalAbilityManagerProxy> delegator_;
+    SAMGR_HIDDEN static inline BrokerDelegator<LocalAbilityManagerProxy> delegator_;
     bool PrepareData(MessageParcel& data, int32_t said, const std::string& extension);
 };
 }

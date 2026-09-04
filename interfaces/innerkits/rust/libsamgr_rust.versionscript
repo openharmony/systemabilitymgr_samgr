@@ -1,0 +1,70 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+{
+  global:
+    /* ---- OHOS::SamgrRust cxx bridge: AbilityStub (stable names) ---- */
+    OHOS$SamgrRust$cxxbridge1$AbilityStub$dump;
+    OHOS$SamgrRust$cxxbridge1$AbilityStub$on_remote_request;
+    OHOS$SamgrRust$cxxbridge1$AbilityStub$operator$alignof;
+    OHOS$SamgrRust$cxxbridge1$AbilityStub$operator$sizeof;
+
+    /* ---- OHOS::SamgrRust cxx bridge: callback closures (stable names) ---- */
+    OHOS$SamgrRust$cxxbridge1$LoadSystemAbilityWithCallback$on_fail$1;
+    OHOS$SamgrRust$cxxbridge1$LoadSystemAbilityWithCallback$on_success$1;
+    OHOS$SamgrRust$cxxbridge1$SubscribeSystemAbility$on_add$1;
+    OHOS$SamgrRust$cxxbridge1$SubscribeSystemAbility$on_remove$1;
+    OHOS$SamgrRust$cxxbridge1$SubscribeSystemProcess$on_start$1;
+    OHOS$SamgrRust$cxxbridge1$SubscribeSystemProcess$on_stop$1;
+
+    /* ---- samgr::manage::SystemAbilityManager (all public methods) ---- */
+    _RNv*5samgr*20SystemAbilityManager*;
+
+    /* ---- samgr::manage::UnsubscribeHandler ---- */
+    _RNv*5samgr*18UnsubscribeHandler11unsubscribe;
+
+    /* ---- samgr::wrapper::ffi::AddSystemAbility ---- */
+    _RNv*5samgr*16AddSystemAbility;
+
+    /* ---- cxx unique_ptr: UnSubscribeSystemAbilityHandler ---- */
+    _RNv*5samgr*31UnSubscribeSystemAbilityHandler*15UniquePtrTarget10___typename;
+    _RNv*5samgr*31UnSubscribeSystemAbilityHandler*15UniquePtrTarget5___get;
+    _RNv*5samgr*31UnSubscribeSystemAbilityHandler*15UniquePtrTarget5___raw;
+    _RNv*5samgr*31UnSubscribeSystemAbilityHandler*15UniquePtrTarget6___drop;
+    _RNv*5samgr*31UnSubscribeSystemAbilityHandler*15UniquePtrTarget6___null;
+    _RNv*5samgr*31UnSubscribeSystemAbilityHandler*15UniquePtrTarget9___release;
+
+    /* ---- cxx unique_ptr: UnSubscribeSystemProcessHandler ---- */
+    _RNv*5samgr*31UnSubscribeSystemProcessHandler*15UniquePtrTarget10___typename;
+    _RNv*5samgr*31UnSubscribeSystemProcessHandler*15UniquePtrTarget5___get;
+    _RNv*5samgr*31UnSubscribeSystemProcessHandler*15UniquePtrTarget5___raw;
+    _RNv*5samgr*31UnSubscribeSystemProcessHandler*15UniquePtrTarget6___drop;
+    _RNv*5samgr*31UnSubscribeSystemProcessHandler*15UniquePtrTarget6___null;
+    _RNv*5samgr*31UnSubscribeSystemProcessHandler*15UniquePtrTarget9___release;
+
+    /* ---- core::fmt::Debug for SystemProcessInfo ---- */
+    _RNv*5samgr*17SystemProcessInfo*5Debug3fmt;
+
+    /* ---- cxx bridge: box alloc/dealloc/drop for AbilityStub (stable) ---- */
+    cxxbridge1$box$OHOS$SamgrRust$AbilityStub$alloc;
+    cxxbridge1$box$OHOS$SamgrRust$AbilityStub$dealloc;
+    cxxbridge1$box$OHOS$SamgrRust$AbilityStub$drop;
+
+    /* ---- cxx bridge: rust_vec for SystemProcessInfo (stable) ---- */
+    cxxbridge1$rust_vec$OHOS$SamgrRust$SystemProcessInfo*;
+
+    /* ---- Rust crate metadata (hash is volatile) ---- */
+    rust_metadata_samgr*;
+  local:
+    *;
+};

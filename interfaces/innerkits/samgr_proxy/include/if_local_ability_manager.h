@@ -26,6 +26,11 @@
 #include "safwk_ipc_interface_code.h"
 
 namespace OHOS {
+#if defined(__GNUC__) && __GNUC__ >= 4
+    #define SAMGR_HIDDEN __attribute__((visibility("hidden")))
+#else
+    #define SAMGR_HIDDEN
+#endif
 enum {
     IPC_STAT_CMD_START = 0,
     IPC_STAT_CMD_STOP = 1,
@@ -78,7 +83,8 @@ public:
         const std::vector<std::u16string>& args) = 0;
     DECLARE_INTERFACE_DESCRIPTOR(u"OHOS.ILocalAbilityManager");
 protected:
-    static inline const std::u16string LOCAL_ABILITY_MANAGER_INTERFACE_TOKEN = u"ohos.localabilitymanager.accessToken";
+    SAMGR_HIDDEN static inline const std::u16string LOCAL_ABILITY_MANAGER_INTERFACE_TOKEN =
+        u"ohos.localabilitymanager.accessToken";
 };
 }
 #endif // !defined(IF_LOCAL_ABILITY_MANAGER_H)
