@@ -228,6 +228,7 @@ void NotStartedStateHandler::OnEnter(const std::shared_ptr<SystemProcessContext>
         return;
     }
     context->lastStopTime = GetTickCount(); //进程退出
+    context->pendingLoadFirstTimestamp = 0;
     listener->OnProcessNotStartedLocked(context->processName);
 }
 

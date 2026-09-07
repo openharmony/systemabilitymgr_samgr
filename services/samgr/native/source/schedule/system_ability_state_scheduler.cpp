@@ -550,10 +550,11 @@ int32_t SystemAbilityStateScheduler::PendLoadEventLocked(const std::shared_ptr<S
         HILOGW("Scheduler:callback invalid!");
         return CALLBACK_NULL;
     }
-    if (abilityContext->pendingLoadFirstTimestamp == 0) {
-        abilityContext->pendingLoadFirstTimestamp = GetTickCount();
+    auto processContext = abilityContext->ownProcessContext;
+    if (processContext->pendingLoadFirstTimestamp == 0) {
+        processContext->pendingLoadFirstTimestamp = GetTickCount();
     }
-    int64_t elapsed = GetTickCount() - abilityContext->pendingLoadFirstTimestamp;
+    int64_t elapsed = GetTickCount() - processContext->pendingLoadFirstTimestamp;
     bool isExist = std::any_of(abilityContext->pendingLoadEventList.begin(),
         abilityContext->pendingLoadEventList.end(), [&loadRequestInfo](const auto& loadEventItem) {
             return loadRequestInfo.callback->AsObject() == loadEventItem.callback->AsObject();
@@ -618,7 +619,7 @@ void SystemAbilityStateScheduler::ProcessPendingLoadOverflow(
         }
         abilityContext->pendingLoadEventList.clear();
         abilityContext->pendingLoadEventCountMap.clear();
-        abilityContext->pendingLoadFirstTimestamp = 0;
+        processContext->pendingLoadFirstTimestamp = 0;
         HILOGI("HandlePendingLoadOverflow:clear SA:%{public}d pendingLoadEvent", abilityContext->systemAbilityId);
     }
     if (CheckProcessStarted(processContext->processName)) {

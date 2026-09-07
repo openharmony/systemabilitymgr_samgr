@@ -99,7 +99,7 @@ bool DeviceNetworkingCollect::ReportMissedEvents()
     std::vector<DmDeviceInfo> devList;
     int32_t ret = 0;
     {
-        SamgrXCollie samgrXCollie("samgr--GetTrustedDeviceList");
+        SamgrXCollie samgrXCollie("samgr--GetTrustedDeviceList1");
         ret = DeviceManager::GetInstance().GetTrustedDeviceList(PKG_NAME, "", devList);
     }
     if (ret != ERR_OK) {

@@ -161,7 +161,7 @@ bool SamgrUtil::CheckCallerProcess(const std::string& callProcess)
 {
     uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
     Security::AccessToken::NativeTokenInfo nativeTokenInfo;
-    SamgrXCollie samgrXCollie("samgr--GetNativeTokenInfo");
+    SamgrXCollie samgrXCollie("samgr--GetNativeTokenInfo3");
     int32_t tokenInfoResult = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
     if (tokenInfoResult != ERR_OK) {
         HILOGE("get token info failed");
@@ -419,7 +419,7 @@ void SamgrUtil::RequestAuth()
 void SamgrUtil::DeviceIdToNetworkId(std::string& networkId)
 {
     std::vector<DmDeviceInfo> devList;
-    SamgrXCollie samgrXCollie("samgr--GetTrustedDeviceList");
+    SamgrXCollie samgrXCollie("samgr--GetTrustedDeviceList2");
     if (DeviceManager::GetInstance().GetTrustedDeviceList(PKG_NAME, "", devList) == ERR_OK) {
         for (const DmDeviceInfo& devInfo : devList) {
             if (networkId == devInfo.deviceId) {
