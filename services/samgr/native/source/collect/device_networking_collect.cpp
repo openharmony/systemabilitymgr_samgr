@@ -16,6 +16,7 @@
 #include "device_networking_collect.h"
 
 #include "sam_log.h"
+#include "samgr_xcollie.h"
 #include "sa_profiles.h"
 #include "system_ability_manager.h"
 
@@ -64,7 +65,10 @@ int32_t DeviceNetworkingCollect::OnStart()
 
 int32_t DeviceNetworkingCollect::OnStop()
 {
-    DeviceManager::GetInstance().UnRegisterDevStateCallback(PKG_NAME);
+    {
+        SamgrXCollie samgrXCollie("samgr--UnRegisterDevStateCallback");
+        DeviceManager::GetInstance().UnRegisterDevStateCallback(PKG_NAME);
+    }
     CleanFfrt();
     if (workHandler_ != nullptr) {
         workHandler_ = nullptr;
@@ -93,7 +97,11 @@ bool DeviceNetworkingCollect::IsDmReady()
 bool DeviceNetworkingCollect::ReportMissedEvents()
 {
     std::vector<DmDeviceInfo> devList;
-    int32_t ret = DeviceManager::GetInstance().GetTrustedDeviceList(PKG_NAME, "", devList);
+    int32_t ret = 0;
+    {
+        SamgrXCollie samgrXCollie("samgr--GetTrustedDeviceList");
+        ret = DeviceManager::GetInstance().GetTrustedDeviceList(PKG_NAME, "", devList);
+    }
     if (ret != ERR_OK) {
         HILOGE("DeviceNetworkingCollect GetTrustedDeviceList error");
         return false;
@@ -130,20 +138,27 @@ bool DeviceNetworkingCollect::AddDeviceChangeListener()
 {
     HILOGI("AddDMListener called");
     if (IsDmReady()) {
-        int32_t ret = DeviceManager::GetInstance().InitDeviceManager(PKG_NAME, initCallback_);
-        if (ret != ERR_OK) {
-            HILOGE("InitDeviceManager error");
-            return false;
+        int32_t ret = 0;
+        {
+            SamgrXCollie samgrXCollie("samgr--InitDeviceManager");
+            ret = DeviceManager::GetInstance().InitDeviceManager(PKG_NAME, initCallback_);
+            if (ret != ERR_OK) {
+                HILOGE("InitDeviceManager error");
+                return false;
+            }
         }
         if (!ReportMissedEvents()) {
             HILOGE("ReportMissedEvents error");
             return false;
         }
-        ret = DeviceManager::GetInstance().RegisterDevStateCallback(PKG_NAME, "", stateCallback_);
-        if (ret != ERR_OK) {
-            DeviceManager::GetInstance().UnRegisterDevStateCallback(PKG_NAME);
-            HILOGE("RegisterDevStateCallback error");
-            return false;
+        {
+            SamgrXCollie samgrXCollie("samgr--RegisterDevStateCallback");
+            ret = DeviceManager::GetInstance().RegisterDevStateCallback(PKG_NAME, "", stateCallback_);
+            if (ret != ERR_OK) {
+                DeviceManager::GetInstance().UnRegisterDevStateCallback(PKG_NAME);
+                HILOGE("RegisterDevStateCallback error");
+                return false;
+            }
         }
         HILOGI("AddDMListener success");
         return true;

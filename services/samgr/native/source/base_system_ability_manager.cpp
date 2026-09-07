@@ -1406,6 +1406,7 @@ int32_t BaseSystemAbilityManager::StartDynamicSystemProcess(const std::u16string
     auto extraArgv = eventStr.c_str();
     if (abilityStateScheduler_ && !abilityStateScheduler_->IsSystemProcessNeverStartedLocked(name)) {
         // Waiting for the init subsystem to perceive process death
+        SamgrXCollie samgrXCollie("samgr--WaitForStatus_" + Str16ToStr8(name));
         int ret = ServiceWaitForStatus(Str16ToStr8(name).c_str(), ServiceStatus::SERVICE_STOPPED, 1);
         if (ret != 0) {
             HILOGE("ServiceWaitForStatus proc:%{public}s,SA:%{public}d timeout",
@@ -1414,10 +1415,10 @@ int32_t BaseSystemAbilityManager::StartDynamicSystemProcess(const std::u16string
     }
     int64_t begin = GetTickCount();
     int result = ERR_INVALID_VALUE;
+    SamgrXCollie samgrXCollie("samgr--startProccess_" + ToString(systemAbilityId));
     if (!IsInitBootFinished()) {
         result = ServiceControlWithExtra(Str16ToStr8(name).c_str(), ServiceAction::START, &extraArgv, 1);
     } else {
-        SamgrXCollie samgrXCollie("samgr--startProccess_" + ToString(systemAbilityId));
         result = ServiceControlWithExtra(Str16ToStr8(name).c_str(), ServiceAction::START, &extraArgv, 1);
     }
 
@@ -1948,7 +1949,11 @@ int32_t BaseSystemAbilityManager::SendStrategy(int32_t type, std::vector<int32_t
     HILOGD("SendStrategy begin");
     uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
     Security::AccessToken::NativeTokenInfo nativeTokenInfo;
-    int32_t result = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
+    int32_t result = 0;
+    {
+        SamgrXCollie samgrXCollie("samgr--GetNativeTokenInfo");
+        result = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
+    }
     if (result != ERR_OK || nativeTokenInfo.processName != RESOURCE_SCHEDULE_PROCESS_NAME) {
         HILOGW("SendStrategy reject used by %{public}s", nativeTokenInfo.processName.c_str());
         return ERR_PERMISSION_DENIED;

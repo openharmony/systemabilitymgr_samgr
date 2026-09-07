@@ -279,8 +279,8 @@ void SystemAbilityManagerStub::SetIpcPrior()
 
 void SystemAbilityManagerStub::ResetIpcPrior()
 {
-    QOS::SetThreadQos(OHOS::QOS::QosLevel::QOS_USER_INTERACTIVE);
     SamgrXCollie samgrXCollie("samgr--ResetQos");
+    QOS::SetThreadQos(OHOS::QOS::QosLevel::QOS_USER_INTERACTIVE);
     std::lock_guard<std::mutex> lock(highPrioTidSetLock_);
     HILOGI("SAMStub::ResetIpcPrior");
     for (const auto& tid : highPrioTidSet_) {

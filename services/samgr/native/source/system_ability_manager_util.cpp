@@ -29,6 +29,7 @@
 #include "string_ex.h"
 #include "tools.h"
 #include "sam_log.h"
+#include "samgr_xcollie.h"
 #include "concurrent_task_client.h"
 #ifdef SUPPORT_DEVICE_MANAGER
 #include "device_manager.h"
@@ -160,6 +161,7 @@ bool SamgrUtil::CheckCallerProcess(const std::string& callProcess)
 {
     uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
     Security::AccessToken::NativeTokenInfo nativeTokenInfo;
+    SamgrXCollie samgrXCollie("samgr--GetNativeTokenInfo");
     int32_t tokenInfoResult = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
     if (tokenInfoResult != ERR_OK) {
         HILOGE("get token info failed");
@@ -406,6 +408,7 @@ void SamgrUtil::RegisterSAListener()
 void SamgrUtil::RequestAuth()
 {
     HILOGI("RequestAuth begin");
+    SamgrXCollie samgrXCollie("samgr--RequestAuth");
     std::unordered_map<std::string, std::string> payload;
     payload["pid"] = std::to_string(getpid());
     OHOS::ConcurrentTask::ConcurrentTaskClient::GetInstance().RequestAuth(payload);
@@ -416,6 +419,7 @@ void SamgrUtil::RequestAuth()
 void SamgrUtil::DeviceIdToNetworkId(std::string& networkId)
 {
     std::vector<DmDeviceInfo> devList;
+    SamgrXCollie samgrXCollie("samgr--GetTrustedDeviceList");
     if (DeviceManager::GetInstance().GetTrustedDeviceList(PKG_NAME, "", devList) == ERR_OK) {
         for (const DmDeviceInfo& devInfo : devList) {
             if (networkId == devInfo.deviceId) {
@@ -521,6 +525,7 @@ bool SamgrUtil::KillProcessByPid(int32_t pid, int32_t tid)
         return false;
     }
     std::string processName = GetProcessNameFromCmdline(peerBinderPid);
+    SamgrXCollie samgrXCollie("samgr--KillProcessByPid_" + processName);
     int32_t ret = ServiceControlWithExtra(processName.c_str(),
         ServiceAction::STOP, nullptr, 0);
     HILOGI("Kill PeerBinder process %{public}s, pid=%{public}d, processName=%{public}s",

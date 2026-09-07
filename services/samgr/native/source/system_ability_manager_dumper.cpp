@@ -23,6 +23,7 @@
 #include "if_local_ability_manager.h"
 #include "ipc_payload_statistics.h"
 #include "samgr_err_code.h"
+#include "samgr_xcollie.h"
 
 using namespace std;
 namespace OHOS {
@@ -333,6 +334,7 @@ void SystemAbilityManagerDumper::CollectFfrtMetricInfoInProcs(int32_t fd, const 
             result.append("process " + std::to_string(pid) + " not found!\n");
             continue;
         }
+        SamgrXCollie samgrXCollie("samgr--FfrtStatCmdProc_" + ToString(pid));
         obj->FfrtStatCmdProc(fd, cmd);
     }
 }
@@ -569,6 +571,7 @@ void SystemAbilityManagerDumper::DumpFfrtInfoInProc(
         return;
     }
     std::string resultForProcess;
+    SamgrXCollie samgrXCollie("samgr--FfrtStatCmdProc_" + ToString(pid));
     if (!obj->FfrtDumperProc(resultForProcess)) {
         HILOGE("safwk FfrtDumperProc execute failed");
         return;
@@ -736,6 +739,7 @@ bool SystemAbilityManagerDumper::CanDump()
 {
     uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
     Security::AccessToken::NativeTokenInfo nativeTokenInfo;
+    SamgrXCollie samgrXCollie("samgr--GetNativeTokenInfo");
     int32_t result = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
     if (result == ERR_OK && nativeTokenInfo.processName == HIDUMPER_PROCESS_NAME) {
         return true;
