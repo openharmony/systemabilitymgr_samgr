@@ -1406,7 +1406,6 @@ int32_t BaseSystemAbilityManager::StartDynamicSystemProcess(const std::u16string
     auto extraArgv = eventStr.c_str();
     if (abilityStateScheduler_ && !abilityStateScheduler_->IsSystemProcessNeverStartedLocked(name)) {
         // Waiting for the init subsystem to perceive process death
-        SamgrXCollie samgrXCollie("samgr--WaitForStatus_" + Str16ToStr8(name));
         int ret = ServiceWaitForStatus(Str16ToStr8(name).c_str(), ServiceStatus::SERVICE_STOPPED, 1);
         if (ret != 0) {
             HILOGE("ServiceWaitForStatus proc:%{public}s,SA:%{public}d timeout",
@@ -1951,7 +1950,7 @@ int32_t BaseSystemAbilityManager::SendStrategy(int32_t type, std::vector<int32_t
     Security::AccessToken::NativeTokenInfo nativeTokenInfo;
     int32_t result = 0;
     {
-        SamgrXCollie samgrXCollie("samgr--GetNativeTokenInfo");
+        SamgrXCollie samgrXCollie("samgr--GetNativeTokenInfo1");
         result = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
     }
     if (result != ERR_OK || nativeTokenInfo.processName != RESOURCE_SCHEDULE_PROCESS_NAME) {

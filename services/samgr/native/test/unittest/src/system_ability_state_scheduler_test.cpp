@@ -921,6 +921,8 @@ HWTEST_F(SystemAbilityStateSchedulerTest, PendLoadEventLocked002, TestSize.Level
     systemAbilityStateScheduler->Init(saProfiles);
 
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
+    auto processContext = std::make_shared<SystemProcessContext>();
+    systemAbilityContext->ownProcessContext = processContext;
     LoadRequestInfo loadRequestInfo;
     loadRequestInfo.systemAbilityId = SAID;
     loadRequestInfo.callback = new SystemAbilityLoadCallbackMock();
@@ -943,6 +945,8 @@ HWTEST_F(SystemAbilityStateSchedulerTest, PendLoadEventLocked003, TestSize.Level
     systemAbilityStateScheduler->Init(saProfiles);
 
     std::shared_ptr<SystemAbilityContext> systemAbilityContext = std::make_shared<SystemAbilityContext>();
+    auto processContext = std::make_shared<SystemProcessContext>();
+    systemAbilityContext->ownProcessContext = processContext;
     LoadRequestInfo loadRequestInfo;
     loadRequestInfo.systemAbilityId = SAID;
     loadRequestInfo.callback = new SystemAbilityLoadCallbackMock();
@@ -966,6 +970,45 @@ HWTEST_F(SystemAbilityStateSchedulerTest, PendLoadEventLocked004, TestSize.Level
     LoadRequestInfo loadRequestInfo;
     int32_t ret = systemAbilityStateScheduler->PendLoadEventLocked(systemAbilityContext, loadRequestInfo);
     EXPECT_EQ(ret, CALLBACK_NULL);
+}
+
+/**
+ * @tc.name: PendLoadEventLocked005
+ * @tc.desc: test PendLoadEventLocked
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityStateSchedulerTest, PendLoadEventLocked005, TestSize.Level3)
+{
+    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
+        std::make_shared<SystemAbilityStateScheduler>(
+    std::weak_ptr<BaseSystemAbilityManager>{});
+    std::list<SaProfile> saProfiles;
+    systemAbilityStateScheduler->Init(saProfiles);
+
+    std::shared_ptr<SystemAbilityContext> abilityContext = std::make_shared<SystemAbilityContext>();
+    auto processContext = std::make_shared<SystemProcessContext>();
+    abilityContext->ownProcessContext = processContext;
+    int32_t callingPid = 1234;
+    LoadRequestInfo loadRequestInfo;
+    loadRequestInfo.systemAbilityId = SAID;
+    loadRequestInfo.callback = new SystemAbilityLoadCallbackMock();
+    loadRequestInfo.callingPid = callingPid;
+    LoadRequestInfo loadRequestInfo2;
+    loadRequestInfo2.systemAbilityId = SAID;
+    loadRequestInfo2.callback = new SystemAbilityLoadCallbackMock();
+    loadRequestInfo2.callingPid = callingPid;
+    int32_t ret = systemAbilityStateScheduler->PendLoadEventLocked(abilityContext, loadRequestInfo);
+    EXPECT_EQ(ret, ERR_OK);
+
+    abilityContext->pendingLoadEventCountMap[callingPid] = 50;
+    ret = systemAbilityStateScheduler->PendLoadEventLocked(abilityContext, loadRequestInfo2);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    processContext->pendingLoadFirstTimestamp -= 60000;
+    ret = systemAbilityStateScheduler->PendLoadEventLocked(abilityContext, loadRequestInfo2);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
+    abilityContext->pendingLoadEventCountMap[callingPid] = 1;
+    ret = systemAbilityStateScheduler->PendLoadEventLocked(abilityContext, loadRequestInfo2);
+    EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
 
 /**

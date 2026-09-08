@@ -323,6 +323,7 @@ bool SystemAbilityManagerDumper::FfrtStatCmdParser(int32_t& cmd, const std::vect
 void SystemAbilityManagerDumper::CollectFfrtMetricInfoInProcs(int32_t fd, const std::vector<int32_t>& processIds,
     std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler, int32_t cmd, std::string& result)
 {
+    SamgrXCollie samgrXCollie("samgr--FfrtStatCmdProc_All");
     for (const int32_t pid : processIds) {
         if (pid == getpid()) {
             CollectFfrtStatistics(cmd, result);
@@ -334,7 +335,6 @@ void SystemAbilityManagerDumper::CollectFfrtMetricInfoInProcs(int32_t fd, const 
             result.append("process " + std::to_string(pid) + " not found!\n");
             continue;
         }
-        SamgrXCollie samgrXCollie("samgr--FfrtStatCmdProc_" + ToString(pid));
         obj->FfrtStatCmdProc(fd, cmd);
     }
 }
@@ -571,7 +571,7 @@ void SystemAbilityManagerDumper::DumpFfrtInfoInProc(
         return;
     }
     std::string resultForProcess;
-    SamgrXCollie samgrXCollie("samgr--FfrtStatCmdProc_" + ToString(pid));
+    SamgrXCollie samgrXCollie("samgr--FfrtDumperProc_" + ToString(pid));
     if (!obj->FfrtDumperProc(resultForProcess)) {
         HILOGE("safwk FfrtDumperProc execute failed");
         return;
@@ -739,7 +739,7 @@ bool SystemAbilityManagerDumper::CanDump()
 {
     uint32_t accessToken = IPCSkeleton::GetCallingTokenID();
     Security::AccessToken::NativeTokenInfo nativeTokenInfo;
-    SamgrXCollie samgrXCollie("samgr--GetNativeTokenInfo");
+    SamgrXCollie samgrXCollie("samgr--GetNativeTokenInfo2");
     int32_t result = Security::AccessToken::AccessTokenKit::GetNativeTokenInfo(accessToken, nativeTokenInfo);
     if (result == ERR_OK && nativeTokenInfo.processName == HIDUMPER_PROCESS_NAME) {
         return true;
