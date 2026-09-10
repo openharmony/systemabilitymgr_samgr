@@ -999,8 +999,8 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, HandlePendingLoadOverflowDefault00
 
     auto manager = std::make_shared<BaseSystemAbilityManager>();
     auto scheduler = std::make_shared<SystemAbilityStateScheduler>(manager);
-    EXPECT_EQ(scheduler->HandlePendingLoadOverflow(abilityContext), PEND_LOAD_EVENT_SIZE_LIMIT);
     scheduler->recoverHandler_ = std::make_shared<FFRTHandler>("RestartProcessHandler");
+    EXPECT_EQ(scheduler->HandlePendingLoadOverflow(abilityContext), PEND_LOAD_EVENT_SIZE_LIMIT);
     ASSERT_NE(scheduler->recoverHandler_, nullptr);
     EXPECT_EQ(abilityContext->ownProcessContext->state, SystemProcessState::STARTED);
     scheduler->recoverHandler_->CleanFfrt();
