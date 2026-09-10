@@ -84,6 +84,8 @@ private:
         std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler, std::string& result);
     static void IllegalInput(std::string& result);
 #ifdef SUPPORT_MULTI_INSTANCE
+    static bool IsMultiInstanceSa(int32_t said);
+    static std::shared_ptr<SystemAbilityStateScheduler> GetForegroundUserScheduler();
     static void ShowMultiInstanceSaIds(std::string& result);
 #endif
     static void DumpFfrtInfoInProc(
