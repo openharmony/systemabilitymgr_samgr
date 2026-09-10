@@ -1521,6 +1521,90 @@ HWTEST_F(SystemAbilityManagerDumperTest, GetListenerDumpProc002, TestSize.Level1
 }
 
 #ifdef SUPPORT_MULTI_INSTANCE
+namespace {
+constexpr int32_t DUMP_MULTI_SA_ID = 1001;
+constexpr int32_t DUMP_FOREGROUND_USER_ID = 100;
+constexpr int32_t DUMP_BACKGROUND_USER_ID = 101;
+constexpr const char* DUMP_LOADED_STATE = "LOADED";
+constexpr const char* DUMP_HIDUMPER_PROCESS = "hidumper_service";
+const std::string DUMP_FOREGROUND_PROCESS = "foreground_dump_process";
+const std::string DUMP_BACKGROUND_PROCESS = "background_dump_process";
+
+std::shared_ptr<MultiSystemAbilityManager> CreateDumpManager(int32_t userId,
+    const std::string& processName)
+{
+    auto manager = std::make_shared<MultiSystemAbilityManager>(userId);
+    auto scheduler = std::make_shared<SystemAbilityStateScheduler>(manager);
+    auto processContext = std::make_shared<SystemProcessContext>();
+    processContext->processName = Str8ToStr16(processName);
+    processContext->pid = userId;
+    processContext->state = SystemProcessState::STARTED;
+    auto abilityContext = std::make_shared<SystemAbilityContext>();
+    abilityContext->systemAbilityId = DUMP_MULTI_SA_ID;
+    abilityContext->state = SystemAbilityState::LOADED;
+    abilityContext->ownProcessContext = processContext;
+    processContext->saList.push_back(DUMP_MULTI_SA_ID);
+    scheduler->abilityContextMap_[DUMP_MULTI_SA_ID] = abilityContext;
+    scheduler->processContextMap_[processContext->processName] = processContext;
+    manager->abilityStateScheduler_ = scheduler;
+    return manager;
+}
+
+void RestoreDumpManager(std::map<int32_t, std::shared_ptr<MultiSystemAbilityManager>>& managers,
+    int32_t userId, bool existed, const std::shared_ptr<MultiSystemAbilityManager>& original)
+{
+    if (existed) {
+        managers[userId] = original;
+        return;
+    }
+    managers.erase(userId);
+}
+} // namespace
+
+/**
+ * @tc.name: MultiInstanceDump004
+ * @tc.desc: verify standard dump commands use the foreground multi-user manager
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityManagerDumperTest, MultiInstanceDump004, TestSize.Level3)
+{
+    SamMockPermission::MockProcess(DUMP_HIDUMPER_PROCESS);
+    auto saMgr = SystemAbilityManager::GetInstance();
+    ASSERT_NE(saMgr, nullptr);
+    const auto originalSaIds = saMgr->multiInstanceSaIds_;
+    const int32_t originalForeground = saMgr->userLifecycleManager_.GetForegroundUserId();
+    const auto foregroundIt = saMgr->userLifecycleManager_.multiUserManagers_.find(DUMP_FOREGROUND_USER_ID);
+    const auto backgroundIt = saMgr->userLifecycleManager_.multiUserManagers_.find(DUMP_BACKGROUND_USER_ID);
+    const bool hadForeground = foregroundIt != saMgr->userLifecycleManager_.multiUserManagers_.end();
+    const bool hadBackground = backgroundIt != saMgr->userLifecycleManager_.multiUserManagers_.end();
+    const auto originalForegroundManager = hadForeground ? foregroundIt->second : nullptr;
+    const auto originalBackgroundManager = hadBackground ? backgroundIt->second : nullptr;
+    auto foreground = CreateDumpManager(DUMP_FOREGROUND_USER_ID, DUMP_FOREGROUND_PROCESS);
+    auto background = CreateDumpManager(DUMP_BACKGROUND_USER_ID, DUMP_BACKGROUND_PROCESS);
+    saMgr->multiInstanceSaIds_.insert(DUMP_MULTI_SA_ID);
+    saMgr->userLifecycleManager_.multiUserManagers_[DUMP_FOREGROUND_USER_ID] = foreground;
+    saMgr->userLifecycleManager_.multiUserManagers_[DUMP_BACKGROUND_USER_ID] = background;
+    saMgr->userLifecycleManager_.foregroundUserId_.store(DUMP_FOREGROUND_USER_ID);
+    auto baseScheduler = std::make_shared<SystemAbilityStateScheduler>(
+        std::weak_ptr<BaseSystemAbilityManager>{});
+    const std::vector<std::vector<std::string>> commands = {
+        { "-sa", std::to_string(DUMP_MULTI_SA_ID) }, { "-l" },
+        { "-sm", DUMP_LOADED_STATE }, { "-p", DUMP_FOREGROUND_PROCESS },
+    };
+    for (const auto& args : commands) {
+        std::string result;
+        EXPECT_TRUE(SystemAbilityManagerDumper::Dump(baseScheduler, args, result));
+        EXPECT_NE(result.find(DUMP_FOREGROUND_PROCESS), std::string::npos);
+        EXPECT_EQ(result.find(DUMP_BACKGROUND_PROCESS), std::string::npos);
+    }
+    saMgr->multiInstanceSaIds_ = originalSaIds;
+    RestoreDumpManager(saMgr->userLifecycleManager_.multiUserManagers_, DUMP_FOREGROUND_USER_ID,
+        hadForeground, originalForegroundManager);
+    RestoreDumpManager(saMgr->userLifecycleManager_.multiUserManagers_, DUMP_BACKGROUND_USER_ID,
+        hadBackground, originalBackgroundManager);
+    saMgr->userLifecycleManager_.foregroundUserId_.store(originalForeground);
+}
+
 /**
  * @tc.name: MultiInstanceDump001
  * @tc.desc: test --multi-instance via Dump

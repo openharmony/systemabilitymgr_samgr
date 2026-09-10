@@ -775,6 +775,12 @@ void SystemAbilityManagerDumper::ShowAllSystemAbilityInfo(
         return;
     }
     abilityStateScheduler->GetAllSystemAbilityInfo(result);
+#ifdef SUPPORT_MULTI_INSTANCE
+    auto foregroundUserScheduler = GetForegroundUserScheduler();
+    if (foregroundUserScheduler != nullptr && foregroundUserScheduler != abilityStateScheduler) {
+        foregroundUserScheduler->GetAllSystemAbilityInfo(result);
+    }
+#endif
 }
 
 void SystemAbilityManagerDumper::ShowSystemAbilityInfo(int32_t said,
@@ -784,6 +790,15 @@ void SystemAbilityManagerDumper::ShowSystemAbilityInfo(int32_t said,
         HILOGE("abilityStateScheduler is nullptr");
         return;
     }
+#ifdef SUPPORT_MULTI_INSTANCE
+    if (IsMultiInstanceSa(said)) {
+        auto foregroundUserScheduler = GetForegroundUserScheduler();
+        if (foregroundUserScheduler != nullptr) {
+            foregroundUserScheduler->GetSystemAbilityInfo(said, result);
+            return;
+        }
+    }
+#endif
     abilityStateScheduler->GetSystemAbilityInfo(said, result);
 }
 
@@ -795,6 +810,12 @@ void SystemAbilityManagerDumper::ShowProcessInfo(const std::string& processName,
         return;
     }
     abilityStateScheduler->GetProcessInfo(processName, result);
+#ifdef SUPPORT_MULTI_INSTANCE
+    auto foregroundUserScheduler = GetForegroundUserScheduler();
+    if (foregroundUserScheduler != nullptr && foregroundUserScheduler != abilityStateScheduler) {
+        foregroundUserScheduler->GetProcessInfo(processName, result);
+    }
+#endif
 }
 
 void SystemAbilityManagerDumper::ShowAllSystemAbilityInfoInState(const std::string& state,
@@ -805,9 +826,37 @@ void SystemAbilityManagerDumper::ShowAllSystemAbilityInfoInState(const std::stri
         return;
     }
     abilityStateScheduler->GetAllSystemAbilityInfoByState(state, result);
+#ifdef SUPPORT_MULTI_INSTANCE
+    auto foregroundUserScheduler = GetForegroundUserScheduler();
+    if (foregroundUserScheduler != nullptr && foregroundUserScheduler != abilityStateScheduler) {
+        foregroundUserScheduler->GetAllSystemAbilityInfoByState(state, result);
+    }
+#endif
 }
 
 #ifdef SUPPORT_MULTI_INSTANCE
+bool SystemAbilityManagerDumper::IsMultiInstanceSa(int32_t said)
+{
+    auto saMgr = SystemAbilityManager::GetInstance();
+    return saMgr != nullptr && saMgr->IsMultiInstanceSaId(said);
+}
+
+std::shared_ptr<SystemAbilityStateScheduler> SystemAbilityManagerDumper::GetForegroundUserScheduler()
+{
+    auto saMgr = SystemAbilityManager::GetInstance();
+    if (saMgr == nullptr) {
+        HILOGE("saMgr is nullptr");
+        return nullptr;
+    }
+    const int32_t foregroundUserId = saMgr->GetForegroundUserId();
+    auto multiUserManager = saMgr->GetMultiUserManager(foregroundUserId);
+    if (multiUserManager == nullptr) {
+        HILOGD("foreground user manager is not available, userId:%{public}d", foregroundUserId);
+        return nullptr;
+    }
+    return multiUserManager->GetAbilityStateScheduler();
+}
+
 void SystemAbilityManagerDumper::ShowMultiInstanceSaIds(std::string& result)
 {
     auto saMgr = SystemAbilityManager::GetInstance();

@@ -40,6 +40,11 @@ public:
 
     int32_t GetUserId() const override { return userId_; }
 
+    std::shared_ptr<SystemAbilityStateScheduler> GetAbilityStateScheduler() const
+    {
+        return abilityStateScheduler_;
+    }
+
     int32_t Init(const std::list<SaProfile>& saProfiles);
     void Destroy() override;
 
