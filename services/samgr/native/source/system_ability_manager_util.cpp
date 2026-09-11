@@ -525,7 +525,6 @@ bool SamgrUtil::KillProcessByPid(int32_t pid, int32_t tid)
         return false;
     }
     std::string processName = GetProcessNameFromCmdline(peerBinderPid);
-    SamgrXCollie samgrXCollie("samgr--KillProcessByPid_" + processName);
     int32_t ret = ServiceControlWithExtra(processName.c_str(),
         ServiceAction::STOP, nullptr, 0);
     HILOGI("Kill PeerBinder process %{public}s, pid=%{public}d, processName=%{public}s",
