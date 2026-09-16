@@ -147,7 +147,6 @@ public:
     }
 
     int32_t GetCallingUserId() const;
-    bool IsValidCallingUserId(int32_t userId) const;
     int32_t RouteForUser(int32_t saId, int32_t caller);
     int32_t RouteForSa(int32_t saId, int32_t caller);
     bool IsMultiInstanceSaId(int32_t saId);

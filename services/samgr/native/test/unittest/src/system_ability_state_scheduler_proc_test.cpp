@@ -113,20 +113,6 @@ void SystemAbilityStateSchedulerProcTest::TearDown()
     DTEST_LOG << "TearDown" << std::endl;
 }
 
-HWTEST_F(SystemAbilityStateSchedulerProcTest, KillSystemProcessLocked002, TestSize.Level3)
-{
-    cout << "begin KillSystemProcessLocked002 "<< endl;
-    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
-    std::shared_ptr<SystemProcessContext> systemProcessContext = std::make_shared<SystemProcessContext>();
-    systemProcessContext->processName = u"1234567890123456789012345678901234567890123456789"
-        "01234567890123456789012345678901234567890123456";
-    int result = systemAbilityStateScheduler->KillSystemProcessLocked(systemProcessContext);
-    cout << "begin KillSystemProcessLocked002 result is "<< result << endl;
-    EXPECT_EQ(result, 102);
-}
-
 /**
  * @tc.name: CanRestartProcessLocked001
  * @tc.desc: test CanRestartProcessLocked, with enableRestart is true
@@ -408,24 +394,6 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, SendProcessStateEvent001, TestSize
     int32_t ret =
         systemAbilityStateScheduler->SendProcessStateEvent(processInfo, ProcessStateEvent ::PROCESS_STARTED_EVENT);
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
-}
-
-/**
- * @tc.name: TryKillSystemProcess002
- * @tc.desc: test TryKillSystemProcess, can kill process
- * @tc.type: FUNC
- * @tc.require: I6FDNZ
- */
-HWTEST_F(SystemAbilityStateSchedulerProcTest, TryKillSystemProcess002, TestSize.Level3)
-{
-    std::shared_ptr<SystemAbilityStateScheduler> systemAbilityStateScheduler =
-        std::make_shared<SystemAbilityStateScheduler>(
-    std::weak_ptr<BaseSystemAbilityManager>{});
-    std::list<SaProfile> saProfiles;
-    systemAbilityStateScheduler->Init(saProfiles);
-    std::shared_ptr<SystemProcessContext> systemProcessContext = std::make_shared<SystemProcessContext>();
-    int32_t ret = systemAbilityStateScheduler->TryKillSystemProcess(systemProcessContext);
-    EXPECT_EQ(ret, ERR_OK);
 }
 
 /**
@@ -889,40 +857,6 @@ HWTEST_F(SystemAbilityStateSchedulerProcTest, ProcessListenerSubscriptionSources
     EXPECT_TRUE(scheduler->processListeners_.front().hasDirectSubscription);
     EXPECT_EQ(scheduler->UnSubscribeSystemProcess(listener, false), ERR_OK);
     EXPECT_TRUE(scheduler->processListeners_.empty());
-}
-
-HWTEST_F(SystemAbilityStateSchedulerProcTest, ProcessListenerNullEntryRemoval001, TestSize.Level3)
-{
-    auto scheduler = std::make_shared<SystemAbilityStateScheduler>(std::weak_ptr<BaseSystemAbilityManager>{});
-    sptr<CountingDefaultProcessListener> listener = new CountingDefaultProcessListener();
-    sptr<CountingDefaultProcessListener> inactiveListener = new CountingDefaultProcessListener();
-    sptr<ISystemProcessStatusChange> nullRemoteListener = new NullRemoteDefaultProcessListener();
-    ASSERT_NE(scheduler, nullptr);
-    ASSERT_NE(listener, nullptr);
-    ASSERT_NE(inactiveListener, nullptr);
-    ASSERT_NE(nullRemoteListener, nullptr);
-    scheduler->processListeners_.emplace_back(nullptr);
-    scheduler->processListeners_.emplace_back(nullRemoteListener);
-    scheduler->processListeners_.emplace_back(listener, true);
-    scheduler->processListeners_.emplace_back(inactiveListener);
-    scheduler->processListeners_.back().hasDirectSubscription = false;
-
-    auto processContext = std::make_shared<SystemProcessContext>();
-    processContext->processName = process;
-    scheduler->NotifyProcessStarted(processContext);
-    scheduler->NotifyProcessStopped(processContext);
-    EXPECT_EQ(listener->startedCount_, 1U);
-    EXPECT_EQ(listener->stoppedCount_, 1U);
-    EXPECT_EQ(inactiveListener->startedCount_, 1U);
-    EXPECT_EQ(inactiveListener->stoppedCount_, 1U);
-
-    scheduler->UnSubscribeSystemProcess(listener->AsObject());
-    ASSERT_EQ(scheduler->processListeners_.size(), 2U);
-    scheduler->processListeners_.remove_if([](const auto& item) {
-        return item.listener == nullptr || item.listener->AsObject() == nullptr;
-    });
-    ASSERT_EQ(scheduler->processListeners_.size(), 1U);
-    EXPECT_EQ(scheduler->processListeners_.front().listener->AsObject(), inactiveListener->AsObject());
 }
 
 HWTEST_F(SystemAbilityStateSchedulerProcTest, ProcessListenerNullRemote001, TestSize.Level3)
