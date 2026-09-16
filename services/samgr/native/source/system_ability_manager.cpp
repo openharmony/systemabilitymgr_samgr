@@ -343,10 +343,6 @@ sptr<IRemoteObject> SystemAbilityManager::GetSystemAbility(int32_t systemAbility
 {
 #ifdef SUPPORT_MULTI_INSTANCE
     const int32_t caller = GetCallingUserId();
-    if (!IsValidCallingUserId(caller)) {
-        HILOGD("GetSystemAbility: invalid calling userId:%{public}d", caller);
-        return nullptr;
-    }
     int32_t target = RouteForUser(systemAbilityId, caller);
     if (target != BASE_USER) {
         auto mgr = GetMultiUserManager(target);
@@ -391,10 +387,6 @@ sptr<IRemoteObject> SystemAbilityManager::CheckSystemAbility(int32_t systemAbili
 {
 #ifdef SUPPORT_MULTI_INSTANCE
     const int32_t caller = GetCallingUserId();
-    if (!IsValidCallingUserId(caller)) {
-        HILOGD("CheckSystemAbility: invalid calling userId:%{public}d", caller);
-        return nullptr;
-    }
     int32_t target = RouteForUser(systemAbilityId, caller);
     if (target != BASE_USER) {
         auto mgr = GetMultiUserManager(target);
@@ -423,10 +415,6 @@ int32_t SystemAbilityManager::AddSystemAbility(int32_t systemAbilityId, const sp
 {
 #ifdef SUPPORT_MULTI_INSTANCE
     const int32_t caller = GetCallingUserId();
-    if (!IsValidCallingUserId(caller)) {
-        HILOGE("AddSystemAbility: invalid calling userId:%{public}d, SA:%{public}d", caller, systemAbilityId);
-        return INVALID_CALLING_USER_ID;
-    }
     int32_t routeResult = RouteForSa(systemAbilityId, caller);
     if (routeResult != SAMGR_OK) {
         return routeResult;
@@ -448,10 +436,6 @@ int32_t SystemAbilityManager::RemoveSystemAbility(int32_t systemAbilityId)
 {
 #ifdef SUPPORT_MULTI_INSTANCE
     const int32_t caller = GetCallingUserId();
-    if (!IsValidCallingUserId(caller) && !userLifecycleManager_.IsUserStopping(caller)) {
-        HILOGD("RemoveSystemAbility: invalid calling userId:%{public}d", caller);
-        return INVALID_CALLING_USER_ID;
-    }
     int32_t routeResult = RouteForSa(systemAbilityId, caller);
     if (routeResult != SAMGR_OK) {
         return routeResult;
@@ -460,6 +444,8 @@ int32_t SystemAbilityManager::RemoveSystemAbility(int32_t systemAbilityId)
         auto mgr = userLifecycleManager_.IsUserStopping(caller) ?
             GetStoppingMultiUserManager(caller) : GetMultiUserManager(caller);
         if (mgr == nullptr) {
+            HILOGE("RemoveSystemAbility: multiUserManager[%{public}d] not found, SA:%{public}d",
+                caller, systemAbilityId);
             return ERR_INVALID_VALUE;
         }
         return mgr->RemoveSystemAbility(systemAbilityId);
@@ -473,11 +459,6 @@ int32_t SystemAbilityManager::SubscribeSystemAbility(int32_t systemAbilityId,
 {
 #ifdef SUPPORT_MULTI_INSTANCE
     const int32_t caller = GetCallingUserId();
-    if (!IsValidCallingUserId(caller)) {
-        HILOGD("SubscribeSystemAbility: invalid calling userId:%{public}d", caller);
-        return INVALID_CALLING_USER_ID;
-    }
-
     if (caller == BASE_USER && IsMultiInstanceSaId(systemAbilityId)) {
         if (!BaseSystemAbilityManager::CheckInputSysAbilityId(systemAbilityId) || listener == nullptr ||
             listener->AsObject() == nullptr) {
@@ -490,6 +471,8 @@ int32_t SystemAbilityManager::SubscribeSystemAbility(int32_t systemAbilityId,
         if (target != BASE_USER) {
             auto mgr = GetMultiUserManager(target);
             if (mgr == nullptr) {
+                HILOGE("SubscribeSystemAbility: multiUserManager[%{public}d] not found, SA:%{public}d",
+                    caller, systemAbilityId);
                 return ERR_INVALID_VALUE;
             }
             return mgr->SubscribeSystemAbility(systemAbilityId, listener);
@@ -504,11 +487,6 @@ int32_t SystemAbilityManager::UnSubscribeSystemAbility(int32_t systemAbilityId,
 {
 #ifdef SUPPORT_MULTI_INSTANCE
     const int32_t caller = GetCallingUserId();
-    if (!IsValidCallingUserId(caller)) {
-        HILOGD("UnSubscribeSystemAbility: invalid calling userId:%{public}d", caller);
-        return INVALID_CALLING_USER_ID;
-    }
-
     if (caller == BASE_USER && IsMultiInstanceSaId(systemAbilityId)) {
         return userLifecycleManager_.UnSubscribeSystemAbilityForAllUsers(systemAbilityId, listener);
     } else {
@@ -516,6 +494,8 @@ int32_t SystemAbilityManager::UnSubscribeSystemAbility(int32_t systemAbilityId,
         if (target != BASE_USER) {
             auto mgr = GetMultiUserManager(target);
             if (mgr == nullptr) {
+                HILOGE("UnSubscribeSystemAbility: multiUserManager[%{public}d] not found, SA:%{public}d",
+                    caller, systemAbilityId);
                 return ERR_INVALID_VALUE;
             }
             return mgr->UnSubscribeSystemAbility(systemAbilityId, listener);
@@ -529,10 +509,6 @@ sptr<IRemoteObject> SystemAbilityManager::CheckSystemAbility(int32_t systemAbili
 {
 #ifdef SUPPORT_MULTI_INSTANCE
     const int32_t caller = GetCallingUserId();
-    if (!IsValidCallingUserId(caller)) {
-        HILOGD("CheckSystemAbility(isExist): invalid calling userId:%{public}d", caller);
-        return nullptr;
-    }
     int32_t target = RouteForUser(systemAbilityId, caller);
     if (target != BASE_USER) {
         auto mgr = GetMultiUserManager(target);
@@ -551,10 +527,6 @@ int32_t SystemAbilityManager::AddOnDemandSystemAbilityInfo(int32_t systemAbility
 {
 #ifdef SUPPORT_MULTI_INSTANCE
     const int32_t caller = GetCallingUserId();
-    if (!IsValidCallingUserId(caller)) {
-        HILOGD("AddOnDemandSystemAbilityInfo: invalid calling userId:%{public}d", caller);
-        return INVALID_CALLING_USER_ID;
-    }
     int32_t routeResult = RouteForSa(systemAbilityId, caller);
     if (routeResult != SAMGR_OK) {
         return routeResult;
@@ -562,6 +534,8 @@ int32_t SystemAbilityManager::AddOnDemandSystemAbilityInfo(int32_t systemAbility
     if (caller != BASE_USER) {
         auto mgr = GetMultiUserManager(caller);
         if (mgr == nullptr) {
+            HILOGE("AddOnDemandSystemAbilityInfo: multiUserManager[%{public}d] not found, SA:%{public}d",
+                caller, systemAbilityId);
             return ERR_INVALID_VALUE;
         }
         return mgr->AddOnDemandSystemAbilityInfo(systemAbilityId, procName);
@@ -586,10 +560,6 @@ int32_t SystemAbilityManager::AddSystemProcess(const std::u16string& procName,
 {
 #ifdef SUPPORT_MULTI_INSTANCE
     const int32_t caller = GetCallingUserId();
-    if (!IsValidCallingUserId(caller)) {
-        HILOGD("AddSystemProcess: invalid calling userId:%{public}d", caller);
-        return INVALID_CALLING_USER_ID;
-    }
     if (caller != BASE_USER) {
         auto mgr = GetMultiUserManager(caller);
         if (mgr == nullptr) {
@@ -607,10 +577,6 @@ int32_t SystemAbilityManager::GetSystemProcessInfo(int32_t systemAbilityId, Syst
 {
 #ifdef SUPPORT_MULTI_INSTANCE
     const int32_t caller = GetCallingUserId();
-    if (!IsValidCallingUserId(caller)) {
-        HILOGD("GetSystemProcessInfo: invalid calling userId:%{public}d", caller);
-        return INVALID_CALLING_USER_ID;
-    }
     int32_t target = RouteForUser(systemAbilityId, caller);
     if (target != BASE_USER) {
         auto mgr = GetMultiUserManager(target);
@@ -626,25 +592,20 @@ int32_t SystemAbilityManager::GetSystemProcessInfo(int32_t systemAbilityId, Syst
 
 int32_t SystemAbilityManager::GetRunningSystemProcess(std::list<SystemProcessInfo>& systemProcessInfos)
 {
-#ifdef SUPPORT_MULTI_INSTANCE
-    const int32_t caller = GetCallingUserId();
-    if (!IsValidCallingUserId(caller)) {
-        HILOGD("GetRunningSystemProcess: invalid calling userId:%{public}d", caller);
-        return INVALID_CALLING_USER_ID;
-    }
-#endif
     int32_t result = BaseSystemAbilityManager::GetRunningSystemProcess(systemProcessInfos);
 #ifdef SUPPORT_MULTI_INSTANCE
     for (int32_t userId : userLifecycleManager_.GetValidUserIds()) {
         auto mgr = GetMultiUserManager(userId);
-        if (mgr != nullptr) {
-            std::list<SystemProcessInfo> userProcessInfos;
-            int32_t userResult = mgr->GetRunningSystemProcess(userProcessInfos);
-            if (userResult == ERR_OK) {
-                systemProcessInfos.insert(systemProcessInfos.end(), userProcessInfos.begin(), userProcessInfos.end());
-            } else if (result == ERR_OK) {
-                result = userResult;
-            }
+        if (mgr == nullptr) {
+            HILOGD("GetRunningSystemProcess: multiUserManager[%{public}d] not found", userId);
+            return ERR_INVALID_VALUE;
+        }
+        std::list<SystemProcessInfo> userProcessInfos;
+        int32_t userResult = mgr->GetRunningSystemProcess(userProcessInfos);
+        if (userResult == ERR_OK) {
+            systemProcessInfos.insert(systemProcessInfos.end(), userProcessInfos.begin(), userProcessInfos.end());
+        } else if (result == ERR_OK) {
+            result = userResult;
         }
     }
 #endif
@@ -655,11 +616,6 @@ int32_t SystemAbilityManager::SubscribeSystemProcess(const sptr<ISystemProcessSt
 {
 #ifdef SUPPORT_MULTI_INSTANCE
     const int32_t caller = GetCallingUserId();
-    if (!IsValidCallingUserId(caller)) {
-        HILOGD("SubscribeSystemProcess: invalid calling userId:%{public}d", caller);
-        return INVALID_CALLING_USER_ID;
-    }
-
     if (caller == BASE_USER) {
         bool subscriptionAdded = false;
         int32_t result = userLifecycleManager_.SubscribeSystemProcessForAllUsers(listener, subscriptionAdded);
@@ -690,11 +646,6 @@ int32_t SystemAbilityManager::UnSubscribeSystemProcess(const sptr<ISystemProcess
 {
 #ifdef SUPPORT_MULTI_INSTANCE
     const int32_t caller = GetCallingUserId();
-    if (!IsValidCallingUserId(caller)) {
-        HILOGD("UnSubscribeSystemProcess: invalid calling userId:%{public}d", caller);
-        return INVALID_CALLING_USER_ID;
-    }
-
     if (caller == BASE_USER) {
         int32_t result = userLifecycleManager_.UnSubscribeSystemProcessForAllUsers(listener);
         if (result != ERR_OK) {
@@ -742,10 +693,6 @@ int32_t SystemAbilityManager::LoadSystemAbility(int32_t systemAbilityId,
 {
 #ifdef SUPPORT_MULTI_INSTANCE
     const int32_t caller = GetCallingUserId();
-    if (!IsValidCallingUserId(caller)) {
-        HILOGE("LoadSystemAbility(callback): invalid calling userId:%{public}d", caller);
-        return INVALID_CALLING_USER_ID;
-    }
     int32_t target = RouteForUser(systemAbilityId, caller);
     if (target != BASE_USER) {
         auto mgr = GetMultiUserManager(target);
@@ -904,10 +851,6 @@ int32_t SystemAbilityManager::UnloadSystemAbility(int32_t systemAbilityId)
 {
 #ifdef SUPPORT_MULTI_INSTANCE
     const int32_t caller = GetCallingUserId();
-    if (!IsValidCallingUserId(caller)) {
-        HILOGD("UnloadSystemAbility: invalid calling userId:%{public}d", caller);
-        return INVALID_CALLING_USER_ID;
-    }
     int32_t routeResult = RouteForSa(systemAbilityId, caller);
     if (routeResult != SAMGR_OK) {
         return routeResult;
@@ -915,6 +858,8 @@ int32_t SystemAbilityManager::UnloadSystemAbility(int32_t systemAbilityId)
     if (caller != BASE_USER) {
         auto mgr = GetMultiUserManager(caller);
         if (mgr == nullptr) {
+            HILOGE("UnloadSystemAbility: multiUserManager[%{public}d] not found, SA:%{public}d",
+                caller, systemAbilityId);
             return ERR_INVALID_VALUE;
         }
         return mgr->UnloadSystemAbility(systemAbilityId);
@@ -927,10 +872,6 @@ int32_t SystemAbilityManager::CancelUnloadSystemAbility(int32_t systemAbilityId)
 {
 #ifdef SUPPORT_MULTI_INSTANCE
     const int32_t caller = GetCallingUserId();
-    if (!IsValidCallingUserId(caller)) {
-        HILOGD("CancelUnloadSystemAbility: invalid calling userId:%{public}d", caller);
-        return INVALID_CALLING_USER_ID;
-    }
     int32_t routeResult = RouteForSa(systemAbilityId, caller);
     if (routeResult != SAMGR_OK) {
         return routeResult;
@@ -938,6 +879,8 @@ int32_t SystemAbilityManager::CancelUnloadSystemAbility(int32_t systemAbilityId)
     if (caller != BASE_USER) {
         auto mgr = GetMultiUserManager(caller);
         if (mgr == nullptr) {
+            HILOGE("CancelUnloadSystemAbility: multiUserManager[%{public}d] not found, SA:%{public}d",
+                caller, systemAbilityId);
             return ERR_INVALID_VALUE;
         }
         return mgr->CancelUnloadSystemAbility(systemAbilityId);
@@ -948,13 +891,6 @@ int32_t SystemAbilityManager::CancelUnloadSystemAbility(int32_t systemAbilityId)
 
 int32_t SystemAbilityManager::UnloadAllIdleSystemAbility()
 {
-#ifdef SUPPORT_MULTI_INSTANCE
-    const int32_t caller = GetCallingUserId();
-    if (!IsValidCallingUserId(caller)) {
-        HILOGD("UnloadAllIdleSystemAbility: invalid calling userId:%{public}d", caller);
-        return INVALID_CALLING_USER_ID;
-    }
-#endif
     int32_t result = BaseSystemAbilityManager::UnloadAllIdleSystemAbility();
 #ifdef SUPPORT_MULTI_INSTANCE
     for (int32_t userId : userLifecycleManager_.GetValidUserIds()) {
@@ -972,13 +908,6 @@ int32_t SystemAbilityManager::UnloadAllIdleSystemAbility()
 
 int32_t SystemAbilityManager::UnloadProcess(const std::vector<std::u16string>& processList)
 {
-#ifdef SUPPORT_MULTI_INSTANCE
-    const int32_t caller = GetCallingUserId();
-    if (!IsValidCallingUserId(caller)) {
-        HILOGD("UnloadProcess: invalid calling userId:%{public}d", caller);
-        return INVALID_CALLING_USER_ID;
-    }
-#endif
     int32_t result = BaseSystemAbilityManager::UnloadProcess(processList);
 #ifdef SUPPORT_MULTI_INSTANCE
     for (int32_t userId : userLifecycleManager_.GetValidUserIds()) {
@@ -996,13 +925,6 @@ int32_t SystemAbilityManager::UnloadProcess(const std::vector<std::u16string>& p
 
 int32_t SystemAbilityManager::GetLruIdleSystemAbilityProc(std::vector<IdleProcessInfo>& processInfos)
 {
-#ifdef SUPPORT_MULTI_INSTANCE
-    const int32_t caller = GetCallingUserId();
-    if (!IsValidCallingUserId(caller)) {
-        HILOGD("GetLruIdleSystemAbilityProc: invalid calling userId:%{public}d", caller);
-        return INVALID_CALLING_USER_ID;
-    }
-#endif
     int32_t result = BaseSystemAbilityManager::GetLruIdleSystemAbilityProc(processInfos);
 #ifdef SUPPORT_MULTI_INSTANCE
     for (int32_t userId : userLifecycleManager_.GetValidUserIds()) {
@@ -1030,10 +952,6 @@ sptr<IRemoteObject> SystemAbilityManager::GetLocalAbilityManagerProxy(int32_t sy
 {
 #ifdef SUPPORT_MULTI_INSTANCE
     const int32_t caller = GetCallingUserId();
-    if (!IsValidCallingUserId(caller)) {
-        HILOGD("GetLocalAbilityManagerProxy: invalid calling userId:%{public}d", caller);
-        return nullptr;
-    }
     int32_t target = RouteForUser(systemAbilityId, caller);
     if (target != BASE_USER) {
         auto mgr = GetMultiUserManager(target);
@@ -1056,12 +974,6 @@ int32_t SystemAbilityManager::SendStrategy(int32_t type, std::vector<int32_t>& s
     int32_t level, std::string& action)
 {
 #ifdef SUPPORT_MULTI_INSTANCE
-    const int32_t caller = GetCallingUserId();
-    if (!IsValidCallingUserId(caller)) {
-        HILOGD("SendStrategy: invalid calling userId:%{public}d", caller);
-        return INVALID_CALLING_USER_ID;
-    }
-
     if (systemAbilityIds.empty()) {
         return BaseSystemAbilityManager::SendStrategy(type, systemAbilityIds, level, action);
     }
@@ -1121,10 +1033,6 @@ int32_t SystemAbilityManager::GetOnDemandPolicy(int32_t systemAbilityId, OnDeman
 {
 #ifdef SUPPORT_MULTI_INSTANCE
     const int32_t caller = GetCallingUserId();
-    if (!IsValidCallingUserId(caller)) {
-        HILOGD("GetOnDemandPolicy: invalid calling userId:%{public}d", caller);
-        return INVALID_CALLING_USER_ID;
-    }
     int32_t routeResult = RouteForSa(systemAbilityId, caller);
     if (routeResult != SAMGR_OK) {
         return routeResult;
@@ -1132,6 +1040,8 @@ int32_t SystemAbilityManager::GetOnDemandPolicy(int32_t systemAbilityId, OnDeman
     if (caller != BASE_USER) {
         auto mgr = GetMultiUserManager(caller);
         if (mgr == nullptr) {
+            HILOGE("GetOnDemandPolicy: multiUserManager[%{public}d] not found, SA:%{public}d",
+                caller, systemAbilityId);
             return ERR_INVALID_VALUE;
         }
         return mgr->GetOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
@@ -1145,10 +1055,6 @@ int32_t SystemAbilityManager::UpdateOnDemandPolicy(int32_t systemAbilityId, OnDe
 {
 #ifdef SUPPORT_MULTI_INSTANCE
     const int32_t caller = GetCallingUserId();
-    if (!IsValidCallingUserId(caller)) {
-        HILOGD("UpdateOnDemandPolicy: invalid calling userId:%{public}d", caller);
-        return INVALID_CALLING_USER_ID;
-    }
     int32_t routeResult = RouteForSa(systemAbilityId, caller);
     if (routeResult != SAMGR_OK) {
         return routeResult;
@@ -1156,6 +1062,8 @@ int32_t SystemAbilityManager::UpdateOnDemandPolicy(int32_t systemAbilityId, OnDe
     if (caller != BASE_USER) {
         auto mgr = GetMultiUserManager(caller);
         if (mgr == nullptr) {
+            HILOGE("UpdateOnDemandPolicy: multiUserManager[%{public}d] not found, SA:%{public}d",
+                caller, systemAbilityId);
             return ERR_INVALID_VALUE;
         }
         return mgr->UpdateOnDemandPolicy(systemAbilityId, type, abilityOnDemandEvents);
@@ -1172,13 +1080,6 @@ int32_t SystemAbilityManager::GetExtensionSaIds(const std::string& extension, st
 int32_t SystemAbilityManager::GetExtensionRunningSaList(const std::string& extension,
     std::vector<sptr<IRemoteObject>>& saList)
 {
-#ifdef SUPPORT_MULTI_INSTANCE
-    const int32_t caller = GetCallingUserId();
-    if (!IsValidCallingUserId(caller)) {
-        HILOGD("GetExtensionRunningSaList: invalid calling userId:%{public}d", caller);
-        return INVALID_CALLING_USER_ID;
-    }
-#endif
     int32_t result = BaseSystemAbilityManager::GetExtensionRunningSaList(extension, saList);
 #ifdef SUPPORT_MULTI_INSTANCE
     for (int32_t userId : userLifecycleManager_.GetValidUserIds()) {
@@ -1200,13 +1101,6 @@ int32_t SystemAbilityManager::GetExtensionRunningSaList(const std::string& exten
 int32_t SystemAbilityManager::GetRunningSaExtensionInfoList(const std::string& extension,
     std::vector<SaExtensionInfo>& infoList)
 {
-#ifdef SUPPORT_MULTI_INSTANCE
-    const int32_t caller = GetCallingUserId();
-    if (!IsValidCallingUserId(caller)) {
-        HILOGD("GetRunningSaExtensionInfoList: invalid calling userId:%{public}d", caller);
-        return INVALID_CALLING_USER_ID;
-    }
-#endif
     int32_t result = BaseSystemAbilityManager::GetRunningSaExtensionInfoList(extension, infoList);
 #ifdef SUPPORT_MULTI_INSTANCE
     for (int32_t userId : userLifecycleManager_.GetValidUserIds()) {
@@ -1230,10 +1124,6 @@ int32_t SystemAbilityManager::GetCommonEventExtraDataIdlist(int32_t saId, std::v
 {
 #ifdef SUPPORT_MULTI_INSTANCE
     const int32_t caller = GetCallingUserId();
-    if (!IsValidCallingUserId(caller)) {
-        HILOGD("GetCommonEventExtraDataIdlist: invalid calling userId:%{public}d", caller);
-        return INVALID_CALLING_USER_ID;
-    }
     int32_t routeResult = RouteForSa(saId, caller);
     if (routeResult != SAMGR_OK) {
         return routeResult;
@@ -1241,6 +1131,8 @@ int32_t SystemAbilityManager::GetCommonEventExtraDataIdlist(int32_t saId, std::v
     if (caller != BASE_USER) {
         auto mgr = GetMultiUserManager(caller);
         if (mgr == nullptr) {
+            HILOGE("GetCommonEventExtraDataIdlist: multiUserManager[%{public}d] not found, SA:%{public}d",
+                caller, saId);
             return ERR_INVALID_VALUE;
         }
         return mgr->GetCommonEventExtraDataIdlist(saId, extraDataIdList, eventName);
@@ -1331,11 +1223,6 @@ int32_t SystemAbilityManager::GetCallingUserId() const
     }
 
     return static_cast<int32_t>(callingUserId);
-}
-
-bool SystemAbilityManager::IsValidCallingUserId(int32_t userId) const
-{
-    return userId == BASE_USER || IsValidUser(userId);
 }
 
 int32_t SystemAbilityManager::RouteForUser(int32_t saId, int32_t caller)

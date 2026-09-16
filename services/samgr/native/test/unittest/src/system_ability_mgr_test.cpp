@@ -2070,9 +2070,6 @@ HWTEST_F(SystemAbilityMgrTest, MultiUserRoutingDecision001, TestSize.Level3)
     saMgr->userLifecycleManager_.validUserIds_.insert(userId);
     saMgr->userLifecycleManager_.foregroundUserId_.store(userId);
 
-    EXPECT_TRUE(saMgr->IsValidCallingUserId(BASE_USER));
-    EXPECT_TRUE(saMgr->IsValidCallingUserId(userId));
-    EXPECT_FALSE(saMgr->IsValidCallingUserId(SAMGR_INVALID_USER_ID));
     EXPECT_EQ(saMgr->RouteForUser(regularSaId, userId), BASE_USER);
     EXPECT_EQ(saMgr->RouteForUser(multiInstanceSaId, BASE_USER), userId);
     EXPECT_EQ(saMgr->RouteForUser(multiInstanceSaId, userId), userId);
@@ -2416,7 +2413,7 @@ HWTEST_F(SystemAbilityMgrTest, MultiUserBaseLifecycleGuard005, TestSize.Level3)
 
 /**
  * @tc.name: MultiUserMissingManagerAggregation006
- * @tc.desc: Verify aggregate operations skip valid users whose manager is absent.
+ * @tc.desc: Verify aggregate operations reject valid users whose manager is absent.
  * @tc.type: FUNC
  */
 HWTEST_F(SystemAbilityMgrTest, MultiUserMissingManagerAggregation006, TestSize.Level3)
@@ -2430,7 +2427,7 @@ HWTEST_F(SystemAbilityMgrTest, MultiUserMissingManagerAggregation006, TestSize.L
     std::vector<sptr<IRemoteObject>> abilityList;
     std::vector<ISystemAbilityManager::SaExtensionInfo> extensionInfos;
 
-    EXPECT_EQ(saMgr->GetRunningSystemProcess(processInfos), ERR_OK);
+    EXPECT_EQ(saMgr->GetRunningSystemProcess(processInfos), ERR_INVALID_VALUE);
     EXPECT_EQ(saMgr->GetExtensionRunningSaList("missing", abilityList), ERR_OK);
     EXPECT_EQ(saMgr->GetRunningSaExtensionInfoList("missing", extensionInfos), ERR_OK);
     bool dispatched = false;
