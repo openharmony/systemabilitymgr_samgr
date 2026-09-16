@@ -54,6 +54,9 @@ int32_t MultiSystemAbilityManager::Init(const std::list<SaProfile>& saProfiles)
     if (workHandler_ == nullptr) {
         workHandler_ = std::make_shared<FFRTHandler>("workHandler");
     }
+    if (deathHandler_ == nullptr && SamgrUtil::CheckSupportSetDeathPrior()) {
+        deathHandler_ = std::make_shared<FFRTHandler>("deathHandler", ffrt_qos_user_interactive);
+    }
     reportEventTimer_ = std::make_unique<Utils::Timer>("DfxReporter", -1);
 
     auto systemAbilityManager = SystemAbilityManager::GetInstance();

@@ -27,9 +27,19 @@ namespace {
     constexpr uint64_t CONVERSION_FACTOR = 1000; // ms to us
 }
 
-FFRTHandler::FFRTHandler(const std::string& name)
+ffrt_queue_t FFRTHandler::CreateQueue(const std::string& name, ffrt_qos_t qos)
 {
-    queue_ = ffrt_queue_create(ffrt_queue_serial, name.c_str(), nullptr);
+    ffrt_queue_attr_t attr;
+    ffrt_queue_attr_init(&attr);
+    ffrt_queue_attr_set_qos(&attr, qos);
+    ffrt_queue_t queue = ffrt_queue_create(ffrt_queue_serial, name.c_str(), &attr);
+    ffrt_queue_attr_destroy(&attr);
+    return queue;
+}
+
+FFRTHandler::FFRTHandler(const std::string& name, ffrt_qos_t qos) : qos_(qos)
+{
+    queue_ = CreateQueue(name, qos);
 }
 
 FFRTHandler::~FFRTHandler()
@@ -56,7 +66,7 @@ void FFRTHandler::CleanFfrt()
     ffrt_queue_destroy(queueHandle);
 }
 
-void FFRTHandler::SetFfrt(const std::string& name)
+void FFRTHandler::SetFfrt(const std::string& name, ffrt_qos_t qos)
 {
     ffrt_queue_t queueHandle = nullptr;
     {
@@ -69,12 +79,18 @@ void FFRTHandler::SetFfrt(const std::string& name)
             queueHandle = queue_;
             queue_ = nullptr;
         }
-        queue_ = ffrt_queue_create(ffrt_queue_serial, name.c_str(), nullptr);
+        qos_ = qos;
+        queue_ = CreateQueue(name, qos);
     }
     if (queueHandle != nullptr) {
         SamgrXCollie samgrXCollie("samgr--SetFfrt_queue_destroy");
         ffrt_queue_destroy(queueHandle);
     }
+}
+
+ffrt_qos_t FFRTHandler::GetQos() const
+{
+    return qos_;
 }
 
 bool FFRTHandler::PostTask(std::function<void()> func)

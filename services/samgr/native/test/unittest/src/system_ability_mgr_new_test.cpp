@@ -145,7 +145,8 @@ void ProcMapObjTestPrevSet(sptr<SystemAbilityManager>& saMgr, int32_t maxLoop)
 
 void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
 {
-    std::weak_ptr<BaseSystemAbilityManager> weakMgr;
+    saMgr->selfPtr_ = std::shared_ptr<BaseSystemAbilityManager>(saMgr.GetRefPtr(), [](BaseSystemAbilityManager*) {});
+    std::weak_ptr<BaseSystemAbilityManager> weakMgr = saMgr->weak_from_this();
     saMgr->abilityDeath_ = sptr<IRemoteObject::DeathRecipient>(
         new AbilityDeathRecipient(weakMgr));
     saMgr->systemProcessDeath_ = sptr<IRemoteObject::DeathRecipient>(
@@ -157,6 +158,7 @@ void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
     saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(
         new RemoteCallbackDeathRecipient(weakMgr));
     saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    saMgr->deathHandler_ = make_shared<FFRTHandler>("deathHandler", ffrt_qos_user_interactive);
     saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(
         new DeviceStatusCollectManager(weakMgr));
     saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>(weakMgr);
@@ -532,6 +534,60 @@ HWTEST_F(SystemAbilityMgrNewTest, SetFfrt001, TestSize.Level3)
     saMgr->SetFfrt();
     EXPECT_NE(saMgr->collectManager_, nullptr);
     EXPECT_NE(saMgr->abilityStateScheduler_, nullptr);
+}
+
+/**
+ * @tc.name: SetFfrtDeathHandler001
+ * @tc.desc: test SetFfrt rebuilds deathHandler_ queue with preserved QoS
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrNewTest, SetFfrtDeathHandler001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
+    InitSaMgr(saMgr);
+    EXPECT_NE(saMgr->deathHandler_, nullptr);
+    ffrt_qos_t originalQos = saMgr->deathHandler_->GetQos();
+    ffrt_queue_t oldQueue = saMgr->deathHandler_->queue_;
+    EXPECT_NE(oldQueue, nullptr);
+    saMgr->SetFfrt();
+    EXPECT_NE(saMgr->deathHandler_->queue_, nullptr);
+    EXPECT_NE(saMgr->deathHandler_->queue_, oldQueue);
+    EXPECT_EQ(saMgr->deathHandler_->GetQos(), originalQos);
+}
+
+/**
+ * @tc.name: SetFfrtAfterCleanFfrtDeathHandler001
+ * @tc.desc: test SetFfrt rebuilds deathHandler_ after CleanFfrt, QoS preserved
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrNewTest, SetFfrtAfterCleanFfrtDeathHandler001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
+    InitSaMgr(saMgr);
+    ffrt_qos_t originalQos = saMgr->deathHandler_->GetQos();
+    saMgr->CleanFfrt();
+    EXPECT_EQ(saMgr->deathHandler_->queue_, nullptr);
+    EXPECT_EQ(saMgr->deathHandler_->GetQos(), originalQos);
+    saMgr->SetFfrt();
+    EXPECT_NE(saMgr->deathHandler_->queue_, nullptr);
+    EXPECT_EQ(saMgr->deathHandler_->GetQos(), originalQos);
+}
+
+/**
+ * @tc.name: SetFfrtWithNullDeathHandler001
+ * @tc.desc: test SetFfrt does not crash when deathHandler_ is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrNewTest, SetFfrtWithNullDeathHandler001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    EXPECT_TRUE(saMgr != nullptr);
+    InitSaMgr(saMgr);
+    saMgr->deathHandler_ = nullptr;
+    saMgr->SetFfrt();
+    SUCCEED();
 }
 
 /**

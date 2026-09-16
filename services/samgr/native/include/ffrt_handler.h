@@ -26,7 +26,7 @@
 namespace OHOS {
 class FFRTHandler {
 public:
-    explicit FFRTHandler(const std::string& name);
+    explicit FFRTHandler(const std::string& name, ffrt_qos_t qos = ffrt_qos_default);
     ~FFRTHandler();
     bool PostTask(std::function<void()> func);
     bool PostTask(std::function<void()> func, uint64_t delayTime);
@@ -35,12 +35,16 @@ public:
     void DelTask(const std::string& name);
     bool HasInnerEvent(const std::string name);
     void CleanFfrt();
-    void SetFfrt(const std::string& name);
+    void SetFfrt(const std::string& name, ffrt_qos_t qos = ffrt_qos_default);
+    ffrt_qos_t GetQos() const;
 
 private:
+    ffrt_queue_t CreateQueue(const std::string& name, ffrt_qos_t qos);
+
     samgr::shared_mutex mutex_;
     std::map<std::string, std::queue<ffrt::task_handle>> taskMap_;
     ffrt_queue_t queue_ = nullptr;
+    ffrt_qos_t qos_ = ffrt_qos_default;
 };
 } // namespace OHOS
 #endif // OHOS_SAMGR_FFRT_HANDLER_H

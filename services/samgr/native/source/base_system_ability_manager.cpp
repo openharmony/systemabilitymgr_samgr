@@ -230,6 +230,7 @@ void BaseSystemAbilityManager::ReleaseSubSystems()
         reportEventTimer_->Shutdown();
     }
     workHandler_ = nullptr;
+    deathHandler_ = nullptr;
 }
 
 void BaseSystemAbilityManager::Destroy()
@@ -252,6 +253,9 @@ void BaseSystemAbilityManager::Init()
 
     if (workHandler_ == nullptr) {
         workHandler_ = make_shared<FFRTHandler>("workHandler");
+    }
+    if (deathHandler_ == nullptr && SamgrUtil::CheckSupportSetDeathPrior()) {
+        deathHandler_ = make_shared<FFRTHandler>("deathHandler", ffrt_qos_user_interactive);
     }
     collectManager_ = sptr<DeviceStatusCollectManager>(new DeviceStatusCollectManager(weak_from_this()));
     abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>(weak_from_this());
@@ -895,6 +899,31 @@ int32_t BaseSystemAbilityManager::UnSubscribeSystemAbility(int32_t systemAbility
     }
     HILOGI("UnSubscribeSA:%{public}d_%{public}d_%{public}zu", systemAbilityId, callingPid, listeners.size());
     return ERR_OK;
+}
+
+void BaseSystemAbilityManager::AsyncUnSubscribeSystemAbility(const sptr<IRemoteObject>& remoteObject)
+{
+    if (remoteObject == nullptr) {
+        HILOGE("AsyncUnSubscribeSystemAbility remoteObject is null");
+        return;
+    }
+    auto handler = deathHandler_;
+    if (handler == nullptr) {
+        HILOGW("AsyncUnSubscribeSystemAbility deathHandler is null, fallback to sync");
+        UnSubscribeSystemAbility(remoteObject);
+        return;
+    }
+    auto task = [remoteObject, weakThis = weak_from_this()]() {
+        auto self = weakThis.lock();
+        if (self == nullptr) {
+            return;
+        }
+        self->UnSubscribeSystemAbility(remoteObject);
+    };
+    if (!handler->PostTask(task)) {
+        HILOGE("AsyncUnSubscribeSystemAbility PostTask failed, fallback to sync");
+        UnSubscribeSystemAbility(remoteObject);
+    }
 }
 
 void BaseSystemAbilityManager::UnSubscribeSystemAbility(const sptr<IRemoteObject>& remoteObject)
@@ -2052,6 +2081,9 @@ void BaseSystemAbilityManager::CleanFfrt()
     if (workHandler_ != nullptr) {
         workHandler_->CleanFfrt();
     }
+    if (deathHandler_ != nullptr) {
+        deathHandler_->CleanFfrt();
+    }
     if (collectManager_ != nullptr) {
         collectManager_->CleanFfrt();
     }
@@ -2064,6 +2096,9 @@ void BaseSystemAbilityManager::SetFfrt()
 {
     if (workHandler_ != nullptr) {
         workHandler_->SetFfrt("workHandler");
+    }
+    if (deathHandler_ != nullptr) {
+        deathHandler_->SetFfrt("deathHandler", deathHandler_->GetQos());
     }
     if (collectManager_ != nullptr) {
         collectManager_->SetFfrt();

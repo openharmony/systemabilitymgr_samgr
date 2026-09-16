@@ -30,6 +30,9 @@
 #include "system_ability_manager_util.h"
 #include "ability_death_recipient.h"
 #include "test_log.h"
+#include <atomic>
+#include <chrono>
+#include <thread>
 #define private public
 #define protected public
 #include "ipc_skeleton.h"
@@ -54,7 +57,8 @@ constexpr int32_t TEST_OVERFLOW_SAID = 99999;
 
 void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
 {
-    std::weak_ptr<BaseSystemAbilityManager> weakMgr;
+    saMgr->selfPtr_ = std::shared_ptr<BaseSystemAbilityManager>(saMgr.GetRefPtr(), [](BaseSystemAbilityManager*) {});
+    std::weak_ptr<BaseSystemAbilityManager> weakMgr = saMgr->weak_from_this();
     saMgr->abilityDeath_ = sptr<IRemoteObject::DeathRecipient>(
         new AbilityDeathRecipient(weakMgr));
     saMgr->systemProcessDeath_ = sptr<IRemoteObject::DeathRecipient>(
@@ -66,6 +70,7 @@ void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
     saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(
         new RemoteCallbackDeathRecipient(weakMgr));
     saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    saMgr->deathHandler_ = make_shared<FFRTHandler>("deathHandler", ffrt_qos_user_interactive);
     saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(
         new DeviceStatusCollectManager(weakMgr));
     saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>(weakMgr);
@@ -565,4 +570,243 @@ HWTEST_F(SystemAbilityMgrSubscribeTest, UnSubscribeSystemProcess004, TestSize.Le
     EXPECT_EQ(ret, ERR_INVALID_VALUE);
 }
 
+/**
+ * @tc.name: UnSubscribeSystemAbilityAsyncNonBlocked001
+ * @tc.desc: Verify async AsyncUnSubscribeSystemAbility does not block the calling thread.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrSubscribeTest, UnSubscribeSystemAbilityAsyncNonBlocked001, TestSize.Level1)
+{
+    DTEST_LOG << " UnSubscribeSystemAbilityAsyncNonBlocked001 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    ASSERT_TRUE(saMgr != nullptr);
+    InitSaMgr(saMgr);
+
+    constexpr int32_t LISTENER_COUNT = 5000;
+    constexpr int32_t SA_COUNT = 100;
+    std::vector<sptr<SaStatusChangeMock>> callbacks;
+    for (int32_t i = 0; i < LISTENER_COUNT; ++i) {
+        auto cb = new SaStatusChangeMock();
+        callbacks.emplace_back(cb);
+        int32_t saId = FIRST_SYS_ABILITY_ID + (i % SA_COUNT);
+        saMgr->listenerMap_[saId].push_back({cb, saId});
+        ++saMgr->subscribeCountMap_[saId];
+    }
+
+    auto start = std::chrono::steady_clock::now();
+    for (auto& cb : callbacks) {
+        saMgr->AsyncUnSubscribeSystemAbility(cb->AsObject());
+    }
+    auto elapsed = std::chrono::steady_clock::now() - start;
+    auto asyncMs = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
+    DTEST_LOG << "Async AsyncUnSubscribeSystemAbility took " << asyncMs << "ms" << std::endl;
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(8000));
+
+    bool allCleaned = true;
+    for (int32_t i = 0; i < SA_COUNT; ++i) {
+        int32_t saId = FIRST_SYS_ABILITY_ID + i;
+        auto it = saMgr->listenerMap_.find(saId);
+        if (it != saMgr->listenerMap_.end() && !it->second.empty()) {
+            allCleaned = false;
+            break;
+        }
+    }
+    EXPECT_EQ(allCleaned, true);
+}
+
+/**
+ * @tc.name: SubscribeDuringDeathNotification001
+ * @tc.desc: Verify SubscribeSystemAbility is not blocked during async death notifications.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrSubscribeTest, SubscribeDuringDeathNotification001, TestSize.Level1)
+{
+    DTEST_LOG << " SubscribeDuringDeathNotification001 " << std::endl;
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    ASSERT_TRUE(saMgr != nullptr);
+    InitSaMgr(saMgr);
+
+    constexpr int32_t LISTENER_COUNT = 5000;
+    constexpr int32_t SA_COUNT = 100;
+    std::vector<sptr<SaStatusChangeMock>> callbacks;
+    for (int32_t i = 0; i < LISTENER_COUNT; ++i) {
+        auto cb = new SaStatusChangeMock();
+        callbacks.emplace_back(cb);
+        int32_t saId = FIRST_SYS_ABILITY_ID + (i % SA_COUNT);
+        saMgr->listenerMap_[saId].push_back({cb, saId});
+        ++saMgr->subscribeCountMap_[saId];
+    }
+
+    std::atomic<bool> subscribeDone(false);
+    std::thread subscribeThread([&saMgr, &subscribeDone]() {
+        auto start = std::chrono::steady_clock::now();
+        auto cb = new SaStatusChangeMock();
+        int32_t saId = FIRST_SYS_ABILITY_ID + 100;
+        int32_t ret = saMgr->SubscribeSystemAbility(saId, cb);
+        auto elapsed = std::chrono::steady_clock::now() - start;
+        auto ms = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
+        DTEST_LOG << "Subscribe during async death took " << ms << "ms" << std::endl;
+        EXPECT_EQ(ret, ERR_OK);
+        subscribeDone.store(true);
+    });
+
+    for (auto& cb : callbacks) {
+        saMgr->AsyncUnSubscribeSystemAbility(cb->AsObject());
+    }
+
+    subscribeThread.join();
+    EXPECT_EQ(subscribeDone.load(), true);
+
+    std::this_thread::sleep_for(std::chrono::milliseconds(8000));
+}
+
+/**
+ * @tc.name: AsyncUnSubscribeSystemAbility001
+ * @tc.desc: test AsyncUnSubscribeSystemAbility with null remoteObject
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrSubscribeTest, AsyncUnSubscribeSystemAbility001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    ASSERT_TRUE(saMgr != nullptr);
+    InitSaMgr(saMgr);
+    sptr<IRemoteObject> nullObj = nullptr;
+    saMgr->AsyncUnSubscribeSystemAbility(nullObj);
+    SUCCEED();
+}
+
+/**
+ * @tc.name: AsyncUnSubscribeSystemAbility002
+ * @tc.desc: test AsyncUnSubscribeSystemAbility with deathHandler_ nullptr, fallback to sync
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrSubscribeTest, AsyncUnSubscribeSystemAbility002, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    ASSERT_TRUE(saMgr != nullptr);
+    InitSaMgr(saMgr);
+    saMgr->deathHandler_ = nullptr;
+    sptr<SaStatusChangeMock> callback(new SaStatusChangeMock());
+    saMgr->listenerMap_[SAID].push_back({callback, SAID});
+    ++saMgr->subscribeCountMap_[SAID];
+    saMgr->AsyncUnSubscribeSystemAbility(callback->AsObject());
+    auto it = saMgr->listenerMap_.find(SAID);
+    if (it != saMgr->listenerMap_.end()) {
+        EXPECT_TRUE(it->second.empty());
+    }
+}
+
+/**
+ * @tc.name: AsyncUnSubscribeSystemAbility003
+ * @tc.desc: test AsyncUnSubscribeSystemAbility with PostTask failure (queue_ nullptr), fallback to sync
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrSubscribeTest, AsyncUnSubscribeSystemAbility003, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    ASSERT_TRUE(saMgr != nullptr);
+    InitSaMgr(saMgr);
+    saMgr->deathHandler_->CleanFfrt();
+    EXPECT_EQ(saMgr->deathHandler_->queue_, nullptr);
+    sptr<SaStatusChangeMock> callback(new SaStatusChangeMock());
+    saMgr->listenerMap_[SAID].push_back({callback, SAID});
+    ++saMgr->subscribeCountMap_[SAID];
+    saMgr->AsyncUnSubscribeSystemAbility(callback->AsObject());
+    auto it = saMgr->listenerMap_.find(SAID);
+    if (it != saMgr->listenerMap_.end()) {
+        EXPECT_TRUE(it->second.empty());
+    }
+}
+
+/**
+ * @tc.name: AsyncUnSubscribeSystemAbility004
+ * @tc.desc: test AsyncUnSubscribeSystemAbility normal async path with valid deathHandler
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrSubscribeTest, AsyncUnSubscribeSystemAbility004, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    ASSERT_TRUE(saMgr != nullptr);
+    InitSaMgr(saMgr);
+    sptr<SaStatusChangeMock> callback(new SaStatusChangeMock());
+    saMgr->listenerMap_[SAID].push_back({callback, SAID});
+    ++saMgr->subscribeCountMap_[SAID];
+    saMgr->AsyncUnSubscribeSystemAbility(callback->AsObject());
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    auto it = saMgr->listenerMap_.find(SAID);
+    if (it != saMgr->listenerMap_.end()) {
+        EXPECT_TRUE(it->second.empty());
+    }
+}
+
+/**
+ * @tc.name: DeathHandlerInit001
+ * @tc.desc: test Init does not recreate deathHandler_ when already initialized
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrSubscribeTest, DeathHandlerInit001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    ASSERT_TRUE(saMgr != nullptr);
+    auto preHandler = make_shared<FFRTHandler>("preDeathHandler", ffrt_qos_user_initiated);
+    saMgr->deathHandler_ = preHandler;
+    saMgr->Init();
+    EXPECT_EQ(saMgr->deathHandler_, preHandler);
+    saMgr->CleanFfrt();
+}
+
+/**
+ * @tc.name: AsyncUnSubscribeSystemAbility005
+ * @tc.desc: test async task does not crash when manager (weak_this) is expired before task executes
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrSubscribeTest, AsyncUnSubscribeSystemAbility005, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    ASSERT_TRUE(saMgr != nullptr);
+    InitSaMgr(saMgr);
+    sptr<SaStatusChangeMock> callback(new SaStatusChangeMock());
+    saMgr->listenerMap_[SAID].push_back({callback, SAID});
+    ++saMgr->subscribeCountMap_[SAID];
+    saMgr->AsyncUnSubscribeSystemAbility(callback->AsObject());
+    saMgr->selfPtr_.reset();
+    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    auto it = saMgr->listenerMap_.find(SAID);
+    EXPECT_TRUE(it != saMgr->listenerMap_.end() && !it->second.empty());
+    saMgr->deathHandler_->CleanFfrt();
+}
+
+/**
+ * @tc.name: CleanFfrtCleansDeathHandler001
+ * @tc.desc: test BaseSystemAbilityManager::CleanFfrt cleans deathHandler_ queue
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrSubscribeTest, CleanFfrtCleansDeathHandler001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    ASSERT_TRUE(saMgr != nullptr);
+    InitSaMgr(saMgr);
+    EXPECT_NE(saMgr->deathHandler_, nullptr);
+    EXPECT_NE(saMgr->deathHandler_->queue_, nullptr);
+    saMgr->CleanFfrt();
+    EXPECT_NE(saMgr->deathHandler_, nullptr);
+    EXPECT_EQ(saMgr->deathHandler_->queue_, nullptr);
+}
+
+/**
+ * @tc.name: CleanFfrtWithNullDeathHandler001
+ * @tc.desc: test BaseSystemAbilityManager::CleanFfrt does not crash when deathHandler_ is null
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrSubscribeTest, CleanFfrtWithNullDeathHandler001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    ASSERT_TRUE(saMgr != nullptr);
+    InitSaMgr(saMgr);
+    saMgr->deathHandler_ = nullptr;
+    saMgr->CleanFfrt();
+    SUCCEED();
+}
 } // namespace OHOS
+

@@ -441,4 +441,113 @@ HWTEST_F(FFRTHandlerTest, HasInnerEvent002, TestSize.Level1)
     EXPECT_FALSE(handler.HasInnerEvent("non_existing_task"));
     handler.CleanFfrt();
 }
+
+/**
+ * @tc.name: ConstructorWithQos001
+ * @tc.desc: test FFRTHandler constructor with explicit QoS parameter
+ * @tc.type: FUNC
+ */
+HWTEST_F(FFRTHandlerTest, ConstructorWithQos001, TestSize.Level1)
+{
+    FFRTHandler handler("ConstructorQos", ffrt_qos_user_initiated);
+    EXPECT_NE(handler.queue_, nullptr);
+    EXPECT_EQ(handler.qos_, ffrt_qos_user_initiated);
+    EXPECT_EQ(handler.GetQos(), ffrt_qos_user_initiated);
+    handler.CleanFfrt();
+}
+
+/**
+ * @tc.name: ConstructorWithQos002
+ * @tc.desc: test FFRTHandler constructor with default QoS (ffrt_qos_default)
+ * @tc.type: FUNC
+ */
+HWTEST_F(FFRTHandlerTest, ConstructorWithQos002, TestSize.Level1)
+{
+    FFRTHandler handler("ConstructorDefault");
+    EXPECT_NE(handler.queue_, nullptr);
+    EXPECT_EQ(handler.qos_, ffrt_qos_default);
+    EXPECT_EQ(handler.GetQos(), ffrt_qos_default);
+    handler.CleanFfrt();
+}
+
+/**
+ * @tc.name: GetQos001
+ * @tc.desc: test GetQos returns correct QoS for different QoS values
+ * @tc.type: FUNC
+ */
+HWTEST_F(FFRTHandlerTest, GetQos001, TestSize.Level1)
+{
+    FFRTHandler handler1("GetQos1", ffrt_qos_user_initiated);
+    EXPECT_EQ(handler1.GetQos(), ffrt_qos_user_initiated);
+    handler1.CleanFfrt();
+
+    FFRTHandler handler2("GetQos2", ffrt_qos_default);
+    EXPECT_EQ(handler2.GetQos(), ffrt_qos_default);
+    handler2.CleanFfrt();
+}
+
+/**
+ * @tc.name: SetFfrtWithQos001
+ * @tc.desc: test SetFfrt updates QoS and creates new queue with specified QoS
+ * @tc.type: FUNC
+ */
+HWTEST_F(FFRTHandlerTest, SetFfrtWithQos001, TestSize.Level1)
+{
+    FFRTHandler handler("SetFfrtQos_old", ffrt_qos_default);
+    EXPECT_EQ(handler.GetQos(), ffrt_qos_default);
+    ffrt_queue_t oldQueue = handler.queue_;
+    EXPECT_NE(oldQueue, nullptr);
+    handler.SetFfrt("SetFfrtQos_new", ffrt_qos_user_initiated);
+    EXPECT_NE(handler.queue_, nullptr);
+    EXPECT_NE(handler.queue_, oldQueue);
+    EXPECT_EQ(handler.GetQos(), ffrt_qos_user_initiated);
+    EXPECT_EQ(handler.qos_, ffrt_qos_user_initiated);
+    handler.CleanFfrt();
+}
+
+/**
+ * @tc.name: SetFfrtWithQos002
+ * @tc.desc: test SetFfrt with default QoS after CleanFfrt (queue_ is nullptr)
+ * @tc.type: FUNC
+ */
+HWTEST_F(FFRTHandlerTest, SetFfrtWithQos002, TestSize.Level1)
+{
+    FFRTHandler handler("SetFfrtQosNull", ffrt_qos_user_initiated);
+    handler.CleanFfrt();
+    EXPECT_EQ(handler.queue_, nullptr);
+    handler.SetFfrt("SetFfrtQosRecreate");
+    EXPECT_NE(handler.queue_, nullptr);
+    EXPECT_EQ(handler.GetQos(), ffrt_qos_default);
+    handler.CleanFfrt();
+}
+
+/**
+ * @tc.name: CreateQueue001
+ * @tc.desc: test CreateQueue creates a valid queue with QoS
+ * @tc.type: FUNC
+ */
+HWTEST_F(FFRTHandlerTest, CreateQueue001, TestSize.Level1)
+{
+    FFRTHandler handler("CreateQueueTest");
+    ffrt_queue_t queue = handler.CreateQueue("CreateQueue001", ffrt_qos_user_initiated);
+    EXPECT_NE(queue, nullptr);
+    ffrt_queue_destroy(queue);
+    handler.CleanFfrt();
+}
+
+/**
+ * @tc.name: QosPreservedAfterCleanFfrt001
+ * @tc.desc: test GetQos returns original QoS after CleanFfrt (qos_ survives queue destruction)
+ * @tc.type: FUNC
+ */
+HWTEST_F(FFRTHandlerTest, QosPreservedAfterCleanFfrt001, TestSize.Level1)
+{
+    FFRTHandler handler("QosPreserved", ffrt_qos_user_initiated);
+    EXPECT_EQ(handler.GetQos(), ffrt_qos_user_initiated);
+    EXPECT_NE(handler.queue_, nullptr);
+    handler.CleanFfrt();
+    EXPECT_EQ(handler.queue_, nullptr);
+    EXPECT_EQ(handler.GetQos(), ffrt_qos_user_initiated);
+    handler.CleanFfrt();
+}
 } // namespace OHOS

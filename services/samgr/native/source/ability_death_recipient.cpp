@@ -19,6 +19,7 @@
 #include "iremote_proxy.h"
 #include "sam_log.h"
 #include "hitrace_meter.h"
+#include "system_ability_manager_util.h"
 
 namespace OHOS {
 
@@ -62,7 +63,11 @@ void AbilityStatusDeathRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote
     HitraceScopedEx samgrHitrace(HITRACE_LEVEL_INFO, HITRACE_TAG_SAMGR, OnRemoteDiedTag.c_str());
     auto manager = manager_.lock();
     if (manager != nullptr) {
-        manager->UnSubscribeSystemAbility(remote.promote());
+        if (SamgrUtil::CheckSupportSetDeathPrior()) {
+            manager->AsyncUnSubscribeSystemAbility(remote.promote());
+        } else {
+            manager->UnSubscribeSystemAbility(remote.promote());
+        }
     }
     HILOGD("AbilityStatusDeathRecipient death notice success");
 }
