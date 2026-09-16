@@ -62,6 +62,7 @@ public:
     static bool CheckSystemProcessStarted(const std::u16string& procName);
     static bool CheckSystemProcessStarted(const std::u16string& procName, int32_t userId);
     static bool CheckSupportSetPrior();
+    static bool CheckSupportSetDeathPrior();
 #ifdef SUPPORT_PENGLAI_MODE
     static bool CheckPengLaiPermission(int32_t systemAbilityId);
 #endif

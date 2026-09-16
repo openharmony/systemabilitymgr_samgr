@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,6 +16,8 @@
 #include "base_system_ability_mgr_test.h"
 #include "itest_transaction_service.h"
 #include "multi_system_ability_manager.h"
+#include "parameter.h"
+#include "parameters.h"
 #include "sa_status_change_mock.h"
 #include "system_ability_manager.h"
 #include "system_process_status_change_stub.h"
@@ -363,6 +365,7 @@ HWTEST_F(BaseSystemAbilityMgrTest, MultiSystemAbilityLifecycle001, TestSize.Leve
  */
 HWTEST_F(BaseSystemAbilityMgrTest, MultiSystemAbilityInit001, TestSize.Level1)
 {
+    system::SetParameter("const.samgr.setdeathprior.support", "true");
     constexpr int32_t USER_ID = 103;
     GlobalSubscriptionInfo subscriptions;
     subscriptions.systemAbilitySubscriptions.push_back({SAID, nullptr, 0});
@@ -373,10 +376,49 @@ HWTEST_F(BaseSystemAbilityMgrTest, MultiSystemAbilityInit001, TestSize.Level1)
 
     EXPECT_EQ(manager->Init(profiles), ERR_OK);
     EXPECT_NE(manager->workHandler_, nullptr);
+    EXPECT_NE(manager->deathHandler_, nullptr);
+    EXPECT_NE(manager->deathHandler_->queue_, nullptr);
+    EXPECT_EQ(manager->deathHandler_->GetQos(), ffrt_qos_user_interactive);
     EXPECT_NE(manager->abilityStateScheduler_, nullptr);
     EXPECT_NE(manager->collectManager_, nullptr);
     EXPECT_TRUE(manager->globalSubscriptions_.systemAbilitySubscriptions.empty());
     EXPECT_TRUE(manager->globalSubscriptions_.systemProcessSubscriptions.empty());
+    manager->Destroy();
+    system::SetParameter("const.samgr.setdeathprior.support", "false");
+}
+
+/**
+ * @tc.name: MultiSystemAbilityInitDeathHandlerIdempotent001
+ * @tc.desc: test MultiSystemAbilityManager::Init does not recreate deathHandler_ when already set
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, MultiSystemAbilityInitDeathHandlerIdempotent001, TestSize.Level3)
+{
+    constexpr int32_t USER_ID = 106;
+    auto manager = std::make_shared<MultiSystemAbilityManager>(USER_ID);
+    auto preHandler = std::make_shared<FFRTHandler>("preDeathHandler", ffrt_qos_user_initiated);
+    manager->deathHandler_ = preHandler;
+    std::list<SaProfile> profiles;
+    ASSERT_EQ(manager->Init(profiles), ERR_OK);
+    EXPECT_EQ(manager->deathHandler_, preHandler);
+    EXPECT_EQ(manager->deathHandler_->GetQos(), ffrt_qos_user_initiated);
+    manager->Destroy();
+}
+
+/**
+ * @tc.name: MultiSystemAbilityInitDeathHandlerDisabled001
+ * @tc.desc: test MultiSystemAbilityManager::Init does not create deathHandler_ when param is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(BaseSystemAbilityMgrTest, MultiSystemAbilityInitDeathHandlerDisabled001, TestSize.Level3)
+{
+    system::SetParameter("const.samgr.setdeathprior.support", "false");
+    constexpr int32_t USER_ID = 107;
+    auto manager = std::make_shared<MultiSystemAbilityManager>(USER_ID);
+    std::list<SaProfile> profiles;
+    ASSERT_EQ(manager->Init(profiles), ERR_OK);
+    EXPECT_NE(manager->workHandler_, nullptr);
+    EXPECT_EQ(manager->deathHandler_, nullptr);
     manager->Destroy();
 }
 

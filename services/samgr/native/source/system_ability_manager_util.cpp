@@ -65,6 +65,7 @@ constexpr const char* PENG_LAI = "penglai";
 constexpr const char* PENGLAI_PATH = "profile/penglai";
 constexpr const char* LOGGER_TRANSPROC_PATH = "/proc/transaction_proc";
 constexpr const char* SET_PRIOR_PARAM = "const.samgr.setprior.support";
+constexpr const char* SET_DEATH_PRIOR_PARAM = "const.samgr.setdeathprior.support";
 constexpr const char* SAMGR_CACHE_KEY = "samgr.cache.sa";
 #ifdef SUPPORT_DEVICE_MANAGER
 constexpr const char* PKG_NAME = "Samgr_Networking";
@@ -319,6 +320,12 @@ bool SamgrUtil::CheckSystemProcessStarted(const std::u16string& procName, int32_
 bool SamgrUtil::CheckSupportSetPrior()
 {
     return system::GetBoolParameter(SET_PRIOR_PARAM, false);
+}
+
+bool SamgrUtil::CheckSupportSetDeathPrior()
+{
+    static bool supported = system::GetBoolParameter(SET_DEATH_PRIOR_PARAM, false);
+    return supported;
 }
 
 #ifdef SUPPORT_PENGLAI_MODE

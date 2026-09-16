@@ -174,6 +174,7 @@ public:
 
     void OnAbilityCallbackDied(const sptr<IRemoteObject>& remoteObject);
     void OnRemoteCallbackDied(const sptr<IRemoteObject>& remoteObject);
+    void AsyncUnSubscribeSystemAbility(const sptr<IRemoteObject>& remoteObject);
 
 protected:
     BaseSystemAbilityManager() = default;
@@ -308,6 +309,7 @@ protected:
 #endif
 
     std::shared_ptr<FFRTHandler> workHandler_;
+    std::shared_ptr<FFRTHandler> deathHandler_;
 
     std::shared_ptr<SystemAbilityStateScheduler> abilityStateScheduler_;
 
