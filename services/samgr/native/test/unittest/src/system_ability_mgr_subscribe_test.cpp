@@ -32,6 +32,8 @@
 #include "test_log.h"
 #include <atomic>
 #include <chrono>
+#include <condition_variable>
+#include <mutex>
 #include <thread>
 #define private public
 #define protected public
@@ -601,7 +603,18 @@ HWTEST_F(SystemAbilityMgrSubscribeTest, UnSubscribeSystemAbilityAsyncNonBlocked0
     auto asyncMs = std::chrono::duration_cast<std::chrono::milliseconds>(elapsed).count();
     DTEST_LOG << "Async AsyncUnSubscribeSystemAbility took " << asyncMs << "ms" << std::endl;
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(8000));
+    std::mutex mtx;
+    std::condition_variable cv;
+    bool allTasksDone = false;
+    saMgr->deathHandler_->PostTask([&mtx, &cv, &allTasksDone]() {
+        std::lock_guard<std::mutex> lock(mtx);
+        allTasksDone = true;
+        cv.notify_one();
+    });
+    {
+        std::unique_lock<std::mutex> lock(mtx);
+        cv.wait(lock, [&allTasksDone] { return allTasksDone; });
+    }
 
     bool allCleaned = true;
     for (int32_t i = 0; i < SA_COUNT; ++i) {
@@ -733,27 +746,22 @@ HWTEST_F(SystemAbilityMgrSubscribeTest, AsyncUnSubscribeSystemAbility004, TestSi
     saMgr->listenerMap_[SAID].push_back({callback, SAID});
     ++saMgr->subscribeCountMap_[SAID];
     saMgr->AsyncUnSubscribeSystemAbility(callback->AsObject());
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    std::mutex mtx;
+    std::condition_variable cv;
+    bool done = false;
+    saMgr->deathHandler_->PostTask([&mtx, &cv, &done]() {
+        std::lock_guard<std::mutex> lock(mtx);
+        done = true;
+        cv.notify_one();
+    });
+    {
+        std::unique_lock<std::mutex> lock(mtx);
+        cv.wait(lock, [&done] { return done; });
+    }
     auto it = saMgr->listenerMap_.find(SAID);
     if (it != saMgr->listenerMap_.end()) {
         EXPECT_TRUE(it->second.empty());
     }
-}
-
-/**
- * @tc.name: DeathHandlerInit001
- * @tc.desc: test Init does not recreate deathHandler_ when already initialized
- * @tc.type: FUNC
- */
-HWTEST_F(SystemAbilityMgrSubscribeTest, DeathHandlerInit001, TestSize.Level3)
-{
-    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
-    ASSERT_TRUE(saMgr != nullptr);
-    auto preHandler = make_shared<FFRTHandler>("preDeathHandler", ffrt_qos_user_initiated);
-    saMgr->deathHandler_ = preHandler;
-    saMgr->Init();
-    EXPECT_EQ(saMgr->deathHandler_, preHandler);
-    saMgr->CleanFfrt();
 }
 
 /**
@@ -771,10 +779,37 @@ HWTEST_F(SystemAbilityMgrSubscribeTest, AsyncUnSubscribeSystemAbility005, TestSi
     ++saMgr->subscribeCountMap_[SAID];
     saMgr->AsyncUnSubscribeSystemAbility(callback->AsObject());
     saMgr->selfPtr_.reset();
-    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+    std::mutex mtx;
+    std::condition_variable cv;
+    bool done = false;
+    saMgr->deathHandler_->PostTask([&mtx, &cv, &done]() {
+        std::lock_guard<std::mutex> lock(mtx);
+        done = true;
+        cv.notify_one();
+    });
+    {
+        std::unique_lock<std::mutex> lock(mtx);
+        cv.wait(lock, [&done] { return done; });
+    }
     auto it = saMgr->listenerMap_.find(SAID);
     EXPECT_TRUE(it != saMgr->listenerMap_.end() && !it->second.empty());
     saMgr->deathHandler_->CleanFfrt();
+}
+
+/**
+ * @tc.name: DeathHandlerInit001
+ * @tc.desc: test Init does not recreate deathHandler_ when already initialized
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemAbilityMgrSubscribeTest, DeathHandlerInit001, TestSize.Level3)
+{
+    sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
+    ASSERT_TRUE(saMgr != nullptr);
+    auto preHandler = make_shared<FFRTHandler>("preDeathHandler", ffrt_qos_user_initiated);
+    saMgr->deathHandler_ = preHandler;
+    saMgr->Init();
+    EXPECT_EQ(saMgr->deathHandler_, preHandler);
+    saMgr->CleanFfrt();
 }
 
 /**
