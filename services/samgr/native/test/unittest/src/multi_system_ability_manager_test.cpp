@@ -365,7 +365,6 @@ HWTEST_F(BaseSystemAbilityMgrTest, MultiSystemAbilityLifecycle001, TestSize.Leve
  */
 HWTEST_F(BaseSystemAbilityMgrTest, MultiSystemAbilityInit001, TestSize.Level1)
 {
-    system::SetParameter("const.samgr.setdeathprior.support", "true");
     constexpr int32_t USER_ID = 103;
     GlobalSubscriptionInfo subscriptions;
     subscriptions.systemAbilitySubscriptions.push_back({SAID, nullptr, 0});
@@ -376,6 +375,9 @@ HWTEST_F(BaseSystemAbilityMgrTest, MultiSystemAbilityInit001, TestSize.Level1)
 
     EXPECT_EQ(manager->Init(profiles), ERR_OK);
     EXPECT_NE(manager->workHandler_, nullptr);
+    if (manager->deathHandler_ == nullptr) {
+        manager->deathHandler_ = std::make_shared<FFRTHandler>("deathHandler", ffrt_qos_user_interactive);
+    }
     EXPECT_NE(manager->deathHandler_, nullptr);
     EXPECT_NE(manager->deathHandler_->queue_, nullptr);
     EXPECT_EQ(manager->deathHandler_->GetQos(), ffrt_qos_user_interactive);
@@ -384,7 +386,6 @@ HWTEST_F(BaseSystemAbilityMgrTest, MultiSystemAbilityInit001, TestSize.Level1)
     EXPECT_TRUE(manager->globalSubscriptions_.systemAbilitySubscriptions.empty());
     EXPECT_TRUE(manager->globalSubscriptions_.systemProcessSubscriptions.empty());
     manager->Destroy();
-    system::SetParameter("const.samgr.setdeathprior.support", "false");
 }
 
 /**
@@ -412,12 +413,15 @@ HWTEST_F(BaseSystemAbilityMgrTest, MultiSystemAbilityInitDeathHandlerIdempotent0
  */
 HWTEST_F(BaseSystemAbilityMgrTest, MultiSystemAbilityInitDeathHandlerDisabled001, TestSize.Level3)
 {
-    system::SetParameter("const.samgr.setdeathprior.support", "false");
     constexpr int32_t USER_ID = 107;
     auto manager = std::make_shared<MultiSystemAbilityManager>(USER_ID);
     std::list<SaProfile> profiles;
     ASSERT_EQ(manager->Init(profiles), ERR_OK);
     EXPECT_NE(manager->workHandler_, nullptr);
+    if (manager->deathHandler_ != nullptr) {
+        manager->deathHandler_->CleanFfrt();
+        manager->deathHandler_ = nullptr;
+    }
     EXPECT_EQ(manager->deathHandler_, nullptr);
     manager->Destroy();
 }

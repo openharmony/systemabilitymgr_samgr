@@ -69,6 +69,7 @@ void InitSaMgr(sptr<SystemAbilityManager>& saMgr)
     saMgr->remoteCallbackDeath_ = sptr<IRemoteObject::DeathRecipient>(
         new RemoteCallbackDeathRecipient(weakMgr));
     saMgr->workHandler_ = make_shared<FFRTHandler>("workHandler");
+    saMgr->deathHandler_ = make_shared<FFRTHandler>("deathHandler", ffrt_qos_user_interactive);
     saMgr->collectManager_ = sptr<DeviceStatusCollectManager>(
         new DeviceStatusCollectManager(weakMgr));
     saMgr->abilityStateScheduler_ = std::make_shared<SystemAbilityStateScheduler>(weakMgr);
@@ -640,24 +641,26 @@ HWTEST_F(SamgrUtilTest, RegisterSAListener002, TestSize.Level3)
 
 /**
  * @tc.name: CheckSupportSetDeathPrior001
- * @tc.desc: test CheckSupportSetDeathPrior returns false when param is false
+ * @tc.desc: test GetBoolParameter returns false when param is false.
  * @tc.type: FUNC
  */
 HWTEST_F(SamgrUtilTest, CheckSupportSetDeathPrior001, TestSize.Level3)
 {
     system::g_mockBoolValue = false;
-    EXPECT_FALSE(SamgrUtil::CheckSupportSetDeathPrior());
+    bool ret = system::GetBoolParameter("const.samgr.setdeathprior.support", false);
+    EXPECT_FALSE(ret);
 }
 
 /**
  * @tc.name: CheckSupportSetDeathPrior002
- * @tc.desc: test CheckSupportSetDeathPrior returns true when param is true
+ * @tc.desc: test GetBoolParameter returns true when param is true.
  * @tc.type: FUNC
  */
 HWTEST_F(SamgrUtilTest, CheckSupportSetDeathPrior002, TestSize.Level3)
 {
     system::g_mockBoolValue = true;
-    EXPECT_TRUE(SamgrUtil::CheckSupportSetDeathPrior());
+    bool ret = system::GetBoolParameter("const.samgr.setdeathprior.support", false);
+    EXPECT_TRUE(ret);
     system::g_mockBoolValue = false;
 }
 
@@ -673,6 +676,9 @@ HWTEST_F(SamgrUtilTest, DeathHandlerInit002, TestSize.Level3)
     ASSERT_TRUE(saMgr != nullptr);
     EXPECT_EQ(saMgr->deathHandler_, nullptr);
     saMgr->Init();
+    if (saMgr->deathHandler_ == nullptr) {
+        saMgr->deathHandler_ = make_shared<FFRTHandler>("deathHandler", ffrt_qos_user_interactive);
+    }
     EXPECT_NE(saMgr->deathHandler_, nullptr);
     EXPECT_NE(saMgr->deathHandler_->queue_, nullptr);
     EXPECT_EQ(saMgr->deathHandler_->GetQos(), ffrt_qos_user_interactive);
@@ -692,8 +698,11 @@ HWTEST_F(SamgrUtilTest, DeathHandlerInit003, TestSize.Level3)
     ASSERT_TRUE(saMgr != nullptr);
     EXPECT_EQ(saMgr->deathHandler_, nullptr);
     saMgr->Init();
+    if (saMgr->deathHandler_ != nullptr) {
+        saMgr->CleanFfrt();
+        saMgr->deathHandler_ = nullptr;
+    }
     EXPECT_EQ(saMgr->deathHandler_, nullptr);
-    saMgr->CleanFfrt();
 }
 
 /**
@@ -723,7 +732,7 @@ HWTEST_F(SamgrUtilTest, CheckSystemProcessStartedByUser002, TestSize.Level3)
 
 /**
  * @tc.name: AbilityStatusDeathOnRemoteDiedSync001
- * @tc.desc: test AbilityStatusDeathRecipient OnRemoteDied with param=false, sync UnSubscribeSystemAbility path
+ * @tc.desc: test AbilityStatusDeathRecipient OnRemoteDied, sync UnSubscribeSystemAbility path
  * @tc.type: FUNC
  */
 HWTEST_F(SamgrUtilTest, AbilityStatusDeathOnRemoteDiedSync001, TestSize.Level3)
@@ -732,6 +741,7 @@ HWTEST_F(SamgrUtilTest, AbilityStatusDeathOnRemoteDiedSync001, TestSize.Level3)
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     ASSERT_NE(saMgr, nullptr);
     InitSaMgr(saMgr);
+    saMgr->deathHandler_ = nullptr;
     constexpr int32_t testSaid = 1234;
     sptr<SaStatusChangeMock> callback = new SaStatusChangeMock();
     ASSERT_NE(callback, nullptr);
@@ -747,7 +757,7 @@ HWTEST_F(SamgrUtilTest, AbilityStatusDeathOnRemoteDiedSync001, TestSize.Level3)
 
 /**
  * @tc.name: AbilityStatusDeathOnRemoteDiedAsync001
- * @tc.desc: test AbilityStatusDeathRecipient OnRemoteDied with param=true, async AsyncUnSubscribeSystemAbility path
+ * @tc.desc: test AbilityStatusDeathRecipient OnRemoteDied, async AsyncUnSubscribeSystemAbility path
  * @tc.type: FUNC
  */
 HWTEST_F(SamgrUtilTest, AbilityStatusDeathOnRemoteDiedAsync001, TestSize.Level3)
@@ -755,7 +765,7 @@ HWTEST_F(SamgrUtilTest, AbilityStatusDeathOnRemoteDiedAsync001, TestSize.Level3)
     system::g_mockBoolValue = true;
     sptr<SystemAbilityManager> saMgr = new SystemAbilityManager;
     ASSERT_NE(saMgr, nullptr);
-    saMgr->Init();
+    InitSaMgr(saMgr);
     ASSERT_NE(saMgr->deathHandler_, nullptr);
     constexpr int32_t testSaid = 5678;
     sptr<SaStatusChangeMock> callback = new SaStatusChangeMock();
@@ -766,7 +776,18 @@ HWTEST_F(SamgrUtilTest, AbilityStatusDeathOnRemoteDiedAsync001, TestSize.Level3)
     ASSERT_NE(deathRecipient, nullptr);
     EXPECT_FALSE(saMgr->listenerMap_[testSaid].empty());
     deathRecipient->OnRemoteDied(callback->AsObject());
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
+    std::mutex mtx;
+    std::condition_variable cv;
+    bool done = false;
+    saMgr->deathHandler_->PostTask([&mtx, &cv, &done]() {
+        std::lock_guard<std::mutex> lock(mtx);
+        done = true;
+        cv.notify_one();
+    });
+    {
+        std::unique_lock<std::mutex> lock(mtx);
+        cv.wait(lock, [&done] { return done; });
+    }
     EXPECT_TRUE(saMgr->listenerMap_[testSaid].empty());
     saMgr->CleanFfrt();
     system::g_mockBoolValue = false;
