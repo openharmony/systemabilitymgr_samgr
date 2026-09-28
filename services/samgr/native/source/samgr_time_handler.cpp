@@ -23,6 +23,9 @@ namespace {
 constexpr uint32_t INIT_NUM = 4;
 constexpr uint32_t MAX_EVENT = 8;
 constexpr int32_t RETRY_TIMES = 3;
+
+constexpr uint64_t FDSAN_TAG_EPOLL = 0XD001800ULL << 32 | 0X00000001;
+constexpr uint64_t FDSAN_TAG_TIMER = 0XD001800ULL << 32 | 0X00000002;
 }
 SamgrTimeHandler* volatile SamgrTimeHandler::singleton = nullptr;
 SamgrTimeHandler::Deletor SamgrTimeHandler::deletor;
@@ -45,6 +48,8 @@ SamgrTimeHandler::SamgrTimeHandler()
     epollfd = epoll_create(INIT_NUM);
     if (epollfd == -1) {
         HILOGE("SamgrTimeHandler epoll_create error");
+    } else {
+        fdsan_exchange_owner_tag(epollfd, 0, FDSAN_TAG_EPOLL);
     }
 }
 
@@ -80,7 +85,7 @@ void SamgrTimeHandler::OnTime(SamgrTimeHandler &handle, int number, struct epoll
             funcTime();
             handle.timeFunc.Erase(timerfd);
             epoll_ctl(this->epollfd, EPOLL_CTL_DEL, timerfd, nullptr);
-            ::close(timerfd);
+            fdsan_close_with_tag(timerfd, FDSAN_TAG_TIMER);
         }
     }
 }
@@ -89,10 +94,10 @@ SamgrTimeHandler::~SamgrTimeHandler()
 {
     auto closeFunc = [this](uint32_t fd) {
         epoll_ctl(this->epollfd, EPOLL_CTL_DEL, fd, nullptr);
-        ::close(fd);
+        fdsan_close_with_tag(fd, FDSAN_TAG_TIMER);
     };
     timeFunc.Clear(closeFunc);
-    ::close(epollfd);
+    fdsan_close_with_tag(epollfd, FDSAN_TAG_EPOLL);
 }
 
 int SamgrTimeHandler::CreateAndRetry()
@@ -122,12 +127,13 @@ bool SamgrTimeHandler::PostTask(TaskType func, uint64_t delayTime)
             return false;
         }
     }
+    fdsan_exchange_owner_tag(timerfd, 0, FDSAN_TAG_TIMER);
     epoll_event event {};
     event.events = EPOLLIN | EPOLLWAKEUP;
     event.data.u32 = static_cast<uint32_t>(timerfd);
     if (epoll_ctl(epollfd, EPOLL_CTL_ADD, timerfd, &event) == -1) {
         HILOGE("epoll_ctl(EPOLL_CTL_ADD) failed : %{public}s", strerror(errno));
-        ::close(timerfd);
+        fdsan_close_with_tag(timerfd, FDSAN_TAG_TIMER);
         return false;
     }
     struct itimerspec newValue = {};
@@ -138,7 +144,7 @@ bool SamgrTimeHandler::PostTask(TaskType func, uint64_t delayTime)
 
     if (timerfd_settime(timerfd, 0, &newValue, NULL) == -1) {
         HILOGE("timerfd_settime failed : %{public}s", strerror(errno));
-        ::close(timerfd);
+        fdsan_close_with_tag(timerfd, FDSAN_TAG_TIMER);
         return false;
     }
     auto isFirst = timeFunc.FirstInsert(timerfd, func);
