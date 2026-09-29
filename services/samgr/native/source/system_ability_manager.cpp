@@ -70,7 +70,7 @@ void SystemAbilityManager::RegisterDistribute(int32_t systemAbilityId, bool isDi
 {
 #ifdef SAMGR_ENABLE_DELAY_DBINDER
     if (isDistributed) {
-        std::shared_lock<samgr::shared_mutex> readLock(dBinderServiceLock_);
+        std::unique_lock<samgr::shared_mutex> readLock(dBinderServiceLock_);
         if (dBinderService_ != nullptr) {
             u16string strName = Str8ToStr16(to_string(systemAbilityId));
             SamgrXCollie samgrXCollie("samgr--RegisterRemoteProxy1_" + ToString(systemAbilityId));
